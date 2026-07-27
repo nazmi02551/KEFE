@@ -36,8 +36,8 @@ def _openapi_errors() -> list[str]:
     contract = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
     errors: list[str] = []
 
-    if contract.get("info", {}).get("version") != "0.6.0":
-        errors.append("OpenAPI checked-in version must match API v0.6.0")
+    if contract.get("info", {}).get("version") != "0.7.0":
+        errors.append("OpenAPI checked-in version must match API v0.7.0")
 
     security_schemes = contract.get("components", {}).get("securitySchemes", {})
     bearer = security_schemes.get("HTTPBearer")
@@ -84,7 +84,7 @@ def main() -> None:
     missing_errors = sorted(used - registered)
     missing_paths = _check_manifest_paths()
 
-    schema = (CONTRACTS / "postgresql-m0-schema.v1.2.0.sql").read_text(encoding="utf-8")
+    schema = (CONTRACTS / "postgresql-m0-schema.v1.3.0.sql").read_text(encoding="utf-8")
     config = (CONTRACTS / "config-registry.v1.2.0.yaml").read_text(encoding="utf-8")
     admission_policy = (CONTRACTS / "identity-admission-policy.v1.yaml").read_text(
         encoding="utf-8"
@@ -104,6 +104,8 @@ def main() -> None:
         schema_errors.append("M0 schema must expose revocable guest actor sessions")
     if "token_hash char(64) NOT NULL UNIQUE" not in schema:
         schema_errors.append("Guest bearer credentials must persist only as token hashes")
+    if "is_required boolean NOT NULL DEFAULT true" not in schema:
+        schema_errors.append("M0 schema must expose explicit question requiredness")
 
     config_errors: list[str] = []
     required_config_keys = {
@@ -155,7 +157,7 @@ def main() -> None:
     print(
         "Contract sync OK: "
         f"{len(used)} executable DomainError codes registered; "
-        "HTTP API, identity admission, persistence and outbox invariants verified."
+        "HTTP API, typed questions, identity admission, persistence and outbox invariants verified."
     )
 
 
