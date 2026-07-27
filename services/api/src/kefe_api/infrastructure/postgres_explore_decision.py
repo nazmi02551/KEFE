@@ -59,7 +59,7 @@ class PostgresExploreDecisionRepository(PostgresDecisionRepository):
             question_rows = connection.execute(
                 text(
                     """
-                    SELECT DISTINCT ON (q.id)
+                    SELECT
                         qv.id,
                         qv.prompt,
                         qv.response_type,
@@ -67,10 +67,21 @@ class PostgresExploreDecisionRepository(PostgresDecisionRepository):
                         qv.is_required
                     FROM content.issue i
                     JOIN content.question q ON q.issue_id = i.id
-                    JOIN content.question_version qv ON qv.question_id = q.id
+                    JOIN LATERAL (
+                        SELECT
+                            version.id,
+                            version.prompt,
+                            version.response_type,
+                            version.response_schema,
+                            version.is_required
+                        FROM content.question_version version
+                        WHERE version.question_id = q.id
+                          AND version.is_active = true
+                        ORDER BY version.version_no DESC
+                        LIMIT 1
+                    ) qv ON true
                     WHERE i.case_version_id = :version_id
-                      AND qv.is_active = true
-                    ORDER BY q.id, qv.version_no DESC
+                    ORDER BY i.sort_order, q.sort_order, q.id
                     """
                 ),
                 {"version_id": version_id},
