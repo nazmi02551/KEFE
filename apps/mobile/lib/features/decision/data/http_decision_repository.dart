@@ -111,10 +111,11 @@ class HttpDecisionRepository implements DecisionRepository {
 
   @override
   Future<String> startSession(String caseId) async {
+    final headers = await _authorizedHeaders();
     final response = await _request(
       () => _client.post(
         _uri('/v1/cases/$caseId/weigh-sessions'),
-        headers: await _authorizedHeaders(),
+        headers: headers,
       ),
     );
     return _decode(response)['session_id'] as String;
@@ -126,10 +127,11 @@ class HttpDecisionRepository implements DecisionRepository {
     required String questionId,
     required Object value,
   }) async {
+    final headers = await _authorizedHeaders(json: true);
     final response = await _request(
       () => _client.put(
         _uri('/v1/weigh-sessions/$sessionId/responses'),
-        headers: await _authorizedHeaders(json: true),
+        headers: headers,
         body: jsonEncode({
           'responses': [
             {'question_id': questionId, 'value': value},
@@ -145,11 +147,12 @@ class HttpDecisionRepository implements DecisionRepository {
     required String sessionId,
     required String idempotencyKey,
   }) async {
+    final headers = await _authorizedHeaders();
     final response = await _request(
       () => _client.post(
         _uri('/v1/weigh-sessions/$sessionId/commit'),
         headers: {
-          ...await _authorizedHeaders(),
+          ...headers,
           'Idempotency-Key': idempotencyKey,
         },
       ),
@@ -159,10 +162,11 @@ class HttpDecisionRepository implements DecisionRepository {
 
   @override
   Future<RevealResult> reveal(String sessionId) async {
+    final headers = await _authorizedHeaders();
     final response = await _request(
       () => _client.get(
         _uri('/v1/weigh-sessions/$sessionId/reveal'),
-        headers: await _authorizedHeaders(),
+        headers: headers,
       ),
     );
     final body = _decode(response);
