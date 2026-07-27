@@ -5,6 +5,7 @@ from typing import Annotated
 from fastapi import Depends, Request, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from kefe_api.modules.identity.admission import GuestAdmissionGuard
 from kefe_api.modules.identity.models import ActorPrincipal
 from kefe_api.modules.identity.service import IdentityService
 
@@ -15,7 +16,12 @@ def get_identity_service(request: Request) -> IdentityService:
     return request.app.state.identity_service
 
 
+def get_guest_admission_guard(request: Request) -> GuestAdmissionGuard:
+    return request.app.state.guest_admission_guard
+
+
 IdentityServiceDep = Annotated[IdentityService, Depends(get_identity_service)]
+GuestAdmissionGuardDep = Annotated[GuestAdmissionGuard, Depends(get_guest_admission_guard)]
 BearerCredentialsDep = Annotated[
     HTTPAuthorizationCredentials | None,
     Security(_bearer),
