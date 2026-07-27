@@ -6,7 +6,7 @@ FastAPI modular monolith. Capability modules own domain/application behavior beh
 
 The executable product path is:
 
-`Guest Identity → Explore → Case → Weigh → Commit → Reveal`
+`Guest Identity → Explore → Case → Typed Weigh → Private Reason → Commit → Reveal`
 
 The same decision application service supports two persistence adapters:
 
@@ -23,10 +23,15 @@ The same decision application service supports two persistence adapters:
 - Question behavior is versioned through `response_type` + `response_schema` and validated server-side.
 - Question display order is explicit editorial data, not UUID or insertion order.
 - The first typed question contracts are `SINGLE_CHOICE` and `CONFIDENCE`.
+- Private reason capture is schema-driven and actor-scoped.
+- Reason tags are validated against the CaseVersion policy, deduplicated and bounded.
+- Optional short reason text is technically capped and enters moderation state `PENDING`; tags-only reasons use `NOT_REQUIRED`.
+- Reasons remain `PRIVATE` in this slice; there is no public comment feed, ranking or cross-user reason read model.
+- Draft reasons are editable only before Commit and become immutable with the decision lifecycle.
 - Sessions are pinned to a CaseVersion; stale versions are blocked.
 - Consumer reveal returns the Trusted result layer.
 - Domain failures use stable machine-readable error codes.
-- Draft response updates and commit use a row-locked write boundary in PostgreSQL.
+- Draft response/reason updates and commit use row-locked write boundaries in PostgreSQL.
 - The same commit `Idempotency-Key` is replay-safe, including concurrent retries.
 - Competing different-key commits linearize to one successful commit.
 - A commit idempotency key cannot silently identify another actor commit command.
@@ -75,12 +80,12 @@ The default API persistence remains `memory`, so PostgreSQL is opt-in until loca
 
 ### Demo Case
 
-The development bootstrap exposes one low-risk DILEMMA Case through fixed UUID fixtures. It now contains a required `SINGLE_CHOICE` question and an optional schema-driven `CONFIDENCE` question. These are development fixtures, not product identifiers or a global rule for question requiredness.
+The development bootstrap exposes one low-risk DILEMMA Case through fixed UUID fixtures. It contains a required `SINGLE_CHOICE` question, an optional schema-driven `CONFIDENCE` question and a private reason policy with structured tags plus optional short text. These are development fixtures, not product identifiers or global product defaults.
 
 ### Next backend slices
 
-1. Context/source read contracts with progressive disclosure and no result leakage.
-2. reason capture and safe Perspective read model.
+1. safe Perspective read model after Commit, beginning with moderation-approved opposing reasons rather than popularity-only ranking.
+2. Context/source read contracts with progressive disclosure and no result leakage.
 3. outbox backlog/dead-letter observability and audited replay tooling.
 4. expand CaseVersion/content persistence toward the full physical contract.
 5. query-budget and latency regression tests.
