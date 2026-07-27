@@ -36,4 +36,6 @@ abstract interface class DecisionRepository {
   });
 
   Future<RevealResult> reveal(String sessionId);
+
+  Future<PerspectiveResult> fetchPerspectives(String sessionId);
 }
