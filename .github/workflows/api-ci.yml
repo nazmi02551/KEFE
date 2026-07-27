@@ -117,7 +117,9 @@ jobs:
         working-directory: services/api
         env:
           KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
-        run: python -m kefe_api.infrastructure.seed_demo
+        run: |
+          python -m kefe_api.infrastructure.seed_demo
+          python -m kefe_api.infrastructure.seed_context_demo
       - name: PostgreSQL integration tests
         id: postgres-tests
         continue-on-error: true
@@ -131,6 +133,7 @@ jobs:
           tests/test_postgres_outbox_integration.py
           tests/test_private_reason_postgres.py
           tests/test_perspective_postgres.py
+          tests/test_context_postgres.py
           > postgres-test-output.txt 2>&1
       - name: Upload PostgreSQL diagnostics on failure
         if: steps.postgres-tests.outcome == 'failure'

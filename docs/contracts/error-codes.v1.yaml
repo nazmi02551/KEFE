@@ -1,4 +1,4 @@
-registry_version: 1.3.0
+registry_version: 1.4.0
 errors:
 - code: AUTH_REQUIRED
   http_status: 401
@@ -28,6 +28,9 @@ errors:
   http_status: 429
   retryable: true
 - code: CASE_NOT_FOUND
+  http_status: 404
+  retryable: false
+- code: CASE_VERSION_CONTEXT_NOT_FOUND
   http_status: 404
   retryable: false
 - code: CASE_VERSION_STALE

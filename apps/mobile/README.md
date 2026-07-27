@@ -6,11 +6,11 @@ Flutter consumer application. The client consumes semantic copy/configuration, s
 
 The executable first-use path is:
 
-`Welcome → First Case → Typed Weigh → Private Reason → Commit → Reveal → Perspective → Continue as Guest → Explore`
+`Welcome → First Case → Context → Typed Weigh → Private Reason → Commit → Reveal → Perspective → Continue as Guest → Explore`
 
 The regular product path is:
 
-`Explore → Case → Typed Weigh → Private Reason → Commit → Reveal → Perspective`
+`Explore → Case → Context → Typed Weigh → Private Reason → Commit → Reveal → Perspective`
 
 A Case can also be opened directly through `/case/:caseId` without forcing first-use onboarding.
 
@@ -19,6 +19,12 @@ A Case can also be opened directly through `/case/:caseId` without forcing first
 Onboarding intentionally avoids a long tutorial. A fresh installation sees two concise product-promise steps, then enters the existing low-risk demo Case. The onboarding completion flag is persisted when the user reaches the first Reveal, so an app restart does not force a completed user through the tutorial again. Perspective remains the post-Reveal continuation in the same Case journey; the visible guest-continuation action then advances into Explore.
 
 The current slice does **not** implement account creation and does not encode a final primary-navigation redesign.
+
+### Pre-Commit Context and Sources
+
+The Case screen loads Context through the immutable CaseVersion identifier before Weigh. `ESSENTIAL` blocks are visible by default; `DETAIL` blocks and source metadata require explicit expansion. Claim status (`VERIFIED`, `CLAIMED`, `DISPUTED`, `UNKNOWN`) is displayed separately from source kind.
+
+The Context surface is public/read-only and contains no community result, Perspective, participant reason or other post-Commit signal. Clients preserve editorial order, do not locally re-rank evidence and never embed untrusted remote HTML. Context failure does not unlock result data or destroy the user's decision draft.
 
 ### Typed question engine
 
@@ -59,7 +65,7 @@ Perspective transport state is separate from decision recovery: `IDLE`, `LOADING
 
 - Riverpod for feature/application state
 - GoRouter for declarative routes and Case deep links
-- provider-neutral `DecisionRepository` command/read boundary plus optional `PerspectiveRepository` read capability
+- provider-neutral `DecisionRepository` plus optional `ContextRepository` and `PerspectiveRepository` read capabilities
 - local `OnboardingStore` boundary for first-use completion state
 - HTTP adapter isolated from UI/application state
 - schema-driven question and private-reason inputs
@@ -97,4 +103,4 @@ Perspective starts only after Reveal succeeds and therefore sits outside this mu
 
 ### Quality gate
 
-Mobile CI pins Flutter 3.44.4 and runs dependency resolution, formatting, static analysis and widget tests. Tests cover Commit First, ThemeMode.system, local draft restoration, pre-Commit sync recovery, same-key uncertain-Commit recovery without replaying answers/reasons, Reveal-only retry, Explore navigation, direct Case deep links, first-use onboarding, schema-driven Choice/Confidence inputs, private Reason Capture, Perspective Commit gating, bounded role rendering, private-reason non-leakage and Perspective-only retry.
+Mobile CI pins Flutter 3.44.4 and runs dependency resolution, formatting, static analysis and widget tests. Tests cover Commit First, Context progressive disclosure and leakage boundaries, ThemeMode.system, local draft restoration, pre-Commit sync recovery, same-key uncertain-Commit recovery without replaying answers/reasons, Reveal-only retry, Explore navigation, direct Case deep links, first-use onboarding, schema-driven Choice/Confidence inputs, private Reason Capture, Perspective Commit gating, bounded role rendering, private-reason non-leakage and Perspective-only retry.

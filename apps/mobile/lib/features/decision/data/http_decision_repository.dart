@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../../core/config/app_config.dart';
+import '../../context/data/context_repository.dart';
+import '../../context/domain/context_models.dart';
 import '../domain/decision_models.dart';
 import 'decision_repository.dart';
 
@@ -36,7 +38,8 @@ class ApiFailure implements Exception {
   String toString() => 'ApiFailure($statusCode, $code)';
 }
 
-class HttpDecisionRepository implements DecisionRepository, PerspectiveRepository {
+class HttpDecisionRepository
+    implements DecisionRepository, PerspectiveRepository, ContextRepository {
   HttpDecisionRepository({
     required AppConfig config,
     required http.Client client,
@@ -116,6 +119,41 @@ class HttpDecisionRepository implements DecisionRepository, PerspectiveRepositor
           responseSchema: schema,
         );
       }).toList(growable: false),
+    );
+  }
+
+  @override
+  Future<CaseContextSnapshot> fetchContext(String caseVersionId) async {
+    final body = _decode(await _request(() => _client.get(
+      _uri('/v1/case-versions/$caseVersionId/context'),
+    )));
+    return CaseContextSnapshot(
+      caseVersionId: body['case_version_id'] as String,
+      blocks: (body['blocks'] as List<Object?>)
+          .cast<Map<String, Object?>>()
+          .map((item) => CaseContextBlock(
+                id: item['context_block_id'] as String,
+                displayOrder: item['display_order'] as int,
+                disclosureLevel: item['disclosure_level'] as String,
+                title: item['title'] as String,
+                body: item['body'] as String,
+                claimStatus: item['claim_status'] as String,
+                sourceIds: (item['source_ids'] as List<Object?>).cast<String>(),
+              ))
+          .toList(growable: false),
+      sources: (body['sources'] as List<Object?>)
+          .cast<Map<String, Object?>>()
+          .map((item) => CaseContextSource(
+                id: item['source_id'] as String,
+                title: item['title'] as String,
+                publisher: item['publisher'] as String,
+                sourceKind: item['source_kind'] as String,
+                url: item['url'] == null ? null : Uri.parse(item['url'] as String),
+                publishedAt: item['published_at'] == null
+                    ? null
+                    : DateTime.parse(item['published_at'] as String),
+              ))
+          .toList(growable: false),
     );
   }
 

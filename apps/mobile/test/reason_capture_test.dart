@@ -144,14 +144,19 @@ Future<MemoryDecisionDraftStore> pumpReasonCase(
   return draftStore;
 }
 
-Future<void> tapCommit(WidgetTester tester) async {
-  final commit = find.byKey(const ValueKey('commit-button'));
+Future<void> tapVisible(WidgetTester tester, Finder finder) async {
   await tester.scrollUntilVisible(
-    commit,
+    finder,
     300,
     scrollable: find.byType(Scrollable).first,
   );
-  await tester.tap(commit);
+  await tester.pump();
+  await tester.tap(finder);
+  await tester.pump();
+}
+
+Future<void> tapCommit(WidgetTester tester) async {
+  await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
   await tester.pumpAndSettle();
 }
 
@@ -163,8 +168,7 @@ void main() {
     final repository = ReasonFakeRepository();
     await pumpReasonCase(tester, repository);
 
-    await tester.tap(find.byKey(const ValueKey('option-A')));
-    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const ValueKey('option-A')));
     expect(
       const KefeStrings(Locale('tr', 'TR')).reasonHelper,
       contains('diğer kullanıcılara gösterilmez'),
@@ -184,15 +188,16 @@ void main() {
     final repository = ReasonFakeRepository();
     final draftStore = await pumpReasonCase(tester, repository);
 
-    expect(find.byKey(const ValueKey('reason-card')), findsOneWidget);
-
-    await tester.tap(find.byKey(const ValueKey('option-A')));
-    await tester.tap(find.byKey(const ValueKey('reason-tag-FAIRNESS')));
-    await tester.tap(find.byKey(const ValueKey('reason-tag-NEED')));
-    await tester.enterText(
-      find.byKey(const ValueKey('reason-text')),
-      'Adalet ve ihtiyaç birlikte etkili oldu.',
+    await tapVisible(tester, find.byKey(const ValueKey('option-A')));
+    await tapVisible(tester, find.byKey(const ValueKey('reason-tag-FAIRNESS')));
+    await tapVisible(tester, find.byKey(const ValueKey('reason-tag-NEED')));
+    final reasonText = find.byKey(const ValueKey('reason-text'));
+    await tester.scrollUntilVisible(
+      reasonText,
+      300,
+      scrollable: find.byType(Scrollable).first,
     );
+    await tester.enterText(reasonText, 'Adalet ve ihtiyaç birlikte etkili oldu.');
     await tester.pumpAndSettle();
 
     final localDraft = draftStore.draftFor(reasonCaseId)!;
@@ -215,9 +220,9 @@ void main() {
     final repository = ReasonFakeRepository();
     final draftStore = await pumpReasonCase(tester, repository);
 
-    await tester.tap(find.byKey(const ValueKey('reason-tag-FAIRNESS')));
-    await tester.tap(find.byKey(const ValueKey('reason-tag-NEED')));
-    await tester.tap(find.byKey(const ValueKey('reason-tag-RESPONSIBILITY')));
+    await tapVisible(tester, find.byKey(const ValueKey('reason-tag-FAIRNESS')));
+    await tapVisible(tester, find.byKey(const ValueKey('reason-tag-NEED')));
+    await tapVisible(tester, find.byKey(const ValueKey('reason-tag-RESPONSIBILITY')));
     await tester.pumpAndSettle();
 
     final tags = draftStore.draftFor(reasonCaseId)!.reasonTags;
@@ -233,9 +238,8 @@ void main() {
     final repository = ReasonFakeRepository()..reasonTransportFailures = 1;
     final draftStore = await pumpReasonCase(tester, repository);
 
-    await tester.tap(find.byKey(const ValueKey('option-A')));
-    await tester.tap(find.byKey(const ValueKey('reason-tag-FAIRNESS')));
-    await tester.pump();
+    await tapVisible(tester, find.byKey(const ValueKey('option-A')));
+    await tapVisible(tester, find.byKey(const ValueKey('reason-tag-FAIRNESS')));
     await tapCommit(tester);
 
     final pending = draftStore.draftFor(reasonCaseId)!;
@@ -259,9 +263,8 @@ void main() {
     final repository = ReasonFakeRepository()..commitTransportFailures = 1;
     final draftStore = await pumpReasonCase(tester, repository);
 
-    await tester.tap(find.byKey(const ValueKey('option-B')));
-    await tester.tap(find.byKey(const ValueKey('reason-tag-RESPONSIBILITY')));
-    await tester.pump();
+    await tapVisible(tester, find.byKey(const ValueKey('option-B')));
+    await tapVisible(tester, find.byKey(const ValueKey('reason-tag-RESPONSIBILITY')));
     await tapCommit(tester);
 
     expect(draftStore.draftFor(reasonCaseId)?.phase, DecisionDraftPhase.commitPending);

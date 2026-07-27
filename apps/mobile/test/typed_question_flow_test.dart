@@ -108,6 +108,16 @@ Future<void> pumpTypedCase(
   await tester.pumpAndSettle();
 }
 
+Future<Finder> makeVisible(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(
+    finder,
+    300,
+    scrollable: find.byType(Scrollable).first,
+  );
+  await tester.pump();
+  return finder;
+}
+
 void main() {
   testWidgets('required choice enables Commit while Confidence stays optional', (
     tester,
@@ -115,11 +125,19 @@ void main() {
     final repository = TypedQuestionRepository();
     await pumpTypedCase(tester, repository);
 
-    final commit = find.byKey(const ValueKey('commit-button'));
+    final commit = await makeVisible(
+      tester,
+      find.byKey(const ValueKey('commit-button')),
+    );
     expect(tester.widget<FilledButton>(commit).onPressed, isNull);
 
-    await tester.tap(find.byKey(const ValueKey('option-A')));
+    final option = await makeVisible(
+      tester,
+      find.byKey(const ValueKey('option-A')),
+    );
+    await tester.tap(option);
     await tester.pump();
+    await makeVisible(tester, commit);
     expect(tester.widget<FilledButton>(commit).onPressed, isNotNull);
   });
 
@@ -129,18 +147,25 @@ void main() {
     final repository = TypedQuestionRepository();
     await pumpTypedCase(tester, repository);
 
-    expect(
-      find.byKey(const ValueKey('confidence-$confidenceQuestionId-4')),
-      findsOneWidget,
+    final option = await makeVisible(
+      tester,
+      find.byKey(const ValueKey('option-B')),
     );
+    await tester.tap(option);
+    await tester.pump();
 
-    await tester.tap(find.byKey(const ValueKey('option-B')));
-    await tester.pump();
-    await tester.tap(
+    final confidence = await makeVisible(
+      tester,
       find.byKey(const ValueKey('confidence-$confidenceQuestionId-4')),
     );
+    await tester.tap(confidence);
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('commit-button')));
+
+    final commit = await makeVisible(
+      tester,
+      find.byKey(const ValueKey('commit-button')),
+    );
+    await tester.tap(commit);
     await tester.pumpAndSettle();
 
     expect(repository.submitted[choiceQuestionId], 'B');
