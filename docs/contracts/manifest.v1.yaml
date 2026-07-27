@@ -1,4 +1,4 @@
-manifest_version: 1.9.0
+manifest_version: 1.10.0
 updated_at: '2026-07-27'
 policy:
   executable_schema_source: services/api/migrations
@@ -33,9 +33,13 @@ contracts:
     path: docs/contracts/mobile-perspective-ui.v1.yaml
     version: 1.0.0
     role: mobile_post_reveal_perspective_state_contract
+  - id: context-source-read-policy
+    path: docs/contracts/context-source-read-policy.v1.yaml
+    version: 1.0.0
+    role: case_version_pinned_pre_commit_evidence_policy
   - id: error-registry
     path: docs/contracts/error-codes.v1.yaml
-    version: 1.3.0
+    version: 1.4.0
     role: stable_api_errors
   - id: postgresql-m0-schema
     path: docs/contracts/postgresql-m0-schema.v1.5.0.sql
@@ -49,6 +53,7 @@ contracts:
       - services/api/migrations/versions/20260727_0005_typed_questions.py
       - services/api/migrations/versions/20260727_0006_private_reason.py
       - services/api/migrations/versions/20260727_0007_perspective_card.py
+      - services/api/migrations/versions/20260727_0008_context_sources.py
   - id: repository-structure
     path: docs/contracts/repository-structure.v1.txt
     version: '1'
@@ -64,3 +69,4 @@ architecture_decisions:
   - docs/adr/0008-offline-safe-mobile-reason-capture.md
   - docs/adr/0009-commit-gated-bounded-perspective.md
   - docs/adr/0010-mobile-perspective-consumption.md
+  - docs/adr/0011-context-and-source-read-layer.md
