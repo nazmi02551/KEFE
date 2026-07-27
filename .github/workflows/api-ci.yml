@@ -130,6 +130,7 @@ jobs:
           tests/test_postgres_integration.py
           tests/test_postgres_outbox_integration.py
           tests/test_private_reason_postgres.py
+          tests/test_perspective_postgres.py
           > postgres-test-output.txt 2>&1
       - name: Upload PostgreSQL diagnostics on failure
         if: steps.postgres-tests.outcome == 'failure'
