@@ -1,0 +1,52 @@
+name: Mobile CI
+
+on:
+  pull_request:
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  flutter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.4'
+          channel: stable
+          cache: true
+      - name: Resolve dependencies
+        working-directory: apps/mobile
+        run: flutter pub get
+      - name: Normalize formatting
+        working-directory: apps/mobile
+        run: dart format lib test
+      - name: Analyze
+        working-directory: apps/mobile
+        run: flutter analyze
+      - name: Test
+        id: tests
+        continue-on-error: true
+        working-directory: apps/mobile
+        run: flutter test --reporter expanded > test-output.txt 2>&1
+      - name: Upload test diagnostics on failure
+        if: steps.tests.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-test-output
+          path: apps/mobile/test-output.txt
+          if-no-files-found: error
+      - name: Enforce tests
+        if: always()
+        run: test '${{ steps.tests.outcome }}' = 'success'
