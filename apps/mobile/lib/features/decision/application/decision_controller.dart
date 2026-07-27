@@ -60,7 +60,9 @@ class DecisionState {
 
   String? get selectedOption {
     final caseValue = caseData;
-    if (caseValue == null) return null;
+    if (caseValue == null) {
+      return null;
+    }
     for (final question in caseValue.questions) {
       if (question.responseType == 'SINGLE_CHOICE') {
         return responses[question.id] as String?;
@@ -71,7 +73,9 @@ class DecisionState {
 
   bool get hasRequiredResponses {
     final caseValue = caseData;
-    if (caseValue == null) return false;
+    if (caseValue == null) {
+      return false;
+    }
     return caseValue.questions
         .where((question) => question.required)
         .every((question) => responses.containsKey(question.id));
@@ -124,7 +128,9 @@ class DecisionController extends Notifier<DecisionState> {
     try {
       await _repository.ensureGuestCredential();
       final caseData = await _repository.fetchCase(caseId);
-      if (generation != _loadGeneration) return;
+      if (generation != _loadGeneration) {
+        return;
+      }
 
       if (draft != null && draft.caseVersionId == caseData.versionId) {
         state = DecisionState(
@@ -144,31 +150,43 @@ class DecisionController extends Notifier<DecisionState> {
       }
 
       final sessionId = await _repository.startSession(caseData.id);
-      if (generation != _loadGeneration) return;
+      if (generation != _loadGeneration) {
+        return;
+      }
       state = DecisionState(caseData: caseData, sessionId: sessionId);
     } on ClientTransportFailure catch (error) {
-      if (generation != _loadGeneration) return;
+      if (generation != _loadGeneration) {
+        return;
+      }
       if (draft != null) {
         _restoreOfflineDraft(draft, error.code);
         return;
       }
       state = DecisionState(errorCode: error.code);
     } on ApiFailure catch (error) {
-      if (generation != _loadGeneration) return;
+      if (generation != _loadGeneration) {
+        return;
+      }
       state = DecisionState(errorCode: error.code);
     } catch (_) {
-      if (generation != _loadGeneration) return;
+      if (generation != _loadGeneration) {
+        return;
+      }
       state = const DecisionState(errorCode: 'UNEXPECTED_CLIENT_ERROR');
     }
   }
 
   Future<void> select(String value) async {
     final caseData = state.caseData;
-    if (caseData == null) return;
+    if (caseData == null) {
+      return;
+    }
     final choice = caseData.questions
         .where((question) => question.responseType == 'SINGLE_CHOICE')
         .firstOrNull;
-    if (choice == null) return;
+    if (choice == null) {
+      return;
+    }
     await setResponse(choice.id, value);
   }
 
@@ -178,8 +196,12 @@ class DecisionController extends Notifier<DecisionState> {
     }
     final caseData = state.caseData;
     final sessionId = state.sessionId;
-    if (caseData == null || sessionId == null) return;
-    if (!caseData.questions.any((question) => question.id == questionId)) return;
+    if (caseData == null || sessionId == null) {
+      return;
+    }
+    if (!caseData.questions.any((question) => question.id == questionId)) {
+      return;
+    }
 
     final responses = {...state.responses, questionId: value};
     final draft = DecisionDraft(
@@ -197,11 +219,15 @@ class DecisionController extends Notifier<DecisionState> {
   }
 
   Future<void> commit() async {
-    if (state.submitting || !state.hasRequiredResponses) return;
+    if (state.submitting || !state.hasRequiredResponses) {
+      return;
+    }
 
     final caseData = state.caseData;
     final sessionId = state.sessionId;
-    if (caseData == null || sessionId == null) return;
+    if (caseData == null || sessionId == null) {
+      return;
+    }
 
     final stored = await _draftStore.readForCase(caseData.id);
     if (stored != null && stored.phase != DecisionDraftPhase.editing) {
@@ -230,9 +256,13 @@ class DecisionController extends Notifier<DecisionState> {
   }
 
   Future<void> retryPending() async {
-    if (state.submitting) return;
+    if (state.submitting) {
+      return;
+    }
     final caseData = state.caseData;
-    if (caseData == null) return;
+    if (caseData == null) {
+      return;
+    }
 
     final draft = await _draftStore.readForCase(caseData.id);
     if (draft == null || draft.phase == DecisionDraftPhase.editing) {
@@ -254,10 +284,14 @@ class DecisionController extends Notifier<DecisionState> {
     try {
       if (current.phase == DecisionDraftPhase.commitPending) {
         for (final response in current.effectiveResponses.entries) {
+          final value = response.value;
+          if (value == null) {
+            continue;
+          }
           await _repository.answer(
             sessionId: current.sessionId,
             questionId: response.key,
-            value: response.value as Object,
+            value: value,
           );
         }
         await _repository.commit(
