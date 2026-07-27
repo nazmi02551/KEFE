@@ -1,0 +1,58 @@
+KEFE monorepo contract v1.0.0
+
+/apps
+  /mobile                 Flutter consumer app
+    /lib/core             app bootstrap, routing, theme, localization, networking
+    /lib/features         feature modules: explore, case, weigh, reveal, perspective, activity, my_kefe, sharing, auth
+  /web                    Next.js public/deep-link/web experience
+  /admin                  Next.js Admin Studio
+
+/services
+  /api                    FastAPI modular monolith
+    /src/modules/identity
+    /src/modules/taxonomy
+    /src/modules/content
+    /src/modules/weighing
+    /src/modules/results
+    /src/modules/arguments
+    /src/modules/trust
+    /src/modules/integrity
+    /src/modules/experts
+    /src/modules/notifications
+    /src/modules/sharing
+    /src/modules/personal_insights
+    /src/modules/research
+    /src/modules/ai
+    /src/modules/admin
+    /src/platform          DB, queue, cache, observability, provider adapters
+
+/packages
+  /contracts              OpenAPI-generated DTOs and shared JSON schemas
+  /design-tokens          semantic design tokens; no screen-specific literals
+  /localization           copy keys, locale resources, formatting contracts
+  /config-schema          typed configuration/feature-flag schemas
+  /test-fixtures          deterministic Case/Question/Result fixtures
+
+/infra
+  /iac                    environment-neutral IaC modules
+  /migrations             ordered PostgreSQL migrations (expand/contract)
+  /observability          dashboards, alerts, SLO definitions
+  /security               policy-as-code, dependency/SBOM configuration
+
+/docs
+  /adr                    architecture decision records
+  /runbooks               incident/restore/provider-fallback runbooks
+  /generated              generated API/ERD docs; never canonical source
+
+/tools
+  contract-check          OpenAPI/JSON Schema/config compatibility validation
+  architecture-check      forbidden imports/module dependency fitness tests
+  seed                    reproducible editorial/test seed tooling
+
+Hard rules
+1. Domain/application modules do not import vendor SDKs directly.
+2. Cross-module writes occur through declared application ports/services, not foreign table reach-through.
+3. User-facing copy uses semantic keys; screen code does not duplicate product strings.
+4. API and event contracts are source-controlled and compatibility-checked in CI.
+5. Generated clients/models are derived artifacts, not hand-edited sources.
+6. Secrets are environment/secret-manager inputs, never config registry values.
