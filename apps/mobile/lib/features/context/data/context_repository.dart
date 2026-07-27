@@ -11,6 +11,12 @@ extension ContextRepositoryAccess on DecisionRepository {
     if (repository is ContextRepository) {
       return (repository as ContextRepository).fetchContext(caseVersionId);
     }
-    throw const ClientTransportFailure(code: 'CONTEXT_NOT_CONFIGURED');
+    return Future.value(
+      CaseContextSnapshot(
+        caseVersionId: caseVersionId,
+        blocks: const [],
+        sources: const [],
+      ),
+    );
   }
 }
