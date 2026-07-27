@@ -3,7 +3,7 @@
 **Updated:** 2026-07-27  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Latest verified implementation commit:** `50116080c2cfc594d61096c747328488519e2947`
+**Latest verified implementation commit:** `179ab69a4ba8e20970f16ecda1be20c20533b776`
 
 This file is the **single canonical durable engineering handoff point** for continuing KEFE development when a chat session, local environment or tool run is interrupted. Before starting new work, verify this file against `main`, open pull requests and recent CI runs.
 
@@ -24,11 +24,12 @@ The editable DOCX and generated PDF package are synchronized only at meaningful 
 
 Binding product rules relevant to the executable path include:
 
-- Canonical Golden Path: `Launch → Explore → Case → Weigh → Commit → Reveal → Perspective → My KEFE Progress → Share`.
+- Canonical Golden Path: `Launch → Explore → Case → Context → Weigh → Commit → Reveal → Perspective → My KEFE Progress → Share`.
 - First-session path includes the short promise, Demo DILEMMA, optional post-Reveal Account Offer and the same downstream Perspective/Progress/Share value path.
 - Commit First: community/result layers are unavailable before the user's confirmed decision.
-- Commit First is not Blind First; context and sources must remain available without result leakage.
+- Commit First is not Blind First; Context and Sources remain available before Commit without result leakage.
 - CaseVersion pinning and published-version immutability.
+- Claim status (`VERIFIED / CLAIMED / DISPUTED / UNKNOWN`) is distinct from source kind and provenance.
 - Provider-neutral ports/adapters and configuration-driven infrastructure.
 - Reason Capture is optional and private-by-default in the current executable scope.
 - There is no raw comment wall. Perspective is a bounded, quality-oriented post-Commit experience with curated fallback when AI is unavailable.
@@ -55,6 +56,10 @@ Binding product rules relevant to the executable path include:
 - CaseVersion-pinned PostgreSQL curated Perspective cards in four bounded semantic slots.
 - Deterministic `DEGRADED_CURATED` fallback with provenance and methodology metadata.
 - Current private/pending reasons are excluded from Perspective; view events contain no card/reason text.
+- Public `GET /v1/case-versions/{case_version_id}/context` read boundary.
+- CaseVersion-pinned Context blocks, Sources, provenance links and progressive-disclosure metadata.
+- Context leakage guardrails prevent results, Perspective, participant reasons, sample metrics and community signals from entering the pre-Commit response.
+- Context claim states and source kinds are modeled separately.
 - Contract manifest, ADRs, error registry and schema snapshots.
 
 ### Mobile
@@ -76,69 +81,69 @@ Binding product rules relevant to the executable path include:
 - At most four API-ordered Perspective roles (`NEAR`, `OPPOSING`, `BRIDGE`, `ALTERNATIVE_CONTEXT`) with unknown slots filtered safely.
 - Explicit Perspective UI states for loading, ready, cluster pending, curated fallback, retryable error and viewer-only reason moderation notice.
 - Perspective-only retry; failures do not hide the trusted Reveal or replay responses, reasons, Commit or Reveal.
-- Neutral curated-fallback and methodology disclosure copy; private reason text is never rendered as a Perspective card.
+- Context appears after the Case summary and before Weigh.
+- `ESSENTIAL` Context is visible by default; `DETAIL` blocks and Sources are explicitly expandable.
+- Context failure is isolated from decision recovery and does not expose or trigger post-Commit data.
+- Remote evidence is rendered as trusted structured fields; untrusted remote HTML is not embedded.
 
 ### Most recent merged product slices
 
-- PR #17 — first-use onboarding through first Reveal.
-- PR #18 — typed question engine and Confidence capture.
 - PR #20 — private-by-default structured Reason Capture backend.
 - PR #22 — mobile private Reason Capture and offline-safe pre-Commit synchronization.
 - PR #25 — Commit-gated bounded Perspective backend and curated fallback.
 - PR #26 — mobile post-Reveal Perspective consumption with isolated safe retry.
+- PR #27 — CaseVersion-pinned pre-Commit Context and Source read layer across backend, contracts and mobile.
 
 ## 3. Current executable path
 
 Mobile consumer path today:
 
-`Onboarding → Explore → Case → Typed Weigh → Optional Private Reason → Commit → Trusted Reveal → Curated Perspective`
+`Onboarding → Explore → Case Summary → Context + Sources → Typed Weigh → Optional Private Reason → Commit → Trusted Reveal → Curated Perspective`
 
-The reason step is optional and CaseVersion/schema-driven. Blank input never blocks Commit and causes no reason API call. Results remain hidden until Commit. Reason data is not exposed to other users in the current product surface; optional short text may enter server-side safety moderation. After a successful Reveal, the mobile client automatically requests and renders the bounded, actor-owned Perspective read model below Reveal. Perspective retry is isolated to its GET request and never replays decision commands.
+Context is public, CaseVersion-pinned and available before Commit. It contains editorially ordered evidence blocks, claim states and source provenance, but no community/result/Perspective/participant-reason leakage. The reason step is optional and schema-driven. Blank reason input never blocks Commit. Results remain hidden until Commit. After a successful Reveal, the mobile client automatically requests and renders the bounded, actor-owned Perspective read model below Reveal.
 
-The active demo remains a low-risk DILEMMA. Its current reason/question configuration is a development fixture, not a product-wide default.
+The active demo remains a low-risk DILEMMA. Its current context, source, reason and question configuration is a development fixture, not a product-wide default.
 
 ## 4. Canonical decision status and implementation guardrails
 
-There are no open product decisions in the current official documentation set. The former checkpoint list of open questions was based on superseded document versions and must not be used to delay, reverse or silently reinterpret approved decisions.
+There are no open product decisions in the current official documentation set. Superseded open-decision lists must not be used to delay, reverse or silently reinterpret approved decisions.
 
-Some canonical decisions are not yet fully expressed in this executable slice. Navigation, user-facing Commit terminology, Quick Weigh behavior, identity/account conversion, retention, sampling/methodology, civic review/publication, expert verification, KEFE+, social visibility and Perspective ranking must be introduced only through small reviewed slices that cite the current authority documents and update the relevant ADRs/contracts/tests.
+Some canonical decisions are not yet fully expressed in this executable slice. Navigation, user-facing Commit terminology, Quick Weigh behavior, identity/account conversion, retention, sampling/methodology, civic review/publication, expert verification, KEFE+, social visibility and production Perspective ranking must be introduced only through small reviewed slices that cite the current authority documents and update the relevant ADRs/contracts/tests.
 
 Implementation guardrails for the next slice:
 
 - Do not expose a community result or Perspective before Commit.
+- Keep Context and Sources available before Commit without leaking post-Commit signals.
 - Do not expose current private or `PENDING` reasons to another user.
 - Do not add a raw feed, popularity-only ranking or unlabeled AI-authored text.
 - Keep human reasons and AI summaries separate in the data model and UI.
 - Preserve a deterministic curated fallback when AI or clustering is unavailable.
-- Carry provenance, moderation state and sample/methodology metadata through the read model.
+- Carry provenance, moderation state and sample/methodology metadata through applicable read models.
+- Preserve optional guest continuation; do not force account creation to complete the first value loop.
 
 ## 5. Recommended next delivery sequence
 
 Continue in small reviewed vertical slices:
 
-1. **Context + Sources read layer**
-   - before coding, lock slice-specific placement, progressive disclosure, read API and evidence semantics in ADR-0011 and a machine-readable contract
-   - define the exact `VERIFIED / CLAIMED / DISPUTED / UNKNOWN` presentation and source metadata without silently inventing product behavior
-   - prevent community/result leakage before Commit while keeping context available
-   - preserve CaseVersion pinning, published-version immutability and source/version auditability
+1. **Account Offer + My KEFE Progress foundation**
+   - lock the post-Reveal Account Offer placement and guest-continuation behavior in an ADR and machine-readable contract
+   - make guest-to-account conversion, ownership continuity and retention behavior explicit before implementation
+   - add the minimum approved My KEFE Progress read model without premature personality claims or gamification
+   - preserve the already completed Reveal and Perspective path even when account conversion is skipped
 
-2. **Account Offer + My KEFE Progress foundation**
-   - preserve optional, transparent guest continuation and the canonical first-session boundary
-   - make identity/retention behavior explicit in contracts before implementation
-   - connect committed activity to the approved progress model without premature gamification
-
-3. **Content/Admin foundation**
-   - Case/Issue/Question authoring contracts
-   - publication workflow and audit trail
+2. **Content/Admin foundation**
+   - Case/Issue/Question/Context/Source authoring contracts
+   - publication workflow, CaseVersion immutability and audit trail
    - taxonomy/configuration management
+   - source verification and claim-status review
 
-4. **Observability and deployment baseline**
+3. **Observability and deployment baseline**
    - request/event correlation
    - SLO/error/latency metrics
    - secrets and environment contract
    - development/staging deployment runbook
 
-5. **Milestone documentation synchronization**
+4. **Milestone documentation synchronization**
    - patch the Engineering Blueprint and relevant specialist documents with executable decisions accumulated through the milestone
    - regenerate DOCX/PDF package from editable sources
    - visually verify renders, update manifest and archive prior versions
@@ -158,12 +163,13 @@ At the beginning of every new work session:
 9. Merge only after all relevant CI jobs pass.
 10. Update this checkpoint after every meaningful merged milestone.
 11. Treat older handoff files as redirects to this file, not independent state sources.
+12. Synchronize editable DOCX/PDF only at a declared milestone boundary, not after every small merge.
 
 ## 7. Recovery prompt for a new chat
 
 Use the following message if continuation must move to another conversation:
 
-> Continue KEFE development from repository `nazmi02551/KEFE`. First read `docs/status/CURRENT.md` on `main`, inspect open PRs, recent commits and CI, and verify the checkpoint is current. Use the current official KEFE documentation versions recorded there; do not revive superseded open-decision lists. Preserve Commit First, CaseVersion pinning and provider-neutral ports/adapters. Lock the next slice in an ADR and machine-readable contract before coding, keep the change coherent and small, and merge only with green CI. Keep DOCX/PDF synchronization obligations in the milestone checklist.
+> Continue KEFE development from repository `nazmi02551/KEFE`. First read `docs/status/CURRENT.md` on `main`, inspect open PRs, recent commits and CI, and verify the checkpoint is current. Use the current official KEFE documentation versions recorded there; do not revive superseded open-decision lists. Preserve Commit First, pre-Commit Context without result leakage, CaseVersion pinning and provider-neutral ports/adapters. Lock the next slice in an ADR and machine-readable contract before coding, keep the change coherent and small, and merge only with green CI. Keep DOCX/PDF synchronization obligations in the milestone checklist.
 
 ## 8. Reliability rule
 
