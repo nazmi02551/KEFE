@@ -8,6 +8,7 @@ from kefe_api.modules.decision.models import (
     CaseVersion,
     CommitAttempt,
     DraftUpdateAttempt,
+    Exposure,
     RevealSnapshot,
     WeighSession,
 )
@@ -29,6 +30,13 @@ class DecisionRepository(Protocol):
     ) -> None: ...
 
     def get_session(self, session_id: UUID) -> WeighSession | None: ...
+
+    def record_exposures(
+        self,
+        *,
+        session_id: UUID,
+        exposures: tuple[Exposure, ...],
+    ) -> None: ...
 
     def update_draft_responses(
         self,
