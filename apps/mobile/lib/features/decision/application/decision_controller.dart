@@ -90,28 +90,27 @@ class DecisionController extends Notifier<DecisionState> {
   DecisionRepository get _repository => ref.read(decisionRepositoryProvider);
   DecisionDraftStore get _draftStore => ref.read(decisionDraftStoreProvider);
 
+  int _loadGeneration = 0;
+
   @override
   DecisionState build() => const DecisionState();
 
-  Future<void> load() async {
-    state = state.copyWith(loading: true, clearError: true);
-    final draft = await _draftStore.read();
+  Future<void> load(String caseId) async {
+    final generation = ++_loadGeneration;
+    state = const DecisionState(loading: true);
+    final draft = await _draftStore.readForCase(caseId);
 
     try {
       await _repository.ensureGuestCredential();
-      final caseData = await _repository.fetchCase(demoCaseId);
+      final caseData = await _repository.fetchCase(caseId);
+      if (generation != _loadGeneration) return;
 
-      if (draft != null &&
-          draft.caseId == caseData.id &&
-          draft.caseVersionId == caseData.versionId) {
-        state = state.copyWith(
-          loading: false,
+      if (draft != null && draft.caseVersionId == caseData.versionId) {
+        state = DecisionState(
           caseData: caseData,
           sessionId: draft.sessionId,
           selectedOption: draft.selectedOption,
           recoveryPending: draft.phase != DecisionDraftPhase.editing,
-          offlineDraft: false,
-          clearError: true,
         );
         if (draft.phase != DecisionDraftPhase.editing) {
           await _resumeDraft(draft);
@@ -120,28 +119,25 @@ class DecisionController extends Notifier<DecisionState> {
       }
 
       if (draft != null) {
-        await _draftStore.clear();
+        await _draftStore.clearForCase(caseId);
       }
 
       final sessionId = await _repository.startSession(caseData.id);
-      state = state.copyWith(
-        loading: false,
-        caseData: caseData,
-        sessionId: sessionId,
-        recoveryPending: false,
-        offlineDraft: false,
-        clearError: true,
-      );
+      if (generation != _loadGeneration) return;
+      state = DecisionState(caseData: caseData, sessionId: sessionId);
     } on ClientTransportFailure catch (error) {
+      if (generation != _loadGeneration) return;
       if (draft != null) {
         _restoreOfflineDraft(draft, error.code);
         return;
       }
-      state = state.copyWith(loading: false, errorCode: error.code);
+      state = DecisionState(errorCode: error.code);
     } on ApiFailure catch (error) {
-      state = state.copyWith(loading: false, errorCode: error.code);
+      if (generation != _loadGeneration) return;
+      state = DecisionState(errorCode: error.code);
     } catch (_) {
-      state = state.copyWith(loading: false, errorCode: 'UNEXPECTED_CLIENT_ERROR');
+      if (generation != _loadGeneration) return;
+      state = const DecisionState(errorCode: 'UNEXPECTED_CLIENT_ERROR');
     }
   }
 
@@ -171,18 +167,14 @@ class DecisionController extends Notifier<DecisionState> {
   }
 
   Future<void> commit() async {
-    if (state.submitting) {
-      return;
-    }
+    if (state.submitting) return;
 
     final caseData = state.caseData;
     final sessionId = state.sessionId;
     final selected = state.selectedOption;
-    if (caseData == null || sessionId == null || selected == null) {
-      return;
-    }
+    if (caseData == null || sessionId == null || selected == null) return;
 
-    final stored = await _draftStore.read();
+    final stored = await _draftStore.readForCase(caseData.id);
     if (stored != null && stored.phase != DecisionDraftPhase.editing) {
       await _resumeDraft(stored);
       return;
@@ -210,10 +202,11 @@ class DecisionController extends Notifier<DecisionState> {
   }
 
   Future<void> retryPending() async {
-    if (state.submitting) {
-      return;
-    }
-    final draft = await _draftStore.read();
+    if (state.submitting) return;
+    final caseData = state.caseData;
+    if (caseData == null) return;
+
+    final draft = await _draftStore.readForCase(caseData.id);
     if (draft == null || draft.phase == DecisionDraftPhase.editing) {
       await commit();
       return;
@@ -249,7 +242,7 @@ class DecisionController extends Notifier<DecisionState> {
       }
 
       final reveal = await _repository.reveal(current.sessionId);
-      await _draftStore.clear();
+      await _draftStore.clearForCase(current.caseId);
       state = state.copyWith(
         submitting: false,
         recoveryPending: false,
@@ -282,8 +275,7 @@ class DecisionController extends Notifier<DecisionState> {
   }
 
   void _restoreOfflineDraft(DecisionDraft draft, String transportCode) {
-    state = state.copyWith(
-      loading: false,
+    state = DecisionState(
       caseData: draft.caseData,
       sessionId: draft.sessionId,
       selectedOption: draft.selectedOption,
