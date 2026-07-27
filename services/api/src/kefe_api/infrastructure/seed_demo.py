@@ -11,12 +11,14 @@ from kefe_api.infrastructure.db import build_engine
 from kefe_api.modules.decision.bootstrap import (
     DEMO_CASE_ID,
     DEMO_CASE_VERSION_ID,
+    DEMO_CONFIDENCE_QUESTION_ID,
     DEMO_QUESTION_ID,
 )
 
 DEMO_ISSUE_ID = UUID("44444444-4444-4444-8444-444444444444")
 DEMO_STABLE_QUESTION_ID = UUID("55555555-5555-4555-8555-555555555555")
 DEMO_RESULT_ID = UUID("66666666-6666-4666-8666-666666666666")
+DEMO_STABLE_CONFIDENCE_QUESTION_ID = UUID("88888888-8888-4888-8888-888888888888")
 
 
 def seed_demo() -> None:
@@ -84,7 +86,14 @@ def seed_demo() -> None:
             text(
                 """
                 INSERT INTO content.question_version (
-                    id, question_id, version_no, prompt, response_type, response_schema, is_active
+                    id,
+                    question_id,
+                    version_no,
+                    prompt,
+                    response_type,
+                    response_schema,
+                    is_required,
+                    is_active
                 )
                 VALUES (
                     :id,
@@ -93,15 +102,65 @@ def seed_demo() -> None:
                     'Son koltuğu kime verirdin?',
                     'SINGLE_CHOICE',
                     CAST(:response_schema AS jsonb),
+                    true,
                     true
                 )
-                ON CONFLICT (id) DO NOTHING
+                ON CONFLICT (id) DO UPDATE SET
+                    response_schema = EXCLUDED.response_schema,
+                    is_required = EXCLUDED.is_required
                 """
             ),
             {
                 "id": DEMO_QUESTION_ID,
                 "question_id": DEMO_STABLE_QUESTION_ID,
                 "response_schema": json.dumps({"options": ["A", "B"]}),
+            },
+        )
+        connection.execute(
+            text(
+                """
+                INSERT INTO content.question (id, issue_id, stable_code)
+                VALUES (:id, :issue_id, 'DECISION_CONFIDENCE')
+                ON CONFLICT (id) DO NOTHING
+                """
+            ),
+            {
+                "id": DEMO_STABLE_CONFIDENCE_QUESTION_ID,
+                "issue_id": DEMO_ISSUE_ID,
+            },
+        )
+        connection.execute(
+            text(
+                """
+                INSERT INTO content.question_version (
+                    id,
+                    question_id,
+                    version_no,
+                    prompt,
+                    response_type,
+                    response_schema,
+                    is_required,
+                    is_active
+                )
+                VALUES (
+                    :id,
+                    :question_id,
+                    1,
+                    'Bu kararından ne kadar eminsin?',
+                    'CONFIDENCE',
+                    CAST(:response_schema AS jsonb),
+                    false,
+                    true
+                )
+                ON CONFLICT (id) DO UPDATE SET
+                    response_schema = EXCLUDED.response_schema,
+                    is_required = EXCLUDED.is_required
+                """
+            ),
+            {
+                "id": DEMO_CONFIDENCE_QUESTION_ID,
+                "question_id": DEMO_STABLE_CONFIDENCE_QUESTION_ID,
+                "response_schema": json.dumps({"min": 1, "max": 5, "step": 1}),
             },
         )
         connection.execute(
