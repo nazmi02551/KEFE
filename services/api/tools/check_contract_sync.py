@@ -47,8 +47,8 @@ def _openapi_errors() -> list[str]:
     contract = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
     errors: list[str] = []
 
-    if contract.get("info", {}).get("version") != "0.9.0":
-        errors.append("OpenAPI checked-in version must match API v0.9.0")
+    if contract.get("info", {}).get("version") != "0.10.0":
+        errors.append("OpenAPI checked-in version must match API v0.10.0")
 
     bearer = contract.get("components", {}).get("securitySchemes", {}).get("HTTPBearer")
     if bearer != {"scheme": "bearer", "type": "http"}:
@@ -64,6 +64,9 @@ def _openapi_errors() -> list[str]:
         "PerspectiveCardResponse",
         "PerspectiveMethodologyResponse",
         "PerspectiveResponse",
+        "ContextSourceResponse",
+        "ContextBlockResponse",
+        "ContextSnapshotResponse",
     }
     missing_schemas = sorted(required_schemas - schemas.keys())
     if missing_schemas:
@@ -113,6 +116,14 @@ def _openapi_errors() -> list[str]:
             "PerspectiveResponse missing fields: " + ", ".join(missing_perspective_fields)
         )
 
+    context_properties = schemas.get("ContextSnapshotResponse", {}).get("properties", {})
+    required_context_fields = {"case_version_id", "blocks", "sources"}
+    missing_context_fields = sorted(required_context_fields - context_properties.keys())
+    if missing_context_fields:
+        errors.append(
+            "ContextSnapshotResponse missing fields: " + ", ".join(missing_context_fields)
+        )
+
     paths = contract.get("paths", {})
     case_operation = paths.get("/v1/cases/{case_id}", {}).get("get", {})
     if _response_ref(case_operation) != "#/components/schemas/CaseDetailResponse":
@@ -127,6 +138,14 @@ def _openapi_errors() -> list[str]:
     ).get("get", {})
     if _response_ref(perspective_operation) != "#/components/schemas/PerspectiveResponse":
         errors.append("GET perspectives must return PerspectiveResponse")
+
+    context_operation = paths.get(
+        "/v1/case-versions/{case_version_id}/context", {}
+    ).get("get", {})
+    if _response_ref(context_operation) != "#/components/schemas/ContextSnapshotResponse":
+        errors.append("GET CaseVersion context must return ContextSnapshotResponse")
+    if context_operation.get("security"):
+        errors.append("GET CaseVersion context must remain public before Commit")
 
     protected_operations = (
         ("/v1/cases/{case_id}/weigh-sessions", "post"),
@@ -154,7 +173,7 @@ def _openapi_errors() -> list[str]:
 
 
 def _schema_errors() -> list[str]:
-    schema = (CONTRACTS / "postgresql-m0-schema.v1.5.0.sql").read_text(encoding="utf-8")
+    schema = (CONTRACTS / "postgresql-m0-schema.v1.6.0.sql").read_text(encoding="utf-8")
     required_fragments = {
         "commit_idempotency_key text": "explicit Commit idempotency",
         "commit_idempotency_actor_key_idx": "actor-scoped Commit idempotency",
@@ -178,6 +197,13 @@ def _schema_errors() -> list[str]:
         "source_kind text NOT NULL DEFAULT 'CURATED' CHECK (source_kind = 'CURATED')": (
             "curated-only first Perspective slice"
         ),
+        "CREATE TABLE content.context_source": "CaseVersion-pinned Context sources",
+        "CREATE TABLE content.context_block": "progressive Context blocks",
+        "CREATE TABLE content.context_block_source": "Context-to-source provenance links",
+        "claim_status IN ('VERIFIED','CLAIMED','DISPUTED','UNKNOWN')": (
+            "explicit Context claim states"
+        ),
+        "disclosure_level IN ('ESSENTIAL','DETAIL')": "Context disclosure levels",
     }
     return [
         f"M0 schema missing {description}"
@@ -242,7 +268,8 @@ def main() -> None:
     print(
         "Contract sync OK: "
         f"{len(used)} DomainError codes registered; HTTP API, typed questions, "
-        "private reasons, Perspective, identity, persistence and outbox invariants verified."
+        "private reasons, Context, Perspective, identity, persistence and outbox "
+        "invariants verified."
     )
 
 
