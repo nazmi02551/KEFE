@@ -59,10 +59,10 @@ class ReasonPolicy {
     final rawTextMaxLength = schema['text_max_length'];
     return ReasonPolicy(
       tags: tags,
-      maxTags: rawMaxTags is int ? rawMaxTags.clamp(1, 10) : 3,
+      maxTags: rawMaxTags is int ? rawMaxTags.clamp(1, 10).toInt() : 3,
       textEnabled: schema['text_enabled'] == true,
       textMaxLength: rawTextMaxLength is int
-          ? rawTextMaxLength.clamp(1, 1000)
+          ? rawTextMaxLength.clamp(1, 1000).toInt()
           : 500,
     );
   }
