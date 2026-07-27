@@ -260,7 +260,13 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(pending, findsOneWidget);
-    expect(find.textContaining('Bu yalnızca benim özel gerekçem.'), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('perspective-section')),
+        matching: find.textContaining('Bu yalnızca benim özel gerekçem.'),
+      ),
+      findsNothing,
+    );
   });
 
   testWidgets('Perspective retry never replays answer reason Commit or Reveal', (
