@@ -50,6 +50,18 @@ def _start_and_answer(client: TestClient, actor_headers: dict[str, str]) -> str:
     return session_id
 
 
+def test_postgres_explore_lists_published_cases(monkeypatch: pytest.MonkeyPatch) -> None:
+    client = _postgres_client(monkeypatch)
+    try:
+        response = client.get("/v1/cases?limit=10")
+        assert response.status_code == 200
+        items = response.json()["items"]
+        assert any(item["case_id"] == str(DEMO_CASE_ID) for item in items)
+        assert all("questions" not in item for item in items)
+    finally:
+        get_settings.cache_clear()
+
+
 def test_postgres_case_weigh_commit_reveal_and_outbox(monkeypatch: pytest.MonkeyPatch) -> None:
     database_url = os.environ["KEFE_DATABASE_URL"]
     client = _postgres_client(monkeypatch)
