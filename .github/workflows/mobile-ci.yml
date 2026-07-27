@@ -36,5 +36,17 @@ jobs:
         working-directory: apps/mobile
         run: flutter analyze
       - name: Test
+        id: tests
+        continue-on-error: true
         working-directory: apps/mobile
-        run: flutter test
+        run: flutter test --reporter expanded > test-output.txt 2>&1
+      - name: Upload test diagnostics on failure
+        if: steps.tests.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-test-output
+          path: apps/mobile/test-output.txt
+          if-no-files-found: error
+      - name: Enforce tests
+        if: always()
+        run: test '${{ steps.tests.outcome }}' = 'success'
