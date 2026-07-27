@@ -8,6 +8,8 @@ from kefe_api.core.errors import DomainError
 from kefe_api.modules.decision.models import (
     CommitStatus,
     DraftUpdateStatus,
+    Exposure,
+    ExposureKind,
     Question,
     WeighSession,
     WeighState,
@@ -49,6 +51,38 @@ class DecisionService:
             payload={"actor_id": str(actor_id), "case_version_id": str(case.id)},
         )
         return session
+
+    def record_exposures(
+        self,
+        *,
+        actor_id: UUID,
+        session_id: UUID,
+        items: tuple[tuple[ExposureKind, UUID], ...],
+    ) -> int:
+        session = self._owned_session(actor_id, session_id)
+        case = self._repo.get_case_version(session.case_version_id)
+        if case is None:
+            raise DomainError("CASE_VERSION_STALE", "Case version is no longer available", 409)
+
+        invalid = [
+            {"kind": kind.value, "ref_id": str(ref_id)}
+            for kind, ref_id in items
+            if ref_id not in case.exposure_ids(kind)
+        ]
+        if invalid:
+            raise DomainError(
+                "WEIGH_EXPOSURE_INVALID",
+                "Exposure reference is not part of the pinned CaseVersion",
+                422,
+                meta={"invalid_exposures": invalid},
+            )
+
+        now = datetime.now(UTC)
+        exposures = tuple(
+            Exposure(kind=kind, ref_id=ref_id, occurred_at=now) for kind, ref_id in items
+        )
+        self._repo.record_exposures(session_id=session_id, exposures=exposures)
+        return len(exposures)
 
     def update_responses(
         self, *, actor_id: UUID, session_id: UUID, responses: dict[UUID, Any]
