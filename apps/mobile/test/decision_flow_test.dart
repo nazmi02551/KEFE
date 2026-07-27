@@ -56,6 +56,13 @@ class FakeDecisionRepository implements DecisionRepository {
   }
 
   @override
+  Future<void> savePrivateReason({
+    required String sessionId,
+    required List<String> tags,
+    required String? text,
+  }) async {}
+
+  @override
   Future<void> commit({
     required String sessionId,
     required String idempotencyKey,
@@ -201,6 +208,7 @@ void main() {
 
     expect(repository.commitCalls, 2);
     expect(repository.commitKeys, [firstKey, firstKey]);
+    expect(repository.answerCalls, 1);
     expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
     expect(draftStore.draftFor(demoCaseId), isNull);
   });

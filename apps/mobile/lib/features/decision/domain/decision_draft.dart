@@ -4,6 +4,7 @@ import 'decision_models.dart';
 
 enum DecisionDraftPhase {
   editing,
+  syncPending,
   commitPending,
   committedAwaitingReveal,
 }
@@ -15,6 +16,8 @@ class DecisionDraft {
     required this.sessionId,
     required this.updatedAt,
     this.responses = const {},
+    this.reasonTags = const [],
+    this.reasonText,
     this.questionId,
     this.selectedOption,
     this.commitIdempotencyKey,
@@ -24,6 +27,8 @@ class DecisionDraft {
   final DecisionCase caseData;
   final String sessionId;
   final Map<String, Object?> responses;
+  final List<String> reasonTags;
+  final String? reasonText;
 
   // Legacy fields are kept only to migrate v2 single-answer drafts safely.
   final String? questionId;
@@ -46,6 +51,9 @@ class DecisionDraft {
 
   DecisionDraft copyWith({
     Map<String, Object?>? responses,
+    List<String>? reasonTags,
+    String? reasonText,
+    bool clearReasonText = false,
     String? commitIdempotencyKey,
     DecisionDraftPhase? phase,
     DateTime? updatedAt,
@@ -54,6 +62,8 @@ class DecisionDraft {
       caseData: caseData,
       sessionId: sessionId,
       responses: responses ?? effectiveResponses,
+      reasonTags: reasonTags ?? this.reasonTags,
+      reasonText: clearReasonText ? null : reasonText ?? this.reasonText,
       commitIdempotencyKey: commitIdempotencyKey ?? this.commitIdempotencyKey,
       phase: phase ?? this.phase,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -84,6 +94,8 @@ class DecisionDraft {
     },
     'session_id': sessionId,
     'responses': effectiveResponses,
+    'reason_tags': reasonTags,
+    'reason_text': reasonText,
     'commit_idempotency_key': commitIdempotencyKey,
     'phase': phase.name,
     'updated_at': updatedAt.toUtc().toIso8601String(),
@@ -134,6 +146,8 @@ class DecisionDraft {
       ),
       sessionId: json['session_id'] as String,
       responses: responses,
+      reasonTags: (json['reason_tags'] as List<Object?>? ?? const []).cast<String>(),
+      reasonText: json['reason_text'] as String?,
       commitIdempotencyKey: json['commit_idempotency_key'] as String?,
       phase: phase,
       updatedAt: DateTime.parse(json['updated_at'] as String),

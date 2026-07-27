@@ -24,6 +24,12 @@ abstract interface class DecisionRepository {
     required Object value,
   });
 
+  Future<void> savePrivateReason({
+    required String sessionId,
+    required List<String> tags,
+    required String? text,
+  });
+
   Future<void> commit({
     required String sessionId,
     required String idempotencyKey,
