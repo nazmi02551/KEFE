@@ -8,6 +8,7 @@ from kefe_api.modules.decision.models import (
     CaseVersion,
     CommitAttempt,
     DraftUpdateAttempt,
+    ReasonUpdateAttempt,
     RevealSnapshot,
     WeighSession,
 )
@@ -37,6 +38,16 @@ class DecisionRepository(Protocol):
         session_id: UUID,
         responses: dict[UUID, Any],
     ) -> DraftUpdateAttempt: ...
+
+    def update_private_reason(
+        self,
+        *,
+        actor_id: UUID,
+        session_id: UUID,
+        tags: tuple[str, ...],
+        text: str | None,
+        updated_at: datetime,
+    ) -> ReasonUpdateAttempt: ...
 
     def commit_session(
         self,
