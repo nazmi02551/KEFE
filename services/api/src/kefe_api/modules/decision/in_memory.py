@@ -26,6 +26,16 @@ class InMemoryDecisionRepository:
     def save_session(self, session: WeighSession) -> None:
         self._sessions[session.id] = deepcopy(session)
 
+    def save_session_with_event(
+        self,
+        session: WeighSession,
+        *,
+        event_name: str,
+        payload: dict[str, object],
+    ) -> None:
+        self.save_session(session)
+        self.append_event(event_name, session.id, payload)
+
     def get_session(self, session_id: UUID) -> WeighSession | None:
         session = self._sessions.get(session_id)
         return deepcopy(session) if session else None
