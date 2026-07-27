@@ -12,6 +12,8 @@ from kefe_api.modules.decision.bootstrap import (
     DEMO_CASE_ID,
     DEMO_CASE_VERSION_ID,
     DEMO_CONFIDENCE_QUESTION_ID,
+    DEMO_PERSPECTIVE_A_ID,
+    DEMO_PERSPECTIVE_B_ID,
     DEMO_QUESTION_ID,
 )
 
@@ -203,6 +205,70 @@ def seed_demo() -> None:
                 "generated_at": datetime.now(UTC),
             },
         )
+        _seed_perspective(
+            connection,
+            perspective_id=DEMO_PERSPECTIVE_A_ID,
+            target_value="A",
+            text_body=(
+                "A seçeneği, sınırlı kaynağı o anda daha acil ihtiyacı olan kişiye "
+                "vermenin daha adil olduğunu savunur."
+            ),
+        )
+        _seed_perspective(
+            connection,
+            perspective_id=DEMO_PERSPECTIVE_B_ID,
+            target_value="B",
+            text_body=(
+                "B seçeneği, önceliğin yalnız mevcut ihtiyete değil sorumluluk ve "
+                "koşulların bütünüyle değerlendirilmesi gerektiğini savunur."
+            ),
+        )
+
+
+def _seed_perspective(connection, *, perspective_id: UUID, target_value: str, text_body: str) -> None:
+    connection.execute(
+        text(
+            """
+            INSERT INTO content.perspective_item (
+                id,
+                case_version_id,
+                question_version_id,
+                target_value,
+                text_body,
+                source_kind,
+                moderation_state,
+                publication_state,
+                editorial_priority
+            )
+            VALUES (
+                :id,
+                :case_version_id,
+                :question_version_id,
+                CAST(:target_value AS jsonb),
+                :text_body,
+                'EDITORIAL_HUMAN',
+                'ALLOWED',
+                'PUBLISHED',
+                10
+            )
+            ON CONFLICT (id) DO UPDATE SET
+                target_value = EXCLUDED.target_value,
+                text_body = EXCLUDED.text_body,
+                source_kind = EXCLUDED.source_kind,
+                moderation_state = EXCLUDED.moderation_state,
+                publication_state = EXCLUDED.publication_state,
+                editorial_priority = EXCLUDED.editorial_priority,
+                updated_at = now()
+            """
+        ),
+        {
+            "id": perspective_id,
+            "case_version_id": DEMO_CASE_VERSION_ID,
+            "question_version_id": DEMO_QUESTION_ID,
+            "target_value": json.dumps(target_value),
+            "text_body": text_body,
+        },
+    )
 
 
 if __name__ == "__main__":
