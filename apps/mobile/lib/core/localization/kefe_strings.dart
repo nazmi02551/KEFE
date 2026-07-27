@@ -62,8 +62,8 @@ class KefeStrings {
       : 'This question type is not supported in this version.';
   String get reasonTitle => _tr ? 'Neden böyle düşündün?' : 'Why did you think this?';
   String get reasonHelper => _tr
-      ? 'İstersen kararında etkili olan gerekçeleri seç. Bu aşamada gerekçen yalnızca sana aittir.'
-      : 'Optionally choose what shaped your decision. At this stage your reason remains private.';
+      ? 'İstersen kararında etkili olan gerekçeleri seç. Bu sürümde gerekçen diğer kullanıcılara gösterilmez; kısa metin güvenlik amacıyla incelenebilir.'
+      : 'Optionally choose what shaped your decision. In this version it is not shown to other users; short text may be reviewed for safety.';
   String reasonSelectionLimit(int maxTags) => _tr
       ? 'En fazla $maxTags gerekçe seçebilirsin.'
       : 'You can choose up to $maxTags reasons.';
@@ -80,6 +80,7 @@ class KefeStrings {
       'RULES' => _tr ? 'Kural' : 'Rules',
       'CONSEQUENCE' => _tr ? 'Sonuç' : 'Consequence',
       'PROPORTIONALITY' => _tr ? 'Orantılılık' : 'Proportionality',
+      'PRACTICAL_IMPACT' => _tr ? 'Pratik etki' : 'Practical impact',
       _ => code.replaceAll('_', ' '),
     };
   }
