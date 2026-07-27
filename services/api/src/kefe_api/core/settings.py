@@ -11,9 +11,17 @@ class Settings(BaseSettings):
 
     environment: str = "development"
     api_title: str = "KEFE API"
-    api_version: str = "0.3.1"
+    api_version: str = "0.4.0"
     persistence_backend: Literal["memory", "postgres"] = "memory"
     database_url: str | None = None
+
+    event_transport: Literal["logging"] = "logging"
+    outbox_batch_size: int = 100
+    outbox_lease_seconds: int = 30
+    outbox_poll_seconds: float = 1.0
+    outbox_retry_base_seconds: int = 5
+    outbox_retry_max_seconds: int = 900
+    outbox_max_attempts: int = 8
 
 
 @lru_cache
