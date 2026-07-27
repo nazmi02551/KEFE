@@ -68,11 +68,13 @@ class _OnboardingGateScreenState extends ConsumerState<OnboardingGateScreen> {
                 onPageChanged: (page) => setState(() => _page = page),
                 children: [
                   _PromisePage(
+                    key: const ValueKey('onboarding-promise-1'),
                     eyebrow: strings.appName,
                     title: strings.onboardingTitleOne,
                     body: strings.onboardingBodyOne,
                   ),
                   _PromisePage(
+                    key: const ValueKey('onboarding-promise-2'),
                     eyebrow: strings.onboardingStepTwoEyebrow,
                     title: strings.onboardingTitleTwo,
                     body: strings.onboardingBodyTwo,
@@ -133,6 +135,7 @@ class _PromisePage extends StatelessWidget {
     required this.eyebrow,
     required this.title,
     required this.body,
+    super.key,
   });
 
   final String eyebrow;
