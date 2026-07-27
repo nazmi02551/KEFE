@@ -27,6 +27,9 @@ The same decision application service supports two persistence adapters:
 - A commit idempotency key cannot silently identify another actor commit command.
 - Session state and its start/commit outbox event are persisted in one transaction.
 - Decision lifecycle outbox rows have database uniqueness guards.
+- Outbox transport is provider-neutral and runs outside the request transaction.
+- Outbox workers use bounded batches, leases, exponential backoff and dead-letter state.
+- Delivery semantics are at-least-once; downstream consumers must be idempotent by `event_id`.
 
 ## Local PostgreSQL
 
@@ -46,7 +49,16 @@ export KEFE_PERSISTENCE_BACKEND=postgres
 uvicorn kefe_api.main:app --reload
 ```
 
-The default remains `memory`, so PostgreSQL is opt-in until local/dev environment orchestration is fully standardized.
+Run the event publisher in another terminal:
+
+```bash
+export KEFE_DATABASE_URL='postgresql+psycopg://kefe:kefe@localhost:5432/kefe'
+python -m kefe_api.workers.outbox
+```
+
+The initial transport is structured logging. A managed queue or broker adapter can replace it behind `EventTransport` without changing decision domain/application code.
+
+The default API persistence remains `memory`, so PostgreSQL is opt-in until local/dev environment orchestration is fully standardized.
 
 ### Demo IDs
 
@@ -54,8 +66,8 @@ The development bootstrap exposes one low-risk DILEMMA seed through fixed UUIDs 
 
 ### Next backend slice
 
-1. outbox publisher worker with retry/backoff and consumer idempotency contract
-2. full OpenAPI synchronization and generated client model gate
-3. richer CaseVersion/question schema from the full physical contract
-4. query-budget and latency regression tests
-5. replace temporary `X-Actor-Id` development identity with the guest/auth boundary
+1. replace temporary `X-Actor-Id` development identity with the guest/auth boundary
+2. synchronize the full OpenAPI contract and add generated-client compatibility gates
+3. add outbox backlog/dead-letter observability and an audited replay command
+4. expand CaseVersion/question persistence toward the full physical contract
+5. add query-budget and latency regression tests
