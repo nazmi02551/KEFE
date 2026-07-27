@@ -27,14 +27,18 @@ def _check_manifest_paths() -> list[str]:
     return [path for path in paths if not (REPO_ROOT / path.strip()).exists()]
 
 
+def _source_contains(fragment: str) -> bool:
+    return any(fragment in path.read_text(encoding="utf-8") for path in API_SRC.rglob("*.py"))
+
+
 def main() -> None:
     registered = _registered_error_codes()
     used = _used_domain_error_codes()
     missing_errors = sorted(used - registered)
     missing_paths = _check_manifest_paths()
 
-    schema = (CONTRACTS / "postgresql-m0-schema.v1.1.0.sql").read_text(encoding="utf-8")
-    config = (CONTRACTS / "config-registry.v1.1.0.yaml").read_text(encoding="utf-8")
+    schema = (CONTRACTS / "postgresql-m0-schema.v1.2.0.sql").read_text(encoding="utf-8")
+    config = (CONTRACTS / "config-registry.v1.2.0.yaml").read_text(encoding="utf-8")
     schema_errors: list[str] = []
     if "commit_idempotency_key text" not in schema:
         schema_errors.append("M0 schema must expose explicit commit_idempotency_key")
@@ -46,9 +50,14 @@ def main() -> None:
         schema_errors.append("M0 schema must expose durable outbox retry and lease fields")
     if "dead_lettered_at timestamptz" not in schema:
         schema_errors.append("M0 schema must expose outbox dead-letter state")
+    if "CREATE TABLE identity.actor_session" not in schema:
+        schema_errors.append("M0 schema must expose revocable guest actor sessions")
+    if "token_hash char(64) NOT NULL UNIQUE" not in schema:
+        schema_errors.append("Guest bearer credentials must persist only as token hashes")
 
     config_errors: list[str] = []
     required_config_keys = {
+        "identity.guest_token_ttl_days",
         "events.transport",
         "events.outbox.batch_size",
         "events.outbox.lease_seconds",
@@ -61,7 +70,11 @@ def main() -> None:
         key for key in required_config_keys if f"- key: {key}\n" not in config
     )
     if missing_config:
-        config_errors.append(f"Missing outbox config keys: {', '.join(missing_config)}")
+        config_errors.append(f"Missing required config keys: {', '.join(missing_config)}")
+
+    source_errors: list[str] = []
+    if _source_contains("X-Actor-Id"):
+        source_errors.append("Protected API code must not trust the development X-Actor-Id header")
 
     problems: list[str] = []
     if missing_errors:
@@ -70,6 +83,7 @@ def main() -> None:
         problems.append(f"Missing contract manifest paths: {', '.join(missing_paths)}")
     problems.extend(schema_errors)
     problems.extend(config_errors)
+    problems.extend(source_errors)
 
     if problems:
         raise SystemExit("\n".join(problems))
@@ -77,7 +91,7 @@ def main() -> None:
     print(
         "Contract sync OK: "
         f"{len(used)} executable DomainError codes registered; "
-        "manifest paths, M0 persistence and outbox delivery invariants verified."
+        "manifest paths, identity, persistence and outbox invariants verified."
     )
 
 
