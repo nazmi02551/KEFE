@@ -12,6 +12,9 @@ from kefe_api.modules.decision.models import (
     CommitStatus,
     DraftUpdateAttempt,
     DraftUpdateStatus,
+    PerspectiveItem,
+    PerspectiveModerationState,
+    PerspectivePublicationState,
     PrivateReason,
     ReasonModerationState,
     ReasonUpdateAttempt,
@@ -22,12 +25,19 @@ from kefe_api.modules.decision.models import (
 
 
 class InMemoryDecisionRepository:
-    def __init__(self, *, cases: list[CaseVersion], reveals: list[RevealSnapshot]) -> None:
+    def __init__(
+        self,
+        *,
+        cases: list[CaseVersion],
+        reveals: list[RevealSnapshot],
+        perspectives: list[PerspectiveItem] | None = None,
+    ) -> None:
         self._cases = {case.id: case for case in cases}
         self._current_by_case = {case.case_id: case.id for case in cases}
         self._sessions: dict[UUID, WeighSession] = {}
         self._reasons: dict[UUID, PrivateReason] = {}
         self._reveals = {snapshot.case_version_id: snapshot for snapshot in reveals}
+        self._perspectives = tuple(perspectives or ())
         self.events: list[dict[str, Any]] = []
         self._lock = RLock()
 
@@ -177,6 +187,27 @@ class InMemoryDecisionRepository:
     def get_reveal(self, case_version_id: UUID) -> RevealSnapshot | None:
         with self._lock:
             return self._reveals.get(case_version_id)
+
+    def get_opposing_perspectives(
+        self,
+        *,
+        case_version_id: UUID,
+        question_version_id: UUID,
+        viewer_value: Any,
+        limit: int,
+    ) -> tuple[PerspectiveItem, ...]:
+        with self._lock:
+            eligible = [
+                item
+                for item in self._perspectives
+                if item.case_version_id == case_version_id
+                and item.question_version_id == question_version_id
+                and item.publication_state is PerspectivePublicationState.PUBLISHED
+                and item.moderation_state is PerspectiveModerationState.ALLOWED
+                and item.target_value != viewer_value
+            ]
+            eligible.sort(key=lambda item: (item.editorial_priority, item.created_at, str(item.id)))
+            return tuple(deepcopy(eligible[:limit]))
 
     def append_event(self, name: str, aggregate_id: UUID, payload: dict[str, object]) -> None:
         with self._lock:
