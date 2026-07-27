@@ -24,6 +24,12 @@ def _postgres_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     return TestClient(create_app())
 
 
+def _guest_headers(client: TestClient) -> dict[str, str]:
+    response = client.post("/v1/identity/guest")
+    assert response.status_code == 201
+    return {"Authorization": f"Bearer {response.json()['access_token']}"}
+
+
 def _start_and_answer(client: TestClient, actor_headers: dict[str, str]) -> str:
     start = client.post(
         f"/v1/cases/{DEMO_CASE_ID}/weigh-sessions",
@@ -47,7 +53,7 @@ def _start_and_answer(client: TestClient, actor_headers: dict[str, str]) -> str:
 def test_postgres_case_weigh_commit_reveal_and_outbox(monkeypatch: pytest.MonkeyPatch) -> None:
     database_url = os.environ["KEFE_DATABASE_URL"]
     client = _postgres_client(monkeypatch)
-    actor_headers = {"X-Actor-Id": str(uuid4())}
+    actor_headers = _guest_headers(client)
 
     try:
         case = client.get(f"/v1/cases/{DEMO_CASE_ID}")
@@ -99,7 +105,7 @@ def test_competing_postgres_commits_create_one_commit_event(
 ) -> None:
     database_url = os.environ["KEFE_DATABASE_URL"]
     client = _postgres_client(monkeypatch)
-    actor_headers = {"X-Actor-Id": str(uuid4())}
+    actor_headers = _guest_headers(client)
 
     try:
         session_id = _start_and_answer(client, actor_headers)
@@ -138,7 +144,7 @@ def test_competing_postgres_commits_create_one_commit_event(
 
 def test_concurrent_same_key_is_idempotent(monkeypatch: pytest.MonkeyPatch) -> None:
     client = _postgres_client(monkeypatch)
-    actor_headers = {"X-Actor-Id": str(uuid4())}
+    actor_headers = _guest_headers(client)
 
     try:
         session_id = _start_and_answer(client, actor_headers)
@@ -158,5 +164,28 @@ def test_concurrent_same_key_is_idempotent(monkeypatch: pytest.MonkeyPatch) -> N
         assert first[0] == 200
         assert second[0] == 200
         assert first[1] == second[1]
+    finally:
+        get_settings.cache_clear()
+
+
+def test_guest_token_is_persisted_and_revocable(monkeypatch: pytest.MonkeyPatch) -> None:
+    client = _postgres_client(monkeypatch)
+    headers = _guest_headers(client)
+
+    try:
+        assert client.post(
+            f"/v1/cases/{DEMO_CASE_ID}/weigh-sessions",
+            headers=headers,
+        ).status_code == 201
+
+        revoked = client.delete("/v1/identity/session", headers=headers)
+        assert revoked.status_code == 204
+
+        denied = client.post(
+            f"/v1/cases/{DEMO_CASE_ID}/weigh-sessions",
+            headers=headers,
+        )
+        assert denied.status_code == 401
+        assert denied.json()["code"] == "AUTH_TOKEN_REVOKED"
     finally:
         get_settings.cache_clear()

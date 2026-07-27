@@ -1,4 +1,4 @@
-manifest_version: 1.1.0
+manifest_version: 1.2.1
 updated_at: '2026-07-27'
 policy:
   executable_schema_source: services/api/migrations
@@ -9,26 +9,31 @@ contracts:
     path: docs/contracts/core-erd.v1.mmd
     version: '1'
     role: conceptual_core_model
+  - id: openapi
+    path: docs/contracts/openapi.v1.json
+    version: 0.5.0
+    role: http_api_contract
   - id: event-envelope
     path: docs/contracts/event-envelope.v1.schema.json
     version: '1'
     role: event_envelope
   - id: config-registry
-    path: docs/contracts/config-registry.v1.1.0.yaml
-    version: 1.1.0
+    path: docs/contracts/config-registry.v1.2.0.yaml
+    version: 1.2.0
     role: typed_configuration
   - id: error-registry
     path: docs/contracts/error-codes.v1.yaml
-    version: 1.0.1
+    version: 1.1.0
     role: stable_api_errors
   - id: postgresql-m0-schema
-    path: docs/contracts/postgresql-m0-schema.v1.1.0.sql
-    version: 1.1.0
+    path: docs/contracts/postgresql-m0-schema.v1.2.0.sql
+    version: 1.2.0
     role: derived_executable_schema_snapshot
     derived_from:
       - services/api/migrations/versions/20260727_0001_m0_core.py
       - services/api/migrations/versions/20260727_0002_commit_concurrency.py
       - services/api/migrations/versions/20260727_0003_outbox_delivery.py
+      - services/api/migrations/versions/20260727_0004_guest_identity.py
   - id: repository-structure
     path: docs/contracts/repository-structure.v1.txt
     version: '1'
@@ -37,3 +42,4 @@ architecture_decisions:
   - docs/adr/0001-postgres-persistence-and-commit-idempotency.md
   - docs/adr/0002-linearizable-decision-commit.md
   - docs/adr/0003-transactional-outbox-delivery.md
+  - docs/adr/0004-guest-identity-opaque-tokens.md

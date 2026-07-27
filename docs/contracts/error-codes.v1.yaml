@@ -1,5 +1,17 @@
-registry_version: 1.0.1
+registry_version: 1.1.0
 errors:
+- code: AUTH_REQUIRED
+  http_status: 401
+  retryable: false
+- code: AUTH_TOKEN_INVALID
+  http_status: 401
+  retryable: false
+- code: AUTH_TOKEN_EXPIRED
+  http_status: 401
+  retryable: false
+- code: AUTH_TOKEN_REVOKED
+  http_status: 401
+  retryable: false
 - code: AUTH_OTP_INVALID
   http_status: 400
   retryable: true

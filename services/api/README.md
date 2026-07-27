@@ -6,7 +6,7 @@ FastAPI modular monolith. Capability modules own domain/application behavior beh
 
 The first executable product slice is:
 
-`Case → Weigh → Commit → Reveal`
+`Guest Identity → Case → Weigh → Commit → Reveal`
 
 The same decision application service supports two persistence adapters:
 
@@ -15,6 +15,8 @@ The same decision application service supports two persistence adapters:
 
 ### Implemented invariants
 
+- Guest users receive opaque revocable bearer credentials; client-supplied actor IDs are not trusted.
+- Only bearer-token hashes are persisted server-side; raw guest tokens are returned to the client and are not stored.
 - Commit First: Reveal is forbidden before a confirmed commit.
 - Session ownership is actor-scoped.
 - Required questions must be answered before commit.
@@ -49,6 +51,14 @@ export KEFE_PERSISTENCE_BACKEND=postgres
 uvicorn kefe_api.main:app --reload
 ```
 
+Create a guest credential before calling protected Decision endpoints:
+
+```bash
+curl -X POST http://localhost:8000/v1/identity/guest
+```
+
+Use the returned token as `Authorization: Bearer <token>`. `POST /v1/identity/guest` does not require phone/email and is intentionally separate from later account verification.
+
 Run the event publisher in another terminal:
 
 ```bash
@@ -66,8 +76,8 @@ The development bootstrap exposes one low-risk DILEMMA seed through fixed UUIDs 
 
 ### Next backend slice
 
-1. replace temporary `X-Actor-Id` development identity with the guest/auth boundary
-2. synchronize the full OpenAPI contract and add generated-client compatibility gates
+1. check in generated OpenAPI and enforce compatibility/drift gates
+2. add guest-token issuance rate limiting and device-integrity adapter boundary
 3. add outbox backlog/dead-letter observability and an audited replay command
 4. expand CaseVersion/question persistence toward the full physical contract
 5. add query-budget and latency regression tests
