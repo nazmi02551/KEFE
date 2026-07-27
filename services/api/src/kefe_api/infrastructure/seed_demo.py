@@ -75,9 +75,9 @@ def seed_demo() -> None:
         connection.execute(
             text(
                 """
-                INSERT INTO content.question (id, issue_id, stable_code)
-                VALUES (:id, :issue_id, 'PRIMARY_DECISION')
-                ON CONFLICT (id) DO NOTHING
+                INSERT INTO content.question (id, issue_id, stable_code, sort_order)
+                VALUES (:id, :issue_id, 'PRIMARY_DECISION', 0)
+                ON CONFLICT (id) DO UPDATE SET sort_order = EXCLUDED.sort_order
                 """
             ),
             {"id": DEMO_STABLE_QUESTION_ID, "issue_id": DEMO_ISSUE_ID},
@@ -119,9 +119,9 @@ def seed_demo() -> None:
         connection.execute(
             text(
                 """
-                INSERT INTO content.question (id, issue_id, stable_code)
-                VALUES (:id, :issue_id, 'DECISION_CONFIDENCE')
-                ON CONFLICT (id) DO NOTHING
+                INSERT INTO content.question (id, issue_id, stable_code, sort_order)
+                VALUES (:id, :issue_id, 'DECISION_CONFIDENCE', 10)
+                ON CONFLICT (id) DO UPDATE SET sort_order = EXCLUDED.sort_order
                 """
             ),
             {
