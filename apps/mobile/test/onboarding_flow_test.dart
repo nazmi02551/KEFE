@@ -130,12 +130,12 @@ void main() {
     );
 
     expect(find.byKey(const ValueKey('onboarding-pages')), findsOneWidget);
-    expect(find.text('Önce kendi kararını gör.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('onboarding-promise-1')), findsOneWidget);
     expect(repository.caseCalls, 0);
 
     await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
     await tester.pumpAndSettle();
-    expect(find.text('Sonra neden ayrıştığını keşfet.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('onboarding-promise-2')), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
     await tester.pumpAndSettle();
@@ -170,8 +170,11 @@ void main() {
 
     expect(repository.commitCalls, 1);
     expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
-    expect(find.byKey(const ValueKey('first-use-completion')), findsOneWidget);
     expect(onboardingStore.completed, isTrue);
+
+    await tester.drag(find.byType(ListView), const Offset(0, -600));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('first-use-completion')), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('continue-as-guest')));
     await tester.pumpAndSettle();
