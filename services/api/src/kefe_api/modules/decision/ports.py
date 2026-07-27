@@ -8,6 +8,7 @@ from kefe_api.modules.decision.models import (
     CaseVersion,
     CommitAttempt,
     DraftUpdateAttempt,
+    PerspectiveItem,
     ReasonUpdateAttempt,
     RevealSnapshot,
     WeighSession,
@@ -60,5 +61,14 @@ class DecisionRepository(Protocol):
     ) -> CommitAttempt: ...
 
     def get_reveal(self, case_version_id: UUID) -> RevealSnapshot | None: ...
+
+    def get_opposing_perspectives(
+        self,
+        *,
+        case_version_id: UUID,
+        question_version_id: UUID,
+        viewer_value: Any,
+        limit: int,
+    ) -> tuple[PerspectiveItem, ...]: ...
 
     def append_event(self, name: str, aggregate_id: UUID, payload: dict[str, object]) -> None: ...
