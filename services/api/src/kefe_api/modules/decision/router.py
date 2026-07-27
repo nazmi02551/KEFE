@@ -94,6 +94,8 @@ def get_case(case_id: UUID, service: DecisionServiceDep) -> dict[str, Any]:
                 "question_id": question.id,
                 "prompt": question.prompt,
                 "response_type": question.response_type,
+                "required": question.required,
+                "response_schema": dict(question.response_schema),
                 "options": question.options,
             }
             for question in case.questions
