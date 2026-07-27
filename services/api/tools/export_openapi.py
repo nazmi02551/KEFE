@@ -35,9 +35,11 @@ def main() -> None:
     if args.check is not None:
         committed = json.loads(args.check.read_text(encoding="utf-8"))
         if committed != generated:
-            raise SystemExit(
-                "Generated OpenAPI differs from checked-in contract; regenerate and review compatibility"
+            message = (
+                "Generated OpenAPI differs from checked-in contract; "
+                "regenerate and review compatibility"
             )
+            raise SystemExit(message)
         print(f"OpenAPI contract matches {args.check}")
 
 
