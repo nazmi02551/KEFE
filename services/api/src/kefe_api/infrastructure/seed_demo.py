@@ -113,7 +113,22 @@ def seed_demo() -> None:
             {
                 "id": DEMO_QUESTION_ID,
                 "question_id": DEMO_STABLE_QUESTION_ID,
-                "response_schema": json.dumps({"options": ["A", "B"]}),
+                "response_schema": json.dumps(
+                    {
+                        "options": ["A", "B"],
+                        "reason": {
+                            "tags": [
+                                "FAIRNESS",
+                                "NEED",
+                                "RESPONSIBILITY",
+                                "PRACTICAL_IMPACT",
+                            ],
+                            "max_tags": 3,
+                            "text_enabled": True,
+                            "text_max_length": 500,
+                        },
+                    }
+                ),
             },
         )
         connection.execute(
