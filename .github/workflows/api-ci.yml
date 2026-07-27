@@ -36,6 +36,9 @@ jobs:
       - name: Lint
         working-directory: services/api
         run: ruff check .
+      - name: Contract sync
+        working-directory: services/api
+        run: python tools/check_contract_sync.py
       - name: Unit tests
         working-directory: services/api
         run: pytest --ignore=tests/test_postgres_integration.py --cov=kefe_api --cov-report=term-missing
