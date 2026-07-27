@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     environment: str = "development"
     api_title: str = "KEFE API"
-    api_version: str = "0.7.0"
+    api_version: str = "0.8.0"
     persistence_backend: Literal["memory", "postgres"] = "memory"
     database_url: str | None = None
 

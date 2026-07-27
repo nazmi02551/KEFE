@@ -20,6 +20,17 @@ class DraftUpdateStatus(StrEnum):
     NOT_EDITABLE = "NOT_EDITABLE"
 
 
+class ReasonModerationState(StrEnum):
+    NOT_REQUIRED = "NOT_REQUIRED"
+    PENDING = "PENDING"
+    ALLOWED = "ALLOWED"
+    BLOCKED = "BLOCKED"
+
+
+class ReasonVisibility(StrEnum):
+    PRIVATE = "PRIVATE"
+
+
 class CommitStatus(StrEnum):
     COMMITTED = "COMMITTED"
     IDEMPOTENT_REPLAY = "IDEMPOTENT_REPLAY"
@@ -72,9 +83,25 @@ class WeighSession:
 
 
 @dataclass(frozen=True, slots=True)
+class PrivateReason:
+    session_id: UUID
+    tags: tuple[str, ...]
+    text: str | None
+    moderation_state: ReasonModerationState
+    visibility: ReasonVisibility = ReasonVisibility.PRIVATE
+    updated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+
+
+@dataclass(frozen=True, slots=True)
 class DraftUpdateAttempt:
     status: DraftUpdateStatus
     session: WeighSession | None
+
+
+@dataclass(frozen=True, slots=True)
+class ReasonUpdateAttempt:
+    status: DraftUpdateStatus
+    reason: PrivateReason | None
 
 
 @dataclass(frozen=True, slots=True)

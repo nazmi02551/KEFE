@@ -1,6 +1,6 @@
 [project]
 name = "kefe-api"
-version = "0.7.0"
+version = "0.8.0"
 description = "KEFE FastAPI modular monolith"
 requires-python = ">=3.12"
 dependencies = [

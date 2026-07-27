@@ -64,8 +64,20 @@ jobs:
         working-directory: services/api
         run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
       - name: Unit tests
+        id: unit-tests
+        continue-on-error: true
         working-directory: services/api
-        run: pytest --cov=kefe_api --cov-report=term-missing
+        run: pytest --cov=kefe_api --cov-report=term-missing > unit-test-output.txt 2>&1
+      - name: Upload unit test diagnostics on failure
+        if: steps.unit-tests.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-unit-test-output
+          path: services/api/unit-test-output.txt
+          if-no-files-found: error
+      - name: Enforce unit tests
+        if: always()
+        run: test '${{ steps.unit-tests.outcome }}' = 'success'
 
   postgres-integration:
     needs: lint-unit
@@ -107,8 +119,25 @@ jobs:
           KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
         run: python -m kefe_api.infrastructure.seed_demo
       - name: PostgreSQL integration tests
+        id: postgres-tests
+        continue-on-error: true
         working-directory: services/api
         env:
           KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
           KEFE_RUN_POSTGRES_TESTS: '1'
-        run: pytest tests/test_postgres_integration.py tests/test_postgres_outbox_integration.py
+        run: >-
+          pytest
+          tests/test_postgres_integration.py
+          tests/test_postgres_outbox_integration.py
+          tests/test_private_reason_postgres.py
+          > postgres-test-output.txt 2>&1
+      - name: Upload PostgreSQL diagnostics on failure
+        if: steps.postgres-tests.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: postgres-test-output
+          path: services/api/postgres-test-output.txt
+          if-no-files-found: error
+      - name: Enforce PostgreSQL tests
+        if: always()
+        run: test '${{ steps.postgres-tests.outcome }}' = 'success'

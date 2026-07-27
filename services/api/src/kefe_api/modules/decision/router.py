@@ -64,6 +64,19 @@ class UpdateResponsesRequest(BaseModel):
     responses: list[ResponseItem] = Field(min_length=1)
 
 
+class UpdatePrivateReasonRequest(BaseModel):
+    tags: list[str] = Field(default_factory=list, max_length=10)
+    text: str | None = Field(default=None, max_length=1000)
+
+
+class PrivateReasonResponse(BaseModel):
+    session_id: UUID
+    tags: list[str]
+    text: str | None
+    moderation_state: str
+    visibility: str
+
+
 def get_service(request: Request) -> DecisionService:
     return request.app.state.decision_service
 
@@ -156,6 +169,31 @@ def update_responses(
         "state": session.state,
         "response_count": len(session.responses),
     }
+
+
+@router.put(
+    "/weigh-sessions/{session_id}/reason",
+    response_model=PrivateReasonResponse,
+)
+def update_private_reason(
+    session_id: UUID,
+    body: UpdatePrivateReasonRequest,
+    principal: PrincipalDep,
+    service: DecisionServiceDep,
+) -> PrivateReasonResponse:
+    reason = service.update_private_reason(
+        actor_id=principal.actor_id,
+        session_id=session_id,
+        tags=body.tags,
+        text=body.text,
+    )
+    return PrivateReasonResponse(
+        session_id=reason.session_id,
+        tags=list(reason.tags),
+        text=reason.text,
+        moderation_state=reason.moderation_state,
+        visibility=reason.visibility,
+    )
 
 
 @router.post("/weigh-sessions/{session_id}/commit")

@@ -57,7 +57,13 @@ def test_case_exposes_typed_question_contract_without_results() -> None:
     decision = questions[str(DEMO_QUESTION_ID)]
     assert decision["response_type"] == "SINGLE_CHOICE"
     assert decision["required"] is True
-    assert decision["response_schema"] == {"options": ["A", "B"]}
+    assert decision["response_schema"]["options"] == ["A", "B"]
+    assert decision["response_schema"]["reason"] == {
+        "tags": ["FAIRNESS", "NEED", "RESPONSIBILITY", "PRACTICAL_IMPACT"],
+        "max_tags": 3,
+        "text_enabled": True,
+        "text_max_length": 500,
+    }
 
     confidence = questions[str(DEMO_CONFIDENCE_QUESTION_ID)]
     assert confidence["response_type"] == "CONFIDENCE"
