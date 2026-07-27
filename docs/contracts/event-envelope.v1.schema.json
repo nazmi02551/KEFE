@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.kefe.example/events/v1/envelope.json",
+  "title": "KEFE Domain/Analytics Event Envelope",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_name",
+    "event_version",
+    "occurred_at",
+    "producer_version",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "event_name": {
+      "type": "string"
+    },
+    "event_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "producer_version": {
+      "type": "string"
+    },
+    "trace_id": {
+      "type": ["string", "null"]
+    },
+    "actor_id": {
+      "type": ["string", "null"],
+      "format": "uuid"
+    },
+    "session_id": {
+      "type": ["string", "null"],
+      "format": "uuid"
+    },
+    "payload": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": false
+}

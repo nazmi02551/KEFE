@@ -1,0 +1,43 @@
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+
+# secrets / local env
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub-cache/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+coverage/
+
+# Generated artifacts
+packages/contracts/generated/
+docs/generated/
+
+# Logs
+*.log
