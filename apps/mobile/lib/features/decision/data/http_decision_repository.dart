@@ -1,0 +1,188 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../../core/config/app_config.dart';
+import '../domain/decision_models.dart';
+import 'decision_repository.dart';
+
+abstract interface class CredentialStore {
+  Future<String?> read();
+  Future<void> write(String token);
+  Future<void> clear();
+}
+
+class MemoryCredentialStore implements CredentialStore {
+  String? _token;
+
+  @override
+  Future<void> clear() async => _token = null;
+
+  @override
+  Future<String?> read() async => _token;
+
+  @override
+  Future<void> write(String token) async => _token = token;
+}
+
+class ApiFailure implements Exception {
+  ApiFailure(this.code, this.statusCode);
+
+  final String code;
+  final int statusCode;
+
+  @override
+  String toString() => 'ApiFailure($statusCode, $code)';
+}
+
+class HttpDecisionRepository implements DecisionRepository {
+  HttpDecisionRepository({
+    required AppConfig config,
+    required http.Client client,
+    required CredentialStore credentialStore,
+  })  : _config = config,
+        _client = client,
+        _credentialStore = credentialStore;
+
+  final AppConfig _config;
+  final http.Client _client;
+  final CredentialStore _credentialStore;
+
+  String? _token;
+
+  Uri _uri(String path) => _config.apiBaseUri.resolve(path);
+
+  @override
+  Future<GuestCredential> ensureGuestCredential() async {
+    final existing = _token ?? await _credentialStore.read();
+    if (existing != null) {
+      _token = existing;
+      return GuestCredential(
+        actorId: '',
+        accessToken: existing,
+        expiresAt: DateTime.now().toUtc().add(const Duration(days: 30)),
+      );
+    }
+
+    final response = await _client.post(
+      _uri('/v1/identity/guest'),
+      headers: const {'content-type': 'application/json'},
+      body: jsonEncode({'platform': 'ANDROID'}),
+    );
+    final body = _decode(response);
+    final credential = GuestCredential(
+      actorId: body['actor_id'] as String,
+      accessToken: body['access_token'] as String,
+      expiresAt: DateTime.parse(body['expires_at'] as String),
+    );
+    _token = credential.accessToken;
+    await _credentialStore.write(credential.accessToken);
+    return credential;
+  }
+
+  @override
+  Future<DecisionCase> fetchCase(String caseId) async {
+    final response = await _client.get(_uri('/v1/cases/$caseId'));
+    final body = _decode(response);
+    return DecisionCase(
+      id: body['case_id'] as String,
+      versionId: body['case_version_id'] as String,
+      title: body['title'] as String,
+      summary: body['summary'] as String,
+      format: body['base_format'] as String,
+      domain: body['primary_domain'] as String,
+      risk: body['content_risk'] as String,
+      questions: (body['questions'] as List<Object?>)
+          .cast<Map<String, Object?>>()
+          .map(
+            (item) => DecisionQuestion(
+              id: item['question_id'] as String,
+              prompt: item['prompt'] as String,
+              responseType: item['response_type'] as String,
+              options: (item['options'] as List<Object?>).cast<String>(),
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+
+  @override
+  Future<String> startSession(String caseId) async {
+    final response = await _client.post(
+      _uri('/v1/cases/$caseId/weigh-sessions'),
+      headers: await _authorizedHeaders(),
+    );
+    return _decode(response)['session_id'] as String;
+  }
+
+  @override
+  Future<void> answer({
+    required String sessionId,
+    required String questionId,
+    required Object value,
+  }) async {
+    final response = await _client.put(
+      _uri('/v1/weigh-sessions/$sessionId/responses'),
+      headers: await _authorizedHeaders(json: true),
+      body: jsonEncode({
+        'responses': [
+          {'question_id': questionId, 'value': value},
+        ],
+      }),
+    );
+    _decode(response);
+  }
+
+  @override
+  Future<void> commit({
+    required String sessionId,
+    required String idempotencyKey,
+  }) async {
+    final response = await _client.post(
+      _uri('/v1/weigh-sessions/$sessionId/commit'),
+      headers: {
+        ...await _authorizedHeaders(),
+        'Idempotency-Key': idempotencyKey,
+      },
+    );
+    _decode(response);
+  }
+
+  @override
+  Future<RevealResult> reveal(String sessionId) async {
+    final response = await _client.get(
+      _uri('/v1/weigh-sessions/$sessionId/reveal'),
+      headers: await _authorizedHeaders(),
+    );
+    final body = _decode(response);
+    return RevealResult(
+      layer: body['layer'] as String,
+      sampleSize: body['n'] as int,
+      confidence: body['confidence'] as String,
+      values: (body['result'] as Map<String, Object?>).map(
+        (key, value) => MapEntry(key, (value as num).toDouble()),
+      ),
+    );
+  }
+
+  Future<Map<String, String>> _authorizedHeaders({bool json = false}) async {
+    final credential = await ensureGuestCredential();
+    return {
+      'authorization': 'Bearer ${credential.accessToken}',
+      if (json) 'content-type': 'application/json',
+    };
+  }
+
+  Map<String, Object?> _decode(http.Response response) {
+    final decoded = response.body.isEmpty
+        ? <String, Object?>{}
+        : (jsonDecode(response.body) as Map<String, Object?>);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return decoded;
+    }
+    throw ApiFailure(
+      decoded['code'] as String? ?? 'UNKNOWN_API_ERROR',
+      response.statusCode,
+    );
+  }
+}
