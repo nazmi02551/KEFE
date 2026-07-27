@@ -145,7 +145,7 @@ void main() {
     expect(repository.caseCalls, 1);
   });
 
-  testWidgets('first Reveal completes onboarding only after guest continuation', (
+  testWidgets('first Reveal persists onboarding completion before continuation', (
     tester,
   ) async {
     useTurkishLocale(tester);
@@ -171,7 +171,7 @@ void main() {
     expect(repository.commitCalls, 1);
     expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
     expect(find.byKey(const ValueKey('first-use-completion')), findsOneWidget);
-    expect(onboardingStore.completed, isFalse);
+    expect(onboardingStore.completed, isTrue);
 
     await tester.tap(find.byKey(const ValueKey('continue-as-guest')));
     await tester.pumpAndSettle();
