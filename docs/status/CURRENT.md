@@ -3,9 +3,9 @@
 **Updated:** 2026-07-27  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Latest verified implementation commit:** `5956fa69c451a49bf38463535548f7275db408a7`
+**Latest verified implementation commit:** `62228637b57ad29ec0cf25b388baac7b29ceef82`
 
-This file is the durable handoff point for continuing KEFE development when a chat session, local environment or tool run is interrupted. Before starting new work, verify this file against `main`, open pull requests and recent CI runs.
+This file is the **single canonical durable handoff point** for continuing KEFE development when a chat session, local environment or tool run is interrupted. Before starting new work, verify this file against `main`, open pull requests and recent CI runs.
 
 ## 1. Product authority
 
@@ -55,30 +55,32 @@ Binding product rules currently implemented:
 - Light/Dark/System theme support.
 - Secure platform credential storage.
 - Offline decision drafts pinned to CaseVersion.
-- Durable Commit idempotency key and uncertain-Commit recovery.
 - Explore screen and canonical `/case/:caseId` deep-link route.
 - First-use onboarding through first Reveal.
 - Typed question registry and Confidence capture.
+- Schema-driven private Reason Capture with bounded tags and optional short text.
+- Private reason persisted with the pinned offline decision draft and synchronized to the same WeighSession before Commit.
+- Four-phase recovery boundary: `editing → syncPending → commitPending → committedAwaitingReveal`.
+- Pre-Commit response/reason synchronization can safely retry before Commit.
+- Once Commit may have been sent, retries use only the same Commit idempotency key and never replay mutable answers/reasons.
 - Turkish/English semantic copy and accessibility-oriented controls.
 
 ### Most recent merged product slices
 
-- PR #16 — Explore discovery and deep-linkable Case flow.
 - PR #17 — first-use onboarding through first Reveal.
 - PR #18 — typed question engine and Confidence capture.
 - PR #20 — private-by-default structured Reason Capture backend.
+- PR #22 — mobile private Reason Capture and offline-safe pre-Commit synchronization.
 
 ## 3. Current executable path
 
 Consumer path today:
 
-`Onboarding → Explore → Case → Typed Weigh → Commit → Trusted Reveal`
+`Onboarding → Explore → Case → Typed Weigh → Private Reason → Commit → Trusted Reveal`
 
-Backend capability now additionally supports:
+The private reason step is optional and CaseVersion/schema-driven. Results remain hidden until Commit. Reason data is not exposed to other users in the current product surface; optional short text may enter server-side safety moderation.
 
-`Typed Weigh → Private Reason → Commit`
-
-The active demo remains a low-risk DILEMMA. Results remain hidden until Commit. Reason data is not exposed to other users in the current product surface.
+The active demo remains a low-risk DILEMMA. Its current reason/question configuration is a development fixture, not a product-wide default.
 
 ## 4. Known open product decisions
 
@@ -98,24 +100,24 @@ Do not close these implicitly in code without updating the approved product deci
 - Civic P2/P3 review and delayed publication policy.
 - Expert verification operating model.
 - KEFE+ launch timing.
-- Social reason visibility and moderation boundaries.
+- Social reason visibility, moderation and ranking boundaries.
 
 ## 5. Recommended next delivery sequence
 
 The next implementation work should remain in small reviewed slices:
 
-1. **Mobile Reason Capture**
-   - render structured reason tags from the published CaseVersion policy
-   - optional short-text input only when enabled by schema
-   - persist reason draft safely with the existing decision draft
-   - submit reason before Commit using the same pinned session
-   - no public feed or cross-user reason visibility
+1. **Reveal Perspective layer**
+   - expose only moderation-approved human reasons after Commit
+   - begin with a safe opposing-perspective read model, not a classic comment feed
+   - carry reason provenance, moderation state and methodology/sample metadata
+   - avoid popularity-only ranking; preserve bridge/quality direction without inventing a final algorithm prematurely
+   - keep AI summaries separate and explicitly labeled when introduced later
 
-2. **Reveal perspective layer**
-   - strongest moderation-approved opposing reasons after Commit
-   - sample/methodology metadata
-   - no popularity-only ranking
-   - preserve separation between human reasons and AI summaries
+2. **Context + Sources read layer**
+   - progressive context blocks and source metadata
+   - VERIFIED / CLAIMED / DISPUTED / UNKNOWN semantics
+   - no result leakage before Commit
+   - preserve CaseVersion pinning and source/version auditability
 
 3. **Content/Admin foundation**
    - Case/Issue/Question authoring contracts
@@ -129,15 +131,15 @@ The next implementation work should remain in small reviewed slices:
    - development/staging deployment runbook
 
 5. **Milestone documentation synchronization**
-   - patch Engineering Blueprint and relevant specialist documents
-   - regenerate DOCX/PDF package
-   - update manifest and archive prior versions
+   - patch Engineering Blueprint and relevant specialist documents with the executable decisions accumulated through this milestone
+   - regenerate DOCX/PDF package from editable sources
+   - visually verify renders, update manifest and archive prior versions
 
 ## 6. Continuation protocol
 
 At the beginning of every new work session:
 
-1. Read this file from `main`.
+1. Read **only this checkpoint as the canonical engineering handoff**: `docs/status/CURRENT.md` from `main`.
 2. Check open PRs and recent merged PRs.
 3. Check the latest CI status before branching.
 4. Create one feature branch for one coherent slice.
@@ -145,6 +147,7 @@ At the beginning of every new work session:
 6. Add or update tests and machine-readable contracts in the same PR.
 7. Merge only after all relevant CI jobs pass.
 8. Update this checkpoint after every meaningful merged milestone.
+9. Treat older handoff files as redirects to this file, not independent state sources.
 
 ## 7. Recovery prompt for a new chat
 
@@ -154,4 +157,4 @@ Use the following message if continuation must move to another conversation:
 
 ## 8. Reliability rule
 
-Chat history is not the source of truth. GitHub `main`, approved product documents, machine-readable contracts, ADRs and this checkpoint file are the durable recovery sources.
+Chat history is not the source of truth. GitHub `main`, approved product documents, machine-readable contracts, ADRs and **this checkpoint file** are the durable recovery sources. There must be only one live project checkpoint; legacy handoff paths must redirect here rather than duplicate state.
