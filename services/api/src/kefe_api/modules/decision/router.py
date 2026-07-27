@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Annotated, Any
 from uuid import UUID
 
@@ -75,6 +76,30 @@ class PrivateReasonResponse(BaseModel):
     text: str | None
     moderation_state: str
     visibility: str
+
+
+class PerspectiveCardResponse(BaseModel):
+    perspective_id: UUID
+    slot: str
+    body: str
+    source_kind: str
+    provenance_label: str
+    moderation_state: str
+
+
+class PerspectiveMethodologyResponse(BaseModel):
+    mode: str
+    sample_kind: str
+    sample_size: int
+    generated_at: datetime
+    provenance_note: str
+
+
+class PerspectiveResponse(BaseModel):
+    session_id: UUID
+    case_version_id: UUID
+    cards: list[PerspectiveCardResponse] = Field(max_length=4)
+    methodology: PerspectiveMethodologyResponse
 
 
 def get_service(request: Request) -> DecisionService:
@@ -230,3 +255,37 @@ def reveal(
         "generated_at": snapshot.generated_at,
         "result": snapshot.payload,
     }
+
+
+@router.get(
+    "/weigh-sessions/{session_id}/perspectives",
+    response_model=PerspectiveResponse,
+)
+def perspectives(
+    session_id: UUID,
+    principal: PrincipalDep,
+    service: DecisionServiceDep,
+) -> PerspectiveResponse:
+    snapshot = service.perspectives(actor_id=principal.actor_id, session_id=session_id)
+    return PerspectiveResponse(
+        session_id=session_id,
+        case_version_id=snapshot.case_version_id,
+        cards=[
+            PerspectiveCardResponse(
+                perspective_id=card.perspective_id,
+                slot=card.slot,
+                body=card.body,
+                source_kind=card.source_kind,
+                provenance_label=card.provenance_label,
+                moderation_state=card.moderation_state,
+            )
+            for card in snapshot.cards
+        ],
+        methodology=PerspectiveMethodologyResponse(
+            mode=snapshot.mode,
+            sample_kind=snapshot.sample_kind,
+            sample_size=snapshot.sample_size,
+            generated_at=snapshot.generated_at,
+            provenance_note=snapshot.provenance_note,
+        ),
+    )
