@@ -111,7 +111,7 @@ void main() {
             MemoryDecisionDraftStore(),
           ),
         ],
-        child: const KefeApp(),
+        child: const KefeApp(initialLocation: '/explore'),
       ),
     );
     await tester.pumpAndSettle();

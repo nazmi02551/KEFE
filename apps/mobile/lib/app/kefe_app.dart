@@ -6,9 +6,10 @@ import '../core/design/kefe_theme.dart';
 import '../core/localization/kefe_strings.dart';
 import '../features/decision/presentation/decision_flow_screen.dart';
 import '../features/explore/presentation/explore_screen.dart';
+import '../features/onboarding/presentation/onboarding_gate_screen.dart';
 
 class KefeApp extends StatefulWidget {
-  const KefeApp({this.initialLocation = '/explore', super.key});
+  const KefeApp({this.initialLocation = '/welcome', super.key});
 
   final String initialLocation;
 
@@ -20,7 +21,11 @@ class _KefeAppState extends State<KefeApp> {
   late final GoRouter _router = GoRouter(
     initialLocation: widget.initialLocation,
     routes: [
-      GoRoute(path: '/', redirect: (_, _) => '/explore'),
+      GoRoute(path: '/', redirect: (_, _) => '/welcome'),
+      GoRoute(
+        path: '/welcome',
+        builder: (context, state) => const OnboardingGateScreen(),
+      ),
       GoRoute(
         path: '/explore',
         builder: (context, state) => const ExploreScreen(),
@@ -29,6 +34,7 @@ class _KefeAppState extends State<KefeApp> {
         path: '/case/:caseId',
         builder: (context, state) => DecisionFlowScreen(
           caseId: state.pathParameters['caseId']!,
+          firstUse: state.uri.queryParameters['firstUse'] == '1',
         ),
       ),
     ],

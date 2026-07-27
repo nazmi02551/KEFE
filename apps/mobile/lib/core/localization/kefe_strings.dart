@@ -17,6 +17,25 @@ class KefeStrings {
   String get promise => _tr
       ? 'Kararını tart. Farklı düşünmenin nedenlerini gör.'
       : 'Weigh your decision. See why people differ.';
+  String get onboardingTitleOne => _tr
+      ? 'Önce kendi kararını gör.'
+      : 'See your own decision first.';
+  String get onboardingBodyOne => _tr
+      ? 'KEFE sana çoğunluğun ne dediğini göstermeden önce, aynı konuya kendi gözünden bakmanı ister.'
+      : 'Before showing what the crowd thinks, KEFE asks you to look at the same question through your own eyes.';
+  String get onboardingStepTwoEyebrow => _tr ? 'Farkı keşfet' : 'Discover the difference';
+  String get onboardingTitleTwo => _tr
+      ? 'Sonra neden ayrıştığını keşfet.'
+      : 'Then discover why views diverge.';
+  String get onboardingBodyTwo => _tr
+      ? 'Kararından sonra topluluk sonucunu, farklı perspektifleri ve zamanla fikrinin nasıl değiştiğini inceleyebilirsin.'
+      : 'After your decision, you can inspect community results, different perspectives and how your view changes over time.';
+  String get onboardingNext => _tr ? 'Devam et' : 'Continue';
+  String get onboardingTryCase => _tr ? 'İlk tartımı yap' : 'Make your first weigh';
+  String get continueAsGuest => _tr ? 'Misafir olarak devam et' : 'Continue as guest';
+  String get firstRevealHelper => _tr
+      ? 'İlk tartımın tamamlandı. KEFE’yi keşfetmeye misafir olarak devam edebilirsin.'
+      : 'Your first weigh is complete. You can continue exploring KEFE as a guest.';
   String get exploreTitle => _tr ? 'Keşfet' : 'Explore';
   String get exploreIntro => _tr
       ? 'Önce sen karar ver. Sonra dünyayı gör.'

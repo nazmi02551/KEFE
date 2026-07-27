@@ -4,17 +4,28 @@ Flutter consumer application. The client consumes semantic copy/configuration, s
 
 ## Current M0 slice
 
-The executable mobile path is:
+The executable first-use path is:
+
+`Welcome → First Case → Weigh → Commit → Reveal → Continue as Guest → Explore`
+
+The regular product path is:
 
 `Explore → Case → Weigh → Commit → Reveal`
 
-A Case can also be opened directly through `/case/:caseId`.
+A Case can also be opened directly through `/case/:caseId` without forcing first-use onboarding.
+
+### First-use onboarding
+
+Onboarding intentionally avoids a long tutorial. A fresh installation sees two concise product-promise steps, then enters the existing low-risk demo Case. The onboarding completion flag is persisted when the user reaches the first Reveal, so an app restart does not force a completed user through the tutorial again. The visible guest-continuation action then advances into Explore.
+
+The current slice does **not** implement account creation and does not encode a final 3-vs-4-tab navigation decision.
 
 ### Architecture
 
 - Riverpod for feature/application state
 - GoRouter for declarative routes and Case deep links
 - provider-neutral `DecisionRepository`
+- local `OnboardingStore` boundary for first-use completion state
 - HTTP adapter isolated from UI/application state
 - semantic Turkish/English copy catalog
 - Light/Dark/System theme support
@@ -43,4 +54,4 @@ Drafts are keyed by Case ID, so opening another Case cannot silently replace a d
 
 ### Quality gate
 
-Mobile CI pins Flutter 3.44.4 and runs dependency resolution, formatting, static analysis and widget tests. Tests cover Commit First, ThemeMode.system, local draft restoration, uncertain-commit recovery, Reveal-only retry, Explore navigation and direct Case deep links.
+Mobile CI pins Flutter 3.44.4 and runs dependency resolution, formatting, static analysis and widget tests. Tests cover Commit First, ThemeMode.system, local draft restoration, uncertain-commit recovery, Reveal-only retry, Explore navigation, direct Case deep links and the first-use onboarding path through Reveal.
