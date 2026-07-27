@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/kefe_strings.dart';
+import '../../onboarding/application/onboarding_controller.dart';
 import '../application/decision_controller.dart';
 
 class DecisionFlowScreen extends ConsumerStatefulWidget {
-  const DecisionFlowScreen({required this.caseId, super.key});
+  const DecisionFlowScreen({
+    required this.caseId,
+    this.firstUse = false,
+    super.key,
+  });
 
   final String caseId;
+  final bool firstUse;
 
   @override
   ConsumerState<DecisionFlowScreen> createState() => _DecisionFlowScreenState();
@@ -62,6 +69,7 @@ class _DecisionFlowScreenState extends ConsumerState<DecisionFlowScreen> {
                   : _DecisionContent(
                       key: ValueKey('content-${state.caseData!.id}'),
                       state: state,
+                      firstUse: widget.firstUse,
                     ),
         ),
       ),
@@ -70,9 +78,14 @@ class _DecisionFlowScreenState extends ConsumerState<DecisionFlowScreen> {
 }
 
 class _DecisionContent extends ConsumerWidget {
-  const _DecisionContent({required this.state, super.key});
+  const _DecisionContent({
+    required this.state,
+    required this.firstUse,
+    super.key,
+  });
 
   final DecisionState state;
+  final bool firstUse;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -154,8 +167,18 @@ class _DecisionContent extends ConsumerWidget {
                     : strings.commitHelper,
             textAlign: TextAlign.center,
           ),
-        ] else
+        ] else ...[
           _RevealCard(state: state),
+          if (firstUse) ...[
+            const SizedBox(height: 20),
+            _FirstUseCompletionCard(
+              onContinue: () async {
+                await ref.read(onboardingControllerProvider).complete();
+                if (context.mounted) context.go('/explore');
+              },
+            ),
+          ],
+        ],
         if (state.errorCode != null) ...[
           const SizedBox(height: 16),
           Semantics(
@@ -215,6 +238,35 @@ class _RevealCard extends StatelessWidget {
               '${strings.trustedSample} · '
               'n=${reveal.sampleSize} · ${reveal.confidence}',
               key: const ValueKey('reveal-methodology'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FirstUseCompletionCard extends StatelessWidget {
+  const _FirstUseCompletionCard({required this.onContinue});
+
+  final Future<void> Function() onContinue;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
+    return Card(
+      key: const ValueKey('first-use-completion'),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(strings.firstRevealHelper),
+            const SizedBox(height: 16),
+            FilledButton(
+              key: const ValueKey('continue-as-guest'),
+              onPressed: onContinue,
+              child: Text(strings.continueAsGuest),
             ),
           ],
         ),
