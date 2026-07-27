@@ -6,6 +6,7 @@ import '../../../core/localization/kefe_strings.dart';
 import '../../onboarding/application/onboarding_controller.dart';
 import '../application/decision_controller.dart';
 import 'question_input.dart';
+import 'reason_input.dart';
 
 class DecisionFlowScreen extends ConsumerStatefulWidget {
   const DecisionFlowScreen({
@@ -98,6 +99,7 @@ class _DecisionContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = KefeStrings.of(context);
     final caseData = state.caseData!;
+    final reasonPolicy = caseData.reasonPolicy;
     final controller = ref.read(decisionControllerProvider.notifier);
     final inputsEnabled = state.reveal == null && !state.recoveryPending && !state.submitting;
 
@@ -118,6 +120,17 @@ class _DecisionContent extends ConsumerWidget {
             value: state.responseFor(question.id),
             enabled: inputsEnabled,
             onChanged: (value) => controller.setResponse(question.id, value),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (reasonPolicy != null) ...[
+          ReasonInputCard(
+            policy: reasonPolicy,
+            selectedTags: state.reasonTags,
+            text: state.reasonText,
+            enabled: inputsEnabled,
+            onTagToggled: controller.toggleReasonTag,
+            onTextChanged: controller.setReasonText,
           ),
           const SizedBox(height: 12),
         ],
