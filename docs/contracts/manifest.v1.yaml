@@ -1,4 +1,4 @@
-manifest_version: 1.10.0
+manifest_version: 1.11.0
 updated_at: '2026-07-27'
 policy:
   executable_schema_source: services/api/migrations
@@ -11,7 +11,7 @@ contracts:
     role: conceptual_core_model
   - id: openapi
     path: docs/contracts/openapi.v1.json
-    version: 0.9.0
+    version: 0.10.0
     role: http_api_contract
   - id: event-envelope
     path: docs/contracts/event-envelope.v1.schema.json
@@ -42,8 +42,8 @@ contracts:
     version: 1.4.0
     role: stable_api_errors
   - id: postgresql-m0-schema
-    path: docs/contracts/postgresql-m0-schema.v1.5.0.sql
-    version: 1.5.0
+    path: docs/contracts/postgresql-m0-schema.v1.6.0.sql
+    version: 1.6.0
     role: derived_executable_schema_snapshot
     derived_from:
       - services/api/migrations/versions/20260727_0001_m0_core.py
