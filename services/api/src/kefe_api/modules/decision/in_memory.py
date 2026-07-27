@@ -12,6 +12,7 @@ from kefe_api.modules.decision.models import (
     CommitStatus,
     DraftUpdateAttempt,
     DraftUpdateStatus,
+    Exposure,
     RevealSnapshot,
     WeighSession,
     WeighState,
@@ -23,6 +24,7 @@ class InMemoryDecisionRepository:
         self._cases = {case.id: case for case in cases}
         self._current_by_case = {case.case_id: case.id for case in cases}
         self._sessions: dict[UUID, WeighSession] = {}
+        self._exposures: dict[UUID, dict[tuple[str, UUID], Exposure]] = {}
         self._reveals = {snapshot.case_version_id: snapshot for snapshot in reveals}
         self.events: list[dict[str, Any]] = []
         self._lock = RLock()
@@ -61,6 +63,21 @@ class InMemoryDecisionRepository:
         with self._lock:
             session = self._sessions.get(session_id)
             return deepcopy(session) if session else None
+
+    def record_exposures(
+        self,
+        *,
+        session_id: UUID,
+        exposures: tuple[Exposure, ...],
+    ) -> None:
+        with self._lock:
+            bucket = self._exposures.setdefault(session_id, {})
+            for exposure in exposures:
+                bucket.setdefault((exposure.kind.value, exposure.ref_id), exposure)
+
+    def exposures_for(self, session_id: UUID) -> tuple[Exposure, ...]:
+        with self._lock:
+            return tuple(self._exposures.get(session_id, {}).values())
 
     def update_draft_responses(
         self,
