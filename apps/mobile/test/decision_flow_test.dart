@@ -26,6 +26,16 @@ const sampleCase = DecisionCase(
   ],
 );
 
+const sampleSummary = DecisionCaseSummary(
+  id: demoCaseId,
+  versionId: 'version-1',
+  title: 'Son koltuk kime verilmeli?',
+  summary: 'İki makul ihtiyaç arasında sınırlı bir kaynağı tart.',
+  format: 'DILEMMA',
+  domain: 'DAILY_LIFE',
+  risk: 'L0',
+);
+
 class FakeDecisionRepository implements DecisionRepository {
   int answerCalls = 0;
   int commitCalls = 0;
@@ -76,6 +86,11 @@ class FakeDecisionRepository implements DecisionRepository {
   }
 
   @override
+  Future<List<DecisionCaseSummary>> fetchExploreCases({int limit = 20}) async {
+    return const [sampleSummary];
+  }
+
+  @override
   Future<RevealResult> reveal(String sessionId) async {
     revealCalls += 1;
     if (revealTransportFailures > 0) {
@@ -113,7 +128,7 @@ Future<void> pumpKefe(
         decisionRepositoryProvider.overrideWithValue(repository),
         decisionDraftStoreProvider.overrideWithValue(draftStore),
       ],
-      child: const KefeApp(),
+      child: const KefeApp(initialLocation: '/case/$demoCaseId'),
     ),
   );
   await tester.pumpAndSettle();
@@ -139,7 +154,7 @@ void main() {
     expect(repository.commitCalls, 1);
     expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
     expect(find.byKey(const ValueKey('reveal-methodology')), findsOneWidget);
-    expect(draftStore.draft, isNull);
+    expect(draftStore.draftFor(demoCaseId), isNull);
   });
 
   testWidgets('application supports dark theme without changing flow semantics', (
@@ -174,7 +189,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repository.commitCalls, 1);
-    expect(draftStore.draft?.phase, DecisionDraftPhase.commitPending);
+    expect(
+      draftStore.draftFor(demoCaseId)?.phase,
+      DecisionDraftPhase.commitPending,
+    );
     expect(find.byKey(const ValueKey('decision-status-message')), findsOneWidget);
 
     final firstKey = repository.commitKeys.single;
@@ -184,7 +202,7 @@ void main() {
     expect(repository.commitCalls, 2);
     expect(repository.commitKeys, [firstKey, firstKey]);
     expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
-    expect(draftStore.draft, isNull);
+    expect(draftStore.draftFor(demoCaseId), isNull);
   });
 
   testWidgets('confirmed commit retries only Reveal after connectivity loss', (
@@ -203,7 +221,7 @@ void main() {
     expect(repository.commitCalls, 1);
     expect(repository.revealCalls, 1);
     expect(
-      draftStore.draft?.phase,
+      draftStore.draftFor(demoCaseId)?.phase,
       DecisionDraftPhase.committedAwaitingReveal,
     );
 
@@ -220,14 +238,14 @@ void main() {
   ) async {
     useTurkishLocale(tester);
     final repository = FakeDecisionRepository()..fetchCaseOffline = true;
-    final draftStore = MemoryDecisionDraftStore()
-      ..draft = DecisionDraft(
-        caseData: sampleCase,
-        sessionId: 'session-offline',
-        questionId: 'question-1',
-        selectedOption: 'B',
-        updatedAt: DateTime.utc(2026, 7, 27),
-      );
+    final draftStore = MemoryDecisionDraftStore();
+    draftStore.drafts[demoCaseId] = DecisionDraft(
+      caseData: sampleCase,
+      sessionId: 'session-offline',
+      questionId: 'question-1',
+      selectedOption: 'B',
+      updatedAt: DateTime.utc(2026, 7, 27),
+    );
 
     await pumpKefe(tester, repository, draftStore);
 
