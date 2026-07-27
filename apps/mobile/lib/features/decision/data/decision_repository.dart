@@ -42,11 +42,12 @@ abstract interface class PerspectiveRepository {
   Future<PerspectiveResult> fetchPerspectives(String sessionId);
 }
 
-class UnavailablePerspectiveRepository implements PerspectiveRepository {
-  const UnavailablePerspectiveRepository();
-
-  @override
+extension PerspectiveRepositoryAccess on DecisionRepository {
   Future<PerspectiveResult> fetchPerspectives(String sessionId) {
+    final repository = this;
+    if (repository is PerspectiveRepository) {
+      return repository.fetchPerspectives(sessionId);
+    }
     throw const ClientTransportFailure(code: 'PERSPECTIVE_NOT_CONFIGURED');
   }
 }
