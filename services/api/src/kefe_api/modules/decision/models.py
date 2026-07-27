@@ -14,6 +14,31 @@ class WeighState(StrEnum):
     BLOCKED_BY_VERSION = "BLOCKED_BY_VERSION"
 
 
+class ClaimStatus(StrEnum):
+    VERIFIED = "VERIFIED"
+    CLAIMED = "CLAIMED"
+    DISPUTED = "DISPUTED"
+    UNKNOWN = "UNKNOWN"
+
+
+class ClaimPresentation(StrEnum):
+    CRITICAL = "CRITICAL"
+    DETAIL = "DETAIL"
+
+
+class ContextKind(StrEnum):
+    CONTEXT = "CONTEXT"
+    LEGAL_FRAME = "LEGAL_FRAME"
+    CULTURAL_CONTEXT = "CULTURAL_CONTEXT"
+    METHODOLOGY = "METHODOLOGY"
+
+
+class ExposureKind(StrEnum):
+    CLAIM = "CLAIM"
+    CONTEXT_BLOCK = "CONTEXT_BLOCK"
+    SOURCE = "SOURCE"
+
+
 class DraftUpdateStatus(StrEnum):
     UPDATED = "UPDATED"
     NOT_FOUND = "NOT_FOUND"
@@ -28,6 +53,32 @@ class CommitStatus(StrEnum):
     STALE_VERSION = "STALE_VERSION"
     INCOMPLETE = "INCOMPLETE"
     IDEMPOTENCY_KEY_REUSED = "IDEMPOTENCY_KEY_REUSED"
+
+
+@dataclass(frozen=True, slots=True)
+class Source:
+    id: UUID
+    title: str
+    publisher: str
+    url: str
+    published_at: datetime | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class Claim:
+    id: UUID
+    text: str
+    status: ClaimStatus
+    presentation: ClaimPresentation
+    source_ids: tuple[UUID, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class ContextBlock:
+    id: UUID
+    kind: ContextKind
+    title: str
+    body: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,7 +106,20 @@ class CaseVersion:
     content_risk: str
     version_no: int
     questions: tuple[Question, ...]
+    critical_claims: tuple[Claim, ...] = ()
+    detail_claims: tuple[Claim, ...] = ()
+    context_blocks: tuple[ContextBlock, ...] = ()
+    sources: tuple[Source, ...] = ()
     accepts_weighs: bool = True
+
+    def exposure_ids(self, kind: ExposureKind) -> frozenset[UUID]:
+        if kind is ExposureKind.CLAIM:
+            return frozenset(claim.id for claim in (*self.critical_claims, *self.detail_claims))
+        if kind is ExposureKind.CONTEXT_BLOCK:
+            return frozenset(block.id for block in self.context_blocks)
+        if kind is ExposureKind.SOURCE:
+            return frozenset(source.id for source in self.sources)
+        return frozenset()
 
 
 @dataclass(slots=True)
@@ -69,6 +133,13 @@ class WeighSession:
     started_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     committed_at: datetime | None = None
     commit_key: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class Exposure:
+    kind: ExposureKind
+    ref_id: UUID
+    occurred_at: datetime
 
 
 @dataclass(frozen=True, slots=True)
