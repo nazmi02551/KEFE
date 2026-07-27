@@ -4,12 +4,26 @@ from datetime import UTC, datetime
 from uuid import UUID
 
 from kefe_api.modules.decision.in_memory import InMemoryDecisionRepository
-from kefe_api.modules.decision.models import CaseVersion, Question, RevealSnapshot
+from kefe_api.modules.decision.models import (
+    CaseVersion,
+    PerspectiveCard,
+    PerspectiveMode,
+    PerspectiveSlot,
+    PerspectiveSnapshot,
+    PerspectiveSourceKind,
+    Question,
+    ReasonModerationState,
+    RevealSnapshot,
+)
 
 DEMO_CASE_ID = UUID("11111111-1111-4111-8111-111111111111")
 DEMO_CASE_VERSION_ID = UUID("22222222-2222-4222-8222-222222222222")
 DEMO_QUESTION_ID = UUID("33333333-3333-4333-8333-333333333333")
 DEMO_CONFIDENCE_QUESTION_ID = UUID("77777777-7777-4777-8777-777777777777")
+DEMO_NEAR_PERSPECTIVE_ID = UUID("90000000-0000-4000-8000-000000000001")
+DEMO_OPPOSING_PERSPECTIVE_ID = UUID("90000000-0000-4000-8000-000000000002")
+DEMO_BRIDGE_PERSPECTIVE_ID = UUID("90000000-0000-4000-8000-000000000003")
+DEMO_ALTERNATIVE_PERSPECTIVE_ID = UUID("90000000-0000-4000-8000-000000000004")
 
 
 def build_demo_repository() -> InMemoryDecisionRepository:
@@ -52,12 +66,65 @@ def build_demo_repository() -> InMemoryDecisionRepository:
             ),
         ),
     )
+    generated_at = datetime.now(UTC)
     reveal = RevealSnapshot(
         case_version_id=case.id,
         layer="TRUSTED",
         n=1284,
         confidence="HIGH",
-        generated_at=datetime.now(UTC),
+        generated_at=generated_at,
         payload={"A": 0.57, "B": 0.43},
     )
-    return InMemoryDecisionRepository(cases=[case], reveals=[reveal])
+    perspective = PerspectiveSnapshot(
+        case_version_id=case.id,
+        mode=PerspectiveMode.DEGRADED_CURATED,
+        sample_kind="CURATED_FALLBACK",
+        sample_size=4,
+        generated_at=generated_at,
+        provenance_note="KEFE demo editoryal kartları; topluluk gerekçesi içermez.",
+        cards=(
+            PerspectiveCard(
+                perspective_id=DEMO_NEAR_PERSPECTIVE_ID,
+                slot=PerspectiveSlot.NEAR,
+                body="İhtiyacı daha acil görünen kişiye öncelik vermek zararı azaltabilir.",
+                source_kind=PerspectiveSourceKind.CURATED,
+                provenance_label="KEFE editoryal",
+                moderation_state=ReasonModerationState.NOT_REQUIRED,
+            ),
+            PerspectiveCard(
+                perspective_id=DEMO_OPPOSING_PERSPECTIVE_ID,
+                slot=PerspectiveSlot.OPPOSING,
+                body="Sırayı korumak, kişisel değerlendirmeden doğacak keyfiliği sınırlayabilir.",
+                source_kind=PerspectiveSourceKind.CURATED,
+                provenance_label="KEFE editoryal",
+                moderation_state=ReasonModerationState.NOT_REQUIRED,
+            ),
+            PerspectiveCard(
+                perspective_id=DEMO_BRIDGE_PERSPECTIVE_ID,
+                slot=PerspectiveSlot.BRIDGE,
+                body=(
+                    "Acil ihtiyacı gözetirken sırada bekleyenin hakkını açık bir ölçütle "
+                    "korumak iki kaygıyı birlikte taşıyabilir."
+                ),
+                source_kind=PerspectiveSourceKind.CURATED,
+                provenance_label="KEFE editoryal",
+                moderation_state=ReasonModerationState.NOT_REQUIRED,
+            ),
+            PerspectiveCard(
+                perspective_id=DEMO_ALTERNATIVE_PERSPECTIVE_ID,
+                slot=PerspectiveSlot.ALTERNATIVE_CONTEXT,
+                body=(
+                    "Koltuk tek kaynak değilse kısa süreli destek veya yer değişimi ikilemi "
+                    "yumuşatabilir."
+                ),
+                source_kind=PerspectiveSourceKind.CURATED,
+                provenance_label="KEFE editoryal",
+                moderation_state=ReasonModerationState.NOT_REQUIRED,
+            ),
+        ),
+    )
+    return InMemoryDecisionRepository(
+        cases=[case],
+        reveals=[reveal],
+        perspectives=[perspective],
+    )
