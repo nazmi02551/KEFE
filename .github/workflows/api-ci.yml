@@ -53,7 +53,7 @@ jobs:
         run: python tools/check_contract_sync.py
       - name: Unit tests
         working-directory: services/api
-        run: pytest --ignore=tests/test_postgres_integration.py --cov=kefe_api --cov-report=term-missing
+        run: pytest --cov=kefe_api --cov-report=term-missing
 
   postgres-integration:
     needs: lint-unit
@@ -94,9 +94,9 @@ jobs:
         env:
           KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
         run: python -m kefe_api.infrastructure.seed_demo
-      - name: PostgreSQL integration test
+      - name: PostgreSQL integration tests
         working-directory: services/api
         env:
           KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
           KEFE_RUN_POSTGRES_TESTS: '1'
-        run: pytest tests/test_postgres_integration.py
+        run: pytest tests/test_postgres_integration.py tests/test_postgres_outbox_integration.py
