@@ -7,12 +7,16 @@ from kefe_api.infrastructure.postgres_identity import PostgresIdentityRepository
 from kefe_api.infrastructure.postgres_perspective_decision import (
     PostgresPerspectiveDecisionRepository,
 )
+from kefe_api.infrastructure.postgres_progress import PostgresProgressRepository
 from kefe_api.modules.context.bootstrap import build_demo_context_repository
 from kefe_api.modules.context.ports import ContextRepository
 from kefe_api.modules.decision.bootstrap import build_demo_repository
+from kefe_api.modules.decision.in_memory import InMemoryDecisionRepository
 from kefe_api.modules.decision.ports import DecisionRepository
 from kefe_api.modules.identity.in_memory import InMemoryIdentityRepository
 from kefe_api.modules.identity.ports import IdentityRepository
+from kefe_api.modules.progress.in_memory import InMemoryProgressRepository
+from kefe_api.modules.progress.ports import ProgressRepository
 
 
 def build_decision_repository(settings: Settings) -> DecisionRepository:
@@ -33,6 +37,21 @@ def build_context_repository(settings: Settings) -> ContextRepository:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
 
     return PostgresContextRepository(build_engine(settings.database_url))
+
+
+def build_progress_repository(
+    settings: Settings,
+    decision_repository: DecisionRepository,
+) -> ProgressRepository:
+    if settings.persistence_backend == "memory":
+        if not isinstance(decision_repository, InMemoryDecisionRepository):
+            raise RuntimeError("memory progress requires the in-memory decision repository")
+        return InMemoryProgressRepository(decision_repository)
+
+    if not settings.database_url:
+        raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
+
+    return PostgresProgressRepository(build_engine(settings.database_url))
 
 
 def build_identity_repository(settings: Settings) -> IdentityRepository:
