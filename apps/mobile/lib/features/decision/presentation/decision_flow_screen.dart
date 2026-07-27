@@ -5,7 +5,9 @@ import '../../../core/localization/kefe_strings.dart';
 import '../application/decision_controller.dart';
 
 class DecisionFlowScreen extends ConsumerStatefulWidget {
-  const DecisionFlowScreen({super.key});
+  const DecisionFlowScreen({required this.caseId, super.key});
+
+  final String caseId;
 
   @override
   ConsumerState<DecisionFlowScreen> createState() => _DecisionFlowScreenState();
@@ -15,8 +17,20 @@ class _DecisionFlowScreenState extends ConsumerState<DecisionFlowScreen> {
   @override
   void initState() {
     super.initState();
+    _load();
+  }
+
+  @override
+  void didUpdateWidget(covariant DecisionFlowScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.caseId != widget.caseId) {
+      _load();
+    }
+  }
+
+  void _load() {
     Future.microtask(
-      () => ref.read(decisionControllerProvider.notifier).load(),
+      () => ref.read(decisionControllerProvider.notifier).load(widget.caseId),
     );
   }
 
@@ -43,12 +57,10 @@ class _DecisionFlowScreenState extends ConsumerState<DecisionFlowScreen> {
                       key: const ValueKey('error'),
                       message: strings.messageForCode(state.errorCode),
                       retryLabel: strings.retry,
-                      onRetry: ref
-                          .read(decisionControllerProvider.notifier)
-                          .load,
+                      onRetry: _load,
                     )
                   : _DecisionContent(
-                      key: const ValueKey('content'),
+                      key: ValueKey('content-${state.caseData!.id}'),
                       state: state,
                     ),
         ),
