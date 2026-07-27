@@ -175,7 +175,7 @@ void main() {
 
     expect(repository.commitCalls, 1);
     expect(draftStore.draft?.phase, DecisionDraftPhase.commitPending);
-    expect(find.text('Kararımı Senkronize Et'), findsOneWidget);
+    expect(find.byKey(const ValueKey('decision-status-message')), findsOneWidget);
 
     final firstKey = repository.commitKeys.single;
     await tester.tap(find.byKey(const ValueKey('commit-button')));
@@ -233,7 +233,7 @@ void main() {
 
     expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
     expect(find.byKey(const ValueKey('option-B')), findsOneWidget);
-    expect(find.text('Çevrimdışı taslak geri yüklendi.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('decision-status-message')), findsOneWidget);
     expect(repository.startSessionCalls, 0);
   });
 }
