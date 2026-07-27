@@ -60,12 +60,39 @@ class KefeStrings {
   String get unsupportedQuestionType => _tr
       ? 'Bu soru tipi bu sürümde desteklenmiyor.'
       : 'This question type is not supported in this version.';
+  String get reasonTitle => _tr ? 'Neden böyle düşündün?' : 'Why did you think this?';
+  String get reasonHelper => _tr
+      ? 'İstersen kararında etkili olan gerekçeleri seç. Bu aşamada gerekçen yalnızca sana aittir.'
+      : 'Optionally choose what shaped your decision. At this stage your reason remains private.';
+  String reasonSelectionLimit(int maxTags) => _tr
+      ? 'En fazla $maxTags gerekçe seçebilirsin.'
+      : 'You can choose up to $maxTags reasons.';
+  String get reasonTextLabel => _tr ? 'Kısa gerekçe' : 'Short reason';
+  String get reasonTextHint => _tr
+      ? 'İstersen kendi cümlelerinle ekle…'
+      : 'Optionally add it in your own words…';
+  String reasonTagLabel(String code) {
+    return switch (code) {
+      'FAIRNESS' => _tr ? 'Adalet' : 'Fairness',
+      'NEED' => _tr ? 'İhtiyaç' : 'Need',
+      'RESPONSIBILITY' => _tr ? 'Sorumluluk' : 'Responsibility',
+      'EMPATHY' => _tr ? 'Empati' : 'Empathy',
+      'RULES' => _tr ? 'Kural' : 'Rules',
+      'CONSEQUENCE' => _tr ? 'Sonuç' : 'Consequence',
+      'PROPORTIONALITY' => _tr ? 'Orantılılık' : 'Proportionality',
+      _ => code.replaceAll('_', ' '),
+    };
+  }
+
   String get pendingHelper => _tr
       ? 'Kararın cihazda güvende. Aynı karar anahtarıyla güvenli biçimde yeniden denenecek.'
       : 'Your decision is safe on this device. It will retry with the same decision key.';
   String get offlineDraft => _tr
       ? 'Çevrimdışı taslak geri yüklendi.'
       : 'Offline draft restored.';
+  String get decisionSyncPending => _tr
+      ? 'Yanıtların ve gerekçen cihazda güvende. Bağlantı geldiğinde Commit öncesi senkronizasyon yeniden denenecek.'
+      : 'Your answers and reason are safe on this device. Pre-commit sync will retry when connectivity returns.';
   String get revealPending => _tr
       ? 'Kararın kaydedildi. Sonuç bağlantı geldiğinde yeniden açılabilir.'
       : 'Your decision is committed. The result can be reopened when connectivity returns.';
@@ -82,6 +109,7 @@ class KefeStrings {
   String messageForCode(String? code) {
     return switch (code) {
       'OFFLINE_DRAFT_RESTORED' => offlineDraft,
+      'DECISION_SYNC_PENDING' => decisionSyncPending,
       'WEIGH_COMMIT_UNCERTAIN' => uncertainCommit,
       'RESULT_SYNC_PENDING' => revealPending,
       'NETWORK_UNAVAILABLE' || 'NETWORK_TIMEOUT' => _tr
