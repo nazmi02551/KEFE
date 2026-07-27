@@ -51,6 +51,15 @@ jobs:
       - name: Contract sync
         working-directory: services/api
         run: python tools/check_contract_sync.py
+      - name: Export OpenAPI
+        working-directory: services/api
+        run: python tools/export_openapi.py --output openapi.generated.json
+      - name: Upload OpenAPI contract
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-contract
+          path: services/api/openapi.generated.json
+          if-no-files-found: error
       - name: Unit tests
         working-directory: services/api
         run: pytest --cov=kefe_api --cov-report=term-missing
