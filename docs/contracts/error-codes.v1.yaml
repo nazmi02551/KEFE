@@ -1,4 +1,4 @@
-registry_version: 1.2.0
+registry_version: 1.3.0
 errors:
 - code: AUTH_REQUIRED
   http_status: 401
@@ -60,6 +60,27 @@ errors:
 - code: IDEMPOTENCY_KEY_REUSED
   http_status: 409
   retryable: false
+- code: REASON_NOT_SUPPORTED
+  http_status: 422
+  retryable: false
+- code: REASON_EMPTY
+  http_status: 422
+  retryable: false
+- code: REASON_TAG_INVALID
+  http_status: 422
+  retryable: false
+- code: REASON_TAG_LIMIT_EXCEEDED
+  http_status: 422
+  retryable: false
+- code: REASON_TEXT_NOT_ALLOWED
+  http_status: 422
+  retryable: false
+- code: REASON_TEXT_TOO_LONG
+  http_status: 422
+  retryable: false
+- code: REASON_BLOCKED_BY_POLICY
+  http_status: 422
+  retryable: false
 - code: RESULT_COMMIT_REQUIRED
   http_status: 403
   retryable: false
@@ -69,9 +90,6 @@ errors:
 - code: RESULT_NOT_READY
   http_status: 409
   retryable: true
-- code: REASON_BLOCKED_BY_POLICY
-  http_status: 422
-  retryable: false
 - code: SHARE_NOT_ALLOWED_FOR_RISK
   http_status: 422
   retryable: false
