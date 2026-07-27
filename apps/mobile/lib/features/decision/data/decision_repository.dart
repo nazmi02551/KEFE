@@ -36,6 +36,17 @@ abstract interface class DecisionRepository {
   });
 
   Future<RevealResult> reveal(String sessionId);
+}
 
+abstract interface class PerspectiveRepository {
   Future<PerspectiveResult> fetchPerspectives(String sessionId);
+}
+
+class UnavailablePerspectiveRepository implements PerspectiveRepository {
+  const UnavailablePerspectiveRepository();
+
+  @override
+  Future<PerspectiveResult> fetchPerspectives(String sessionId) {
+    throw const ClientTransportFailure(code: 'PERSPECTIVE_NOT_CONFIGURED');
+  }
 }
