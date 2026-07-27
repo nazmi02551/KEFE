@@ -41,7 +41,7 @@ class _DecisionFlowScreenState extends ConsumerState<DecisionFlowScreen> {
               : state.caseData == null
                   ? _ErrorState(
                       key: const ValueKey('error'),
-                      message: strings.genericError,
+                      message: strings.messageForCode(state.errorCode),
                       retryLabel: strings.retry,
                       onRetry: ref
                           .read(decisionControllerProvider.notifier)
@@ -104,9 +104,10 @@ class _DecisionContent extends ConsumerWidget {
                           child: Text(option, textAlign: TextAlign.center),
                         ),
                         selected: state.selectedOption == option,
-                        onSelected: state.reveal == null
-                            ? (_) => controller.select(option)
-                            : null,
+                        onSelected:
+                            state.reveal == null && !state.recoveryPending
+                                ? (_) => controller.select(option)
+                                : null,
                       ),
                     ),
                   ),
@@ -120,29 +121,43 @@ class _DecisionContent extends ConsumerWidget {
             key: const ValueKey('commit-button'),
             onPressed: state.selectedOption == null || state.submitting
                 ? null
-                : controller.commit,
+                : state.recoveryPending
+                    ? controller.retryPending
+                    : controller.commit,
             child: state.submitting
                 ? const SizedBox.square(
                     dimension: 22,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text(strings.commit),
+                : Text(
+                    state.recoveryPending ? strings.retrySync : strings.commit,
+                  ),
           ),
           const SizedBox(height: 8),
           Text(
             state.selectedOption == null
                 ? strings.selectAnswer
-                : strings.commitHelper,
+                : state.recoveryPending
+                    ? strings.pendingHelper
+                    : strings.commitHelper,
             textAlign: TextAlign.center,
           ),
         ] else
           _RevealCard(state: state),
         if (state.errorCode != null) ...[
           const SizedBox(height: 16),
-          Text(
-            strings.genericError,
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
-            textAlign: TextAlign.center,
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              strings.messageForCode(state.errorCode),
+              key: const ValueKey('decision-status-message'),
+              style: TextStyle(
+                color: state.offlineDraft
+                    ? Theme.of(context).colorScheme.secondary
+                    : Theme.of(context).colorScheme.error,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
         ],
       ],

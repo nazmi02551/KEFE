@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -40,9 +41,9 @@ class HttpDecisionRepository implements DecisionRepository {
     required AppConfig config,
     required http.Client client,
     required CredentialStore credentialStore,
-  })  : _config = config,
-        _client = client,
-        _credentialStore = credentialStore;
+  }) : _config = config,
+       _client = client,
+       _credentialStore = credentialStore;
 
   final AppConfig _config;
   final http.Client _client;
@@ -64,10 +65,12 @@ class HttpDecisionRepository implements DecisionRepository {
       );
     }
 
-    final response = await _client.post(
-      _uri('/v1/identity/guest'),
-      headers: const {'content-type': 'application/json'},
-      body: jsonEncode({'platform': 'ANDROID'}),
+    final response = await _request(
+      () => _client.post(
+        _uri('/v1/identity/guest'),
+        headers: const {'content-type': 'application/json'},
+        body: jsonEncode({'platform': 'ANDROID'}),
+      ),
     );
     final body = _decode(response);
     final credential = GuestCredential(
@@ -82,7 +85,7 @@ class HttpDecisionRepository implements DecisionRepository {
 
   @override
   Future<DecisionCase> fetchCase(String caseId) async {
-    final response = await _client.get(_uri('/v1/cases/$caseId'));
+    final response = await _request(() => _client.get(_uri('/v1/cases/$caseId')));
     final body = _decode(response);
     return DecisionCase(
       id: body['case_id'] as String,
@@ -108,9 +111,12 @@ class HttpDecisionRepository implements DecisionRepository {
 
   @override
   Future<String> startSession(String caseId) async {
-    final response = await _client.post(
-      _uri('/v1/cases/$caseId/weigh-sessions'),
-      headers: await _authorizedHeaders(),
+    final headers = await _authorizedHeaders();
+    final response = await _request(
+      () => _client.post(
+        _uri('/v1/cases/$caseId/weigh-sessions'),
+        headers: headers,
+      ),
     );
     return _decode(response)['session_id'] as String;
   }
@@ -121,14 +127,17 @@ class HttpDecisionRepository implements DecisionRepository {
     required String questionId,
     required Object value,
   }) async {
-    final response = await _client.put(
-      _uri('/v1/weigh-sessions/$sessionId/responses'),
-      headers: await _authorizedHeaders(json: true),
-      body: jsonEncode({
-        'responses': [
-          {'question_id': questionId, 'value': value},
-        ],
-      }),
+    final headers = await _authorizedHeaders(json: true);
+    final response = await _request(
+      () => _client.put(
+        _uri('/v1/weigh-sessions/$sessionId/responses'),
+        headers: headers,
+        body: jsonEncode({
+          'responses': [
+            {'question_id': questionId, 'value': value},
+          ],
+        }),
+      ),
     );
     _decode(response);
   }
@@ -138,21 +147,27 @@ class HttpDecisionRepository implements DecisionRepository {
     required String sessionId,
     required String idempotencyKey,
   }) async {
-    final response = await _client.post(
-      _uri('/v1/weigh-sessions/$sessionId/commit'),
-      headers: {
-        ...await _authorizedHeaders(),
-        'Idempotency-Key': idempotencyKey,
-      },
+    final headers = await _authorizedHeaders();
+    final response = await _request(
+      () => _client.post(
+        _uri('/v1/weigh-sessions/$sessionId/commit'),
+        headers: {
+          ...headers,
+          'Idempotency-Key': idempotencyKey,
+        },
+      ),
     );
     _decode(response);
   }
 
   @override
   Future<RevealResult> reveal(String sessionId) async {
-    final response = await _client.get(
-      _uri('/v1/weigh-sessions/$sessionId/reveal'),
-      headers: await _authorizedHeaders(),
+    final headers = await _authorizedHeaders();
+    final response = await _request(
+      () => _client.get(
+        _uri('/v1/weigh-sessions/$sessionId/reveal'),
+        headers: headers,
+      ),
     );
     final body = _decode(response);
     return RevealResult(
@@ -171,6 +186,16 @@ class HttpDecisionRepository implements DecisionRepository {
       'authorization': 'Bearer ${credential.accessToken}',
       if (json) 'content-type': 'application/json',
     };
+  }
+
+  Future<http.Response> _request(Future<http.Response> Function() action) async {
+    try {
+      return await action().timeout(_config.requestTimeout);
+    } on TimeoutException {
+      throw const ClientTransportFailure(code: 'NETWORK_TIMEOUT');
+    } on http.ClientException {
+      throw const ClientTransportFailure();
+    }
   }
 
   Map<String, Object?> _decode(http.Response response) {

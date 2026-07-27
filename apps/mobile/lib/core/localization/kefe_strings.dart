@@ -21,15 +21,40 @@ class KefeStrings {
   String get retry => _tr ? 'Tekrar dene' : 'Try again';
   String get start => _tr ? 'Başla' : 'Start';
   String get commit => _tr ? 'Kararımı Ver' : 'Commit My Decision';
+  String get retrySync => _tr ? 'Kararımı Senkronize Et' : 'Sync My Decision';
   String get commitHelper => _tr
       ? 'Kararını kilitle ve sonucu gör.'
       : 'Lock your decision and reveal the result.';
+  String get pendingHelper => _tr
+      ? 'Kararın cihazda güvende. Aynı karar anahtarıyla güvenli biçimde yeniden denenecek.'
+      : 'Your decision is safe on this device. It will retry with the same decision key.';
+  String get offlineDraft => _tr
+      ? 'Çevrimdışı taslak geri yüklendi.'
+      : 'Offline draft restored.';
+  String get revealPending => _tr
+      ? 'Kararın kaydedildi. Sonuç bağlantı geldiğinde yeniden açılabilir.'
+      : 'Your decision is committed. The result can be reopened when connectivity returns.';
+  String get uncertainCommit => _tr
+      ? 'Bağlantı kesildi. Kararın gönderilmiş olabilir; aynı anahtarla güvenli biçimde kontrol edeceğiz.'
+      : 'Connection dropped. Your decision may already be committed; we will safely check with the same key.';
   String get revealTitle => _tr ? 'Topluluk nasıl tarttı?' : 'How did the community weigh it?';
   String get trustedSample => _tr ? 'Güvenilir örneklem' : 'Trusted sample';
   String get selectAnswer => _tr ? 'Bir seçenek seç' : 'Choose an option';
   String get genericError => _tr
       ? 'Bir sorun oluştu. Kararın kaybolmadı; tekrar deneyebilirsin.'
       : 'Something went wrong. Your decision was not lost; you can retry.';
+
+  String messageForCode(String? code) {
+    return switch (code) {
+      'OFFLINE_DRAFT_RESTORED' => offlineDraft,
+      'WEIGH_COMMIT_UNCERTAIN' => uncertainCommit,
+      'RESULT_SYNC_PENDING' => revealPending,
+      'NETWORK_UNAVAILABLE' || 'NETWORK_TIMEOUT' => _tr
+          ? 'Bağlantı kurulamadı. Cihazdaki karar korunuyor.'
+          : 'Could not connect. The decision on this device is preserved.',
+      _ => genericError,
+    };
+  }
 }
 
 class KefeStringsDelegate extends LocalizationsDelegate<KefeStrings> {

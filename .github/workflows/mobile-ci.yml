@@ -33,8 +33,20 @@ jobs:
         working-directory: apps/mobile
         run: dart format lib test
       - name: Analyze
+        id: analyze
+        continue-on-error: true
         working-directory: apps/mobile
-        run: flutter analyze
+        run: flutter analyze > analyze-output.txt 2>&1
+      - name: Upload analyze diagnostics on failure
+        if: steps.analyze.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-analyze-output
+          path: apps/mobile/analyze-output.txt
+          if-no-files-found: error
+      - name: Enforce analyze
+        if: always()
+        run: test '${{ steps.analyze.outcome }}' = 'success'
       - name: Test
         id: tests
         continue-on-error: true
