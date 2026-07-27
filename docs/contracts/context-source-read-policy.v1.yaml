@@ -1,0 +1,71 @@
+contract: context-source-read-policy
+version: 1.0.0
+status: accepted
+updated_at: '2026-07-27'
+authority:
+  adr: docs/adr/0011-context-and-source-read-layer.md
+endpoint:
+  method: GET
+  path: /v1/case-versions/{case_version_id}/context
+  authentication: public_read
+  pinned_to: case_version_id
+  requires_commit: false
+privacy_and_leakage:
+  allowed_data:
+    - context_blocks
+    - source_metadata
+  forbidden_data:
+    - result_distribution
+    - community_result
+    - perspective_cards
+    - participant_reason
+    - expert_compare
+    - friend_result
+context_blocks:
+  maximum: 20
+  preserve_editorial_order: true
+  disclosure_levels:
+    - ESSENTIAL
+    - DETAIL
+  claim_statuses:
+    - VERIFIED
+    - CLAIMED
+    - DISPUTED
+    - UNKNOWN
+  body_format: plain_text
+  required_fields:
+    - context_block_id
+    - display_order
+    - disclosure_level
+    - title
+    - body
+    - claim_status
+    - source_ids
+sources:
+  maximum: 20
+  kinds:
+    - OFFICIAL
+    - NEWS
+    - RESEARCH
+    - EDITORIAL
+    - OTHER
+  required_fields:
+    - source_id
+    - title
+    - publisher
+    - source_kind
+  optional_fields:
+    - url
+    - published_at
+semantics:
+  claim_status_is_source_trust_score: false
+  source_kind_is_truth_verdict: false
+  user_votes_determine_claim_status: false
+client:
+  default_surface: ESSENTIAL
+  explicit_expansion: DETAIL
+  local_reranking: forbidden
+  remote_html_embedding: forbidden
+future_events:
+  - context.expanded
+  - source.opened
