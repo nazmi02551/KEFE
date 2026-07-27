@@ -5,29 +5,33 @@
 **Default branch:** `main`  
 **Latest verified implementation commit:** `62228637b57ad29ec0cf25b388baac7b29ceef82`
 
-This file is the **single canonical durable handoff point** for continuing KEFE development when a chat session, local environment or tool run is interrupted. Before starting new work, verify this file against `main`, open pull requests and recent CI runs.
+This file is the **single canonical durable engineering handoff point** for continuing KEFE development when a chat session, local environment or tool run is interrupted. Before starting new work, verify this file against `main`, open pull requests and recent CI runs.
 
 ## 1. Product authority
 
-The product remains governed by the approved KEFE documentation ecosystem. The active product baseline is:
+The repository implementation is governed by the approved KEFE documentation ecosystem. The current authority baseline is:
 
-- KEFE Master Product Document v1.1 Approved Canonical
-- KEFE Documentation Governance v1.2 Approved
-- KEFE Product Bible v1.3 Working Baseline
-- KEFE Engineering Blueprint v0.3 Architecture Baseline
+- KEFE Master Product Document v1.2.0 Approved Canonical
+- KEFE Documentation Governance v1.3.2 Approved
+- KEFE Product Bible v1.4.0 Working Baseline
+- KEFE Engineering Blueprint v0.5.0 Implementation Contract Baseline
+- KEFE Technical Contract Pack v1.0.0
+- KEFE Documentation Ecosystem audit/package v3.2 (validation PASS)
 
-The editable DOCX and generated PDF package must be synchronized at meaningful milestone boundaries. The repository implementation must not silently redefine product decisions that remain open in the approved documents.
+The v3.2 audit records **0 open product decisions** and **0 planned official documents**. This does not authorize implementation to improvise product behavior: each delivery slice must translate the applicable canonical decisions into a reviewed ADR, API/schema contract and acceptance tests before or with code. Older handoff notes and superseded document versions are not decision authorities.
 
-Binding product rules currently implemented:
+The editable DOCX and generated PDF package are synchronized only at meaningful milestone boundaries, following the documentation governance rules.
 
-- `Discover → Context → Weigh → Commit → Reveal → Perspective → Reflect → Share`
+Binding product rules relevant to the executable path include:
+
+- Canonical Golden Path: `Launch → Explore → Case → Weigh → Commit → Reveal → Perspective → My KEFE Progress → Share`.
+- First-session path includes the short promise, Demo DILEMMA, optional post-Reveal Account Offer and the same downstream Perspective/Progress/Share value path.
 - Commit First: community/result layers are unavailable before the user's confirmed decision.
-- Commit First is not Blind First.
+- Commit First is not Blind First; context and sources must remain available without result leakage.
 - CaseVersion pinning and published-version immutability.
 - Provider-neutral ports/adapters and configuration-driven infrastructure.
-- No final 3-vs-4-tab primary navigation decision has been encoded.
-- No final branded Commit CTA has been encoded; the technical action remains `COMMIT`.
-- Reason Capture is private-by-default until an explicit later product/moderation policy enables cross-user visibility.
+- Reason Capture is optional and private-by-default in the current executable scope.
+- There is no raw comment wall. Perspective is a bounded, quality-oriented post-Commit experience with curated fallback when AI is unavailable.
 
 ## 2. Completed executable milestones
 
@@ -76,62 +80,64 @@ Binding product rules currently implemented:
 
 Consumer path today:
 
-`Onboarding → Explore → Case → Typed Weigh → Private Reason → Commit → Trusted Reveal`
+`Onboarding → Explore → Case → Typed Weigh → Optional Private Reason → Commit → Trusted Reveal`
 
-The private reason step is optional and CaseVersion/schema-driven. Results remain hidden until Commit. Reason data is not exposed to other users in the current product surface; optional short text may enter server-side safety moderation.
+The reason step is optional and CaseVersion/schema-driven. Blank input never blocks Commit and causes no reason API call. Results remain hidden until Commit. Reason data is not exposed to other users in the current product surface; optional short text may enter server-side safety moderation.
 
 The active demo remains a low-risk DILEMMA. Its current reason/question configuration is a development fixture, not a product-wide default.
 
-## 4. Known open product decisions
+## 4. Canonical decision status and implementation guardrails
 
-Do not close these implicitly in code without updating the approved product decision process:
+There are no open product decisions in the current official documentation set. The former checkpoint list of open questions was based on superseded document versions and must not be used to delay, reverse or silently reinterpret approved decisions.
 
-- Final primary navigation: three or four destinations.
-- Final user-facing Commit CTA.
-- Quick Weigh Reveal timing.
-- Final North Star window: WAU or MAU.
-- Guest retention duration beyond current technical baseline.
-- MVP CALL breadth.
-- Country launch sequence.
-- Values release phase and scientific validation.
-- Atlas confidence/default publication thresholds.
-- Raw versus Trusted consumer presentation.
-- Balanced Sample methodology.
-- Civic P2/P3 review and delayed publication policy.
-- Expert verification operating model.
-- KEFE+ launch timing.
-- Social reason visibility, moderation and ranking boundaries.
+Some canonical decisions are not yet fully expressed in this executable slice. Navigation, user-facing Commit terminology, Quick Weigh behavior, identity/account conversion, retention, sampling/methodology, civic review/publication, expert verification, KEFE+, social visibility and Perspective ranking must be introduced only through small reviewed slices that cite the current authority documents and update the relevant ADRs/contracts/tests.
+
+Implementation guardrails for the next slice:
+
+- Do not expose a community result or Perspective before Commit.
+- Do not expose current private or `PENDING` reasons to another user.
+- Do not add a raw feed, popularity-only ranking or unlabeled AI-authored text.
+- Keep human reasons and AI summaries separate in the data model and UI.
+- Preserve a deterministic curated fallback when AI or clustering is unavailable.
+- Carry provenance, moderation state and sample/methodology metadata through the read model.
 
 ## 5. Recommended next delivery sequence
 
-The next implementation work should remain in small reviewed slices:
+Continue in small reviewed vertical slices:
 
-1. **Reveal Perspective layer**
-   - expose only moderation-approved human reasons after Commit
-   - begin with a safe opposing-perspective read model, not a classic comment feed
-   - carry reason provenance, moderation state and methodology/sample metadata
-   - avoid popularity-only ranking; preserve bridge/quality direction without inventing a final algorithm prematurely
-   - keep AI summaries separate and explicitly labeled when introduced later
+1. **Reveal → Perspective foundation**
+   - before coding, record the slice decision in ADR-0009 and lock the API entitlement/addressing contract
+   - post-Commit only; maximum four strong cards: near, opposing, Bridge and alternative context
+   - start with a deterministic curated fallback and provider-neutral clustering port
+   - expose only moderation-approved eligible human reasons; current private/pending reasons remain inaccessible
+   - include provenance and sample/methodology metadata
+   - exclude raw feed, reactions, reporting, public authoring and AI-generated summaries from this first slice
+   - required states: `LOADING`, `READY`, `CLUSTER_PENDING`, `DEGRADED_CURATED`, `REASON_PENDING_MODERATION`, `ERROR_RETRYABLE`
 
 2. **Context + Sources read layer**
    - progressive context blocks and source metadata
-   - VERIFIED / CLAIMED / DISPUTED / UNKNOWN semantics
+   - `VERIFIED / CLAIMED / DISPUTED / UNKNOWN` semantics
    - no result leakage before Commit
    - preserve CaseVersion pinning and source/version auditability
 
-3. **Content/Admin foundation**
+3. **Account Offer + My KEFE Progress foundation**
+   - preserve optional, transparent guest continuation and the canonical first-session boundary
+   - make identity/retention behavior explicit in contracts before implementation
+   - connect committed activity to the approved progress model without premature gamification
+
+4. **Content/Admin foundation**
    - Case/Issue/Question authoring contracts
    - publication workflow and audit trail
    - taxonomy/configuration management
 
-4. **Observability and deployment baseline**
+5. **Observability and deployment baseline**
    - request/event correlation
    - SLO/error/latency metrics
    - secrets and environment contract
    - development/staging deployment runbook
 
-5. **Milestone documentation synchronization**
-   - patch Engineering Blueprint and relevant specialist documents with the executable decisions accumulated through this milestone
+6. **Milestone documentation synchronization**
+   - patch the Engineering Blueprint and relevant specialist documents with executable decisions accumulated through the milestone
    - regenerate DOCX/PDF package from editable sources
    - visually verify renders, update manifest and archive prior versions
 
@@ -142,19 +148,21 @@ At the beginning of every new work session:
 1. Read **only this checkpoint as the canonical engineering handoff**: `docs/status/CURRENT.md` from `main`.
 2. Check open PRs and recent merged PRs.
 3. Check the latest CI status before branching.
-4. Create one feature branch for one coherent slice.
-5. Keep architecture/provider boundaries intact.
-6. Add or update tests and machine-readable contracts in the same PR.
-7. Merge only after all relevant CI jobs pass.
-8. Update this checkpoint after every meaningful merged milestone.
-9. Treat older handoff files as redirects to this file, not independent state sources.
+4. Resolve the next slice against the current official document versions; do not resurrect superseded open-decision lists.
+5. Lock slice-specific product/API behavior in an ADR and machine-readable contract before implementation.
+6. Create one feature branch for one coherent vertical slice.
+7. Keep architecture/provider boundaries intact.
+8. Add or update tests and machine-readable contracts in the same PR.
+9. Merge only after all relevant CI jobs pass.
+10. Update this checkpoint after every meaningful merged milestone.
+11. Treat older handoff files as redirects to this file, not independent state sources.
 
 ## 7. Recovery prompt for a new chat
 
 Use the following message if continuation must move to another conversation:
 
-> Continue KEFE development from repository `nazmi02551/KEFE`. First read `docs/status/CURRENT.md` on `main`, inspect open PRs, recent commits and CI, and verify the checkpoint is current. Preserve Commit First, CaseVersion pinning, provider-neutral ports/adapters and all open product decisions. Continue with the next recommended coherent slice; do not silently lock unresolved product decisions. Keep DOCX/PDF synchronization obligations in the milestone checklist.
+> Continue KEFE development from repository `nazmi02551/KEFE`. First read `docs/status/CURRENT.md` on `main`, inspect open PRs, recent commits and CI, and verify the checkpoint is current. Use the current official KEFE documentation versions recorded there; do not revive superseded open-decision lists. Preserve Commit First, CaseVersion pinning and provider-neutral ports/adapters. Lock the next slice in an ADR and machine-readable contract before coding, keep the change coherent and small, and merge only with green CI. Keep DOCX/PDF synchronization obligations in the milestone checklist.
 
 ## 8. Reliability rule
 
-Chat history is not the source of truth. GitHub `main`, approved product documents, machine-readable contracts, ADRs and **this checkpoint file** are the durable recovery sources. There must be only one live project checkpoint; legacy handoff paths must redirect here rather than duplicate state.
+Chat history is not the source of truth. GitHub `main`, current approved product documents, machine-readable contracts, ADRs and **this checkpoint file** are the durable recovery sources. There must be only one live project checkpoint; legacy handoff paths must redirect here rather than duplicate state.
