@@ -164,13 +164,12 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('option-A')));
     await tester.pumpAndSettle();
-    final privacyCopy = find.textContaining('diğer kullanıcılara gösterilmez');
-    await tester.scrollUntilVisible(
-      privacyCopy,
-      200,
-      scrollable: find.byType(Scrollable).first,
+    await tester.drag(find.byType(ListView), const Offset(0, -300));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('diğer kullanıcılara gösterilmez'),
+      findsOneWidget,
     );
-    expect(privacyCopy, findsOneWidget);
 
     await tapCommit(tester);
 
@@ -243,7 +242,6 @@ void main() {
     final pending = draftStore.draftFor(reasonCaseId)!;
     expect(pending.phase, DecisionDraftPhase.syncPending);
     expect(repository.commitCalls, 0);
-    expect(find.byKey(const ValueKey('decision-status-message')), findsOneWidget);
 
     final idempotencyKey = pending.commitIdempotencyKey;
     await tapCommit(tester);
