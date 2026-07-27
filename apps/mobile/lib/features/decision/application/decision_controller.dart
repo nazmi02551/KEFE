@@ -45,6 +45,10 @@ class DecisionState {
     this.reasonTags = const {},
     this.reasonText = '',
     this.reveal,
+    this.perspectiveState = PerspectiveUiState.idle,
+    this.perspective,
+    this.reasonPendingModeration = false,
+    this.perspectiveErrorCode,
     this.errorCode,
   });
 
@@ -58,6 +62,10 @@ class DecisionState {
   final Set<String> reasonTags;
   final String reasonText;
   final RevealResult? reveal;
+  final PerspectiveUiState perspectiveState;
+  final PerspectiveResult? perspective;
+  final bool reasonPendingModeration;
+  final String? perspectiveErrorCode;
   final String? errorCode;
 
   Object? responseFor(String questionId) => responses[questionId];
@@ -92,7 +100,12 @@ class DecisionState {
     Set<String>? reasonTags,
     String? reasonText,
     RevealResult? reveal,
+    PerspectiveUiState? perspectiveState,
+    PerspectiveResult? perspective,
+    bool? reasonPendingModeration,
+    String? perspectiveErrorCode,
     String? errorCode,
+    bool clearPerspectiveError = false,
     bool clearError = false,
   }) {
     return DecisionState(
@@ -106,6 +119,13 @@ class DecisionState {
       reasonTags: reasonTags ?? this.reasonTags,
       reasonText: reasonText ?? this.reasonText,
       reveal: reveal ?? this.reveal,
+      perspectiveState: perspectiveState ?? this.perspectiveState,
+      perspective: perspective ?? this.perspective,
+      reasonPendingModeration:
+          reasonPendingModeration ?? this.reasonPendingModeration,
+      perspectiveErrorCode: clearPerspectiveError
+          ? null
+          : perspectiveErrorCode ?? this.perspectiveErrorCode,
       errorCode: clearError ? null : errorCode ?? this.errorCode,
     );
   }
@@ -299,6 +319,12 @@ class DecisionController extends Notifier<DecisionState> {
     await _resumeDraft(draft);
   }
 
+  Future<void> retryPerspective() async {
+    final sessionId = state.sessionId;
+    if (state.reveal == null || sessionId == null) return;
+    await _loadPerspective(sessionId);
+  }
+
   Future<void> _resumeDraft(DecisionDraft draft) async {
     state = state.copyWith(
       submitting: true,
@@ -355,8 +381,13 @@ class DecisionController extends Notifier<DecisionState> {
         recoveryPending: false,
         offlineDraft: false,
         reveal: reveal,
+        reasonPendingModeration:
+            _normalizedReasonText(current.reasonText ?? '') != null,
+        perspectiveState: PerspectiveUiState.loading,
+        clearPerspectiveError: true,
         clearError: true,
       );
+      await _loadPerspective(current.sessionId, alreadyLoading: true);
     } on ClientTransportFailure catch (_) {
       state = state.copyWith(
         submitting: false,
@@ -380,6 +411,51 @@ class DecisionController extends Notifier<DecisionState> {
         submitting: false,
         recoveryPending: true,
         errorCode: 'UNEXPECTED_CLIENT_ERROR',
+      );
+    }
+  }
+
+  Future<void> _loadPerspective(
+    String sessionId, {
+    bool alreadyLoading = false,
+  }) async {
+    if (!alreadyLoading) {
+      state = state.copyWith(
+        perspectiveState: PerspectiveUiState.loading,
+        clearPerspectiveError: true,
+      );
+    }
+    try {
+      final result = await _repository.fetchPerspectives(sessionId);
+      final caseVersionId = state.caseData?.versionId;
+      if (result.sessionId != sessionId ||
+          caseVersionId == null ||
+          result.caseVersionId != caseVersionId) {
+        state = state.copyWith(
+          perspectiveState: PerspectiveUiState.errorRetryable,
+          perspectiveErrorCode: 'PERSPECTIVE_VERSION_MISMATCH',
+        );
+        return;
+      }
+      state = state.copyWith(
+        perspectiveState: result.uiState,
+        perspective: result,
+        clearPerspectiveError: true,
+      );
+    } on ClientTransportFailure catch (error) {
+      state = state.copyWith(
+        perspectiveState: PerspectiveUiState.errorRetryable,
+        perspectiveErrorCode: error.code,
+      );
+    } on ApiFailure catch (error) {
+      state = state.copyWith(
+        perspectiveState: PerspectiveUiState.errorRetryable,
+        perspectiveErrorCode: error.code,
+      );
+    } catch (_) {
+      state = state.copyWith(
+        perspectiveState: PerspectiveUiState.errorRetryable,
+        perspectiveErrorCode: 'UNEXPECTED_PERSPECTIVE_ERROR',
       );
     }
   }

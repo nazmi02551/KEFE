@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../onboarding/application/onboarding_controller.dart';
 import '../application/decision_controller.dart';
+import 'perspective_section.dart';
 import 'question_input.dart';
 import 'reason_input.dart';
 
@@ -163,6 +164,13 @@ class _DecisionContent extends ConsumerWidget {
           ),
         ] else ...[
           _RevealCard(state: state),
+          const SizedBox(height: 20),
+          PerspectiveSection(
+            state: state.perspectiveState,
+            result: state.perspective,
+            reasonPendingModeration: state.reasonPendingModeration,
+            onRetry: controller.retryPerspective,
+          ),
           if (firstUse) ...[
             const SizedBox(height: 20),
             _FirstUseCompletionCard(

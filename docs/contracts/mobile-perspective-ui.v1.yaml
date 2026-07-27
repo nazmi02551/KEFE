@@ -1,0 +1,59 @@
+contract: mobile-perspective-ui
+version: 1.0.0
+status: accepted
+updated_at: '2026-07-27'
+authority:
+  adr: docs/adr/0010-mobile-perspective-consumption.md
+  backend_policy: docs/contracts/perspective-read-policy.v1.yaml
+placement:
+  after: successful_reveal
+  surface: same_case_journey
+  primary_navigation_destination: false
+fetch:
+  automatic_after_reveal: true
+  retry_operation: GET /v1/weigh-sessions/{session_id}/perspectives
+  retry_must_not_replay:
+    - response_write
+    - private_reason_write
+    - commit
+states:
+  transport_presentation:
+    - IDLE
+    - LOADING
+    - READY
+    - CLUSTER_PENDING
+    - DEGRADED_CURATED
+    - ERROR_RETRYABLE
+  viewer_flags:
+    - REASON_PENDING_MODERATION
+mapping:
+  API_READY: READY
+  API_CLUSTER_PENDING: CLUSTER_PENDING
+  API_DEGRADED_CURATED: DEGRADED_CURATED
+cards:
+  maximum: 4
+  preserve_api_order: true
+  recognized_slots:
+    - NEAR
+    - OPPOSING
+    - BRIDGE
+    - ALTERNATIVE_CONTEXT
+  local_reranking: forbidden
+  required_visible_fields:
+    - semantic_role
+    - body
+    - provenance_label
+methodology:
+  secondary_disclosure: true
+  degraded_curated_tone: neutral_fallback
+privacy:
+  local_private_reason_as_card_source: forbidden
+  pending_reason_means_cross_user_visible: false
+excluded:
+  - primary_navigation_change
+  - standalone_perspective_route
+  - reactions
+  - reporting
+  - public_reason_authoring
+  - popularity_ranking
+  - ai_generated_summary

@@ -139,3 +139,77 @@ class RevealResult {
   final String confidence;
   final Map<String, double> values;
 }
+
+enum PerspectiveUiState {
+  idle,
+  loading,
+  ready,
+  clusterPending,
+  degradedCurated,
+  errorRetryable,
+}
+
+enum PerspectiveSlot {
+  near,
+  opposing,
+  bridge,
+  alternativeContext,
+}
+
+@immutable
+class PerspectiveCard {
+  const PerspectiveCard({
+    required this.id,
+    required this.slot,
+    required this.body,
+    required this.sourceKind,
+    required this.provenanceLabel,
+    required this.moderationState,
+  });
+
+  final String id;
+  final PerspectiveSlot slot;
+  final String body;
+  final String sourceKind;
+  final String provenanceLabel;
+  final String moderationState;
+}
+
+@immutable
+class PerspectiveMethodology {
+  const PerspectiveMethodology({
+    required this.mode,
+    required this.sampleKind,
+    required this.sampleSize,
+    required this.generatedAt,
+    required this.provenanceNote,
+  });
+
+  final String mode;
+  final String sampleKind;
+  final int sampleSize;
+  final DateTime generatedAt;
+  final String provenanceNote;
+}
+
+@immutable
+class PerspectiveResult {
+  const PerspectiveResult({
+    required this.sessionId,
+    required this.caseVersionId,
+    required this.cards,
+    required this.methodology,
+  });
+
+  final String sessionId;
+  final String caseVersionId;
+  final List<PerspectiveCard> cards;
+  final PerspectiveMethodology methodology;
+
+  PerspectiveUiState get uiState => switch (methodology.mode) {
+    'READY' => PerspectiveUiState.ready,
+    'CLUSTER_PENDING' => PerspectiveUiState.clusterPending,
+    'DEGRADED_CURATED' => PerspectiveUiState.degradedCurated,
+    _ => PerspectiveUiState.errorRetryable,
+  };
+}
