@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/kefe_strings.dart';
+import '../../context/presentation/context_section.dart';
 import '../../onboarding/application/onboarding_controller.dart';
 import '../application/decision_controller.dart';
 import 'perspective_section.dart';
@@ -114,6 +115,8 @@ class _DecisionContent extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
         Text(caseData.summary, style: Theme.of(context).textTheme.bodyLarge),
+        const SizedBox(height: 20),
+        ContextSection(caseVersionId: caseData.versionId),
         const SizedBox(height: 24),
         for (final question in caseData.questions) ...[
           QuestionInputCard(
