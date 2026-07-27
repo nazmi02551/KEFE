@@ -15,16 +15,22 @@ class ContextSection extends ConsumerWidget {
     final strings = KefeStrings.of(context);
     final contextValue = ref.watch(contextSnapshotProvider(caseVersionId));
 
-    return Card(
-      key: const ValueKey('context-section'),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: contextValue.when(
-          loading: () => Semantics(
+    return contextValue.when(
+      loading: () => Card(
+        key: const ValueKey('context-section'),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Semantics(
             label: strings.contextLoading,
             child: const Center(child: CircularProgressIndicator()),
           ),
-          error: (_, _) => Column(
+        ),
+      ),
+      error: (_, _) => Card(
+        key: const ValueKey('context-section'),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
@@ -40,9 +46,20 @@ class ContextSection extends ConsumerWidget {
               ),
             ],
           ),
-          data: (snapshot) => _ContextContent(snapshot: snapshot),
         ),
       ),
+      data: (snapshot) {
+        if (snapshot.blocks.isEmpty && snapshot.sources.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        return Card(
+          key: const ValueKey('context-section'),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: _ContextContent(snapshot: snapshot),
+          ),
+        );
+      },
     );
   }
 }
