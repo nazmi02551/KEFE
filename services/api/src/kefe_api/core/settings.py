@@ -11,9 +11,11 @@ class Settings(BaseSettings):
 
     environment: str = "development"
     api_title: str = "KEFE API"
-    api_version: str = "0.4.0"
+    api_version: str = "0.5.0"
     persistence_backend: Literal["memory", "postgres"] = "memory"
     database_url: str | None = None
+
+    guest_token_ttl_days: int = 30
 
     event_transport: Literal["logging"] = "logging"
     outbox_batch_size: int = 100
