@@ -3,13 +3,28 @@ from __future__ import annotations
 from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, Request
+from fastapi import APIRouter, Depends, Header, Query, Request
 from pydantic import BaseModel, Field
 
 from kefe_api.modules.decision.service import DecisionService
 from kefe_api.modules.identity.dependencies import PrincipalDep
 
 router = APIRouter(prefix="/v1", tags=["Decision"])
+
+
+class CaseSummaryResponse(BaseModel):
+    case_id: UUID
+    case_version_id: UUID
+    version_no: int
+    title: str
+    summary: str
+    base_format: str
+    primary_domain: str
+    content_risk: str
+
+
+class CaseListResponse(BaseModel):
+    items: list[CaseSummaryResponse]
 
 
 class StartSessionResponse(BaseModel):
@@ -37,6 +52,29 @@ IdempotencyKey = Annotated[
     str,
     Header(alias="Idempotency-Key", min_length=8, max_length=128),
 ]
+
+
+@router.get("/cases", response_model=CaseListResponse)
+def list_cases(
+    service: DecisionServiceDep,
+    limit: Annotated[int, Query(ge=1, le=50)] = 20,
+) -> CaseListResponse:
+    cases = service.list_cases(limit=limit)
+    return CaseListResponse(
+        items=[
+            CaseSummaryResponse(
+                case_id=case.case_id,
+                case_version_id=case.id,
+                version_no=case.version_no,
+                title=case.title,
+                summary=case.summary,
+                base_format=case.base_format,
+                primary_domain=case.primary_domain,
+                content_risk=case.content_risk,
+            )
+            for case in cases
+        ]
+    )
 
 
 @router.get("/cases/{case_id}")
