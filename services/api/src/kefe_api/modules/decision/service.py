@@ -29,11 +29,10 @@ class DecisionService:
             case_id=case.case_id,
             case_version_id=case.id,
         )
-        self._repo.save_session(session)
-        self._repo.append_event(
-            "weigh.started",
-            session.id,
-            {"actor_id": str(actor_id), "case_version_id": str(case.id)},
+        self._repo.save_session_with_event(
+            session,
+            event_name="weigh.started",
+            payload={"actor_id": str(actor_id), "case_version_id": str(case.id)},
         )
         return session
 
@@ -96,11 +95,10 @@ class DecisionService:
         session.state = WeighState.COMMITTED
         session.commit_key = idempotency_key
         session.committed_at = datetime.now(UTC)
-        self._repo.save_session(session)
-        self._repo.append_event(
-            "weigh.committed",
-            session.id,
-            {
+        self._repo.save_session_with_event(
+            session,
+            event_name="weigh.committed",
+            payload={
                 "actor_id": str(actor_id),
                 "case_version_id": str(session.case_version_id),
                 "committed_at": session.committed_at.isoformat(),
