@@ -87,17 +87,17 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Topluluk nasıl tarttı?'), findsNothing);
-    expect(find.text('Kararımı Ver'), findsOneWidget);
+    expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
+    expect(find.byKey(const ValueKey('commit-button')), findsOneWidget);
 
-    await tester.tap(find.text('A'));
+    await tester.tap(find.byKey(const ValueKey('option-A')));
     await tester.pump();
-    await tester.tap(find.text('Kararımı Ver'));
+    await tester.tap(find.byKey(const ValueKey('commit-button')));
     await tester.pumpAndSettle();
 
     expect(repository.commitCalls, 1);
-    expect(find.text('Topluluk nasıl tarttı?'), findsOneWidget);
-    expect(find.textContaining('n=1284'), findsOneWidget);
+    expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
+    expect(find.byKey(const ValueKey('reveal-methodology')), findsOneWidget);
   });
 
   testWidgets('application supports dark theme without changing flow semantics', (
@@ -119,6 +119,6 @@ void main() {
 
     final material = tester.widget<MaterialApp>(find.byType(MaterialApp));
     expect(material.themeMode, ThemeMode.system);
-    expect(find.text('Kararımı Ver'), findsOneWidget);
+    expect(find.byKey(const ValueKey('commit-button')), findsOneWidget);
   });
 }
