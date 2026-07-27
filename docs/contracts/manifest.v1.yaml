@@ -1,4 +1,4 @@
-manifest_version: 1.6.0
+manifest_version: 1.7.0
 updated_at: '2026-07-27'
 policy:
   executable_schema_source: services/api/migrations
@@ -25,6 +25,10 @@ contracts:
     path: docs/contracts/identity-admission-policy.v1.yaml
     version: 1.0.0
     role: typed_identity_admission_configuration
+  - id: perspective-read-policy
+    path: docs/contracts/perspective-read-policy.v1.yaml
+    version: 1.0.0
+    role: commit_gated_bounded_perspective_policy
   - id: error-registry
     path: docs/contracts/error-codes.v1.yaml
     version: 1.3.0
@@ -53,3 +57,4 @@ architecture_decisions:
   - docs/adr/0006-schema-driven-question-engine.md
   - docs/adr/0007-private-by-default-reason-capture.md
   - docs/adr/0008-offline-safe-mobile-reason-capture.md
+  - docs/adr/0009-commit-gated-bounded-perspective.md
