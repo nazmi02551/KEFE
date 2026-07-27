@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, Query, Request
 from pydantic import BaseModel, Field
 
+from kefe_api.modules.decision.models import ExposureKind
 from kefe_api.modules.decision.service import DecisionService
 from kefe_api.modules.identity.dependencies import PrincipalDep
 
@@ -27,6 +29,28 @@ class CaseListResponse(BaseModel):
     items: list[CaseSummaryResponse]
 
 
+class SourceResponse(BaseModel):
+    source_id: UUID
+    title: str
+    publisher: str
+    url: str
+    published_at: datetime | None = None
+
+
+class ClaimResponse(BaseModel):
+    claim_id: UUID
+    text: str
+    status: str
+    source_ids: list[UUID]
+
+
+class ContextBlockResponse(BaseModel):
+    context_block_id: UUID
+    kind: str
+    title: str
+    body: str
+
+
 class QuestionResponse(BaseModel):
     question_id: UUID
     prompt: str
@@ -45,6 +69,10 @@ class CaseDetailResponse(BaseModel):
     base_format: str
     primary_domain: str
     content_risk: str
+    critical_claims: list[ClaimResponse]
+    detail_claims: list[ClaimResponse]
+    context_blocks: list[ContextBlockResponse]
+    sources: list[SourceResponse]
     questions: list[QuestionResponse]
 
 
@@ -53,6 +81,19 @@ class StartSessionResponse(BaseModel):
     case_id: UUID
     case_version_id: UUID
     state: str
+
+
+class ExposureItem(BaseModel):
+    kind: ExposureKind
+    ref_id: UUID
+
+
+class RecordExposuresRequest(BaseModel):
+    items: list[ExposureItem] = Field(min_length=1, max_length=100)
+
+
+class RecordExposuresResponse(BaseModel):
+    recorded_count: int
 
 
 class ResponseItem(BaseModel):
@@ -98,6 +139,15 @@ def list_cases(
     )
 
 
+def _claim_response(claim) -> ClaimResponse:
+    return ClaimResponse(
+        claim_id=claim.id,
+        text=claim.text,
+        status=claim.status.value,
+        source_ids=list(claim.source_ids),
+    )
+
+
 @router.get("/cases/{case_id}", response_model=CaseDetailResponse)
 def get_case(case_id: UUID, service: DecisionServiceDep) -> CaseDetailResponse:
     case = service.get_case(case_id)
@@ -110,6 +160,27 @@ def get_case(case_id: UUID, service: DecisionServiceDep) -> CaseDetailResponse:
         base_format=case.base_format,
         primary_domain=case.primary_domain,
         content_risk=case.content_risk,
+        critical_claims=[_claim_response(claim) for claim in case.critical_claims],
+        detail_claims=[_claim_response(claim) for claim in case.detail_claims],
+        context_blocks=[
+            ContextBlockResponse(
+                context_block_id=block.id,
+                kind=block.kind.value,
+                title=block.title,
+                body=block.body,
+            )
+            for block in case.context_blocks
+        ],
+        sources=[
+            SourceResponse(
+                source_id=source.id,
+                title=source.title,
+                publisher=source.publisher,
+                url=source.url,
+                published_at=source.published_at,
+            )
+            for source in case.sources
+        ],
         questions=[
             QuestionResponse(
                 question_id=question.id,
@@ -137,6 +208,24 @@ def start_session(
         case_version_id=session.case_version_id,
         state=session.state,
     )
+
+
+@router.post(
+    "/weigh-sessions/{session_id}/exposures",
+    response_model=RecordExposuresResponse,
+)
+def record_exposures(
+    session_id: UUID,
+    body: RecordExposuresRequest,
+    principal: PrincipalDep,
+    service: DecisionServiceDep,
+) -> RecordExposuresResponse:
+    recorded_count = service.record_exposures(
+        actor_id=principal.actor_id,
+        session_id=session_id,
+        items=tuple((item.kind, item.ref_id) for item in body.items),
+    )
+    return RecordExposuresResponse(recorded_count=recorded_count)
 
 
 @router.put("/weigh-sessions/{session_id}/responses")
