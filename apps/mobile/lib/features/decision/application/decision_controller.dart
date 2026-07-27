@@ -146,10 +146,14 @@ class DecisionController extends Notifier<DecisionState> {
   }
 
   Future<void> select(String value) async {
-    if (state.reveal != null || state.submitting || state.recoveryPending) return;
+    if (state.reveal != null || state.submitting || state.recoveryPending) {
+      return;
+    }
     final caseData = state.caseData;
     final sessionId = state.sessionId;
-    if (caseData == null || sessionId == null || caseData.questions.isEmpty) return;
+    if (caseData == null || sessionId == null || caseData.questions.isEmpty) {
+      return;
+    }
 
     final draft = DecisionDraft(
       caseData: caseData,
@@ -167,12 +171,16 @@ class DecisionController extends Notifier<DecisionState> {
   }
 
   Future<void> commit() async {
-    if (state.submitting) return;
+    if (state.submitting) {
+      return;
+    }
 
     final caseData = state.caseData;
     final sessionId = state.sessionId;
     final selected = state.selectedOption;
-    if (caseData == null || sessionId == null || selected == null) return;
+    if (caseData == null || sessionId == null || selected == null) {
+      return;
+    }
 
     final stored = await _draftStore.read();
     if (stored != null && stored.phase != DecisionDraftPhase.editing) {
@@ -202,7 +210,9 @@ class DecisionController extends Notifier<DecisionState> {
   }
 
   Future<void> retryPending() async {
-    if (state.submitting) return;
+    if (state.submitting) {
+      return;
+    }
     final draft = await _draftStore.read();
     if (draft == null || draft.phase == DecisionDraftPhase.editing) {
       await commit();
