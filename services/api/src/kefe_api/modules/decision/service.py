@@ -9,12 +9,16 @@ from kefe_api.core.errors import DomainError
 from kefe_api.modules.decision.models import (
     CommitStatus,
     DraftUpdateStatus,
+    PerspectiveSelection,
     PrivateReason,
     Question,
     WeighSession,
     WeighState,
 )
 from kefe_api.modules.decision.ports import DecisionRepository
+
+PERSPECTIVE_SELECTION_POLICY = "EDITORIAL_OPPOSITION_V1"
+PERSPECTIVE_TECHNICAL_LIMIT = 10
 
 
 class DecisionService:
@@ -271,6 +275,50 @@ class DecisionService:
             {"case_version_id": str(session.case_version_id), "layer": snapshot.layer},
         )
         return snapshot
+
+    def perspectives(self, *, actor_id: UUID, session_id: UUID) -> PerspectiveSelection:
+        session = self._owned_session(actor_id, session_id)
+        if session.state is not WeighState.COMMITTED:
+            raise DomainError(
+                "PERSPECTIVE_COMMIT_REQUIRED",
+                "Commit is required before perspectives are available",
+                403,
+            )
+
+        case = self._repo.get_case_version(session.case_version_id)
+        if case is None:
+            raise DomainError("CASE_VERSION_STALE", "Case version is no longer available", 409)
+
+        axis = next(
+            (
+                question
+                for question in case.questions
+                if question.response_type == "SINGLE_CHOICE"
+                and question.id in session.responses
+            ),
+            None,
+        )
+        if axis is None:
+            return PerspectiveSelection(
+                question_version_id=None,
+                viewer_value=None,
+                selection_policy=PERSPECTIVE_SELECTION_POLICY,
+                items=(),
+            )
+
+        viewer_value = session.responses[axis.id]
+        items = self._repo.get_opposing_perspectives(
+            case_version_id=session.case_version_id,
+            question_version_id=axis.id,
+            viewer_value=viewer_value,
+            limit=PERSPECTIVE_TECHNICAL_LIMIT,
+        )
+        return PerspectiveSelection(
+            question_version_id=axis.id,
+            viewer_value=viewer_value,
+            selection_policy=PERSPECTIVE_SELECTION_POLICY,
+            items=items,
+        )
 
     def _owned_session(self, actor_id: UUID, session_id: UUID) -> WeighSession:
         session = self._repo.get_session(session_id)
