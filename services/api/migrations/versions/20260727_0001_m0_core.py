@@ -138,7 +138,8 @@ def upgrade() -> None:
         CREATE TABLE decision.response (
             id uuid PRIMARY KEY,
             session_id uuid NOT NULL REFERENCES decision.weigh_session(id) ON DELETE CASCADE,
-            question_version_id uuid NOT NULL REFERENCES content.question_version(id) ON DELETE RESTRICT,
+            question_version_id uuid NOT NULL
+                REFERENCES content.question_version(id) ON DELETE RESTRICT,
             value_json jsonb NOT NULL,
             updated_at timestamptz NOT NULL DEFAULT now(),
             UNIQUE(session_id, question_version_id)
