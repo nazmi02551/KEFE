@@ -36,14 +36,24 @@ def _openapi_errors() -> list[str]:
     contract = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
     errors: list[str] = []
 
+    if contract.get("info", {}).get("version") != "0.6.0":
+        errors.append("OpenAPI checked-in version must match API v0.6.0")
+
     security_schemes = contract.get("components", {}).get("securitySchemes", {})
     bearer = security_schemes.get("HTTPBearer")
     if bearer != {"scheme": "bearer", "type": "http"}:
         errors.append("OpenAPI must expose the HTTP Bearer security scheme")
 
+    schemas = contract.get("components", {}).get("schemas", {})
+    if "GuestCreateRequest" not in schemas:
+        errors.append("OpenAPI must expose GuestCreateRequest admission inputs")
+
     paths = contract.get("paths", {})
-    if "/v1/identity/guest" not in paths:
+    guest_operation = paths.get("/v1/identity/guest", {}).get("post", {})
+    if not guest_operation:
         errors.append("OpenAPI must expose guest identity creation")
+    elif "requestBody" not in guest_operation:
+        errors.append("Guest identity creation must expose optional admission request body")
 
     protected_operations = (
         ("/v1/cases/{case_id}/weigh-sessions", "post"),
@@ -76,6 +86,9 @@ def main() -> None:
 
     schema = (CONTRACTS / "postgresql-m0-schema.v1.2.0.sql").read_text(encoding="utf-8")
     config = (CONTRACTS / "config-registry.v1.2.0.yaml").read_text(encoding="utf-8")
+    admission_policy = (CONTRACTS / "identity-admission-policy.v1.yaml").read_text(
+        encoding="utf-8"
+    )
     schema_errors: list[str] = []
     if "commit_idempotency_key text" not in schema:
         schema_errors.append("M0 schema must expose explicit commit_idempotency_key")
@@ -109,6 +122,19 @@ def main() -> None:
     if missing_config:
         config_errors.append(f"Missing required config keys: {', '.join(missing_config)}")
 
+    admission_keys = {
+        "identity.guest_issue_rate_limit",
+        "identity.guest_issue_rate_window_seconds",
+        "identity.device_integrity_mode",
+    }
+    missing_admission = sorted(
+        key for key in admission_keys if f"- key: {key}\n" not in admission_policy
+    )
+    if missing_admission:
+        config_errors.append(
+            f"Missing identity admission policy keys: {', '.join(missing_admission)}"
+        )
+
     source_errors: list[str] = []
     if _source_contains("X-Actor-Id"):
         source_errors.append("Protected API code must not trust the development X-Actor-Id header")
@@ -129,7 +155,7 @@ def main() -> None:
     print(
         "Contract sync OK: "
         f"{len(used)} executable DomainError codes registered; "
-        "HTTP API, identity, persistence and outbox invariants verified."
+        "HTTP API, identity admission, persistence and outbox invariants verified."
     )
 
 

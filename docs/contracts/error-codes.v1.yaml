@@ -1,4 +1,4 @@
-registry_version: 1.1.0
+registry_version: 1.2.0
 errors:
 - code: AUTH_REQUIRED
   http_status: 401
@@ -11,6 +11,15 @@ errors:
   retryable: false
 - code: AUTH_TOKEN_REVOKED
   http_status: 401
+  retryable: false
+- code: AUTH_GUEST_RATE_LIMITED
+  http_status: 429
+  retryable: true
+- code: AUTH_DEVICE_INTEGRITY_REQUIRED
+  http_status: 403
+  retryable: false
+- code: AUTH_DEVICE_INTEGRITY_FAILED
+  http_status: 403
   retryable: false
 - code: AUTH_OTP_INVALID
   http_status: 400
