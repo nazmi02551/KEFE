@@ -12,6 +12,7 @@ from kefe_api.modules.decision.models import (
     CommitStatus,
     DraftUpdateAttempt,
     DraftUpdateStatus,
+    PerspectiveSnapshot,
     PrivateReason,
     ReasonModerationState,
     ReasonUpdateAttempt,
@@ -22,12 +23,21 @@ from kefe_api.modules.decision.models import (
 
 
 class InMemoryDecisionRepository:
-    def __init__(self, *, cases: list[CaseVersion], reveals: list[RevealSnapshot]) -> None:
+    def __init__(
+        self,
+        *,
+        cases: list[CaseVersion],
+        reveals: list[RevealSnapshot],
+        perspectives: list[PerspectiveSnapshot] | None = None,
+    ) -> None:
         self._cases = {case.id: case for case in cases}
         self._current_by_case = {case.case_id: case.id for case in cases}
         self._sessions: dict[UUID, WeighSession] = {}
         self._reasons: dict[UUID, PrivateReason] = {}
         self._reveals = {snapshot.case_version_id: snapshot for snapshot in reveals}
+        self._perspectives = {
+            snapshot.case_version_id: snapshot for snapshot in (perspectives or [])
+        }
         self.events: list[dict[str, Any]] = []
         self._lock = RLock()
 
@@ -176,7 +186,11 @@ class InMemoryDecisionRepository:
 
     def get_reveal(self, case_version_id: UUID) -> RevealSnapshot | None:
         with self._lock:
-            return self._reveals.get(case_version_id)
+            return deepcopy(self._reveals.get(case_version_id))
+
+    def get_perspective(self, case_version_id: UUID) -> PerspectiveSnapshot | None:
+        with self._lock:
+            return deepcopy(self._perspectives.get(case_version_id))
 
     def append_event(self, name: str, aggregate_id: UUID, payload: dict[str, object]) -> None:
         with self._lock:
