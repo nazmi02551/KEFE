@@ -104,7 +104,8 @@ class InMemoryGuestIssueRateLimiter:
             while entries and entries[0] <= cutoff:
                 entries.popleft()
             if len(entries) >= limit:
-                retry_after = max(1, int((entries[0] + timedelta(seconds=window_seconds) - now).total_seconds()))
+                retry_at = entries[0] + timedelta(seconds=window_seconds)
+                retry_after = max(1, int((retry_at - now).total_seconds()))
                 return RateLimitDecision(False, retry_after)
             entries.append(now)
             return RateLimitDecision(True)
@@ -157,7 +158,10 @@ class GuestAdmissionGuard:
                 "Device integrity verification failed",
                 403,
             )
-        if self._integrity_mode is IntegrityMode.REQUIRED and assessment.state is not IntegrityState.VERIFIED:
+        if (
+            self._integrity_mode is IntegrityMode.REQUIRED
+            and assessment.state is not IntegrityState.VERIFIED
+        ):
             raise DomainError(
                 "AUTH_DEVICE_INTEGRITY_REQUIRED",
                 "Verified device integrity is required",
