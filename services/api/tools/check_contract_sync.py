@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -29,6 +30,42 @@ def _check_manifest_paths() -> list[str]:
 
 def _source_contains(fragment: str) -> bool:
     return any(fragment in path.read_text(encoding="utf-8") for path in API_SRC.rglob("*.py"))
+
+
+def _openapi_errors() -> list[str]:
+    contract = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
+    errors: list[str] = []
+
+    security_schemes = contract.get("components", {}).get("securitySchemes", {})
+    bearer = security_schemes.get("HTTPBearer")
+    if bearer != {"scheme": "bearer", "type": "http"}:
+        errors.append("OpenAPI must expose the HTTP Bearer security scheme")
+
+    paths = contract.get("paths", {})
+    if "/v1/identity/guest" not in paths:
+        errors.append("OpenAPI must expose guest identity creation")
+
+    protected_operations = (
+        ("/v1/cases/{case_id}/weigh-sessions", "post"),
+        ("/v1/weigh-sessions/{session_id}/responses", "put"),
+        ("/v1/weigh-sessions/{session_id}/commit", "post"),
+        ("/v1/weigh-sessions/{session_id}/reveal", "get"),
+        ("/v1/identity/session", "delete"),
+    )
+    for path, method in protected_operations:
+        operation = paths.get(path, {}).get(method, {})
+        if {"HTTPBearer": []} not in operation.get("security", []):
+            errors.append(f"OpenAPI operation {method.upper()} {path} must require Bearer auth")
+
+    for path, path_item in paths.items():
+        for method, operation in path_item.items():
+            if method.lower() not in {"get", "post", "put", "patch", "delete"}:
+                continue
+            for parameter in operation.get("parameters", []):
+                if parameter.get("name", "").lower() == "x-actor-id":
+                    errors.append(f"OpenAPI must not expose X-Actor-Id ({method.upper()} {path})")
+
+    return errors
 
 
 def main() -> None:
@@ -84,6 +121,7 @@ def main() -> None:
     problems.extend(schema_errors)
     problems.extend(config_errors)
     problems.extend(source_errors)
+    problems.extend(_openapi_errors())
 
     if problems:
         raise SystemExit("\n".join(problems))
@@ -91,7 +129,7 @@ def main() -> None:
     print(
         "Contract sync OK: "
         f"{len(used)} executable DomainError codes registered; "
-        "manifest paths, identity, persistence and outbox invariants verified."
+        "HTTP API, identity, persistence and outbox invariants verified."
     )
 
 
