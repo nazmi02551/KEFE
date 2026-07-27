@@ -21,6 +21,13 @@ class ExploreFakeRepository implements DecisionRepository {
   }) async {}
 
   @override
+  Future<void> savePrivateReason({
+    required String sessionId,
+    required List<String> tags,
+    required String? text,
+  }) async {}
+
+  @override
   Future<void> commit({
     required String sessionId,
     required String idempotencyKey,
