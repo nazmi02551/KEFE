@@ -3,7 +3,7 @@
 **Updated:** 2026-07-27  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Latest verified implementation commit:** `acc85c89aa3ef2be7d76d6f5ce02f2e5293783ab`
+**Latest verified implementation commit:** `50116080c2cfc594d61096c747328488519e2947`
 
 This file is the **single canonical durable engineering handoff point** for continuing KEFE development when a chat session, local environment or tool run is interrupted. Before starting new work, verify this file against `main`, open pull requests and recent CI runs.
 
@@ -72,6 +72,11 @@ Binding product rules relevant to the executable path include:
 - Pre-Commit response/reason synchronization can safely retry before Commit.
 - Once Commit may have been sent, retries use only the same Commit idempotency key and never replay mutable answers/reasons.
 - Turkish/English semantic copy and accessibility-oriented controls.
+- Automatic post-Reveal consumption of the actor-owned Perspective endpoint in the same Case journey; no new primary navigation destination.
+- At most four API-ordered Perspective roles (`NEAR`, `OPPOSING`, `BRIDGE`, `ALTERNATIVE_CONTEXT`) with unknown slots filtered safely.
+- Explicit Perspective UI states for loading, ready, cluster pending, curated fallback, retryable error and viewer-only reason moderation notice.
+- Perspective-only retry; failures do not hide the trusted Reveal or replay responses, reasons, Commit or Reveal.
+- Neutral curated-fallback and methodology disclosure copy; private reason text is never rendered as a Perspective card.
 
 ### Most recent merged product slices
 
@@ -80,18 +85,15 @@ Binding product rules relevant to the executable path include:
 - PR #20 — private-by-default structured Reason Capture backend.
 - PR #22 — mobile private Reason Capture and offline-safe pre-Commit synchronization.
 - PR #25 — Commit-gated bounded Perspective backend and curated fallback.
+- PR #26 — mobile post-Reveal Perspective consumption with isolated safe retry.
 
 ## 3. Current executable path
 
 Mobile consumer path today:
 
-`Onboarding → Explore → Case → Typed Weigh → Optional Private Reason → Commit → Trusted Reveal`
+`Onboarding → Explore → Case → Typed Weigh → Optional Private Reason → Commit → Trusted Reveal → Curated Perspective`
 
-Backend capability now continues through:
-
-`Trusted Reveal → Commit-gated Curated Perspective`
-
-The reason step is optional and CaseVersion/schema-driven. Blank input never blocks Commit and causes no reason API call. Results remain hidden until Commit. Reason data is not exposed to other users in the current product surface; optional short text may enter server-side safety moderation. The mobile client does not yet render the Perspective endpoint.
+The reason step is optional and CaseVersion/schema-driven. Blank input never blocks Commit and causes no reason API call. Results remain hidden until Commit. Reason data is not exposed to other users in the current product surface; optional short text may enter server-side safety moderation. After a successful Reveal, the mobile client automatically requests and renders the bounded, actor-owned Perspective read model below Reveal. Perspective retry is isolated to its GET request and never replays decision commands.
 
 The active demo remains a low-risk DILEMMA. Its current reason/question configuration is a development fixture, not a product-wide default.
 
@@ -114,38 +116,29 @@ Implementation guardrails for the next slice:
 
 Continue in small reviewed vertical slices:
 
-1. **Mobile Perspective consumption**
-   - before coding, lock placement, navigation and UI state transitions in ADR-0010; do not infer the final visual treatment
-   - consume the session-scoped endpoint only after successful Commit/Reveal
-   - render at most four ordered roles: near, opposing, Bridge and alternative context
-   - distinguish curated fallback and methodology/provenance without alarmist degradation copy
-   - implement `LOADING`, `READY`, `CLUSTER_PENDING`, `DEGRADED_CURATED`, `REASON_PENDING_MODERATION` and `ERROR_RETRYABLE`
-   - preserve safe retry without replaying Commit, answers or reasons
-   - exclude reactions, reporting, public authoring, local ranking and AI-generated summaries
+1. **Context + Sources read layer**
+   - before coding, lock slice-specific placement, progressive disclosure, read API and evidence semantics in ADR-0011 and a machine-readable contract
+   - define the exact `VERIFIED / CLAIMED / DISPUTED / UNKNOWN` presentation and source metadata without silently inventing product behavior
+   - prevent community/result leakage before Commit while keeping context available
+   - preserve CaseVersion pinning, published-version immutability and source/version auditability
 
-2. **Context + Sources read layer**
-   - progressive context blocks and source metadata
-   - `VERIFIED / CLAIMED / DISPUTED / UNKNOWN` semantics
-   - no result leakage before Commit
-   - preserve CaseVersion pinning and source/version auditability
-
-3. **Account Offer + My KEFE Progress foundation**
+2. **Account Offer + My KEFE Progress foundation**
    - preserve optional, transparent guest continuation and the canonical first-session boundary
    - make identity/retention behavior explicit in contracts before implementation
    - connect committed activity to the approved progress model without premature gamification
 
-4. **Content/Admin foundation**
+3. **Content/Admin foundation**
    - Case/Issue/Question authoring contracts
    - publication workflow and audit trail
    - taxonomy/configuration management
 
-5. **Observability and deployment baseline**
+4. **Observability and deployment baseline**
    - request/event correlation
    - SLO/error/latency metrics
    - secrets and environment contract
    - development/staging deployment runbook
 
-6. **Milestone documentation synchronization**
+5. **Milestone documentation synchronization**
    - patch the Engineering Blueprint and relevant specialist documents with executable decisions accumulated through the milestone
    - regenerate DOCX/PDF package from editable sources
    - visually verify renders, update manifest and archive prior versions
