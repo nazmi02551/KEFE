@@ -188,7 +188,6 @@ void main() {
     final repository = ReasonFakeRepository();
     final draftStore = await pumpReasonCase(tester, repository);
 
-    await tapVisible(tester, find.byKey(const ValueKey('reason-card')));
     await tapVisible(tester, find.byKey(const ValueKey('option-A')));
     await tapVisible(tester, find.byKey(const ValueKey('reason-tag-FAIRNESS')));
     await tapVisible(tester, find.byKey(const ValueKey('reason-tag-NEED')));
