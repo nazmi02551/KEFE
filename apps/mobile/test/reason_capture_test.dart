@@ -144,6 +144,29 @@ Future<MemoryDecisionDraftStore> pumpReasonCase(
 }
 
 void main() {
+  testWidgets('blank private reason stays optional and is not submitted', (
+    tester,
+  ) async {
+    useTurkishLocale(tester);
+    final repository = ReasonFakeRepository();
+    await pumpReasonCase(tester, repository);
+
+    expect(
+      find.textContaining('diğer kullanıcılara gösterilmez'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('option-A')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const ValueKey('commit-button')));
+    await tester.tap(find.byKey(const ValueKey('commit-button')));
+    await tester.pumpAndSettle();
+
+    expect(repository.reasonCalls, 0);
+    expect(repository.commitCalls, 1);
+    expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
+  });
+
   testWidgets('schema-driven private reason is persisted and synced before Commit', (
     tester,
   ) async {
