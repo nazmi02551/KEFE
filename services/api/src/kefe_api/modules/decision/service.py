@@ -8,6 +8,7 @@ from kefe_api.core.errors import DomainError
 from kefe_api.modules.decision.models import (
     CommitStatus,
     DraftUpdateStatus,
+    Question,
     WeighSession,
     WeighState,
 )
@@ -57,14 +58,30 @@ class DecisionService:
         if case is None:
             raise DomainError("CASE_VERSION_STALE", "Case version is no longer available", 409)
 
-        allowed = {question.id for question in case.questions}
-        unknown = [str(question_id) for question_id in responses if question_id not in allowed]
+        questions = {question.id: question for question in case.questions}
+        unknown = [str(question_id) for question_id in responses if question_id not in questions]
         if unknown:
             raise DomainError(
                 "WEIGH_RESPONSE_INVALID",
                 "Response contains unknown questions",
                 422,
                 meta={"unknown_question_ids": unknown},
+            )
+
+        invalid = [
+            {
+                "question_id": str(question_id),
+                "response_type": questions[question_id].response_type,
+            }
+            for question_id, value in responses.items()
+            if not self._is_valid_response(questions[question_id], value)
+        ]
+        if invalid:
+            raise DomainError(
+                "WEIGH_RESPONSE_INVALID",
+                "Response does not match the question schema",
+                422,
+                meta={"invalid_responses": invalid},
             )
 
         attempt = self._repo.update_draft_responses(
@@ -93,7 +110,9 @@ class DecisionService:
             actor_id=actor_id,
             session_id=session_id,
             idempotency_key=idempotency_key,
-            required_question_ids=frozenset(question.id for question in pinned.questions),
+            required_question_ids=frozenset(
+                question.id for question in pinned.questions if question.required
+            ),
             committed_at=datetime.now(UTC),
         )
 
@@ -162,3 +181,23 @@ class DecisionService:
         if session is None or session.actor_id != actor_id:
             raise DomainError("WEIGH_SESSION_NOT_FOUND", "Weigh session not found", 404)
         return session
+
+    @staticmethod
+    def _is_valid_response(question: Question, value: Any) -> bool:
+        if question.response_type == "SINGLE_CHOICE":
+            return isinstance(value, str) and value in question.options
+
+        if question.response_type == "CONFIDENCE":
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                return False
+            minimum = question.response_schema.get("min", 1)
+            maximum = question.response_schema.get("max", 5)
+            step = question.response_schema.get("step", 1)
+            if not all(isinstance(item, (int, float)) for item in (minimum, maximum, step)):
+                return False
+            if step <= 0 or value < minimum or value > maximum:
+                return False
+            steps = (value - minimum) / step
+            return abs(steps - round(steps)) < 1e-9
+
+        return False

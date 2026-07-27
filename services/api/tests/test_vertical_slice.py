@@ -5,7 +5,11 @@ from fastapi.testclient import TestClient
 
 from kefe_api.core.errors import DomainError
 from kefe_api.main import create_app
-from kefe_api.modules.decision.bootstrap import DEMO_CASE_ID, DEMO_QUESTION_ID
+from kefe_api.modules.decision.bootstrap import (
+    DEMO_CASE_ID,
+    DEMO_CONFIDENCE_QUESTION_ID,
+    DEMO_QUESTION_ID,
+)
 
 
 def _guest(client: TestClient) -> tuple[UUID, dict[str, str]]:
@@ -42,6 +46,25 @@ def test_explore_lists_published_cases_without_identity() -> None:
     assert "result" not in items[0]
 
 
+def test_case_exposes_typed_question_contract_without_results() -> None:
+    client = TestClient(create_app())
+    response = client.get(f"/v1/cases/{DEMO_CASE_ID}")
+    assert response.status_code == 200
+    body = response.json()
+    assert "result" not in body
+
+    questions = {item["question_id"]: item for item in body["questions"]}
+    decision = questions[str(DEMO_QUESTION_ID)]
+    assert decision["response_type"] == "SINGLE_CHOICE"
+    assert decision["required"] is True
+    assert decision["response_schema"] == {"options": ["A", "B"]}
+
+    confidence = questions[str(DEMO_CONFIDENCE_QUESTION_ID)]
+    assert confidence["response_type"] == "CONFIDENCE"
+    assert confidence["required"] is False
+    assert confidence["response_schema"] == {"min": 1, "max": 5, "step": 1}
+
+
 def test_guest_identity_is_required_for_decision_writes() -> None:
     client = TestClient(create_app())
     response = client.post(f"/v1/cases/{DEMO_CASE_ID}/weigh-sessions")
@@ -70,6 +93,56 @@ def test_commit_first_happy_path() -> None:
     assert reveal.status_code == 200
     assert reveal.json()["layer"] == "TRUSTED"
     assert reveal.json()["n"] > 0
+
+
+def test_optional_confidence_can_be_saved_before_commit() -> None:
+    client = TestClient(create_app())
+    _, headers = _guest(client)
+    session_id = _start(client, headers)
+    response = client.put(
+        f"/v1/weigh-sessions/{session_id}/responses",
+        headers=headers,
+        json={
+            "responses": [
+                {"question_id": str(DEMO_QUESTION_ID), "value": "B"},
+                {"question_id": str(DEMO_CONFIDENCE_QUESTION_ID), "value": 4},
+            ]
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["response_count"] == 2
+
+    commit = client.post(
+        f"/v1/weigh-sessions/{session_id}/commit",
+        headers={**headers, "Idempotency-Key": "commit-confidence"},
+    )
+    assert commit.status_code == 200
+
+
+def test_invalid_choice_and_confidence_are_rejected_by_schema() -> None:
+    client = TestClient(create_app())
+    _, headers = _guest(client)
+    session_id = _start(client, headers)
+
+    invalid_choice = client.put(
+        f"/v1/weigh-sessions/{session_id}/responses",
+        headers=headers,
+        json={"responses": [{"question_id": str(DEMO_QUESTION_ID), "value": "C"}]},
+    )
+    assert invalid_choice.status_code == 422
+    assert invalid_choice.json()["code"] == "WEIGH_RESPONSE_INVALID"
+
+    invalid_confidence = client.put(
+        f"/v1/weigh-sessions/{session_id}/responses",
+        headers=headers,
+        json={
+            "responses": [
+                {"question_id": str(DEMO_CONFIDENCE_QUESTION_ID), "value": 6},
+            ]
+        },
+    )
+    assert invalid_confidence.status_code == 422
+    assert invalid_confidence.json()["code"] == "WEIGH_RESPONSE_INVALID"
 
 
 def test_reveal_before_commit_is_forbidden() -> None:

@@ -36,8 +36,8 @@ def _openapi_errors() -> list[str]:
     contract = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
     errors: list[str] = []
 
-    if contract.get("info", {}).get("version") != "0.6.0":
-        errors.append("OpenAPI checked-in version must match API v0.6.0")
+    if contract.get("info", {}).get("version") != "0.7.0":
+        errors.append("OpenAPI checked-in version must match API v0.7.0")
 
     security_schemes = contract.get("components", {}).get("securitySchemes", {})
     bearer = security_schemes.get("HTTPBearer")
@@ -48,7 +48,45 @@ def _openapi_errors() -> list[str]:
     if "GuestCreateRequest" not in schemas:
         errors.append("OpenAPI must expose GuestCreateRequest admission inputs")
 
+    case_schema = schemas.get("CaseDetailResponse")
+    if not isinstance(case_schema, dict):
+        errors.append("OpenAPI must expose typed CaseDetailResponse")
+    else:
+        questions = case_schema.get("properties", {}).get("questions", {})
+        question_ref = questions.get("items", {}).get("$ref")
+        if question_ref != "#/components/schemas/QuestionResponse":
+            errors.append("CaseDetailResponse.questions must reference QuestionResponse")
+
+    question_schema = schemas.get("QuestionResponse")
+    if not isinstance(question_schema, dict):
+        errors.append("OpenAPI must expose typed QuestionResponse")
+    else:
+        properties = question_schema.get("properties", {})
+        required_fields = {
+            "question_id",
+            "prompt",
+            "response_type",
+            "required",
+            "response_schema",
+            "options",
+        }
+        missing = sorted(required_fields - properties.keys())
+        if missing:
+            errors.append(f"QuestionResponse missing typed fields: {', '.join(missing)}")
+
     paths = contract.get("paths", {})
+    case_operation = paths.get("/v1/cases/{case_id}", {}).get("get", {})
+    case_response_ref = (
+        case_operation.get("responses", {})
+        .get("200", {})
+        .get("content", {})
+        .get("application/json", {})
+        .get("schema", {})
+        .get("$ref")
+    )
+    if case_response_ref != "#/components/schemas/CaseDetailResponse":
+        errors.append("GET /v1/cases/{case_id} must return typed CaseDetailResponse")
+
     guest_operation = paths.get("/v1/identity/guest", {}).get("post", {})
     if not guest_operation:
         errors.append("OpenAPI must expose guest identity creation")
@@ -78,13 +116,28 @@ def _openapi_errors() -> list[str]:
     return errors
 
 
+def _question_schema_errors(schema: str) -> list[str]:
+    errors: list[str] = []
+    match = re.search(
+        r"CREATE TABLE content\.question \((.*?)\n\);",
+        schema,
+        flags=re.DOTALL,
+    )
+    if match is None:
+        return ["M0 schema must expose content.question"]
+    question_block = match.group(1)
+    if "sort_order integer NOT NULL DEFAULT 0" not in question_block:
+        errors.append("M0 schema must expose deterministic question sort_order")
+    return errors
+
+
 def main() -> None:
     registered = _registered_error_codes()
     used = _used_domain_error_codes()
     missing_errors = sorted(used - registered)
     missing_paths = _check_manifest_paths()
 
-    schema = (CONTRACTS / "postgresql-m0-schema.v1.2.0.sql").read_text(encoding="utf-8")
+    schema = (CONTRACTS / "postgresql-m0-schema.v1.3.0.sql").read_text(encoding="utf-8")
     config = (CONTRACTS / "config-registry.v1.2.0.yaml").read_text(encoding="utf-8")
     admission_policy = (CONTRACTS / "identity-admission-policy.v1.yaml").read_text(
         encoding="utf-8"
@@ -104,6 +157,9 @@ def main() -> None:
         schema_errors.append("M0 schema must expose revocable guest actor sessions")
     if "token_hash char(64) NOT NULL UNIQUE" not in schema:
         schema_errors.append("Guest bearer credentials must persist only as token hashes")
+    if "is_required boolean NOT NULL DEFAULT true" not in schema:
+        schema_errors.append("M0 schema must expose explicit question requiredness")
+    schema_errors.extend(_question_schema_errors(schema))
 
     config_errors: list[str] = []
     required_config_keys = {
@@ -155,7 +211,7 @@ def main() -> None:
     print(
         "Contract sync OK: "
         f"{len(used)} executable DomainError codes registered; "
-        "HTTP API, identity admission, persistence and outbox invariants verified."
+        "HTTP API, typed questions, identity admission, persistence and outbox invariants verified."
     )
 
 

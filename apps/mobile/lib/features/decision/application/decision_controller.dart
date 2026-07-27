@@ -41,7 +41,7 @@ class DecisionState {
     this.offlineDraft = false,
     this.caseData,
     this.sessionId,
-    this.selectedOption,
+    this.responses = const {},
     this.reveal,
     this.errorCode,
   });
@@ -52,9 +52,34 @@ class DecisionState {
   final bool offlineDraft;
   final DecisionCase? caseData;
   final String? sessionId;
-  final String? selectedOption;
+  final Map<String, Object?> responses;
   final RevealResult? reveal;
   final String? errorCode;
+
+  Object? responseFor(String questionId) => responses[questionId];
+
+  String? get selectedOption {
+    final caseValue = caseData;
+    if (caseValue == null) {
+      return null;
+    }
+    for (final question in caseValue.questions) {
+      if (question.responseType == 'SINGLE_CHOICE') {
+        return responses[question.id] as String?;
+      }
+    }
+    return null;
+  }
+
+  bool get hasRequiredResponses {
+    final caseValue = caseData;
+    if (caseValue == null) {
+      return false;
+    }
+    return caseValue.questions
+        .where((question) => question.required)
+        .every((question) => responses.containsKey(question.id));
+  }
 
   DecisionState copyWith({
     bool? loading,
@@ -63,7 +88,7 @@ class DecisionState {
     bool? offlineDraft,
     DecisionCase? caseData,
     String? sessionId,
-    String? selectedOption,
+    Map<String, Object?>? responses,
     RevealResult? reveal,
     String? errorCode,
     bool clearError = false,
@@ -75,7 +100,7 @@ class DecisionState {
       offlineDraft: offlineDraft ?? this.offlineDraft,
       caseData: caseData ?? this.caseData,
       sessionId: sessionId ?? this.sessionId,
-      selectedOption: selectedOption ?? this.selectedOption,
+      responses: responses ?? this.responses,
       reveal: reveal ?? this.reveal,
       errorCode: clearError ? null : errorCode ?? this.errorCode,
     );
@@ -103,13 +128,15 @@ class DecisionController extends Notifier<DecisionState> {
     try {
       await _repository.ensureGuestCredential();
       final caseData = await _repository.fetchCase(caseId);
-      if (generation != _loadGeneration) return;
+      if (generation != _loadGeneration) {
+        return;
+      }
 
       if (draft != null && draft.caseVersionId == caseData.versionId) {
         state = DecisionState(
           caseData: caseData,
           sessionId: draft.sessionId,
-          selectedOption: draft.selectedOption,
+          responses: draft.effectiveResponses,
           recoveryPending: draft.phase != DecisionDraftPhase.editing,
         );
         if (draft.phase != DecisionDraftPhase.editing) {
@@ -123,56 +150,84 @@ class DecisionController extends Notifier<DecisionState> {
       }
 
       final sessionId = await _repository.startSession(caseData.id);
-      if (generation != _loadGeneration) return;
+      if (generation != _loadGeneration) {
+        return;
+      }
       state = DecisionState(caseData: caseData, sessionId: sessionId);
     } on ClientTransportFailure catch (error) {
-      if (generation != _loadGeneration) return;
+      if (generation != _loadGeneration) {
+        return;
+      }
       if (draft != null) {
         _restoreOfflineDraft(draft, error.code);
         return;
       }
       state = DecisionState(errorCode: error.code);
     } on ApiFailure catch (error) {
-      if (generation != _loadGeneration) return;
+      if (generation != _loadGeneration) {
+        return;
+      }
       state = DecisionState(errorCode: error.code);
     } catch (_) {
-      if (generation != _loadGeneration) return;
+      if (generation != _loadGeneration) {
+        return;
+      }
       state = const DecisionState(errorCode: 'UNEXPECTED_CLIENT_ERROR');
     }
   }
 
   Future<void> select(String value) async {
+    final caseData = state.caseData;
+    if (caseData == null) {
+      return;
+    }
+    final choice = caseData.questions
+        .where((question) => question.responseType == 'SINGLE_CHOICE')
+        .firstOrNull;
+    if (choice == null) {
+      return;
+    }
+    await setResponse(choice.id, value);
+  }
+
+  Future<void> setResponse(String questionId, Object value) async {
     if (state.reveal != null || state.submitting || state.recoveryPending) {
       return;
     }
     final caseData = state.caseData;
     final sessionId = state.sessionId;
-    if (caseData == null || sessionId == null || caseData.questions.isEmpty) {
+    if (caseData == null || sessionId == null) {
+      return;
+    }
+    if (!caseData.questions.any((question) => question.id == questionId)) {
       return;
     }
 
+    final responses = {...state.responses, questionId: value};
     final draft = DecisionDraft(
       caseData: caseData,
       sessionId: sessionId,
-      questionId: caseData.questions.first.id,
-      selectedOption: value,
+      responses: responses,
       updatedAt: DateTime.now().toUtc(),
     );
     await _draftStore.write(draft);
     state = state.copyWith(
-      selectedOption: value,
+      responses: responses,
       offlineDraft: false,
       clearError: true,
     );
   }
 
   Future<void> commit() async {
-    if (state.submitting) return;
+    if (state.submitting || !state.hasRequiredResponses) {
+      return;
+    }
 
     final caseData = state.caseData;
     final sessionId = state.sessionId;
-    final selected = state.selectedOption;
-    if (caseData == null || sessionId == null || selected == null) return;
+    if (caseData == null || sessionId == null) {
+      return;
+    }
 
     final stored = await _draftStore.readForCase(caseData.id);
     if (stored != null && stored.phase != DecisionDraftPhase.editing) {
@@ -183,8 +238,7 @@ class DecisionController extends Notifier<DecisionState> {
     final pending = DecisionDraft(
       caseData: caseData,
       sessionId: sessionId,
-      questionId: caseData.questions.first.id,
-      selectedOption: selected,
+      responses: state.responses,
       commitIdempotencyKey:
           stored?.commitIdempotencyKey ?? _idempotencyKey(sessionId),
       phase: DecisionDraftPhase.commitPending,
@@ -202,9 +256,13 @@ class DecisionController extends Notifier<DecisionState> {
   }
 
   Future<void> retryPending() async {
-    if (state.submitting) return;
+    if (state.submitting) {
+      return;
+    }
     final caseData = state.caseData;
-    if (caseData == null) return;
+    if (caseData == null) {
+      return;
+    }
 
     final draft = await _draftStore.readForCase(caseData.id);
     if (draft == null || draft.phase == DecisionDraftPhase.editing) {
@@ -225,11 +283,17 @@ class DecisionController extends Notifier<DecisionState> {
     var current = draft;
     try {
       if (current.phase == DecisionDraftPhase.commitPending) {
-        await _repository.answer(
-          sessionId: current.sessionId,
-          questionId: current.questionId,
-          value: current.selectedOption,
-        );
+        for (final response in current.effectiveResponses.entries) {
+          final value = response.value;
+          if (value == null) {
+            continue;
+          }
+          await _repository.answer(
+            sessionId: current.sessionId,
+            questionId: response.key,
+            value: value,
+          );
+        }
         await _repository.commit(
           sessionId: current.sessionId,
           idempotencyKey: current.commitIdempotencyKey!,
@@ -278,7 +342,7 @@ class DecisionController extends Notifier<DecisionState> {
     state = DecisionState(
       caseData: draft.caseData,
       sessionId: draft.sessionId,
-      selectedOption: draft.selectedOption,
+      responses: draft.effectiveResponses,
       recoveryPending: draft.phase != DecisionDraftPhase.editing,
       offlineDraft: true,
       errorCode: draft.phase == DecisionDraftPhase.editing

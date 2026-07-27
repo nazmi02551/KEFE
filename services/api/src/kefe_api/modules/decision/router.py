@@ -27,6 +27,27 @@ class CaseListResponse(BaseModel):
     items: list[CaseSummaryResponse]
 
 
+class QuestionResponse(BaseModel):
+    question_id: UUID
+    prompt: str
+    response_type: str
+    required: bool
+    response_schema: dict[str, Any]
+    options: list[str]
+
+
+class CaseDetailResponse(BaseModel):
+    case_id: UUID
+    case_version_id: UUID
+    version_no: int
+    title: str
+    summary: str
+    base_format: str
+    primary_domain: str
+    content_risk: str
+    questions: list[QuestionResponse]
+
+
 class StartSessionResponse(BaseModel):
     session_id: UUID
     case_id: UUID
@@ -77,28 +98,30 @@ def list_cases(
     )
 
 
-@router.get("/cases/{case_id}")
-def get_case(case_id: UUID, service: DecisionServiceDep) -> dict[str, Any]:
+@router.get("/cases/{case_id}", response_model=CaseDetailResponse)
+def get_case(case_id: UUID, service: DecisionServiceDep) -> CaseDetailResponse:
     case = service.get_case(case_id)
-    return {
-        "case_id": case.case_id,
-        "case_version_id": case.id,
-        "version_no": case.version_no,
-        "title": case.title,
-        "summary": case.summary,
-        "base_format": case.base_format,
-        "primary_domain": case.primary_domain,
-        "content_risk": case.content_risk,
-        "questions": [
-            {
-                "question_id": question.id,
-                "prompt": question.prompt,
-                "response_type": question.response_type,
-                "options": question.options,
-            }
+    return CaseDetailResponse(
+        case_id=case.case_id,
+        case_version_id=case.id,
+        version_no=case.version_no,
+        title=case.title,
+        summary=case.summary,
+        base_format=case.base_format,
+        primary_domain=case.primary_domain,
+        content_risk=case.content_risk,
+        questions=[
+            QuestionResponse(
+                question_id=question.id,
+                prompt=question.prompt,
+                response_type=question.response_type,
+                required=question.required,
+                response_schema=dict(question.response_schema),
+                options=list(question.options),
+            )
             for question in case.questions
         ],
-    }
+    )
 
 
 @router.post("/cases/{case_id}/weigh-sessions", status_code=201)

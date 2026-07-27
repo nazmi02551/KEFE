@@ -2,11 +2,11 @@
 
 FastAPI modular monolith. Capability modules own domain/application behavior behind declared ports; infrastructure/provider adapters remain outside domain code.
 
-## M0 vertical slice
+## Current M0 vertical slice
 
-The first executable product slice is:
+The executable product path is:
 
-`Guest Identity → Case → Weigh → Commit → Reveal`
+`Guest Identity → Explore → Case → Weigh → Commit → Reveal`
 
 The same decision application service supports two persistence adapters:
 
@@ -19,7 +19,10 @@ The same decision application service supports two persistence adapters:
 - Only bearer-token hashes are persisted server-side; raw guest tokens are returned to the client and are not stored.
 - Commit First: Reveal is forbidden before a confirmed commit.
 - Session ownership is actor-scoped.
-- Required questions must be answered before commit.
+- Required questions must be answered before commit; optional questions do not silently become blockers.
+- Question behavior is versioned through `response_type` + `response_schema` and validated server-side.
+- Question display order is explicit editorial data, not UUID or insertion order.
+- The first typed question contracts are `SINGLE_CHOICE` and `CONFIDENCE`.
 - Sessions are pinned to a CaseVersion; stale versions are blocked.
 - Consumer reveal returns the Trusted result layer.
 - Domain failures use stable machine-readable error codes.
@@ -70,14 +73,14 @@ The initial transport is structured logging. A managed queue or broker adapter c
 
 The default API persistence remains `memory`, so PostgreSQL is opt-in until local/dev environment orchestration is fully standardized.
 
-### Demo IDs
+### Demo Case
 
-The development bootstrap exposes one low-risk DILEMMA seed through fixed UUIDs in `modules/decision/bootstrap.py`. These are fixtures only, not product identifiers.
+The development bootstrap exposes one low-risk DILEMMA Case through fixed UUID fixtures. It now contains a required `SINGLE_CHOICE` question and an optional schema-driven `CONFIDENCE` question. These are development fixtures, not product identifiers or a global rule for question requiredness.
 
-### Next backend slice
+### Next backend slices
 
-1. check in generated OpenAPI and enforce compatibility/drift gates
-2. add guest-token issuance rate limiting and device-integrity adapter boundary
-3. add outbox backlog/dead-letter observability and an audited replay command
-4. expand CaseVersion/question persistence toward the full physical contract
-5. add query-budget and latency regression tests
+1. Context/source read contracts with progressive disclosure and no result leakage.
+2. reason capture and safe Perspective read model.
+3. outbox backlog/dead-letter observability and audited replay tooling.
+4. expand CaseVersion/content persistence toward the full physical contract.
+5. query-budget and latency regression tests.

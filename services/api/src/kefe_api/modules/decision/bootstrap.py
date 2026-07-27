@@ -9,6 +9,7 @@ from kefe_api.modules.decision.models import CaseVersion, Question, RevealSnapsh
 DEMO_CASE_ID = UUID("11111111-1111-4111-8111-111111111111")
 DEMO_CASE_VERSION_ID = UUID("22222222-2222-4222-8222-222222222222")
 DEMO_QUESTION_ID = UUID("33333333-3333-4333-8333-333333333333")
+DEMO_CONFIDENCE_QUESTION_ID = UUID("77777777-7777-4777-8777-777777777777")
 
 
 def build_demo_repository() -> InMemoryDecisionRepository:
@@ -26,7 +27,15 @@ def build_demo_repository() -> InMemoryDecisionRepository:
                 id=DEMO_QUESTION_ID,
                 prompt="Son koltuğu kime verirdin?",
                 response_type="SINGLE_CHOICE",
-                options=("A", "B"),
+                required=True,
+                response_schema={"options": ["A", "B"]},
+            ),
+            Question(
+                id=DEMO_CONFIDENCE_QUESTION_ID,
+                prompt="Bu kararından ne kadar eminsin?",
+                response_type="CONFIDENCE",
+                required=False,
+                response_schema={"min": 1, "max": 5, "step": 1},
             ),
         ),
     )

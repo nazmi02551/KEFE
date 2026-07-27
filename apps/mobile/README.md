@@ -20,6 +20,17 @@ Onboarding intentionally avoids a long tutorial. A fresh installation sees two c
 
 The current slice does **not** implement account creation and does not encode a final 3-vs-4-tab navigation decision.
 
+### Typed question engine
+
+Case screens no longer own one hard-coded input. Each Question carries `responseType`, requiredness and a response schema. The client dispatches to a question input renderer while the backend remains the authority for response validation.
+
+Currently supported renderers:
+
+- `SINGLE_CHOICE`
+- `CONFIDENCE`, using schema-driven `min`, `max` and `step`
+
+Required-question completeness controls Commit. Optional Confidence can be captured without becoming a universal blocker. Unsupported required types do not silently unlock Commit.
+
 ### Architecture
 
 - Riverpod for feature/application state
@@ -27,6 +38,7 @@ The current slice does **not** implement account creation and does not encode a 
 - provider-neutral `DecisionRepository`
 - local `OnboardingStore` boundary for first-use completion state
 - HTTP adapter isolated from UI/application state
+- schema-driven question input registry
 - semantic Turkish/English copy catalog
 - Light/Dark/System theme support
 - Commit First enforced by the backend and reflected in the UI
@@ -48,10 +60,10 @@ Android emulators typically need `http://10.0.2.2:8000` for a backend running on
 
 ### Decision recovery
 
-The local draft keeps the pinned CaseVersion, server session ID, selected response and commit recovery state. Before the first commit request, the client persists the idempotency key. When network outcome is uncertain, the same key is reused; after Commit is confirmed, only Reveal is retried.
+The local draft keeps the pinned CaseVersion, server session ID, typed response map and commit recovery state. Before the first commit request, the client persists the idempotency key. When network outcome is uncertain, the same key and response set are reused; after Commit is confirmed, only Reveal is retried.
 
-Drafts are keyed by Case ID, so opening another Case cannot silently replace a different in-progress draft.
+Drafts are keyed by Case ID, so opening another Case cannot silently replace a different in-progress draft. The previous single-answer draft shape is migrated into the response-map representation when read.
 
 ### Quality gate
 
-Mobile CI pins Flutter 3.44.4 and runs dependency resolution, formatting, static analysis and widget tests. Tests cover Commit First, ThemeMode.system, local draft restoration, uncertain-commit recovery, Reveal-only retry, Explore navigation, direct Case deep links and the first-use onboarding path through Reveal.
+Mobile CI pins Flutter 3.44.4 and runs dependency resolution, formatting, static analysis and widget tests. Tests cover Commit First, ThemeMode.system, local draft restoration, uncertain-commit recovery, Reveal-only retry, Explore navigation, direct Case deep links, first-use onboarding and schema-driven Choice/Confidence inputs.

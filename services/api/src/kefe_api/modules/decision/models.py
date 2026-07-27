@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum
@@ -34,7 +35,13 @@ class Question:
     id: UUID
     prompt: str
     response_type: str
-    options: tuple[str, ...] = ()
+    required: bool = True
+    response_schema: Mapping[str, Any] = field(default_factory=dict)
+
+    @property
+    def options(self) -> tuple[str, ...]:
+        raw_options = self.response_schema.get("options", ())
+        return tuple(str(option) for option in raw_options)
 
 
 @dataclass(frozen=True, slots=True)

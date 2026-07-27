@@ -52,6 +52,14 @@ class KefeStrings {
   String get commitHelper => _tr
       ? 'Kararını kilitle ve sonucu gör.'
       : 'Lock your decision and reveal the result.';
+  String get completeRequired => _tr
+      ? 'Devam etmek için zorunlu soruları yanıtla.'
+      : 'Answer the required questions to continue.';
+  String get requiredQuestion => _tr ? 'Zorunlu' : 'Required';
+  String get optionalQuestion => _tr ? 'İsteğe bağlı' : 'Optional';
+  String get unsupportedQuestionType => _tr
+      ? 'Bu soru tipi bu sürümde desteklenmiyor.'
+      : 'This question type is not supported in this version.';
   String get pendingHelper => _tr
       ? 'Kararın cihazda güvende. Aynı karar anahtarıyla güvenli biçimde yeniden denenecek.'
       : 'Your decision is safe on this device. It will retry with the same decision key.';
