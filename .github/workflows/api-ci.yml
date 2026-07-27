@@ -48,6 +48,15 @@ jobs:
       - name: Enforce lint
         if: always()
         run: test '${{ steps.lint.outcome }}' = 'success'
+      - name: Export generated OpenAPI
+        working-directory: services/api
+        run: python tools/export_openapi.py --output openapi.generated.json
+      - name: Upload generated OpenAPI
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-generated
+          path: services/api/openapi.generated.json
+          if-no-files-found: error
       - name: Contract sync
         working-directory: services/api
         run: python tools/check_contract_sync.py
