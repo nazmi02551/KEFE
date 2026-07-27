@@ -46,7 +46,7 @@ extension PerspectiveRepositoryAccess on DecisionRepository {
   Future<PerspectiveResult> fetchPerspectives(String sessionId) {
     final repository = this;
     if (repository is PerspectiveRepository) {
-      return repository.fetchPerspectives(sessionId);
+      return (repository as PerspectiveRepository).fetchPerspectives(sessionId);
     }
     throw const ClientTransportFailure(code: 'PERSPECTIVE_NOT_CONFIGURED');
   }
