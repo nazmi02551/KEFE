@@ -4,12 +4,22 @@ from datetime import UTC, datetime
 from uuid import UUID
 
 from kefe_api.modules.decision.in_memory import InMemoryDecisionRepository
-from kefe_api.modules.decision.models import CaseVersion, Question, RevealSnapshot
+from kefe_api.modules.decision.models import (
+    CaseVersion,
+    PerspectiveItem,
+    PerspectiveModerationState,
+    PerspectivePublicationState,
+    PerspectiveSourceKind,
+    Question,
+    RevealSnapshot,
+)
 
 DEMO_CASE_ID = UUID("11111111-1111-4111-8111-111111111111")
 DEMO_CASE_VERSION_ID = UUID("22222222-2222-4222-8222-222222222222")
 DEMO_QUESTION_ID = UUID("33333333-3333-4333-8333-333333333333")
 DEMO_CONFIDENCE_QUESTION_ID = UUID("77777777-7777-4777-8777-777777777777")
+DEMO_PERSPECTIVE_A_ID = UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1")
+DEMO_PERSPECTIVE_B_ID = UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2")
 
 
 def build_demo_repository() -> InMemoryDecisionRepository:
@@ -60,4 +70,38 @@ def build_demo_repository() -> InMemoryDecisionRepository:
         generated_at=datetime.now(UTC),
         payload={"A": 0.57, "B": 0.43},
     )
-    return InMemoryDecisionRepository(cases=[case], reveals=[reveal])
+    perspectives = [
+        PerspectiveItem(
+            id=DEMO_PERSPECTIVE_A_ID,
+            case_version_id=case.id,
+            question_version_id=DEMO_QUESTION_ID,
+            target_value="A",
+            text=(
+                "A seçeneği, sınırlı kaynağı o anda daha acil ihtiyacı olan kişiye "
+                "vermenin daha adil olduğunu savunur."
+            ),
+            source_kind=PerspectiveSourceKind.EDITORIAL_HUMAN,
+            moderation_state=PerspectiveModerationState.ALLOWED,
+            publication_state=PerspectivePublicationState.PUBLISHED,
+            editorial_priority=10,
+        ),
+        PerspectiveItem(
+            id=DEMO_PERSPECTIVE_B_ID,
+            case_version_id=case.id,
+            question_version_id=DEMO_QUESTION_ID,
+            target_value="B",
+            text=(
+                "B seçeneği, önceliğin yalnız mevcut ihtiyete değil sorumluluk ve "
+                "koşulların bütünüyle değerlendirilmesi gerektiğini savunur."
+            ),
+            source_kind=PerspectiveSourceKind.EDITORIAL_HUMAN,
+            moderation_state=PerspectiveModerationState.ALLOWED,
+            publication_state=PerspectivePublicationState.PUBLISHED,
+            editorial_priority=10,
+        ),
+    ]
+    return InMemoryDecisionRepository(
+        cases=[case],
+        reveals=[reveal],
+        perspectives=perspectives,
+    )
