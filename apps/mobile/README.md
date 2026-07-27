@@ -6,19 +6,19 @@ Flutter consumer application. The client consumes semantic copy/configuration, s
 
 The executable first-use path is:
 
-`Welcome → First Case → Typed Weigh → Private Reason → Commit → Reveal → Continue as Guest → Explore`
+`Welcome → First Case → Typed Weigh → Private Reason → Commit → Reveal → Perspective → Continue as Guest → Explore`
 
 The regular product path is:
 
-`Explore → Case → Typed Weigh → Private Reason → Commit → Reveal`
+`Explore → Case → Typed Weigh → Private Reason → Commit → Reveal → Perspective`
 
 A Case can also be opened directly through `/case/:caseId` without forcing first-use onboarding.
 
 ### First-use onboarding
 
-Onboarding intentionally avoids a long tutorial. A fresh installation sees two concise product-promise steps, then enters the existing low-risk demo Case. The onboarding completion flag is persisted when the user reaches the first Reveal, so an app restart does not force a completed user through the tutorial again. The visible guest-continuation action then advances into Explore.
+Onboarding intentionally avoids a long tutorial. A fresh installation sees two concise product-promise steps, then enters the existing low-risk demo Case. The onboarding completion flag is persisted when the user reaches the first Reveal, so an app restart does not force a completed user through the tutorial again. Perspective remains the post-Reveal continuation in the same Case journey; the visible guest-continuation action then advances into Explore.
 
-The current slice does **not** implement account creation and does not encode a final 3-vs-4-tab navigation decision.
+The current slice does **not** implement account creation and does not encode a final primary-navigation redesign.
 
 ### Typed question engine
 
@@ -35,22 +35,31 @@ Required-question completeness controls Commit. Optional Confidence can be captu
 
 A published CaseVersion can expose an optional `reason` policy inside its question schema. The mobile client renders that policy rather than hard-coding a universal reason form.
 
-The policy can define:
+The policy can define structured reason tags, tag limits, optional short text and its length limit. Reason data is persisted with the same CaseVersion-pinned local draft as the typed responses. Before Commit, the client synchronizes responses and the optional private reason to the same server-side weigh session.
 
-- structured reason tags
-- the maximum number of selectable tags
-- whether short free text is enabled
-- the short-text character limit
+Reason visibility remains private in this slice. A short-text reason can be marked as pending moderation for the viewer, but that status never means the reason is exposed as Perspective content.
 
-Reason data is persisted with the same CaseVersion-pinned local draft as the typed responses. Before Commit, the client synchronizes responses and the optional private reason to the same server-side weigh session. Reason visibility remains private in this slice; there is no public comment feed, cross-user reason browser, ranking or client-side AI summary.
+### Post-Reveal Perspective
 
-The backend remains authoritative for allowed tags, moderation state and length constraints. The client-side limits exist for immediate UX feedback and offline consistency, not as a trust boundary.
+Perspective is loaded automatically only after a successful Reveal and is rendered below Reveal in the same Case journey. It does not add a primary navigation destination.
+
+The mobile client:
+
+- consumes the actor-owned session-scoped Perspective endpoint
+- renders at most four API-ordered roles: `NEAR`, `OPPOSING`, `BRIDGE`, `ALTERNATIVE_CONTEXT`
+- does not locally re-rank cards
+- distinguishes curated fallback and provenance/methodology metadata
+- treats an empty Perspective set as valid
+- never derives cards from the local private reason
+- never adds reactions, public authoring, popularity metrics or AI summaries in this slice
+
+Perspective transport state is separate from decision recovery: `IDLE`, `LOADING`, `READY`, `CLUSTER_PENDING`, `DEGRADED_CURATED`, `ERROR_RETRYABLE`. A Perspective retry performs only the Perspective GET; it cannot replay answers, private reason writes, Commit or Reveal.
 
 ### Architecture
 
 - Riverpod for feature/application state
 - GoRouter for declarative routes and Case deep links
-- provider-neutral `DecisionRepository`
+- provider-neutral `DecisionRepository` command/read boundary plus optional `PerspectiveRepository` read capability
 - local `OnboardingStore` boundary for first-use completion state
 - HTTP adapter isolated from UI/application state
 - schema-driven question and private-reason inputs
@@ -84,8 +93,8 @@ The recovery state machine is deliberately split into four phases:
 3. `commitPending` — pre-Commit synchronization completed and the stable idempotency key is durable. Commit may already have reached the server, so retry sends **only Commit with the same key**; it does not replay mutable response/reason writes.
 4. `committedAwaitingReveal` — Commit is server-confirmed; only Reveal is retried.
 
-This separation prevents an uncertain Commit response from causing the client to replay draft mutations against an already committed session. Drafts remain keyed by Case ID, so opening another Case cannot silently replace a different in-progress draft. The previous single-answer draft shape is migrated into the response-map representation when read.
+Perspective starts only after Reveal succeeds and therefore sits outside this mutable decision recovery state machine.
 
 ### Quality gate
 
-Mobile CI pins Flutter 3.44.4 and runs dependency resolution, formatting, static analysis and widget tests. Tests cover Commit First, ThemeMode.system, local draft restoration, pre-Commit sync recovery, same-key uncertain-Commit recovery without replaying answers/reasons, Reveal-only retry, Explore navigation, direct Case deep links, first-use onboarding, schema-driven Choice/Confidence inputs and private Reason Capture.
+Mobile CI pins Flutter 3.44.4 and runs dependency resolution, formatting, static analysis and widget tests. Tests cover Commit First, ThemeMode.system, local draft restoration, pre-Commit sync recovery, same-key uncertain-Commit recovery without replaying answers/reasons, Reveal-only retry, Explore navigation, direct Case deep links, first-use onboarding, schema-driven Choice/Confidence inputs, private Reason Capture, Perspective Commit gating, bounded role rendering, private-reason non-leakage and Perspective-only retry.
