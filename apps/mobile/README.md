@@ -16,7 +16,7 @@ A Case can also be opened directly through `/case/:caseId` without forcing first
 
 ### First-use onboarding
 
-Onboarding intentionally avoids a long tutorial. A fresh installation sees two concise product-promise steps, then enters the existing low-risk demo Case. The onboarding completion flag is written only after the user reaches Reveal and chooses to continue as a guest. This demonstrates the product value before asking for any future account upgrade.
+Onboarding intentionally avoids a long tutorial. A fresh installation sees two concise product-promise steps, then enters the existing low-risk demo Case. The onboarding completion flag is persisted when the user reaches the first Reveal, so an app restart does not force a completed user through the tutorial again. The visible guest-continuation action then advances into Explore.
 
 The current slice does **not** implement account creation and does not encode a final 3-vs-4-tab navigation decision.
 
