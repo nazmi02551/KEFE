@@ -12,6 +12,9 @@ from kefe_api.modules.decision.models import (
     CommitStatus,
     DraftUpdateAttempt,
     DraftUpdateStatus,
+    PrivateReason,
+    ReasonModerationState,
+    ReasonUpdateAttempt,
     RevealSnapshot,
     WeighSession,
     WeighState,
@@ -23,6 +26,7 @@ class InMemoryDecisionRepository:
         self._cases = {case.id: case for case in cases}
         self._current_by_case = {case.case_id: case.id for case in cases}
         self._sessions: dict[UUID, WeighSession] = {}
+        self._reasons: dict[UUID, PrivateReason] = {}
         self._reveals = {snapshot.case_version_id: snapshot for snapshot in reveals}
         self.events: list[dict[str, Any]] = []
         self._lock = RLock()
@@ -77,6 +81,38 @@ class InMemoryDecisionRepository:
                 return DraftUpdateAttempt(DraftUpdateStatus.NOT_EDITABLE, deepcopy(session))
             session.responses.update(responses)
             return DraftUpdateAttempt(DraftUpdateStatus.UPDATED, deepcopy(session))
+
+    def update_private_reason(
+        self,
+        *,
+        actor_id: UUID,
+        session_id: UUID,
+        tags: tuple[str, ...],
+        text: str | None,
+        updated_at: datetime,
+    ) -> ReasonUpdateAttempt:
+        with self._lock:
+            session = self._sessions.get(session_id)
+            if session is None or session.actor_id != actor_id:
+                return ReasonUpdateAttempt(DraftUpdateStatus.NOT_FOUND, None)
+            if session.state is not WeighState.DRAFT:
+                return ReasonUpdateAttempt(
+                    DraftUpdateStatus.NOT_EDITABLE,
+                    deepcopy(self._reasons.get(session_id)),
+                )
+            reason = PrivateReason(
+                session_id=session_id,
+                tags=tags,
+                text=text,
+                moderation_state=(
+                    ReasonModerationState.PENDING
+                    if text is not None
+                    else ReasonModerationState.NOT_REQUIRED
+                ),
+                updated_at=updated_at,
+            )
+            self._reasons[session_id] = reason
+            return ReasonUpdateAttempt(DraftUpdateStatus.UPDATED, deepcopy(reason))
 
     def commit_session(
         self,
@@ -133,6 +169,7 @@ class InMemoryDecisionRepository:
                     "actor_id": str(actor_id),
                     "case_version_id": str(session.case_version_id),
                     "committed_at": committed_at.isoformat(),
+                    "has_reason": session.id in self._reasons,
                 },
             )
             return CommitAttempt(CommitStatus.COMMITTED, deepcopy(session))
