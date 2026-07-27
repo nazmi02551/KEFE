@@ -1,0 +1,319 @@
+registry_version: 1.1.0
+generated_at: '2026-07-27'
+principles:
+- One concept has one semantic key; consumers reference the key, not duplicated literals.
+- Configuration is typed, versioned, owned, auditable and rollback-capable.
+- Secrets never live in this registry.
+- Domain invariants, legal/safety guardrails and consent requirements are not overridable
+  by remote config.
+entries:
+- key: copy.commit.primary
+  type: localized_string
+  owner: Product/Content Design
+  scope:
+  - locale
+  default:
+    tr-TR: Kararımı Ver
+    en: Submit my decision
+  remote: true
+  audit: true
+- key: copy.commit.helper_first_uses
+  type: localized_string
+  owner: Product/Content Design
+  scope:
+  - locale
+  default:
+    tr-TR: Kararını kilitle ve sonucu gör.
+    en: Lock your decision and see the result.
+  remote: true
+  audit: true
+- key: product.commit.helper_max_uses
+  type: integer
+  owner: Product
+  default: 3
+  constraints:
+    min: 0
+    max: 10
+  remote: true
+  audit: true
+- key: product.guest.committed_retention_days
+  type: integer
+  owner: Privacy/Product
+  default: 30
+  constraints:
+    min: 1
+    max: 90
+  remote: false
+  audit: true
+  change_gate: privacy_review
+- key: client.offline_draft_retention_days
+  type: integer
+  owner: Client Engineering/Privacy
+  default: 7
+  constraints:
+    min: 1
+    max: 30
+  remote: true
+  audit: true
+- key: client.theme.mode
+  type: enum
+  owner: Client Engineering
+  default: SYSTEM
+  allowed:
+  - SYSTEM
+  - LIGHT
+  - DARK
+  scope:
+  - user_device
+  remote: false
+  audit: false
+- key: client.locale.default
+  type: bcp47
+  owner: Localization
+  default: tr-TR
+  scope:
+  - install
+  - account
+  remote: false
+  audit: false
+- key: client.content_region.default
+  type: country_code_or_AUTO
+  owner: Product/Localization
+  default: AUTO
+  scope:
+  - account
+  remote: true
+  audit: true
+- key: feature.retro.enabled
+  type: boolean
+  owner: Product
+  default: false
+  scope:
+  - environment
+  - country
+  - cohort
+  remote: true
+  audit: true
+- key: feature.decide.enabled
+  type: boolean
+  owner: Product
+  default: false
+  scope:
+  - environment
+  - country
+  - cohort
+  remote: true
+  audit: true
+- key: feature.values.enabled
+  type: boolean
+  owner: Product/Research
+  default: false
+  scope:
+  - environment
+  - country
+  - cohort
+  remote: true
+  audit: true
+- key: feature.ai_reason_clustering.enabled
+  type: boolean
+  owner: AI/Trust
+  default: true
+  scope:
+  - environment
+  - case_risk
+  remote: true
+  audit: true
+  kill_switch: true
+- key: feature.share.enabled
+  type: boolean
+  owner: Product/Trust
+  default: true
+  scope:
+  - environment
+  - case_risk
+  remote: true
+  audit: true
+  kill_switch: true
+- key: policy.results.consumer_default_layer
+  type: enum
+  owner: Trust/Methodology
+  default: TRUSTED
+  allowed:
+  - TRUSTED
+  remote: false
+  audit: true
+- key: policy.atlas.country_min_n
+  type: integer
+  owner: Trust/Methodology
+  default: 100
+  constraints:
+    min: 100
+  remote: false
+  audit: true
+  change_gate: methodology_review
+- key: policy.atlas.high_confidence_candidate_min_n
+  type: integer
+  owner: Trust/Methodology
+  default: 500
+  constraints:
+    min: 100
+  remote: false
+  audit: true
+  change_gate: methodology_review
+- key: policy.balanced_sample.effective_min_n
+  type: integer
+  owner: Trust/Research
+  default: 800
+  constraints:
+    min: 200
+  remote: false
+  audit: true
+  change_gate: methodology_review
+- key: policy.balanced_sample.critical_cell_min_n
+  type: integer
+  owner: Trust/Research
+  default: 50
+  constraints:
+    min: 20
+  remote: false
+  audit: true
+  change_gate: methodology_review
+- key: policy.p3.minimum_result_delay_minutes
+  type: integer
+  owner: Civic/Trust
+  default: 60
+  constraints:
+    min: 60
+  remote: true
+  audit: true
+  change_gate: civic_review
+- key: ai.route.question_generation
+  type: provider_route
+  owner: AI Engineering
+  default:
+    provider: PRIMARY
+    fallback:
+    - SECONDARY
+    timeout_ms: 5000
+  remote: true
+  audit: true
+- key: ai.route.reason_clustering
+  type: provider_route
+  owner: AI Engineering
+  default:
+    provider: PRIMARY
+    fallback:
+    - SECONDARY
+    - DEGRADED_CURATED
+    timeout_ms: 10000
+  remote: true
+  audit: true
+- key: performance.api.commit_p95_ms
+  type: integer
+  owner: Engineering
+  default: 500
+  constraints:
+    min: 50
+    max: 5000
+  remote: false
+  audit: true
+- key: performance.api.feed_p95_ms
+  type: integer
+  owner: Engineering
+  default: 700
+  constraints:
+    min: 50
+    max: 5000
+  remote: false
+  audit: true
+- key: performance.api.reveal_cached_p95_ms
+  type: integer
+  owner: Engineering
+  default: 800
+  constraints:
+    min: 50
+    max: 5000
+  remote: false
+  audit: true
+- key: content.mvp.call_max_share_percent
+  type: integer
+  owner: Product/Editorial
+  default: 15
+  constraints:
+    min: 0
+    max: 30
+  remote: true
+  audit: true
+- key: events.transport
+  type: enum
+  owner: Platform Engineering
+  default: LOGGING
+  allowed:
+  - LOGGING
+  scope:
+  - environment
+  remote: false
+  audit: true
+  note: Broker/provider adapters may be added without changing domain/application modules.
+- key: events.outbox.batch_size
+  type: integer
+  owner: Platform Engineering
+  default: 100
+  constraints:
+    min: 1
+    max: 1000
+  remote: false
+  audit: true
+- key: events.outbox.lease_seconds
+  type: integer
+  owner: Platform Engineering
+  default: 30
+  constraints:
+    min: 5
+    max: 300
+  remote: false
+  audit: true
+- key: events.outbox.poll_seconds
+  type: number
+  owner: Platform Engineering
+  default: 1.0
+  constraints:
+    min: 0.1
+    max: 60
+  remote: false
+  audit: true
+- key: events.outbox.retry_base_seconds
+  type: integer
+  owner: Platform Engineering
+  default: 5
+  constraints:
+    min: 1
+    max: 300
+  remote: false
+  audit: true
+- key: events.outbox.retry_max_seconds
+  type: integer
+  owner: Platform Engineering
+  default: 900
+  constraints:
+    min: 30
+    max: 86400
+  remote: false
+  audit: true
+- key: events.outbox.max_attempts
+  type: integer
+  owner: Platform Engineering
+  default: 8
+  constraints:
+    min: 1
+    max: 50
+  remote: false
+  audit: true
+non_configurable_invariants:
+- Reveal cannot expose community/expert/popular-reason results before a server-confirmed
+  commit.
+- Published CaseVersion is immutable; correction creates a new version.
+- AI output is never represented as human or expert opinion.
+- Direct PII cannot be exposed to analytics or consumer result payloads.
+- Individual decision history is not sold and cannot be used for political microtargeting.
+- Outbox delivery is at-least-once; consumers must be idempotent and transport choice cannot weaken domain commit atomicity.
