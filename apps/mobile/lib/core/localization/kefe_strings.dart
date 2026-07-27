@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../../features/decision/domain/decision_models.dart';
+
 class KefeStrings {
   const KefeStrings(this.locale);
 
@@ -103,6 +105,45 @@ class KefeStrings {
   String get revealTitle => _tr ? 'Topluluk nasıl tarttı?' : 'How did the community weigh it?';
   String get trustedSample => _tr ? 'Güvenilir örneklem' : 'Trusted sample';
   String get selectAnswer => _tr ? 'Bir seçenek seç' : 'Choose an option';
+
+  String get perspectiveTitle => _tr ? 'Başka açılardan bak' : 'See other perspectives';
+  String get perspectiveLoading => _tr
+      ? 'Perspektifler hazırlanıyor…'
+      : 'Preparing perspectives…';
+  String get perspectiveRetry => _tr ? 'Perspektifleri tekrar yükle' : 'Retry perspectives';
+  String get perspectiveUnavailable => _tr
+      ? 'Sonucun hazır. Perspektifler şu anda yüklenemedi; kararını yeniden göndermeden tekrar deneyebilirsin.'
+      : 'Your result is ready. Perspectives could not load right now; you can retry without resending your decision.';
+  String get perspectiveCuratedNote => _tr
+      ? 'Şimdilik doğrulanmış editoryal perspektifler gösteriliyor.'
+      : 'For now, verified curated perspectives are shown.';
+  String get perspectiveClusterPending => _tr
+      ? 'Mevcut perspektifleri görebilirsin; daha geniş perspektif işlemesi sürüyor.'
+      : 'You can view the available perspectives while broader processing continues.';
+  String get perspectiveEmpty => _tr
+      ? 'Bu vaka için şu anda uygun bir karşı perspektif yok.'
+      : 'There is no eligible counter-perspective for this case right now.';
+  String get reasonPendingModeration => _tr
+      ? 'Kendi kısa gerekçen güvenlik incelemesinde. Bu, aşağıdaki perspektiflerin kaynağı olduğu anlamına gelmez.'
+      : 'Your short reason is under safety review. This does not mean it is a source for the perspectives below.';
+  String get perspectiveMethodology => _tr ? 'Bu görünüm hakkında' : 'About this view';
+  String perspectiveSlotLabel(PerspectiveSlot slot) {
+    return switch (slot) {
+      PerspectiveSlot.near => _tr ? 'Yakın perspektif' : 'Nearby perspective',
+      PerspectiveSlot.opposing => _tr ? 'Karşı perspektif' : 'Opposing perspective',
+      PerspectiveSlot.bridge => _tr ? 'Köprü perspektifi' : 'Bridge perspective',
+      PerspectiveSlot.alternativeContext => _tr ? 'Alternatif bağlam' : 'Alternative context',
+    };
+  }
+
+  String perspectiveSourceLabel(String sourceKind) {
+    return switch (sourceKind) {
+      'CURATED' => _tr ? 'Editoryal olarak derlendi' : 'Editorially curated',
+      'HUMAN_REASON' => _tr ? 'İnsan gerekçesi' : 'Human reason',
+      _ => _tr ? 'Kaynak bilgisi' : 'Source information',
+    };
+  }
+
   String get genericError => _tr
       ? 'Bir sorun oluştu. Kararın kaybolmadı; tekrar deneyebilirsin.'
       : 'Something went wrong. Your decision was not lost; you can retry.';
