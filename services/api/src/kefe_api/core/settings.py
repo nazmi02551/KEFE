@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -10,7 +11,9 @@ class Settings(BaseSettings):
 
     environment: str = "development"
     api_title: str = "KEFE API"
-    api_version: str = "0.2.0"
+    api_version: str = "0.3.0"
+    persistence_backend: Literal["memory", "postgres"] = "memory"
+    database_url: str | None = None
 
 
 @lru_cache

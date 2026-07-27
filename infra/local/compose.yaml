@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: kefe
+      POSTGRES_USER: kefe
+      POSTGRES_PASSWORD: kefe
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kefe -d kefe"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - kefe_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  kefe_postgres_data:

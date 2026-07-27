@@ -13,6 +13,14 @@ class DecisionRepository(Protocol):
 
     def save_session(self, session: WeighSession) -> None: ...
 
+    def save_session_with_event(
+        self,
+        session: WeighSession,
+        *,
+        event_name: str,
+        payload: dict[str, object],
+    ) -> None: ...
+
     def get_session(self, session_id: UUID) -> WeighSession | None: ...
 
     def get_reveal(self, case_version_id: UUID) -> RevealSnapshot | None: ...
