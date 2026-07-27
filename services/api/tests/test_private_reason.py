@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from fastapi.testclient import TestClient
 
 from kefe_api.main import create_app
@@ -126,4 +124,3 @@ def test_reason_is_actor_scoped() -> None:
     )
     assert response.status_code == 404
     assert response.json()["code"] == "WEIGH_SESSION_NOT_FOUND"
-    UUID(session_id)
