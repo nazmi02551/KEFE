@@ -35,8 +35,16 @@ def get_actor_id(x_actor_id: Annotated[UUID, Header(alias="X-Actor-Id")]) -> UUI
     return x_actor_id
 
 
+DecisionServiceDep = Annotated[DecisionService, Depends(get_service)]
+ActorIdDep = Annotated[UUID, Depends(get_actor_id)]
+IdempotencyKey = Annotated[
+    str,
+    Header(alias="Idempotency-Key", min_length=8, max_length=128),
+]
+
+
 @router.get("/cases/{case_id}")
-def get_case(case_id: UUID, service: DecisionService = Depends(get_service)) -> dict[str, Any]:
+def get_case(case_id: UUID, service: DecisionServiceDep) -> dict[str, Any]:
     case = service.get_case(case_id)
     return {
         "case_id": case.case_id,
@@ -62,8 +70,8 @@ def get_case(case_id: UUID, service: DecisionService = Depends(get_service)) -> 
 @router.post("/cases/{case_id}/weigh-sessions", status_code=201)
 def start_session(
     case_id: UUID,
-    actor_id: UUID = Depends(get_actor_id),
-    service: DecisionService = Depends(get_service),
+    actor_id: ActorIdDep,
+    service: DecisionServiceDep,
 ) -> StartSessionResponse:
     session = service.start_session(actor_id=actor_id, case_id=case_id)
     return StartSessionResponse(
@@ -78,8 +86,8 @@ def start_session(
 def update_responses(
     session_id: UUID,
     body: UpdateResponsesRequest,
-    actor_id: UUID = Depends(get_actor_id),
-    service: DecisionService = Depends(get_service),
+    actor_id: ActorIdDep,
+    service: DecisionServiceDep,
 ) -> dict[str, Any]:
     session = service.update_responses(
         actor_id=actor_id,
@@ -96,12 +104,9 @@ def update_responses(
 @router.post("/weigh-sessions/{session_id}/commit")
 def commit(
     session_id: UUID,
-    idempotency_key: Annotated[
-        str,
-        Header(alias="Idempotency-Key", min_length=8, max_length=128),
-    ],
-    actor_id: UUID = Depends(get_actor_id),
-    service: DecisionService = Depends(get_service),
+    idempotency_key: IdempotencyKey,
+    actor_id: ActorIdDep,
+    service: DecisionServiceDep,
 ) -> dict[str, Any]:
     session = service.commit(
         actor_id=actor_id,
@@ -119,8 +124,8 @@ def commit(
 @router.get("/weigh-sessions/{session_id}/reveal")
 def reveal(
     session_id: UUID,
-    actor_id: UUID = Depends(get_actor_id),
-    service: DecisionService = Depends(get_service),
+    actor_id: ActorIdDep,
+    service: DecisionServiceDep,
 ) -> dict[str, Any]:
     snapshot = service.reveal(actor_id=actor_id, session_id=session_id)
     return {
