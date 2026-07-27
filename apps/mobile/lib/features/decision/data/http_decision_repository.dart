@@ -168,6 +168,26 @@ class HttpDecisionRepository implements DecisionRepository {
   }
 
   @override
+  Future<void> savePrivateReason({
+    required String sessionId,
+    required List<String> tags,
+    required String? text,
+  }) async {
+    final headers = await _authorizedHeaders(json: true);
+    final response = await _request(
+      () => _client.put(
+        _uri('/v1/weigh-sessions/$sessionId/reason'),
+        headers: headers,
+        body: jsonEncode({
+          'tags': tags,
+          'text': text,
+        }),
+      ),
+    );
+    _decode(response);
+  }
+
+  @override
   Future<void> commit({
     required String sessionId,
     required String idempotencyKey,
