@@ -1,0 +1,132 @@
+from __future__ import annotations
+
+from typing import Annotated, Any
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, Header, Request
+from pydantic import BaseModel, Field
+
+from kefe_api.modules.decision.service import DecisionService
+
+router = APIRouter(prefix="/v1", tags=["Decision"])
+
+
+class StartSessionResponse(BaseModel):
+    session_id: UUID
+    case_id: UUID
+    case_version_id: UUID
+    state: str
+
+
+class ResponseItem(BaseModel):
+    question_id: UUID
+    value: Any
+
+
+class UpdateResponsesRequest(BaseModel):
+    responses: list[ResponseItem] = Field(min_length=1)
+
+
+def get_service(request: Request) -> DecisionService:
+    return request.app.state.decision_service
+
+
+def get_actor_id(x_actor_id: Annotated[UUID, Header(alias="X-Actor-Id")]) -> UUID:
+    return x_actor_id
+
+
+@router.get("/cases/{case_id}")
+def get_case(case_id: UUID, service: DecisionService = Depends(get_service)) -> dict[str, Any]:
+    case = service.get_case(case_id)
+    return {
+        "case_id": case.case_id,
+        "case_version_id": case.id,
+        "version_no": case.version_no,
+        "title": case.title,
+        "summary": case.summary,
+        "base_format": case.base_format,
+        "primary_domain": case.primary_domain,
+        "content_risk": case.content_risk,
+        "questions": [
+            {
+                "question_id": question.id,
+                "prompt": question.prompt,
+                "response_type": question.response_type,
+                "options": question.options,
+            }
+            for question in case.questions
+        ],
+    }
+
+
+@router.post("/cases/{case_id}/weigh-sessions", status_code=201)
+def start_session(
+    case_id: UUID,
+    actor_id: UUID = Depends(get_actor_id),
+    service: DecisionService = Depends(get_service),
+) -> StartSessionResponse:
+    session = service.start_session(actor_id=actor_id, case_id=case_id)
+    return StartSessionResponse(
+        session_id=session.id,
+        case_id=session.case_id,
+        case_version_id=session.case_version_id,
+        state=session.state,
+    )
+
+
+@router.put("/weigh-sessions/{session_id}/responses")
+def update_responses(
+    session_id: UUID,
+    body: UpdateResponsesRequest,
+    actor_id: UUID = Depends(get_actor_id),
+    service: DecisionService = Depends(get_service),
+) -> dict[str, Any]:
+    session = service.update_responses(
+        actor_id=actor_id,
+        session_id=session_id,
+        responses={item.question_id: item.value for item in body.responses},
+    )
+    return {
+        "session_id": session.id,
+        "state": session.state,
+        "response_count": len(session.responses),
+    }
+
+
+@router.post("/weigh-sessions/{session_id}/commit")
+def commit(
+    session_id: UUID,
+    idempotency_key: Annotated[
+        str,
+        Header(alias="Idempotency-Key", min_length=8, max_length=128),
+    ],
+    actor_id: UUID = Depends(get_actor_id),
+    service: DecisionService = Depends(get_service),
+) -> dict[str, Any]:
+    session = service.commit(
+        actor_id=actor_id,
+        session_id=session_id,
+        idempotency_key=idempotency_key,
+    )
+    return {
+        "session_id": session.id,
+        "state": session.state,
+        "committed_at": session.committed_at,
+        "reveal_available": True,
+    }
+
+
+@router.get("/weigh-sessions/{session_id}/reveal")
+def reveal(
+    session_id: UUID,
+    actor_id: UUID = Depends(get_actor_id),
+    service: DecisionService = Depends(get_service),
+) -> dict[str, Any]:
+    snapshot = service.reveal(actor_id=actor_id, session_id=session_id)
+    return {
+        "layer": snapshot.layer,
+        "n": snapshot.n,
+        "confidence": snapshot.confidence,
+        "generated_at": snapshot.generated_at,
+        "result": snapshot.payload,
+    }
