@@ -119,14 +119,17 @@ class HttpDecisionRepository implements DecisionRepository {
       risk: body['content_risk'] as String,
       questions: (body['questions'] as List<Object?>)
           .cast<Map<String, Object?>>()
-          .map(
-            (item) => DecisionQuestion(
+          .map((item) {
+            final schema = (item['response_schema'] as Map<String, Object?>?) ?? const {};
+            return DecisionQuestion(
               id: item['question_id'] as String,
               prompt: item['prompt'] as String,
               responseType: item['response_type'] as String,
-              options: (item['options'] as List<Object?>).cast<String>(),
-            ),
-          )
+              required: item['required'] as bool? ?? true,
+              options: (item['options'] as List<Object?>? ?? const []).cast<String>(),
+              responseSchema: schema,
+            );
+          })
           .toList(growable: false),
     );
   }
