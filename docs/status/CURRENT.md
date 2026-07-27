@@ -3,7 +3,7 @@
 **Updated:** 2026-07-27  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Latest verified implementation commit:** `62228637b57ad29ec0cf25b388baac7b29ceef82`
+**Latest verified implementation commit:** `acc85c89aa3ef2be7d76d6f5ce02f2e5293783ab`
 
 This file is the **single canonical durable engineering handoff point** for continuing KEFE development when a chat session, local environment or tool run is interrupted. Before starting new work, verify this file against `main`, open pull requests and recent CI runs.
 
@@ -51,6 +51,10 @@ Binding product rules relevant to the executable path include:
 - Private structured Reason Capture with schema-driven tags and optional short text.
 - Reason moderation lifecycle: tags-only `NOT_REQUIRED`, free text `PENDING`, private visibility only.
 - Reasons become immutable at Commit.
+- Actor-owned, Commit-gated `GET /v1/weigh-sessions/{session_id}/perspectives` read model.
+- CaseVersion-pinned PostgreSQL curated Perspective cards in four bounded semantic slots.
+- Deterministic `DEGRADED_CURATED` fallback with provenance and methodology metadata.
+- Current private/pending reasons are excluded from Perspective; view events contain no card/reason text.
 - Contract manifest, ADRs, error registry and schema snapshots.
 
 ### Mobile
@@ -75,14 +79,19 @@ Binding product rules relevant to the executable path include:
 - PR #18 — typed question engine and Confidence capture.
 - PR #20 — private-by-default structured Reason Capture backend.
 - PR #22 — mobile private Reason Capture and offline-safe pre-Commit synchronization.
+- PR #25 — Commit-gated bounded Perspective backend and curated fallback.
 
 ## 3. Current executable path
 
-Consumer path today:
+Mobile consumer path today:
 
 `Onboarding → Explore → Case → Typed Weigh → Optional Private Reason → Commit → Trusted Reveal`
 
-The reason step is optional and CaseVersion/schema-driven. Blank input never blocks Commit and causes no reason API call. Results remain hidden until Commit. Reason data is not exposed to other users in the current product surface; optional short text may enter server-side safety moderation.
+Backend capability now continues through:
+
+`Trusted Reveal → Commit-gated Curated Perspective`
+
+The reason step is optional and CaseVersion/schema-driven. Blank input never blocks Commit and causes no reason API call. Results remain hidden until Commit. Reason data is not exposed to other users in the current product surface; optional short text may enter server-side safety moderation. The mobile client does not yet render the Perspective endpoint.
 
 The active demo remains a low-risk DILEMMA. Its current reason/question configuration is a development fixture, not a product-wide default.
 
@@ -105,14 +114,14 @@ Implementation guardrails for the next slice:
 
 Continue in small reviewed vertical slices:
 
-1. **Reveal → Perspective foundation**
-   - before coding, record the slice decision in ADR-0009 and lock the API entitlement/addressing contract
-   - post-Commit only; maximum four strong cards: near, opposing, Bridge and alternative context
-   - start with a deterministic curated fallback and provider-neutral clustering port
-   - expose only moderation-approved eligible human reasons; current private/pending reasons remain inaccessible
-   - include provenance and sample/methodology metadata
-   - exclude raw feed, reactions, reporting, public authoring and AI-generated summaries from this first slice
-   - required states: `LOADING`, `READY`, `CLUSTER_PENDING`, `DEGRADED_CURATED`, `REASON_PENDING_MODERATION`, `ERROR_RETRYABLE`
+1. **Mobile Perspective consumption**
+   - before coding, lock placement, navigation and UI state transitions in ADR-0010; do not infer the final visual treatment
+   - consume the session-scoped endpoint only after successful Commit/Reveal
+   - render at most four ordered roles: near, opposing, Bridge and alternative context
+   - distinguish curated fallback and methodology/provenance without alarmist degradation copy
+   - implement `LOADING`, `READY`, `CLUSTER_PENDING`, `DEGRADED_CURATED`, `REASON_PENDING_MODERATION` and `ERROR_RETRYABLE`
+   - preserve safe retry without replaying Commit, answers or reasons
+   - exclude reactions, reporting, public authoring, local ranking and AI-generated summaries
 
 2. **Context + Sources read layer**
    - progressive context blocks and source metadata
