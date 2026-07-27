@@ -46,6 +46,10 @@ Implemented:
 - Guest admission guard with rate-limiting/device-integrity ports.
 - Public bounded `GET /v1/cases` Explore read model.
 - Canonical Case read plus Weigh session, response, commit and reveal endpoints.
+- Schema-driven QuestionVersion contract using `response_type`, `response_schema`, explicit requiredness and editorial `sort_order`.
+- Server-side validation for `SINGLE_CHOICE` and `CONFIDENCE` values.
+- Commit completeness based only on explicitly required questions.
+- Typed `CaseDetailResponse` / `QuestionResponse` OpenAPI contract rather than a generic Case object.
 - Checked-in OpenAPI contract and drift gate.
 - Machine-readable error/config/schema contracts and ADRs.
 
@@ -72,11 +76,16 @@ Implemented:
 - Onboarding completion persisted at the first Reveal boundary so restarts do not replay a completed tutorial.
 - Explicit guest continuation from first Reveal into Explore.
 - Direct Case deep links bypass onboarding rather than being trapped by the first-use gate.
+- Schema-driven question input registry instead of one hard-coded Case input.
+- `SINGLE_CHOICE` and schema-driven `CONFIDENCE` renderers.
+- Generic typed response-map drafts/recovery with migration of the prior single-answer local shape.
+- Commit enablement derived from required-question completeness rather than screen-specific state.
 
 ## 3. Recent merged milestones
 
 Most relevant merged PRs, newest first:
 
+- PR #18 — Schema-driven typed question engine and Confidence capture.
 - PR #17 — First-use onboarding through first Reveal.
 - PR #16 — Explore discovery and deep-linkable Case flow.
 - PR #14 — Secure mobile session and uncertain commit recovery.
@@ -109,7 +118,7 @@ Mobile gates include:
 - Flutter analyze.
 - widget tests.
 
-PR #17 passed the complete Mobile CI gate before merge.
+PR #18 passed the complete API, PostgreSQL and Mobile CI gates before merge. The architecture fitness gate now also verifies typed Case/Question OpenAPI contracts, question requiredness and deterministic question ordering.
 
 ## 5. Documentation synchronization obligation
 
@@ -126,6 +135,8 @@ At the next documentation-sync milestone, patch the relevant approved/working do
 - offline per-Case drafts and uncertain-commit recovery.
 - Explore read model and canonical `/case/:caseId` deep links.
 - first-use onboarding through first Reveal and guest continuation.
+- schema-driven question engine, explicit requiredness/order, response validation and Confidence capture.
+- typed Case/Question OpenAPI response contracts.
 - CI architecture/contract/OpenAPI fitness gates.
 
 Do not regenerate DOCX/PDF after every small code commit. Regenerate and visually verify the document package at meaningful milestone boundaries to avoid churn and document drift.
@@ -146,15 +157,16 @@ Unless explicitly approved in the product documentation/decision log, keep these
 - advanced Civic/P2+/P3 review/delay rules.
 - final KEFE+ launch timing.
 - exact timing and UX of optional guest→account upgrade after first value demonstration.
+- global Confidence requiredness and default range; current demo configuration is not a product-wide rule.
 
 ## 7. Recommended next engineering sequence
 
 Continue in thin vertical slices rather than broad scaffolding.
 
-1. **Case experience depth**
-   - Context/source surfaces behind explicit contracts;
-   - progressive disclosure without leaking result/community data;
-   - question-type expansion without hard-coding format behavior into screens;
+1. **Case Context + Sources**
+   - explicit read contracts for context blocks and source metadata;
+   - progressive disclosure without leaking community/result data;
+   - claim/source status semantics compatible with VERIFIED / CLAIMED / DISPUTED / UNKNOWN;
    - preserve CaseVersion pinning and Commit First.
 2. **Reason capture + Perspective**
    - short structured reason capture;
