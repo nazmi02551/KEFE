@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../onboarding/application/onboarding_controller.dart';
 import '../application/decision_controller.dart';
+import 'question_input.dart';
 
 class DecisionFlowScreen extends ConsumerStatefulWidget {
   const DecisionFlowScreen({
@@ -97,8 +98,8 @@ class _DecisionContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = KefeStrings.of(context);
     final caseData = state.caseData!;
-    final question = caseData.questions.first;
     final controller = ref.read(decisionControllerProvider.notifier);
+    final inputsEnabled = state.reveal == null && !state.recoveryPending && !state.submitting;
 
     return ListView(
       padding: const EdgeInsets.all(20),
@@ -111,46 +112,20 @@ class _DecisionContent extends ConsumerWidget {
         const SizedBox(height: 12),
         Text(caseData.summary, style: Theme.of(context).textTheme.bodyLarge),
         const SizedBox(height: 24),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  question.prompt,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 16),
-                for (final option in question.options)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Semantics(
-                      selected: state.selectedOption == option,
-                      button: true,
-                      child: ChoiceChip(
-                        key: ValueKey('option-$option'),
-                        label: SizedBox(
-                          width: double.infinity,
-                          child: Text(option, textAlign: TextAlign.center),
-                        ),
-                        selected: state.selectedOption == option,
-                        onSelected:
-                            state.reveal == null && !state.recoveryPending
-                                ? (_) => controller.select(option)
-                                : null,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+        for (final question in caseData.questions) ...[
+          QuestionInputCard(
+            question: question,
+            value: state.responseFor(question.id),
+            enabled: inputsEnabled,
+            onChanged: (value) => controller.setResponse(question.id, value),
           ),
-        ),
-        const SizedBox(height: 20),
+          const SizedBox(height: 12),
+        ],
+        const SizedBox(height: 8),
         if (state.reveal == null) ...[
           FilledButton(
             key: const ValueKey('commit-button'),
-            onPressed: state.selectedOption == null || state.submitting
+            onPressed: !state.hasRequiredResponses || state.submitting
                 ? null
                 : state.recoveryPending
                     ? controller.retryPending
@@ -166,8 +141,8 @@ class _DecisionContent extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            state.selectedOption == null
-                ? strings.selectAnswer
+            !state.hasRequiredResponses
+                ? strings.completeRequired
                 : state.recoveryPending
                     ? strings.pendingHelper
                     : strings.commitHelper,
