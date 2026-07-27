@@ -1,4 +1,4 @@
-registry_version: 1.3.0
+registry_version: 1.4.0
 errors:
 - code: AUTH_REQUIRED
   http_status: 401
@@ -90,6 +90,9 @@ errors:
 - code: RESULT_NOT_READY
   http_status: 409
   retryable: true
+- code: PERSPECTIVE_COMMIT_REQUIRED
+  http_status: 403
+  retryable: false
 - code: SHARE_NOT_ALLOWED_FOR_RISK
   http_status: 422
   retryable: false
