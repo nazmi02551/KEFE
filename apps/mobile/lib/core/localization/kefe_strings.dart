@@ -17,6 +17,14 @@ class KefeStrings {
   String get promise => _tr
       ? 'Kararını tart. Farklı düşünmenin nedenlerini gör.'
       : 'Weigh your decision. See why people differ.';
+  String get exploreTitle => _tr ? 'Keşfet' : 'Explore';
+  String get exploreIntro => _tr
+      ? 'Önce sen karar ver. Sonra dünyayı gör.'
+      : 'Decide first. Then see the world.';
+  String get exploreEmpty => _tr
+      ? 'Şu anda tartılacak bir içerik yok.'
+      : 'There is nothing to weigh right now.';
+  String get openCase => _tr ? 'Tartmaya Başla' : 'Start Weighing';
   String get loading => _tr ? 'Hazırlanıyor…' : 'Preparing…';
   String get retry => _tr ? 'Tekrar dene' : 'Try again';
   String get start => _tr ? 'Başla' : 'Start';
