@@ -46,6 +46,38 @@ class KefeStrings {
       ? 'Şu anda tartılacak bir içerik yok.'
       : 'There is nothing to weigh right now.';
   String get openCase => _tr ? 'Tartmaya Başla' : 'Start Weighing';
+
+  String get contextTitle => _tr ? 'Bağlam' : 'Context';
+  String get contextHelper => _tr
+      ? 'Karar vermeden önce doğrulanmış bilgiler ile iddia ve belirsizlikleri ayrı ayrı incele.'
+      : 'Before deciding, review verified information separately from claims and uncertainty.';
+  String get contextDetails => _tr ? 'Ayrıntıları aç' : 'Show details';
+  String get contextSources => _tr ? 'Kaynakları gör' : 'View sources';
+  String get contextLoading => _tr ? 'Bağlam hazırlanıyor…' : 'Preparing context…';
+  String get contextUnavailable => _tr
+      ? 'Bağlam şu anda yüklenemedi. Sonuç veya topluluk bilgisi gösterilmedi.'
+      : 'Context could not load right now. No result or community information was shown.';
+  String get contextRetry => _tr ? 'Bağlamı tekrar yükle' : 'Retry context';
+  String contextClaimStatus(String status) {
+    return switch (status) {
+      'VERIFIED' => _tr ? 'Doğrulandı' : 'Verified',
+      'CLAIMED' => _tr ? 'İddia' : 'Claimed',
+      'DISPUTED' => _tr ? 'Çelişkili' : 'Disputed',
+      'UNKNOWN' => _tr ? 'Bilinmiyor' : 'Unknown',
+      _ => status,
+    };
+  }
+
+  String contextSourceKind(String sourceKind) {
+    return switch (sourceKind) {
+      'OFFICIAL' => _tr ? 'Resmî kaynak' : 'Official source',
+      'NEWS' => _tr ? 'Haber kaynağı' : 'News source',
+      'RESEARCH' => _tr ? 'Araştırma' : 'Research',
+      'EDITORIAL' => _tr ? 'Editoryal kaynak' : 'Editorial source',
+      _ => _tr ? 'Diğer kaynak' : 'Other source',
+    };
+  }
+
   String get loading => _tr ? 'Hazırlanıyor…' : 'Preparing…';
   String get retry => _tr ? 'Tekrar dene' : 'Try again';
   String get start => _tr ? 'Başla' : 'Start';
