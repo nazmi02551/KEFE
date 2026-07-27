@@ -49,3 +49,4 @@ architecture_decisions:
   - docs/adr/0003-transactional-outbox-delivery.md
   - docs/adr/0004-guest-identity-opaque-tokens.md
   - docs/adr/0005-guest-admission-and-device-integrity.md
+  - docs/adr/0006-schema-driven-question-engine.md
