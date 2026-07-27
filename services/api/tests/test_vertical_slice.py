@@ -141,6 +141,8 @@ def test_competing_commits_linearize_to_one_commit_event() -> None:
 
     assert outcomes == {"COMMITTED", "WEIGH_SESSION_ALREADY_COMMITTED"}
     committed_events = [
-        event for event in app.state.decision_repository.events if event["name"] == "weigh.committed"
+        event
+        for event in app.state.decision_repository.events
+        if event["name"] == "weigh.committed"
     ]
     assert len(committed_events) == 1
