@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, Request
+from fastapi import APIRouter
 from pydantic import BaseModel
 
-from kefe_api.modules.identity.models import ActorPrincipal
-from kefe_api.modules.identity.service import IdentityService
+from kefe_api.modules.identity.dependencies import AuthorizationHeader, IdentityServiceDep
 
 router = APIRouter(prefix="/v1/identity", tags=["Identity"])
 
@@ -18,24 +16,6 @@ class GuestCredentialResponse(BaseModel):
     token_type: str = "Bearer"
     access_token: str
     expires_at: datetime
-
-
-def get_identity_service(request: Request) -> IdentityService:
-    return request.app.state.identity_service
-
-
-IdentityServiceDep = Annotated[IdentityService, Depends(get_identity_service)]
-AuthorizationHeader = Annotated[str | None, Header(alias="Authorization")]
-
-
-def get_principal(
-    authorization: AuthorizationHeader,
-    service: IdentityServiceDep,
-) -> ActorPrincipal:
-    return service.authenticate(authorization)
-
-
-PrincipalDep = Annotated[ActorPrincipal, Depends(get_principal)]
 
 
 @router.post("/guest", status_code=201)
