@@ -23,9 +23,13 @@ Core invariants already treated as binding:
 
 ## 2. Executable state on `main`
 
-The current walking skeleton is:
+The regular walking skeleton is:
 
 `Explore → Case → Weigh → Commit → Reveal`
+
+The first-use path is:
+
+`Welcome → First Case → Weigh → Commit → Reveal → Continue as Guest → Explore`
 
 ### Backend
 
@@ -63,11 +67,17 @@ Implemented:
 - Explore screen.
 - Canonical `/case/:caseId` deep-link route.
 - Explore → Case and direct deep-link widget coverage.
+- Two-step first-use onboarding with no long tutorial.
+- First real low-risk Case used to demonstrate product value.
+- Onboarding completion persisted at the first Reveal boundary so restarts do not replay a completed tutorial.
+- Explicit guest continuation from first Reveal into Explore.
+- Direct Case deep links bypass onboarding rather than being trapped by the first-use gate.
 
 ## 3. Recent merged milestones
 
 Most relevant merged PRs, newest first:
 
+- PR #17 — First-use onboarding through first Reveal.
 - PR #16 — Explore discovery and deep-linkable Case flow.
 - PR #14 — Secure mobile session and uncertain commit recovery.
 - PR #13 — Flutter M0 mobile foundation.
@@ -99,6 +109,8 @@ Mobile gates include:
 - Flutter analyze.
 - widget tests.
 
+PR #17 passed the complete Mobile CI gate before merge.
+
 ## 5. Documentation synchronization obligation
 
 The executable repository has advanced beyond the last rendered office-document milestone.
@@ -113,6 +125,7 @@ At the next documentation-sync milestone, patch the relevant approved/working do
 - secure credential storage.
 - offline per-Case drafts and uncertain-commit recovery.
 - Explore read model and canonical `/case/:caseId` deep links.
+- first-use onboarding through first Reveal and guest continuation.
 - CI architecture/contract/OpenAPI fitness gates.
 
 Do not regenerate DOCX/PDF after every small code commit. Regenerate and visually verify the document package at meaningful milestone boundaries to avoid churn and document drift.
@@ -132,25 +145,22 @@ Unless explicitly approved in the product documentation/decision log, keep these
 - final Atlas trust thresholds and consumer Raw/Trusted presentation.
 - advanced Civic/P2+/P3 review/delay rules.
 - final KEFE+ launch timing.
+- exact timing and UX of optional guest→account upgrade after first value demonstration.
 
 ## 7. Recommended next engineering sequence
 
 Continue in thin vertical slices rather than broad scaffolding.
 
-1. **First-use onboarding + guest continuation**
-   - two concise product-promise steps at most;
-   - first real low-risk Case experience;
-   - Reveal demonstrates product value;
-   - account creation remains optional after value is demonstrated;
-   - do not encode the final primary-navigation decision.
-2. **Case experience depth**
-   - Context/source surfaces and question-type expansion behind contracts;
+1. **Case experience depth**
+   - Context/source surfaces behind explicit contracts;
+   - progressive disclosure without leaking result/community data;
+   - question-type expansion without hard-coding format behavior into screens;
    - preserve CaseVersion pinning and Commit First.
-3. **Reason capture + Perspective**
+2. **Reason capture + Perspective**
    - short structured reason capture;
    - safe argument/perspective read model;
    - no classic engagement-first comment feed.
-4. **M0 milestone documentation sync**
+3. **M0 milestone documentation sync**
    - Engineering Blueprint and related authority docs;
    - DOCX → reviewed PDF render;
    - refreshed documentation package/manifest.
