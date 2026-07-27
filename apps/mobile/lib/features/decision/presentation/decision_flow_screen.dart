@@ -15,7 +15,9 @@ class _DecisionFlowScreenState extends ConsumerState<DecisionFlowScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.read(decisionControllerProvider.notifier).load());
+    Future.microtask(
+      () => ref.read(decisionControllerProvider.notifier).load(),
+    );
   }
 
   @override
@@ -29,13 +31,21 @@ class _DecisionFlowScreenState extends ConsumerState<DecisionFlowScreen> {
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 220),
           child: state.loading
-              ? Center(key: const ValueKey('loading'), child: Semantics(label: strings.loading, child: const CircularProgressIndicator()))
+              ? Center(
+                  key: const ValueKey('loading'),
+                  child: Semantics(
+                    label: strings.loading,
+                    child: const CircularProgressIndicator(),
+                  ),
+                )
               : state.caseData == null
                   ? _ErrorState(
                       key: const ValueKey('error'),
                       message: strings.genericError,
                       retryLabel: strings.retry,
-                      onRetry: ref.read(decisionControllerProvider.notifier).load,
+                      onRetry: ref
+                          .read(decisionControllerProvider.notifier)
+                          .load,
                     )
                   : _DecisionContent(
                       key: const ValueKey('content'),
@@ -62,7 +72,11 @@ class _DecisionContent extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        Text(caseData.title, style: Theme.of(context).textTheme.headlineMedium),
+        Text(
+          caseData.title,
+          key: const ValueKey('case-title'),
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
         const SizedBox(height: 12),
         Text(caseData.summary, style: Theme.of(context).textTheme.bodyLarge),
         const SizedBox(height: 24),
@@ -72,7 +86,10 @@ class _DecisionContent extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(question.prompt, style: Theme.of(context).textTheme.titleLarge),
+                Text(
+                  question.prompt,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
                 const SizedBox(height: 16),
                 for (final option in question.options)
                   Padding(
@@ -81,12 +98,15 @@ class _DecisionContent extends ConsumerWidget {
                       selected: state.selectedOption == option,
                       button: true,
                       child: ChoiceChip(
+                        key: ValueKey('option-$option'),
                         label: SizedBox(
                           width: double.infinity,
                           child: Text(option, textAlign: TextAlign.center),
                         ),
                         selected: state.selectedOption == option,
-                        onSelected: state.reveal == null ? (_) => controller.select(option) : null,
+                        onSelected: state.reveal == null
+                            ? (_) => controller.select(option)
+                            : null,
                       ),
                     ),
                   ),
@@ -97,7 +117,10 @@ class _DecisionContent extends ConsumerWidget {
         const SizedBox(height: 20),
         if (state.reveal == null) ...[
           FilledButton(
-            onPressed: state.selectedOption == null || state.submitting ? null : controller.commit,
+            key: const ValueKey('commit-button'),
+            onPressed: state.selectedOption == null || state.submitting
+                ? null
+                : controller.commit,
             child: state.submitting
                 ? const SizedBox.square(
                     dimension: 22,
@@ -107,7 +130,9 @@ class _DecisionContent extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            state.selectedOption == null ? strings.selectAnswer : strings.commitHelper,
+            state.selectedOption == null
+                ? strings.selectAnswer
+                : strings.commitHelper,
             textAlign: TextAlign.center,
           ),
         ] else
@@ -135,12 +160,16 @@ class _RevealCard extends StatelessWidget {
     final strings = KefeStrings.of(context);
     final reveal = state.reveal!;
     return Card(
+      key: const ValueKey('reveal-card'),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(strings.revealTitle, style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              strings.revealTitle,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 12),
             for (final entry in reveal.values.entries)
               Padding(
@@ -155,7 +184,11 @@ class _RevealCard extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 8),
-            Text('${strings.trustedSample} · n=${reveal.sampleSize} · ${reveal.confidence}'),
+            Text(
+              '${strings.trustedSample} · '
+              'n=${reveal.sampleSize} · ${reveal.confidence}',
+              key: const ValueKey('reveal-methodology'),
+            ),
           ],
         ),
       ),
@@ -164,7 +197,12 @@ class _RevealCard extends StatelessWidget {
 }
 
 class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message, required this.retryLabel, required this.onRetry, super.key});
+  const _ErrorState({
+    required this.message,
+    required this.retryLabel,
+    required this.onRetry,
+    super.key,
+  });
 
   final String message;
   final String retryLabel;
