@@ -3,7 +3,7 @@
 **Updated:** 2026-07-27  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Latest verified checkpoint commit:** `b87ba9c15b35562ba56b661046a8bc6eda9547da`
+**Latest verified implementation commit:** `5956fa69c451a49bf38463535548f7275db408a7`
 
 This file is the durable handoff point for continuing KEFE development when a chat session, local environment or tool run is interrupted. Before starting new work, verify this file against `main`, open pull requests and recent CI runs.
 
@@ -27,6 +27,7 @@ Binding product rules currently implemented:
 - Provider-neutral ports/adapters and configuration-driven infrastructure.
 - No final 3-vs-4-tab primary navigation decision has been encoded.
 - No final branded Commit CTA has been encoded; the technical action remains `COMMIT`.
+- Reason Capture is private-by-default until an explicit later product/moderation policy enables cross-user visibility.
 
 ## 2. Completed executable milestones
 
@@ -43,6 +44,9 @@ Binding product rules currently implemented:
 - Generated OpenAPI contract and drift gate.
 - Typed question engine with `SINGLE_CHOICE` and `CONFIDENCE` validation.
 - Required-question semantics stored in PostgreSQL.
+- Private structured Reason Capture with schema-driven tags and optional short text.
+- Reason moderation lifecycle: tags-only `NOT_REQUIRED`, free text `PENDING`, private visibility only.
+- Reasons become immutable at Commit.
 - Contract manifest, ADRs, error registry and schema snapshots.
 
 ### Mobile
@@ -59,16 +63,22 @@ Binding product rules currently implemented:
 
 ### Most recent merged product slices
 
-- PR #14 — secure mobile session and uncertain Commit recovery.
 - PR #16 — Explore discovery and deep-linkable Case flow.
 - PR #17 — first-use onboarding through first Reveal.
 - PR #18 — typed question engine and Confidence capture.
+- PR #20 — private-by-default structured Reason Capture backend.
 
 ## 3. Current executable path
 
+Consumer path today:
+
 `Onboarding → Explore → Case → Typed Weigh → Commit → Trusted Reveal`
 
-The active demo remains a low-risk DILEMMA. Results remain hidden until Commit.
+Backend capability now additionally supports:
+
+`Typed Weigh → Private Reason → Commit`
+
+The active demo remains a low-risk DILEMMA. Results remain hidden until Commit. Reason data is not exposed to other users in the current product surface.
 
 ## 4. Known open product decisions
 
@@ -94,16 +104,18 @@ Do not close these implicitly in code without updating the approved product deci
 
 The next implementation work should remain in small reviewed slices:
 
-1. **Reason Capture foundation**
-   - structured reason tags plus optional short text
-   - moderation-safe storage boundary
-   - no open social feed yet
-   - Commit First preserved
+1. **Mobile Reason Capture**
+   - render structured reason tags from the published CaseVersion policy
+   - optional short-text input only when enabled by schema
+   - persist reason draft safely with the existing decision draft
+   - submit reason before Commit using the same pinned session
+   - no public feed or cross-user reason visibility
 
 2. **Reveal perspective layer**
-   - strongest opposing reasons after Commit
+   - strongest moderation-approved opposing reasons after Commit
    - sample/methodology metadata
    - no popularity-only ranking
+   - preserve separation between human reasons and AI summaries
 
 3. **Content/Admin foundation**
    - Case/Issue/Question authoring contracts
