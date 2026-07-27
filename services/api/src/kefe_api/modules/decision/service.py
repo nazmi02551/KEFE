@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID, uuid4
@@ -8,6 +9,7 @@ from kefe_api.core.errors import DomainError
 from kefe_api.modules.decision.models import (
     CommitStatus,
     DraftUpdateStatus,
+    PrivateReason,
     Question,
     WeighSession,
     WeighState,
@@ -100,6 +102,100 @@ class DecisionService:
         assert attempt.session is not None
         return attempt.session
 
+    def update_private_reason(
+        self,
+        *,
+        actor_id: UUID,
+        session_id: UUID,
+        tags: list[str],
+        text: str | None,
+    ) -> PrivateReason:
+        session = self._owned_session(actor_id, session_id)
+        case = self._repo.get_case_version(session.case_version_id)
+        if case is None:
+            raise DomainError("CASE_VERSION_STALE", "Case version is no longer available", 409)
+
+        policy = self._reason_policy(case.questions)
+        if policy is None:
+            raise DomainError(
+                "REASON_NOT_SUPPORTED",
+                "This Case does not accept a structured reason",
+                422,
+            )
+
+        normalized_tags = tuple(dict.fromkeys(tag.strip().upper() for tag in tags if tag.strip()))
+        normalized_text = text.strip() if text is not None else None
+        if normalized_text == "":
+            normalized_text = None
+        if not normalized_tags and normalized_text is None:
+            raise DomainError(
+                "REASON_EMPTY",
+                "At least one reason tag or short text is required",
+                422,
+            )
+
+        allowed_tags = {
+            str(tag).strip().upper()
+            for tag in policy.get("tags", ())
+            if str(tag).strip()
+        }
+        unknown_tags = [tag for tag in normalized_tags if tag not in allowed_tags]
+        if unknown_tags:
+            raise DomainError(
+                "REASON_TAG_INVALID",
+                "Reason contains unsupported tags",
+                422,
+                meta={"unknown_tags": unknown_tags},
+            )
+
+        max_tags = self._bounded_int(policy.get("max_tags", 3), default=3, minimum=1, maximum=10)
+        if len(normalized_tags) > max_tags:
+            raise DomainError(
+                "REASON_TAG_LIMIT_EXCEEDED",
+                "Too many reason tags",
+                422,
+                meta={"max_tags": max_tags},
+            )
+
+        text_enabled = policy.get("text_enabled", False) is True
+        if normalized_text is not None and not text_enabled:
+            raise DomainError(
+                "REASON_TEXT_NOT_ALLOWED",
+                "Short reason text is disabled for this Case",
+                422,
+            )
+        text_max_length = self._bounded_int(
+            policy.get("text_max_length", 500),
+            default=500,
+            minimum=1,
+            maximum=1000,
+        )
+        if normalized_text is not None and len(normalized_text) > text_max_length:
+            raise DomainError(
+                "REASON_TEXT_TOO_LONG",
+                "Short reason text exceeds the Case limit",
+                422,
+                meta={"max_length": text_max_length},
+            )
+
+        attempt = self._repo.update_private_reason(
+            actor_id=actor_id,
+            session_id=session_id,
+            tags=normalized_tags,
+            text=normalized_text,
+            updated_at=datetime.now(UTC),
+        )
+        if attempt.status is DraftUpdateStatus.NOT_FOUND:
+            raise DomainError("WEIGH_SESSION_NOT_FOUND", "Weigh session not found", 404)
+        if attempt.status is DraftUpdateStatus.NOT_EDITABLE:
+            raise DomainError(
+                "WEIGH_SESSION_NOT_EDITABLE",
+                "Reason cannot be changed after Commit",
+                409,
+            )
+        assert attempt.reason is not None
+        return attempt.reason
+
     def commit(self, *, actor_id: UUID, session_id: UUID, idempotency_key: str) -> WeighSession:
         session = self._owned_session(actor_id, session_id)
         pinned = self._repo.get_case_version(session.case_version_id)
@@ -181,6 +277,20 @@ class DecisionService:
         if session is None or session.actor_id != actor_id:
             raise DomainError("WEIGH_SESSION_NOT_FOUND", "Weigh session not found", 404)
         return session
+
+    @staticmethod
+    def _reason_policy(questions: tuple[Question, ...]) -> Mapping[str, Any] | None:
+        for question in questions:
+            raw = question.response_schema.get("reason")
+            if isinstance(raw, Mapping):
+                return raw
+        return None
+
+    @staticmethod
+    def _bounded_int(value: Any, *, default: int, minimum: int, maximum: int) -> int:
+        if isinstance(value, bool) or not isinstance(value, int):
+            return default
+        return min(max(value, minimum), maximum)
 
     @staticmethod
     def _is_valid_response(question: Question, value: Any) -> bool:
