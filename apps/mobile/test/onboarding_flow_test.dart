@@ -122,6 +122,17 @@ Future<void> pumpOnboardingApp(
   await tester.pumpAndSettle();
 }
 
+Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(
+    finder,
+    300,
+    scrollable: find.byType(Scrollable).first,
+  );
+  await tester.pump();
+  await tester.tap(finder);
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('fresh user sees two promises before the first real Case', (
     tester,
@@ -172,18 +183,22 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('option-A')));
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('commit-button')));
-    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
 
     expect(repository.commitCalls, 1);
     expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
     expect(onboardingStore.completed, isTrue);
 
-    await tester.drag(find.byType(ListView), const Offset(0, -600));
+    final continueButton = find.byKey(const ValueKey('continue-as-guest'));
+    await tester.scrollUntilVisible(
+      continueButton,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('first-use-completion')), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('continue-as-guest')));
+    await tester.tap(continueButton);
     await tester.pumpAndSettle();
 
     expect(onboardingStore.completed, isTrue);
