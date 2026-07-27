@@ -143,6 +143,17 @@ Future<MemoryDecisionDraftStore> pumpReasonCase(
   return draftStore;
 }
 
+Future<void> tapCommit(WidgetTester tester) async {
+  final commit = find.byKey(const ValueKey('commit-button'));
+  await tester.scrollUntilVisible(
+    commit,
+    300,
+    scrollable: find.byType(Scrollable).first,
+  );
+  await tester.tap(commit);
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('blank private reason stays optional and is not submitted', (
     tester,
@@ -151,16 +162,17 @@ void main() {
     final repository = ReasonFakeRepository();
     await pumpReasonCase(tester, repository);
 
-    expect(
-      find.textContaining('diğer kullanıcılara gösterilmez'),
-      findsOneWidget,
-    );
-
     await tester.tap(find.byKey(const ValueKey('option-A')));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.byKey(const ValueKey('commit-button')));
-    await tester.tap(find.byKey(const ValueKey('commit-button')));
-    await tester.pumpAndSettle();
+    final privacyCopy = find.textContaining('diğer kullanıcılara gösterilmez');
+    await tester.scrollUntilVisible(
+      privacyCopy,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(privacyCopy, findsOneWidget);
+
+    await tapCommit(tester);
 
     expect(repository.reasonCalls, 0);
     expect(repository.commitCalls, 1);
@@ -189,8 +201,7 @@ void main() {
     expect(localDraft.reasonTags, containsAll(['FAIRNESS', 'NEED']));
     expect(localDraft.reasonText, 'Adalet ve ihtiyaç birlikte etkili oldu.');
 
-    await tester.tap(find.byKey(const ValueKey('commit-button')));
-    await tester.pumpAndSettle();
+    await tapCommit(tester);
 
     expect(repository.lastTags, ['FAIRNESS', 'NEED']);
     expect(repository.lastText, 'Adalet ve ihtiyaç birlikte etkili oldu.');
@@ -227,8 +238,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('option-A')));
     await tester.tap(find.byKey(const ValueKey('reason-tag-FAIRNESS')));
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('commit-button')));
-    await tester.pumpAndSettle();
+    await tapCommit(tester);
 
     final pending = draftStore.draftFor(reasonCaseId)!;
     expect(pending.phase, DecisionDraftPhase.syncPending);
@@ -236,8 +246,7 @@ void main() {
     expect(find.byKey(const ValueKey('decision-status-message')), findsOneWidget);
 
     final idempotencyKey = pending.commitIdempotencyKey;
-    await tester.tap(find.byKey(const ValueKey('commit-button')));
-    await tester.pumpAndSettle();
+    await tapCommit(tester);
 
     expect(repository.answerCalls, 2);
     expect(repository.reasonCalls, 2);
@@ -256,8 +265,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('option-B')));
     await tester.tap(find.byKey(const ValueKey('reason-tag-RESPONSIBILITY')));
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('commit-button')));
-    await tester.pumpAndSettle();
+    await tapCommit(tester);
 
     expect(draftStore.draftFor(reasonCaseId)?.phase, DecisionDraftPhase.commitPending);
     expect(repository.answerCalls, 1);
@@ -265,8 +273,7 @@ void main() {
     expect(repository.commitCalls, 1);
     final key = repository.commitKeys.single;
 
-    await tester.tap(find.byKey(const ValueKey('commit-button')));
-    await tester.pumpAndSettle();
+    await tapCommit(tester);
 
     expect(repository.answerCalls, 1);
     expect(repository.reasonCalls, 1);
