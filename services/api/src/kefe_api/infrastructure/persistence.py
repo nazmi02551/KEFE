@@ -3,7 +3,9 @@ from __future__ import annotations
 from kefe_api.core.settings import Settings
 from kefe_api.infrastructure.db import build_engine
 from kefe_api.infrastructure.postgres_identity import PostgresIdentityRepository
-from kefe_api.infrastructure.postgres_reason_decision import PostgresReasonDecisionRepository
+from kefe_api.infrastructure.postgres_perspective_decision import (
+    PostgresPerspectiveDecisionRepository,
+)
 from kefe_api.modules.decision.bootstrap import build_demo_repository
 from kefe_api.modules.decision.ports import DecisionRepository
 from kefe_api.modules.identity.in_memory import InMemoryIdentityRepository
@@ -17,7 +19,7 @@ def build_decision_repository(settings: Settings) -> DecisionRepository:
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
 
-    return PostgresReasonDecisionRepository(build_engine(settings.database_url))
+    return PostgresPerspectiveDecisionRepository(build_engine(settings.database_url))
 
 
 def build_identity_repository(settings: Settings) -> IdentityRepository:
