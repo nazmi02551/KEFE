@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import text
+from sqlalchemy import text as sql_text
 
 from kefe_api.infrastructure.postgres_explore_decision import PostgresExploreDecisionRepository
 from kefe_api.modules.decision.models import (
@@ -41,7 +41,7 @@ class PostgresReasonDecisionRepository(PostgresExploreDecisionRepository):
                 else ReasonModerationState.NOT_REQUIRED
             )
             connection.execute(
-                text(
+                sql_text(
                     """
                     INSERT INTO decision.private_reason (
                         session_id,
@@ -77,7 +77,7 @@ class PostgresReasonDecisionRepository(PostgresExploreDecisionRepository):
                 },
             )
             connection.execute(
-                text(
+                sql_text(
                     """
                     UPDATE decision.weigh_session
                     SET updated_at = :updated_at
