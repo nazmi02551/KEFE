@@ -6,7 +6,7 @@ from uuid import UUID
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from kefe_api.modules.identity.dependencies import AuthorizationHeader, IdentityServiceDep
+from kefe_api.modules.identity.dependencies import AuthorizationDep, IdentityServiceDep
 
 router = APIRouter(prefix="/v1/identity", tags=["Identity"])
 
@@ -30,7 +30,7 @@ def create_guest(service: IdentityServiceDep) -> GuestCredentialResponse:
 
 @router.delete("/session", status_code=204)
 def revoke_session(
-    authorization: AuthorizationHeader,
+    authorization: AuthorizationDep,
     service: IdentityServiceDep,
 ) -> None:
     service.authenticate(authorization)
