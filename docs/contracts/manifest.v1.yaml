@@ -1,4 +1,4 @@
-manifest_version: 1.2.0
+manifest_version: 1.2.1
 updated_at: '2026-07-27'
 policy:
   executable_schema_source: services/api/migrations
@@ -9,6 +9,10 @@ contracts:
     path: docs/contracts/core-erd.v1.mmd
     version: '1'
     role: conceptual_core_model
+  - id: openapi
+    path: docs/contracts/openapi.v1.json
+    version: 0.5.0
+    role: http_api_contract
   - id: event-envelope
     path: docs/contracts/event-envelope.v1.schema.json
     version: '1'
