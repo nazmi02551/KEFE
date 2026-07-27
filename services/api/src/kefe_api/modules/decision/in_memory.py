@@ -27,6 +27,16 @@ class InMemoryDecisionRepository:
         self.events: list[dict[str, Any]] = []
         self._lock = RLock()
 
+    def list_current_cases(self, *, limit: int) -> tuple[CaseVersion, ...]:
+        with self._lock:
+            current = [
+                self._cases[version_id]
+                for version_id in self._current_by_case.values()
+                if version_id in self._cases
+            ]
+            current.sort(key=lambda case: (case.content_risk, case.title, str(case.case_id)))
+            return tuple(current[:limit])
+
     def get_current_case_version(self, case_id: UUID) -> CaseVersion | None:
         with self._lock:
             version_id = self._current_by_case.get(case_id)

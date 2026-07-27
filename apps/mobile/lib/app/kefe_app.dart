@@ -5,18 +5,40 @@ import 'package:go_router/go_router.dart';
 import '../core/design/kefe_theme.dart';
 import '../core/localization/kefe_strings.dart';
 import '../features/decision/presentation/decision_flow_screen.dart';
+import '../features/explore/presentation/explore_screen.dart';
 
-final _router = GoRouter(
-  routes: [
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const DecisionFlowScreen(),
-    ),
-  ],
-);
+class KefeApp extends StatefulWidget {
+  const KefeApp({this.initialLocation = '/explore', super.key});
 
-class KefeApp extends StatelessWidget {
-  const KefeApp({super.key});
+  final String initialLocation;
+
+  @override
+  State<KefeApp> createState() => _KefeAppState();
+}
+
+class _KefeAppState extends State<KefeApp> {
+  late final GoRouter _router = GoRouter(
+    initialLocation: widget.initialLocation,
+    routes: [
+      GoRoute(path: '/', redirect: (_, _) => '/explore'),
+      GoRoute(
+        path: '/explore',
+        builder: (context, state) => const ExploreScreen(),
+      ),
+      GoRoute(
+        path: '/case/:caseId',
+        builder: (context, state) => DecisionFlowScreen(
+          caseId: state.pathParameters['caseId']!,
+        ),
+      ),
+    ],
+  );
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

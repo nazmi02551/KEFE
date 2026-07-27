@@ -14,6 +14,27 @@ class GuestCredential {
 }
 
 @immutable
+class DecisionCaseSummary {
+  const DecisionCaseSummary({
+    required this.id,
+    required this.versionId,
+    required this.title,
+    required this.summary,
+    required this.format,
+    required this.domain,
+    required this.risk,
+  });
+
+  final String id;
+  final String versionId;
+  final String title;
+  final String summary;
+  final String format;
+  final String domain;
+  final String risk;
+}
+
+@immutable
 class DecisionQuestion {
   const DecisionQuestion({
     required this.id,

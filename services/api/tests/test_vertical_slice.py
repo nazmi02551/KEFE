@@ -30,6 +30,18 @@ def _answer(client: TestClient, session_id: str, headers: dict[str, str]) -> Non
     assert response.status_code == 200
 
 
+def test_explore_lists_published_cases_without_identity() -> None:
+    client = TestClient(create_app())
+    response = client.get("/v1/cases?limit=1")
+    assert response.status_code == 200
+    items = response.json()["items"]
+    assert len(items) == 1
+    assert items[0]["case_id"] == str(DEMO_CASE_ID)
+    assert items[0]["base_format"] == "DILEMMA"
+    assert "questions" not in items[0]
+    assert "result" not in items[0]
+
+
 def test_guest_identity_is_required_for_decision_writes() -> None:
     client = TestClient(create_app())
     response = client.post(f"/v1/cases/{DEMO_CASE_ID}/weigh-sessions")

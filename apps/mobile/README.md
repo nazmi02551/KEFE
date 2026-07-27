@@ -2,38 +2,45 @@
 
 Flutter consumer application. The client consumes semantic copy/configuration, shared contracts and design tokens; screen code must not duplicate product constants or vendor-specific integrations.
 
-## M0 mobile foundation
+## Current M0 slice
 
-The first executable mobile slice implements:
+The executable mobile path is:
 
-`Guest Identity → Case → Weigh → Commit → Reveal`
+`Explore → Case → Weigh → Commit → Reveal`
+
+A Case can also be opened directly through `/case/:caseId`.
 
 ### Architecture
 
-- Riverpod for predictable feature/application state
-- GoRouter for declarative navigation and future deep links
+- Riverpod for feature/application state
+- GoRouter for declarative routes and Case deep links
 - provider-neutral `DecisionRepository`
 - HTTP adapter isolated from UI/application state
 - semantic Turkish/English copy catalog
 - Light/Dark/System theme support
 - Commit First enforced by the backend and reflected in the UI
-- accessible controls, semantic selection state and reduced layout complexity
+- accessible controls and semantic selection/status state
+- platform secure storage for the guest session token
+- per-Case local decision drafts for connectivity recovery
 
 ### Runtime configuration
 
-The API endpoint is supplied without hard-coding environment URLs:
+Runtime values are supplied without hard-coded environment URLs:
 
 ```bash
 flutter run \
-  --dart-define=KEFE_API_BASE_URL=http://localhost:8000
+  --dart-define=KEFE_API_BASE_URL=http://localhost:8000 \
+  --dart-define=KEFE_HTTP_TIMEOUT_SECONDS=12
 ```
 
 Android emulators typically need `http://10.0.2.2:8000` for a backend running on the host machine.
 
-### Credential storage
+### Decision recovery
 
-The foundation intentionally exposes a `CredentialStore` port. The current memory adapter proves the flow but is not production persistence. A platform secure-storage adapter is required before public beta; raw bearer credentials must never be written to logs, analytics or ordinary preferences.
+The local draft keeps the pinned CaseVersion, server session ID, selected response and commit recovery state. Before the first commit request, the client persists the idempotency key. When network outcome is uncertain, the same key is reused; after Commit is confirmed, only Reveal is retried.
+
+Drafts are keyed by Case ID, so opening another Case cannot silently replace a different in-progress draft.
 
 ### Quality gate
 
-Mobile CI pins Flutter 3.44.4 and runs dependency resolution, formatting, static analysis and widget tests. The initial tests verify Commit First and ThemeMode.system behavior.
+Mobile CI pins Flutter 3.44.4 and runs dependency resolution, formatting, static analysis and widget tests. Tests cover Commit First, ThemeMode.system, local draft restoration, uncertain-commit recovery, Reveal-only retry, Explore navigation and direct Case deep links.

@@ -84,6 +84,28 @@ class HttpDecisionRepository implements DecisionRepository {
   }
 
   @override
+  Future<List<DecisionCaseSummary>> fetchExploreCases({int limit = 20}) async {
+    final response = await _request(
+      () => _client.get(_uri('/v1/cases?limit=$limit')),
+    );
+    final body = _decode(response);
+    return (body['items'] as List<Object?>)
+        .cast<Map<String, Object?>>()
+        .map(
+          (item) => DecisionCaseSummary(
+            id: item['case_id'] as String,
+            versionId: item['case_version_id'] as String,
+            title: item['title'] as String,
+            summary: item['summary'] as String,
+            format: item['base_format'] as String,
+            domain: item['primary_domain'] as String,
+            risk: item['content_risk'] as String,
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  @override
   Future<DecisionCase> fetchCase(String caseId) async {
     final response = await _request(() => _client.get(_uri('/v1/cases/$caseId')));
     final body = _decode(response);

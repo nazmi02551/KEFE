@@ -18,6 +18,10 @@ class DecisionService:
     def __init__(self, repository: DecisionRepository) -> None:
         self._repo = repository
 
+    def list_cases(self, *, limit: int = 20):
+        bounded_limit = min(max(limit, 1), 50)
+        return self._repo.list_current_cases(limit=bounded_limit)
+
     def get_case(self, case_id: UUID):
         case = self._repo.get_current_case_version(case_id)
         if case is None:

@@ -12,6 +12,8 @@ class ClientTransportFailure implements Exception {
 abstract interface class DecisionRepository {
   Future<GuestCredential> ensureGuestCredential();
 
+  Future<List<DecisionCaseSummary>> fetchExploreCases({int limit = 20});
+
   Future<DecisionCase> fetchCase(String caseId);
 
   Future<String> startSession(String caseId);
