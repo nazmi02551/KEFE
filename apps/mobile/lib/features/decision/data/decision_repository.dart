@@ -1,5 +1,14 @@
 import '../domain/decision_models.dart';
 
+class ClientTransportFailure implements Exception {
+  const ClientTransportFailure({this.code = 'NETWORK_UNAVAILABLE'});
+
+  final String code;
+
+  @override
+  String toString() => 'ClientTransportFailure($code)';
+}
+
 abstract interface class DecisionRepository {
   Future<GuestCredential> ensureGuestCredential();
 
