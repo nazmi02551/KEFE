@@ -48,7 +48,45 @@ def _openapi_errors() -> list[str]:
     if "GuestCreateRequest" not in schemas:
         errors.append("OpenAPI must expose GuestCreateRequest admission inputs")
 
+    case_schema = schemas.get("CaseDetailResponse")
+    if not isinstance(case_schema, dict):
+        errors.append("OpenAPI must expose typed CaseDetailResponse")
+    else:
+        questions = case_schema.get("properties", {}).get("questions", {})
+        question_ref = questions.get("items", {}).get("$ref")
+        if question_ref != "#/components/schemas/QuestionResponse":
+            errors.append("CaseDetailResponse.questions must reference QuestionResponse")
+
+    question_schema = schemas.get("QuestionResponse")
+    if not isinstance(question_schema, dict):
+        errors.append("OpenAPI must expose typed QuestionResponse")
+    else:
+        properties = question_schema.get("properties", {})
+        required_fields = {
+            "question_id",
+            "prompt",
+            "response_type",
+            "required",
+            "response_schema",
+            "options",
+        }
+        missing = sorted(required_fields - properties.keys())
+        if missing:
+            errors.append(f"QuestionResponse missing typed fields: {', '.join(missing)}")
+
     paths = contract.get("paths", {})
+    case_operation = paths.get("/v1/cases/{case_id}", {}).get("get", {})
+    case_response_ref = (
+        case_operation.get("responses", {})
+        .get("200", {})
+        .get("content", {})
+        .get("application/json", {})
+        .get("schema", {})
+        .get("$ref")
+    )
+    if case_response_ref != "#/components/schemas/CaseDetailResponse":
+        errors.append("GET /v1/cases/{case_id} must return typed CaseDetailResponse")
+
     guest_operation = paths.get("/v1/identity/guest", {}).get("post", {})
     if not guest_operation:
         errors.append("OpenAPI must expose guest identity creation")
@@ -75,6 +113,21 @@ def _openapi_errors() -> list[str]:
                 if parameter.get("name", "").lower() == "x-actor-id":
                     errors.append(f"OpenAPI must not expose X-Actor-Id ({method.upper()} {path})")
 
+    return errors
+
+
+def _question_schema_errors(schema: str) -> list[str]:
+    errors: list[str] = []
+    match = re.search(
+        r"CREATE TABLE content\.question \((.*?)\n\);",
+        schema,
+        flags=re.DOTALL,
+    )
+    if match is None:
+        return ["M0 schema must expose content.question"]
+    question_block = match.group(1)
+    if "sort_order integer NOT NULL DEFAULT 0" not in question_block:
+        errors.append("M0 schema must expose deterministic question sort_order")
     return errors
 
 
@@ -106,6 +159,7 @@ def main() -> None:
         schema_errors.append("Guest bearer credentials must persist only as token hashes")
     if "is_required boolean NOT NULL DEFAULT true" not in schema:
         schema_errors.append("M0 schema must expose explicit question requiredness")
+    schema_errors.extend(_question_schema_errors(schema))
 
     config_errors: list[str] = []
     required_config_keys = {
