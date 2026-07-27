@@ -11,6 +11,12 @@ depends_on = None
 def upgrade() -> None:
     op.execute(
         """
+        ALTER TABLE content.question
+        ADD COLUMN sort_order integer NOT NULL DEFAULT 0
+        """
+    )
+    op.execute(
+        """
         ALTER TABLE content.question_version
         ADD COLUMN is_required boolean NOT NULL DEFAULT true
         """
@@ -22,5 +28,11 @@ def downgrade() -> None:
         """
         ALTER TABLE content.question_version
         DROP COLUMN IF EXISTS is_required
+        """
+    )
+    op.execute(
+        """
+        ALTER TABLE content.question
+        DROP COLUMN IF EXISTS sort_order
         """
     )
