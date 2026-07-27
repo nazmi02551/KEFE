@@ -47,8 +47,8 @@ def _openapi_errors() -> list[str]:
     contract = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
     errors: list[str] = []
 
-    if contract.get("info", {}).get("version") != "0.8.0":
-        errors.append("OpenAPI checked-in version must match API v0.8.0")
+    if contract.get("info", {}).get("version") != "0.9.0":
+        errors.append("OpenAPI checked-in version must match API v0.9.0")
 
     bearer = contract.get("components", {}).get("securitySchemes", {}).get("HTTPBearer")
     if bearer != {"scheme": "bearer", "type": "http"}:
@@ -61,6 +61,9 @@ def _openapi_errors() -> list[str]:
         "QuestionResponse",
         "UpdatePrivateReasonRequest",
         "PrivateReasonResponse",
+        "PerspectiveCardResponse",
+        "PerspectiveMethodologyResponse",
+        "PerspectiveResponse",
     }
     missing_schemas = sorted(required_schemas - schemas.keys())
     if missing_schemas:
@@ -95,6 +98,21 @@ def _openapi_errors() -> list[str]:
             "PrivateReasonResponse missing fields: " + ", ".join(missing_reason_fields)
         )
 
+    perspective_properties = schemas.get("PerspectiveResponse", {}).get("properties", {})
+    required_perspective_fields = {
+        "session_id",
+        "case_version_id",
+        "cards",
+        "methodology",
+    }
+    missing_perspective_fields = sorted(
+        required_perspective_fields - perspective_properties.keys()
+    )
+    if missing_perspective_fields:
+        errors.append(
+            "PerspectiveResponse missing fields: " + ", ".join(missing_perspective_fields)
+        )
+
     paths = contract.get("paths", {})
     case_operation = paths.get("/v1/cases/{case_id}", {}).get("get", {})
     if _response_ref(case_operation) != "#/components/schemas/CaseDetailResponse":
@@ -104,12 +122,19 @@ def _openapi_errors() -> list[str]:
     if _response_ref(reason_operation) != "#/components/schemas/PrivateReasonResponse":
         errors.append("PUT private reason must return PrivateReasonResponse")
 
+    perspective_operation = paths.get(
+        "/v1/weigh-sessions/{session_id}/perspectives", {}
+    ).get("get", {})
+    if _response_ref(perspective_operation) != "#/components/schemas/PerspectiveResponse":
+        errors.append("GET perspectives must return PerspectiveResponse")
+
     protected_operations = (
         ("/v1/cases/{case_id}/weigh-sessions", "post"),
         ("/v1/weigh-sessions/{session_id}/responses", "put"),
         ("/v1/weigh-sessions/{session_id}/reason", "put"),
         ("/v1/weigh-sessions/{session_id}/commit", "post"),
         ("/v1/weigh-sessions/{session_id}/reveal", "get"),
+        ("/v1/weigh-sessions/{session_id}/perspectives", "get"),
         ("/v1/identity/session", "delete"),
     )
     for path, method in protected_operations:
@@ -129,7 +154,7 @@ def _openapi_errors() -> list[str]:
 
 
 def _schema_errors() -> list[str]:
-    schema = (CONTRACTS / "postgresql-m0-schema.v1.4.0.sql").read_text(encoding="utf-8")
+    schema = (CONTRACTS / "postgresql-m0-schema.v1.5.0.sql").read_text(encoding="utf-8")
     required_fragments = {
         "commit_idempotency_key text": "explicit Commit idempotency",
         "commit_idempotency_actor_key_idx": "actor-scoped Commit idempotency",
@@ -147,6 +172,11 @@ def _schema_errors() -> list[str]:
         ),
         "moderation_state IN ('NOT_REQUIRED','PENDING','ALLOWED','BLOCKED')": (
             "reason moderation lifecycle"
+        ),
+        "CREATE TABLE content.perspective_card": "CaseVersion-pinned Perspective cards",
+        "perspective_one_published_slot_idx": "one published card per Perspective slot",
+        "source_kind text NOT NULL DEFAULT 'CURATED' CHECK (source_kind = 'CURATED')": (
+            "curated-only first Perspective slice"
         ),
     }
     return [
@@ -212,7 +242,7 @@ def main() -> None:
     print(
         "Contract sync OK: "
         f"{len(used)} DomainError codes registered; HTTP API, typed questions, "
-        "private reasons, identity, persistence and outbox invariants verified."
+        "private reasons, Perspective, identity, persistence and outbox invariants verified."
     )
 
 

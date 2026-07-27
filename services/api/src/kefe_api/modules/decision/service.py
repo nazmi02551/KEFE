@@ -9,6 +9,8 @@ from kefe_api.core.errors import DomainError
 from kefe_api.modules.decision.models import (
     CommitStatus,
     DraftUpdateStatus,
+    PerspectiveMode,
+    PerspectiveSnapshot,
     PrivateReason,
     Question,
     WeighSession,
@@ -250,13 +252,7 @@ class DecisionService:
         raise RuntimeError(f"Unsupported commit status: {attempt.status}")
 
     def reveal(self, *, actor_id: UUID, session_id: UUID):
-        session = self._owned_session(actor_id, session_id)
-        if session.state is not WeighState.COMMITTED:
-            raise DomainError(
-                "RESULT_COMMIT_REQUIRED",
-                "Commit is required before reveal",
-                403,
-            )
+        session = self._committed_owned_session(actor_id, session_id)
         snapshot = self._repo.get_reveal(session.case_version_id)
         if snapshot is None:
             raise DomainError(
@@ -271,6 +267,40 @@ class DecisionService:
             {"case_version_id": str(session.case_version_id), "layer": snapshot.layer},
         )
         return snapshot
+
+    def perspectives(self, *, actor_id: UUID, session_id: UUID) -> PerspectiveSnapshot:
+        session = self._committed_owned_session(actor_id, session_id)
+        snapshot = self._repo.get_perspective(session.case_version_id)
+        if snapshot is None:
+            snapshot = PerspectiveSnapshot(
+                case_version_id=session.case_version_id,
+                mode=PerspectiveMode.DEGRADED_CURATED,
+                sample_kind="CURATED_FALLBACK",
+                sample_size=0,
+                generated_at=datetime.now(UTC),
+                provenance_note="No published curated perspectives for this CaseVersion.",
+                cards=(),
+            )
+        self._repo.append_event(
+            "perspective.viewed",
+            session.id,
+            {
+                "case_version_id": str(session.case_version_id),
+                "mode": snapshot.mode.value,
+                "card_count": len(snapshot.cards),
+            },
+        )
+        return snapshot
+
+    def _committed_owned_session(self, actor_id: UUID, session_id: UUID) -> WeighSession:
+        session = self._owned_session(actor_id, session_id)
+        if session.state is not WeighState.COMMITTED:
+            raise DomainError(
+                "RESULT_COMMIT_REQUIRED",
+                "Commit is required before reveal or Perspective",
+                403,
+            )
+        return session
 
     def _owned_session(self, actor_id: UUID, session_id: UUID) -> WeighSession:
         session = self._repo.get_session(session_id)

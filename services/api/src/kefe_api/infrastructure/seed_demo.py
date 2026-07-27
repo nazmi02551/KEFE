@@ -9,9 +9,13 @@ from sqlalchemy import text
 from kefe_api.core.settings import get_settings
 from kefe_api.infrastructure.db import build_engine
 from kefe_api.modules.decision.bootstrap import (
+    DEMO_ALTERNATIVE_PERSPECTIVE_ID,
+    DEMO_BRIDGE_PERSPECTIVE_ID,
     DEMO_CASE_ID,
     DEMO_CASE_VERSION_ID,
     DEMO_CONFIDENCE_QUESTION_ID,
+    DEMO_NEAR_PERSPECTIVE_ID,
+    DEMO_OPPOSING_PERSPECTIVE_ID,
     DEMO_QUESTION_ID,
 )
 
@@ -20,6 +24,32 @@ DEMO_STABLE_QUESTION_ID = UUID("55555555-5555-4555-8555-555555555555")
 DEMO_RESULT_ID = UUID("66666666-6666-4666-8666-666666666666")
 DEMO_STABLE_CONFIDENCE_QUESTION_ID = UUID("88888888-8888-4888-8888-888888888888")
 
+DEMO_PERSPECTIVES = (
+    (
+        DEMO_NEAR_PERSPECTIVE_ID,
+        "NEAR",
+        "İhtiyacı daha acil görünen kişiye öncelik vermek zararı azaltabilir.",
+    ),
+    (
+        DEMO_OPPOSING_PERSPECTIVE_ID,
+        "OPPOSING",
+        "Sırayı korumak, kişisel değerlendirmeden doğacak keyfiliği sınırlayabilir.",
+    ),
+    (
+        DEMO_BRIDGE_PERSPECTIVE_ID,
+        "BRIDGE",
+        (
+            "Acil ihtiyacı gözetirken sırada bekleyenin hakkını açık bir ölçütle "
+            "korumak iki kaygıyı birlikte taşıyabilir."
+        ),
+    ),
+    (
+        DEMO_ALTERNATIVE_PERSPECTIVE_ID,
+        "ALTERNATIVE_CONTEXT",
+        "Koltuk tek kaynak değilse kısa süreli destek veya yer değişimi ikilemi yumuşatabilir.",
+    ),
+)
+
 
 def seed_demo() -> None:
     settings = get_settings()
@@ -27,6 +57,7 @@ def seed_demo() -> None:
         raise RuntimeError("KEFE_DATABASE_URL is required to seed PostgreSQL")
 
     engine = build_engine(settings.database_url)
+    published_at = datetime.now(UTC)
     with engine.begin() as connection:
         connection.execute(
             text(
@@ -59,7 +90,7 @@ def seed_demo() -> None:
                 "case_id": DEMO_CASE_ID,
                 "title": "Son koltuk kime verilmeli?",
                 "summary": "İki makul ihtiyaç arasında sınırlı bir kaynağı tart.",
-                "published_at": datetime.now(UTC),
+                "published_at": published_at,
             },
         )
         connection.execute(
@@ -200,9 +231,51 @@ def seed_demo() -> None:
                 "id": DEMO_RESULT_ID,
                 "case_version_id": DEMO_CASE_VERSION_ID,
                 "payload": json.dumps({"A": 0.57, "B": 0.43}),
-                "generated_at": datetime.now(UTC),
+                "generated_at": published_at,
             },
         )
+        for perspective_id, slot, body in DEMO_PERSPECTIVES:
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO content.perspective_card (
+                        id,
+                        case_version_id,
+                        slot,
+                        body,
+                        source_kind,
+                        provenance_label,
+                        moderation_state,
+                        status,
+                        published_at
+                    )
+                    VALUES (
+                        :id,
+                        :case_version_id,
+                        :slot,
+                        :body,
+                        'CURATED',
+                        'KEFE editoryal',
+                        'NOT_REQUIRED',
+                        'PUBLISHED',
+                        :published_at
+                    )
+                    ON CONFLICT (id) DO UPDATE SET
+                        body = EXCLUDED.body,
+                        provenance_label = EXCLUDED.provenance_label,
+                        status = EXCLUDED.status,
+                        published_at = EXCLUDED.published_at,
+                        updated_at = now()
+                    """
+                ),
+                {
+                    "id": perspective_id,
+                    "case_version_id": DEMO_CASE_VERSION_ID,
+                    "slot": slot,
+                    "body": body,
+                    "published_at": published_at,
+                },
+            )
 
 
 if __name__ == "__main__":

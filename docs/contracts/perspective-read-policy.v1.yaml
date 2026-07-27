@@ -1,0 +1,86 @@
+contract: perspective-read-policy
+version: 1.0.0
+status: accepted
+updated_at: '2026-07-27'
+authority:
+  adr: docs/adr/0009-commit-gated-bounded-perspective.md
+  product_baseline:
+    - KEFE Master Product Document v1.2.0
+    - KEFE Product Bible v1.4.0
+    - KEFE Engineering Blueprint v0.5.0
+endpoint:
+  method: GET
+  path: /v1/weigh-sessions/{session_id}/perspectives
+  authentication: bearer
+  ownership: authenticated_actor
+  required_session_state: COMMITTED
+  pinned_by: case_version_id
+errors:
+  missing_or_foreign_session:
+    code: WEIGH_SESSION_NOT_FOUND
+    http_status: 404
+  commit_required:
+    code: RESULT_COMMIT_REQUIRED
+    http_status: 403
+response:
+  maximum_cards: 4
+  unique_by: slot
+  slot_order:
+    - NEAR
+    - OPPOSING
+    - BRIDGE
+    - ALTERNATIVE_CONTEXT
+  modes:
+    - READY
+    - CLUSTER_PENDING
+    - DEGRADED_CURATED
+  client_only_states:
+    - LOADING
+    - REASON_PENDING_MODERATION
+    - ERROR_RETRYABLE
+  required_methodology_fields:
+    - mode
+    - sample_kind
+    - sample_size
+    - generated_at
+    - provenance_note
+card:
+  required_fields:
+    - perspective_id
+    - slot
+    - body
+    - source_kind
+    - provenance_label
+    - moderation_state
+  source_kinds:
+    - CURATED
+    - HUMAN_REASON
+  moderation_states:
+    - NOT_REQUIRED
+    - ALLOWED
+eligibility:
+  first_slice_source_kind: CURATED
+  first_slice_mode: DEGRADED_CURATED
+  current_private_reasons_allowed: false
+  human_reason_required_visibility: POLICY_ELIGIBLE
+  human_reason_required_moderation_state: ALLOWED
+privacy:
+  expose_reason_text_in_events: false
+  expose_card_text_in_events: false
+  expose_author_profile: false
+  expose_popularity_metrics: false
+ranking:
+  first_slice: deterministic_slot_order
+  popularity_only: forbidden
+fallback:
+  required: true
+  kind: curated_case_version_snapshot
+  empty_response_allowed: true
+out_of_scope:
+  - raw_reason_feed
+  - cross_user_private_reason_visibility
+  - reactions
+  - reporting
+  - persuasion_metrics
+  - ai_generated_summaries
+  - provider_selection

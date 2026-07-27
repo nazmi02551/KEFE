@@ -31,6 +31,24 @@ class ReasonVisibility(StrEnum):
     PRIVATE = "PRIVATE"
 
 
+class PerspectiveMode(StrEnum):
+    READY = "READY"
+    CLUSTER_PENDING = "CLUSTER_PENDING"
+    DEGRADED_CURATED = "DEGRADED_CURATED"
+
+
+class PerspectiveSlot(StrEnum):
+    NEAR = "NEAR"
+    OPPOSING = "OPPOSING"
+    BRIDGE = "BRIDGE"
+    ALTERNATIVE_CONTEXT = "ALTERNATIVE_CONTEXT"
+
+
+class PerspectiveSourceKind(StrEnum):
+    CURATED = "CURATED"
+    HUMAN_REASON = "HUMAN_REASON"
+
+
 class CommitStatus(StrEnum):
     COMMITTED = "COMMITTED"
     IDEMPOTENT_REPLAY = "IDEMPOTENT_REPLAY"
@@ -90,6 +108,27 @@ class PrivateReason:
     moderation_state: ReasonModerationState
     visibility: ReasonVisibility = ReasonVisibility.PRIVATE
     updated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+
+
+@dataclass(frozen=True, slots=True)
+class PerspectiveCard:
+    perspective_id: UUID
+    slot: PerspectiveSlot
+    body: str
+    source_kind: PerspectiveSourceKind
+    provenance_label: str
+    moderation_state: ReasonModerationState
+
+
+@dataclass(frozen=True, slots=True)
+class PerspectiveSnapshot:
+    case_version_id: UUID
+    mode: PerspectiveMode
+    sample_kind: str
+    sample_size: int
+    generated_at: datetime
+    provenance_note: str
+    cards: tuple[PerspectiveCard, ...]
 
 
 @dataclass(frozen=True, slots=True)
