@@ -1,0 +1,90 @@
+contract_version: 1.0.0
+updated_at: '2026-07-28'
+authority:
+  adr: docs/adr/0012-account-offer-and-my-kefe-progress-foundation.md
+  product_rule: optional_post_reveal_account_offer_and_progressive_my_kefe
+endpoint:
+  method: GET
+  path: /v1/me/progress
+  authentication: required
+  ownership: current_actor_only
+  mutation: false
+account_offer:
+  placement: POST_REVEAL
+  first_session_eligible_after_committed_weighs: 1
+  blocking: false
+  dismissible: true
+  continue_as_guest_required: true
+  account_creation_available_in_this_slice: false
+  forbidden_client_behavior:
+    - force_registration
+    - hide_reveal_or_perspective
+    - render_nonfunctional_create_account_action
+    - use_loss_framed_or_scarcity_copy
+ownership_continuity:
+  source_of_truth: server_actor_id
+  client_side_history_copy: forbidden
+  future_conversion:
+    allowed_strategies:
+      - preserve_actor_identity
+      - audited_atomic_server_merge
+    rollback_rule: guest_actor_and_progress_remain_unchanged
+progress:
+  source_records:
+    - decision.weigh_session where state=COMMITTED
+  fields:
+    - meaningful_weigh_count
+    - distinct_case_count
+    - distinct_domain_count
+    - first_committed_at
+    - last_committed_at
+    - recent_cases
+  recent_cases:
+    maximum_items: 5
+    fields:
+      - case_id
+      - case_version_id
+      - title
+      - primary_domain
+      - committed_at
+  readiness:
+    INSUFFICIENT_DATA:
+      committed_weigh_count_min: 0
+      committed_weigh_count_max: 2
+    FORMING:
+      committed_weigh_count_min: 3
+      committed_weigh_count_max: null
+    note: presentation_readiness_only_not_research_validated
+  forbidden_outputs:
+    - permanent_personality_label
+    - ideology_or_party_inference
+    - political_profile
+    - psychometric_score
+    - country_representative_claim
+    - streak
+    - leaderboard
+    - xp_or_currency
+    - private_reason_text
+    - raw_response_payload
+methodology:
+  sample_scope: current_actor_committed_history
+  confidence_claims: none
+  advanced_insights: deferred_to_methodology_backed_contract
+privacy:
+  forbidden_response_data:
+    - bearer_token
+    - token_hash
+    - integrity_evidence
+    - phone
+    - email
+    - private_reason_text
+analytics:
+  allowed_events:
+    - progress.viewed
+    - account_offer.viewed
+    - account_offer.dismissed
+    - account_offer.continue_as_guest
+  event_payload_forbidden:
+    - raw_response
+    - private_reason_text
+    - bearer_token
