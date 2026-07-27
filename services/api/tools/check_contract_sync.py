@@ -3,7 +3,6 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[3]
 API_SRC = REPO_ROOT / "services" / "api" / "src"
 CONTRACTS = REPO_ROOT / "docs" / "contracts"
