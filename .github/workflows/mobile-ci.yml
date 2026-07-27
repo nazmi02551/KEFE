@@ -1,0 +1,40 @@
+name: Mobile CI
+
+on:
+  pull_request:
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  flutter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.4'
+          channel: stable
+          cache: true
+      - name: Resolve dependencies
+        working-directory: apps/mobile
+        run: flutter pub get
+      - name: Verify formatting
+        working-directory: apps/mobile
+        run: dart format --output=none --set-exit-if-changed lib test
+      - name: Analyze
+        working-directory: apps/mobile
+        run: flutter analyze
+      - name: Test
+        working-directory: apps/mobile
+        run: flutter test
