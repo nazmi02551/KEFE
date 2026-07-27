@@ -225,6 +225,56 @@ class HttpDecisionRepository implements DecisionRepository {
     );
   }
 
+  @override
+  Future<PerspectiveResult> fetchPerspectives(String sessionId) async {
+    final headers = await _authorizedHeaders();
+    final response = await _request(
+      () => _client.get(
+        _uri('/v1/weigh-sessions/$sessionId/perspectives'),
+        headers: headers,
+      ),
+    );
+    final body = _decode(response);
+    final methodology = body['methodology'] as Map<String, Object?>;
+    final cards = (body['cards'] as List<Object?>)
+        .cast<Map<String, Object?>>()
+        .map(_parsePerspectiveCard)
+        .whereType<PerspectiveCard>()
+        .take(4)
+        .toList(growable: false);
+    return PerspectiveResult(
+      sessionId: body['session_id'] as String,
+      caseVersionId: body['case_version_id'] as String,
+      cards: cards,
+      methodology: PerspectiveMethodology(
+        mode: methodology['mode'] as String,
+        sampleKind: methodology['sample_kind'] as String,
+        sampleSize: methodology['sample_size'] as int,
+        generatedAt: DateTime.parse(methodology['generated_at'] as String),
+        provenanceNote: methodology['provenance_note'] as String,
+      ),
+    );
+  }
+
+  PerspectiveCard? _parsePerspectiveCard(Map<String, Object?> item) {
+    final slot = switch (item['slot']) {
+      'NEAR' => PerspectiveSlot.near,
+      'OPPOSING' => PerspectiveSlot.opposing,
+      'BRIDGE' => PerspectiveSlot.bridge,
+      'ALTERNATIVE_CONTEXT' => PerspectiveSlot.alternativeContext,
+      _ => null,
+    };
+    if (slot == null) return null;
+    return PerspectiveCard(
+      id: item['perspective_id'] as String,
+      slot: slot,
+      body: item['body'] as String,
+      sourceKind: item['source_kind'] as String,
+      provenanceLabel: item['provenance_label'] as String,
+      moderationState: item['moderation_state'] as String,
+    );
+  }
+
   Future<Map<String, String>> _authorizedHeaders({bool json = false}) async {
     final credential = await ensureGuestCredential();
     return {
