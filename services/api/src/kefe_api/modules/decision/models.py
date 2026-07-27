@@ -31,6 +31,22 @@ class ReasonVisibility(StrEnum):
     PRIVATE = "PRIVATE"
 
 
+class PerspectiveSourceKind(StrEnum):
+    EDITORIAL_HUMAN = "EDITORIAL_HUMAN"
+
+
+class PerspectiveModerationState(StrEnum):
+    PENDING = "PENDING"
+    ALLOWED = "ALLOWED"
+    BLOCKED = "BLOCKED"
+
+
+class PerspectivePublicationState(StrEnum):
+    DRAFT = "DRAFT"
+    PUBLISHED = "PUBLISHED"
+    WITHDRAWN = "WITHDRAWN"
+
+
 class CommitStatus(StrEnum):
     COMMITTED = "COMMITTED"
     IDEMPOTENT_REPLAY = "IDEMPOTENT_REPLAY"
@@ -90,6 +106,28 @@ class PrivateReason:
     moderation_state: ReasonModerationState
     visibility: ReasonVisibility = ReasonVisibility.PRIVATE
     updated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+
+
+@dataclass(frozen=True, slots=True)
+class PerspectiveItem:
+    id: UUID
+    case_version_id: UUID
+    question_version_id: UUID
+    target_value: Any
+    text: str
+    source_kind: PerspectiveSourceKind
+    moderation_state: PerspectiveModerationState
+    publication_state: PerspectivePublicationState
+    editorial_priority: int
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+
+
+@dataclass(frozen=True, slots=True)
+class PerspectiveSelection:
+    question_version_id: UUID | None
+    viewer_value: Any | None
+    selection_policy: str
+    items: tuple[PerspectiveItem, ...]
 
 
 @dataclass(frozen=True, slots=True)
