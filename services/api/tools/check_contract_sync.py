@@ -33,7 +33,8 @@ def main() -> None:
     missing_errors = sorted(used - registered)
     missing_paths = _check_manifest_paths()
 
-    schema = (CONTRACTS / "postgresql-m0-schema.v1.0.1.sql").read_text(encoding="utf-8")
+    schema = (CONTRACTS / "postgresql-m0-schema.v1.1.0.sql").read_text(encoding="utf-8")
+    config = (CONTRACTS / "config-registry.v1.1.0.yaml").read_text(encoding="utf-8")
     schema_errors: list[str] = []
     if "commit_idempotency_key text" not in schema:
         schema_errors.append("M0 schema must expose explicit commit_idempotency_key")
@@ -41,6 +42,26 @@ def main() -> None:
         schema_errors.append("M0 schema must enforce actor-scoped commit idempotency")
     if "outbox_decision_lifecycle_once_idx" not in schema:
         schema_errors.append("M0 schema must enforce lifecycle outbox uniqueness")
+    if "next_attempt_at timestamptz" not in schema or "locked_until timestamptz" not in schema:
+        schema_errors.append("M0 schema must expose durable outbox retry and lease fields")
+    if "dead_lettered_at timestamptz" not in schema:
+        schema_errors.append("M0 schema must expose outbox dead-letter state")
+
+    config_errors: list[str] = []
+    required_config_keys = {
+        "events.transport",
+        "events.outbox.batch_size",
+        "events.outbox.lease_seconds",
+        "events.outbox.poll_seconds",
+        "events.outbox.retry_base_seconds",
+        "events.outbox.retry_max_seconds",
+        "events.outbox.max_attempts",
+    }
+    missing_config = sorted(
+        key for key in required_config_keys if f"- key: {key}\n" not in config
+    )
+    if missing_config:
+        config_errors.append(f"Missing outbox config keys: {', '.join(missing_config)}")
 
     problems: list[str] = []
     if missing_errors:
@@ -48,6 +69,7 @@ def main() -> None:
     if missing_paths:
         problems.append(f"Missing contract manifest paths: {', '.join(missing_paths)}")
     problems.extend(schema_errors)
+    problems.extend(config_errors)
 
     if problems:
         raise SystemExit("\n".join(problems))
@@ -55,7 +77,7 @@ def main() -> None:
     print(
         "Contract sync OK: "
         f"{len(used)} executable DomainError codes registered; "
-        "manifest paths and M0 persistence invariants verified."
+        "manifest paths, M0 persistence and outbox delivery invariants verified."
     )
 
 
