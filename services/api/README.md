@@ -6,7 +6,7 @@ FastAPI modular monolith. Capability modules own domain/application behavior beh
 
 The executable product path is:
 
-`Guest Identity → Explore → Case → Typed Weigh → Private Reason → Commit → Reveal`
+`Guest Identity → Explore → Case → Typed Weigh → Private Reason → Commit → Reveal → Perspective`
 
 The same decision application service supports two persistence adapters:
 
@@ -17,25 +17,29 @@ The same decision application service supports two persistence adapters:
 
 - Guest users receive opaque revocable bearer credentials; client-supplied actor IDs are not trusted.
 - Only bearer-token hashes are persisted server-side; raw guest tokens are returned to the client and are not stored.
-- Commit First: Reveal is forbidden before a confirmed commit.
+- Commit First: Reveal and Perspective are forbidden before a confirmed Commit.
 - Session ownership is actor-scoped.
-- Required questions must be answered before commit; optional questions do not silently become blockers.
+- Required questions must be answered before Commit; optional questions do not silently become blockers.
 - Question behavior is versioned through `response_type` + `response_schema` and validated server-side.
 - Question display order is explicit editorial data, not UUID or insertion order.
 - The first typed question contracts are `SINGLE_CHOICE` and `CONFIDENCE`.
 - Private reason capture is schema-driven and actor-scoped.
 - Reason tags are validated against the CaseVersion policy, deduplicated and bounded.
 - Optional short reason text is technically capped and enters moderation state `PENDING`; tags-only reasons use `NOT_REQUIRED`.
-- Reasons remain `PRIVATE` in this slice; there is no public comment feed, ranking or cross-user reason read model.
+- Participant reasons remain `PRIVATE`; the Perspective endpoint never reads `decision.private_reason`.
 - Draft reasons are editable only before Commit and become immutable with the decision lifecycle.
+- The first Perspective source is `EDITORIAL_HUMAN`, linked to the pinned CaseVersion and decision question.
+- Perspective eligibility requires `PUBLISHED` + `ALLOWED` editorial content after Commit.
+- `EDITORIAL_OPPOSITION_V1` selects items whose structured target differs from the viewer's committed `SINGLE_CHOICE` value.
+- Perspective ordering uses explicit editorial priority and deterministic tie-breaking, not likes, popularity or engagement.
 - Sessions are pinned to a CaseVersion; stale versions are blocked.
 - Consumer reveal returns the Trusted result layer.
 - Domain failures use stable machine-readable error codes.
-- Draft response/reason updates and commit use row-locked write boundaries in PostgreSQL.
-- The same commit `Idempotency-Key` is replay-safe, including concurrent retries.
-- Competing different-key commits linearize to one successful commit.
-- A commit idempotency key cannot silently identify another actor commit command.
-- Session state and its start/commit outbox event are persisted in one transaction.
+- Draft response/reason updates and Commit use row-locked write boundaries in PostgreSQL.
+- The same Commit `Idempotency-Key` is replay-safe, including concurrent retries.
+- Competing different-key commits linearize to one successful Commit.
+- A Commit idempotency key cannot silently identify another actor Commit command.
+- Session state and its start/Commit outbox event are persisted in one transaction.
 - Decision lifecycle outbox rows have database uniqueness guards.
 - Outbox transport is provider-neutral and runs outside the request transaction.
 - Outbox workers use bounded batches, leases, exponential backoff and dead-letter state.
@@ -80,12 +84,18 @@ The default API persistence remains `memory`, so PostgreSQL is opt-in until loca
 
 ### Demo Case
 
-The development bootstrap exposes one low-risk DILEMMA Case through fixed UUID fixtures. It contains a required `SINGLE_CHOICE` question, an optional schema-driven `CONFIDENCE` question and a private reason policy with structured tags plus optional short text. These are development fixtures, not product identifiers or global product defaults.
+The development bootstrap exposes one low-risk DILEMMA Case through fixed UUID fixtures. It contains a required `SINGLE_CHOICE` question, an optional schema-driven `CONFIDENCE` question, a private reason policy and two moderation-approved editorial human perspectives representing the two structured choices. These are development fixtures, not product identifiers, final copy or global ranking defaults.
+
+### Perspective boundary
+
+`GET /v1/weigh-sessions/{session_id}/perspectives` is Bearer-protected and available only after Commit. The response identifies the decision axis, the viewer's committed value, the versioned selection policy and eligible editorial-human items with provenance/moderation metadata.
+
+This endpoint deliberately does **not** expose another participant's private reason. Participant-reason visibility, consent, moderation thresholds, ranking methodology, AI clustering and persuasion/Bridge Score ordering require later explicit product and methodology contracts.
 
 ### Next backend slices
 
-1. safe Perspective read model after Commit, beginning with moderation-approved opposing reasons rather than popularity-only ranking.
-2. Context/source read contracts with progressive disclosure and no result leakage.
+1. Context/source read contracts with progressive disclosure and no result leakage.
+2. Content/Admin authoring and publication workflow for Cases, Questions and editorial Perspectives.
 3. outbox backlog/dead-letter observability and audited replay tooling.
 4. expand CaseVersion/content persistence toward the full physical contract.
 5. query-budget and latency regression tests.
