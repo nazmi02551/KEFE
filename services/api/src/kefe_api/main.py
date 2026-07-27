@@ -9,6 +9,12 @@ from kefe_api.infrastructure.persistence import (
 from kefe_api.modules.decision.router import router as decision_router
 from kefe_api.modules.decision.service import DecisionService
 from kefe_api.modules.health.router import router as health_router
+from kefe_api.modules.identity.admission import (
+    GuestAdmissionGuard,
+    InMemoryGuestIssueRateLimiter,
+    IntegrityMode,
+    UnconfiguredDeviceIntegrityVerifier,
+)
 from kefe_api.modules.identity.router import router as identity_router
 from kefe_api.modules.identity.service import IdentityService
 
@@ -26,6 +32,13 @@ def create_app() -> FastAPI:
     app.state.identity_service = IdentityService(
         repository=identity_repository,
         guest_token_ttl_days=settings.guest_token_ttl_days,
+    )
+    app.state.guest_admission_guard = GuestAdmissionGuard(
+        limiter=InMemoryGuestIssueRateLimiter(),
+        integrity_verifier=UnconfiguredDeviceIntegrityVerifier(),
+        rate_limit=settings.guest_issue_rate_limit,
+        rate_window_seconds=settings.guest_issue_rate_window_seconds,
+        integrity_mode=IntegrityMode(settings.device_integrity_mode),
     )
 
     install_exception_handlers(app)
