@@ -40,13 +40,21 @@ class DecisionQuestion {
     required this.id,
     required this.prompt,
     required this.responseType,
-    required this.options,
+    this.required = true,
+    this.options = const [],
+    this.responseSchema = const {},
   });
 
   final String id;
   final String prompt;
   final String responseType;
+  final bool required;
   final List<String> options;
+  final Map<String, Object?> responseSchema;
+
+  double get minimum => (responseSchema['min'] as num?)?.toDouble() ?? 1;
+  double get maximum => (responseSchema['max'] as num?)?.toDouble() ?? 5;
+  double get step => (responseSchema['step'] as num?)?.toDouble() ?? 1;
 }
 
 @immutable
