@@ -1,4 +1,4 @@
-manifest_version: 1.0.0
+manifest_version: 1.1.0
 updated_at: '2026-07-27'
 policy:
   executable_schema_source: services/api/migrations
@@ -14,20 +14,21 @@ contracts:
     version: '1'
     role: event_envelope
   - id: config-registry
-    path: docs/contracts/config-registry.v1.yaml
-    version: 1.0.0
+    path: docs/contracts/config-registry.v1.1.0.yaml
+    version: 1.1.0
     role: typed_configuration
   - id: error-registry
     path: docs/contracts/error-codes.v1.yaml
     version: 1.0.1
     role: stable_api_errors
   - id: postgresql-m0-schema
-    path: docs/contracts/postgresql-m0-schema.v1.0.1.sql
-    version: 1.0.1
+    path: docs/contracts/postgresql-m0-schema.v1.1.0.sql
+    version: 1.1.0
     role: derived_executable_schema_snapshot
     derived_from:
       - services/api/migrations/versions/20260727_0001_m0_core.py
       - services/api/migrations/versions/20260727_0002_commit_concurrency.py
+      - services/api/migrations/versions/20260727_0003_outbox_delivery.py
   - id: repository-structure
     path: docs/contracts/repository-structure.v1.txt
     version: '1'
@@ -35,3 +36,4 @@ contracts:
 architecture_decisions:
   - docs/adr/0001-postgres-persistence-and-commit-idempotency.md
   - docs/adr/0002-linearizable-decision-commit.md
+  - docs/adr/0003-transactional-outbox-delivery.md
