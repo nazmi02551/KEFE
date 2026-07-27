@@ -187,7 +187,9 @@ class DecisionController extends Notifier<DecisionState> {
     final caseData = state.caseData;
     final sessionId = state.sessionId;
     if (caseData == null || sessionId == null) return;
-    if (!caseData.questions.any((question) => question.id == questionId)) return;
+    if (!caseData.questions.any((question) => question.id == questionId)) {
+      return;
+    }
 
     final responses = {...state.responses, questionId: value};
     await _writeEditingDraft(
