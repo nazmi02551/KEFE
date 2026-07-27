@@ -77,6 +77,22 @@ class PrivateReasonResponse(BaseModel):
     visibility: str
 
 
+class PerspectiveItemResponse(BaseModel):
+    perspective_id: UUID
+    question_id: UUID
+    target_value: Any
+    text: str
+    source_kind: str
+    moderation_state: str
+
+
+class PerspectiveResponse(BaseModel):
+    question_id: UUID | None
+    viewer_value: Any | None
+    selection_policy: str
+    items: list[PerspectiveItemResponse]
+
+
 def get_service(request: Request) -> DecisionService:
     return request.app.state.decision_service
 
@@ -230,3 +246,31 @@ def reveal(
         "generated_at": snapshot.generated_at,
         "result": snapshot.payload,
     }
+
+
+@router.get(
+    "/weigh-sessions/{session_id}/perspectives",
+    response_model=PerspectiveResponse,
+)
+def perspectives(
+    session_id: UUID,
+    principal: PrincipalDep,
+    service: DecisionServiceDep,
+) -> PerspectiveResponse:
+    selection = service.perspectives(actor_id=principal.actor_id, session_id=session_id)
+    return PerspectiveResponse(
+        question_id=selection.question_version_id,
+        viewer_value=selection.viewer_value,
+        selection_policy=selection.selection_policy,
+        items=[
+            PerspectiveItemResponse(
+                perspective_id=item.id,
+                question_id=item.question_version_id,
+                target_value=item.target_value,
+                text=item.text,
+                source_kind=item.source_kind,
+                moderation_state=item.moderation_state,
+            )
+            for item in selection.items
+        ],
+    )
