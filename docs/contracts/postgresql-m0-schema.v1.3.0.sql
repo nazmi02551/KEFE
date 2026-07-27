@@ -74,6 +74,7 @@ CREATE TABLE content.question (
     id uuid PRIMARY KEY,
     issue_id uuid NOT NULL REFERENCES content.issue(id) ON DELETE RESTRICT,
     stable_code text NOT NULL,
+    sort_order integer NOT NULL DEFAULT 0,
     UNIQUE(issue_id, stable_code)
 );
 
