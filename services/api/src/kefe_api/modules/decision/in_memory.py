@@ -60,6 +60,15 @@ class InMemoryDecisionRepository:
         with self._lock:
             return self._cases.get(version_id)
 
+    def list_actor_committed_sessions(self, actor_id: UUID) -> tuple[WeighSession, ...]:
+        with self._lock:
+            sessions = [
+                deepcopy(session)
+                for session in self._sessions.values()
+                if session.actor_id == actor_id and session.state is WeighState.COMMITTED
+            ]
+            return tuple(sessions)
+
     def save_session_with_event(
         self,
         session: WeighSession,
