@@ -4,6 +4,8 @@ from datetime import UTC, datetime
 
 from sqlalchemy import Connection, text
 
+from kefe_api.core.settings import get_settings
+from kefe_api.infrastructure.db import build_engine
 from kefe_api.modules.context.bootstrap import (
     DEMO_CONTEXT_BLOCK_ID,
     DEMO_CONTEXT_DETAIL_ID,
@@ -126,3 +128,16 @@ def seed_context_demo(connection: Connection) -> None:
                 "source_id": DEMO_CONTEXT_SOURCE_ID,
             },
         )
+
+
+def main() -> None:
+    settings = get_settings()
+    if not settings.database_url:
+        raise RuntimeError("KEFE_DATABASE_URL is required to seed PostgreSQL")
+    engine = build_engine(settings.database_url)
+    with engine.begin() as connection:
+        seed_context_demo(connection)
+
+
+if __name__ == "__main__":
+    main()
