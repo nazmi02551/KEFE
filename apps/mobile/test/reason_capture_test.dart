@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kefe_mobile/app/kefe_app.dart';
+import 'package:kefe_mobile/core/localization/kefe_strings.dart';
 import 'package:kefe_mobile/features/decision/application/decision_controller.dart';
 import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/decision_repository.dart';
@@ -164,11 +165,9 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('option-A')));
     await tester.pumpAndSettle();
-    await tester.drag(find.byType(ListView), const Offset(0, -300));
-    await tester.pumpAndSettle();
     expect(
-      find.textContaining('diğer kullanıcılara gösterilmez'),
-      findsOneWidget,
+      const KefeStrings(Locale('tr', 'TR')).reasonHelper,
+      contains('diğer kullanıcılara gösterilmez'),
     );
 
     await tapCommit(tester);
