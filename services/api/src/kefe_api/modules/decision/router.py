@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, Header, Request
 from pydantic import BaseModel, Field
 
 from kefe_api.modules.decision.service import DecisionService
+from kefe_api.modules.identity.dependencies import PrincipalDep
 
 router = APIRouter(prefix="/v1", tags=["Decision"])
 
@@ -31,12 +32,7 @@ def get_service(request: Request) -> DecisionService:
     return request.app.state.decision_service
 
 
-def get_actor_id(x_actor_id: Annotated[UUID, Header(alias="X-Actor-Id")]) -> UUID:
-    return x_actor_id
-
-
 DecisionServiceDep = Annotated[DecisionService, Depends(get_service)]
-ActorIdDep = Annotated[UUID, Depends(get_actor_id)]
 IdempotencyKey = Annotated[
     str,
     Header(alias="Idempotency-Key", min_length=8, max_length=128),
@@ -70,10 +66,10 @@ def get_case(case_id: UUID, service: DecisionServiceDep) -> dict[str, Any]:
 @router.post("/cases/{case_id}/weigh-sessions", status_code=201)
 def start_session(
     case_id: UUID,
-    actor_id: ActorIdDep,
+    principal: PrincipalDep,
     service: DecisionServiceDep,
 ) -> StartSessionResponse:
-    session = service.start_session(actor_id=actor_id, case_id=case_id)
+    session = service.start_session(actor_id=principal.actor_id, case_id=case_id)
     return StartSessionResponse(
         session_id=session.id,
         case_id=session.case_id,
@@ -86,11 +82,11 @@ def start_session(
 def update_responses(
     session_id: UUID,
     body: UpdateResponsesRequest,
-    actor_id: ActorIdDep,
+    principal: PrincipalDep,
     service: DecisionServiceDep,
 ) -> dict[str, Any]:
     session = service.update_responses(
-        actor_id=actor_id,
+        actor_id=principal.actor_id,
         session_id=session_id,
         responses={item.question_id: item.value for item in body.responses},
     )
@@ -105,11 +101,11 @@ def update_responses(
 def commit(
     session_id: UUID,
     idempotency_key: IdempotencyKey,
-    actor_id: ActorIdDep,
+    principal: PrincipalDep,
     service: DecisionServiceDep,
 ) -> dict[str, Any]:
     session = service.commit(
-        actor_id=actor_id,
+        actor_id=principal.actor_id,
         session_id=session_id,
         idempotency_key=idempotency_key,
     )
@@ -124,10 +120,10 @@ def commit(
 @router.get("/weigh-sessions/{session_id}/reveal")
 def reveal(
     session_id: UUID,
-    actor_id: ActorIdDep,
+    principal: PrincipalDep,
     service: DecisionServiceDep,
 ) -> dict[str, Any]:
-    snapshot = service.reveal(actor_id=actor_id, session_id=session_id)
+    snapshot = service.reveal(actor_id=principal.actor_id, session_id=session_id)
     return {
         "layer": snapshot.layer,
         "n": snapshot.n,
