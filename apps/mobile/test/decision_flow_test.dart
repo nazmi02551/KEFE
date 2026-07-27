@@ -68,8 +68,16 @@ class FakeDecisionRepository implements DecisionRepository {
   Future<String> startSession(String caseId) async => 'session-1';
 }
 
+void useTurkishLocale(WidgetTester tester) {
+  tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
+  addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+}
+
 void main() {
-  testWidgets('Commit First hides result until a decision is committed', (tester) async {
+  testWidgets('Commit First hides result until a decision is committed', (
+    tester,
+  ) async {
+    useTurkishLocale(tester);
     final repository = FakeDecisionRepository();
     await tester.pumpWidget(
       ProviderScope(
@@ -95,6 +103,7 @@ void main() {
   testWidgets('application supports dark theme without changing flow semantics', (
     tester,
   ) async {
+    useTurkishLocale(tester);
     tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
     addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
 
