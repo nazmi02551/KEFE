@@ -13,17 +13,22 @@ class DecisionDraft {
   const DecisionDraft({
     required this.caseData,
     required this.sessionId,
-    required this.questionId,
-    required this.selectedOption,
     required this.updatedAt,
+    this.responses = const {},
+    this.questionId,
+    this.selectedOption,
     this.commitIdempotencyKey,
     this.phase = DecisionDraftPhase.editing,
   });
 
   final DecisionCase caseData;
   final String sessionId;
-  final String questionId;
-  final String selectedOption;
+  final Map<String, Object?> responses;
+
+  // Legacy fields are kept only to migrate v2 single-answer drafts safely.
+  final String? questionId;
+  final String? selectedOption;
+
   final String? commitIdempotencyKey;
   final DecisionDraftPhase phase;
   final DateTime updatedAt;
@@ -31,8 +36,16 @@ class DecisionDraft {
   String get caseId => caseData.id;
   String get caseVersionId => caseData.versionId;
 
+  Map<String, Object?> get effectiveResponses {
+    if (responses.isNotEmpty) return responses;
+    if (questionId != null && selectedOption != null) {
+      return {questionId!: selectedOption};
+    }
+    return const {};
+  }
+
   DecisionDraft copyWith({
-    String? selectedOption,
+    Map<String, Object?>? responses,
     String? commitIdempotencyKey,
     DecisionDraftPhase? phase,
     DateTime? updatedAt,
@@ -40,8 +53,7 @@ class DecisionDraft {
     return DecisionDraft(
       caseData: caseData,
       sessionId: sessionId,
-      questionId: questionId,
-      selectedOption: selectedOption ?? this.selectedOption,
+      responses: responses ?? effectiveResponses,
       commitIdempotencyKey: commitIdempotencyKey ?? this.commitIdempotencyKey,
       phase: phase ?? this.phase,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -63,14 +75,15 @@ class DecisionDraft {
               'id': question.id,
               'prompt': question.prompt,
               'response_type': question.responseType,
+              'required': question.required,
               'options': question.options,
+              'response_schema': question.responseSchema,
             },
           )
           .toList(growable: false),
     },
     'session_id': sessionId,
-    'question_id': questionId,
-    'selected_option': selectedOption,
+    'responses': effectiveResponses,
     'commit_idempotency_key': commitIdempotencyKey,
     'phase': phase.name,
     'updated_at': updatedAt.toUtc().toIso8601String(),
@@ -86,7 +99,10 @@ class DecisionDraft {
             id: question['id'] as String,
             prompt: question['prompt'] as String,
             responseType: question['response_type'] as String,
-            options: (question['options'] as List<Object?>).cast<String>(),
+            required: question['required'] as bool? ?? true,
+            options: (question['options'] as List<Object?>? ?? const []).cast<String>(),
+            responseSchema:
+                (question['response_schema'] as Map?)?.cast<String, Object?>() ?? const {},
           );
         })
         .toList(growable: false);
@@ -96,6 +112,14 @@ class DecisionDraft {
       (value) => value.name == rawPhase,
       orElse: () => DecisionDraftPhase.editing,
     );
+
+    final rawResponses = json['responses'];
+    final responses = rawResponses is Map
+        ? rawResponses.cast<String, Object?>()
+        : <String, Object?>{
+            if (json['question_id'] case final String questionId)
+              questionId: json['selected_option'],
+          };
 
     return DecisionDraft(
       caseData: DecisionCase(
@@ -109,8 +133,7 @@ class DecisionDraft {
         questions: questions,
       ),
       sessionId: json['session_id'] as String,
-      questionId: json['question_id'] as String,
-      selectedOption: json['selected_option'] as String,
+      responses: responses,
       commitIdempotencyKey: json['commit_idempotency_key'] as String?,
       phase: phase,
       updatedAt: DateTime.parse(json['updated_at'] as String),
