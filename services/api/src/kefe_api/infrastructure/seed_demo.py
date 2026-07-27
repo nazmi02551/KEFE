@@ -225,7 +225,13 @@ def seed_demo() -> None:
         )
 
 
-def _seed_perspective(connection, *, perspective_id: UUID, target_value: str, text_body: str) -> None:
+def _seed_perspective(
+    connection,
+    *,
+    perspective_id: UUID,
+    target_value: str,
+    text_body: str,
+) -> None:
     connection.execute(
         text(
             """
