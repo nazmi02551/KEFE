@@ -2,6 +2,12 @@ import 'package:flutter/foundation.dart';
 
 import 'decision_models.dart';
 
+enum DecisionDraftPhase {
+  editing,
+  commitPending,
+  committedAwaitingReveal,
+}
+
 @immutable
 class DecisionDraft {
   const DecisionDraft({
@@ -11,7 +17,7 @@ class DecisionDraft {
     required this.selectedOption,
     required this.updatedAt,
     this.commitIdempotencyKey,
-    this.commitPending = false,
+    this.phase = DecisionDraftPhase.editing,
   });
 
   final DecisionCase caseData;
@@ -19,7 +25,7 @@ class DecisionDraft {
   final String questionId;
   final String selectedOption;
   final String? commitIdempotencyKey;
-  final bool commitPending;
+  final DecisionDraftPhase phase;
   final DateTime updatedAt;
 
   String get caseId => caseData.id;
@@ -28,7 +34,7 @@ class DecisionDraft {
   DecisionDraft copyWith({
     String? selectedOption,
     String? commitIdempotencyKey,
-    bool? commitPending,
+    DecisionDraftPhase? phase,
     DateTime? updatedAt,
   }) {
     return DecisionDraft(
@@ -37,7 +43,7 @@ class DecisionDraft {
       questionId: questionId,
       selectedOption: selectedOption ?? this.selectedOption,
       commitIdempotencyKey: commitIdempotencyKey ?? this.commitIdempotencyKey,
-      commitPending: commitPending ?? this.commitPending,
+      phase: phase ?? this.phase,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
@@ -66,7 +72,7 @@ class DecisionDraft {
     'question_id': questionId,
     'selected_option': selectedOption,
     'commit_idempotency_key': commitIdempotencyKey,
-    'commit_pending': commitPending,
+    'phase': phase.name,
     'updated_at': updatedAt.toUtc().toIso8601String(),
   };
 
@@ -74,18 +80,22 @@ class DecisionDraft {
     final caseJson = (json['case'] as Map).cast<String, Object?>();
     final questions = (caseJson['questions'] as List<Object?>)
         .cast<Map>()
-        .map(
-          (raw) {
-            final question = raw.cast<String, Object?>();
-            return DecisionQuestion(
-              id: question['id'] as String,
-              prompt: question['prompt'] as String,
-              responseType: question['response_type'] as String,
-              options: (question['options'] as List<Object?>).cast<String>(),
-            );
-          },
-        )
+        .map((raw) {
+          final question = raw.cast<String, Object?>();
+          return DecisionQuestion(
+            id: question['id'] as String,
+            prompt: question['prompt'] as String,
+            responseType: question['response_type'] as String,
+            options: (question['options'] as List<Object?>).cast<String>(),
+          );
+        })
         .toList(growable: false);
+
+    final rawPhase = json['phase'] as String? ?? DecisionDraftPhase.editing.name;
+    final phase = DecisionDraftPhase.values.firstWhere(
+      (value) => value.name == rawPhase,
+      orElse: () => DecisionDraftPhase.editing,
+    );
 
     return DecisionDraft(
       caseData: DecisionCase(
@@ -102,7 +112,7 @@ class DecisionDraft {
       questionId: json['question_id'] as String,
       selectedOption: json['selected_option'] as String,
       commitIdempotencyKey: json['commit_idempotency_key'] as String?,
-      commitPending: json['commit_pending'] as bool? ?? false,
+      phase: phase,
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
   }
