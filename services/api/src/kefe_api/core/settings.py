@@ -10,7 +10,7 @@ class Settings(BaseSettings):
 
     environment: str = "development"
     api_title: str = "KEFE API"
-    api_version: str = "0.1.0"
+    api_version: str = "0.2.0"
 
 
 @lru_cache
