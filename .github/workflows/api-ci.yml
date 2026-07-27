@@ -34,8 +34,23 @@ jobs:
         working-directory: services/api
         run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
       - name: Lint
+        id: lint
+        continue-on-error: true
         working-directory: services/api
-        run: ruff check .
+        run: ruff check . --output-format=json > ruff-results.json
+      - name: Upload lint diagnostics on failure
+        if: steps.lint.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruff-results
+          path: services/api/ruff-results.json
+          if-no-files-found: error
+      - name: Enforce lint
+        if: always()
+        run: test '${{ steps.lint.outcome }}' = 'success'
+      - name: Contract sync
+        working-directory: services/api
+        run: python tools/check_contract_sync.py
       - name: Unit tests
         working-directory: services/api
         run: pytest --ignore=tests/test_postgres_integration.py --cov=kefe_api --cov-report=term-missing

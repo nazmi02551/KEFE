@@ -1,7 +1,9 @@
+from concurrent.futures import ThreadPoolExecutor
 from uuid import UUID
 
 from fastapi.testclient import TestClient
 
+from kefe_api.core.errors import DomainError
 from kefe_api.main import create_app
 from kefe_api.modules.decision.bootstrap import DEMO_CASE_ID, DEMO_QUESTION_ID
 
@@ -99,3 +101,48 @@ def test_session_is_actor_scoped() -> None:
     response = client.get(f"/v1/weigh-sessions/{session_id}/reveal", headers=other_actor)
     assert response.status_code == 404
     assert response.json()["code"] == "WEIGH_SESSION_NOT_FOUND"
+
+
+def test_response_update_after_commit_is_rejected() -> None:
+    client = TestClient(create_app())
+    session_id = _start(client)
+    _answer(client, session_id)
+    commit = client.post(
+        f"/v1/weigh-sessions/{session_id}/commit",
+        headers={**HEADERS, "Idempotency-Key": "commit-0006"},
+    )
+    assert commit.status_code == 200
+
+    response = client.put(
+        f"/v1/weigh-sessions/{session_id}/responses",
+        headers=HEADERS,
+        json={"responses": [{"question_id": str(DEMO_QUESTION_ID), "value": "B"}]},
+    )
+    assert response.status_code == 409
+    assert response.json()["code"] == "WEIGH_SESSION_NOT_EDITABLE"
+
+
+def test_competing_commits_linearize_to_one_commit_event() -> None:
+    app = create_app()
+    client = TestClient(app)
+    session_id = UUID(_start(client))
+    _answer(client, str(session_id))
+    service = app.state.decision_service
+
+    def attempt(key: str) -> str:
+        try:
+            service.commit(actor_id=ACTOR_ID, session_id=session_id, idempotency_key=key)
+            return "COMMITTED"
+        except DomainError as exc:
+            return exc.code
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        outcomes = set(executor.map(attempt, ("race-key-1", "race-key-2")))
+
+    assert outcomes == {"COMMITTED", "WEIGH_SESSION_ALREADY_COMMITTED"}
+    committed_events = [
+        event
+        for event in app.state.decision_repository.events
+        if event["name"] == "weigh.committed"
+    ]
+    assert len(committed_events) == 1

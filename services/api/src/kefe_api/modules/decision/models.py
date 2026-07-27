@@ -13,6 +13,22 @@ class WeighState(StrEnum):
     BLOCKED_BY_VERSION = "BLOCKED_BY_VERSION"
 
 
+class DraftUpdateStatus(StrEnum):
+    UPDATED = "UPDATED"
+    NOT_FOUND = "NOT_FOUND"
+    NOT_EDITABLE = "NOT_EDITABLE"
+
+
+class CommitStatus(StrEnum):
+    COMMITTED = "COMMITTED"
+    IDEMPOTENT_REPLAY = "IDEMPOTENT_REPLAY"
+    NOT_FOUND = "NOT_FOUND"
+    ALREADY_COMMITTED = "ALREADY_COMMITTED"
+    STALE_VERSION = "STALE_VERSION"
+    INCOMPLETE = "INCOMPLETE"
+    IDEMPOTENCY_KEY_REUSED = "IDEMPOTENCY_KEY_REUSED"
+
+
 @dataclass(frozen=True, slots=True)
 class Question:
     id: UUID
@@ -46,6 +62,19 @@ class WeighSession:
     started_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     committed_at: datetime | None = None
     commit_key: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class DraftUpdateAttempt:
+    status: DraftUpdateStatus
+    session: WeighSession | None
+
+
+@dataclass(frozen=True, slots=True)
+class CommitAttempt:
+    status: CommitStatus
+    session: WeighSession | None
+    missing_question_ids: tuple[UUID, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
