@@ -46,6 +46,12 @@ class _DecisionFlowScreenState extends ConsumerState<DecisionFlowScreen> {
     final strings = KefeStrings.of(context);
     final state = ref.watch(decisionControllerProvider);
 
+    ref.listen<DecisionState>(decisionControllerProvider, (previous, next) async {
+      if (widget.firstUse && previous?.reveal == null && next.reveal != null) {
+        await ref.read(onboardingControllerProvider).complete();
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(title: Text(strings.appName)),
       body: SafeArea(
@@ -172,10 +178,7 @@ class _DecisionContent extends ConsumerWidget {
           if (firstUse) ...[
             const SizedBox(height: 20),
             _FirstUseCompletionCard(
-              onContinue: () async {
-                await ref.read(onboardingControllerProvider).complete();
-                if (context.mounted) context.go('/explore');
-              },
+              onContinue: () => context.go('/explore'),
             ),
           ],
         ],
@@ -249,7 +252,7 @@ class _RevealCard extends StatelessWidget {
 class _FirstUseCompletionCard extends StatelessWidget {
   const _FirstUseCompletionCard({required this.onContinue});
 
-  final Future<void> Function() onContinue;
+  final VoidCallback onContinue;
 
   @override
   Widget build(BuildContext context) {
