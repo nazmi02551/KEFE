@@ -1443,6 +1443,110 @@
         "title": "DraftContentInput",
         "type": "object"
       },
+      "FlowRuntimeResponse": {
+        "properties": {
+          "case_version_id": {
+            "format": "uuid",
+            "title": "Case Version Id",
+            "type": "string"
+          },
+          "entry_step_code": {
+            "title": "Entry Step Code",
+            "type": "string"
+          },
+          "execution_support": {
+            "title": "Execution Support",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "session_state": {
+            "title": "Session State",
+            "type": "string"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/FlowRuntimeStepResponse"
+            },
+            "title": "Steps",
+            "type": "array"
+          },
+          "template_code": {
+            "title": "Template Code",
+            "type": "string"
+          },
+          "template_version_no": {
+            "title": "Template Version No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "session_id",
+          "case_version_id",
+          "session_state",
+          "template_code",
+          "template_version_no",
+          "entry_step_code",
+          "execution_support",
+          "steps"
+        ],
+        "title": "FlowRuntimeResponse",
+        "type": "object"
+      },
+      "FlowRuntimeStepResponse": {
+        "properties": {
+          "capability_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Capability Codes",
+            "type": "array"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "next_step_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Next Step Codes",
+            "type": "array"
+          },
+          "primitive_code": {
+            "title": "Primitive Code",
+            "type": "string"
+          },
+          "reason_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Code"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "primitive_code",
+          "capability_codes",
+          "next_step_codes",
+          "state",
+          "reason_code"
+        ],
+        "title": "FlowRuntimeStepResponse",
+        "type": "object"
+      },
       "FlowStepInput": {
         "additionalProperties": false,
         "properties": {
@@ -2532,7 +2636,7 @@
   },
   "info": {
     "title": "KEFE API",
-    "version": "0.13.0"
+    "version": "0.14.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -3803,6 +3907,54 @@
         "summary": "Commit",
         "tags": [
           "Decision"
+        ]
+      }
+    },
+    "/v1/weigh-sessions/{session_id}/flow": {
+      "get": {
+        "operationId": "get_flow_runtime_v1_weigh_sessions__session_id__flow_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Session Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowRuntimeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Flow Runtime",
+        "tags": [
+          "Flow Runtime"
         ]
       }
     },
