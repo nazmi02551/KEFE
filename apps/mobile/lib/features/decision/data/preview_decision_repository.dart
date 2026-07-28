@@ -38,7 +38,7 @@ class PreviewDecisionRepository
         prompt: 'Bu kararından ne kadar eminsin?',
         responseType: 'CONFIDENCE',
         required: false,
-        responseSchema: {'min': 1, 'max': 5, 'step': 1},
+        responseSchema: {'min': 1, 'max': 10, 'step': 1},
       ),
     ],
   );
