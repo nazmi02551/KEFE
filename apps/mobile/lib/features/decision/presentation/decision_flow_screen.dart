@@ -6,6 +6,7 @@ import '../../../core/localization/kefe_strings.dart';
 import '../../context/presentation/context_section.dart';
 import '../../onboarding/application/onboarding_controller.dart';
 import '../application/decision_controller.dart';
+import '../domain/decision_models.dart';
 import 'perspective_section.dart';
 import 'question_input.dart';
 import 'reason_input.dart';
@@ -69,7 +70,7 @@ class _DecisionFlowScreenState extends ConsumerState<DecisionFlowScreen> {
                     child: const CircularProgressIndicator(),
                   ),
                 )
-              : state.caseData == null
+              : state.caseData == null || state.flowRuntime == null
                   ? _ErrorState(
                       key: const ValueKey('error'),
                       message: strings.messageForCode(state.errorCode),
@@ -101,9 +102,7 @@ class _DecisionContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = KefeStrings.of(context);
     final caseData = state.caseData!;
-    final reasonPolicy = caseData.reasonPolicy;
-    final controller = ref.read(decisionControllerProvider.notifier);
-    final inputsEnabled = state.reveal == null && !state.recoveryPending && !state.submitting;
+    final flowRuntime = state.flowRuntime!;
 
     return ListView(
       padding: const EdgeInsets.all(20),
@@ -116,8 +115,94 @@ class _DecisionContent extends ConsumerWidget {
         const SizedBox(height: 12),
         Text(caseData.summary, style: Theme.of(context).textTheme.bodyLarge),
         const SizedBox(height: 20),
-        ContextSection(caseVersionId: caseData.versionId),
+        for (final step in flowRuntime.steps)
+          _FlowStepSection(
+            key: ValueKey('flow-step-${step.code}'),
+            step: step,
+            state: state,
+            firstUse: firstUse,
+          ),
+        if (state.errorCode != null) ...[
+          const SizedBox(height: 16),
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              strings.messageForCode(state.errorCode),
+              key: const ValueKey('decision-status-message'),
+              style: TextStyle(
+                color: state.offlineDraft
+                    ? Theme.of(context).colorScheme.secondary
+                    : Theme.of(context).colorScheme.error,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _FlowStepSection extends ConsumerWidget {
+  const _FlowStepSection({
+    required this.step,
+    required this.state,
+    required this.firstUse,
+    super.key,
+  });
+
+  final FlowRuntimeStep step;
+  final DecisionState state;
+  final bool firstUse;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (step.state == FlowStepRuntimeState.blocked) {
+      return const SizedBox.shrink();
+    }
+
+    return switch (step.primitiveCode) {
+      'CONTEXT' => _contextStep(),
+      'DECISION' => _decisionStep(context, ref),
+      'COLLECTIVE_RESULT' => _resultStep(context, ref),
+      _ => step.state == FlowStepRuntimeState.unsupported
+          ? _CapabilityPendingCard(step: step)
+          : const SizedBox.shrink(),
+    };
+  }
+
+  Widget _contextStep() {
+    if (step.state != FlowStepRuntimeState.ready &&
+        step.state != FlowStepRuntimeState.completed) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ContextSection(caseVersionId: state.caseData!.versionId),
         const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _decisionStep(BuildContext context, WidgetRef ref) {
+    if (step.state == FlowStepRuntimeState.unsupported) {
+      return _CapabilityPendingCard(step: step);
+    }
+    if (step.state != FlowStepRuntimeState.ready) {
+      return const SizedBox.shrink();
+    }
+
+    final strings = KefeStrings.of(context);
+    final caseData = state.caseData!;
+    final reasonPolicy = caseData.reasonPolicy;
+    final controller = ref.read(decisionControllerProvider.notifier);
+    final inputsEnabled =
+        !state.recoveryPending && !state.submitting && state.reveal == null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
         for (final question in caseData.questions) ...[
           QuestionInputCard(
             question: question,
@@ -139,65 +224,89 @@ class _DecisionContent extends ConsumerWidget {
           const SizedBox(height: 12),
         ],
         const SizedBox(height: 8),
-        if (state.reveal == null) ...[
-          FilledButton(
-            key: const ValueKey('commit-button'),
-            onPressed: !state.hasRequiredResponses || state.submitting
-                ? null
-                : state.recoveryPending
-                    ? controller.retryPending
-                    : controller.commit,
-            child: state.submitting
-                ? const SizedBox.square(
-                    dimension: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(
-                    state.recoveryPending ? strings.retrySync : strings.commit,
-                  ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            !state.hasRequiredResponses
-                ? strings.completeRequired
-                : state.recoveryPending
-                    ? strings.pendingHelper
-                    : strings.commitHelper,
-            textAlign: TextAlign.center,
-          ),
-        ] else ...[
-          _RevealCard(state: state),
+        FilledButton(
+          key: const ValueKey('commit-button'),
+          onPressed: !state.hasRequiredResponses || state.submitting
+              ? null
+              : state.recoveryPending
+                  ? controller.retryPending
+                  : controller.commit,
+          child: state.submitting
+              ? const SizedBox.square(
+                  dimension: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(state.recoveryPending ? strings.retrySync : strings.commit),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          !state.hasRequiredResponses
+              ? strings.completeRequired
+              : state.recoveryPending
+                  ? strings.pendingHelper
+                  : strings.commitHelper,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
+  Widget _resultStep(BuildContext context, WidgetRef ref) {
+    if (step.state == FlowStepRuntimeState.unsupported) {
+      return _CapabilityPendingCard(step: step);
+    }
+    if (step.state != FlowStepRuntimeState.ready || state.reveal == null) {
+      return const SizedBox.shrink();
+    }
+
+    final controller = ref.read(decisionControllerProvider.notifier);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _RevealCard(state: state),
+        const SizedBox(height: 20),
+        PerspectiveSection(
+          state: state.perspectiveState,
+          result: state.perspective,
+          reasonPendingModeration: state.reasonPendingModeration,
+          onRetry: controller.retryPerspective,
+        ),
+        if (firstUse) ...[
           const SizedBox(height: 20),
-          PerspectiveSection(
-            state: state.perspectiveState,
-            result: state.perspective,
-            reasonPendingModeration: state.reasonPendingModeration,
-            onRetry: controller.retryPerspective,
-          ),
-          if (firstUse) ...[
-            const SizedBox(height: 20),
-            _FirstUseCompletionCard(
-              onContinue: () => context.go('/explore'),
-            ),
-          ],
-        ],
-        if (state.errorCode != null) ...[
-          const SizedBox(height: 16),
-          Semantics(
-            liveRegion: true,
-            child: Text(
-              strings.messageForCode(state.errorCode),
-              key: const ValueKey('decision-status-message'),
-              style: TextStyle(
-                color: state.offlineDraft
-                    ? Theme.of(context).colorScheme.secondary
-                    : Theme.of(context).colorScheme.error,
-              ),
-              textAlign: TextAlign.center,
-            ),
+          _FirstUseCompletionCard(
+            onContinue: () => context.go('/explore'),
           ),
         ],
       ],
+    );
+  }
+}
+
+class _CapabilityPendingCard extends StatelessWidget {
+  const _CapabilityPendingCard({required this.step});
+
+  final FlowRuntimeStep step;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
+    return Card(
+      key: ValueKey('capability-pending-${step.code}'),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              strings.flowCapabilityPendingTitle,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(strings.flowCapabilityPendingBody(step.reasonCode)),
+          ],
+        ),
+      ),
     );
   }
 }
