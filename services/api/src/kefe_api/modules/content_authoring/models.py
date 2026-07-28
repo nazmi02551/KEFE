@@ -55,7 +55,7 @@ class AuthoringSourceReference:
     source_kind: str
     locator: str
     title: str
-    publisher: str
+    publisher: str = ""
     published_at: datetime | None = None
     claim_status: str | None = None
     verified: bool = False
@@ -105,7 +105,11 @@ class AuthoringCaseVersion:
         *,
         published_at: datetime | None = None,
     ) -> AuthoringCaseVersion:
-        return replace(self, state=state, published_at=published_at)
+        return replace(
+            self,
+            state=state,
+            published_at=published_at if published_at is not None else self.published_at,
+        )
 
 
 @dataclass(frozen=True, slots=True)
