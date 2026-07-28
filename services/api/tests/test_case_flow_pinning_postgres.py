@@ -66,9 +66,16 @@ def test_postgres_publication_round_trips_flow_and_configuration_provenance(
         repository = app.state.content_authoring_repository
         case_id = uuid4()
         draft = _draft(case_id)
-        identity = CaseIdentity(id=case_id, slug=f"pg-flow-pin-{uuid4().hex[:10]}")
+        identity = CaseIdentity(
+            id=case_id,
+            slug=f"pg-flow-pin-{uuid4().hex[:10]}",
+        )
 
-        service.create_case(identity=identity, initial_version=draft, actor_ref="editor:test")
+        service.create_case(
+            identity=identity,
+            initial_version=draft,
+            actor_ref="editor:test",
+        )
         service.submit_for_review(draft.id, actor_ref="editor:test")
         service.approve(draft.id, actor_ref="reviewer:test")
         published = service.publish(draft.id, actor_ref="publisher:test")
@@ -77,7 +84,10 @@ def test_postgres_publication_round_trips_flow_and_configuration_provenance(
         reloaded = repository.get_version(published.id)
         assert reloaded is not None
         assert reloaded.content_configuration_id == published.content_configuration_id
-        assert reloaded.content_configuration_version_no == published.content_configuration_version_no
+        assert (
+            reloaded.content_configuration_version_no
+            == published.content_configuration_version_no
+        )
         assert reloaded.resolved_flow == published.resolved_flow
 
         engine = create_engine(database_url)
@@ -107,9 +117,15 @@ def test_postgres_publication_round_trips_flow_and_configuration_provenance(
                 {"version_id": published.id},
             ).mappings().one()
 
-        assert editorial["content_configuration_id"] == str(published.content_configuration_id)
-        assert editorial["resolved_flow"]["template_code"] == "STANDARD_COMMIT_REVEAL"
-        assert consumer["content_configuration_id"] == published.content_configuration_id
+        assert editorial["content_configuration_id"] == str(
+            published.content_configuration_id
+        )
+        assert editorial["resolved_flow"]["template_code"] == (
+            "STANDARD_COMMIT_REVEAL"
+        )
+        assert consumer["content_configuration_id"] == (
+            published.content_configuration_id
+        )
         assert consumer["content_configuration_version_no"] == 1
         assert consumer["flow_template_code"] == "STANDARD_COMMIT_REVEAL"
         assert consumer["flow_template_version_no"] == 1
@@ -117,7 +133,9 @@ def test_postgres_publication_round_trips_flow_and_configuration_provenance(
 
         decision_case = app.state.decision_repository.get_case_version(published.id)
         assert decision_case is not None
-        assert decision_case.content_configuration_id == published.content_configuration_id
+        assert decision_case.content_configuration_id == (
+            published.content_configuration_id
+        )
         assert decision_case.resolved_flow is not None
         assert decision_case.resolved_flow.template_code == "STANDARD_COMMIT_REVEAL"
     finally:
