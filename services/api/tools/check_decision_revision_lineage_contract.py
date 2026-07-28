@@ -26,7 +26,7 @@ def main() -> None:
         "not_every_exposure_is_intervention: true",
         "dimension_specific_delta_engines_forbidden: true",
         "claims_causality: false",
-        "ADVOCACY_SUPPORT",
+        "advocacy_support_is_decision_revision_class: false",
         "target_flow: PRINCIPLE_CONTEXT_RETEST",
         "runtime_case_type_branching: forbidden",
     }:
