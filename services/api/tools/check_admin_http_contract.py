@@ -15,6 +15,16 @@ ROUTER = (
     / "admin_security"
     / "router.py"
 )
+CONFIG_ROUTER = (
+    REPO_ROOT
+    / "services"
+    / "api"
+    / "src"
+    / "kefe_api"
+    / "modules"
+    / "content_configuration"
+    / "admin_router.py"
+)
 
 EXPECTED_PATHS = {
     "/internal/admin/v1/session": {"get"},
@@ -27,10 +37,25 @@ EXPECTED_PATHS = {
     "/internal/admin/v1/case-versions/{version_id}/publish": {"post"},
     "/internal/admin/v1/case-versions/{version_id}/withdraw": {"post"},
     "/internal/admin/v1/cases/{case_id}/audit": {"get"},
+    "/internal/admin/v1/content-configuration/current": {"get"},
+    "/internal/admin/v1/content-configuration/versions": {"get"},
+    "/internal/admin/v1/content-configuration/versions/{version_id}": {"get", "put"},
+    "/internal/admin/v1/content-configuration/audit": {"get"},
+    "/internal/admin/v1/content-configuration/drafts": {"post"},
+    "/internal/admin/v1/content-configuration/versions/{version_id}/publish": {"post"},
+    "/internal/admin/v1/content-configuration/versions/{version_id}/rollback-drafts": {
+        "post"
+    },
 }
-
 WRITE_METHODS = {"post", "put", "patch", "delete"}
-FORBIDDEN_IDENTITY_FIELDS = {"actor_ref", "admin_subject_id", "roles", "capabilities"}
+FORBIDDEN_IDENTITY_FIELDS = {
+    "actor_ref",
+    "admin_subject_id",
+    "roles",
+    "capabilities",
+    "audit_identity",
+    "created_by",
+}
 FORBIDDEN_SECRET_FIELDS = {"session_token", "csrf_token"}
 
 
@@ -49,7 +74,11 @@ def _request_schema_name(operation: dict) -> str | None:
 
 def main() -> None:
     policy = (CONTRACTS / "admin-http-surface.v1.yaml").read_text(encoding="utf-8")
+    config_policy = (CONTRACTS / "admin-content-configuration-http.v1.yaml").read_text(
+        encoding="utf-8"
+    )
     router_source = ROUTER.read_text(encoding="utf-8")
+    config_router_source = CONFIG_ROUTER.read_text(encoding="utf-8")
     openapi = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
     schemas = openapi.get("components", {}).get("schemas", {})
     paths = openapi.get("paths", {})
@@ -72,6 +101,20 @@ def main() -> None:
         if fragment not in policy:
             problems.append(f"Admin HTTP contract missing: {fragment}")
 
+    required_config_policy = {
+        "route_prefix: /internal/admin/v1/content-configuration",
+        "application_service: SecuredContentConfigurationService",
+        "direct_repository_mutation_from_http: forbidden",
+        "consumer_credentials_accepted: false",
+        "csrf_bound_to_same_session: true",
+        "manage: TAXONOMY_MANAGE",
+        "audit_read: AUDIT_READ",
+        "audit_actor_ref: server_derived",
+    }
+    for fragment in sorted(required_config_policy):
+        if fragment not in config_policy:
+            problems.append(f"Admin configuration HTTP contract missing: {fragment}")
+
     required_source = {
         'ADMIN_SESSION_COOKIE = "kefe_admin_session"',
         'ADMIN_CSRF_HEADER = "X-KEFE-CSRF"',
@@ -84,6 +127,20 @@ def main() -> None:
     for fragment in sorted(required_source):
         if fragment not in router_source:
             problems.append(f"Admin HTTP router missing: {fragment}")
+
+    required_config_source = {
+        'prefix="/internal/admin/v1/content-configuration"',
+        "SecuredContentConfigurationService",
+        "configuration.create_draft_from_current(principal)",
+        "configuration.draft_for_edit(principal, version_id)",
+        "configuration.publish(principal, version_id)",
+        "configuration.audit_trail(principal)",
+    }
+    for fragment in sorted(required_config_source):
+        if fragment not in config_router_source:
+            problems.append(f"Admin configuration router missing: {fragment}")
+    if "ContentConfigurationRepository" in config_router_source:
+        problems.append("Admin configuration HTTP must not depend directly on repository")
 
     if "/internal/admin/v1/login" in paths:
         problems.append("Admin HTTP surface must not expose a login/SSO endpoint yet")
@@ -117,17 +174,17 @@ def main() -> None:
                 properties = schemas.get(schema_name, {}).get("properties", {})
                 leaked = sorted(FORBIDDEN_IDENTITY_FIELDS & properties.keys())
                 if leaked:
-                    leaked_fields = ", ".join(leaked)
                     problems.append(
                         f"{schema_name} accepts forbidden Admin identity fields: "
-                        f"{leaked_fields}"
+                        + ", ".join(leaked)
                     )
 
     for schema_name, schema in schemas.items():
-        if not schema_name.startswith("Admin") and schema_name not in {
-            "AuthoringVersionResponse",
-            "AuditTrailResponse",
-        }:
+        if not (
+            schema_name.startswith("Admin")
+            or schema_name.startswith("Configuration")
+            or schema_name in {"AuthoringVersionResponse", "AuditTrailResponse"}
+        ):
             continue
         properties = schema.get("properties", {})
         leaked = sorted(FORBIDDEN_SECRET_FIELDS & properties.keys())
@@ -140,8 +197,8 @@ def main() -> None:
         raise SystemExit("\n".join(problems))
 
     print(
-        "Admin HTTP contract OK: internal route set, same-session CSRF, "
-        "server-derived identity and secret non-disclosure verified."
+        "Admin HTTP contract OK: authoring + composable configuration routes, "
+        "same-session CSRF, server-derived identity and secret non-disclosure verified."
     )
 
 
