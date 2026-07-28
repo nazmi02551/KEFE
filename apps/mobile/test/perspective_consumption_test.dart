@@ -186,9 +186,13 @@ Future<void> pumpPerspectiveCase(
   await tester.pumpAndSettle();
 }
 
-Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+Future<void> makeVisible(WidgetTester tester, Finder finder) async {
   await tester.ensureVisible(finder);
-  await tester.pumpAndSettle();
+  await tester.pump(const Duration(milliseconds: 100));
+}
+
+Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+  await makeVisible(tester, finder);
   await tester.tap(finder);
   await tester.pump();
 }
@@ -224,8 +228,7 @@ void main() {
     expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
 
     final section = find.byKey(const ValueKey('perspective-section'));
-    await tester.ensureVisible(section);
-    await tester.pumpAndSettle();
+    await makeVisible(tester, section);
     expect(section, findsOneWidget);
     expect(find.byKey(const ValueKey('perspective-curated-note')), findsOneWidget);
     expect(find.byKey(const ValueKey('perspective-card-near')), findsOneWidget);
@@ -246,7 +249,7 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('option-A')));
     final reason = find.byKey(const ValueKey('reason-text'));
-    await tester.ensureVisible(reason);
+    await makeVisible(tester, reason);
     await tester.enterText(reason, 'Bu yalnızca benim özel gerekçem.');
     await tester.pump();
     await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
@@ -254,8 +257,7 @@ void main() {
 
     expect(repository.reasonCalls, 1);
     final pending = find.byKey(const ValueKey('reason-pending-moderation'));
-    await tester.ensureVisible(pending);
-    await tester.pumpAndSettle();
+    await makeVisible(tester, pending);
     expect(pending, findsOneWidget);
     expect(
       find.descendant(
@@ -280,8 +282,7 @@ void main() {
     expect(repository.perspectiveCalls, 1);
 
     final retry = find.byKey(const ValueKey('perspective-retry'));
-    await tester.ensureVisible(retry);
-    await tester.pumpAndSettle();
+    await makeVisible(tester, retry);
     await tester.tap(retry);
     await tester.pumpAndSettle();
 
