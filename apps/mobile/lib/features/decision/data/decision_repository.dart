@@ -42,6 +42,34 @@ abstract interface class FlowRuntimeRepository {
   Future<FlowRuntimeSnapshot> fetchFlowRuntime(String sessionId);
 }
 
+abstract interface class DecisionLineageRepository {
+  Future<void> recordFlowStepExposure({
+    required String sessionId,
+    required String stepCode,
+    required String idempotencyKey,
+  });
+
+  Future<void> answerRevision({
+    required String sessionId,
+    required String stepCode,
+    required String questionId,
+    required Object value,
+  });
+
+  Future<void> saveRevisionReason({
+    required String sessionId,
+    required String stepCode,
+    required List<String> tags,
+    required String? text,
+  });
+
+  Future<void> commitRevision({
+    required String sessionId,
+    required String stepCode,
+    required String idempotencyKey,
+  });
+}
+
 extension FlowRuntimeRepositoryAccess on DecisionRepository {
   Future<FlowRuntimeSnapshot> fetchFlowRuntime(String sessionId) {
     final repository = this;
@@ -49,6 +77,16 @@ extension FlowRuntimeRepositoryAccess on DecisionRepository {
       return (repository as FlowRuntimeRepository).fetchFlowRuntime(sessionId);
     }
     throw const ClientTransportFailure(code: 'FLOW_RUNTIME_NOT_CONFIGURED');
+  }
+}
+
+extension DecisionLineageRepositoryAccess on DecisionRepository {
+  DecisionLineageRepository get lineage {
+    final repository = this;
+    if (repository is DecisionLineageRepository) {
+      return repository as DecisionLineageRepository;
+    }
+    throw const ClientTransportFailure(code: 'DECISION_LINEAGE_NOT_CONFIGURED');
   }
 }
 
