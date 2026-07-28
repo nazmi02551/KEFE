@@ -65,18 +65,10 @@ class PreviewDecisionRepository
       ];
 
   @override
-  Future<DecisionCase> fetchCase(String requestedCaseId) async {
-    if (requestedCaseId != caseId) {
-      throw ApiFailure('CASE_NOT_FOUND', 404);
-    }
-    return _case;
-  }
+  Future<DecisionCase> fetchCase(String requestedCaseId) async => _case;
 
   @override
   Future<String> startSession(String requestedCaseId) async {
-    if (requestedCaseId != caseId) {
-      throw ApiFailure('CASE_NOT_FOUND', 404);
-    }
     _committed = false;
     _sessionId = 'preview-session';
     return _sessionId;
@@ -84,11 +76,8 @@ class PreviewDecisionRepository
 
   @override
   Future<FlowRuntimeSnapshot> fetchFlowRuntime(String sessionId) async {
-    if (sessionId != _sessionId) {
-      throw ApiFailure('WEIGH_SESSION_NOT_FOUND', 404);
-    }
     return FlowRuntimeSnapshot(
-      sessionId: sessionId,
+      sessionId: _sessionId,
       caseVersionId: caseVersionId,
       sessionState: _committed ? 'COMMITTED' : 'DRAFT',
       templateCode: 'STANDARD_COMMIT_REVEAL',
@@ -145,32 +134,21 @@ class PreviewDecisionRepository
     required String sessionId,
     required String idempotencyKey,
   }) async {
-    if (sessionId != _sessionId) {
-      throw ApiFailure('WEIGH_SESSION_NOT_FOUND', 404);
-    }
     _committed = true;
   }
 
   @override
-  Future<RevealResult> reveal(String sessionId) async {
-    if (!_committed) {
-      throw ApiFailure('RESULT_COMMIT_REQUIRED', 403);
-    }
-    return const RevealResult(
-      layer: 'TRUSTED',
-      sampleSize: 1284,
-      confidence: 'HIGH',
-      values: {'A': 0.57, 'B': 0.43},
-    );
-  }
+  Future<RevealResult> reveal(String sessionId) async => const RevealResult(
+    layer: 'TRUSTED',
+    sampleSize: 1284,
+    confidence: 'HIGH',
+    values: {'A': 0.57, 'B': 0.43},
+  );
 
   @override
   Future<PerspectiveResult> fetchPerspectives(String sessionId) async {
-    if (!_committed) {
-      throw ApiFailure('RESULT_COMMIT_REQUIRED', 403);
-    }
     return PerspectiveResult(
-      sessionId: sessionId,
+      sessionId: _sessionId,
       caseVersionId: caseVersionId,
       cards: const [
         PerspectiveCard(
