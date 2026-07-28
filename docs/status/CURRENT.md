@@ -3,7 +3,7 @@
 **Updated:** 2026-07-28  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Latest verified implementation commit:** `9416d4366650c3078d92dbf0b5533e4d1a4cdf39`
+**Latest verified implementation commit:** `b36415671322dd15ea3b0a31c1203898ca0ebf58`
 
 This is the **single canonical durable engineering handoff**. Chat history is not a source of truth. At every continuation, read this file from `main`, inspect open PRs/recent CI, then proceed from the repository state.
 
@@ -31,7 +31,7 @@ Binding rules:
 - Guest continuation is always available through the first value loop.
 - Account Offer is optional, post-Reveal, dismissible and non-blocking.
 - My KEFE Progress is actor-scoped and server-derived; no personality, ideology or psychometric inference is authorized in the current foundation.
-- Content authoring is separate from consumer reads/writes; no public Admin authoring endpoint is authorized until a dedicated authentication/threat-model decision is approved.
+- Content authoring is separate from consumer reads/writes; no public Admin authoring endpoint is authorized until a dedicated authentication/authorization/threat-model decision is approved.
 
 ## 2. Completed executable foundation
 
@@ -49,8 +49,13 @@ Backend/contracts:
 - Authenticated `GET /v1/me/progress` with memory/PostgreSQL adapters.
 - Progress fields: committed weigh count, distinct Case/domain coverage, first/last Commit and recent completed Cases.
 - Deterministic OpenAPI export/drift gate, contract fitness checks and PostgreSQL integration tests.
-- M1 provider-neutral Content Authoring core: stable Case identity; versioned Issue/Question/Context/Source aggregate; `DRAFT → IN_REVIEW → APPROVED → PUBLISHED`; rejection/withdrawal rationale; append-only audit; registry-driven publication validation; immutable published CaseVersion; isolated correction revisions; atomic supersede behavior in the first in-memory adapter.
-- Content Authoring currently has **no public HTTP/Admin endpoint** and **no PostgreSQL authoring adapter yet**; those are deliberate next slices, not hidden incompleteness.
+- M1 provider-neutral Content Authoring core: stable Case identity; versioned Issue/Question/Context/Source aggregate; `DRAFT → IN_REVIEW → APPROVED → PUBLISHED`; rejection/withdrawal rationale; append-only audit; registry-driven publication validation; immutable published CaseVersion; isolated correction revisions.
+- PostgreSQL Content Authoring persistence under an isolated `editorial` schema using a provider-neutral JSONB aggregate representation.
+- Atomic publication materializes only approved content into the consumer `content` schema, supersedes the previous published version, appends lifecycle audit and marks the editorial version published in one transaction.
+- Consumer CaseVersion now owns immutable `base_format_code`, `primary_domain_code` and `content_risk`, so historical metadata does not drift after later revisions.
+- Public Context reads allow only materialized `PUBLISHED` or `SUPERSEDED` consumer CaseVersions; `DRAFT`, `IN_REVIEW` and `APPROVED` editorial content cannot leak by guessed ID.
+- Editorial lifecycle audit has a durable database sequence for deterministic transaction ordering.
+- Content Authoring still has **no public HTTP/Admin endpoint**. That is an intentional security boundary, not hidden incompleteness.
 
 Mobile:
 
@@ -72,6 +77,7 @@ Most recent merged product/architecture slices:
 - PR #27 — CaseVersion-pinned Context and Source layer.
 - PR #29 — optional Account Offer and actor-scoped My KEFE Progress foundation.
 - PR #31 — M1 Content Authoring and immutable publication core; merge commit `9416d4366650c3078d92dbf0b5533e4d1a4cdf39`.
+- PR #33 — PostgreSQL editorial persistence, atomic publication materialization and draft-leakage protection; merge commit `b36415671322dd15ea3b0a31c1203898ca0ebf58`.
 
 ## 3. Current executable path
 
@@ -79,7 +85,7 @@ Most recent merged product/architecture slices:
 
 Failures in Context, Perspective or Progress are isolated from the trusted decision state. They cannot replay mutable answers, Reason or Commit. The current low-risk DILEMMA is a development fixture, not a product-wide default.
 
-Content authoring now has an executable domain/application core but is intentionally not connected to a public Admin surface. Consumer reads continue to use only published immutable content.
+Content authoring now has a durable domain/application/persistence core and an atomic publication boundary, but is intentionally not connected to a public Admin surface. Consumer reads continue to use only published immutable materialized content.
 
 ## 4. Guardrails for upcoming work
 
@@ -92,20 +98,23 @@ Content authoring now has an executable domain/application core but is intention
 - Do not expose functional account conversion until enrollment, ownership transfer, recovery, retention and revocation work end to end.
 - Do not silently lock final navigation or branded Commit terminology outside the approved documents.
 - Never mutate a published CaseVersion in place; corrections create a new version.
-- Do not expose authoring/Admin HTTP endpoints before a dedicated admin authentication, authorization and threat-model ADR.
+- Do not expose authoring/Admin HTTP endpoints before a dedicated Admin authentication, authorization and threat-model ADR.
 - Do not embed a CMS vendor, SQL library, identity provider or AI provider into authoring domain rules.
+- Do not let editorial mutable states enter consumer read tables before publication.
 
 ## 5. Recommended next sequence
 
-1. **Content/Admin persistence foundation**
-   - PostgreSQL authoring repository and migrations
-   - atomic publication + previous-version supersede + append-only audit in one transaction
-   - persistence/integration tests proving drafts cannot leak into consumer reads
-
-2. **Admin security boundary before any authoring HTTP surface**
+1. **Admin security boundary before any authoring HTTP surface**
    - authentication/authorization/threat-model ADR
    - role/capability model, audit identity and session controls
+   - explicit separation from consumer guest/account identity
    - only then define authenticated Admin application endpoints
+
+2. **Authenticated Admin application boundary**
+   - internal create/edit/review/approve/publish/withdraw commands over the existing authoring service
+   - anti-CSRF/session controls as applicable to the chosen Admin client
+   - authorization tests for every capability and lifecycle command
+   - no direct database mutation path from UI
 
 3. **Content configuration and review workflows**
    - taxonomy/format/modifier registry management
@@ -134,7 +143,7 @@ Content authoring now has an executable domain/application core but is intention
    - visually verify every render
    - update manifest and archive superseded versions
 
-PR #31 completes the first Content Authoring domain/application slice, **not the full Content/Admin milestone**. Therefore DOCX/PDF regeneration is still deferred until the declared Content/Admin milestone boundary is reached or a product-policy change requires an earlier document revision.
+PR #33 completes the **Content Authoring persistence/publication foundation**, but the broader Content/Admin milestone is not complete until the Admin security boundary and authenticated workflow surface are locked and implemented. Therefore DOCX/PDF regeneration remains deferred until that declared milestone boundary or an earlier product-policy change.
 
 ## 6. Continuation protocol
 
@@ -152,4 +161,4 @@ PR #31 completes the first Content Authoring domain/application slice, **not the
 
 ## 7. New-chat recovery prompt
 
-> Continue KEFE development from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first, then inspect open PRs, recent commits and CI. Preserve Commit First, CaseVersion pinning, pre-Commit Context without result leakage, private Reason boundaries, optional guest continuation, low-claim My KEFE Progress, immutable published content and provider-neutral ports/adapters. Do not expose an Admin authoring endpoint before a dedicated auth/authorization/threat-model ADR. Lock the next coherent slice in an ADR and machine-readable contract before coding. Merge only with green CI and keep the milestone DOCX/PDF synchronization obligation.
+> Continue KEFE development from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first, then inspect open PRs, recent commits and CI. Preserve Commit First, CaseVersion pinning, pre-Commit Context without result leakage, private Reason boundaries, optional guest continuation, low-claim My KEFE Progress, immutable published content and provider-neutral ports/adapters. Editorial drafts live outside consumer publication. Do not expose an Admin authoring endpoint before a dedicated Admin authentication/authorization/threat-model ADR. Lock the next coherent slice in an ADR and machine-readable contract before coding. Merge only with green CI and keep the milestone DOCX/PDF synchronization obligation.
