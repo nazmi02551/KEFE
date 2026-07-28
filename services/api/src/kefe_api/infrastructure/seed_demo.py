@@ -8,13 +8,21 @@ from sqlalchemy import text
 
 from kefe_api.core.settings import get_settings
 from kefe_api.infrastructure.db import build_engine
-from kefe_api.main import create_app
+from kefe_api.infrastructure.persistence import (
+    build_content_authoring_repository,
+    build_content_configuration_repository,
+)
 from kefe_api.modules.content_authoring.models import (
     AuthoringCaseVersion,
     AuthoringIssue,
     AuthoringQuestion,
     CaseIdentity,
     ContentLifecycle,
+)
+from kefe_api.modules.content_authoring.registry import default_authoring_registry
+from kefe_api.modules.content_authoring.service import ContentAuthoringService
+from kefe_api.modules.content_configuration.publication_resolver import (
+    ContentConfigurationPublicationResolver,
 )
 from kefe_api.modules.decision.bootstrap import (
     DEMO_ALTERNATIVE_PERSPECTIVE_ID,
@@ -118,11 +126,18 @@ def _demo_authoring_version() -> AuthoringCaseVersion:
 
 
 def _publish_demo_case() -> None:
-    app = create_app()
-    service = app.state.content_authoring_service
-    repository = app.state.content_authoring_repository
-    existing = repository.get_case(DEMO_CASE_ID)
-    if existing is not None:
+    settings = get_settings()
+    if not settings.database_url:
+        raise RuntimeError("KEFE_DATABASE_URL is required to seed PostgreSQL")
+    postgres_settings = settings.model_copy(update={"persistence_backend": "postgres"})
+    authoring_repository = build_content_authoring_repository(postgres_settings)
+    configuration_repository = build_content_configuration_repository(postgres_settings)
+    service = ContentAuthoringService(
+        authoring_repository,
+        default_authoring_registry(),
+        ContentConfigurationPublicationResolver(configuration_repository),
+    )
+    if authoring_repository.get_case(DEMO_CASE_ID) is not None:
         return
 
     version = _demo_authoring_version()
