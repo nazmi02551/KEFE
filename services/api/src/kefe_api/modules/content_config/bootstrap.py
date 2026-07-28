@@ -82,13 +82,10 @@ def baseline_configuration() -> ContentConfigurationSnapshot:
         claim_states=frozenset({"VERIFIED", "CLAIMED", "DISPUTED", "UNKNOWN"}),
         review_modes=frozenset({"EDITORIAL", "TRUST", "CIVIC", "LEGAL", "SAFETY"}),
         allowed_modifiers=MappingProxyType(allowed_modifiers),
+        # Existing publication behavior remains unchanged in the foundation slice.
+        # Risk/Civic gates will be activated by an explicit reviewed configuration publication.
         review_modes_by_risk=MappingProxyType(
-            {
-                "L0": frozenset({"EDITORIAL"}),
-                "L1": frozenset({"EDITORIAL", "TRUST"}),
-                "L2": frozenset({"EDITORIAL", "TRUST", "SAFETY"}),
-                "L3": frozenset({"EDITORIAL", "TRUST", "SAFETY"}),
-            }
+            {risk: frozenset() for risk in ("L0", "L1", "L2", "L3")}
         ),
         created_at=datetime(2026, 7, 28, tzinfo=UTC),
         published_at=datetime(2026, 7, 28, tzinfo=UTC),
