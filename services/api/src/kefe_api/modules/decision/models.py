@@ -74,6 +74,23 @@ class Question:
 
 
 @dataclass(frozen=True, slots=True)
+class FlowStep:
+    code: str
+    primitive_code: str
+    capability_codes: tuple[str, ...] = ()
+    next_step_codes: tuple[str, ...] = ()
+    payload_schema_ref: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ResolvedFlow:
+    template_code: str
+    template_version_no: int
+    entry_step_code: str
+    steps: tuple[FlowStep, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class CaseVersion:
     id: UUID
     case_id: UUID
@@ -85,6 +102,9 @@ class CaseVersion:
     version_no: int
     questions: tuple[Question, ...]
     accepts_weighs: bool = True
+    content_configuration_id: UUID | None = None
+    content_configuration_version_no: int | None = None
+    resolved_flow: ResolvedFlow | None = None
 
 
 @dataclass(slots=True)

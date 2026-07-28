@@ -62,6 +62,30 @@ class AuthoringSourceReference:
 
 
 @dataclass(frozen=True, slots=True)
+class ResolvedFlowStep:
+    code: str
+    primitive_code: str
+    capability_codes: tuple[str, ...] = ()
+    next_step_codes: tuple[str, ...] = ()
+    payload_schema_ref: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ResolvedFlowDefinition:
+    template_code: str
+    template_version_no: int
+    entry_step_code: str
+    steps: tuple[ResolvedFlowStep, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class PublicationConfigurationResolution:
+    content_configuration_id: UUID
+    content_configuration_version_no: int
+    resolved_flow: ResolvedFlowDefinition
+
+
+@dataclass(frozen=True, slots=True)
 class CaseIdentity:
     id: UUID
     slug: str
@@ -87,6 +111,11 @@ class AuthoringCaseVersion:
     is_real_event: bool = False
     required_review_modes: tuple[str, ...] = ()
     completed_review_modes: tuple[str, ...] = ()
+    flow_template_code: str = "STANDARD_COMMIT_REVEAL"
+    flow_template_version_no: int = 1
+    content_configuration_id: UUID | None = None
+    content_configuration_version_no: int | None = None
+    resolved_flow: ResolvedFlowDefinition | None = None
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     published_at: datetime | None = None
 

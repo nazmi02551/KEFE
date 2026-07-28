@@ -27,6 +27,15 @@ from kefe_api.modules.content_authoring.models import (
 )
 from kefe_api.modules.content_authoring.registry import default_authoring_registry
 from kefe_api.modules.content_authoring.service import ContentAuthoringService
+from kefe_api.modules.content_configuration.bootstrap import (
+    build_default_content_configuration,
+)
+from kefe_api.modules.content_configuration.in_memory import (
+    InMemoryContentConfigurationRepository,
+)
+from kefe_api.modules.content_configuration.publication_resolver import (
+    ContentConfigurationPublicationResolver,
+)
 
 NOW = datetime(2026, 7, 28, 8, 0, tzinfo=UTC)
 
@@ -125,7 +134,14 @@ def _draft(case_id) -> AuthoringCaseVersion:
 
 def _facade() -> tuple[SecuredContentAuthoringService, InMemoryContentAuthoringRepository]:
     repository = InMemoryContentAuthoringRepository()
-    authoring = ContentAuthoringService(repository, default_authoring_registry())
+    configuration_repository = InMemoryContentConfigurationRepository(
+        build_default_content_configuration()
+    )
+    authoring = ContentAuthoringService(
+        repository,
+        default_authoring_registry(),
+        ContentConfigurationPublicationResolver(configuration_repository),
+    )
     facade = SecuredContentAuthoringService(
         authoring=authoring,
         repository=repository,

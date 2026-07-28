@@ -72,6 +72,9 @@ jobs:
       - name: Enforce contract sync
         if: always()
         run: test '${{ steps.contract-sync.outcome }}' = 'success'
+      - name: Case Flow pinning contract
+        working-directory: services/api
+        run: python tools/check_case_flow_pinning_contract.py
       - name: Admin HTTP contract
         id: admin-http-contract
         continue-on-error: true
@@ -167,6 +170,7 @@ jobs:
           tests/test_admin_http_postgres.py
           tests/test_content_configuration_postgres.py
           tests/test_admin_content_configuration_http_postgres.py
+          tests/test_case_flow_pinning_postgres.py
           > postgres-test-output.txt 2>&1
       - name: Upload PostgreSQL diagnostics on failure
         if: steps.postgres-tests.outcome == 'failure'

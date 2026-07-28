@@ -23,6 +23,9 @@ from kefe_api.modules.content_authoring.service import ContentAuthoringService
 from kefe_api.modules.content_configuration.admin_router import (
     router as admin_content_configuration_router,
 )
+from kefe_api.modules.content_configuration.publication_resolver import (
+    ContentConfigurationPublicationResolver,
+)
 from kefe_api.modules.content_configuration.service import ContentConfigurationService
 from kefe_api.modules.context.router import router as context_router
 from kefe_api.modules.context.service import ContextService
@@ -60,6 +63,7 @@ def create_app() -> FastAPI:
     content_authoring_service = ContentAuthoringService(
         content_authoring_repository,
         default_authoring_registry(),
+        ContentConfigurationPublicationResolver(content_configuration_repository),
     )
     secured_content_authoring_service = SecuredContentAuthoringService(
         authoring=content_authoring_service,

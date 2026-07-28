@@ -14,6 +14,7 @@ from kefe_api.modules.content_authoring.models import (
 from kefe_api.modules.content_authoring.ports import (
     ContentAuthoringRegistry,
     ContentAuthoringRepository,
+    PublicationConfigurationResolver,
 )
 
 
@@ -22,9 +23,11 @@ class ContentAuthoringService:
         self,
         repository: ContentAuthoringRepository,
         registry: ContentAuthoringRegistry,
+        publication_configuration_resolver: PublicationConfigurationResolver,
     ) -> None:
         self._repository = repository
         self._registry = registry
+        self._publication_configuration_resolver = publication_configuration_resolver
 
     def create_case(
         self,
@@ -45,6 +48,7 @@ class ContentAuthoringService:
                 "Initial CaseVersion must be version 1 in DRAFT state",
                 422,
             )
+        self._assert_draft_has_no_publication_pin(initial_version)
         audit = LifecycleAuditEntry.create(
             version=initial_version,
             actor_ref=actor_ref,
@@ -102,6 +106,9 @@ class ContentAuthoringService:
             context_blocks=cloned_context,
             sources=cloned_sources,
             completed_review_modes=(),
+            content_configuration_id=None,
+            content_configuration_version_no=None,
+            resolved_flow=None,
             created_at=datetime.now(UTC),
             published_at=None,
         )
@@ -145,6 +152,7 @@ class ContentAuthoringService:
                 "Draft edits cannot change CaseVersion creation time",
                 409,
             )
+        self._assert_draft_has_no_publication_pin(version)
         try:
             self._repository.save_draft(version)
         except ValueError as exc:
@@ -209,17 +217,28 @@ class ContentAuthoringService:
                 },
             )
 
+        resolution = self._publication_configuration_resolver.resolve(version)
         published_at = datetime.now(UTC)
-        published = version.with_state(
-            ContentLifecycle.PUBLISHED,
+        published = replace(
+            version,
+            state=ContentLifecycle.PUBLISHED,
             published_at=published_at,
+            content_configuration_id=resolution.content_configuration_id,
+            content_configuration_version_no=resolution.content_configuration_version_no,
+            resolved_flow=resolution.resolved_flow,
         )
         audit = LifecycleAuditEntry.create(
-            version=version,
+            version=published,
             actor_ref=actor_ref,
             command="publish",
             previous_state=ContentLifecycle.APPROVED,
             new_state=ContentLifecycle.PUBLISHED,
+            rationale=(
+                "Pinned ContentConfiguration "
+                f"v{resolution.content_configuration_version_no} and Flow "
+                f"{resolution.resolved_flow.template_code} "
+                f"v{resolution.resolved_flow.template_version_no}"
+            ),
             occurred_at=published_at,
         )
         try:
@@ -294,6 +313,19 @@ class ContentAuthoringService:
         if version is None:
             raise DomainError("CONTENT_VERSION_NOT_FOUND", "CaseVersion not found", 404)
         return version
+
+    @staticmethod
+    def _assert_draft_has_no_publication_pin(version: AuthoringCaseVersion) -> None:
+        if (
+            version.content_configuration_id is not None
+            or version.content_configuration_version_no is not None
+            or version.resolved_flow is not None
+        ):
+            raise DomainError(
+                "CONTENT_DRAFT_PROVENANCE_FORBIDDEN",
+                "DRAFT CaseVersion cannot provide publication configuration provenance",
+                422,
+            )
 
     @staticmethod
     def _assert_state(
