@@ -45,7 +45,8 @@ FlowRuntimeSnapshot standardFlowRuntime({
   );
 }
 
-mixin StandardFlowRuntimeFake implements FlowRuntimeRepository {
+mixin StandardFlowRuntimeFake
+    implements FlowRuntimeRepository, DecisionLineageRepository {
   bool flowCommitted = false;
   String flowSessionId = 'session-1';
   String flowCaseVersionId = 'version-1';
@@ -59,4 +60,34 @@ mixin StandardFlowRuntimeFake implements FlowRuntimeRepository {
       committed: flowCommitted,
     );
   }
+
+  @override
+  Future<void> recordFlowStepExposure({
+    required String sessionId,
+    required String stepCode,
+    required String idempotencyKey,
+  }) async {}
+
+  @override
+  Future<void> answerRevision({
+    required String sessionId,
+    required String stepCode,
+    required String questionId,
+    required Object value,
+  }) async {}
+
+  @override
+  Future<void> saveRevisionReason({
+    required String sessionId,
+    required String stepCode,
+    required List<String> tags,
+    required String? text,
+  }) async {}
+
+  @override
+  Future<void> commitRevision({
+    required String sessionId,
+    required String stepCode,
+    required String idempotencyKey,
+  }) async {}
 }
