@@ -55,6 +55,7 @@ class AdminSecurityService:
 
         principal = resolution.principal
         self._assert_principal_assurance(principal, current=current)
+        self._session_resolver.mark_seen(principal.session_id, seen_at=current)
         return principal
 
     def authorize(
