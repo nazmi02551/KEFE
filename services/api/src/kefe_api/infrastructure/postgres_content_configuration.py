@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
 from typing import Any
 from uuid import UUID
 
@@ -55,14 +54,9 @@ class PostgresContentConfigurationRepository:
         return tuple(self._from_row(row) for row in rows)
 
     def next_version_no(self) -> int:
-        with self._engine.connect() as connection:
+        with self._engine.begin() as connection:
             value = connection.execute(
-                text(
-                    """
-                    SELECT COALESCE(MAX(version_no), 0) + 1
-                    FROM content_config.configuration_version
-                    """
-                )
+                text("SELECT nextval('content_config.configuration_version_no_seq')")
             ).scalar_one()
         return int(value)
 
