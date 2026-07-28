@@ -47,8 +47,8 @@ def _openapi_errors() -> list[str]:
     contract = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
     errors: list[str] = []
 
-    if contract.get("info", {}).get("version") != "0.10.0":
-        errors.append("OpenAPI checked-in version must match API v0.10.0")
+    if contract.get("info", {}).get("version") != "0.11.0":
+        errors.append("OpenAPI checked-in version must match API v0.11.0")
 
     bearer = contract.get("components", {}).get("securitySchemes", {}).get("HTTPBearer")
     if bearer != {"scheme": "bearer", "type": "http"}:
@@ -67,6 +67,10 @@ def _openapi_errors() -> list[str]:
         "ContextSourceResponse",
         "ContextBlockResponse",
         "ContextSnapshotResponse",
+        "AccountOfferResponse",
+        "RecentCaseResponse",
+        "ProgressResponse",
+        "ProgressEnvelopeResponse",
     }
     missing_schemas = sorted(required_schemas - schemas.keys())
     if missing_schemas:
@@ -124,6 +128,30 @@ def _openapi_errors() -> list[str]:
             "ContextSnapshotResponse missing fields: " + ", ".join(missing_context_fields)
         )
 
+    progress_properties = schemas.get("ProgressEnvelopeResponse", {}).get("properties", {})
+    required_progress_fields = {"account_offer", "progress", "methodology"}
+    missing_progress_fields = sorted(required_progress_fields - progress_properties.keys())
+    if missing_progress_fields:
+        errors.append(
+            "ProgressEnvelopeResponse missing fields: " + ", ".join(missing_progress_fields)
+        )
+
+    progress_detail_properties = schemas.get("ProgressResponse", {}).get("properties", {})
+    forbidden_progress_fields = {
+        "private_reason_text",
+        "raw_response_payload",
+        "personality",
+        "ideology",
+        "political_profile",
+        "psychometric_score",
+        "streak",
+        "leaderboard",
+        "xp",
+    }
+    leaked_progress_fields = sorted(forbidden_progress_fields & progress_detail_properties.keys())
+    if leaked_progress_fields:
+        errors.append("ProgressResponse leaks forbidden fields: " + ", ".join(leaked_progress_fields))
+
     paths = contract.get("paths", {})
     case_operation = paths.get("/v1/cases/{case_id}", {}).get("get", {})
     if _response_ref(case_operation) != "#/components/schemas/CaseDetailResponse":
@@ -147,6 +175,10 @@ def _openapi_errors() -> list[str]:
     if context_operation.get("security"):
         errors.append("GET CaseVersion context must remain public before Commit")
 
+    progress_operation = paths.get("/v1/me/progress", {}).get("get", {})
+    if _response_ref(progress_operation) != "#/components/schemas/ProgressEnvelopeResponse":
+        errors.append("GET /v1/me/progress must return ProgressEnvelopeResponse")
+
     protected_operations = (
         ("/v1/cases/{case_id}/weigh-sessions", "post"),
         ("/v1/weigh-sessions/{session_id}/responses", "put"),
@@ -154,6 +186,7 @@ def _openapi_errors() -> list[str]:
         ("/v1/weigh-sessions/{session_id}/commit", "post"),
         ("/v1/weigh-sessions/{session_id}/reveal", "get"),
         ("/v1/weigh-sessions/{session_id}/perspectives", "get"),
+        ("/v1/me/progress", "get"),
         ("/v1/identity/session", "delete"),
     )
     for path, method in protected_operations:
@@ -268,8 +301,8 @@ def main() -> None:
     print(
         "Contract sync OK: "
         f"{len(used)} DomainError codes registered; HTTP API, typed questions, "
-        "private reasons, Context, Perspective, identity, persistence and outbox "
-        "invariants verified."
+        "private reasons, Context, Perspective, My KEFE Progress, identity, "
+        "persistence and outbox invariants verified."
     )
 
 
