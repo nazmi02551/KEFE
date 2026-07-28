@@ -30,7 +30,9 @@ class InMemoryContentAuthoringRegistry:
         failures: list[PublicationValidationFailure] = []
 
         if not version.title.strip():
-            failures.append(self._failure("CONTENT_TITLE_REQUIRED", "Title is required", "title"))
+            failures.append(
+                self._failure("CONTENT_TITLE_REQUIRED", "Title is required", "title")
+            )
         if not version.summary.strip():
             failures.append(self._failure("CONTENT_SUMMARY_REQUIRED", "Summary is required", "summary"))
         if version.base_format_code not in self.base_formats:
