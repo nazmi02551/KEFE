@@ -39,6 +39,214 @@
         "title": "AccountOfferResponse",
         "type": "object"
       },
+      "AdminAuthoringContextBlockResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "block_type": {
+            "title": "Block Type",
+            "type": "string"
+          },
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "claim_status": {
+            "title": "Claim Status",
+            "type": "string"
+          },
+          "disclosure_level": {
+            "title": "Disclosure Level",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "sort_order": {
+            "title": "Sort Order",
+            "type": "integer"
+          },
+          "source_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Source Ids",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "body",
+          "disclosure_level",
+          "claim_status",
+          "source_ids",
+          "sort_order",
+          "block_type"
+        ],
+        "title": "AdminAuthoringContextBlockResponse",
+        "type": "object"
+      },
+      "AdminAuthoringIssueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/AdminAuthoringQuestionResponse"
+            },
+            "title": "Questions",
+            "type": "array"
+          },
+          "sort_order": {
+            "title": "Sort Order",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "title",
+          "questions",
+          "sort_order"
+        ],
+        "title": "AdminAuthoringIssueResponse",
+        "type": "object"
+      },
+      "AdminAuthoringQuestionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "is_required": {
+            "title": "Is Required",
+            "type": "boolean"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string"
+          },
+          "response_schema": {
+            "additionalProperties": true,
+            "title": "Response Schema",
+            "type": "object"
+          },
+          "response_type": {
+            "title": "Response Type",
+            "type": "string"
+          },
+          "sort_order": {
+            "title": "Sort Order",
+            "type": "integer"
+          },
+          "stable_code": {
+            "title": "Stable Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "stable_code",
+          "prompt",
+          "response_type",
+          "response_schema",
+          "is_active",
+          "is_required",
+          "sort_order"
+        ],
+        "title": "AdminAuthoringQuestionResponse",
+        "type": "object"
+      },
+      "AdminAuthoringSourceResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "claim_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Claim Status"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "locator": {
+            "title": "Locator",
+            "type": "string"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "publisher": {
+            "title": "Publisher",
+            "type": "string"
+          },
+          "source_kind": {
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "source_kind",
+          "locator",
+          "title",
+          "publisher",
+          "published_at",
+          "claim_status",
+          "verified"
+        ],
+        "title": "AdminAuthoringSourceResponse",
+        "type": "object"
+      },
       "AdminSessionResponse": {
         "additionalProperties": false,
         "properties": {
@@ -228,7 +436,7 @@
           },
           "context_blocks": {
             "items": {
-              "$ref": "#/components/schemas/kefe_api__modules__admin_security__router__ContextBlockResponse"
+              "$ref": "#/components/schemas/AdminAuthoringContextBlockResponse"
             },
             "title": "Context Blocks",
             "type": "array"
@@ -253,7 +461,7 @@
           },
           "issues": {
             "items": {
-              "$ref": "#/components/schemas/IssueResponse"
+              "$ref": "#/components/schemas/AdminAuthoringIssueResponse"
             },
             "title": "Issues",
             "type": "array"
@@ -290,7 +498,7 @@
           },
           "sources": {
             "items": {
-              "$ref": "#/components/schemas/SourceResponse"
+              "$ref": "#/components/schemas/AdminAuthoringSourceResponse"
             },
             "title": "Sources",
             "type": "array"
@@ -362,7 +570,7 @@
           },
           "questions": {
             "items": {
-              "$ref": "#/components/schemas/kefe_api__modules__decision__router__QuestionResponse"
+              "$ref": "#/components/schemas/QuestionResponse"
             },
             "title": "Questions",
             "type": "array"
@@ -532,11 +740,59 @@
         "title": "ContextBlockInput",
         "type": "object"
       },
+      "ContextBlockResponse": {
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "claim_status": {
+            "title": "Claim Status",
+            "type": "string"
+          },
+          "context_block_id": {
+            "format": "uuid",
+            "title": "Context Block Id",
+            "type": "string"
+          },
+          "disclosure_level": {
+            "title": "Disclosure Level",
+            "type": "string"
+          },
+          "display_order": {
+            "title": "Display Order",
+            "type": "integer"
+          },
+          "source_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Source Ids",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "context_block_id",
+          "display_order",
+          "disclosure_level",
+          "title",
+          "body",
+          "claim_status",
+          "source_ids"
+        ],
+        "title": "ContextBlockResponse",
+        "type": "object"
+      },
       "ContextSnapshotResponse": {
         "properties": {
           "blocks": {
             "items": {
-              "$ref": "#/components/schemas/kefe_api__modules__context__router__ContextBlockResponse"
+              "$ref": "#/components/schemas/ContextBlockResponse"
             },
             "title": "Blocks",
             "type": "array"
@@ -850,44 +1106,6 @@
         "title": "IssueInput",
         "type": "object"
       },
-      "IssueResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "code": {
-            "title": "Code",
-            "type": "string"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "questions": {
-            "items": {
-              "$ref": "#/components/schemas/kefe_api__modules__admin_security__router__QuestionResponse"
-            },
-            "title": "Questions",
-            "type": "array"
-          },
-          "sort_order": {
-            "title": "Sort Order",
-            "type": "integer"
-          },
-          "title": {
-            "title": "Title",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "code",
-          "title",
-          "questions",
-          "sort_order"
-        ],
-        "title": "IssueResponse",
-        "type": "object"
-      },
       "PerspectiveCardResponse": {
         "properties": {
           "body": {
@@ -1177,6 +1395,49 @@
         "title": "QuestionInput",
         "type": "object"
       },
+      "QuestionResponse": {
+        "properties": {
+          "options": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Options",
+            "type": "array"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string"
+          },
+          "question_id": {
+            "format": "uuid",
+            "title": "Question Id",
+            "type": "string"
+          },
+          "required": {
+            "title": "Required",
+            "type": "boolean"
+          },
+          "response_schema": {
+            "additionalProperties": true,
+            "title": "Response Schema",
+            "type": "object"
+          },
+          "response_type": {
+            "title": "Response Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "question_id",
+          "prompt",
+          "response_type",
+          "required",
+          "response_schema",
+          "options"
+        ],
+        "title": "QuestionResponse",
+        "type": "object"
+      },
       "RationaleRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1313,71 +1574,6 @@
         "title": "SourceInput",
         "type": "object"
       },
-      "SourceResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "claim_status": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Claim Status"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "locator": {
-            "title": "Locator",
-            "type": "string"
-          },
-          "published_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Published At"
-          },
-          "publisher": {
-            "title": "Publisher",
-            "type": "string"
-          },
-          "source_kind": {
-            "title": "Source Kind",
-            "type": "string"
-          },
-          "title": {
-            "title": "Title",
-            "type": "string"
-          },
-          "verified": {
-            "title": "Verified",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "id",
-          "source_kind",
-          "locator",
-          "title",
-          "publisher",
-          "published_at",
-          "claim_status",
-          "verified"
-        ],
-        "title": "SourceResponse",
-        "type": "object"
-      },
       "StartSessionResponse": {
         "properties": {
           "case_id": {
@@ -1490,202 +1686,6 @@
           "type"
         ],
         "title": "ValidationError",
-        "type": "object"
-      },
-      "kefe_api__modules__admin_security__router__ContextBlockResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "block_type": {
-            "title": "Block Type",
-            "type": "string"
-          },
-          "body": {
-            "title": "Body",
-            "type": "string"
-          },
-          "claim_status": {
-            "title": "Claim Status",
-            "type": "string"
-          },
-          "disclosure_level": {
-            "title": "Disclosure Level",
-            "type": "string"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "sort_order": {
-            "title": "Sort Order",
-            "type": "integer"
-          },
-          "source_ids": {
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "title": "Source Ids",
-            "type": "array"
-          },
-          "title": {
-            "title": "Title",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "title",
-          "body",
-          "disclosure_level",
-          "claim_status",
-          "source_ids",
-          "sort_order",
-          "block_type"
-        ],
-        "title": "ContextBlockResponse",
-        "type": "object"
-      },
-      "kefe_api__modules__admin_security__router__QuestionResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "is_active": {
-            "title": "Is Active",
-            "type": "boolean"
-          },
-          "is_required": {
-            "title": "Is Required",
-            "type": "boolean"
-          },
-          "prompt": {
-            "title": "Prompt",
-            "type": "string"
-          },
-          "response_schema": {
-            "additionalProperties": true,
-            "title": "Response Schema",
-            "type": "object"
-          },
-          "response_type": {
-            "title": "Response Type",
-            "type": "string"
-          },
-          "sort_order": {
-            "title": "Sort Order",
-            "type": "integer"
-          },
-          "stable_code": {
-            "title": "Stable Code",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "stable_code",
-          "prompt",
-          "response_type",
-          "response_schema",
-          "is_active",
-          "is_required",
-          "sort_order"
-        ],
-        "title": "QuestionResponse",
-        "type": "object"
-      },
-      "kefe_api__modules__context__router__ContextBlockResponse": {
-        "properties": {
-          "body": {
-            "title": "Body",
-            "type": "string"
-          },
-          "claim_status": {
-            "title": "Claim Status",
-            "type": "string"
-          },
-          "context_block_id": {
-            "format": "uuid",
-            "title": "Context Block Id",
-            "type": "string"
-          },
-          "disclosure_level": {
-            "title": "Disclosure Level",
-            "type": "string"
-          },
-          "display_order": {
-            "title": "Display Order",
-            "type": "integer"
-          },
-          "source_ids": {
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "title": "Source Ids",
-            "type": "array"
-          },
-          "title": {
-            "title": "Title",
-            "type": "string"
-          }
-        },
-        "required": [
-          "context_block_id",
-          "display_order",
-          "disclosure_level",
-          "title",
-          "body",
-          "claim_status",
-          "source_ids"
-        ],
-        "title": "ContextBlockResponse",
-        "type": "object"
-      },
-      "kefe_api__modules__decision__router__QuestionResponse": {
-        "properties": {
-          "options": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Options",
-            "type": "array"
-          },
-          "prompt": {
-            "title": "Prompt",
-            "type": "string"
-          },
-          "question_id": {
-            "format": "uuid",
-            "title": "Question Id",
-            "type": "string"
-          },
-          "required": {
-            "title": "Required",
-            "type": "boolean"
-          },
-          "response_schema": {
-            "additionalProperties": true,
-            "title": "Response Schema",
-            "type": "object"
-          },
-          "response_type": {
-            "title": "Response Type",
-            "type": "string"
-          }
-        },
-        "required": [
-          "question_id",
-          "prompt",
-          "response_type",
-          "required",
-          "response_schema",
-          "options"
-        ],
-        "title": "QuestionResponse",
         "type": "object"
       }
     },
