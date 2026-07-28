@@ -3,7 +3,7 @@
 **Updated:** 2026-07-28  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Latest verified implementation commit:** `9c8ee0de2331bc4d2913dd655502b8a46fb084bd`
+**Latest verified implementation commit:** `9ee366dd1c645039271e45ebc84bce6630a00621`
 
 This is the **single canonical durable engineering handoff**. Chat history is not a source of truth. At every continuation, read this file from `main`, inspect open PRs/recent CI, then proceed from repository state.
 
@@ -52,6 +52,8 @@ Binding product rules:
 - Admin browser sessions are opaque and revocable; raw session/CSRF secrets are never persisted.
 - State-changing Admin browser requests require CSRF verification bound to the same opaque session.
 - Admin HTTP handlers may execute authoring lifecycle commands only through `SecuredContentAuthoringService`.
+- Content configuration uses stable IDs and immutable published versions; rollback creates a new draft instead of mutating history.
+- Source, risk and Civic review requirements are server-derived and cannot be weakened by client-supplied metadata.
 
 ## 2. Completed executable foundation
 
@@ -93,6 +95,10 @@ Backend/contracts:
 - Publish/withdraw continue to require recent step-up; reviewer/submitter separation remains server-enforced.
 - OpenAPI v0.12.0 and Admin HTTP architecture fitness gates are checked in CI.
 - PostgreSQL end-to-end test proves secured Admin HTTP create → submit → independent review → publish → consumer materialization → audit.
+- ADR-0018 and `content-configuration-policy.v1.yaml` define stable Domain/Topic/Base Format/Modifier configuration, immutable published config versions and clone-based rollback.
+- Versioned Content Configuration domain models, repository port, in-memory adapter, bootstrap snapshot and lifecycle service are implemented.
+- Initial derived review rules are server-side: fact-bearing/real-event → `SOURCE_VERIFICATION`; L2/L3 → `RISK_REVIEW`; Civic domain or `CIVIC_INTEGRITY` → `CIVIC_REVIEW`; L3 → `EDITORIAL`.
+- Configuration management is capability-gated by `TAXONOMY_MANAGE`; published/superseded configuration cannot be edited in place.
 
 Mobile:
 
@@ -114,9 +120,10 @@ Most recent merged product/architecture milestones:
 - PR #33 — PostgreSQL editorial persistence, atomic publication materialization and draft-leakage protection.
 - PR #35 — Admin authentication/authorization/threat-model boundary and secured authoring facade.
 - PR #37 — durable Admin subjects/sessions, role-capability persistence, MFA/session assurance and session-bound CSRF substrate.
-- PR #40 — secured internal Admin authoring HTTP surface, OpenAPI v0.12.0, CSRF/session boundary and PostgreSQL end-to-end workflow; implementation merge `9c8ee0de2331bc4d2913dd655502b8a46fb084bd`.
+- PR #40 — secured internal Admin authoring HTTP surface, OpenAPI v0.12.0, CSRF/session boundary and PostgreSQL end-to-end workflow.
 - PR #41 — checkpoint declaring the Content/Admin documentation milestone due.
-- Documentation Ecosystem v3.3 — milestone synchronization completed after PR #40/#41 checkpoint.
+- PR #42 — Documentation Ecosystem v3.3 milestone synchronization completed and PASS.
+- PR #43 — versioned content configuration + derived review policy foundation; implementation merge `9ee366dd1c645039271e45ebc84bce6630a00621`.
 
 ## 3. Current executable paths
 
@@ -127,6 +134,11 @@ Consumer:
 Admin authoring:
 
 `Authenticated Admin Session → Create/Edit DRAFT → Submit → Independent Review → Approve/Reject → Step-up Publish/Withdraw → Immutable Consumer Materialization + Audit`
+
+Content configuration foundation:
+
+`Published Config → Clone DRAFT → Validate Stable IDs/Compatibility → Publish New Immutable Version → Supersede Previous`  
+Rollback is `Historical Published/Superseded Config → Clone New DRAFT → Validate → Explicit Publish`.
 
 Failures in Context, Perspective or Progress remain isolated from trusted decision state. Consumer reads continue to use only published immutable materialized content.
 
@@ -150,15 +162,18 @@ Failures in Context, Perspective or Progress remain isolated from trusted decisi
 - Publication/withdrawal/access-management require recent Admin step-up authentication.
 - Admin session resolution must check revocation, subject state, MFA, absolute expiry and idle expiry before refreshing activity.
 - No external SSO provider may become a dependency of authoring authorization rules.
+- Do not make mutable runtime configuration the authority for already-published CaseVersions.
+- Clients may display derived review requirements but cannot remove or replace server-derived source/risk/Civic review requirements.
+- Content configuration rollback must create a new DRAFT; never rewrite or reactivate a historical version in place.
 
 ## 5. Recommended next sequence
 
-1. **Content configuration and review workflows**
-   - taxonomy/domain/topic management behind stable IDs
-   - base-format and modifier registry management with compatibility validation
-   - source verification and claim-status review
-   - content risk and Civic review-mode enforcement
-   - versioned configuration publication with audit and rollback
+1. **Complete Content configuration persistence and Admin management**
+   - PostgreSQL persistence for configuration versions + audit
+   - internal Admin HTTP configuration lifecycle with existing session/CSRF boundary
+   - wire current published configuration into Content Authoring publication validation
+   - record effective configuration version in publication/audit provenance
+   - source verification / risk / Civic review completion through capability-gated server commands
 
 2. **Observability and deployment baseline**
    - request/event correlation
@@ -176,7 +191,7 @@ Failures in Context, Perspective or Progress remain isolated from trusted decisi
    - sensitive-content restrictions
    - no hidden profile attributes or individual decision leakage
 
-The documentation milestone is closed. The next implementation slice is **Content configuration and review workflows**, beginning with an ADR and machine-readable contract before code.
+The next implementation slice is **PostgreSQL Content Configuration persistence + secured Admin configuration HTTP management**, followed by wiring the effective published configuration into authoring validation/provenance.
 
 ## 6. Continuation protocol
 
@@ -195,4 +210,4 @@ The documentation milestone is closed. The next implementation slice is **Conten
 
 ## 7. New-chat recovery prompt
 
-> Continue KEFE development from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first, then inspect open PRs, recent commits and CI. Current official documentation baseline is Ecosystem v3.3: MPD v1.2.0, GOV v1.4.0, PB v1.4.0, ENG v0.6.0, MVP v1.2.0, ADM v1.2.0 and SEC v1.2.0. Preserve Commit First, CaseVersion pinning, pre-Commit Context without result leakage, private Reason boundaries, optional guest continuation, low-claim My KEFE Progress, immutable published content and provider-neutral ports/adapters. Editorial drafts live outside consumer publication. Admin identity is separate from consumer identity; capability checks, audit identity, reviewer/submitter separation, MFA/session assurance, same-session CSRF and recent step-up are server-side. Internal Admin authoring HTTP exists only under `/internal/admin/v1` through `SecuredContentAuthoringService`; no Admin login/SSO endpoint is implemented yet. The Content/Admin DOCX/PDF milestone synchronization is complete and PASS. Inspect repo state, then continue with Content configuration and review workflows unless a newer checkpoint says otherwise.
+> Continue KEFE development from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first, then inspect open PRs, recent commits and CI. Current official documentation baseline is Ecosystem v3.3: MPD v1.2.0, GOV v1.4.0, PB v1.4.0, ENG v0.6.0, MVP v1.2.0, ADM v1.2.0 and SEC v1.2.0. Preserve Commit First, CaseVersion pinning, pre-Commit Context without result leakage, private Reason boundaries, optional guest continuation, low-claim My KEFE Progress, immutable published content and provider-neutral ports/adapters. Editorial drafts live outside consumer publication. Admin identity is separate from consumer identity; capability checks, audit identity, reviewer/submitter separation, MFA/session assurance, same-session CSRF and recent step-up are server-side. Internal Admin authoring HTTP exists only under `/internal/admin/v1` through `SecuredContentAuthoringService`; no Admin login/SSO endpoint is implemented yet. Versioned Content Configuration foundation is merged in PR #43: stable Domain/Topic/Base Format/Modifier IDs, immutable published config versions, clone-based rollback, `TAXONOMY_MANAGE` gating and server-derived source/risk/Civic review requirements. The Content/Admin DOCX/PDF milestone synchronization is complete and PASS. Inspect repo state, then continue with PostgreSQL Content Configuration persistence + secured Admin configuration HTTP management unless a newer checkpoint says otherwise.
