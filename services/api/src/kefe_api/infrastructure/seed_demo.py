@@ -77,10 +77,30 @@ def seed_demo() -> None:
             text(
                 """
                 INSERT INTO content.case_version (
-                    id, case_id, version_no, status, title, summary, accepts_weighs, published_at
+                    id,
+                    case_id,
+                    version_no,
+                    status,
+                    title,
+                    summary,
+                    accepts_weighs,
+                    published_at,
+                    base_format_code,
+                    primary_domain_code,
+                    content_risk
                 )
                 VALUES (
-                    :id, :case_id, 1, 'PUBLISHED', :title, :summary, true, :published_at
+                    :id,
+                    :case_id,
+                    1,
+                    'PUBLISHED',
+                    :title,
+                    :summary,
+                    true,
+                    :published_at,
+                    'DILEMMA',
+                    'DAILY_LIFE',
+                    'L0'
                 )
                 ON CONFLICT (id) DO NOTHING
                 """
