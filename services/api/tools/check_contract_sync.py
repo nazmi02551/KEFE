@@ -52,8 +52,8 @@ def _openapi_errors() -> list[str]:
     contract = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
     errors: list[str] = []
 
-    if contract.get("info", {}).get("version") != "0.11.0":
-        errors.append("OpenAPI checked-in version must match API v0.11.0")
+    if contract.get("info", {}).get("version") != "0.12.0":
+        errors.append("OpenAPI checked-in version must match API v0.12.0")
 
     bearer = contract.get("components", {}).get("securitySchemes", {}).get("HTTPBearer")
     if bearer != {"scheme": "bearer", "type": "http"}:
@@ -76,6 +76,9 @@ def _openapi_errors() -> list[str]:
         "RecentCaseResponse",
         "ProgressResponse",
         "ProgressEnvelopeResponse",
+        "AdminSessionResponse",
+        "AuthoringVersionResponse",
+        "AuditTrailResponse",
     }
     missing_schemas = sorted(required_schemas - schemas.keys())
     if missing_schemas:
@@ -114,6 +117,16 @@ def _openapi_errors() -> list[str]:
             "last_committed_at",
             "recent_cases",
         },
+        "AdminSessionResponse": {
+            "admin_subject_id",
+            "session_id",
+            "roles",
+            "direct_capabilities",
+            "authenticated_at",
+            "mfa_satisfied_at",
+            "step_up_at",
+            "expires_at",
+        },
     }
     for schema, required in field_contracts.items():
         missing = _missing_fields(schemas, schema, required)
@@ -143,10 +156,14 @@ def _openapi_errors() -> list[str]:
         ("/v1/weigh-sessions/{session_id}/perspectives", "get"): "PerspectiveResponse",
         ("/v1/case-versions/{case_version_id}/context", "get"): "ContextSnapshotResponse",
         ("/v1/me/progress", "get"): "ProgressEnvelopeResponse",
+        ("/internal/admin/v1/session", "get"): "AdminSessionResponse",
+        ("/internal/admin/v1/cases", "post"): "AuthoringVersionResponse",
+        ("/internal/admin/v1/cases/{case_id}/audit", "get"): "AuditTrailResponse",
     }
     for (path, method), schema in response_contracts.items():
         operation = paths.get(path, {}).get(method, {})
-        if _response_ref(operation) != f"#/components/schemas/{schema}":
+        status = "201" if (path, method) == ("/internal/admin/v1/cases", "post") else "200"
+        if _response_ref(operation, status) != f"#/components/schemas/{schema}":
             errors.append(f"{method.upper()} {path} must return {schema}")
 
     context_operation = paths.get(
@@ -171,8 +188,10 @@ def _openapi_errors() -> list[str]:
             errors.append(f"{method.upper()} {path} must require Bearer auth")
 
     for path, path_item in paths.items():
-        if path.startswith("/admin") or "authoring" in path:
-            errors.append(f"OpenAPI must not expose Admin authoring before threat model: {path}")
+        if (path.startswith("/admin") or "authoring" in path) and not path.startswith(
+            "/internal/admin/v1"
+        ):
+            errors.append(f"Unexpected Admin/authoring route outside internal boundary: {path}")
         for method, operation in path_item.items():
             if method.lower() not in {"get", "post", "put", "patch", "delete"}:
                 continue
@@ -184,7 +203,7 @@ def _openapi_errors() -> list[str]:
 
 
 def _schema_errors() -> list[str]:
-    schema = (CONTRACTS / "postgresql-m0-schema.v1.7.0.sql").read_text(encoding="utf-8")
+    schema = (CONTRACTS / "postgresql-m0-schema.v1.8.0.sql").read_text(encoding="utf-8")
     required_fragments = {
         "commit_idempotency_key text": "explicit Commit idempotency",
         "commit_idempotency_actor_key_idx": "actor-scoped Commit idempotency",
@@ -193,7 +212,7 @@ def _schema_errors() -> list[str]:
         "locked_until timestamptz": "durable outbox lease",
         "dead_lettered_at timestamptz": "outbox dead-letter state",
         "CREATE TABLE identity.actor_session": "revocable guest sessions",
-        "token_hash char(64) NOT NULL UNIQUE": "hashed guest credentials",
+        "token_hash char(64) NOT NULL UNIQUE": "hashed credentials",
         "sort_order integer NOT NULL DEFAULT 0": "deterministic question order",
         "is_required boolean NOT NULL DEFAULT true": "question requiredness",
         "CREATE TABLE decision.private_reason": "private reason persistence",
@@ -205,9 +224,6 @@ def _schema_errors() -> list[str]:
         ),
         "CREATE TABLE content.perspective_card": "CaseVersion-pinned Perspective cards",
         "perspective_one_published_slot_idx": "one published card per Perspective slot",
-        "source_kind text NOT NULL DEFAULT 'CURATED' CHECK (source_kind = 'CURATED')": (
-            "curated-only first Perspective slice"
-        ),
         "CREATE TABLE content.context_source": "CaseVersion-pinned Context sources",
         "CREATE TABLE content.context_block": "progressive Context blocks",
         "CREATE TABLE content.context_block_source": "Context-to-source provenance links",
@@ -223,6 +239,10 @@ def _schema_errors() -> list[str]:
         "base_format_code text NOT NULL": "version-owned base format metadata",
         "primary_domain_code text NOT NULL": "version-owned domain metadata",
         "case_version_content_risk_check": "version-owned content risk constraint",
+        "CREATE SCHEMA IF NOT EXISTS admin_security": "isolated Admin security schema",
+        "CREATE TABLE admin_security.subject": "durable Admin subjects",
+        "CREATE TABLE admin_security.session": "durable Admin sessions",
+        "csrf_token_hash": "hashed Admin CSRF secret",
     }
     return [
         f"Schema missing {description}"
@@ -241,8 +261,12 @@ def _authoring_contract_errors() -> list[str]:
         "mutable_authoring_rows_in_consumer_schema_forbidden: true",
         "atomic: true",
         "rollback_on_failure: true",
-        "public_admin_http_endpoint: false",
-        "admin_auth_threat_model_required_before_http_authoring: true",
+        "internal_admin_http_endpoint: true",
+        "public_unauthenticated_admin_http_endpoint: false",
+        "admin_auth_threat_model_completed: true",
+        "admin_session_and_csrf_controls_required: true",
+        "direct_repository_mutation_from_http_forbidden: true",
+        "secured_application_facade: SecuredContentAuthoringService",
     }
     errors = [
         f"Authoring persistence contract missing: {fragment}"
@@ -310,9 +334,10 @@ def main() -> None:
 
     print(
         "Contract sync OK: "
-        f"{len(used)} DomainError codes registered; HTTP API, typed questions, "
-        "private reasons, Context, Perspective, My KEFE Progress, identity, "
-        "editorial persistence, publication boundaries and outbox invariants verified."
+        f"{len(used)} DomainError codes registered; consumer HTTP, Admin HTTP, "
+        "typed questions, private reasons, Context, Perspective, My KEFE Progress, "
+        "identity, editorial persistence, publication, Admin sessions and outbox "
+        "invariants verified."
     )
 
 
