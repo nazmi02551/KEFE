@@ -1,4 +1,4 @@
-registry_version: 1.11.0
+registry_version: 1.12.0
 errors:
 - code: AUTH_REQUIRED
   http_status: 401
@@ -148,6 +148,30 @@ errors:
   http_status: 422
   retryable: false
 - code: FLOW_RUNTIME_UNAVAILABLE
+  http_status: 409
+  retryable: false
+- code: FLOW_STEP_NOT_FOUND
+  http_status: 404
+  retryable: false
+- code: FLOW_STEP_NOT_READY
+  http_status: 409
+  retryable: false
+- code: EXPOSURE_STEP_UNSUPPORTED
+  http_status: 422
+  retryable: false
+- code: REVISION_INITIAL_COMMIT_REQUIRED
+  http_status: 409
+  retryable: false
+- code: REVISION_STEP_INVALID
+  http_status: 422
+  retryable: false
+- code: REVISION_RESPONSE_INVALID
+  http_status: 422
+  retryable: false
+- code: REVISION_RESPONSE_INCOMPLETE
+  http_status: 422
+  retryable: false
+- code: DECISION_REVISION_ALREADY_COMMITTED
   http_status: 409
   retryable: false
 - code: WEIGH_SESSION_NOT_FOUND
