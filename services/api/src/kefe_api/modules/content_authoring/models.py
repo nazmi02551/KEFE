@@ -40,10 +40,13 @@ class AuthoringIssue:
 @dataclass(frozen=True, slots=True)
 class AuthoringContextBlock:
     id: UUID
-    block_type: str
+    title: str
     body: str
     disclosure_level: str
+    claim_status: str
+    source_ids: tuple[UUID, ...] = ()
     sort_order: int = 0
+    block_type: str = "CONTEXT"
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,6 +55,8 @@ class AuthoringSourceReference:
     source_kind: str
     locator: str
     title: str
+    publisher: str
+    published_at: datetime | None = None
     claim_status: str | None = None
     verified: bool = False
 
