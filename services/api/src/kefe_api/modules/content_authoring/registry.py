@@ -11,6 +11,9 @@ from kefe_api.modules.content_authoring.models import (
 
 SchemaValidator = Callable[[dict[str, Any]], bool]
 
+_SOURCE_KINDS = frozenset({"OFFICIAL", "NEWS", "RESEARCH", "EDITORIAL", "OTHER"})
+_DISCLOSURE_LEVELS = frozenset({"ESSENTIAL", "DETAIL"})
+
 
 @dataclass(slots=True)
 class InMemoryContentAuthoringRegistry:
@@ -29,6 +32,18 @@ class InMemoryContentAuthoringRegistry:
     ) -> tuple[PublicationValidationFailure, ...]:
         failures: list[PublicationValidationFailure] = []
 
+        self._validate_identity_fields(version, failures)
+        self._validate_questions(version, failures)
+        self._validate_modifiers(version, failures)
+        self._validate_sources_and_context(version, failures)
+        self._validate_reviews(version, failures)
+        return tuple(failures)
+
+    def _validate_identity_fields(
+        self,
+        version: AuthoringCaseVersion,
+        failures: list[PublicationValidationFailure],
+    ) -> None:
         if not version.title.strip():
             failures.append(
                 self._failure("CONTENT_TITLE_REQUIRED", "Title is required", "title")
@@ -66,6 +81,11 @@ class InMemoryContentAuthoringRegistry:
                 )
             )
 
+    def _validate_questions(
+        self,
+        version: AuthoringCaseVersion,
+        failures: list[PublicationValidationFailure],
+    ) -> None:
         if not version.issues:
             failures.append(
                 self._failure("CONTENT_ISSUE_REQUIRED", "At least one Issue is required", "issues")
@@ -98,17 +118,27 @@ class InMemoryContentAuthoringRegistry:
                     )
                 )
 
-        allowed_for_format = self.allowed_modifiers.get(version.base_format_code, frozenset())
-        invalid_modifiers = sorted(set(version.modifiers) - allowed_for_format)
-        if invalid_modifiers:
+    def _validate_modifiers(
+        self,
+        version: AuthoringCaseVersion,
+        failures: list[PublicationValidationFailure],
+    ) -> None:
+        allowed = self.allowed_modifiers.get(version.base_format_code, frozenset())
+        invalid = sorted(set(version.modifiers) - allowed)
+        if invalid:
             failures.append(
                 self._failure(
                     "CONTENT_MODIFIER_INCOMPATIBLE",
-                    "Incompatible modifiers: " + ", ".join(invalid_modifiers),
+                    "Incompatible modifiers: " + ", ".join(invalid),
                     "modifiers",
                 )
             )
 
+    def _validate_sources_and_context(
+        self,
+        version: AuthoringCaseVersion,
+        failures: list[PublicationValidationFailure],
+    ) -> None:
         if (version.is_fact_bearing or version.is_real_event) and not version.sources:
             failures.append(
                 self._failure(
@@ -118,7 +148,16 @@ class InMemoryContentAuthoringRegistry:
                 )
             )
 
+        source_ids = {source.id for source in version.sources}
         for source in version.sources:
+            if source.source_kind not in _SOURCE_KINDS:
+                failures.append(
+                    self._failure(
+                        "CONTENT_SOURCE_KIND_UNKNOWN",
+                        f"Unknown source kind: {source.source_kind}",
+                        f"source:{source.id}",
+                    )
+                )
             if source.claim_status is not None and source.claim_status not in self.claim_states:
                 failures.append(
                     self._failure(
@@ -136,19 +175,53 @@ class InMemoryContentAuthoringRegistry:
                     )
                 )
 
+        for block in version.context_blocks:
+            if block.disclosure_level not in _DISCLOSURE_LEVELS:
+                failures.append(
+                    self._failure(
+                        "CONTENT_DISCLOSURE_LEVEL_UNKNOWN",
+                        f"Unknown disclosure level: {block.disclosure_level}",
+                        f"context:{block.id}",
+                    )
+                )
+            if block.claim_status not in self.claim_states:
+                failures.append(
+                    self._failure(
+                        "CONTENT_CLAIM_STATE_UNKNOWN",
+                        f"Unknown claim state: {block.claim_status}",
+                        f"context:{block.id}",
+                    )
+                )
+            unknown_sources = sorted(
+                (source_id for source_id in block.source_ids if source_id not in source_ids),
+                key=str,
+            )
+            if unknown_sources:
+                failures.append(
+                    self._failure(
+                        "CONTENT_CONTEXT_SOURCE_UNKNOWN",
+                        "Context references unknown source IDs: "
+                        + ", ".join(str(source_id) for source_id in unknown_sources),
+                        f"context:{block.id}",
+                    )
+                )
+
+    @staticmethod
+    def _validate_reviews(
+        version: AuthoringCaseVersion,
+        failures: list[PublicationValidationFailure],
+    ) -> None:
         missing_reviews = sorted(
             set(version.required_review_modes) - set(version.completed_review_modes)
         )
         if missing_reviews:
             failures.append(
-                self._failure(
-                    "CONTENT_REVIEW_REQUIRED",
-                    "Missing required review modes: " + ", ".join(missing_reviews),
-                    "completed_review_modes",
+                PublicationValidationFailure(
+                    code="CONTENT_REVIEW_REQUIRED",
+                    detail="Missing required review modes: " + ", ".join(missing_reviews),
+                    path="completed_review_modes",
                 )
             )
-
-        return tuple(failures)
 
     @staticmethod
     def _failure(code: str, detail: str, path: str) -> PublicationValidationFailure:
