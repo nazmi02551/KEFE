@@ -12,6 +12,14 @@ def upgrade() -> None:
     op.execute("CREATE SCHEMA IF NOT EXISTS content_config")
     op.execute(
         """
+        CREATE SEQUENCE content_config.configuration_version_no_seq
+        START WITH 2
+        INCREMENT BY 1
+        NO CYCLE
+        """
+    )
+    op.execute(
+        """
         CREATE TABLE content_config.configuration_version (
             id uuid PRIMARY KEY,
             version_no integer NOT NULL UNIQUE CHECK (version_no > 0),
@@ -65,4 +73,5 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.execute("DROP TABLE IF EXISTS content_config.configuration_audit")
     op.execute("DROP TABLE IF EXISTS content_config.configuration_version")
+    op.execute("DROP SEQUENCE IF EXISTS content_config.configuration_version_no_seq")
     op.execute("DROP SCHEMA IF EXISTS content_config")
