@@ -31,6 +31,8 @@ from kefe_api.modules.context.router import router as context_router
 from kefe_api.modules.context.service import ContextService
 from kefe_api.modules.decision.router import router as decision_router
 from kefe_api.modules.decision.service import DecisionService
+from kefe_api.modules.flow_runtime.router import router as flow_runtime_router
+from kefe_api.modules.flow_runtime.service import FlowRuntimeService
 from kefe_api.modules.health.router import router as health_router
 from kefe_api.modules.identity.admission import (
     GuestAdmissionGuard,
@@ -84,6 +86,7 @@ def create_app() -> FastAPI:
     app.state.context_service = ContextService(context_repository)
     app.state.decision_repository = decision_repository
     app.state.decision_service = DecisionService(decision_repository)
+    app.state.flow_runtime_service = FlowRuntimeService(decision_repository)
     app.state.identity_repository = identity_repository
     app.state.identity_service = IdentityService(
         repository=identity_repository,
@@ -113,6 +116,7 @@ def create_app() -> FastAPI:
     app.include_router(identity_router)
     app.include_router(context_router)
     app.include_router(decision_router)
+    app.include_router(flow_runtime_router)
     app.include_router(progress_router)
     app.include_router(admin_router)
     app.include_router(admin_content_configuration_router)
