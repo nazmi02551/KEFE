@@ -171,8 +171,20 @@ def test_postgres_authoring_materializes_only_on_publish_and_preserves_history()
     assert PostgresContextRepository(engine).get_context(first.id) is not None
     assert PostgresContextRepository(engine).get_context(second.id) is not None
 
-    commands = [entry.command for entry in repository.list_audit(identity.id)]
-    assert commands == [
+    assert len(repository.list_audit(identity.id)) == 9
+    with engine.connect() as connection:
+        ordered_commands = connection.execute(
+            text(
+                """
+                SELECT command
+                FROM editorial.lifecycle_audit
+                WHERE case_id = :case_id
+                ORDER BY sequence_no
+                """
+            ),
+            {"case_id": identity.id},
+        ).scalars().all()
+    assert ordered_commands == [
         "create_case",
         "submit_for_review",
         "approve",
