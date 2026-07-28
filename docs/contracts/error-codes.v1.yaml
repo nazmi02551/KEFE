@@ -1,4 +1,4 @@
-registry_version: 1.7.0
+registry_version: 1.8.0
 errors:
 - code: AUTH_REQUIRED
   http_status: 401
@@ -102,6 +102,39 @@ errors:
 - code: CONTENT_LIFECYCLE_CONFLICT
   http_status: 409
   retryable: true
+- code: CONTENT_CONFIG_NOT_PUBLISHED
+  http_status: 503
+  retryable: true
+- code: CONTENT_CONFIG_NOT_FOUND
+  http_status: 404
+  retryable: false
+- code: CONTENT_CONFIG_IMMUTABLE
+  http_status: 409
+  retryable: false
+- code: CONTENT_CONFIG_VERSION_MISMATCH
+  http_status: 409
+  retryable: false
+- code: CONTENT_CONFIG_NOT_DRAFT
+  http_status: 409
+  retryable: false
+- code: CONTENT_CONFIG_ROLLBACK_SOURCE_INVALID
+  http_status: 409
+  retryable: false
+- code: CONTENT_CONFIG_DUPLICATE_CODE
+  http_status: 422
+  retryable: false
+- code: CONTENT_CONFIG_TOPIC_DOMAIN_UNKNOWN
+  http_status: 422
+  retryable: false
+- code: CONTENT_CONFIG_FORMAT_UNKNOWN
+  http_status: 422
+  retryable: false
+- code: CONTENT_CONFIG_MODIFIER_UNKNOWN
+  http_status: 422
+  retryable: false
+- code: CONTENT_CONFIG_REQUIRED_SET_EMPTY
+  http_status: 422
+  retryable: false
 - code: WEIGH_SESSION_NOT_FOUND
   http_status: 404
   retryable: false
