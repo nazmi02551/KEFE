@@ -293,6 +293,7 @@ CREATE INDEX editorial_case_version_state_idx
 ON editorial.case_version(case_id, lifecycle_state, version_no DESC);
 
 CREATE TABLE editorial.lifecycle_audit (
+    sequence_no bigint GENERATED ALWAYS AS IDENTITY UNIQUE,
     audit_id uuid PRIMARY KEY,
     case_id uuid NOT NULL REFERENCES editorial.case_item(id) ON DELETE RESTRICT,
     case_version_id uuid NOT NULL
@@ -306,4 +307,4 @@ CREATE TABLE editorial.lifecycle_audit (
 );
 
 CREATE INDEX editorial_lifecycle_audit_case_idx
-ON editorial.lifecycle_audit(case_id, occurred_at, audit_id);
+ON editorial.lifecycle_audit(case_id, sequence_no);
