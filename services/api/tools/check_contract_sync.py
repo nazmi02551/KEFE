@@ -171,6 +171,8 @@ def _openapi_errors() -> list[str]:
             errors.append(f"{method.upper()} {path} must require Bearer auth")
 
     for path, path_item in paths.items():
+        if path.startswith("/admin") or "authoring" in path:
+            errors.append(f"OpenAPI must not expose Admin authoring before threat model: {path}")
         for method, operation in path_item.items():
             if method.lower() not in {"get", "post", "put", "patch", "delete"}:
                 continue
@@ -182,7 +184,7 @@ def _openapi_errors() -> list[str]:
 
 
 def _schema_errors() -> list[str]:
-    schema = (CONTRACTS / "postgresql-m0-schema.v1.6.0.sql").read_text(encoding="utf-8")
+    schema = (CONTRACTS / "postgresql-m0-schema.v1.7.0.sql").read_text(encoding="utf-8")
     required_fragments = {
         "commit_idempotency_key text": "explicit Commit idempotency",
         "commit_idempotency_actor_key_idx": "actor-scoped Commit idempotency",
@@ -213,12 +215,43 @@ def _schema_errors() -> list[str]:
             "explicit Context claim states"
         ),
         "disclosure_level IN ('ESSENTIAL','DETAIL')": "Context disclosure levels",
+        "CREATE SCHEMA IF NOT EXISTS editorial": "isolated editorial schema",
+        "CREATE TABLE editorial.case_version": "durable authoring aggregate storage",
+        "aggregate jsonb NOT NULL": "provider-neutral editorial aggregate document",
+        "editorial_one_published_case_version_idx": "single editorial published version",
+        "CREATE TABLE editorial.lifecycle_audit": "append-only authoring lifecycle audit",
+        "base_format_code text NOT NULL": "version-owned base format metadata",
+        "primary_domain_code text NOT NULL": "version-owned domain metadata",
+        "case_version_content_risk_check": "version-owned content risk constraint",
     }
     return [
-        f"M0 schema missing {description}"
+        f"Schema missing {description}"
         for fragment, description in required_fragments.items()
         if fragment not in schema
     ]
+
+
+def _authoring_contract_errors() -> list[str]:
+    policy = (CONTRACTS / "content-authoring-persistence.v1.yaml").read_text(
+        encoding="utf-8"
+    )
+    required = {
+        "authoring_schema: editorial",
+        "consumer_materialization_only_on_publish: true",
+        "mutable_authoring_rows_in_consumer_schema_forbidden: true",
+        "atomic: true",
+        "rollback_on_failure: true",
+        "public_admin_http_endpoint: false",
+        "admin_auth_threat_model_required_before_http_authoring: true",
+    }
+    errors = [
+        f"Authoring persistence contract missing: {fragment}"
+        for fragment in sorted(required)
+        if fragment not in policy
+    ]
+    if not _source_contains("class PostgresContentAuthoringRepository"):
+        errors.append("PostgreSQL ContentAuthoringRepository adapter is missing")
+    return errors
 
 
 def _configuration_errors() -> list[str]:
@@ -268,6 +301,7 @@ def main() -> None:
         problems.append("Protected API code must not trust X-Actor-Id")
 
     problems.extend(_schema_errors())
+    problems.extend(_authoring_contract_errors())
     problems.extend(_configuration_errors())
     problems.extend(_openapi_errors())
 
@@ -278,7 +312,7 @@ def main() -> None:
         "Contract sync OK: "
         f"{len(used)} DomainError codes registered; HTTP API, typed questions, "
         "private reasons, Context, Perspective, My KEFE Progress, identity, "
-        "persistence and outbox invariants verified."
+        "editorial persistence, publication boundaries and outbox invariants verified."
     )
 
 
