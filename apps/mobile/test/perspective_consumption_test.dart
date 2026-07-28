@@ -186,16 +186,21 @@ Future<void> pumpPerspectiveCase(
   await tester.pumpAndSettle();
 }
 
+Future<void> makeVisible(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.pump(const Duration(milliseconds: 100));
+}
+
+Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+  await makeVisible(tester, finder);
+  await tester.tap(finder);
+  await tester.pump();
+}
+
 Future<void> commitChoice(WidgetTester tester) async {
   await tester.tap(find.byKey(const ValueKey('option-A')));
   await tester.pump();
-  final commit = find.byKey(const ValueKey('commit-button'));
-  await tester.scrollUntilVisible(
-    commit,
-    300,
-    scrollable: find.byType(Scrollable).first,
-  );
-  await tester.tap(commit);
+  await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
   await tester.pumpAndSettle();
 }
 
@@ -223,11 +228,7 @@ void main() {
     expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
 
     final section = find.byKey(const ValueKey('perspective-section'));
-    await tester.scrollUntilVisible(
-      section,
-      400,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await makeVisible(tester, section);
     expect(section, findsOneWidget);
     expect(find.byKey(const ValueKey('perspective-curated-note')), findsOneWidget);
     expect(find.byKey(const ValueKey('perspective-card-near')), findsOneWidget);
@@ -247,27 +248,16 @@ void main() {
     await pumpPerspectiveCase(tester, repository);
 
     await tester.tap(find.byKey(const ValueKey('option-A')));
-    await tester.enterText(
-      find.byKey(const ValueKey('reason-text')),
-      'Bu yalnızca benim özel gerekçem.',
-    );
-    await tester.pumpAndSettle();
-    final commit = find.byKey(const ValueKey('commit-button'));
-    await tester.scrollUntilVisible(
-      commit,
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(commit);
+    final reason = find.byKey(const ValueKey('reason-text'));
+    await makeVisible(tester, reason);
+    await tester.enterText(reason, 'Bu yalnızca benim özel gerekçem.');
+    await tester.pump();
+    await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
     await tester.pumpAndSettle();
 
     expect(repository.reasonCalls, 1);
     final pending = find.byKey(const ValueKey('reason-pending-moderation'));
-    await tester.scrollUntilVisible(
-      pending,
-      400,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await makeVisible(tester, pending);
     expect(pending, findsOneWidget);
     expect(
       find.descendant(
@@ -292,11 +282,7 @@ void main() {
     expect(repository.perspectiveCalls, 1);
 
     final retry = find.byKey(const ValueKey('perspective-retry'));
-    await tester.scrollUntilVisible(
-      retry,
-      400,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await makeVisible(tester, retry);
     await tester.tap(retry);
     await tester.pumpAndSettle();
 
