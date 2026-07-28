@@ -41,6 +41,7 @@ class DecisionState {
     this.offlineDraft = false,
     this.caseData,
     this.sessionId,
+    this.flowRuntime,
     this.responses = const {},
     this.reasonTags = const {},
     this.reasonText = '',
@@ -58,6 +59,7 @@ class DecisionState {
   final bool offlineDraft;
   final DecisionCase? caseData;
   final String? sessionId;
+  final FlowRuntimeSnapshot? flowRuntime;
   final Map<String, Object?> responses;
   final Set<String> reasonTags;
   final String reasonText;
@@ -89,6 +91,13 @@ class DecisionState {
         .every((question) => responses.containsKey(question.id));
   }
 
+  bool get hasReadyDecisionStep => flowRuntime?.steps.any(
+        (step) =>
+            step.primitiveCode == 'DECISION' &&
+            step.state == FlowStepRuntimeState.ready,
+      ) ??
+      false;
+
   DecisionState copyWith({
     bool? loading,
     bool? submitting,
@@ -96,6 +105,7 @@ class DecisionState {
     bool? offlineDraft,
     DecisionCase? caseData,
     String? sessionId,
+    FlowRuntimeSnapshot? flowRuntime,
     Map<String, Object?>? responses,
     Set<String>? reasonTags,
     String? reasonText,
@@ -115,6 +125,7 @@ class DecisionState {
       offlineDraft: offlineDraft ?? this.offlineDraft,
       caseData: caseData ?? this.caseData,
       sessionId: sessionId ?? this.sessionId,
+      flowRuntime: flowRuntime ?? this.flowRuntime,
       responses: responses ?? this.responses,
       reasonTags: reasonTags ?? this.reasonTags,
       reasonText: reasonText ?? this.reasonText,
@@ -155,16 +166,28 @@ class DecisionController extends Notifier<DecisionState> {
       if (generation != _loadGeneration) return;
 
       if (draft != null && draft.caseVersionId == caseData.versionId) {
+        final flowRuntime = await _repository.fetchFlowRuntime(draft.sessionId);
+        _assertFlowMatches(
+          flowRuntime,
+          sessionId: draft.sessionId,
+          caseVersionId: caseData.versionId,
+        );
+        final refreshedDraft = draft.copyWith(
+          flowRuntime: flowRuntime,
+          updatedAt: DateTime.now().toUtc(),
+        );
+        await _draftStore.write(refreshedDraft);
         state = DecisionState(
           caseData: caseData,
           sessionId: draft.sessionId,
+          flowRuntime: flowRuntime,
           responses: draft.effectiveResponses,
           reasonTags: draft.reasonTags.toSet(),
           reasonText: draft.reasonText ?? '',
           recoveryPending: draft.phase != DecisionDraftPhase.editing,
         );
         if (draft.phase != DecisionDraftPhase.editing) {
-          await _resumeDraft(draft);
+          await _resumeDraft(refreshedDraft);
         }
         return;
       }
@@ -175,7 +198,17 @@ class DecisionController extends Notifier<DecisionState> {
 
       final sessionId = await _repository.startSession(caseData.id);
       if (generation != _loadGeneration) return;
-      state = DecisionState(caseData: caseData, sessionId: sessionId);
+      final flowRuntime = await _repository.fetchFlowRuntime(sessionId);
+      _assertFlowMatches(
+        flowRuntime,
+        sessionId: sessionId,
+        caseVersionId: caseData.versionId,
+      );
+      state = DecisionState(
+        caseData: caseData,
+        sessionId: sessionId,
+        flowRuntime: flowRuntime,
+      );
     } on ClientTransportFailure catch (error) {
       if (generation != _loadGeneration) return;
       if (draft != null) {
@@ -246,7 +279,11 @@ class DecisionController extends Notifier<DecisionState> {
       reasonTags: tags,
       reasonText: state.reasonText,
     );
-    state = state.copyWith(reasonTags: tags, offlineDraft: false, clearError: true);
+    state = state.copyWith(
+      reasonTags: tags,
+      offlineDraft: false,
+      clearError: true,
+    );
   }
 
   Future<void> setReasonText(String value) async {
@@ -254,7 +291,10 @@ class DecisionController extends Notifier<DecisionState> {
     final caseData = state.caseData;
     final sessionId = state.sessionId;
     final policy = caseData?.reasonPolicy;
-    if (caseData == null || sessionId == null || policy == null || !policy.textEnabled) {
+    if (caseData == null ||
+        sessionId == null ||
+        policy == null ||
+        !policy.textEnabled) {
       return;
     }
 
@@ -268,15 +308,24 @@ class DecisionController extends Notifier<DecisionState> {
       reasonTags: state.reasonTags,
       reasonText: text,
     );
-    state = state.copyWith(reasonText: text, offlineDraft: false, clearError: true);
+    state = state.copyWith(
+      reasonText: text,
+      offlineDraft: false,
+      clearError: true,
+    );
   }
 
   Future<void> commit() async {
-    if (state.submitting || !state.hasRequiredResponses) return;
+    if (state.submitting ||
+        !state.hasRequiredResponses ||
+        !state.hasReadyDecisionStep) {
+      return;
+    }
 
     final caseData = state.caseData;
     final sessionId = state.sessionId;
-    if (caseData == null || sessionId == null) return;
+    final flowRuntime = state.flowRuntime;
+    if (caseData == null || sessionId == null || flowRuntime == null) return;
 
     final stored = await _draftStore.readForCase(caseData.id);
     if (stored != null && stored.phase != DecisionDraftPhase.editing) {
@@ -287,6 +336,7 @@ class DecisionController extends Notifier<DecisionState> {
     final pending = DecisionDraft(
       caseData: caseData,
       sessionId: sessionId,
+      flowRuntime: flowRuntime,
       responses: state.responses,
       reasonTags: state.reasonTags.toList(growable: false),
       reasonText: _normalizedReasonText(state.reasonText),
@@ -330,11 +380,13 @@ class DecisionController extends Notifier<DecisionState> {
       submitting: true,
       recoveryPending: true,
       offlineDraft: false,
+      flowRuntime: draft.flowRuntime,
       clearError: true,
     );
 
     var current = draft;
-    var allowLegacyIncompleteFallback = current.phase == DecisionDraftPhase.commitPending;
+    var allowLegacyIncompleteFallback =
+        current.phase == DecisionDraftPhase.commitPending;
     try {
       while (true) {
         if (current.phase == DecisionDraftPhase.syncPending) {
@@ -354,7 +406,8 @@ class DecisionController extends Notifier<DecisionState> {
               idempotencyKey: current.commitIdempotencyKey!,
             );
           } on ApiFailure catch (error) {
-            if (allowLegacyIncompleteFallback && error.code == 'WEIGH_RESPONSE_INCOMPLETE') {
+            if (allowLegacyIncompleteFallback &&
+                error.code == 'WEIGH_RESPONSE_INCOMPLETE') {
               current = current.copyWith(
                 phase: DecisionDraftPhase.syncPending,
                 updatedAt: DateTime.now().toUtc(),
@@ -375,11 +428,23 @@ class DecisionController extends Notifier<DecisionState> {
       }
 
       final reveal = await _repository.reveal(current.sessionId);
+      final flowRuntime = await _repository.fetchFlowRuntime(current.sessionId);
+      _assertFlowMatches(
+        flowRuntime,
+        sessionId: current.sessionId,
+        caseVersionId: current.caseVersionId,
+      );
+      current = current.copyWith(
+        flowRuntime: flowRuntime,
+        updatedAt: DateTime.now().toUtc(),
+      );
+      await _draftStore.write(current);
       await _draftStore.clearForCase(current.caseId);
       state = state.copyWith(
         submitting: false,
         recoveryPending: false,
         offlineDraft: false,
+        flowRuntime: flowRuntime,
         reveal: reveal,
         reasonPendingModeration:
             _normalizedReasonText(current.reasonText ?? '') != null,
@@ -393,6 +458,7 @@ class DecisionController extends Notifier<DecisionState> {
         submitting: false,
         recoveryPending: true,
         offlineDraft: true,
+        flowRuntime: current.flowRuntime,
         errorCode: switch (current.phase) {
           DecisionDraftPhase.syncPending => 'DECISION_SYNC_PENDING',
           DecisionDraftPhase.commitPending => 'WEIGH_COMMIT_UNCERTAIN',
@@ -404,12 +470,14 @@ class DecisionController extends Notifier<DecisionState> {
       state = state.copyWith(
         submitting: false,
         recoveryPending: current.phase != DecisionDraftPhase.editing,
+        flowRuntime: current.flowRuntime,
         errorCode: error.code,
       );
     } catch (_) {
       state = state.copyWith(
         submitting: false,
         recoveryPending: true,
+        flowRuntime: current.flowRuntime,
         errorCode: 'UNEXPECTED_CLIENT_ERROR',
       );
     }
@@ -488,10 +556,13 @@ class DecisionController extends Notifier<DecisionState> {
     required Set<String> reasonTags,
     required String reasonText,
   }) async {
+    final flowRuntime = state.flowRuntime;
+    if (flowRuntime == null) return;
     await _draftStore.write(
       DecisionDraft(
         caseData: caseData,
         sessionId: sessionId,
+        flowRuntime: flowRuntime,
         responses: responses,
         reasonTags: reasonTags.toList(growable: false),
         reasonText: _normalizedReasonText(reasonText),
@@ -501,9 +572,29 @@ class DecisionController extends Notifier<DecisionState> {
   }
 
   void _restoreOfflineDraft(DecisionDraft draft, String transportCode) {
+    final flowRuntime = draft.flowRuntime;
+    if (flowRuntime == null ||
+        !flowRuntime.matches(
+          sessionId: draft.sessionId,
+          caseVersionId: draft.caseVersionId,
+        )) {
+      state = DecisionState(
+        caseData: draft.caseData,
+        sessionId: draft.sessionId,
+        responses: draft.effectiveResponses,
+        reasonTags: draft.reasonTags.toSet(),
+        reasonText: draft.reasonText ?? '',
+        recoveryPending: draft.phase != DecisionDraftPhase.editing,
+        offlineDraft: true,
+        errorCode: 'FLOW_RUNTIME_OFFLINE_UNAVAILABLE',
+      );
+      return;
+    }
+
     state = DecisionState(
       caseData: draft.caseData,
       sessionId: draft.sessionId,
+      flowRuntime: flowRuntime,
       responses: draft.effectiveResponses,
       reasonTags: draft.reasonTags.toSet(),
       reasonText: draft.reasonText ?? '',
@@ -515,8 +606,24 @@ class DecisionController extends Notifier<DecisionState> {
     );
   }
 
+  void _assertFlowMatches(
+    FlowRuntimeSnapshot flowRuntime, {
+    required String sessionId,
+    required String caseVersionId,
+  }) {
+    if (!flowRuntime.matches(
+      sessionId: sessionId,
+      caseVersionId: caseVersionId,
+    )) {
+      throw ApiFailure('FLOW_RUNTIME_VERSION_MISMATCH', 409);
+    }
+  }
+
   bool get _inputsEditable =>
-      state.reveal == null && !state.submitting && !state.recoveryPending;
+      state.reveal == null &&
+      !state.submitting &&
+      !state.recoveryPending &&
+      state.hasReadyDecisionStep;
 
   String? _normalizedReasonText(String value) {
     final normalized = value.trim();
