@@ -167,6 +167,10 @@ def test_published_version_is_immutable_and_revision_supersedes_atomically() -> 
     assert raised.value.code == "CONTENT_PUBLISHED_IMMUTABLE"
 
     revision = service.create_revision(source_version_id=first.id, actor_ref="editor:2")
+    assert revision.issues[0].id != first.issues[0].id
+    assert revision.issues[0].questions[0].id != first.issues[0].questions[0].id
+    assert revision.completed_review_modes == ()
+
     revised = service.save_draft(replace(revision, title="Corrected title"))
     service.submit_for_review(revised.id, actor_ref="editor:2")
     service.approve(revised.id, actor_ref="reviewer:2")
@@ -208,5 +212,5 @@ def test_reject_requires_rationale_and_returns_version_to_draft() -> None:
 def test_no_public_authoring_http_route_is_registered() -> None:
     from kefe_api.main import create_app
 
-    paths = {route.path for route in create_app().routes}
+    paths = {getattr(route, "path", "") for route in create_app().routes}
     assert not any("authoring" in path or "/admin" in path for path in paths)
