@@ -1,0 +1,124 @@
+contract_version: 1.0.0
+updated_at: '2026-07-28'
+source_adr: docs/adr/0019-case-agnostic-composable-decision-engine.md
+status: architecture_locked_implementation_pending
+
+value_lifecycle:
+  - ME
+  - WE
+  - SIGNAL
+  - IMPACT
+
+experience_path_is_separate_from_value_lifecycle: true
+collective_result_is_signal: false
+
+layers:
+  ME:
+    includes:
+      - DECISION
+      - REASON
+      - CONFIDENCE
+      - DECISION_REVISION
+      - DECISION_DELTA
+      - REFLECTION
+  WE:
+    includes:
+      - COLLECTIVE_RESULT
+      - REASON_DISTRIBUTION
+      - SEGMENT_DISTRIBUTION
+      - STAKEHOLDER_DISTRIBUTION
+      - STAKEHOLDER_GAP
+      - ARGUMENT_PATTERN
+      - CONSENSUS_AND_DIVERGENCE
+  SIGNAL:
+    methodology_qualified: true
+  IMPACT:
+    traceable_follow_through: true
+
+contribution_classes:
+  - CORE_PRE_RESULT
+  - EXPOSED
+  - ADVOCACY_SUPPORT
+mixing_contribution_classes_forbidden: true
+result_exposure_permanently_excludes_decision_from_core_for_that_lineage: true
+signal_card_mini_weigh_after_result_exposure_class: EXPOSED
+advocacy_support_is_not_decision_sample: true
+
+signal_dimensions:
+  minimum:
+    - AGREEMENT
+    - SAMPLE_STRENGTH
+    - DATA_QUALITY
+    - STABILITY
+    - COUNTERARGUMENT_EXPOSURE
+    - COUNTERARGUMENT_RESILIENCE
+    - STAKEHOLDER_DISTRIBUTION
+    - SCOPE_ALIGNMENT
+    - FRESHNESS
+  methodology_version_required: true
+  high_percentage_alone_is_sufficient: false
+  stakeholder_gap_must_not_be_hidden: true
+  scope_alignment_required: true
+
+signal_scope:
+  may_include:
+    - GEOGRAPHIC
+    - JURISDICTIONAL
+    - STAKEHOLDER_POPULATION
+    - TEMPORAL
+    - ELIGIBILITY
+    - CASE_QUESTION
+    - TARGET_RELEVANCE
+  broad_unrelated_population_cannot_claim_narrow_governance_authority: true
+
+product_semantics:
+  challenge_card:
+    result_shown_before_core_weigh: false
+    primary_goal: independent_weigh
+  signal_or_consensus_card:
+    result_may_be_shown: true
+    primary_goal: communicate_qualified_signal_and_possible_follow_through
+  challenge_and_signal_cards_are_semantically_distinct: true
+  implementation_inheritance_locked: false
+
+neutrality:
+  kefe_has_normative_view: false
+  signal_is_community_pattern_under_methodology: true
+  consensus_confers_formal_authority: false
+
+impact_lifecycle:
+  - SIGNAL
+  - TARGET
+  - INSTITUTION_RESPONSE
+  - ACTION
+  - IMPACT_EVIDENCE
+  - IMPACT_VERIFICATION
+
+institution_response:
+  provenance_required: true
+  identity_or_authority_verification_required: true
+  can_be_intervention: true
+  can_trigger_decision_revision_and_delta: true
+
+impact_integrity:
+  verified_real_world_state_required_for_verified_impact: true
+  causality_must_not_be_claimed_without_evidence: true
+
+methodology_version_covers:
+  - CLAIM_TAXONOMY
+  - ARGUMENT_TAXONOMY
+  - CAPABILITY_SEMANTICS
+  - SAMPLE_DEFINITION
+  - CONTRIBUTION_CLASS_RULES
+  - SIGNAL_CRITERIA
+  - CONSENSUS_CRITERIA
+  - SCOPE_RULES
+  - STAKEHOLDER_RULES
+  - AI_CLASSIFICATION
+  - COMPOSITION_RECOMMENDATION_LOGIC
+
+reproducibility:
+  case_versions_pin_relevant_semantics: true
+  collective_results_pin_sample_and_methodology: true
+  signals_pin_methodology_and_scope: true
+  future_live_configuration_must_not_reinterpret_published_history_silently: true

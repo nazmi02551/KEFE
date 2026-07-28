@@ -1,0 +1,160 @@
+contract_version: 1.0.0
+updated_at: '2026-07-28'
+source_adr: docs/adr/0019-case-agnostic-composable-decision-engine.md
+status: architecture_locked_implementation_pending
+principle: case_agnostic_composition_over_case_types
+
+hierarchy:
+  - PRIMITIVE
+  - CAPABILITY
+  - FLOW_TEMPLATE_VERSION
+  - CASE_VERSION
+
+base_format:
+  semantics: editorial_archetype_not_runtime_case_class
+
+flow:
+  case_version_pins_resolved_flow: true
+  case_version_pins_relevant_methodology_and_configuration: true
+  steps_are_versioned: true
+  schema_before_screen: true
+  fixed_global_screen_sequence_required: false
+  unknown_step_behavior: fail_safe_unsupported
+  case_specific_runtime_behavior_requires_adr: true
+
+semantic_primitives:
+  - CONTEXT
+  - ACTOR
+  - STAKEHOLDER
+  - CLAIM
+  - EVIDENCE
+  - ARGUMENT
+  - QUESTION
+  - DECISION
+  - CONFIDENCE
+  - SCENARIO
+  - REVEAL
+  - EXPOSURE
+  - INTERVENTION
+  - COMPARISON
+  - OUTCOME
+  - COLLECTIVE_RESULT
+  - SIGNAL
+  - IMPACT
+
+starter_capabilities:
+  - PRINCIPLE_FIRST
+  - COMMIT_FIRST
+  - ACTOR_BLIND
+  - SOURCE_BLIND
+  - EVIDENCE_REVEAL
+  - SOURCE_REVEAL
+  - ACTOR_REVEAL
+  - ROLE_FLIP
+  - COUNTERARGUMENT
+  - CLAIM_GRAPH
+  - ARGUMENT_GRAPH
+  - RESPONSIBILITY_ANALYSIS
+  - PROCESS_ANALYSIS
+  - INCENTIVE_MAP
+  - THRESHOLD_ANALYSIS
+  - FAIRNESS_MODEL_COMPARISON
+  - POLICY_SIMULATOR
+  - STAKEHOLDER_ANALYSIS
+  - REFLECTION
+  - INSTITUTION_RESPONSE
+  - IMPACT_TRACKING
+
+commit_and_blind:
+  commit_first_global_rule: true
+  blind_first_global_rule: false
+  blind_variants_are_optional_capabilities: true
+
+generic_decision_lineage:
+  entities:
+    - DECISION_REVISION
+    - EXPOSURE
+    - INTERVENTION
+    - DECISION_DELTA
+  delta_formula: D1 + Intervention + D2 -> Delta
+  dimension_specific_delta_engines_forbidden: true
+  intervention_dimension_is_metadata: true
+
+context_reveal_exposure:
+  context: decision_relevant_information
+  reveal: previously_withheld_information_becomes_available
+  exposure: actor_encountered_information_or_result
+  intervention: exposure_or_event_selected_for_decision_change_analysis
+
+claim_model:
+  claimant_separate_from_claim: true
+  types:
+    - FACTUAL
+    - CAUSAL
+    - BEHAVIORAL
+    - MOTIVE
+    - NORMATIVE
+    - LEGAL
+    - PROCESS
+    - PREDICTION
+  states:
+    - VERIFIED
+    - SUPPORTED
+    - CLAIMED
+    - DISPUTED
+    - UNVERIFIED
+    - UNRESOLVED
+    - 'FALSE'
+  taxonomy_versioned: true
+  source_or_claimant_reputation_cannot_directly_determine_claim_state: true
+
+argument_graph:
+  first_class_relationships_required: true
+  reply_must_be_linkable_to_addressed_claim_or_question: true
+  provider_neutral: true
+
+ingestion:
+  normalized_lineage:
+    - SOURCE_ARTIFACT
+    - ORIGINAL_CONTENT
+    - MEDIA
+    - CLAIMS
+    - EXTERNAL_EVIDENCE
+    - REPLIES
+    - REPLY_CLAIMS
+    - ARGUMENT_FAMILIES
+    - DECISION_PROBLEMS
+    - CANDIDATE_CASES
+  one_source_may_create_multiple_cases: true
+  source_specific_logic_ends_at_adapter: true
+
+process_incentive_motive:
+  distinct_semantics:
+    - RULE
+    - PROCESS
+    - INCENTIVE
+    - OBSERVED_BEHAVIOR
+    - MOTIVE_CLAIM
+  incentive_does_not_prove_motive: true
+
+ai_role:
+  allowed:
+    - EXTRACT
+    - CLASSIFY
+    - NORMALIZE
+    - SUGGEST
+    - COMPOSE
+    - DETECT
+  forbidden:
+    - FINAL_TRUTH_AUTHORITY
+    - NORMATIVE_VERDICT
+    - KEFE_POLITICAL_OR_MORAL_POSITION
+    - AUTONOMOUS_PUBLICATION
+
+implementation_sequence:
+  - expand_versioned_content_configuration_for_primitives_capabilities_and_flow
+  - implement_one_generic_flow_step_vertical_slice
+  - add_decision_revision_exposure_intervention_delta
+  - promote_claim_and_argument_graph_to_first_class_domain_model
+  - implement_signal_bounded_context
+  - implement_impact_bounded_context

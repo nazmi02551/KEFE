@@ -1,4 +1,4 @@
-manifest_version: 1.18.0
+manifest_version: 1.20.0
 updated_at: '2026-07-28'
 policy:
   executable_schema_source: services/api/migrations
@@ -53,6 +53,14 @@ contracts:
     path: docs/contracts/content-configuration-policy.v1.yaml
     version: 1.0.0
     role: versioned_taxonomy_compatibility_and_derived_review_policy
+  - id: composable-decision-engine
+    path: docs/contracts/composable-decision-engine.v1.yaml
+    version: 1.0.0
+    role: case_agnostic_primitive_capability_flow_and_decision_lineage_policy
+  - id: signal-impact-model
+    path: docs/contracts/signal-impact-model.v1.yaml
+    version: 1.0.0
+    role: methodology_qualified_signal_and_verified_impact_lifecycle_policy
   - id: admin-security-policy
     path: docs/contracts/admin-security-policy.v1.yaml
     version: 1.0.0
@@ -107,3 +115,4 @@ architecture_decisions:
   - docs/adr/0016-durable-admin-sessions-and-csrf.md
   - docs/adr/0017-secured-admin-http-application-surface.md
   - docs/adr/0018-versioned-content-configuration.md
+  - docs/adr/0019-case-agnostic-composable-decision-engine.md
