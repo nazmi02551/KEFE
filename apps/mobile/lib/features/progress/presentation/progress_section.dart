@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/kefe_strings.dart';
 import '../application/progress_controller.dart';
+import 'progress_strings.dart';
 
 class ProgressSection extends ConsumerStatefulWidget {
   const ProgressSection({super.key});
