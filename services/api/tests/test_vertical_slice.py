@@ -68,7 +68,7 @@ def test_case_exposes_typed_question_contract_without_results() -> None:
     confidence = questions[str(DEMO_CONFIDENCE_QUESTION_ID)]
     assert confidence["response_type"] == "CONFIDENCE"
     assert confidence["required"] is False
-    assert confidence["response_schema"] == {"min": 1, "max": 5, "step": 1}
+    assert confidence["response_schema"] == {"min": 1, "max": 10, "step": 1}
 
 
 def test_guest_identity_is_required_for_decision_writes() -> None:
@@ -111,7 +111,7 @@ def test_optional_confidence_can_be_saved_before_commit() -> None:
         json={
             "responses": [
                 {"question_id": str(DEMO_QUESTION_ID), "value": "B"},
-                {"question_id": str(DEMO_CONFIDENCE_QUESTION_ID), "value": 4},
+                {"question_id": str(DEMO_CONFIDENCE_QUESTION_ID), "value": 8},
             ]
         },
     )
@@ -143,7 +143,7 @@ def test_invalid_choice_and_confidence_are_rejected_by_schema() -> None:
         headers=headers,
         json={
             "responses": [
-                {"question_id": str(DEMO_CONFIDENCE_QUESTION_ID), "value": 6},
+                {"question_id": str(DEMO_CONFIDENCE_QUESTION_ID), "value": 11},
             ]
         },
     )
