@@ -1,4 +1,4 @@
-manifest_version: 1.23.0
+manifest_version: 1.24.0
 updated_at: '2026-07-28'
 policy:
   executable_schema_source: services/api/migrations
@@ -65,6 +65,10 @@ contracts:
     path: docs/contracts/content-configuration-persistence.v1.yaml
     version: 1.1.0
     role: durable_composable_configuration_jsonb_and_audit_policy
+  - id: case-version-flow-pinning
+    path: docs/contracts/case-version-flow-pinning.v1.yaml
+    version: 1.0.0
+    role: immutable_publication_time_configuration_and_resolved_flow_provenance_policy
   - id: signal-impact-model
     path: docs/contracts/signal-impact-model.v1.yaml
     version: 1.0.0
@@ -87,7 +91,7 @@ contracts:
     role: secured_composable_configuration_management_http_policy
   - id: error-registry
     path: docs/contracts/error-codes.v1.yaml
-    version: 1.9.0
+    version: 1.10.0
     role: stable_api_errors
   - id: postgresql-m0-schema
     path: docs/contracts/postgresql-m0-schema.v1.8.0.sql
@@ -130,3 +134,4 @@ architecture_decisions:
   - docs/adr/0019-case-agnostic-composable-decision-engine.md
   - docs/adr/0020-composable-content-configuration-registry.md
   - docs/adr/0021-secured-admin-content-configuration-http.md
+  - docs/adr/0022-case-version-flow-and-configuration-pinning.md
