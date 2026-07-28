@@ -38,6 +38,20 @@ abstract interface class DecisionRepository {
   Future<RevealResult> reveal(String sessionId);
 }
 
+abstract interface class FlowRuntimeRepository {
+  Future<FlowRuntimeSnapshot> fetchFlowRuntime(String sessionId);
+}
+
+extension FlowRuntimeRepositoryAccess on DecisionRepository {
+  Future<FlowRuntimeSnapshot> fetchFlowRuntime(String sessionId) {
+    final repository = this;
+    if (repository is FlowRuntimeRepository) {
+      return (repository as FlowRuntimeRepository).fetchFlowRuntime(sessionId);
+    }
+    throw const ClientTransportFailure(code: 'FLOW_RUNTIME_NOT_CONFIGURED');
+  }
+}
+
 abstract interface class PerspectiveRepository {
   Future<PerspectiveResult> fetchPerspectives(String sessionId);
 }

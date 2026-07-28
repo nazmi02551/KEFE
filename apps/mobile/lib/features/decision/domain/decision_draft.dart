@@ -15,6 +15,7 @@ class DecisionDraft {
     required this.caseData,
     required this.sessionId,
     required this.updatedAt,
+    this.flowRuntime,
     this.responses = const {},
     this.reasonTags = const [],
     this.reasonText,
@@ -26,6 +27,7 @@ class DecisionDraft {
 
   final DecisionCase caseData;
   final String sessionId;
+  final FlowRuntimeSnapshot? flowRuntime;
   final Map<String, Object?> responses;
   final List<String> reasonTags;
   final String? reasonText;
@@ -50,6 +52,7 @@ class DecisionDraft {
   }
 
   DecisionDraft copyWith({
+    FlowRuntimeSnapshot? flowRuntime,
     Map<String, Object?>? responses,
     List<String>? reasonTags,
     String? reasonText,
@@ -61,6 +64,7 @@ class DecisionDraft {
     return DecisionDraft(
       caseData: caseData,
       sessionId: sessionId,
+      flowRuntime: flowRuntime ?? this.flowRuntime,
       responses: responses ?? effectiveResponses,
       reasonTags: reasonTags ?? this.reasonTags,
       reasonText: clearReasonText ? null : reasonText ?? this.reasonText,
@@ -93,6 +97,7 @@ class DecisionDraft {
           .toList(growable: false),
     },
     'session_id': sessionId,
+    'flow_runtime': flowRuntime?.toJson(),
     'responses': effectiveResponses,
     'reason_tags': reasonTags,
     'reason_text': reasonText,
@@ -112,14 +117,17 @@ class DecisionDraft {
             prompt: question['prompt'] as String,
             responseType: question['response_type'] as String,
             required: question['required'] as bool? ?? true,
-            options: (question['options'] as List<Object?>? ?? const []).cast<String>(),
+            options: (question['options'] as List<Object?>? ?? const [])
+                .cast<String>(),
             responseSchema:
-                (question['response_schema'] as Map?)?.cast<String, Object?>() ?? const {},
+                (question['response_schema'] as Map?)?.cast<String, Object?>() ??
+                const {},
           );
         })
         .toList(growable: false);
 
-    final rawPhase = json['phase'] as String? ?? DecisionDraftPhase.editing.name;
+    final rawPhase =
+        json['phase'] as String? ?? DecisionDraftPhase.editing.name;
     final phase = DecisionDraftPhase.values.firstWhere(
       (value) => value.name == rawPhase,
       orElse: () => DecisionDraftPhase.editing,
@@ -133,6 +141,11 @@ class DecisionDraft {
               questionId: json['selected_option'],
           };
 
+    final rawFlow = json['flow_runtime'];
+    final flowRuntime = rawFlow is Map
+        ? FlowRuntimeSnapshot.fromJson(rawFlow.cast<String, Object?>())
+        : null;
+
     return DecisionDraft(
       caseData: DecisionCase(
         id: caseJson['id'] as String,
@@ -145,8 +158,10 @@ class DecisionDraft {
         questions: questions,
       ),
       sessionId: json['session_id'] as String,
+      flowRuntime: flowRuntime,
       responses: responses,
-      reasonTags: (json['reason_tags'] as List<Object?>? ?? const []).cast<String>(),
+      reasonTags: (json['reason_tags'] as List<Object?>? ?? const [])
+          .cast<String>(),
       reasonText: json['reason_text'] as String?,
       commitIdempotencyKey: json['commit_idempotency_key'] as String?,
       phase: phase,

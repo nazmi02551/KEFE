@@ -7,9 +7,13 @@ import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/decision_repository.dart';
 import 'package:kefe_mobile/features/decision/domain/decision_models.dart';
 
+import 'support/flow_runtime_fixture.dart';
+
 const caseId = '11111111-1111-4111-8111-111111111111';
 
-class ExploreFakeRepository implements DecisionRepository {
+class ExploreFakeRepository
+    with StandardFlowRuntimeFake
+    implements DecisionRepository {
   int fetchCaseCalls = 0;
   int startSessionCalls = 0;
 
@@ -31,7 +35,9 @@ class ExploreFakeRepository implements DecisionRepository {
   Future<void> commit({
     required String sessionId,
     required String idempotencyKey,
-  }) async {}
+  }) async {
+    flowCommitted = true;
+  }
 
   @override
   Future<GuestCredential> ensureGuestCredential() async {

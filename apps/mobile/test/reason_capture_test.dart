@@ -9,6 +9,8 @@ import 'package:kefe_mobile/features/decision/data/decision_repository.dart';
 import 'package:kefe_mobile/features/decision/domain/decision_draft.dart';
 import 'package:kefe_mobile/features/decision/domain/decision_models.dart';
 
+import 'support/flow_runtime_fixture.dart';
+
 const reasonCaseId = 'bbbbbbbb-1111-4111-8111-bbbbbbbbbbbb';
 const reasonQuestionId = 'reason-choice';
 
@@ -38,7 +40,13 @@ const reasonCase = DecisionCase(
   ],
 );
 
-class ReasonFakeRepository implements DecisionRepository {
+class ReasonFakeRepository
+    with StandardFlowRuntimeFake
+    implements DecisionRepository {
+  ReasonFakeRepository() {
+    flowCaseVersionId = 'reason-version-1';
+  }
+
   int answerCalls = 0;
   int reasonCalls = 0;
   int commitCalls = 0;
@@ -87,6 +95,7 @@ class ReasonFakeRepository implements DecisionRepository {
       commitTransportFailures -= 1;
       throw const ClientTransportFailure();
     }
+    flowCommitted = true;
   }
 
   @override
@@ -203,6 +212,7 @@ void main() {
     final localDraft = draftStore.draftFor(reasonCaseId)!;
     expect(localDraft.reasonTags, containsAll(['FAIRNESS', 'NEED']));
     expect(localDraft.reasonText, 'Adalet ve ihtiyaç birlikte etkili oldu.');
+    expect(localDraft.flowRuntime?.templateCode, 'STANDARD_COMMIT_REVEAL');
 
     await tapCommit(tester);
 

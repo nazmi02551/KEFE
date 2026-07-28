@@ -9,9 +9,13 @@ import 'package:kefe_mobile/features/decision/domain/decision_models.dart';
 import 'package:kefe_mobile/features/onboarding/application/onboarding_controller.dart';
 import 'package:kefe_mobile/features/onboarding/data/onboarding_store.dart';
 
+import 'support/flow_runtime_fixture.dart';
+
 const onboardingCaseId = '11111111-1111-4111-8111-111111111111';
 
-class OnboardingFakeRepository implements DecisionRepository {
+class OnboardingFakeRepository
+    with StandardFlowRuntimeFake
+    implements DecisionRepository {
   int exploreCalls = 0;
   int caseCalls = 0;
   int commitCalls = 0;
@@ -36,6 +40,7 @@ class OnboardingFakeRepository implements DecisionRepository {
     required String idempotencyKey,
   }) async {
     commitCalls += 1;
+    flowCommitted = true;
   }
 
   @override
