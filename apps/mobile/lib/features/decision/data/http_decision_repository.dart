@@ -42,6 +42,7 @@ class HttpDecisionRepository
     implements
         DecisionRepository,
         FlowRuntimeRepository,
+        DecisionLineageRepository,
         PerspectiveRepository,
         ContextRepository {
   HttpDecisionRepository({
@@ -211,6 +212,78 @@ class HttpDecisionRepository
       ),
     );
     return FlowRuntimeSnapshot.fromJson(body);
+  }
+
+  @override
+  Future<void> recordFlowStepExposure({
+    required String sessionId,
+    required String stepCode,
+    required String idempotencyKey,
+  }) async {
+    final headers = await _authorizedHeaders();
+    final response = await _request(
+      () => _client.post(
+        _uri('/v1/weigh-sessions/$sessionId/flow-steps/$stepCode/exposures'),
+        headers: {...headers, 'Idempotency-Key': idempotencyKey},
+      ),
+    );
+    _decode(response);
+  }
+
+  @override
+  Future<void> answerRevision({
+    required String sessionId,
+    required String stepCode,
+    required String questionId,
+    required Object value,
+  }) async {
+    final headers = await _authorizedHeaders(json: true);
+    final response = await _request(
+      () => _client.put(
+        _uri('/v1/weigh-sessions/$sessionId/decision-steps/$stepCode/responses'),
+        headers: headers,
+        body: jsonEncode({
+          'responses': [
+            {'question_id': questionId, 'value': value},
+          ],
+        }),
+      ),
+    );
+    _decode(response);
+  }
+
+  @override
+  Future<void> saveRevisionReason({
+    required String sessionId,
+    required String stepCode,
+    required List<String> tags,
+    required String? text,
+  }) async {
+    final headers = await _authorizedHeaders(json: true);
+    final response = await _request(
+      () => _client.put(
+        _uri('/v1/weigh-sessions/$sessionId/decision-steps/$stepCode/reason'),
+        headers: headers,
+        body: jsonEncode({'tags': tags, 'text': text}),
+      ),
+    );
+    _decode(response);
+  }
+
+  @override
+  Future<void> commitRevision({
+    required String sessionId,
+    required String stepCode,
+    required String idempotencyKey,
+  }) async {
+    final headers = await _authorizedHeaders();
+    final response = await _request(
+      () => _client.post(
+        _uri('/v1/weigh-sessions/$sessionId/decision-steps/$stepCode/commit'),
+        headers: {...headers, 'Idempotency-Key': idempotencyKey},
+      ),
+    );
+    _decode(response);
   }
 
   @override
