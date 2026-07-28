@@ -1,0 +1,66 @@
+name: Finalize Reflection Architecture
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/finalize-reflection-architecture.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - name: Register Reflection architecture contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          manifest = Path('docs/contracts/manifest.v1.yaml')
+          text = manifest.read_text(encoding='utf-8')
+          text = text.replace('manifest_version: 1.29.0', 'manifest_version: 1.30.0')
+          decision_block = '''  - id: decision-revision-lineage
+            path: docs/contracts/decision-revision-lineage.v1.yaml
+            version: 1.1.0
+            role: immutable_decision_revision_exposure_intervention_and_generic_delta_policy
+          '''
+          reflection_block = '''  - id: reflection-runtime
+            path: docs/contracts/reflection-runtime.v1.yaml
+            version: 1.0.0
+            role: actor_scoped_non_causal_reflection_and_lineage_cursor_completion_policy
+          '''
+          if 'id: reflection-runtime' not in text:
+              text = text.replace(decision_block, decision_block + reflection_block)
+          adr = '  - docs/adr/0026-generic-reflection-runtime.md\n'
+          if adr.strip() not in text:
+              text = text.rstrip() + '\n' + adr
+          manifest.write_text(text, encoding='utf-8')
+
+          ci = Path('.github/workflows/api-ci.yml')
+          ci_text = ci.read_text(encoding='utf-8')
+          needle = '''      - name: Decision revision lineage contract
+                working-directory: services/api
+                run: python tools/check_decision_revision_lineage_contract.py
+          '''
+          addition = '''      - name: Reflection runtime contract
+                working-directory: services/api
+                run: python tools/check_reflection_runtime_contract.py
+          '''
+          if 'Reflection runtime contract' not in ci_text:
+              ci_text = ci_text.replace(needle, needle + addition)
+          ci.write_text(ci_text, encoding='utf-8')
+          PY
+      - name: Remove one-shot workflow
+        run: rm -f .github/workflows/finalize-reflection-architecture.yml
+      - name: Commit architecture registration
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Register generic Reflection runtime architecture'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
