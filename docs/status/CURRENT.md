@@ -1,9 +1,9 @@
 # KEFE Current Project Checkpoint
 
-**Updated:** 2026-07-28  
+**Updated:** 2026-07-29  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Latest verified implementation commit:** `164a97dc43dc1c6d4b67e749326ab319d2e2e19b`
+**Latest verified implementation commit:** `c45cf369eeda79daf884beddb25e976c88ddabc4`
 
 This is the **single canonical durable engineering handoff**. Chat history is not a source of truth. On every continuation, read this file from `main`, inspect open PRs/recent CI, and fetch the Drive CURRENT publication artifact only when editable DOCX/PDF source detail is needed.
 
@@ -87,7 +87,7 @@ Retained foundation:
 - provider-neutral Content Authoring lifecycle, immutable published CaseVersion, PostgreSQL editorial persistence and atomic consumer publication.
 - separate Admin security domain, capability-first authorization, MFA/session assurance, same-session CSRF, recent step-up and server-derived audit identity.
 - secured internal Admin authoring/configuration HTTP under `/internal/admin/v1`; no Admin login/SSO endpoint yet.
-- Flutter consumer foundation already contains Explore, Context, typed Question/Reason, Commit, Reveal, Perspective and Progress presentation paths.
+- Flutter consumer foundation contains Explore, Context, typed Question/Reason, Commit, Reveal, Perspective and Progress presentation paths.
 
 ### PR #47 / ADR-0020 — composable Content Configuration — COMPLETE
 
@@ -173,28 +173,64 @@ Verification:
 - unit tests PASS.
 - PostgreSQL integration PASS, including publish → guest session → Flow read → response → Commit → Flow read.
 
+### PR #56 / ADR-0024 — Flutter Flow-driven rendering — COMPLETE
+
+Implementation commit: `94d31fcc6ba9e99ebdeb386f3adf9bbbbfae18db`
+
+Implemented:
+- Flutter fetches the server-authoritative Flow runtime for each active WeighSession.
+- FlowRuntimeSnapshot is persisted with the local DecisionDraft for recovery/offline continuity.
+- rendering iterates server Step order instead of a hard-coded Context → Questions → Commit → Reveal composition.
+- `CONTEXT`, `DECISION` and `COLLECTIVE_RESULT` reuse the existing production UI components.
+- unsupported runtime capability is surfaced explicitly and neutrally; the client never silently emulates or skips it.
+- no Case Type/Base Format branching or default Flow inference was introduced.
+- PARTIAL `PRINCIPLE_CONTEXT_RETEST` reaches the exact DecisionRevision capability boundary without client-side hard-coding.
+- mobile architecture fitness contract: `mobile-flow-runtime-ui.v1.yaml`.
+
+### PR #57 — authoring-published live demo + installable Flow preview — COMPLETE
+
+Implementation commit: `c45cf369eeda79daf884beddb25e976c88ddabc4`
+
+Implemented:
+- the stable demo Case is no longer directly inserted into consumer Case/Question tables.
+- demo CaseVersion is created through the production Content Authoring lifecycle: DRAFT → IN_REVIEW → APPROVED → PUBLISHED.
+- publication pins effective Content Configuration provenance and immutable `STANDARD_COMMIT_REVEAL` resolved Flow before demo result/Perspective fixtures are attached.
+- legacy 1–5 demo Confidence schema was corrected to the canonical authoring contract 1–10 rather than weakening validation.
+- PostgreSQL seed explicitly uses PostgreSQL authoring/configuration adapters; runtime memory defaults cannot divert the seed from durable publication.
+- isolated `main_preview.dart` + PreviewDecisionRepository exercise the same Flow runtime/Decision/Commit/Reveal/Perspective UI contracts without becoming a production runtime fallback.
+- Mobile CI creates a temporary Android host project when packaging, builds a debug APK, and uploads `kefe-preview-android`.
+- production/network failures never switch into preview mode.
+
+Verification:
+- final API CI `30401109769` PASS.
+- final Mobile CI `30401109851` PASS including analyze, widget tests and Android APK build.
+- preview artifact `kefe-preview-android`, Actions artifact ID `8704923555`, generated 2026-07-28.
+
 ## 4. Current implementation gap
 
 Still implementation-pending:
-- consumer/mobile rendering driven by Flow Step/Primitive rather than the current fixed Context → Questions → Commit → Reveal screen composition.
-- a tangible end-to-end real stress-test Case running through the Flow-driven Flutter client.
 - Admin authoring selection/composer UX for non-default FlowTemplateVersion; current HTTP authoring remains transitional default-compatible.
-- DecisionRevision/Exposure/Intervention/Delta.
+- DecisionRevision/Exposure/Intervention/DecisionDelta.
 - first-class Claim/Argument graph and normalized ingestion.
 - WE/Signal bounded context and MethodologyVersion sample/scope/stakeholder semantics.
 - Impact bounded context.
+- production deployment/observability and full account continuity/share maturity.
+
+The first tangible Flow-driven consumer milestone is complete: an authoring-published Case can execute through the generic server Flow and the same Flutter rendering path, with an installable deterministic Preview APK available for direct inspection.
 
 ## 5. Recommended next sequence
 
-1. **Flutter Flow-driven rendering — first tangible live milestone**
-   - consume `/v1/weigh-sessions/{session_id}/flow` through the existing mobile repository/controller.
-   - render existing Context/Question/Commit/Reveal components according to server Step/Primitive state rather than fixed page order.
-   - no Case type branching; unsupported runtime capability is rendered explicitly, not silently skipped.
-   - prove at least one authoring-published real stress-test Case end-to-end on the same backend/runtime.
-2. **DecisionRevision / Exposure / Intervention / Delta** to unlock Principle First + context/retest flows end-to-end.
-3. **First-class Claim + Argument Graph + ingestion normalization**.
-4. **WE/Signal foundation** with contribution classes, Scope Alignment, Stakeholders and MethodologyVersion.
-5. **Impact foundation** with Target, Official Response, Action, Evidence and Verification.
+1. **DecisionRevision / Exposure / Intervention / DecisionDelta**
+   - lock ADR + machine-readable contract before implementation.
+   - make a DecisionRevision an immutable decision state at a defined exposure state.
+   - record actual Exposure separately from authored Reveal intent.
+   - represent methodology-significant exposures/events as Interventions.
+   - compute generic DecisionDelta between revisions; no ActorDelta/LegalDelta/etc. engines.
+   - unlock `PRINCIPLE_CONTEXT_RETEST` and future evidence/actor/source/result retest flows through the existing generic Flow runtime.
+2. **First-class Claim + Argument Graph + ingestion normalization**.
+3. **WE/Signal foundation** with contribution classes, Scope Alignment, Stakeholders and MethodologyVersion.
+4. **Impact foundation** with Target, Official Response, Action, Evidence and Verification.
+5. **Admin Flow Composer UX** over already versioned Primitive/Capability/FlowTemplate semantics.
 6. Continue observability/deployment, account continuity and share in architecture-compatible slices.
 
 No implementation may leapfrog an unresolved product/domain contract.
@@ -216,6 +252,7 @@ No implementation may leapfrog an unresolved product/domain contract.
 - Runtime live config never silently reinterprets historical published objects.
 - Flow execution must use the CaseVersion-pinned resolved Flow.
 - Flow runtime may expose result readiness but never pre-Commit result payload.
+- Preview/demo infrastructure is build-time/dev-only and must never become a production fallback path.
 - Signal sample classes never silently mix.
 - Consensus/Signal is not formal authority and not KEFE opinion.
 
@@ -224,7 +261,7 @@ No implementation may leapfrog an unresolved product/domain contract.
 1. Read this file from `main`.
 2. Inspect open PRs, recent merges and CI.
 3. Fetch Drive CURRENT only when publication-source detail is required; verify its SHA against this checkpoint.
-4. Resolve work against MPD v1.3.0 + ADR-0019 through ADR-0023 + registered contracts.
+4. Resolve work against MPD v1.3.0 + ADR-0019 through ADR-0024 + registered contracts.
 5. One coherent branch per vertical slice.
 6. ADR + machine-readable contract before new behavior.
 7. Preserve ports/adapters, versioning, provenance and historical reproducibility.
@@ -235,4 +272,4 @@ No implementation may leapfrog an unresolved product/domain contract.
 
 ## 8. New-chat recovery prompt
 
-> Continue KEFE from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first and inspect open PRs/recent CI. Official docs baseline remains Ecosystem v3.4. The binding architecture is case-agnostic: `Primitive → Capability → FlowTemplateVersion → CaseVersion`, with `ME → WE → SIGNAL → IMPACT`. PR #52 (`b9b26ddd...`) pins effective Content Configuration provenance and immutable resolved Flow to published CaseVersion. PR #54 (`164a97dc...`) implements ADR-0023/API v0.14: actor-scoped generic Flow runtime from that pinned Flow; `STANDARD_COMMIT_REVEAL` is FULL, while revision-dependent Flow paths report explicit PARTIAL/unsupported capability rather than hard-code. The next slice is Flutter Flow-driven rendering using the existing consumer UI foundation, producing the first tangible live end-to-end stress-test Case. Do not code an unlocked product decision.
+> Continue KEFE from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first and inspect open PRs/recent CI. Official docs baseline remains Ecosystem v3.4. The binding architecture is case-agnostic: `Primitive → Capability → FlowTemplateVersion → CaseVersion`, with `ME → WE → SIGNAL → IMPACT`. PR #54 (`164a97dc...`) provides the server-authoritative generic Flow runtime from the CaseVersion-pinned resolved Flow. PR #56 (`94d31fcc...`) makes Flutter render from that Flow without Case-specific branching. PR #57 (`c45cf369...`) proves a production-authoring-published demo Case through the same architecture and produces an installable deterministic Preview APK. The next locked development target is DecisionRevision → Exposure/Intervention → DecisionDelta so revision-dependent Flow paths such as `PRINCIPLE_CONTEXT_RETEST` become FULL. Do not code an unlocked product decision.
