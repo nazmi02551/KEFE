@@ -125,6 +125,123 @@ class DecisionCase {
   }
 }
 
+enum FlowExecutionSupport { full, partial }
+
+enum FlowStepRuntimeState { ready, completed, blocked, unsupported }
+
+@immutable
+class FlowRuntimeStep {
+  const FlowRuntimeStep({
+    required this.code,
+    required this.primitiveCode,
+    required this.capabilityCodes,
+    required this.nextStepCodes,
+    required this.state,
+    this.reasonCode,
+  });
+
+  final String code;
+  final String primitiveCode;
+  final List<String> capabilityCodes;
+  final List<String> nextStepCodes;
+  final FlowStepRuntimeState state;
+  final String? reasonCode;
+
+  bool get isRenderable =>
+      state == FlowStepRuntimeState.ready ||
+      state == FlowStepRuntimeState.completed ||
+      state == FlowStepRuntimeState.unsupported;
+
+  Map<String, Object?> toJson() => {
+    'code': code,
+    'primitive_code': primitiveCode,
+    'capability_codes': capabilityCodes,
+    'next_step_codes': nextStepCodes,
+    'state': state.name.toUpperCase(),
+    'reason_code': reasonCode,
+  };
+
+  factory FlowRuntimeStep.fromJson(Map<String, Object?> json) {
+    return FlowRuntimeStep(
+      code: json['code'] as String,
+      primitiveCode: json['primitive_code'] as String,
+      capabilityCodes: (json['capability_codes'] as List<Object?>? ?? const [])
+          .map((value) => value.toString())
+          .toList(growable: false),
+      nextStepCodes: (json['next_step_codes'] as List<Object?>? ?? const [])
+          .map((value) => value.toString())
+          .toList(growable: false),
+      state: switch (json['state']) {
+        'READY' => FlowStepRuntimeState.ready,
+        'COMPLETED' => FlowStepRuntimeState.completed,
+        'BLOCKED' => FlowStepRuntimeState.blocked,
+        'UNSUPPORTED' => FlowStepRuntimeState.unsupported,
+        _ => FlowStepRuntimeState.unsupported,
+      },
+      reasonCode: json['reason_code'] as String?,
+    );
+  }
+}
+
+@immutable
+class FlowRuntimeSnapshot {
+  const FlowRuntimeSnapshot({
+    required this.sessionId,
+    required this.caseVersionId,
+    required this.sessionState,
+    required this.templateCode,
+    required this.templateVersionNo,
+    required this.entryStepCode,
+    required this.executionSupport,
+    required this.steps,
+  });
+
+  final String sessionId;
+  final String caseVersionId;
+  final String sessionState;
+  final String templateCode;
+  final int templateVersionNo;
+  final String entryStepCode;
+  final FlowExecutionSupport executionSupport;
+  final List<FlowRuntimeStep> steps;
+
+  bool matches({required String sessionId, required String caseVersionId}) =>
+      this.sessionId == sessionId && this.caseVersionId == caseVersionId;
+
+  Map<String, Object?> toJson() => {
+    'session_id': sessionId,
+    'case_version_id': caseVersionId,
+    'session_state': sessionState,
+    'template_code': templateCode,
+    'template_version_no': templateVersionNo,
+    'entry_step_code': entryStepCode,
+    'execution_support': executionSupport.name.toUpperCase(),
+    'steps': steps.map((step) => step.toJson()).toList(growable: false),
+  };
+
+  factory FlowRuntimeSnapshot.fromJson(Map<String, Object?> json) {
+    return FlowRuntimeSnapshot(
+      sessionId: json['session_id'] as String,
+      caseVersionId: json['case_version_id'] as String,
+      sessionState: json['session_state'] as String,
+      templateCode: json['template_code'] as String,
+      templateVersionNo: json['template_version_no'] as int,
+      entryStepCode: json['entry_step_code'] as String,
+      executionSupport: json['execution_support'] == 'FULL'
+          ? FlowExecutionSupport.full
+          : FlowExecutionSupport.partial,
+      steps: (json['steps'] as List<Object?>)
+          .cast<Map>()
+          .map(
+            (raw) => FlowRuntimeStep.fromJson(
+              raw.cast<String, Object?>(),
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
 @immutable
 class RevealResult {
   const RevealResult({
