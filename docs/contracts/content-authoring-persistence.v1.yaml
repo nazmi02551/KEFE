@@ -1,4 +1,4 @@
-contract_version: 1.0.0
+contract_version: 1.1.0
 updated_at: '2026-07-28'
 capability: content_authoring_postgres_persistence
 storage:
@@ -48,8 +48,13 @@ audit:
   deterministic_database_order: sequence_no
   publication_and_supersede_in_same_transaction: true
 security:
-  public_admin_http_endpoint: false
-  admin_auth_threat_model_required_before_http_authoring: true
+  internal_admin_http_endpoint: true
+  public_unauthenticated_admin_http_endpoint: false
+  admin_auth_threat_model_completed: true
+  admin_session_and_csrf_controls_required: true
+  direct_repository_mutation_from_http_forbidden: true
+  secured_application_facade: SecuredContentAuthoringService
 provider_independence:
   application_depends_on_repository_port: true
   sql_library_forbidden_in_domain: true
+  identity_provider_forbidden_in_authoring_domain: true
