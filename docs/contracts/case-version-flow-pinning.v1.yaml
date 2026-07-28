@@ -1,0 +1,74 @@
+contract_version: 1.0.0
+updated_at: '2026-07-28'
+source_adr: docs/adr/0022-case-version-flow-and-configuration-pinning.md
+status: implementation_contract
+
+authoring_selection:
+  flow_template_code:
+    required: true
+    transitional_default: STANDARD_COMMIT_REVEAL
+  flow_template_version_no:
+    required: true
+    transitional_default: 1
+  runtime_case_subclass_from_flow: forbidden
+
+publication_resolution:
+  effective_configuration: current_published_content_configuration
+  validate:
+    - primary_domain_enabled
+    - base_format_enabled
+    - modifiers_enabled
+    - modifier_compatibility
+    - flow_template_version_exists
+    - flow_template_version_enabled
+    - referenced_primitives_enabled
+    - referenced_capabilities_enabled
+    - capability_primitive_compatibility
+  on_failure: publication_rejected
+
+server_derived_pin:
+  fields:
+    - content_configuration_id
+    - content_configuration_version_no
+    - resolved_flow
+  client_may_override: false
+  immutable_after_publication: true
+
+resolved_flow:
+  self_contained: true
+  fields:
+    - template_code
+    - template_version_no
+    - entry_step_code
+    - steps
+  step_fields:
+    - code
+    - primitive_code
+    - capability_codes
+    - next_step_codes
+    - payload_schema_ref
+
+revision:
+  preserve_editorial_flow_selection: true
+  preserve_previous_publication_pin: false
+  re_resolve_on_publish: true
+
+consumer_materialization:
+  target: content.case_version
+  atomic_with_publication: true
+  fields:
+    - content_configuration_id
+    - content_configuration_version_no
+    - flow_template_code
+    - flow_template_version_no
+    - resolved_flow
+  runtime_uses_live_configuration: false
+
+historical_reproducibility:
+  published_case_behavior_may_be_reinterpreted_by_new_config: false
+  superseded_case_keeps_original_pin: true
+  withdrawn_case_keeps_original_pin: true
+
+methodology_version:
+  in_scope: false
+  reason: dedicated_methodology_bounded_context_not_implemented_yet
