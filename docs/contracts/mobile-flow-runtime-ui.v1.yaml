@@ -1,12 +1,15 @@
-contract_version: 1.0.0
-updated_at: '2026-07-28'
-source_adr: docs/adr/0024-flutter-flow-driven-consumer-rendering.md
+contract_version: 1.1.0
+updated_at: '2026-07-29'
+source_adrs:
+  - docs/adr/0024-flutter-flow-driven-consumer-rendering.md
+  - docs/adr/0025-decision-revision-exposure-intervention-delta.md
 status: implementation_contract
 
 authority:
   case_content: CaseVersion
   step_runtime: actor_scoped_flow_runtime_snapshot
   result_payload: reveal_endpoint
+  revision_commands: actor_scoped_decision_lineage_endpoints
   fixed_screen_fallback_for_flow_session: forbidden
   client_case_type_branching: forbidden
 
@@ -18,22 +21,32 @@ load_sequence:
     - render_steps
   stored_draft:
     persisted_flow_snapshot_allowed: true
+    persisted_flow_step_code_allowed: true
     refresh_from_server_when_online: true
     legacy_draft_without_flow_requires_server_fetch: true
+    legacy_draft_without_step_code_derives_ready_decision_from_pinned_flow: true
     infer_default_flow_when_offline: false
 
-rendering_v1:
+rendering_v2:
   CONTEXT:
-    READY: render_existing_context_section
+    READY:
+      - render_existing_context_section
+      - record_flow_step_exposure_after_actual_render_when_online
+      - refresh_flow_runtime_after_exposure
     COMPLETED: render_existing_context_section
     BLOCKED: render_nothing
+    context_fetch_alone_counts_as_exposure: false
+    offline_restored_draft_records_new_exposure: false
   DECISION:
     READY:
       - render_existing_question_inputs
       - render_optional_private_reason
       - render_commit_action
     COMPLETED: render_no_editable_decision_controls
-    UNSUPPORTED: render_capability_pending
+    first_decision_commands: legacy_initial_decision_endpoints
+    later_decision_commands: decision_revision_endpoints
+    case_question_schema_reused_v1: true
+    client_case_type_branching: false
   COLLECTIVE_RESULT:
     READY:
       - require_reveal_payload
@@ -45,15 +58,32 @@ rendering_v1:
   unknown:
     UNSUPPORTED: render_capability_pending
 
-commit_refresh:
-  refresh_flow_runtime_after_commit: true
-  reveal_remains_result_authority: true
+draft_v2:
+  scope:
+    - case_id
+    - case_version_id
+    - session_id
+    - flow_step_code
+  same_offline_state_machine_for_initial_and_revision_decision: true
+  mutable_input_values_are_step_scoped: true
+  entering_new_ready_decision_clears_previous_step_inputs: true
+  committed_revision_never_reuses_initial_response_endpoint: true
+
+commit_continuation:
+  refresh_flow_runtime_after_any_commit: true
+  reveal_is_not_assumed_after_commit: true
+  reveal_only_when_collective_result_step_ready: true
+  otherwise_continue_rendering_server_flow: true
+  perspective_only_after_reveal: true
+  revision_commit_uses_independent_idempotency_key: true
 
 offline:
   draft_persists_flow_snapshot: true
+  draft_persists_flow_step_code: true
   snapshot_session_match_required: true
   snapshot_case_version_match_required: true
   server_refresh_replaces_cached_snapshot: true
+  exposure_requires_online_server_command: true
 
 partial_execution:
   fixed_fallback: forbidden
@@ -65,3 +95,5 @@ security:
   result_payload_from_flow_runtime: forbidden
   perspective_payload_from_flow_runtime: forbidden
   private_reason_from_flow_runtime: forbidden
+  client_intervention_classification: forbidden
+  client_contribution_class_selection: forbidden
