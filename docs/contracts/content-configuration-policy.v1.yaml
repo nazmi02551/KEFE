@@ -1,0 +1,111 @@
+contract_version: 1.0.0
+updated_at: '2026-07-28'
+source_adr: docs/adr/0018-versioned-content-configuration.md
+
+lifecycle:
+  states: [DRAFT, PUBLISHED, SUPERSEDED]
+  published_immutable: true
+  single_published_version: true
+  rollback_strategy: clone_previous_to_new_draft_then_publish
+
+stable_entities:
+  domain:
+    id_type: stable_code
+    required_fields: [code, label_key, enabled]
+  topic:
+    id_type: stable_code
+    required_fields: [code, domain_code, label_key, enabled]
+  base_format:
+    id_type: stable_code
+    required_fields: [code, label_key, enabled]
+  modifier:
+    id_type: stable_code
+    required_fields: [code, label_key, enabled]
+
+publication_registry:
+  domains:
+    - CIVIC_POLITICS
+    - LAW_JUSTICE
+    - SPORTS
+    - TECHNOLOGY_AI
+    - WORK_BUSINESS
+    - EDUCATION
+    - FAMILY_PARENTING
+    - RELATIONSHIPS
+    - ECONOMY_MONEY
+    - HEALTH_BIOETHICS
+    - SCIENCE_FUTURE
+    - PLANET_ANIMALS
+    - CITY_PUBLIC_LIFE
+    - CULTURE_MEDIA
+    - WORLD_GEOPOLITICS
+    - DAILY_LIFE
+  base_formats: [TODAY, DILEMMA, LAB, VS, CALL, DECIDE, RETRO]
+  risks: [L0, L1, L2, L3]
+  claim_states: [VERIFIED, CLAIMED, DISPUTED, UNKNOWN]
+  source_kinds: [OFFICIAL, NEWS, RESEARCH, EDITORIAL, OTHER]
+  disclosure_levels: [ESSENTIAL, DETAIL]
+  response_types:
+    SINGLE_CHOICE:
+      constraints:
+        min_options: 2
+    CONFIDENCE:
+      constraints:
+        min: 1
+        max: 10
+  modifier_compatibility:
+    TODAY:
+      - PROGRESSIVE_DISCLOSURE
+      - SOURCE_REVEAL
+      - EVOLVE
+      - SENSITIVE_MODE
+      - CIVIC_INTEGRITY
+      - CONFIDENCE_CAPTURE
+      - REASON_CAPTURE
+    DILEMMA:
+      - BLIND_FIRST
+      - PROGRESSIVE_DISCLOSURE
+      - CONFIDENCE_CAPTURE
+      - REASON_CAPTURE
+    LAB:
+      - BLIND_FIRST
+      - IDENTITY_REVEAL
+      - SOURCE_REVEAL
+      - CONFIDENCE_CAPTURE
+      - REASON_CAPTURE
+    VS: [BLIND_FIRST, CONFIDENCE_CAPTURE, REASON_CAPTURE]
+    CALL:
+      - BLIND_FIRST
+      - OFFICIAL_DECISION_COMPARE
+      - EXPERT_COMPARE
+      - EVOLVE
+      - CONFIDENCE_CAPTURE
+      - REASON_CAPTURE
+    DECIDE: [EVOLVE, CONFIDENCE_CAPTURE, REASON_CAPTURE]
+    RETRO: [OUTCOME_REVEAL, CONFIDENCE_CAPTURE, REASON_CAPTURE]
+
+review_policy:
+  modes:
+    - EDITORIAL
+    - SOURCE_VERIFICATION
+    - RISK_REVIEW
+    - CIVIC_REVIEW
+  derived_requirements:
+    - when: is_fact_bearing == true OR is_real_event == true
+      require: SOURCE_VERIFICATION
+    - when: content_risk IN [L2, L3]
+      require: RISK_REVIEW
+    - when: primary_domain_code == CIVIC_POLITICS OR modifiers CONTAINS CIVIC_INTEGRITY
+      require: CIVIC_REVIEW
+    - when: content_risk == L3
+      require: EDITORIAL
+  client_cannot_remove_derived_requirements: true
+
+admin_security:
+  manage_capability: TAXONOMY_MANAGE
+  csrf_required_for_mutations: true
+  audit_identity: server_derived_admin_subject
+
+reproducibility:
+  publication_validation_must_record_config_version: true
+  published_caseversion_never_depends_on_future_live_config: true
