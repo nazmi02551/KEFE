@@ -1,0 +1,58 @@
+name: Prepare DecisionRevision Runtime Checkpoint
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/checkpoint-m2-decision-revision.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  checkpoint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - name: Append durable checkpoint
+        run: |
+          git fetch origin main --depth=1
+          MAIN_SHA=$(git rev-parse origin/main)
+          python - "$MAIN_SHA" <<'PY'
+          from pathlib import Path
+          import sys
+
+          main_sha = sys.argv[1]
+          path = Path('docs/status/CURRENT.md')
+          text = path.read_text(encoding='utf-8')
+          marker = '## M2 DecisionRevision Runtime Checkpoint — 2026-07-29'
+          if marker not in text:
+              block = f'''
+
+          {marker}
+
+          - Main baseline: `{main_sha}`
+          - PR #60 delivered the first executable DecisionRevision lineage slice under ADR-0025.
+          - Initial Commit materializes immutable Revision #1; later Decision Steps use separate revision drafts and immutable revisions.
+          - Context between committed Decisions is recorded as actual Exposure and promoted server-side to a methodology-significant Intervention.
+          - Generic DecisionDelta links predecessor revision, intervention lineage and successor revision without claiming causality.
+          - Flow runtime v2 evaluates between-decision Context and later Decision readiness from server lineage state; Reflection remains explicitly pending.
+          - Consumer Flutter uses the same Flow-driven screen and offline/idempotent draft state machine for initial and later Decisions; no Case/BaseFormat branching was introduced.
+          - Contract baseline: API/OpenAPI 0.15.0, generic Flow runtime 1.1.0, DecisionRevision lineage 1.1.0, Mobile Flow runtime UI 1.1.0, manifest 1.29.0.
+          - Durable PostgreSQL migration: `20260729_0013_decision_revision_lineage.py`.
+          - Validation baseline includes API lint/contracts/unit, PostgreSQL migration/seed/integration, Flutter analyze/widget tests, `PRINCIPLE_CONTEXT_RETEST` acceptance and Preview APK build.
+          - Next architecture slice: generic `REFLECTION` runtime over committed DecisionRevision/DecisionDelta lineage, preserving the same Case-agnostic composition model. Do not introduce Reflection-specific Case types or client-side delta inference.
+          '''
+              path.write_text(text.rstrip() + block + '\n', encoding='utf-8')
+          PY
+      - name: Remove one-shot workflow
+        run: rm -f .github/workflows/checkpoint-m2-decision-revision.yml
+      - name: Commit checkpoint
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Advance checkpoint through DecisionRevision runtime'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
