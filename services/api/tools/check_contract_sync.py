@@ -52,8 +52,8 @@ def _openapi_errors() -> list[str]:
     contract = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
     errors: list[str] = []
 
-    if contract.get("info", {}).get("version") != "0.12.0":
-        errors.append("OpenAPI checked-in version must match API v0.12.0")
+    if contract.get("info", {}).get("version") != "0.13.0":
+        errors.append("OpenAPI checked-in version must match API v0.13.0")
 
     bearer = contract.get("components", {}).get("securitySchemes", {}).get("HTTPBearer")
     if bearer != {"scheme": "bearer", "type": "http"}:
@@ -79,6 +79,9 @@ def _openapi_errors() -> list[str]:
         "AdminSessionResponse",
         "AuthoringVersionResponse",
         "AuditTrailResponse",
+        "ConfigurationVersionResponse",
+        "ConfigurationVersionsResponse",
+        "ConfigurationAuditTrailResponse",
     }
     missing_schemas = sorted(required_schemas - schemas.keys())
     if missing_schemas:
@@ -127,6 +130,26 @@ def _openapi_errors() -> list[str]:
             "step_up_at",
             "expires_at",
         },
+        "ConfigurationVersionResponse": {
+            "id",
+            "version_no",
+            "state",
+            "domains",
+            "topics",
+            "base_formats",
+            "modifiers",
+            "modifier_compatibility",
+            "primitives",
+            "capabilities",
+            "flow_templates",
+            "risks",
+            "claim_states",
+            "source_kinds",
+            "disclosure_levels",
+            "created_at",
+            "published_at",
+            "cloned_from_version_id",
+        },
     }
     for schema, required in field_contracts.items():
         missing = _missing_fields(schemas, schema, required)
@@ -159,10 +182,30 @@ def _openapi_errors() -> list[str]:
         ("/internal/admin/v1/session", "get"): "AdminSessionResponse",
         ("/internal/admin/v1/cases", "post"): "AuthoringVersionResponse",
         ("/internal/admin/v1/cases/{case_id}/audit", "get"): "AuditTrailResponse",
+        (
+            "/internal/admin/v1/content-configuration/current",
+            "get",
+        ): "ConfigurationVersionResponse",
+        (
+            "/internal/admin/v1/content-configuration/versions",
+            "get",
+        ): "ConfigurationVersionsResponse",
+        (
+            "/internal/admin/v1/content-configuration/audit",
+            "get",
+        ): "ConfigurationAuditTrailResponse",
+        (
+            "/internal/admin/v1/content-configuration/drafts",
+            "post",
+        ): "ConfigurationVersionResponse",
+    }
+    created_responses = {
+        ("/internal/admin/v1/cases", "post"),
+        ("/internal/admin/v1/content-configuration/drafts", "post"),
     }
     for (path, method), schema in response_contracts.items():
         operation = paths.get(path, {}).get(method, {})
-        status = "201" if (path, method) == ("/internal/admin/v1/cases", "post") else "200"
+        status = "201" if (path, method) in created_responses else "200"
         if _response_ref(operation, status) != f"#/components/schemas/{schema}":
             errors.append(f"{method.upper()} {path} must return {schema}")
 
