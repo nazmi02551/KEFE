@@ -33,7 +33,10 @@ class ContentConfigurationPublicationResolver:
             failures.append(
                 {
                     "code": "CONTENT_CONFIG_DOMAIN_UNAVAILABLE",
-                    "detail": "CaseVersion primary Domain is unavailable in published configuration",
+                    "detail": (
+                        "CaseVersion primary Domain is unavailable in published "
+                        "configuration"
+                    ),
                     "path": "primary_domain_code",
                 }
             )
@@ -42,7 +45,10 @@ class ContentConfigurationPublicationResolver:
             failures.append(
                 {
                     "code": "CONTENT_CONFIG_FORMAT_UNAVAILABLE",
-                    "detail": "CaseVersion Base Format is unavailable in published configuration",
+                    "detail": (
+                        "CaseVersion Base Format is unavailable in published "
+                        "configuration"
+                    ),
                     "path": "base_format_code",
                 }
             )
@@ -61,13 +67,17 @@ class ContentConfigurationPublicationResolver:
 
         allowed_modifiers = snapshot.modifier_compatibility.get(version.base_format_code)
         if allowed_modifiers is not None:
-            incompatible_modifiers = sorted(set(version.modifiers) - set(allowed_modifiers))
+            incompatible_modifiers = sorted(
+                set(version.modifiers) - set(allowed_modifiers)
+            )
             if incompatible_modifiers:
                 failures.append(
                     {
                         "code": "CONTENT_CONFIG_MODIFIER_INCOMPATIBLE",
-                        "detail": "CaseVersion Modifiers are incompatible with Base Format: "
-                        + ", ".join(incompatible_modifiers),
+                        "detail": (
+                            "CaseVersion Modifiers are incompatible with Base Format: "
+                            + ", ".join(incompatible_modifiers)
+                        ),
                         "path": "modifiers",
                     }
                 )
@@ -86,7 +96,10 @@ class ContentConfigurationPublicationResolver:
             failures.append(
                 {
                     "code": "CONTENT_CONFIG_FLOW_UNAVAILABLE",
-                    "detail": "Selected FlowTemplateVersion is unavailable in published configuration",
+                    "detail": (
+                        "Selected FlowTemplateVersion is unavailable in published "
+                        "configuration"
+                    ),
                     "path": "flow_template_code",
                 }
             )
@@ -125,7 +138,10 @@ class ContentConfigurationPublicationResolver:
                     raise self._flow_invalid(
                         flow.code,
                         step.code,
-                        f"Capability {capability_code} is incompatible with Primitive {step.primitive_code}",
+                        (
+                            f"Capability {capability_code} is incompatible with "
+                            f"Primitive {step.primitive_code}"
+                        ),
                     )
             resolved_steps.append(
                 ResolvedFlowStep(
