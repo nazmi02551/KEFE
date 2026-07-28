@@ -62,6 +62,9 @@ jobs:
       - name: Enforce tests
         if: always()
         run: test '${{ steps.tests.outcome }}' = 'success'
+      - name: Generate transient Android host
+        working-directory: apps/mobile
+        run: flutter create --platforms=android --project-name kefe_mobile .
       - name: Build preview APK
         working-directory: apps/mobile
         run: flutter build apk --debug -t lib/main_preview.dart
