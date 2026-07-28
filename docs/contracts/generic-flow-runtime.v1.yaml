@@ -1,12 +1,15 @@
-contract_version: 1.0.0
-updated_at: '2026-07-28'
-source_adr: docs/adr/0023-generic-consumer-flow-runtime.md
+contract_version: 1.1.0
+updated_at: '2026-07-29'
+source_adrs:
+  - docs/adr/0023-generic-consumer-flow-runtime.md
+  - docs/adr/0025-decision-revision-exposure-intervention-delta.md
 status: implementation_contract
 
 authority:
   session: actor_owned_weigh_session
   case_version: session_pinned_case_version
   flow: case_version_resolved_flow
+  decision_lineage: actor_owned_session_revision_and_exposure_state
   live_content_configuration_lookup: forbidden
 
 http:
@@ -46,24 +49,35 @@ step:
     - state
     - reason_code
 
-primitive_semantics_v1:
+primitive_semantics_v2:
   CONTEXT:
-    non_blocking: true
-    reachable_state: READY
-    transition_satisfied_when_reachable: true
+    before_first_decision:
+      non_blocking: true
+      reachable_state: READY
+      transition_satisfied_when_reachable: true
+    between_decisions:
+      before_actual_exposure: READY
+      transition_satisfied_before_exposure: false
+      after_actual_exposure: COMPLETED
+      transition_satisfied_after_exposure: true
+      context_fetch_alone_counts_as_exposure: false
   DECISION:
     first_decision:
-      draft_state: READY
-      committed_state: COMPLETED
-      transition_satisfied_when: session_committed
+      before_initial_commit: READY
+      after_revision_one: COMPLETED
+      historical_committed_session_without_revision: COMPLETED
+      transition_satisfied_when: revision_one_exists_or_historical_session_committed
     later_decision:
-      after_predecessors: UNSUPPORTED
-      reason_code: FLOW_DECISION_REVISION_REQUIRED
+      predecessors_pending: BLOCKED
+      predecessors_satisfied_without_revision: READY
+      committed_revision_exists_for_step: COMPLETED
+      revision_capability_intrinsically_unsupported: false
   COLLECTIVE_RESULT:
-    before_commit: BLOCKED
-    before_commit_reason: FLOW_COMMIT_REQUIRED
-    after_commit: READY
+    before_initial_commit: BLOCKED
+    before_initial_commit_reason: FLOW_COMMIT_REQUIRED
+    after_initial_commit: READY
     contains_result_payload: false
+    successful_reveal_delivery_may_record_exposure: true
   REFLECTION:
     after_predecessors: UNSUPPORTED
     reason_code: FLOW_REFLECTION_RUNTIME_PENDING
@@ -76,6 +90,15 @@ graph:
   unmet_predecessor_state: BLOCKED
   unmet_predecessor_reason: FLOW_PREDECESSOR_PENDING
   client_completed_step_claims_accepted: false
+  client_revision_state_claims_accepted: false
+  client_exposure_state_claims_accepted: false
+
+lineage:
+  decision_completion_source: committed_decision_revision_for_flow_step
+  context_completion_source: recorded_actual_context_exposure_when_exposure_required
+  result_readiness_source: initial_commit_barrier
+  decision_delta_payload_in_flow_runtime: false
+  intervention_payload_in_flow_runtime: false
 
 legacy:
   missing_resolved_flow:
@@ -83,8 +106,12 @@ legacy:
     http_status: 409
     infer_from_live_configuration: false
     assume_default_flow: false
+  committed_sessions_created_before_revision_persistence:
+    first_decision_treated_as_completed: true
+    synthetic_revision_created_on_read: false
 
 security:
   result_leak_before_commit: forbidden
   reveal_endpoint_remains_authoritative: true
   perspective_endpoint_remains_authoritative: true
+  foreign_session_behavior: not_found
