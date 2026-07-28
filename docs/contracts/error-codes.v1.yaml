@@ -1,4 +1,4 @@
-registry_version: 1.5.0
+registry_version: 1.6.0
 errors:
 - code: AUTH_REQUIRED
   http_status: 401
@@ -27,6 +27,30 @@ errors:
 - code: AUTH_RATE_LIMITED
   http_status: 429
   retryable: true
+- code: ADMIN_AUTH_REQUIRED
+  http_status: 401
+  retryable: false
+- code: ADMIN_SESSION_INVALID
+  http_status: 401
+  retryable: false
+- code: ADMIN_SESSION_EXPIRED
+  http_status: 401
+  retryable: false
+- code: ADMIN_SESSION_REVOKED
+  http_status: 401
+  retryable: false
+- code: ADMIN_MFA_REQUIRED
+  http_status: 403
+  retryable: false
+- code: ADMIN_FORBIDDEN
+  http_status: 403
+  retryable: false
+- code: ADMIN_STEP_UP_REQUIRED
+  http_status: 403
+  retryable: false
+- code: ADMIN_SEPARATION_OF_DUTIES
+  http_status: 403
+  retryable: false
 - code: CASE_NOT_FOUND
   http_status: 404
   retryable: false

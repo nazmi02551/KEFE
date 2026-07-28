@@ -1,0 +1,80 @@
+contract_version: 1.0.0
+updated_at: '2026-07-28'
+capability: admin_security_boundary
+principal:
+  separate_from_consumer_actor: true
+  stable_identifier: admin_subject_id
+  client_supplied_actor_ref_allowed: false
+  external_identity_provider_is_adapter: true
+session:
+  mfa_required: true
+  server_side_revocation_required: true
+  absolute_lifetime_minutes: 720
+  idle_timeout_minutes: 30
+  step_up_freshness_minutes: 15
+  step_up_required_for:
+    - CONTENT_PUBLISH
+    - CONTENT_WITHDRAW
+    - ADMIN_ACCESS_MANAGE
+  browser:
+    opaque_server_session: true
+    secure_cookie: true
+    http_only_cookie: true
+    same_site_cookie: true
+    csrf_protection_for_state_change: true
+    javascript_bearer_storage_forbidden: true
+roles:
+  EDITOR:
+    - CONTENT_CREATE
+    - CONTENT_EDIT
+    - CONTENT_SUBMIT_REVIEW
+  REVIEWER:
+    - CONTENT_REVIEW
+    - SOURCE_VERIFY
+    - RISK_REVIEW
+    - AUDIT_READ
+  PUBLISHER:
+    - CONTENT_PUBLISH
+    - CONTENT_WITHDRAW
+    - AUDIT_READ
+  TAXONOMY_MANAGER:
+    - TAXONOMY_MANAGE
+    - AUDIT_READ
+  ACCESS_ADMIN:
+    - ADMIN_ACCESS_MANAGE
+    - AUDIT_READ
+capabilities:
+  - CONTENT_CREATE
+  - CONTENT_EDIT
+  - CONTENT_SUBMIT_REVIEW
+  - CONTENT_REVIEW
+  - CONTENT_PUBLISH
+  - CONTENT_WITHDRAW
+  - SOURCE_VERIFY
+  - RISK_REVIEW
+  - TAXONOMY_MANAGE
+  - ADMIN_ACCESS_MANAGE
+  - AUDIT_READ
+authorization:
+  server_side_only: true
+  implicit_role_hierarchy: false
+  wildcard_capability: false
+  resource_id_grants_access: false
+separation_of_duties:
+  reviewer_must_differ_from_submitter: true
+  publisher_may_equal_reviewer: true
+  access_admin_implies_publish: false
+audit:
+  actor_ref_format: 'admin:<admin_subject_id>'
+  append_only: true
+  capability_assignment_changes_audited: true
+  authorization_denials_emit_security_signal: true
+  raw_session_tokens_logged: false
+http_surface:
+  authorized_by_this_contract: false
+  prerequisite_for_future_surface:
+    - secured_application_facade
+    - capability_tests
+    - step_up_tests
+    - separation_of_duties_tests
+    - csrf_session_controls_for_browser_client
