@@ -120,13 +120,18 @@ def test_postgres_publication_round_trips_flow_and_configuration_provenance(
         assert editorial["content_configuration_id"] == str(
             published.content_configuration_id
         )
+        assert editorial["content_configuration_version_no"] == (
+            published.content_configuration_version_no
+        )
         assert editorial["resolved_flow"]["template_code"] == (
             "STANDARD_COMMIT_REVEAL"
         )
         assert consumer["content_configuration_id"] == (
             published.content_configuration_id
         )
-        assert consumer["content_configuration_version_no"] == 1
+        assert consumer["content_configuration_version_no"] == (
+            published.content_configuration_version_no
+        )
         assert consumer["flow_template_code"] == "STANDARD_COMMIT_REVEAL"
         assert consumer["flow_template_version_no"] == 1
         assert consumer["resolved_flow"]["entry_step_code"] == "CONTEXT"
@@ -135,6 +140,9 @@ def test_postgres_publication_round_trips_flow_and_configuration_provenance(
         assert decision_case is not None
         assert decision_case.content_configuration_id == (
             published.content_configuration_id
+        )
+        assert decision_case.content_configuration_version_no == (
+            published.content_configuration_version_no
         )
         assert decision_case.resolved_flow is not None
         assert decision_case.resolved_flow.template_code == "STANDARD_COMMIT_REVEAL"
