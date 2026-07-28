@@ -1,4 +1,4 @@
-manifest_version: 1.18.0
+manifest_version: 1.19.0
 updated_at: '2026-07-28'
 policy:
   executable_schema_source: services/api/migrations
@@ -53,6 +53,10 @@ contracts:
     path: docs/contracts/content-configuration-policy.v1.yaml
     version: 1.0.0
     role: versioned_taxonomy_compatibility_and_derived_review_policy
+  - id: content-configuration-persistence
+    path: docs/contracts/content-configuration-persistence.v1.yaml
+    version: 1.0.0
+    role: durable_versioned_content_configuration_storage_and_audit
   - id: admin-security-policy
     path: docs/contracts/admin-security-policy.v1.yaml
     version: 1.0.0
