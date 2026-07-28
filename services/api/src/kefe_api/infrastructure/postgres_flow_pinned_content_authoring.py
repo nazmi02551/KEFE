@@ -15,11 +15,15 @@ from kefe_api.modules.content_authoring.models import (
 )
 
 
-class PostgresFlowPinnedContentAuthoringRepository(PostgresContentAuthoringRepository):
+class PostgresFlowPinnedContentAuthoringRepository(
+    PostgresContentAuthoringRepository
+):
     """Extends the proven authoring adapter with immutable Flow/config provenance."""
 
     @staticmethod
-    def _resolved_flow_document(flow: ResolvedFlowDefinition | None) -> dict[str, Any] | None:
+    def _resolved_flow_document(
+        flow: ResolvedFlowDefinition | None,
+    ) -> dict[str, Any] | None:
         if flow is None:
             return None
         return {
@@ -72,7 +76,9 @@ class PostgresFlowPinnedContentAuthoringRepository(PostgresContentAuthoringRepos
                     if version.content_configuration_id is not None
                     else None
                 ),
-                "content_configuration_version_no": version.content_configuration_version_no,
+                "content_configuration_version_no": (
+                    version.content_configuration_version_no
+                ),
                 "resolved_flow": cls._resolved_flow_document(version.resolved_flow),
             }
         )
@@ -85,11 +91,20 @@ class PostgresFlowPinnedContentAuthoringRepository(PostgresContentAuthoringRepos
         config_id = document.get("content_configuration_id")
         return replace(
             base,
-            flow_template_code=document.get("flow_template_code", "STANDARD_COMMIT_REVEAL"),
-            flow_template_version_no=int(document.get("flow_template_version_no", 1)),
+            flow_template_code=document.get(
+                "flow_template_code",
+                "STANDARD_COMMIT_REVEAL",
+            ),
+            flow_template_version_no=int(
+                document.get("flow_template_version_no", 1)
+            ),
             content_configuration_id=UUID(config_id) if config_id else None,
-            content_configuration_version_no=document.get("content_configuration_version_no"),
-            resolved_flow=cls._resolved_flow_from_document(document.get("resolved_flow")),
+            content_configuration_version_no=document.get(
+                "content_configuration_version_no"
+            ),
+            resolved_flow=cls._resolved_flow_from_document(
+                document.get("resolved_flow")
+            ),
         )
 
     def _materialize_consumer(
@@ -103,7 +118,9 @@ class PostgresFlowPinnedContentAuthoringRepository(PostgresContentAuthoringRepos
             or version.content_configuration_version_no is None
             or version.resolved_flow is None
         ):
-            raise ValueError("published CaseVersion requires resolved Flow/configuration provenance")
+            raise ValueError(
+                "published CaseVersion requires resolved Flow/configuration provenance"
+            )
 
         connection.execute(
             text(
@@ -120,7 +137,9 @@ class PostgresFlowPinnedContentAuthoringRepository(PostgresContentAuthoringRepos
             {
                 "version_id": version.id,
                 "content_configuration_id": version.content_configuration_id,
-                "content_configuration_version_no": version.content_configuration_version_no,
+                "content_configuration_version_no": (
+                    version.content_configuration_version_no
+                ),
                 "flow_template_code": version.resolved_flow.template_code,
                 "flow_template_version_no": version.resolved_flow.template_version_no,
                 "resolved_flow": json.dumps(
