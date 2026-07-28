@@ -43,11 +43,10 @@ class PostgresExploreDecisionRepository(PostgresDecisionRepository):
                         cv.title,
                         cv.summary,
                         cv.accepts_weighs,
-                        ci.base_format_code,
-                        ci.primary_domain_code,
-                        ci.content_risk
+                        cv.base_format_code,
+                        cv.primary_domain_code,
+                        cv.content_risk
                     FROM content.case_version cv
-                    JOIN content.case_item ci ON ci.id = cv.case_id
                     WHERE cv.id = :version_id
                     """
                 ),
