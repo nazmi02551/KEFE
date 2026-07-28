@@ -1,0 +1,103 @@
+contract_version: 1.0.0
+updated_at: '2026-07-28'
+source_adr: docs/adr/0021-secured-admin-content-configuration-http.md
+status: implementation_contract
+
+boundary:
+  route_prefix: /internal/admin/v1/content-configuration
+  application_service: ContentConfigurationService
+  direct_repository_mutation_from_http: forbidden
+  admin_login_endpoint_in_scope: false
+  consumer_credentials_accepted: false
+
+session:
+  cookie: kefe_admin_session
+  csrf_header: X-KEFE-CSRF
+  csrf_bound_to_same_session: true
+  mutation_verification_order:
+    - resolve_session_without_touch
+    - verify_same_session_csrf
+    - touch_session
+    - application_mutation
+
+capabilities:
+  manage: TAXONOMY_MANAGE
+  audit_read: AUDIT_READ
+  taxonomy_manage_recent_step_up_required_by_current_policy: false
+
+read_operations:
+  - method: GET
+    path: /current
+    capability: TAXONOMY_MANAGE
+  - method: GET
+    path: /versions
+    capability: TAXONOMY_MANAGE
+  - method: GET
+    path: /versions/{version_id}
+    capability: TAXONOMY_MANAGE
+  - method: GET
+    path: /audit
+    capability: AUDIT_READ
+
+write_operations:
+  - method: POST
+    path: /drafts
+    capability: TAXONOMY_MANAGE
+    semantics: clone_current_published_to_new_draft
+  - method: PUT
+    path: /versions/{version_id}
+    capability: TAXONOMY_MANAGE
+    semantics: replace_editable_fields_of_existing_draft
+  - method: POST
+    path: /versions/{version_id}/publish
+    capability: TAXONOMY_MANAGE
+    semantics: validate_and_atomically_publish
+  - method: POST
+    path: /versions/{version_id}/rollback-drafts
+    capability: TAXONOMY_MANAGE
+    semantics: clone_historical_published_or_superseded_to_new_draft
+    rationale_required: true
+
+editable_payload:
+  includes:
+    - domains
+    - topics
+    - base_formats
+    - modifiers
+    - modifier_compatibility
+    - primitives
+    - capabilities
+    - flow_templates
+    - risks
+    - claim_states
+    - source_kinds
+    - disclosure_levels
+  strict_unknown_fields_forbidden: true
+  client_forbidden_fields:
+    - id
+    - version_no
+    - lifecycle_state
+    - created_by
+    - created_at
+    - published_at
+    - cloned_from_version_id
+    - actor_ref
+    - admin_subject_id
+    - roles
+    - capabilities_grant
+    - audit_identity
+
+response:
+  may_include:
+    - configuration_identity_and_lifecycle_metadata
+    - full_registry_payload
+    - audit_entries
+  forbidden:
+    - session_token
+    - csrf_token
+    - credential_hashes
+
+security:
+  audit_actor_ref: server_derived
+  no_idp_dependency_in_authorization: true
+  no_cms_vendor_dependency_in_domain: true
