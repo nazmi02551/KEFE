@@ -6,6 +6,7 @@ from uuid import UUID
 from kefe_api.modules.content_authoring.models import (
     AuthoringCaseVersion,
     CaseIdentity,
+    ContentLifecycle,
     LifecycleAuditEntry,
     PublicationValidationFailure,
 )
@@ -38,6 +39,7 @@ class ContentAuthoringRepository(Protocol):
         self,
         *,
         version: AuthoringCaseVersion,
+        expected_state: ContentLifecycle,
         audit: LifecycleAuditEntry,
     ) -> AuthoringCaseVersion: ...
 
@@ -45,6 +47,7 @@ class ContentAuthoringRepository(Protocol):
         self,
         *,
         version: AuthoringCaseVersion,
+        expected_state: ContentLifecycle,
         audit: LifecycleAuditEntry,
     ) -> tuple[AuthoringCaseVersion, AuthoringCaseVersion | None]: ...
 
