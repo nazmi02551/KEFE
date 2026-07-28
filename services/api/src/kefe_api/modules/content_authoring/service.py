@@ -69,11 +69,25 @@ class ContentAuthoringService:
         actor_ref: str,
     ) -> AuthoringCaseVersion:
         source = self._require_version(source_version_id)
+        cloned_issues = tuple(
+            replace(
+                issue,
+                id=uuid4(),
+                questions=tuple(replace(question, id=uuid4()) for question in issue.questions),
+            )
+            for issue in source.issues
+        )
+        cloned_context = tuple(replace(block, id=uuid4()) for block in source.context_blocks)
+        cloned_sources = tuple(replace(item, id=uuid4()) for item in source.sources)
         next_version = replace(
             source,
             id=uuid4(),
             version_no=self._repository.next_version_no(source.case_id),
             state=ContentLifecycle.DRAFT,
+            issues=cloned_issues,
+            context_blocks=cloned_context,
+            sources=cloned_sources,
+            completed_review_modes=(),
             created_at=datetime.now(UTC),
             published_at=None,
         )
