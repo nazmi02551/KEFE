@@ -78,6 +78,9 @@ jobs:
       - name: Generic Flow runtime contract
         working-directory: services/api
         run: python tools/check_generic_flow_runtime_contract.py
+      - name: Decision revision lineage contract
+        working-directory: services/api
+        run: python tools/check_decision_revision_lineage_contract.py
       - name: Admin HTTP contract
         id: admin-http-contract
         continue-on-error: true

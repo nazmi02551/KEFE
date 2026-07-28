@@ -1,0 +1,156 @@
+contract_version: 1.0.0
+updated_at: '2026-07-29'
+source_adr: docs/adr/0025-decision-revision-exposure-intervention-delta.md
+status: architecture_locked_implementation_pending
+
+scope:
+  bounded_context: decision
+  session_lineage_container: WEIGH_SESSION
+  case_authority: session_pinned_CASE_VERSION
+  flow_authority: case_version_pinned_resolved_flow
+  live_content_configuration_lookup: forbidden
+  case_specific_revision_engine: forbidden
+
+decision_revision:
+  immutable_after_commit: true
+  initial_commit_materializes_revision_one: true
+  initial_revision_no: 1
+  monotonic_revision_no_per_session: true
+  unique_committed_revision_per_session_and_flow_step: true
+  actor_identity_server_derived: true
+  case_version_identity_server_derived: true
+  revision_no_server_derived: true
+  contribution_class_server_derived: true
+  captures:
+    - session_id
+    - actor_id
+    - case_version_id
+    - revision_no
+    - flow_step_code
+    - response_snapshot
+    - private_reason_snapshot_when_present
+    - committed_at
+    - exposure_cursor_or_equivalent
+    - contribution_class
+  initial_commit_idempotent_replay_duplicates_revision: false
+
+revision_draft:
+  separate_from_initial_committed_response_rows: true
+  scope:
+    - actor_id
+    - session_id
+    - flow_step_code
+  mutable_until_commit: true
+  committed_revision_mutation: forbidden
+  later_decision_reopens_initial_response_rows: false
+
+flow_validation:
+  requested_step_must_exist_in_pinned_flow: true
+  requested_step_primitive: DECISION
+  blocking_predecessors_must_be_satisfied: true
+  already_committed_step_recommit: forbidden_except_idempotent_replay
+  client_predecessor_completion_claims: forbidden
+  client_revision_number: forbidden
+  client_case_version_override: forbidden
+  client_intervention_classification: forbidden
+
+exposure:
+  semantic: actor_actually_encountered_information_result_or_perspective
+  append_only: true
+  actor_scoped: true
+  case_version_pinned: true
+  multiple_distinct_encounters_allowed: true
+  same_idempotency_key_replay_duplicates_exposure: false
+  minimum_provenance:
+    - actor_id
+    - session_id
+    - case_version_id
+    - flow_step_code
+    - resource_category
+    - optional_resource_id
+    - occurred_at
+    - primitive_code
+    - capability_codes
+    - metadata
+  context_fetch_alone_counts_as_exposure: false
+  context_flow_step_requires_explicit_encounter_record: true
+  successful_actor_scoped_reveal_delivery_may_record_exposure_atomically: true
+  successful_actor_scoped_perspective_delivery_may_record_exposure_atomically: true
+
+intervention:
+  distinct_from_exposure: true
+  not_every_exposure_is_intervention: true
+  server_validated: true
+  may_reference_exposure: true
+  non_exposure_event_allowed: true
+  dimension_and_type_are_metadata_not_engines: true
+  dimension_specific_delta_engines_forbidden: true
+  first_slice_rule:
+    context_between_committed_decision_and_later_decision_is_methodology_significant: true
+    recorded_context_flow_step_exposure_promoted_to_intervention: true
+
+flow_runtime_v2:
+  first_decision:
+    READY: before_initial_commit
+    COMPLETED: revision_one_exists
+  later_decision:
+    BLOCKED: predecessors_unsatisfied
+    READY: predecessors_satisfied_and_no_committed_revision_for_step
+    COMPLETED: committed_revision_exists_for_step
+    unsupported_due_only_to_revision_capability_after_implementation: false
+  context_before_first_decision:
+    default_behavior: informational_non_blocking
+  context_between_decisions:
+    READY: reachable_and_not_exposed
+    COMPLETED: flow_step_exposure_and_intervention_recorded
+  collective_result:
+    result_payload_in_flow_runtime: forbidden
+    successful_reveal_records_result_exposure: true
+    future_post_result_revision_uses_same_intervention_lineage: true
+
+contribution_class:
+  values:
+    - CORE_PRE_RESULT
+    - EXPOSED
+  rules:
+    CORE_PRE_RESULT: no_collective_result_or_signal_exposure_before_revision
+    EXPOSED: collective_result_or_signal_exposure_exists_before_revision
+  advocacy_support_is_decision_revision_class: false
+  client_selectable: false
+
+decision_delta:
+  generic_only: true
+  formula: D1 + Intervention(s) + D2 -> Delta
+  links:
+    - from_revision_id
+    - to_revision_id
+    - intervention_ids
+  records_generic_response_level_diff_or_reproducible_equivalent: true
+  claims_causality: false
+  private_reason_becomes_public: false
+  actor_delta_engine: forbidden
+  legal_delta_engine: forbidden
+  age_delta_engine: forbidden
+  cost_delta_engine: forbidden
+
+security:
+  authentication_required: true
+  same_actor_session_only: true
+  foreign_session_behavior: not_found
+  explicit_exposure_idempotency_required: true
+  later_revision_commit_idempotency_required: true
+  private_response_leakage: forbidden
+  private_reason_leakage: forbidden
+
+first_vertical_slice:
+  target_flow: PRINCIPLE_CONTEXT_RETEST
+  required_sequence:
+    - initial_commit_creates_revision_1
+    - intermediate_context_exposure_recorded
+    - exposure_promoted_to_intervention
+    - later_decision_draft_edited
+    - later_decision_committed_as_revision_2
+    - flow_runtime_marks_later_decision_completed
+    - generic_delta_links_revision_1_intervention_revision_2
+  reflection_required_in_same_slice: false
+  runtime_case_type_branching: forbidden

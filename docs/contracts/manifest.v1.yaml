@@ -1,13 +1,13 @@
-manifest_version: 1.25.0
-updated_at: '2026-07-28'
+manifest_version: 1.27.0
+updated_at: '2026-07-29'
 policy:
   executable_schema_source: services/api/migrations
   product_authority: approved KEFE documentation ecosystem
   compatibility: contract changes require review for backward compatibility and documentation sync
 contracts:
   - id: core-erd
-    path: docs/contracts/core-erd.v1.mmd
-    version: '1'
+    path: docs/contracts/core-erd.v2.mmd
+    version: '2'
     role: conceptual_core_model
   - id: openapi
     path: docs/contracts/openapi.v1.json
@@ -73,6 +73,14 @@ contracts:
     path: docs/contracts/generic-flow-runtime.v1.yaml
     version: 1.0.0
     role: actor_scoped_server_authoritative_caseversion_pinned_flow_runtime
+  - id: mobile-flow-runtime-ui
+    path: docs/contracts/mobile-flow-runtime-ui.v1.yaml
+    version: 1.0.0
+    role: flutter_server_flow_driven_rendering_and_offline_continuity_policy
+  - id: decision-revision-lineage
+    path: docs/contracts/decision-revision-lineage.v1.yaml
+    version: 1.0.0
+    role: immutable_decision_revision_exposure_intervention_and_generic_delta_policy
   - id: signal-impact-model
     path: docs/contracts/signal-impact-model.v1.yaml
     version: 1.0.0
@@ -140,3 +148,5 @@ architecture_decisions:
   - docs/adr/0021-secured-admin-content-configuration-http.md
   - docs/adr/0022-case-version-flow-and-configuration-pinning.md
   - docs/adr/0023-generic-consumer-flow-runtime.md
+  - docs/adr/0024-flutter-flow-driven-consumer-rendering.md
+  - docs/adr/0025-decision-revision-exposure-intervention-delta.md
