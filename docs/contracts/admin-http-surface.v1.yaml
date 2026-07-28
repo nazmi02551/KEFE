@@ -1,0 +1,77 @@
+contract_version: 1.0.0
+updated_at: '2026-07-28'
+capability: admin_http_application_boundary
+mount_path: /admin
+authentication:
+  accepted_credential: opaque_cookie
+  cookie_name: kefe_admin_session
+  consumer_authorization_bearer_fallback: false
+  client_supplied_actor_identity: false
+csrf:
+  header_name: X-KEFE-CSRF
+  required_methods: [POST, PUT, PATCH, DELETE]
+  same_session_binding_required: true
+response:
+  cache_control: no-store
+surface:
+  create_case:
+    method: POST
+    path: /v1/cases
+    capability: CONTENT_CREATE
+    csrf_required: true
+  create_revision:
+    method: POST
+    path: /v1/case-versions/{version_id}/revisions
+    capability: CONTENT_EDIT
+    csrf_required: true
+  save_draft:
+    method: PUT
+    path: /v1/case-versions/{version_id}
+    capability: CONTENT_EDIT
+    csrf_required: true
+  submit_review:
+    method: POST
+    path: /v1/case-versions/{version_id}/submit-review
+    capability: CONTENT_SUBMIT_REVIEW
+    csrf_required: true
+  approve:
+    method: POST
+    path: /v1/case-versions/{version_id}/approve
+    capability: CONTENT_REVIEW
+    csrf_required: true
+    separation_of_duties: reviewer_must_differ_from_submitter
+  reject:
+    method: POST
+    path: /v1/case-versions/{version_id}/reject
+    capability: CONTENT_REVIEW
+    csrf_required: true
+    rationale_required: true
+  publish:
+    method: POST
+    path: /v1/case-versions/{version_id}/publish
+    capability: CONTENT_PUBLISH
+    csrf_required: true
+    recent_step_up_required: true
+  withdraw:
+    method: POST
+    path: /v1/case-versions/{version_id}/withdraw
+    capability: CONTENT_WITHDRAW
+    csrf_required: true
+    rationale_required: true
+    recent_step_up_required: true
+  audit:
+    method: GET
+    path: /v1/cases/{case_id}/audit
+    capability: AUDIT_READ
+    csrf_required: false
+forbidden:
+  - login_endpoint
+  - sso_provider_specific_contract
+  - consumer_bearer_authentication
+  - raw_admin_session_secret_response
+  - direct_repository_or_database_mutation_from_router
+  - client_actor_ref
+  - role_or_capability_override_in_request
+openapi:
+  consumer_contract_includes_admin_routes: false
+  dedicated_admin_openapi: future_artifact
