@@ -3,13 +3,13 @@
 **Updated:** 2026-07-28  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Latest verified implementation commit:** `34c44b073b349a61a1c027b0fceb593978a10f27`
+**Latest verified implementation commit:** `9c8ee0de2331bc4d2913dd655502b8a46fb084bd`
 
 This is the **single canonical durable engineering handoff**. Chat history is not a source of truth. At every continuation, read this file from `main`, inspect open PRs/recent CI, then proceed from the repository state.
 
 ## 1. Product authority
 
-Current approved baseline:
+Current approved documentation baseline pending the milestone synchronization triggered by PR #40:
 
 - KEFE Master Product Document v1.2.0 Approved Canonical
 - KEFE Documentation Governance v1.3.2 Approved
@@ -18,7 +18,7 @@ Current approved baseline:
 - KEFE Technical Contract Pack v1.0.0
 - KEFE Documentation Ecosystem package v3.2 — validation PASS
 
-The audit records **0 open product decisions** and **0 planned official documents**. Implementation must still translate each coherent slice into ADRs, machine-readable contracts and tests. Editable DOCX and generated PDF files are synchronized only at declared milestone boundaries.
+The audit records **0 open product decisions** and **0 planned official documents**. Implementation translates each coherent slice into ADRs, machine-readable contracts and tests. The declared Content/Admin milestone boundary has now been reached, so editable DOCX sources and generated PDFs are due for synchronized regeneration and visual QA before the documentation baseline is advanced.
 
 Binding rules:
 
@@ -34,7 +34,9 @@ Binding rules:
 - Content authoring is separate from consumer reads/writes.
 - Admin identity is a separate security domain from consumer Actor identity; consumer credentials cannot authenticate Admin commands.
 - Admin authorization is capability-first, server-side and least-privilege; audit identity is derived from the authenticated Admin principal.
-- Admin browser sessions are opaque and revocable; raw session/CSRF secrets are never persisted, and state-changing requests require session-bound CSRF verification.
+- Admin browser sessions are opaque and revocable; raw session/CSRF secrets are never persisted.
+- State-changing Admin browser requests require CSRF verification bound to the same opaque session.
+- Admin HTTP handlers may execute authoring lifecycle commands only through `SecuredContentAuthoringService`.
 
 ## 2. Completed executable foundation
 
@@ -53,24 +55,29 @@ Backend/contracts:
 - Progress fields: committed weigh count, distinct Case/domain coverage, first/last Commit and recent completed Cases.
 - Deterministic OpenAPI export/drift gate, contract fitness checks and PostgreSQL integration tests.
 - M1 provider-neutral Content Authoring core: stable Case identity; versioned Issue/Question/Context/Source aggregate; `DRAFT → IN_REVIEW → APPROVED → PUBLISHED`; rejection/withdrawal rationale; append-only audit; registry-driven publication validation; immutable published CaseVersion; isolated correction revisions.
-- PostgreSQL Content Authoring persistence under an isolated `editorial` schema using a provider-neutral JSONB aggregate representation.
-- Atomic publication materializes only approved content into the consumer `content` schema, supersedes the previous published version, appends lifecycle audit and marks the editorial version published in one transaction.
-- Consumer CaseVersion owns immutable `base_format_code`, `primary_domain_code` and `content_risk`, so historical metadata does not drift after later revisions.
-- Public Context reads allow only materialized `PUBLISHED` or `SUPERSEDED` consumer CaseVersions; `DRAFT`, `IN_REVIEW` and `APPROVED` editorial content cannot leak by guessed ID.
+- PostgreSQL Content Authoring persistence under isolated `editorial` schema using a provider-neutral JSONB aggregate representation.
+- Atomic publication materializes only approved content into consumer `content` schema, supersedes the previous published version, appends lifecycle audit and marks the editorial version published in one transaction.
+- Consumer CaseVersion owns immutable `base_format_code`, `primary_domain_code` and `content_risk`.
+- Public Context reads allow only materialized `PUBLISHED` or `SUPERSEDED` consumer CaseVersions.
 - Editorial lifecycle audit has a durable database sequence for deterministic transaction ordering.
-- Admin security boundary is locked by ADR-0015 and a machine-readable policy.
-- Separate `AdminPrincipal`, roles/capabilities, mandatory MFA assurance, absolute/idle expiry checks and recent step-up for publish/withdraw/access-management commands are implemented behind provider-neutral ports.
+- Admin security boundary is locked by ADR-0015 and machine-readable policy.
+- Separate `AdminPrincipal`, roles/capabilities, mandatory MFA assurance, absolute/idle expiry and recent step-up are implemented behind provider-neutral ports.
 - Initial Admin roles: `EDITOR`, `REVIEWER`, `PUBLISHER`, `TAXONOMY_MANAGER`, `ACCESS_ADMIN`; no implicit hierarchy or wildcard capability.
 - Reviewer must differ from submitter for the same CaseVersion; publisher may equal reviewer in the initial operational model.
-- `SecuredContentAuthoringService` derives audit identity as `admin:<admin_subject_id>` and capability-gates authoring lifecycle commands before calling the provider-neutral authoring service.
-- Security-denial audit-sink port exists; raw Admin session tokens are not part of audit identity.
-- Durable Admin session substrate is implemented under an isolated `admin_security` schema.
-- Stable Admin subjects support `ACTIVE`, `SUSPENDED` and `DISABLED` state with explicit role assignments and direct capability grants.
+- `SecuredContentAuthoringService` derives audit identity as `admin:<admin_subject_id>` and capability-gates authoring lifecycle commands.
+- Durable Admin session substrate lives under isolated `admin_security` schema.
+- Stable Admin subjects support `ACTIVE`, `SUSPENDED` and `DISABLED` with explicit role assignments/direct capability grants.
 - Opaque server-side Admin sessions are immediately revocable; only SHA-256 digests of session and CSRF secrets are persisted.
-- MFA assurance, absolute expiry, idle expiry, server-authoritative `last_seen_at` and recent step-up are enforced before capability-gated commands.
-- CSRF tokens are bound to the same opaque Admin session; cross-session CSRF use is rejected.
+- MFA assurance, absolute expiry, idle expiry, server-authoritative `last_seen_at` and recent step-up are enforced.
+- CSRF tokens are bound to the same opaque Admin session; cross-session CSRF is rejected.
 - `AdminSessionResolver`, `AdminSessionIssuer` and `AdminCsrfVerifier` remain provider-neutral; no SSO/IdP vendor is embedded in authorization rules.
-- **No Admin/authoring HTTP endpoint exists yet.** The next slice is the first secured internal Admin HTTP application surface over these durable session/CSRF primitives.
+- Internal Admin HTTP surface is available at `/internal/admin/v1` for session introspection, Case/DRAFT creation, revision, draft save, submit, approve, reject, publish, withdraw and audit trail.
+- No Admin login/SSO endpoint exists yet; external authentication remains a future provider-neutral adapter boundary.
+- Admin HTTP bodies cannot supply audit identity, Admin subject, role or capability values.
+- Mutating Admin HTTP requests require `X-KEFE-CSRF` bound to `kefe_admin_session` before activity touch/mutation.
+- Publish/withdraw continue to require recent step-up; reviewer/submitter separation remains server-enforced.
+- OpenAPI v0.12.0 and Admin HTTP architecture fitness gates are checked in CI.
+- PostgreSQL end-to-end test proves secured Admin HTTP create → submit → independent review → publish → consumer materialization → audit.
 
 Mobile:
 
@@ -89,20 +96,23 @@ Mobile:
 
 Most recent merged product/architecture slices:
 
-- PR #27 — CaseVersion-pinned Context and Source layer.
-- PR #29 — optional Account Offer and actor-scoped My KEFE Progress foundation.
-- PR #31 — M1 Content Authoring and immutable publication core; merge commit `9416d4366650c3078d92dbf0b5533e4d1a4cdf39`.
-- PR #33 — PostgreSQL editorial persistence, atomic publication materialization and draft-leakage protection; merge commit `b36415671322dd15ea3b0a31c1203898ca0ebf58`.
-- PR #35 — Admin authentication/authorization/threat-model boundary and secured Content Authoring facade; merge commit `b68cb11cc37c3d42a6040fd9e5452b1b44fd6c59`.
-- PR #37 — durable Admin subjects/sessions, role-capability persistence, MFA/session assurance and session-bound CSRF substrate; merge commit `34c44b073b349a61a1c027b0fceb593978a10f27`.
+- PR #31 — M1 Content Authoring and immutable publication core; merge `9416d4366650c3078d92dbf0b5533e4d1a4cdf39`.
+- PR #33 — PostgreSQL editorial persistence, atomic publication materialization and draft-leakage protection; merge `b36415671322dd15ea3b0a31c1203898ca0ebf58`.
+- PR #35 — Admin authentication/authorization/threat-model boundary and secured authoring facade; merge `b68cb11cc37c3d42a6040fd9e5452b1b44fd6c59`.
+- PR #37 — durable Admin subjects/sessions, role-capability persistence, MFA/session assurance and session-bound CSRF substrate; merge `34c44b073b349a61a1c027b0fceb593978a10f27`.
+- PR #40 — secured internal Admin authoring HTTP surface, OpenAPI v0.12.0, CSRF/session boundary and PostgreSQL end-to-end workflow; merge `9c8ee0de2331bc4d2913dd655502b8a46fb084bd`.
 
 ## 3. Current executable path
 
+Consumer:
+
 `Onboarding → Explore → Case Summary → Context + Sources → Typed Weigh → Optional Private Reason → Commit → Trusted Reveal → Curated Perspective → My KEFE Progress → Optional Account Offer`
 
-Failures in Context, Perspective or Progress are isolated from the trusted decision state. They cannot replay mutable answers, Reason or Commit. The current low-risk DILEMMA is a development fixture, not a product-wide default.
+Admin authoring:
 
-Content authoring now has a durable domain/application/persistence core, atomic publication boundary, secured Admin application facade and durable Admin session substrate. It is intentionally not yet connected to an HTTP Admin surface. Consumer reads continue to use only published immutable materialized content.
+`Authenticated Admin Session → Create/Edit DRAFT → Submit → Independent Review → Approve/Reject → Step-up Publish/Withdraw → Immutable Consumer Materialization + Audit`
+
+Failures in Context, Perspective or Progress are isolated from the trusted decision state. Consumer reads continue to use only published immutable materialized content.
 
 ## 4. Guardrails for upcoming work
 
@@ -113,7 +123,7 @@ Content authoring now has a durable domain/application/persistence core, atomic 
 - Preserve provenance, moderation and methodology metadata.
 - Do not present activity counters as validated identity or psychological insight.
 - Do not expose functional account conversion until enrollment, ownership transfer, recovery, retention and revocation work end to end.
-- Do not silently lock final navigation or branded Commit terminology outside the approved documents.
+- Do not silently lock final navigation or branded Commit terminology outside approved documents.
 - Never mutate a published CaseVersion in place; corrections create a new version.
 - Do not embed a CMS vendor, SQL library, identity provider or AI provider into authoring domain rules.
 - Do not let editorial mutable states enter consumer read tables before publication.
@@ -123,17 +133,17 @@ Content authoring now has a durable domain/application/persistence core, atomic 
 - State-changing browser Admin requests require same-session CSRF verification.
 - Publication/withdrawal/access-management require recent Admin step-up authentication.
 - Admin session resolution must check revocation, subject state, MFA, absolute expiry and idle expiry before refreshing activity.
+- No external SSO provider may become a dependency of authoring authorization rules.
 
 ## 5. Recommended next sequence
 
-1. **Authenticated Admin HTTP application surface**
-   - expose only internal Admin workflow endpoints backed by opaque revocable Admin sessions
-   - resolve the Admin principal server-side from the session; never accept client-supplied audit identity
-   - require session-bound CSRF on every state-changing browser command
-   - route authoring lifecycle commands only through `SecuredContentAuthoringService`
-   - enforce recent step-up on publish, withdraw and access-management commands
-   - add authorization/CSRF/session-expiry tests for every exposed lifecycle command
-   - keep external SSO/login provider integration outside this slice unless an explicit provider-neutral authentication contract requires it
+1. **Milestone DOCX/PDF synchronization — now due**
+   - patch editable canonical sources with the completed Content/Admin architecture
+   - advance affected document versions consistently
+   - regenerate DOCX/PDF from editable sources
+   - visually verify every rendered page
+   - update document manifest/audit and archive superseded versions
+   - record new documentation baseline here after validation PASS
 
 2. **Content configuration and review workflows**
    - taxonomy/format/modifier registry management
@@ -156,19 +166,13 @@ Content authoring now has a durable domain/application/persistence core, atomic 
    - sensitive-content restrictions
    - no hidden profile attributes or individual decision leakage
 
-6. **Milestone DOCX/PDF synchronization**
-   - patch editable canonical sources
-   - regenerate DOCX/PDF
-   - visually verify every render
-   - update manifest and archive superseded versions
-
-PR #37 completes the **durable Admin session/CSRF substrate**, but the broader Content/Admin milestone is not complete until the authenticated Admin HTTP workflow surface is implemented through the secured facade. Therefore DOCX/PDF regeneration remains deferred until that declared milestone boundary or an earlier product-policy change.
+PR #40 completes the previously declared **Content/Admin milestone boundary**. Documentation regeneration is therefore no longer deferred; it is the immediate next task.
 
 ## 6. Continuation protocol
 
 1. Read this file from `main`.
 2. Inspect open PRs, recent merges and latest CI.
-3. Resolve the next slice against the approved document versions above.
+3. Resolve the next slice against approved document versions above.
 4. Create one branch for one coherent vertical slice.
 5. Lock behavior in an ADR and machine-readable contract before implementation.
 6. Preserve ports/adapters and configuration-driven boundaries.
@@ -181,4 +185,4 @@ PR #37 completes the **durable Admin session/CSRF substrate**, but the broader C
 
 ## 7. New-chat recovery prompt
 
-> Continue KEFE development from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first, then inspect open PRs, recent commits and CI. Preserve Commit First, CaseVersion pinning, pre-Commit Context without result leakage, private Reason boundaries, optional guest continuation, low-claim My KEFE Progress, immutable published content and provider-neutral ports/adapters. Editorial drafts live outside consumer publication. Admin identity is separate from consumer identity, capability checks are server-side, reviewer and submitter are separated, and publish/withdraw/access-management require recent step-up. Durable opaque Admin sessions, revocation, MFA/session assurance and same-session CSRF binding already exist; expose Admin HTTP only through those controls and `SecuredContentAuthoringService`. Merge only with green CI and keep the milestone DOCX/PDF synchronization obligation.
+> Continue KEFE development from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first, then inspect open PRs, recent commits and CI. Preserve Commit First, CaseVersion pinning, pre-Commit Context without result leakage, private Reason boundaries, optional guest continuation, low-claim My KEFE Progress, immutable published content and provider-neutral ports/adapters. Editorial drafts live outside consumer publication. Admin identity is separate from consumer identity; capability checks, audit identity, reviewer/submitter separation, MFA/session assurance, same-session CSRF and recent step-up are server-side. Internal Admin authoring HTTP now exists only under `/internal/admin/v1` through `SecuredContentAuthoringService`; no Admin login/SSO endpoint is implemented yet. PR #40 completed the Content/Admin milestone, so perform the due DOCX/PDF milestone synchronization before the next product slice unless that synchronization is already recorded as validation PASS in this checkpoint.
