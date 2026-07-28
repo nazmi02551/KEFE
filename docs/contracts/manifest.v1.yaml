@@ -1,4 +1,4 @@
-manifest_version: 1.24.0
+manifest_version: 1.25.0
 updated_at: '2026-07-28'
 policy:
   executable_schema_source: services/api/migrations
@@ -11,7 +11,7 @@ contracts:
     role: conceptual_core_model
   - id: openapi
     path: docs/contracts/openapi.v1.json
-    version: 0.13.0
+    version: 0.14.0
     role: http_api_contract
   - id: event-envelope
     path: docs/contracts/event-envelope.v1.schema.json
@@ -69,6 +69,10 @@ contracts:
     path: docs/contracts/case-version-flow-pinning.v1.yaml
     version: 1.0.0
     role: immutable_publication_time_configuration_and_resolved_flow_provenance_policy
+  - id: generic-flow-runtime
+    path: docs/contracts/generic-flow-runtime.v1.yaml
+    version: 1.0.0
+    role: actor_scoped_server_authoritative_caseversion_pinned_flow_runtime
   - id: signal-impact-model
     path: docs/contracts/signal-impact-model.v1.yaml
     version: 1.0.0
@@ -91,7 +95,7 @@ contracts:
     role: secured_composable_configuration_management_http_policy
   - id: error-registry
     path: docs/contracts/error-codes.v1.yaml
-    version: 1.10.0
+    version: 1.11.0
     role: stable_api_errors
   - id: postgresql-m0-schema
     path: docs/contracts/postgresql-m0-schema.v1.8.0.sql
@@ -135,3 +139,4 @@ architecture_decisions:
   - docs/adr/0020-composable-content-configuration-registry.md
   - docs/adr/0021-secured-admin-content-configuration-http.md
   - docs/adr/0022-case-version-flow-and-configuration-pinning.md
+  - docs/adr/0023-generic-consumer-flow-runtime.md
