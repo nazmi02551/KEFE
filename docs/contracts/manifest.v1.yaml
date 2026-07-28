@@ -1,4 +1,4 @@
-manifest_version: 1.14.0
+manifest_version: 1.15.0
 updated_at: '2026-07-28'
 policy:
   executable_schema_source: services/api/migrations
@@ -49,9 +49,13 @@ contracts:
     path: docs/contracts/content-authoring-persistence.v1.yaml
     version: 1.0.0
     role: editorial_postgres_and_atomic_publication_policy
+  - id: admin-security-policy
+    path: docs/contracts/admin-security-policy.v1.yaml
+    version: 1.0.0
+    role: separate_admin_principal_capability_and_session_assurance_policy
   - id: error-registry
     path: docs/contracts/error-codes.v1.yaml
-    version: 1.5.0
+    version: 1.6.0
     role: stable_api_errors
   - id: postgresql-m0-schema
     path: docs/contracts/postgresql-m0-schema.v1.7.0.sql
@@ -86,3 +90,4 @@ architecture_decisions:
   - docs/adr/0012-account-offer-and-my-kefe-progress-foundation.md
   - docs/adr/0013-content-authoring-and-publication-boundary.md
   - docs/adr/0014-content-authoring-postgres-publication.md
+  - docs/adr/0015-admin-authentication-authorization-threat-model.md
