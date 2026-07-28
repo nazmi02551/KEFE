@@ -32,6 +32,10 @@ class AdminCsrfVerifier(Protocol):
     def verify(self, *, session_token: str, csrf_token: str) -> bool: ...
 
 
+class AdminSessionStore(AdminSessionResolver, AdminSessionIssuer, AdminCsrfVerifier, Protocol):
+    """Composite port used by runtime composition; domain services depend on narrower ports."""
+
+
 class AdminSecurityAuditSink(Protocol):
     def authorization_denied(
         self,

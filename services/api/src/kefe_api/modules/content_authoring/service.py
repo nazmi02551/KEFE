@@ -133,6 +133,18 @@ class ContentAuthoringService:
                 "Draft edits cannot change lifecycle state",
                 409,
             )
+        if version.case_id != current.case_id or version.version_no != current.version_no:
+            raise DomainError(
+                "CONTENT_DRAFT_IDENTITY_IMMUTABLE",
+                "Draft edits cannot change Case identity or version number",
+                409,
+            )
+        if version.created_at != current.created_at:
+            raise DomainError(
+                "CONTENT_DRAFT_IDENTITY_IMMUTABLE",
+                "Draft edits cannot change CaseVersion creation time",
+                409,
+            )
         try:
             self._repository.save_draft(version)
         except ValueError as exc:
