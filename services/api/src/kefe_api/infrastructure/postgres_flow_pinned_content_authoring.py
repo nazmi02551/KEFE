@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from dataclasses import replace
 from typing import Any
 from uuid import UUID
@@ -38,7 +39,9 @@ class PostgresFlowPinnedContentAuthoringRepository(PostgresContentAuthoringRepos
         }
 
     @staticmethod
-    def _resolved_flow_from_document(document: dict[str, Any] | None) -> ResolvedFlowDefinition | None:
+    def _resolved_flow_from_document(
+        document: dict[str, Any] | None,
+    ) -> ResolvedFlowDefinition | None:
         if document is None:
             return None
         return ResolvedFlowDefinition(
@@ -120,7 +123,7 @@ class PostgresFlowPinnedContentAuthoringRepository(PostgresContentAuthoringRepos
                 "content_configuration_version_no": version.content_configuration_version_no,
                 "flow_template_code": version.resolved_flow.template_code,
                 "flow_template_version_no": version.resolved_flow.template_version_no,
-                "resolved_flow": __import__("json").dumps(
+                "resolved_flow": json.dumps(
                     self._resolved_flow_document(version.resolved_flow)
                 ),
             },
