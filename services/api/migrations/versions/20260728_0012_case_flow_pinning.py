@@ -13,19 +13,29 @@ def upgrade() -> None:
         """
         ALTER TABLE content.case_version
             ADD COLUMN content_configuration_id uuid NULL
-                REFERENCES content_config.configuration_version(id) ON DELETE RESTRICT,
+                REFERENCES content_config.configuration_version(id)
+                ON DELETE RESTRICT,
             ADD COLUMN content_configuration_version_no integer NULL
-                CHECK (content_configuration_version_no IS NULL OR content_configuration_version_no > 0),
+                CHECK (
+                    content_configuration_version_no IS NULL
+                    OR content_configuration_version_no > 0
+                ),
             ADD COLUMN flow_template_code text NULL,
             ADD COLUMN flow_template_version_no integer NULL
-                CHECK (flow_template_version_no IS NULL OR flow_template_version_no > 0),
+                CHECK (
+                    flow_template_version_no IS NULL
+                    OR flow_template_version_no > 0
+                ),
             ADD COLUMN resolved_flow jsonb NULL
         """
     )
     op.execute(
         """
         CREATE INDEX case_version_configuration_provenance_idx
-        ON content.case_version(content_configuration_id, content_configuration_version_no)
+        ON content.case_version(
+            content_configuration_id,
+            content_configuration_version_no
+        )
         WHERE content_configuration_id IS NOT NULL
         """
     )
