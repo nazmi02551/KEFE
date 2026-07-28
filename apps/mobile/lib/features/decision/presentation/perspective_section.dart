@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/localization/kefe_strings.dart';
+import '../../progress/presentation/progress_section.dart';
 import '../domain/decision_models.dart';
 
 class PerspectiveSection extends StatelessWidget {
@@ -24,45 +25,52 @@ class PerspectiveSection extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return Card(
-      key: const ValueKey('perspective-section'),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              strings.perspectiveTitle,
-              style: Theme.of(context).textTheme.titleLarge,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Card(
+          key: const ValueKey('perspective-section'),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  strings.perspectiveTitle,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                if (reasonPendingModeration) ...[
+                  const SizedBox(height: 12),
+                  Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      strings.reasonPendingModeration,
+                      key: const ValueKey('reason-pending-moderation'),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                switch (state) {
+                  PerspectiveUiState.loading => _LoadingState(strings: strings),
+                  PerspectiveUiState.errorRetryable => _RetryState(
+                      strings: strings,
+                      onRetry: onRetry,
+                    ),
+                  PerspectiveUiState.ready ||
+                  PerspectiveUiState.clusterPending ||
+                  PerspectiveUiState.degradedCurated => _LoadedState(
+                      state: state,
+                      result: result,
+                    ),
+                  PerspectiveUiState.idle => const SizedBox.shrink(),
+                },
+              ],
             ),
-            if (reasonPendingModeration) ...[
-              const SizedBox(height: 12),
-              Semantics(
-                liveRegion: true,
-                child: Text(
-                  strings.reasonPendingModeration,
-                  key: const ValueKey('reason-pending-moderation'),
-                ),
-              ),
-            ],
-            const SizedBox(height: 12),
-            switch (state) {
-              PerspectiveUiState.loading => _LoadingState(strings: strings),
-              PerspectiveUiState.errorRetryable => _RetryState(
-                  strings: strings,
-                  onRetry: onRetry,
-                ),
-              PerspectiveUiState.ready ||
-              PerspectiveUiState.clusterPending ||
-              PerspectiveUiState.degradedCurated => _LoadedState(
-                  state: state,
-                  result: result,
-                ),
-              PerspectiveUiState.idle => const SizedBox.shrink(),
-            },
-          ],
+          ),
         ),
-      ),
+        const SizedBox(height: 20),
+        const ProgressSection(),
+      ],
     );
   }
 }
