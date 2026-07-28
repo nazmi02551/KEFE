@@ -3,7 +3,7 @@
 **Updated:** 2026-07-28  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Latest verified implementation commit:** `ee74719c99f29230447ed7bdd4a2ea01d15eae70`
+**Latest verified implementation commit:** `b9b26dddaeb9298166b28e673cb48c3c8a92e701`
 
 This is the **single canonical durable engineering handoff**. Chat history is not a source of truth. On every continuation, read this file from `main`, inspect open PRs/recent CI, and fetch the Drive CURRENT publication artifact only when editable DOCX/PDF source detail is needed.
 
@@ -22,7 +22,7 @@ Principal versions:
 
 Specialist baseline versions are v1.2.0 for AI Architecture, Analytics Event Dictionary, Case & Scenario Library, Civic Integrity Model, Commercial & Growth Design, Content & Question Design Bible, Decision Graph Specification, Editorial Transformation Guide, Research Methodology, and Trust & Integrity Methodology.
 
-Current publication artifact:
+Current publication artifact:  
 `KEFE_Documentation_Ecosystem_2026-07-28_v3.4_CURRENT.zip`
 
 - 18 active logical documents / 36 active DOCX+PDF files
@@ -42,10 +42,10 @@ Milestone publication is complete only after render/QA, PDF preflight, manifest/
 
 ## 2. Binding product architecture
 
-Consumer experience path:
+Consumer experience path:  
 `Launch → Explore → Case → Context → Weigh → Commit → Reveal → Perspective → My KEFE Progress → Share`
 
-Platform value lifecycle:
+Platform value lifecycle:  
 `ME → WE → SIGNAL → IMPACT`
 
 ADR-0019 is binding:
@@ -54,7 +54,6 @@ ADR-0019 is binding:
 - Composition over Case Types; new cases should be content/configuration/composition, not new runtime feature families.
 - Base Format is an editorial archetype, not a runtime Case class.
 - Schema before Screen.
-- published CaseVersion must pin resolved Flow/Step plus relevant configuration/methodology versions once execution pinning is implemented.
 - Commit First remains global; Blind/Principle First are reusable optional methodology capabilities.
 - Context, Reveal, Exposure and Intervention are distinct.
 - generic lineage is `DecisionRevision → Exposure/Intervention → DecisionRevision → DecisionDelta`; dimension-specific delta engines are forbidden.
@@ -86,6 +85,7 @@ Retained foundation:
 - provider-neutral Content Authoring lifecycle, immutable published CaseVersion, PostgreSQL editorial persistence and atomic consumer publication.
 - separate Admin security domain, capability-first authorization, MFA/session assurance, same-session CSRF, recent step-up and server-derived audit identity.
 - secured internal Admin authoring HTTP under `/internal/admin/v1`; no Admin login/SSO endpoint yet.
+- Flutter consumer foundation already contains Explore, Context, typed Question/Reason, Commit, Reveal, Perspective and Progress presentation paths.
 
 ### PR #47 / ADR-0020 — composable Content Configuration — COMPLETE
 
@@ -96,45 +96,69 @@ Implemented:
 - ContentConfigurationSnapshot owns Primitive/Capability/FlowTemplate registries while retaining Domain/Topic/Base Format/Modifier.
 - generic bootstrap flows `STANDARD_COMMIT_REVEAL` and `PRINCIPLE_CONTEXT_RETEST`.
 - validation for identity uniqueness, references, Capability/Primitive compatibility, entry/transition integrity and terminal Step.
-- contract manifest v1.21.0, error registry v1.9.0.
-- API CI run `30383888427` PASS including PostgreSQL integration.
 
-### PR #49 — durable composable Content Configuration PostgreSQL persistence — COMPLETE
+### PR #49 — durable composable Content Configuration persistence — COMPLETE
 
 Implementation commit: `ee74719c99f29230447ed7bdd4a2ea01d15eae70`
 
 Implemented:
 - migration `20260728_0011` with isolated `content_config` schema.
-- immutable version rows in DRAFT/PUBLISHED/SUPERSEDED lifecycle.
-- one-published-version DB guard.
-- JSONB aggregate storage.
-- append-only configuration audit.
-- clone provenance and explicit rollback-draft model.
-- atomic publish/supersede/audit transaction.
-- seed-on-empty stable configuration bootstrap.
-- PostgreSQL repository factory wiring.
-- full JSONB round-trip for Domains, Topics, Base Formats, Modifiers, Primitives, Capabilities, FlowTemplateVersions, Steps, compatibility/references and existing allow-lists.
-- persistence contract v1.1.0 and manifest v1.22.0.
+- immutable DRAFT/PUBLISHED/SUPERSEDED lifecycle, one-published-version DB guard and JSONB aggregate storage.
+- append-only audit, clone provenance, explicit rollback draft and atomic publish/supersede.
+- full PostgreSQL round-trip for Domains/Topics/Base Formats/Modifiers plus Primitive/Capability/FlowTemplate/Step semantics.
+- API CI `30384684807` PASS.
+
+PR #45 is closed without merge as superseded by PR #49; the pre-ADR-0019 narrow aggregate must not be reintroduced.
+
+### PR #51 / ADR-0021 — secured Admin composable configuration HTTP — COMPLETE
+
+Implementation commit: `a88ee763222ec70e0b50e2c78d1c917bec0d5c68`
+
+Implemented:
+- API/OpenAPI v0.13.0.
+- secured `/internal/admin/v1/content-configuration` lifecycle surface.
+- current/version/audit reads; clone current to DRAFT; DRAFT save; publish; historical rollback-to-new-DRAFT.
+- `TAXONOMY_MANAGE` for configuration management and `AUDIT_READ` for audit.
+- existing opaque Admin session + same-session CSRF ordering reused; no second auth surface.
+- strict payloads forbid client lifecycle/version/admin/audit identity injection.
+- current approved policy still does not require recent step-up for `TAXONOMY_MANAGE`; changing that requires an explicit security-policy decision.
 
 Verification:
-- API CI run `30384684807` PASS.
+- final API CI run `30386784064` PASS.
+- lint, contract sync, Admin HTTP fitness gate, OpenAPI drift, unit tests, migration/seed and PostgreSQL integration PASS.
+
+### PR #52 / ADR-0022 — CaseVersion Flow + configuration pinning — COMPLETE
+
+Implementation commit: `b9b26dddaeb9298166b28e673cb48c3c8a92e701`
+
+Implemented:
+- DRAFT CaseVersion selects `flow_template_code` + `flow_template_version_no`.
+- publication resolves selection against the current PUBLISHED ContentConfiguration.
+- publication validates effective Domain/Base Format/Modifier/Flow/Primitive/Capability compatibility.
+- published CaseVersion pins server-derived `content_configuration_id`, configuration version and self-contained immutable `resolved_flow`.
+- revision preserves editorial Flow selection but clears the previous publication pin and resolves again on its own publication.
+- migration `20260728_0012` adds consumer provenance fields without breaking historical rows.
+- editorial JSONB and consumer materialization round-trip the same Flow/config provenance.
+- consumer CaseVersion read model carries the pinned resolved Flow and does not require future live config to reinterpret historical behavior.
+- transitional authoring default remains `STANDARD_COMMIT_REVEAL` v1; it is configuration data, not a runtime Case subclass.
+
+Verification:
+- final API CI run `30391510709` PASS.
 - lint PASS.
 - contract sync PASS.
-- Admin HTTP contract PASS.
+- Case Flow pinning architecture gate PASS.
+- Admin HTTP gate PASS.
 - OpenAPI drift PASS.
 - unit tests PASS.
 - migration + seed PASS.
-- PostgreSQL integration PASS.
-- integration test proves generic Flow DRAFT save → reload → publish → historical rollback without composition loss and exactly one PUBLISHED configuration.
-
-PR #45 is **closed without merge as superseded by PR #49**. Its valid persistence mechanics were preserved in the architecture-compatible replacement; the old narrow aggregate cannot be reintroduced.
+- PostgreSQL integration PASS, including effective configuration-version provenance after configuration lifecycle advancement.
 
 ## 4. Current implementation gap
 
 Still implementation-pending:
-- secured internal Admin HTTP management for composable configuration lifecycle and expanded registry payloads.
-- publication-time effective config/Flow provenance and resolved Flow pinning onto AuthoringCaseVersion/consumer CaseVersion.
-- generic Flow execution/rendering.
+- generic Flow execution/read-state from CaseVersion-pinned `resolved_flow`.
+- consumer/mobile rendering driven by Flow Step/Primitive rather than the current fixed Context → Questions → Commit → Reveal screen composition.
+- Admin authoring selection/composer UX for non-default FlowTemplateVersion; current HTTP authoring remains transitional default-compatible.
 - DecisionRevision/Exposure/Intervention/Delta.
 - first-class Claim/Argument graph and normalized ingestion.
 - WE/Signal bounded context and MethodologyVersion sample/scope/stakeholder semantics.
@@ -142,20 +166,19 @@ Still implementation-pending:
 
 ## 5. Recommended next sequence
 
-1. **Secured Admin configuration HTTP**
-   - ADR/contract before routes.
-   - existing opaque Admin session + same-session CSRF.
-   - `TAXONOMY_MANAGE` server-side capability.
-   - list/current/read version, clone current to DRAFT, save DRAFT, publish, rollback draft, audit.
-   - no client-supplied Admin/audit identity and no auth/SSO provider coupling.
-2. **Resolved Flow/config provenance at authoring publication**
-   - CaseVersion pins resolved FlowTemplateVersion/config version used for validation/publication.
-3. **Generic consumer Flow execution/rendering slice** proving multiple materially different fixtures use the same runtime path.
-4. **DecisionRevision / Exposure / Intervention / Delta**.
-5. **First-class Claim + Argument Graph + ingestion normalization**.
-6. **WE/Signal foundation** with contribution classes, scope, stakeholders and MethodologyVersion.
-7. **Impact foundation** with Target, Official Response, Action, Evidence and Verification.
-8. Resume observability/deployment, account continuity and share in architecture-compatible slices.
+1. **Generic consumer Flow executor/read-state**
+   - define ADR + machine-readable contract first.
+   - execute only the CaseVersion-pinned `resolved_flow`; never live configuration.
+   - support at least the materially different `STANDARD_COMMIT_REVEAL` and `PRINCIPLE_CONTEXT_RETEST` fixtures through the same runtime path.
+   - preserve Commit First and result-leakage guardrails.
+2. **Flutter Flow-driven rendering**
+   - adapt the existing consumer UI foundation to Step/Primitive state rather than create case-specific screens.
+   - produce the first tangible live milestone with at least one real stress-test Case end-to-end.
+3. **DecisionRevision / Exposure / Intervention / Delta** for pre/post-intervention changes.
+4. **First-class Claim + Argument Graph + ingestion normalization**.
+5. **WE/Signal foundation** with contribution classes, Scope Alignment, Stakeholders and MethodologyVersion.
+6. **Impact foundation** with Target, Official Response, Action, Evidence and Verification.
+7. Continue observability/deployment, account continuity and share in architecture-compatible slices.
 
 No implementation may leapfrog an unresolved product/domain contract.
 
@@ -174,6 +197,7 @@ No implementation may leapfrog an unresolved product/domain contract.
 - Client-provided Admin/audit identity is forbidden.
 - Same-session CSRF and Admin assurance ordering remain binding.
 - Runtime live config never silently reinterprets historical published objects.
+- Flow execution must use the CaseVersion-pinned resolved Flow.
 - Signal sample classes never silently mix.
 - Consensus/Signal is not formal authority and not KEFE opinion.
 
@@ -182,7 +206,7 @@ No implementation may leapfrog an unresolved product/domain contract.
 1. Read this file from `main`.
 2. Inspect open PRs, recent merges and CI.
 3. Fetch Drive CURRENT only when publication-source detail is required; verify its SHA against this checkpoint.
-4. Resolve work against MPD v1.3.0 + ADR-0019 + ADR-0020 + registered contracts.
+4. Resolve work against MPD v1.3.0 + ADR-0019 through ADR-0022 + registered contracts.
 5. One coherent branch per vertical slice.
 6. ADR + machine-readable contract before new behavior.
 7. Preserve ports/adapters, versioning, provenance and historical reproducibility.
@@ -193,4 +217,4 @@ No implementation may leapfrog an unresolved product/domain contract.
 
 ## 8. New-chat recovery prompt
 
-> Continue KEFE from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first, inspect open PRs/recent CI, and use Drive CURRENT only when publication-source detail is required. Official docs baseline is Ecosystem v3.4. ADR-0019 locks the case-agnostic engine: Primitive → Capability → FlowTemplateVersion → CaseVersion; ME → WE → SIGNAL → IMPACT; generic DecisionRevision/Exposure/Intervention/Delta; Claim ≠ claimant; Result ≠ Signal; CORE_PRE_RESULT/EXPOSED/ADVOCACY_SUPPORT separation; Scope/Stakeholder integrity; verified Impact. ADR-0020 + PR #47 implement composable Content Configuration registries. PR #49 (`ee74719c...`) persists the expanded aggregate durably in PostgreSQL with atomic publish/audit/rollback and round-trip Flow semantics. PR #45 is closed superseded. Next slice is secured Admin configuration HTTP, then publication-time resolved Flow/config provenance. Do not code an unlocked product decision.
+> Continue KEFE from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first, inspect open PRs/recent CI, and use Drive CURRENT only when publication-source detail is required. Official docs baseline is Ecosystem v3.4. The binding architecture is case-agnostic: `Primitive → Capability → FlowTemplateVersion → CaseVersion`, with `ME → WE → SIGNAL → IMPACT`. PR #51 (`a88ee763...`) provides secured Admin composable Content Configuration HTTP. PR #52 (`b9b26ddd...`) implements ADR-0022: published CaseVersion pins effective Content Configuration provenance and a self-contained immutable resolved Flow; revisions re-resolve on publication, and consumer runtime must never reinterpret historical Cases through live config. The next slice is generic consumer Flow execution/read-state from the pinned resolved Flow, then adapt the existing Flutter decision UI to Flow-driven Step rendering for the first tangible live milestone. Do not code an unlocked product decision.
