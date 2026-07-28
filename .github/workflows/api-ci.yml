@@ -58,8 +58,20 @@ jobs:
           path: services/api/openapi.generated.json
           if-no-files-found: error
       - name: Contract sync
+        id: contract-sync
+        continue-on-error: true
         working-directory: services/api
-        run: python tools/check_contract_sync.py
+        run: python tools/check_contract_sync.py > contract-sync-output.txt 2>&1
+      - name: Upload contract diagnostics on failure
+        if: steps.contract-sync.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-sync-output
+          path: services/api/contract-sync-output.txt
+          if-no-files-found: error
+      - name: Enforce contract sync
+        if: always()
+        run: test '${{ steps.contract-sync.outcome }}' = 'success'
       - name: OpenAPI drift gate
         working-directory: services/api
         run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
