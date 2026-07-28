@@ -44,6 +44,8 @@ consumer_visibility:
   forbidden_states: [DRAFT, IN_REVIEW, APPROVED]
 audit:
   append_only: true
+  durable_sequence: database_identity
+  deterministic_database_order: sequence_no
   publication_and_supersede_in_same_transaction: true
 security:
   public_admin_http_endpoint: false
