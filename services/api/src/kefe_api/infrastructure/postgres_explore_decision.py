@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlalchemy import text
 
 from kefe_api.infrastructure.postgres_decision import PostgresDecisionRepository
-from kefe_api.modules.decision.models import CaseVersion, Question
+from kefe_api.modules.decision.models import CaseVersion, FlowStep, Question, ResolvedFlow
 
 
 class PostgresExploreDecisionRepository(PostgresDecisionRepository):
@@ -45,7 +45,10 @@ class PostgresExploreDecisionRepository(PostgresDecisionRepository):
                         cv.accepts_weighs,
                         cv.base_format_code,
                         cv.primary_domain_code,
-                        cv.content_risk
+                        cv.content_risk,
+                        cv.content_configuration_id,
+                        cv.content_configuration_version_no,
+                        cv.resolved_flow
                     FROM content.case_version cv
                     WHERE cv.id = :version_id
                     """
@@ -96,6 +99,26 @@ class PostgresExploreDecisionRepository(PostgresDecisionRepository):
             )
             for question_row in question_rows
         )
+        resolved_flow_document = row["resolved_flow"]
+        resolved_flow = (
+            ResolvedFlow(
+                template_code=resolved_flow_document["template_code"],
+                template_version_no=int(resolved_flow_document["template_version_no"]),
+                entry_step_code=resolved_flow_document["entry_step_code"],
+                steps=tuple(
+                    FlowStep(
+                        code=item["code"],
+                        primitive_code=item["primitive_code"],
+                        capability_codes=tuple(item.get("capability_codes", [])),
+                        next_step_codes=tuple(item.get("next_step_codes", [])),
+                        payload_schema_ref=item.get("payload_schema_ref"),
+                    )
+                    for item in resolved_flow_document.get("steps", [])
+                ),
+            )
+            if resolved_flow_document is not None
+            else None
+        )
         return CaseVersion(
             id=row["id"],
             case_id=row["case_id"],
@@ -107,4 +130,7 @@ class PostgresExploreDecisionRepository(PostgresDecisionRepository):
             version_no=row["version_no"],
             questions=questions,
             accepts_weighs=row["accepts_weighs"],
+            content_configuration_id=row["content_configuration_id"],
+            content_configuration_version_no=row["content_configuration_version_no"],
+            resolved_flow=resolved_flow,
         )
