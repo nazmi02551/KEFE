@@ -91,12 +91,28 @@ class DecisionState {
         .every((question) => responses.containsKey(question.id));
   }
 
-  bool get hasReadyDecisionStep => flowRuntime?.steps.any(
-        (step) =>
-            step.primitiveCode == 'DECISION' &&
-            step.state == FlowStepRuntimeState.ready,
-      ) ??
-      false;
+  FlowRuntimeStep? get readyDecisionStep {
+    final runtime = flowRuntime;
+    if (runtime == null) return null;
+    for (final step in runtime.steps) {
+      if (step.primitiveCode == 'DECISION' &&
+          step.state == FlowStepRuntimeState.ready) {
+        return step;
+      }
+    }
+    return null;
+  }
+
+  String? get firstDecisionStepCode {
+    final runtime = flowRuntime;
+    if (runtime == null) return null;
+    for (final step in runtime.steps) {
+      if (step.primitiveCode == 'DECISION') return step.code;
+    }
+    return null;
+  }
+
+  bool get hasReadyDecisionStep => readyDecisionStep != null;
 
   DecisionState copyWith({
     bool? loading,
@@ -151,6 +167,7 @@ class DecisionController extends Notifier<DecisionState> {
   DecisionDraftStore get _draftStore => ref.read(decisionDraftStoreProvider);
 
   int _loadGeneration = 0;
+  final Set<String> _exposureInFlight = {};
 
   @override
   DecisionState build() => const DecisionState();
@@ -172,10 +189,25 @@ class DecisionController extends Notifier<DecisionState> {
           sessionId: draft.sessionId,
           caseVersionId: caseData.versionId,
         );
+        final flowStepCode = draft.flowStepCode ??
+            _readyDecisionStep(flowRuntime)?.code;
         final refreshedDraft = draft.copyWith(
           flowRuntime: flowRuntime,
+          flowStepCode: flowStepCode,
           updatedAt: DateTime.now().toUtc(),
         );
+        final compatible = draft.phase != DecisionDraftPhase.editing ||
+            flowStepCode == null ||
+            _stepIsReady(flowRuntime, flowStepCode);
+        if (!compatible) {
+          await _draftStore.clearForCase(caseId);
+          state = DecisionState(
+            caseData: caseData,
+            sessionId: draft.sessionId,
+            flowRuntime: flowRuntime,
+          );
+          return;
+        }
         await _draftStore.write(refreshedDraft);
         state = DecisionState(
           caseData: caseData,
@@ -239,7 +271,8 @@ class DecisionController extends Notifier<DecisionState> {
     if (!_inputsEditable) return;
     final caseData = state.caseData;
     final sessionId = state.sessionId;
-    if (caseData == null || sessionId == null) return;
+    final stepCode = state.readyDecisionStep?.code;
+    if (caseData == null || sessionId == null || stepCode == null) return;
     if (!caseData.questions.any((question) => question.id == questionId)) {
       return;
     }
@@ -248,6 +281,7 @@ class DecisionController extends Notifier<DecisionState> {
     await _writeEditingDraft(
       caseData: caseData,
       sessionId: sessionId,
+      flowStepCode: stepCode,
       responses: responses,
       reasonTags: state.reasonTags,
       reasonText: state.reasonText,
@@ -263,8 +297,14 @@ class DecisionController extends Notifier<DecisionState> {
     if (!_inputsEditable) return;
     final caseData = state.caseData;
     final sessionId = state.sessionId;
+    final stepCode = state.readyDecisionStep?.code;
     final policy = caseData?.reasonPolicy;
-    if (caseData == null || sessionId == null || policy == null) return;
+    if (caseData == null ||
+        sessionId == null ||
+        stepCode == null ||
+        policy == null) {
+      return;
+    }
     if (!policy.tags.contains(tag)) return;
 
     final tags = {...state.reasonTags};
@@ -275,6 +315,7 @@ class DecisionController extends Notifier<DecisionState> {
     await _writeEditingDraft(
       caseData: caseData,
       sessionId: sessionId,
+      flowStepCode: stepCode,
       responses: state.responses,
       reasonTags: tags,
       reasonText: state.reasonText,
@@ -290,9 +331,11 @@ class DecisionController extends Notifier<DecisionState> {
     if (!_inputsEditable) return;
     final caseData = state.caseData;
     final sessionId = state.sessionId;
+    final stepCode = state.readyDecisionStep?.code;
     final policy = caseData?.reasonPolicy;
     if (caseData == null ||
         sessionId == null ||
+        stepCode == null ||
         policy == null ||
         !policy.textEnabled) {
       return;
@@ -304,6 +347,7 @@ class DecisionController extends Notifier<DecisionState> {
     await _writeEditingDraft(
       caseData: caseData,
       sessionId: sessionId,
+      flowStepCode: stepCode,
       responses: state.responses,
       reasonTags: state.reasonTags,
       reasonText: text,
@@ -315,10 +359,65 @@ class DecisionController extends Notifier<DecisionState> {
     );
   }
 
+  Future<void> recordContextExposure(String stepCode) async {
+    final sessionId = state.sessionId;
+    final caseData = state.caseData;
+    final flowRuntime = state.flowRuntime;
+    if (sessionId == null || caseData == null || flowRuntime == null) return;
+    final step = flowRuntime.steps
+        .where((item) => item.code == stepCode && item.primitiveCode == 'CONTEXT')
+        .firstOrNull;
+    if (step == null || step.state != FlowStepRuntimeState.ready) return;
+
+    final marker = '$sessionId:$stepCode';
+    if (!_exposureInFlight.add(marker)) return;
+    final beforeReady = state.readyDecisionStep?.code;
+    try {
+      await _repository.lineage.recordFlowStepExposure(
+        sessionId: sessionId,
+        stepCode: stepCode,
+        idempotencyKey: 'mobile-flow-exposure-$sessionId-$stepCode-v1',
+      );
+      final refreshed = await _repository.fetchFlowRuntime(sessionId);
+      _assertFlowMatches(
+        refreshed,
+        sessionId: sessionId,
+        caseVersionId: caseData.versionId,
+      );
+      final afterReady = _readyDecisionStep(refreshed)?.code;
+      final enteredNewDecision = afterReady != null && afterReady != beforeReady;
+      if (enteredNewDecision) {
+        await _draftStore.clearForCase(caseData.id);
+      }
+      state = state.copyWith(
+        flowRuntime: refreshed,
+        responses: enteredNewDecision ? const {} : state.responses,
+        reasonTags: enteredNewDecision ? const {} : state.reasonTags,
+        reasonText: enteredNewDecision ? '' : state.reasonText,
+        recoveryPending: false,
+        offlineDraft: false,
+        clearError: true,
+      );
+    } on ClientTransportFailure catch (error) {
+      _exposureInFlight.remove(marker);
+      state = state.copyWith(
+        offlineDraft: true,
+        errorCode: error.code,
+      );
+    } on ApiFailure catch (error) {
+      _exposureInFlight.remove(marker);
+      state = state.copyWith(errorCode: error.code);
+    } catch (_) {
+      _exposureInFlight.remove(marker);
+      state = state.copyWith(errorCode: 'UNEXPECTED_CLIENT_ERROR');
+    }
+  }
+
   Future<void> commit() async {
+    final readyStep = state.readyDecisionStep;
     if (state.submitting ||
         !state.hasRequiredResponses ||
-        !state.hasReadyDecisionStep) {
+        readyStep == null) {
       return;
     }
 
@@ -337,6 +436,7 @@ class DecisionController extends Notifier<DecisionState> {
       caseData: caseData,
       sessionId: sessionId,
       flowRuntime: flowRuntime,
+      flowStepCode: readyStep.code,
       responses: state.responses,
       reasonTags: state.reasonTags.toList(growable: false),
       reasonText: _normalizedReasonText(state.reasonText),
@@ -385,12 +485,23 @@ class DecisionController extends Notifier<DecisionState> {
     );
 
     var current = draft;
+    final stepCode = _resolveDraftStep(current);
+    if (stepCode == null) {
+      state = state.copyWith(
+        submitting: false,
+        recoveryPending: false,
+        errorCode: 'FLOW_DECISION_STEP_UNAVAILABLE',
+      );
+      return;
+    }
+    current = current.copyWith(flowStepCode: stepCode);
+    final revision = _isRevisionStep(current.flowRuntime, stepCode);
     var allowLegacyIncompleteFallback =
-        current.phase == DecisionDraftPhase.commitPending;
+        !revision && current.phase == DecisionDraftPhase.commitPending;
     try {
       while (true) {
         if (current.phase == DecisionDraftPhase.syncPending) {
-          await _syncDraft(current);
+          await _syncDraft(current, revision: revision);
           current = current.copyWith(
             phase: DecisionDraftPhase.commitPending,
             updatedAt: DateTime.now().toUtc(),
@@ -401,10 +512,18 @@ class DecisionController extends Notifier<DecisionState> {
 
         if (current.phase == DecisionDraftPhase.commitPending) {
           try {
-            await _repository.commit(
-              sessionId: current.sessionId,
-              idempotencyKey: current.commitIdempotencyKey!,
-            );
+            if (revision) {
+              await _repository.lineage.commitRevision(
+                sessionId: current.sessionId,
+                stepCode: stepCode,
+                idempotencyKey: current.commitIdempotencyKey!,
+              );
+            } else {
+              await _repository.commit(
+                sessionId: current.sessionId,
+                idempotencyKey: current.commitIdempotencyKey!,
+              );
+            }
           } on ApiFailure catch (error) {
             if (allowLegacyIncompleteFallback &&
                 error.code == 'WEIGH_RESPONSE_INCOMPLETE') {
@@ -427,18 +546,36 @@ class DecisionController extends Notifier<DecisionState> {
         break;
       }
 
-      final reveal = await _repository.reveal(current.sessionId);
       final flowRuntime = await _repository.fetchFlowRuntime(current.sessionId);
       _assertFlowMatches(
         flowRuntime,
         sessionId: current.sessionId,
         caseVersionId: current.caseVersionId,
       );
-      current = current.copyWith(
-        flowRuntime: flowRuntime,
-        updatedAt: DateTime.now().toUtc(),
+      final resultReady = flowRuntime.steps.any(
+        (step) =>
+            step.primitiveCode == 'COLLECTIVE_RESULT' &&
+            step.state == FlowStepRuntimeState.ready,
       );
-      await _draftStore.write(current);
+
+      if (!resultReady) {
+        await _draftStore.clearForCase(current.caseId);
+        state = state.copyWith(
+          submitting: false,
+          recoveryPending: false,
+          offlineDraft: false,
+          flowRuntime: flowRuntime,
+          responses: const {},
+          reasonTags: const {},
+          reasonText: '',
+          reasonPendingModeration: false,
+          clearPerspectiveError: true,
+          clearError: true,
+        );
+        return;
+      }
+
+      final reveal = await _repository.reveal(current.sessionId);
       await _draftStore.clearForCase(current.caseId);
       state = state.copyWith(
         submitting: false,
@@ -461,8 +598,12 @@ class DecisionController extends Notifier<DecisionState> {
         flowRuntime: current.flowRuntime,
         errorCode: switch (current.phase) {
           DecisionDraftPhase.syncPending => 'DECISION_SYNC_PENDING',
-          DecisionDraftPhase.commitPending => 'WEIGH_COMMIT_UNCERTAIN',
-          DecisionDraftPhase.committedAwaitingReveal => 'RESULT_SYNC_PENDING',
+          DecisionDraftPhase.commitPending => revision
+              ? 'DECISION_REVISION_COMMIT_UNCERTAIN'
+              : 'WEIGH_COMMIT_UNCERTAIN',
+          DecisionDraftPhase.committedAwaitingReveal => revision
+              ? 'FLOW_CONTINUATION_PENDING'
+              : 'RESULT_SYNC_PENDING',
           DecisionDraftPhase.editing => 'NETWORK_UNAVAILABLE',
         },
       );
@@ -528,30 +669,56 @@ class DecisionController extends Notifier<DecisionState> {
     }
   }
 
-  Future<void> _syncDraft(DecisionDraft draft) async {
+  Future<void> _syncDraft(
+    DecisionDraft draft, {
+    required bool revision,
+  }) async {
+    final stepCode = draft.flowStepCode;
+    if (stepCode == null) {
+      throw const ClientTransportFailure(code: 'FLOW_DECISION_STEP_UNAVAILABLE');
+    }
     for (final response in draft.effectiveResponses.entries) {
       final value = response.value;
       if (value == null) continue;
-      await _repository.answer(
-        sessionId: draft.sessionId,
-        questionId: response.key,
-        value: value,
-      );
+      if (revision) {
+        await _repository.lineage.answerRevision(
+          sessionId: draft.sessionId,
+          stepCode: stepCode,
+          questionId: response.key,
+          value: value,
+        );
+      } else {
+        await _repository.answer(
+          sessionId: draft.sessionId,
+          questionId: response.key,
+          value: value,
+        );
+      }
     }
 
     final reasonText = _normalizedReasonText(draft.reasonText ?? '');
     if (draft.reasonTags.isNotEmpty || reasonText != null) {
-      await _repository.savePrivateReason(
-        sessionId: draft.sessionId,
-        tags: draft.reasonTags,
-        text: reasonText,
-      );
+      if (revision) {
+        await _repository.lineage.saveRevisionReason(
+          sessionId: draft.sessionId,
+          stepCode: stepCode,
+          tags: draft.reasonTags,
+          text: reasonText,
+        );
+      } else {
+        await _repository.savePrivateReason(
+          sessionId: draft.sessionId,
+          tags: draft.reasonTags,
+          text: reasonText,
+        );
+      }
     }
   }
 
   Future<void> _writeEditingDraft({
     required DecisionCase caseData,
     required String sessionId,
+    required String flowStepCode,
     required Map<String, Object?> responses,
     required Set<String> reasonTags,
     required String reasonText,
@@ -563,6 +730,7 @@ class DecisionController extends Notifier<DecisionState> {
         caseData: caseData,
         sessionId: sessionId,
         flowRuntime: flowRuntime,
+        flowStepCode: flowStepCode,
         responses: responses,
         reasonTags: reasonTags.toList(growable: false),
         reasonText: _normalizedReasonText(reasonText),
@@ -619,11 +787,49 @@ class DecisionController extends Notifier<DecisionState> {
     }
   }
 
+  FlowRuntimeStep? _readyDecisionStep(FlowRuntimeSnapshot flowRuntime) {
+    for (final step in flowRuntime.steps) {
+      if (step.primitiveCode == 'DECISION' &&
+          step.state == FlowStepRuntimeState.ready) {
+        return step;
+      }
+    }
+    return null;
+  }
+
+  bool _stepIsReady(FlowRuntimeSnapshot flowRuntime, String stepCode) {
+    return flowRuntime.steps.any(
+      (step) =>
+          step.code == stepCode &&
+          step.primitiveCode == 'DECISION' &&
+          step.state == FlowStepRuntimeState.ready,
+    );
+  }
+
+  String? _resolveDraftStep(DecisionDraft draft) {
+    final explicit = draft.flowStepCode;
+    if (explicit != null) return explicit;
+    final runtime = draft.flowRuntime;
+    if (runtime == null) return null;
+    return _readyDecisionStep(runtime)?.code;
+  }
+
+  bool _isRevisionStep(FlowRuntimeSnapshot? runtime, String stepCode) {
+    if (runtime == null) return false;
+    String? firstDecision;
+    for (final step in runtime.steps) {
+      if (step.primitiveCode == 'DECISION') {
+        firstDecision = step.code;
+        break;
+      }
+    }
+    return firstDecision != null && stepCode != firstDecision;
+  }
+
   bool get _inputsEditable =>
-      state.reveal == null &&
       !state.submitting &&
       !state.recoveryPending &&
-      state.hasReadyDecisionStep;
+      state.readyDecisionStep != null;
 
   String? _normalizedReasonText(String value) {
     final normalized = value.trim();
