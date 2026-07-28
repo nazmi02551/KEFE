@@ -8,6 +8,7 @@ from kefe_api.modules.content_authoring.models import (
     CaseIdentity,
     ContentLifecycle,
     LifecycleAuditEntry,
+    PublicationConfigurationResolution,
     PublicationValidationFailure,
 )
 
@@ -17,6 +18,13 @@ class ContentAuthoringRegistry(Protocol):
         self,
         version: AuthoringCaseVersion,
     ) -> tuple[PublicationValidationFailure, ...]: ...
+
+
+class PublicationConfigurationResolver(Protocol):
+    def resolve(
+        self,
+        version: AuthoringCaseVersion,
+    ) -> PublicationConfigurationResolution: ...
 
 
 class ContentAuthoringRepository(Protocol):
