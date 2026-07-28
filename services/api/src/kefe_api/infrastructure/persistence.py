@@ -11,11 +11,7 @@ from kefe_api.infrastructure.postgres_perspective_decision import (
 )
 from kefe_api.infrastructure.postgres_progress import PostgresProgressRepository
 from kefe_api.modules.admin_security.in_memory import InMemoryAdminSessionStore
-from kefe_api.modules.admin_security.ports import (
-    AdminCsrfVerifier,
-    AdminSessionIssuer,
-    AdminSessionResolver,
-)
+from kefe_api.modules.admin_security.ports import AdminSessionStore
 from kefe_api.modules.content_authoring.in_memory import InMemoryContentAuthoringRepository
 from kefe_api.modules.content_authoring.ports import ContentAuthoringRepository
 from kefe_api.modules.context.bootstrap import build_demo_context_repository
@@ -27,9 +23,6 @@ from kefe_api.modules.identity.in_memory import InMemoryIdentityRepository
 from kefe_api.modules.identity.ports import IdentityRepository
 from kefe_api.modules.progress.in_memory import InMemoryProgressRepository
 from kefe_api.modules.progress.ports import ProgressRepository
-
-
-AdminSessionStore = AdminSessionResolver & AdminSessionIssuer & AdminCsrfVerifier
 
 
 def build_decision_repository(settings: Settings) -> DecisionRepository:
@@ -87,7 +80,7 @@ def build_content_authoring_repository(settings: Settings) -> ContentAuthoringRe
     return PostgresContentAuthoringRepository(build_engine(settings.database_url))
 
 
-def build_admin_session_store(settings: Settings):
+def build_admin_session_store(settings: Settings) -> AdminSessionStore:
     if settings.persistence_backend == "memory":
         return InMemoryAdminSessionStore()
 
