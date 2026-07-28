@@ -16,6 +16,7 @@ class DecisionDraft {
     required this.sessionId,
     required this.updatedAt,
     this.flowRuntime,
+    this.flowStepCode,
     this.responses = const {},
     this.reasonTags = const [],
     this.reasonText,
@@ -28,6 +29,7 @@ class DecisionDraft {
   final DecisionCase caseData;
   final String sessionId;
   final FlowRuntimeSnapshot? flowRuntime;
+  final String? flowStepCode;
   final Map<String, Object?> responses;
   final List<String> reasonTags;
   final String? reasonText;
@@ -53,6 +55,8 @@ class DecisionDraft {
 
   DecisionDraft copyWith({
     FlowRuntimeSnapshot? flowRuntime,
+    String? flowStepCode,
+    bool clearFlowStepCode = false,
     Map<String, Object?>? responses,
     List<String>? reasonTags,
     String? reasonText,
@@ -65,6 +69,9 @@ class DecisionDraft {
       caseData: caseData,
       sessionId: sessionId,
       flowRuntime: flowRuntime ?? this.flowRuntime,
+      flowStepCode: clearFlowStepCode
+          ? null
+          : flowStepCode ?? this.flowStepCode,
       responses: responses ?? effectiveResponses,
       reasonTags: reasonTags ?? this.reasonTags,
       reasonText: clearReasonText ? null : reasonText ?? this.reasonText,
@@ -98,6 +105,7 @@ class DecisionDraft {
     },
     'session_id': sessionId,
     'flow_runtime': flowRuntime?.toJson(),
+    'flow_step_code': flowStepCode,
     'responses': effectiveResponses,
     'reason_tags': reasonTags,
     'reason_text': reasonText,
@@ -159,6 +167,7 @@ class DecisionDraft {
       ),
       sessionId: json['session_id'] as String,
       flowRuntime: flowRuntime,
+      flowStepCode: json['flow_step_code'] as String?,
       responses: responses,
       reasonTags: (json['reason_tags'] as List<Object?>? ?? const [])
           .cast<String>(),
