@@ -15,6 +15,15 @@ from kefe_api.modules.content_authoring.models import (
 )
 from kefe_api.modules.content_authoring.registry import default_authoring_registry
 from kefe_api.modules.content_authoring.service import ContentAuthoringService
+from kefe_api.modules.content_configuration.bootstrap import (
+    build_default_content_configuration,
+)
+from kefe_api.modules.content_configuration.in_memory import (
+    InMemoryContentConfigurationRepository,
+)
+from kefe_api.modules.content_configuration.publication_resolver import (
+    ContentConfigurationPublicationResolver,
+)
 
 
 def _question() -> AuthoringQuestion:
@@ -66,7 +75,14 @@ def _case_version(
 
 def _service():
     repository = InMemoryContentAuthoringRepository()
-    service = ContentAuthoringService(repository, default_authoring_registry())
+    configuration_repository = InMemoryContentConfigurationRepository(
+        build_default_content_configuration()
+    )
+    service = ContentAuthoringService(
+        repository,
+        default_authoring_registry(),
+        ContentConfigurationPublicationResolver(configuration_repository),
+    )
     return service, repository
 
 
