@@ -17,10 +17,19 @@ class FlowRuntimeService:
     def __init__(self, repository: DecisionRepository) -> None:
         self._repository = repository
 
-    def get_runtime(self, *, actor_id: UUID, session_id: UUID) -> FlowRuntimeSnapshot:
+    def get_runtime(
+        self,
+        *,
+        actor_id: UUID,
+        session_id: UUID,
+    ) -> FlowRuntimeSnapshot:
         session = self._repository.get_session(session_id)
         if session is None or session.actor_id != actor_id:
-            raise DomainError("WEIGH_SESSION_NOT_FOUND", "Weigh session not found", 404)
+            raise DomainError(
+                "WEIGH_SESSION_NOT_FOUND",
+                "Weigh session not found",
+                404,
+            )
 
         case = self._repository.get_case_version(session.case_version_id)
         if case is None:
@@ -92,7 +101,9 @@ class FlowRuntimeService:
                     predecessors[next_code].add(step.code)
 
         decision_codes = [
-            step.code for step in flow.steps if step.primitive_code == "DECISION"
+            step.code
+            for step in flow.steps
+            if step.primitive_code == "DECISION"
         ]
         first_decision_code = decision_codes[0] if decision_codes else None
 
@@ -105,15 +116,19 @@ class FlowRuntimeService:
             for step in flow.steps:
                 if step.code not in remaining:
                     continue
-                if step.code != flow.entry_step_code and not predecessors[
-                    step.code
-                ].issubset(satisfied):
+                predecessor_set = predecessors[step.code]
+                if (
+                    step.code != flow.entry_step_code
+                    and not predecessor_set.issubset(satisfied)
+                ):
                     continue
 
-                runtime_step, transition_satisfied = self._evaluate_reachable_step(
-                    step=step,
-                    session_state=session_state,
-                    first_decision_code=first_decision_code,
+                runtime_step, transition_satisfied = (
+                    self._evaluate_reachable_step(
+                        step=step,
+                        session_state=session_state,
+                        first_decision_code=first_decision_code,
+                    )
                 )
                 evaluated[step.code] = runtime_step
                 remaining.remove(step.code)
@@ -125,15 +140,22 @@ class FlowRuntimeService:
                 break
 
         for step in flow.steps:
-            if step.code in remaining:
-                evaluated[step.code] = FlowRuntimeStep(
-                    code=step.code,
-                    primitive_code=step.primitive_code,
-                    capability_codes=step.capability_codes,
-                    next_step_codes=step.next_step_codes,
-                    state=FlowStepRuntimeState.BLOCKED,
-                    reason_code="FLOW_PREDECESSOR_PENDING",
-                )
+            if step.code not in remaining:
+                continue
+            reason_code = "FLOW_PREDECESSOR_PENDING"
+            if (
+                step.primitive_code == "COLLECTIVE_RESULT"
+                and session_state is not WeighState.COMMITTED
+            ):
+                reason_code = "FLOW_COMMIT_REQUIRED"
+            evaluated[step.code] = FlowRuntimeStep(
+                code=step.code,
+                primitive_code=step.primitive_code,
+                capability_codes=step.capability_codes,
+                next_step_codes=step.next_step_codes,
+                state=FlowStepRuntimeState.BLOCKED,
+                reason_code=reason_code,
+            )
 
         return tuple(evaluated[step.code] for step in flow.steps)
 
