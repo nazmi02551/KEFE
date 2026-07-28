@@ -7,11 +7,19 @@ import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/decision_repository.dart';
 import 'package:kefe_mobile/features/decision/domain/decision_models.dart';
 
+import 'support/flow_runtime_fixture.dart';
+
 const typedCaseId = 'aaaaaaaa-1111-4111-8111-aaaaaaaaaaaa';
 const choiceQuestionId = 'choice-question';
 const confidenceQuestionId = 'confidence-question';
 
-class TypedQuestionRepository implements DecisionRepository {
+class TypedQuestionRepository
+    with StandardFlowRuntimeFake
+    implements DecisionRepository {
+  TypedQuestionRepository() {
+    flowCaseVersionId = 'typed-version-1';
+  }
+
   final Map<String, Object> submitted = {};
 
   @override
@@ -34,7 +42,9 @@ class TypedQuestionRepository implements DecisionRepository {
   Future<void> commit({
     required String sessionId,
     required String idempotencyKey,
-  }) async {}
+  }) async {
+    flowCommitted = true;
+  }
 
   @override
   Future<GuestCredential> ensureGuestCredential() async {
