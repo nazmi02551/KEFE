@@ -1,0 +1,55 @@
+contract_version: 1.0.0
+updated_at: '2026-07-28'
+capability: content_authoring_postgres_persistence
+storage:
+  authoring_schema: editorial
+  consumer_schema: content
+  authoring_representation:
+    aggregate: jsonb
+    indexed_metadata:
+      - case_id
+      - version_no
+      - lifecycle_state
+      - created_at
+      - updated_at
+      - published_at
+  consumer_materialization_only_on_publish: true
+  mutable_authoring_rows_in_consumer_schema_forbidden: true
+publication_transaction:
+  target_precondition: APPROVED
+  lock_target_version: true
+  lock_case_publication_set: true
+  operations:
+    - supersede_previous_editorial_version
+    - supersede_previous_consumer_version
+    - materialize_case_version
+    - materialize_issues
+    - materialize_questions
+    - materialize_context_blocks
+    - materialize_sources
+    - materialize_provenance_links
+    - update_stable_consumer_case_metadata
+    - append_lifecycle_audit
+    - mark_editorial_version_published
+  atomic: true
+  rollback_on_failure: true
+consumer_version_owned_fields:
+  - base_format_code
+  - primary_domain_code
+  - content_risk
+  historical_values_immutable: true
+consumer_visibility:
+  case_listing_states: [PUBLISHED]
+  historical_context_states: [PUBLISHED, SUPERSEDED]
+  forbidden_states: [DRAFT, IN_REVIEW, APPROVED]
+audit:
+  append_only: true
+  durable_sequence: database_identity
+  deterministic_database_order: sequence_no
+  publication_and_supersede_in_same_transaction: true
+security:
+  public_admin_http_endpoint: false
+  admin_auth_threat_model_required_before_http_authoring: true
+provider_independence:
+  application_depends_on_repository_port: true
+  sql_library_forbidden_in_domain: true

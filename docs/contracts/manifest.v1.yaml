@@ -1,4 +1,4 @@
-manifest_version: 1.13.1
+manifest_version: 1.14.0
 updated_at: '2026-07-28'
 policy:
   executable_schema_source: services/api/migrations
@@ -11,7 +11,7 @@ contracts:
     role: conceptual_core_model
   - id: openapi
     path: docs/contracts/openapi.v1.json
-    version: 0.10.0
+    version: 0.11.0
     role: http_api_contract
   - id: event-envelope
     path: docs/contracts/event-envelope.v1.schema.json
@@ -45,13 +45,17 @@ contracts:
     path: docs/contracts/content-authoring-policy.v1.yaml
     version: 1.0.0
     role: immutable_case_version_authoring_and_publication_policy
+  - id: content-authoring-persistence
+    path: docs/contracts/content-authoring-persistence.v1.yaml
+    version: 1.0.0
+    role: editorial_postgres_and_atomic_publication_policy
   - id: error-registry
     path: docs/contracts/error-codes.v1.yaml
     version: 1.5.0
     role: stable_api_errors
   - id: postgresql-m0-schema
-    path: docs/contracts/postgresql-m0-schema.v1.6.0.sql
-    version: 1.6.0
+    path: docs/contracts/postgresql-m0-schema.v1.7.0.sql
+    version: 1.7.0
     role: derived_executable_schema_snapshot
     derived_from:
       - services/api/migrations/versions/20260727_0001_m0_core.py
@@ -62,6 +66,7 @@ contracts:
       - services/api/migrations/versions/20260727_0006_private_reason.py
       - services/api/migrations/versions/20260727_0007_perspective_card.py
       - services/api/migrations/versions/20260727_0008_context_sources.py
+      - services/api/migrations/versions/20260728_0009_content_authoring.py
   - id: repository-structure
     path: docs/contracts/repository-structure.v1.txt
     version: '1'
@@ -80,3 +85,4 @@ architecture_decisions:
   - docs/adr/0011-context-and-source-read-layer.md
   - docs/adr/0012-account-offer-and-my-kefe-progress-foundation.md
   - docs/adr/0013-content-authoring-and-publication-boundary.md
+  - docs/adr/0014-content-authoring-postgres-publication.md

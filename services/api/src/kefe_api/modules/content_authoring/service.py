@@ -69,6 +69,22 @@ class ContentAuthoringService:
         actor_ref: str,
     ) -> AuthoringCaseVersion:
         source = self._require_version(source_version_id)
+        source_map = {item.id: uuid4() for item in source.sources}
+        cloned_sources = tuple(
+            replace(item, id=source_map[item.id]) for item in source.sources
+        )
+        cloned_context = tuple(
+            replace(
+                block,
+                id=uuid4(),
+                source_ids=tuple(
+                    source_map[source_id]
+                    for source_id in block.source_ids
+                    if source_id in source_map
+                ),
+            )
+            for block in source.context_blocks
+        )
         cloned_issues = tuple(
             replace(
                 issue,
@@ -77,8 +93,6 @@ class ContentAuthoringService:
             )
             for issue in source.issues
         )
-        cloned_context = tuple(replace(block, id=uuid4()) for block in source.context_blocks)
-        cloned_sources = tuple(replace(item, id=uuid4()) for item in source.sources)
         next_version = replace(
             source,
             id=uuid4(),
@@ -91,20 +105,16 @@ class ContentAuthoringService:
             created_at=datetime.now(UTC),
             published_at=None,
         )
+        audit = LifecycleAuditEntry.create(
+            version=next_version,
+            actor_ref=actor_ref,
+            command="create_revision",
+            previous_state=None,
+            new_state=ContentLifecycle.DRAFT,
+            rationale=f"Created from version {source.version_no}",
+        )
         try:
-            self._repository.save_draft(next_version)
-            self._repository.transition(
-                version=next_version,
-                expected_state=ContentLifecycle.DRAFT,
-                audit=LifecycleAuditEntry.create(
-                    version=next_version,
-                    actor_ref=actor_ref,
-                    command="create_revision",
-                    previous_state=None,
-                    new_state=ContentLifecycle.DRAFT,
-                    rationale=f"Created from version {source.version_no}",
-                ),
-            )
+            self._repository.save_draft(next_version, create_audit=audit)
         except ValueError as exc:
             raise self._conflict(exc) from exc
         return next_version

@@ -57,7 +57,12 @@ class InMemoryContentAuthoringRepository:
             versions = self.list_versions(case_id)
             return (versions[-1].version_no + 1) if versions else 1
 
-    def save_draft(self, version: AuthoringCaseVersion) -> None:
+    def save_draft(
+        self,
+        version: AuthoringCaseVersion,
+        *,
+        create_audit: LifecycleAuditEntry | None = None,
+    ) -> None:
         with self._lock:
             current = self._versions.get(version.id)
             if current is None:
@@ -65,9 +70,19 @@ class InMemoryContentAuthoringRepository:
                     raise ValueError("case does not exist")
                 if version.state is not ContentLifecycle.DRAFT:
                     raise ValueError("new authoring versions must start as DRAFT")
+                if create_audit is None:
+                    raise ValueError("new authoring versions require a creation audit")
+                if any(
+                    item.version_no == version.version_no
+                    for item in self.list_versions(version.case_id)
+                ):
+                    raise ValueError("version number already exists")
                 self._versions[version.id] = version
                 self._version_ids_by_case.setdefault(version.case_id, []).append(version.id)
+                self._audit_by_case.setdefault(version.case_id, []).append(create_audit)
                 return
+            if create_audit is not None:
+                raise ValueError("creation audit is only valid for a new version")
             if current.state is not ContentLifecycle.DRAFT:
                 raise ValueError("only DRAFT versions are editable")
             if version.state is not ContentLifecycle.DRAFT:
