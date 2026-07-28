@@ -22,7 +22,9 @@ class InMemoryContentConfigurationRepository:
     def current_published(self) -> ContentConfigurationSnapshot | None:
         with self._lock:
             published = [
-                item for item in self._versions.values() if item.state is ContentConfigLifecycle.PUBLISHED
+                item
+                for item in self._versions.values()
+                if item.state is ContentConfigLifecycle.PUBLISHED
             ]
             if not published:
                 return None
@@ -86,7 +88,9 @@ class InMemoryContentConfigurationRepository:
 
             previous = self.current_published()
             if previous is not None:
-                self._versions[previous.id] = previous.with_state(ContentConfigLifecycle.SUPERSEDED)
+                self._versions[previous.id] = previous.with_state(
+                    ContentConfigLifecycle.SUPERSEDED
+                )
             self._versions[snapshot.id] = deepcopy(snapshot)
             self._audit.append(deepcopy(audit))
             return deepcopy(snapshot), deepcopy(previous) if previous is not None else None
