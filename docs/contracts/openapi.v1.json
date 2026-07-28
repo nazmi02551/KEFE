@@ -544,6 +544,97 @@
         "title": "AuthoringVersionResponse",
         "type": "object"
       },
+      "CapabilityInput": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "compatible_primitive_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Compatible Primitive Codes",
+            "type": "array"
+          },
+          "config_schema_ref": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Config Schema Ref"
+          },
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "label_key": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Label Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "label_key"
+        ],
+        "title": "CapabilityInput",
+        "type": "object"
+      },
+      "CapabilityResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "compatible_primitive_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Compatible Primitive Codes",
+            "type": "array"
+          },
+          "config_schema_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Config Schema Ref"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "label_key": {
+            "title": "Label Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "label_key",
+          "compatible_primitive_codes",
+          "config_schema_ref",
+          "enabled"
+        ],
+        "title": "CapabilityResponse",
+        "type": "object"
+      },
       "CaseDetailResponse": {
         "properties": {
           "base_format": {
@@ -677,6 +768,369 @@
         ],
         "title": "ClientPlatform",
         "type": "string"
+      },
+      "ConfigurationAuditEntryResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "actor_ref": {
+            "title": "Actor Ref",
+            "type": "string"
+          },
+          "audit_id": {
+            "format": "uuid",
+            "title": "Audit Id",
+            "type": "string"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "config_version_id": {
+            "format": "uuid",
+            "title": "Config Version Id",
+            "type": "string"
+          },
+          "new_state": {
+            "title": "New State",
+            "type": "string"
+          },
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "previous_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous State"
+          },
+          "rationale": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rationale"
+          }
+        },
+        "required": [
+          "audit_id",
+          "config_version_id",
+          "actor_ref",
+          "command",
+          "previous_state",
+          "new_state",
+          "rationale",
+          "occurred_at"
+        ],
+        "title": "ConfigurationAuditEntryResponse",
+        "type": "object"
+      },
+      "ConfigurationAuditTrailResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ConfigurationAuditEntryResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "ConfigurationAuditTrailResponse",
+        "type": "object"
+      },
+      "ConfigurationDraftInput": {
+        "additionalProperties": false,
+        "properties": {
+          "base_formats": {
+            "items": {
+              "$ref": "#/components/schemas/TaxonomyItemInput"
+            },
+            "title": "Base Formats",
+            "type": "array"
+          },
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/CapabilityInput"
+            },
+            "title": "Capabilities",
+            "type": "array"
+          },
+          "claim_states": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Claim States",
+            "type": "array"
+          },
+          "disclosure_levels": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Disclosure Levels",
+            "type": "array"
+          },
+          "domains": {
+            "items": {
+              "$ref": "#/components/schemas/TaxonomyItemInput"
+            },
+            "title": "Domains",
+            "type": "array"
+          },
+          "flow_templates": {
+            "items": {
+              "$ref": "#/components/schemas/FlowTemplateInput"
+            },
+            "title": "Flow Templates",
+            "type": "array"
+          },
+          "modifier_compatibility": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Modifier Compatibility",
+            "type": "object"
+          },
+          "modifiers": {
+            "items": {
+              "$ref": "#/components/schemas/TaxonomyItemInput"
+            },
+            "title": "Modifiers",
+            "type": "array"
+          },
+          "primitives": {
+            "items": {
+              "$ref": "#/components/schemas/PrimitiveInput"
+            },
+            "title": "Primitives",
+            "type": "array"
+          },
+          "risks": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Risks",
+            "type": "array"
+          },
+          "source_kinds": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Source Kinds",
+            "type": "array"
+          },
+          "topics": {
+            "items": {
+              "$ref": "#/components/schemas/TopicItemInput"
+            },
+            "title": "Topics",
+            "type": "array"
+          }
+        },
+        "required": [
+          "domains",
+          "base_formats",
+          "modifiers",
+          "modifier_compatibility",
+          "primitives",
+          "capabilities",
+          "flow_templates",
+          "risks",
+          "claim_states",
+          "source_kinds",
+          "disclosure_levels"
+        ],
+        "title": "ConfigurationDraftInput",
+        "type": "object"
+      },
+      "ConfigurationVersionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "base_formats": {
+            "items": {
+              "$ref": "#/components/schemas/TaxonomyItemResponse"
+            },
+            "title": "Base Formats",
+            "type": "array"
+          },
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/CapabilityResponse"
+            },
+            "title": "Capabilities",
+            "type": "array"
+          },
+          "claim_states": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Claim States",
+            "type": "array"
+          },
+          "cloned_from_version_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cloned From Version Id"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "disclosure_levels": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Disclosure Levels",
+            "type": "array"
+          },
+          "domains": {
+            "items": {
+              "$ref": "#/components/schemas/TaxonomyItemResponse"
+            },
+            "title": "Domains",
+            "type": "array"
+          },
+          "flow_templates": {
+            "items": {
+              "$ref": "#/components/schemas/FlowTemplateResponse"
+            },
+            "title": "Flow Templates",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "modifier_compatibility": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Modifier Compatibility",
+            "type": "object"
+          },
+          "modifiers": {
+            "items": {
+              "$ref": "#/components/schemas/TaxonomyItemResponse"
+            },
+            "title": "Modifiers",
+            "type": "array"
+          },
+          "primitives": {
+            "items": {
+              "$ref": "#/components/schemas/PrimitiveResponse"
+            },
+            "title": "Primitives",
+            "type": "array"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "risks": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Risks",
+            "type": "array"
+          },
+          "source_kinds": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Source Kinds",
+            "type": "array"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "topics": {
+            "items": {
+              "$ref": "#/components/schemas/TopicItemResponse"
+            },
+            "title": "Topics",
+            "type": "array"
+          },
+          "version_no": {
+            "title": "Version No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "version_no",
+          "state",
+          "domains",
+          "topics",
+          "base_formats",
+          "modifiers",
+          "modifier_compatibility",
+          "primitives",
+          "capabilities",
+          "flow_templates",
+          "risks",
+          "claim_states",
+          "source_kinds",
+          "disclosure_levels",
+          "created_at",
+          "published_at",
+          "cloned_from_version_id"
+        ],
+        "title": "ConfigurationVersionResponse",
+        "type": "object"
+      },
+      "ConfigurationVersionsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ConfigurationVersionResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "ConfigurationVersionsResponse",
+        "type": "object"
       },
       "ContextBlockInput": {
         "additionalProperties": false,
@@ -989,6 +1443,194 @@
         "title": "DraftContentInput",
         "type": "object"
       },
+      "FlowStepInput": {
+        "additionalProperties": false,
+        "properties": {
+          "capability_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Capability Codes",
+            "type": "array"
+          },
+          "code": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "next_step_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Next Step Codes",
+            "type": "array"
+          },
+          "payload_schema_ref": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payload Schema Ref"
+          },
+          "primitive_code": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Primitive Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "primitive_code"
+        ],
+        "title": "FlowStepInput",
+        "type": "object"
+      },
+      "FlowStepResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "capability_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Capability Codes",
+            "type": "array"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "next_step_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Next Step Codes",
+            "type": "array"
+          },
+          "payload_schema_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payload Schema Ref"
+          },
+          "primitive_code": {
+            "title": "Primitive Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "primitive_code",
+          "capability_codes",
+          "next_step_codes",
+          "payload_schema_ref"
+        ],
+        "title": "FlowStepResponse",
+        "type": "object"
+      },
+      "FlowTemplateInput": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "entry_step_code": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Entry Step Code",
+            "type": "string"
+          },
+          "label_key": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Label Key",
+            "type": "string"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/FlowStepInput"
+            },
+            "minItems": 1,
+            "title": "Steps",
+            "type": "array"
+          },
+          "version_no": {
+            "exclusiveMinimum": 0.0,
+            "title": "Version No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "code",
+          "version_no",
+          "label_key",
+          "entry_step_code",
+          "steps"
+        ],
+        "title": "FlowTemplateInput",
+        "type": "object"
+      },
+      "FlowTemplateResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "entry_step_code": {
+            "title": "Entry Step Code",
+            "type": "string"
+          },
+          "label_key": {
+            "title": "Label Key",
+            "type": "string"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/FlowStepResponse"
+            },
+            "title": "Steps",
+            "type": "array"
+          },
+          "version_no": {
+            "title": "Version No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "code",
+          "version_no",
+          "label_key",
+          "entry_step_code",
+          "steps",
+          "enabled"
+        ],
+        "title": "FlowTemplateResponse",
+        "type": "object"
+      },
       "GuestCreateRequest": {
         "properties": {
           "integrity_evidence": {
@@ -1210,6 +1852,82 @@
           "methodology"
         ],
         "title": "PerspectiveResponse",
+        "type": "object"
+      },
+      "PrimitiveInput": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "label_key": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Label Key",
+            "type": "string"
+          },
+          "payload_schema_ref": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payload Schema Ref"
+          }
+        },
+        "required": [
+          "code",
+          "label_key"
+        ],
+        "title": "PrimitiveInput",
+        "type": "object"
+      },
+      "PrimitiveResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "label_key": {
+            "title": "Label Key",
+            "type": "string"
+          },
+          "payload_schema_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payload Schema Ref"
+          }
+        },
+        "required": [
+          "code",
+          "label_key",
+          "payload_schema_ref",
+          "enabled"
+        ],
+        "title": "PrimitiveResponse",
         "type": "object"
       },
       "PrivateReasonResponse": {
@@ -1605,6 +2323,122 @@
         "title": "StartSessionResponse",
         "type": "object"
       },
+      "TaxonomyItemInput": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "label_key": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Label Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "label_key"
+        ],
+        "title": "TaxonomyItemInput",
+        "type": "object"
+      },
+      "TaxonomyItemResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "label_key": {
+            "title": "Label Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "label_key",
+          "enabled"
+        ],
+        "title": "TaxonomyItemResponse",
+        "type": "object"
+      },
+      "TopicItemInput": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "domain_code": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Domain Code",
+            "type": "string"
+          },
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "label_key": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Label Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "domain_code",
+          "label_key"
+        ],
+        "title": "TopicItemInput",
+        "type": "object"
+      },
+      "TopicItemResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "domain_code": {
+            "title": "Domain Code",
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "label_key": {
+            "title": "Label Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "domain_code",
+          "label_key",
+          "enabled"
+        ],
+        "title": "TopicItemResponse",
+        "type": "object"
+      },
       "UpdatePrivateReasonRequest": {
         "properties": {
           "tags": {
@@ -1698,7 +2532,7 @@
   },
   "info": {
     "title": "KEFE API",
-    "version": "0.12.0"
+    "version": "0.13.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -2265,6 +3099,356 @@
         "summary": "Audit Trail",
         "tags": [
           "Internal Admin"
+        ]
+      }
+    },
+    "/internal/admin/v1/content-configuration/audit": {
+      "get": {
+        "operationId": "audit_internal_admin_v1_content_configuration_audit_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationAuditTrailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Audit",
+        "tags": [
+          "Internal Admin Content Configuration"
+        ]
+      }
+    },
+    "/internal/admin/v1/content-configuration/current": {
+      "get": {
+        "operationId": "current_internal_admin_v1_content_configuration_current_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationVersionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Current",
+        "tags": [
+          "Internal Admin Content Configuration"
+        ]
+      }
+    },
+    "/internal/admin/v1/content-configuration/drafts": {
+      "post": {
+        "operationId": "create_draft_internal_admin_v1_content_configuration_drafts_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-KEFE-CSRF",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Csrf"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationVersionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Draft",
+        "tags": [
+          "Internal Admin Content Configuration"
+        ]
+      }
+    },
+    "/internal/admin/v1/content-configuration/versions": {
+      "get": {
+        "operationId": "list_versions_internal_admin_v1_content_configuration_versions_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationVersionsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Versions",
+        "tags": [
+          "Internal Admin Content Configuration"
+        ]
+      }
+    },
+    "/internal/admin/v1/content-configuration/versions/{version_id}": {
+      "get": {
+        "operationId": "get_version_internal_admin_v1_content_configuration_versions__version_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationVersionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Version",
+        "tags": [
+          "Internal Admin Content Configuration"
+        ]
+      },
+      "put": {
+        "operationId": "save_draft_internal_admin_v1_content_configuration_versions__version_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-KEFE-CSRF",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Csrf"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigurationDraftInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationVersionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Save Draft",
+        "tags": [
+          "Internal Admin Content Configuration"
+        ]
+      }
+    },
+    "/internal/admin/v1/content-configuration/versions/{version_id}/publish": {
+      "post": {
+        "operationId": "publish_internal_admin_v1_content_configuration_versions__version_id__publish_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-KEFE-CSRF",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Csrf"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationVersionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Publish",
+        "tags": [
+          "Internal Admin Content Configuration"
+        ]
+      }
+    },
+    "/internal/admin/v1/content-configuration/versions/{version_id}/rollback-drafts": {
+      "post": {
+        "operationId": "create_rollback_draft_internal_admin_v1_content_configuration_versions__version_id__rollback_drafts_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-KEFE-CSRF",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Csrf"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RationaleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationVersionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Rollback Draft",
+        "tags": [
+          "Internal Admin Content Configuration"
         ]
       }
     },

@@ -1,4 +1,4 @@
-manifest_version: 1.22.0
+manifest_version: 1.23.0
 updated_at: '2026-07-28'
 policy:
   executable_schema_source: services/api/migrations
@@ -11,7 +11,7 @@ contracts:
     role: conceptual_core_model
   - id: openapi
     path: docs/contracts/openapi.v1.json
-    version: 0.12.0
+    version: 0.13.0
     role: http_api_contract
   - id: event-envelope
     path: docs/contracts/event-envelope.v1.schema.json
@@ -81,6 +81,10 @@ contracts:
     path: docs/contracts/admin-http-surface.v1.yaml
     version: 1.0.0
     role: secured_cookie_csrf_admin_authoring_http_policy
+  - id: admin-content-configuration-http
+    path: docs/contracts/admin-content-configuration-http.v1.yaml
+    version: 1.0.0
+    role: secured_composable_configuration_management_http_policy
   - id: error-registry
     path: docs/contracts/error-codes.v1.yaml
     version: 1.9.0
@@ -125,3 +129,4 @@ architecture_decisions:
   - docs/adr/0018-versioned-content-configuration.md
   - docs/adr/0019-case-agnostic-composable-decision-engine.md
   - docs/adr/0020-composable-content-configuration-registry.md
+  - docs/adr/0021-secured-admin-content-configuration-http.md
