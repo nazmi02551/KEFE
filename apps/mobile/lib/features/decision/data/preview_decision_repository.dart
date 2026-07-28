@@ -2,7 +2,11 @@ import '../domain/decision_models.dart';
 import 'decision_repository.dart';
 
 class PreviewDecisionRepository
-    implements DecisionRepository, FlowRuntimeRepository, PerspectiveRepository {
+    implements
+        DecisionRepository,
+        FlowRuntimeRepository,
+        DecisionLineageRepository,
+        PerspectiveRepository {
   static const caseId = '11111111-1111-4111-8111-111111111111';
   static const caseVersionId = '22222222-2222-4222-8222-222222222222';
 
@@ -113,6 +117,38 @@ class PreviewDecisionRepository
         ),
       ],
     );
+  }
+
+  @override
+  Future<void> recordFlowStepExposure({
+    required String sessionId,
+    required String stepCode,
+    required String idempotencyKey,
+  }) async {}
+
+  @override
+  Future<void> answerRevision({
+    required String sessionId,
+    required String stepCode,
+    required String questionId,
+    required Object value,
+  }) async {}
+
+  @override
+  Future<void> saveRevisionReason({
+    required String sessionId,
+    required String stepCode,
+    required List<String> tags,
+    required String? text,
+  }) async {}
+
+  @override
+  Future<void> commitRevision({
+    required String sessionId,
+    required String stepCode,
+    required String idempotencyKey,
+  }) async {
+    _committed = true;
   }
 
   @override
