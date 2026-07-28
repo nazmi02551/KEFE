@@ -24,6 +24,7 @@ lifecycle:
     - PUBLISHED
     - SUPERSEDED
     - WITHDRAWN
+  concurrency: compare_and_set_expected_state
   commands:
     submit_for_review:
       from: [DRAFT]
@@ -47,6 +48,15 @@ immutability:
   published_case_version_mutable: false
   correction_strategy: create_new_version
   historical_decision_pin_preserved: true
+revision:
+  new_case_version_id_required: true
+  version_owned_nodes_reidentified:
+    - issue
+    - question
+    - context_block
+    - source_reference
+  completed_review_modes_reset: true
+  source_and_claim_review_may_require_revalidation: true
 consumer_visibility:
   visible_states: [PUBLISHED]
   draft_leakage_forbidden: true
@@ -68,6 +78,8 @@ publication_validation:
     - rule: format_modifier_combination_must_be_compatible
 audit:
   append_only: true
+  system_commands:
+    - supersede_on_publish
   fields:
     - audit_id
     - case_id
@@ -80,6 +92,7 @@ audit:
     - occurred_at
 provider_independence:
   repository_port_required: true
+  registry_port_required: true
   domain_must_not_depend_on:
     - cms_vendor
     - sql_library
