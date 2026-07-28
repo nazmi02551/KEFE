@@ -107,15 +107,20 @@ def main() -> None:
                     and parameter.get("name", "").lower() == "x-kefe-csrf"
                 ]
                 if not csrf:
-                    problems.append(f"Admin write missing CSRF header contract: {method.upper()} {path}")
+                    problems.append(
+                        "Admin write missing CSRF header contract: "
+                        f"{method.upper()} {path}"
+                    )
 
             schema_name = _request_schema_name(operation)
             if schema_name:
                 properties = schemas.get(schema_name, {}).get("properties", {})
                 leaked = sorted(FORBIDDEN_IDENTITY_FIELDS & properties.keys())
                 if leaked:
+                    leaked_fields = ", ".join(leaked)
                     problems.append(
-                        f"{schema_name} accepts forbidden Admin identity fields: {', '.join(leaked)}"
+                        f"{schema_name} accepts forbidden Admin identity fields: "
+                        f"{leaked_fields}"
                     )
 
     for schema_name, schema in schemas.items():
