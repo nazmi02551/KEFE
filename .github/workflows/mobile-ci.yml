@@ -62,3 +62,12 @@ jobs:
       - name: Enforce tests
         if: always()
         run: test '${{ steps.tests.outcome }}' = 'success'
+      - name: Build preview APK
+        working-directory: apps/mobile
+        run: flutter build apk --debug -t lib/main_preview.dart
+      - name: Upload preview APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: kefe-preview-android
+          path: apps/mobile/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
