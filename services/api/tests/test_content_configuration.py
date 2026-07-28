@@ -22,7 +22,10 @@ from kefe_api.modules.content_authoring.models import (
 from kefe_api.modules.content_configuration.bootstrap import build_default_content_configuration
 from kefe_api.modules.content_configuration.in_memory import InMemoryContentConfigurationRepository
 from kefe_api.modules.content_configuration.models import (
+    CapabilityDefinition,
     ContentConfigLifecycle,
+    FlowStepDefinition,
+    FlowTemplateDefinition,
     TopicItem,
 )
 from kefe_api.modules.content_configuration.service import ContentConfigurationService
@@ -149,6 +152,133 @@ def test_topic_must_reference_known_domain() -> None:
     with pytest.raises(DomainError) as exc:
         service.save_draft(principal, invalid)
     assert exc.value.code == "CONTENT_CONFIG_TOPIC_DOMAIN_UNKNOWN"
+
+
+def test_default_configuration_composes_materially_different_flows() -> None:
+    service = _service()
+    principal = _principal(AdminRole.TAXONOMY_MANAGER)
+    draft = service.create_draft_from_current(principal)
+
+    by_code = {flow.code: flow for flow in draft.flow_templates}
+    standard = by_code["STANDARD_COMMIT_REVEAL"]
+    retest = by_code["PRINCIPLE_CONTEXT_RETEST"]
+
+    assert standard.entry_step_code == "CONTEXT"
+    assert retest.entry_step_code == "PRINCIPLE"
+    assert {step.primitive_code for step in standard.steps} <= draft.enabled_primitive_codes
+    assert {step.primitive_code for step in retest.steps} <= draft.enabled_primitive_codes
+    assert any(
+        "PRINCIPLE_FIRST" in step.capability_codes for step in retest.steps
+    )
+    assert all(
+        "PRINCIPLE_FIRST" not in step.capability_codes for step in standard.steps
+    )
+
+    saved = service.save_draft(principal, draft)
+    assert saved.flow_templates == draft.flow_templates
+
+
+def test_capability_compatibility_must_reference_known_primitive() -> None:
+    service = _service()
+    principal = _principal(AdminRole.TAXONOMY_MANAGER)
+    draft = service.create_draft_from_current(principal)
+    first = draft.capabilities[0]
+    invalid_capability = replace(
+        first,
+        compatible_primitive_codes=frozenset({"MISSING_PRIMITIVE"}),
+    )
+    invalid = replace(
+        draft,
+        capabilities=(invalid_capability, *draft.capabilities[1:]),
+    )
+
+    with pytest.raises(DomainError) as exc:
+        service.save_draft(principal, invalid)
+    assert exc.value.code == "CONTENT_CONFIG_REFERENCE_UNKNOWN"
+
+
+def test_flow_step_rejects_incompatible_capability() -> None:
+    service = _service()
+    principal = _principal(AdminRole.TAXONOMY_MANAGER)
+    draft = service.create_draft_from_current(principal)
+    flow = draft.flow_templates[0]
+    context_step = flow.steps[0]
+    invalid_step = replace(
+        context_step,
+        capability_codes=("PRINCIPLE_FIRST",),
+    )
+    invalid_flow = replace(flow, steps=(invalid_step, *flow.steps[1:]))
+    invalid = replace(
+        draft,
+        flow_templates=(invalid_flow, *draft.flow_templates[1:]),
+    )
+
+    with pytest.raises(DomainError) as exc:
+        service.save_draft(principal, invalid)
+    assert exc.value.code == "CONTENT_CONFIG_CAPABILITY_INCOMPATIBLE"
+
+
+def test_flow_transition_target_must_exist_in_same_template() -> None:
+    service = _service()
+    principal = _principal(AdminRole.TAXONOMY_MANAGER)
+    draft = service.create_draft_from_current(principal)
+    flow = draft.flow_templates[0]
+    first_step = flow.steps[0]
+    invalid_step = replace(first_step, next_step_codes=("MISSING_STEP",))
+    invalid_flow = replace(flow, steps=(invalid_step, *flow.steps[1:]))
+    invalid = replace(
+        draft,
+        flow_templates=(invalid_flow, *draft.flow_templates[1:]),
+    )
+
+    with pytest.raises(DomainError) as exc:
+        service.save_draft(principal, invalid)
+    assert exc.value.code == "CONTENT_CONFIG_REFERENCE_UNKNOWN"
+
+
+def test_flow_requires_terminal_step() -> None:
+    service = _service()
+    principal = _principal(AdminRole.TAXONOMY_MANAGER)
+    draft = service.create_draft_from_current(principal)
+    flow = FlowTemplateDefinition(
+        code="NO_TERMINAL",
+        version_no=1,
+        label_key="flow.no_terminal",
+        entry_step_code="A",
+        steps=(
+            FlowStepDefinition(
+                code="A",
+                primitive_code="CONTEXT",
+                next_step_codes=("B",),
+            ),
+            FlowStepDefinition(
+                code="B",
+                primitive_code="DECISION",
+                capability_codes=("COMMIT_FIRST",),
+                next_step_codes=("A",),
+            ),
+        ),
+    )
+    invalid = replace(draft, flow_templates=(*draft.flow_templates, flow))
+
+    with pytest.raises(DomainError) as exc:
+        service.save_draft(principal, invalid)
+    assert exc.value.code == "CONTENT_CONFIG_FLOW_INVALID"
+
+
+def test_unrestricted_capability_can_be_registered_without_runtime_case_type() -> None:
+    service = _service()
+    principal = _principal(AdminRole.TAXONOMY_MANAGER)
+    draft = service.create_draft_from_current(principal)
+    capability = CapabilityDefinition(
+        code="FUTURE_GENERIC_CAPABILITY",
+        label_key="capability.future_generic_capability",
+        compatible_primitive_codes=frozenset(),
+    )
+    updated = replace(draft, capabilities=(*draft.capabilities, capability))
+
+    saved = service.save_draft(principal, updated)
+    assert "FUTURE_GENERIC_CAPABILITY" in saved.enabled_capability_codes
 
 
 def test_review_requirements_are_derived_server_side() -> None:

@@ -1,0 +1,98 @@
+contract_version: 1.0.0
+updated_at: '2026-07-28'
+source_adr: docs/adr/0020-composable-content-configuration-registry.md
+status: implementation_contract
+
+aggregate:
+  root: ContentConfigurationSnapshot
+  lifecycle: [DRAFT, PUBLISHED, SUPERSEDED]
+  published_immutable: true
+  single_published_version: true
+  rollback: clone_historical_to_new_draft_then_publish
+
+registries:
+  existing:
+    - DOMAIN
+    - TOPIC
+    - BASE_FORMAT
+    - MODIFIER
+  composable:
+    - PRIMITIVE
+    - CAPABILITY
+    - FLOW_TEMPLATE_VERSION
+
+primitive_definition:
+  identity: code
+  required_fields:
+    - code
+    - label_key
+    - enabled
+  optional_fields:
+    - payload_schema_ref
+  renderer_is_domain_identity: false
+
+capability_definition:
+  identity: code
+  required_fields:
+    - code
+    - label_key
+    - compatible_primitive_codes
+    - enabled
+  optional_fields:
+    - config_schema_ref
+  empty_compatibility_means_unrestricted_at_registry_layer: true
+
+flow_template_version:
+  identity: [code, version_no]
+  version_no_positive: true
+  required_fields:
+    - code
+    - version_no
+    - label_key
+    - entry_step_code
+    - steps
+    - enabled
+  runtime_case_subtype: false
+
+flow_step:
+  identity_scope: flow_template_version
+  identity: code
+  required_fields:
+    - code
+    - primitive_code
+    - capability_codes
+    - next_step_codes
+  optional_fields:
+    - payload_schema_ref
+  conditional_expression_dsl: deferred
+
+validation:
+  unique_codes:
+    - primitives
+    - capabilities
+  unique_composite_keys:
+    - [flow_template.code, flow_template.version_no]
+  references:
+    capability_compatible_primitives_must_exist: true
+    step_primitive_must_exist: true
+    step_capabilities_must_exist: true
+    restricted_capability_must_match_step_primitive: true
+    entry_step_must_exist: true
+    next_steps_must_exist_in_same_template: true
+  flow_shape:
+    minimum_steps: 1
+    minimum_terminal_steps: 1
+    cycle_policy: not_locked
+
+migration:
+  base_format_and_modifier_fields_retained: true
+  current_published_configuration_remains_immutable: true
+  claim_unknown_legacy_migration_in_scope: false
+  consumer_caseversion_flow_storage_in_scope: false
+  mobile_flow_renderer_in_scope: false
+
+next_slices:
+  - postgres_persistence_for_expanded_aggregate
+  - admin_http_management_for_expanded_aggregate
+  - authoring_caseversion_resolved_flow_pinning
+  - generic_consumer_flow_execution_and_rendering

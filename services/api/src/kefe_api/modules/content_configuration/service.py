@@ -207,16 +207,22 @@ class ContentConfigurationService:
         domain_codes = [item.code for item in snapshot.domains]
         format_codes = [item.code for item in snapshot.base_formats]
         modifier_codes = [item.code for item in snapshot.modifiers]
+        primitive_codes = [item.code for item in snapshot.primitives]
+        capability_codes = [item.code for item in snapshot.capabilities]
+        flow_keys = [(item.code, item.version_no) for item in snapshot.flow_templates]
 
         for label, values in (
             ("domain", domain_codes),
             ("base format", format_codes),
             ("modifier", modifier_codes),
+            ("primitive", primitive_codes),
+            ("capability", capability_codes),
+            ("flow template version", flow_keys),
         ):
             if len(values) != len(set(values)):
                 raise DomainError(
                     "CONTENT_CONFIG_DUPLICATE_CODE",
-                    f"Duplicate {label} code exists in content configuration",
+                    f"Duplicate {label} identity exists in content configuration",
                     422,
                 )
 
@@ -248,6 +254,122 @@ class ContentConfigurationService:
                     422,
                     meta={"modifier_codes": unknown},
                 )
+
+        primitive_set = set(primitive_codes)
+        enabled_primitive_set = snapshot.enabled_primitive_codes
+        capability_set = set(capability_codes)
+        enabled_capability_set = snapshot.enabled_capability_codes
+        capability_by_code = {item.code: item for item in snapshot.capabilities}
+
+        for capability in snapshot.capabilities:
+            unknown = sorted(capability.compatible_primitive_codes - primitive_set)
+            if unknown:
+                raise DomainError(
+                    "CONTENT_CONFIG_REFERENCE_UNKNOWN",
+                    "Capability compatibility references unknown Primitives",
+                    422,
+                    meta={
+                        "capability_code": capability.code,
+                        "primitive_codes": unknown,
+                    },
+                )
+
+        for flow in snapshot.flow_templates:
+            if flow.version_no <= 0 or not flow.steps:
+                raise DomainError(
+                    "CONTENT_CONFIG_FLOW_INVALID",
+                    "Flow Template must have a positive version and at least one Step",
+                    422,
+                    meta={"flow_code": flow.code, "version_no": flow.version_no},
+                )
+
+            step_codes = [step.code for step in flow.steps]
+            if len(step_codes) != len(set(step_codes)):
+                raise DomainError(
+                    "CONTENT_CONFIG_DUPLICATE_CODE",
+                    "Duplicate Step code exists within a Flow Template version",
+                    422,
+                    meta={"flow_code": flow.code, "version_no": flow.version_no},
+                )
+            step_set = set(step_codes)
+            if flow.entry_step_code not in step_set:
+                raise DomainError(
+                    "CONTENT_CONFIG_FLOW_INVALID",
+                    "Flow Template entry Step does not exist",
+                    422,
+                    meta={
+                        "flow_code": flow.code,
+                        "entry_step_code": flow.entry_step_code,
+                    },
+                )
+            if not any(not step.next_step_codes for step in flow.steps):
+                raise DomainError(
+                    "CONTENT_CONFIG_FLOW_INVALID",
+                    "Flow Template requires at least one terminal Step",
+                    422,
+                    meta={"flow_code": flow.code, "version_no": flow.version_no},
+                )
+
+            for step in flow.steps:
+                available_primitives = (
+                    enabled_primitive_set if flow.enabled else frozenset(primitive_set)
+                )
+                if step.primitive_code not in available_primitives:
+                    raise DomainError(
+                        "CONTENT_CONFIG_REFERENCE_UNKNOWN",
+                        "Flow Step references an unavailable Primitive",
+                        422,
+                        meta={
+                            "flow_code": flow.code,
+                            "step_code": step.code,
+                            "primitive_code": step.primitive_code,
+                        },
+                    )
+
+                for capability_code in step.capability_codes:
+                    available_capabilities = (
+                        enabled_capability_set
+                        if flow.enabled
+                        else frozenset(capability_set)
+                    )
+                    if capability_code not in available_capabilities:
+                        raise DomainError(
+                            "CONTENT_CONFIG_REFERENCE_UNKNOWN",
+                            "Flow Step references an unavailable Capability",
+                            422,
+                            meta={
+                                "flow_code": flow.code,
+                                "step_code": step.code,
+                                "capability_code": capability_code,
+                            },
+                        )
+                    capability = capability_by_code[capability_code]
+                    compatible = capability.compatible_primitive_codes
+                    if compatible and step.primitive_code not in compatible:
+                        raise DomainError(
+                            "CONTENT_CONFIG_CAPABILITY_INCOMPATIBLE",
+                            "Capability is incompatible with the Flow Step Primitive",
+                            422,
+                            meta={
+                                "flow_code": flow.code,
+                                "step_code": step.code,
+                                "primitive_code": step.primitive_code,
+                                "capability_code": capability_code,
+                            },
+                        )
+
+                unknown_next = sorted(set(step.next_step_codes) - step_set)
+                if unknown_next:
+                    raise DomainError(
+                        "CONTENT_CONFIG_REFERENCE_UNKNOWN",
+                        "Flow Step transition references unknown target Steps",
+                        422,
+                        meta={
+                            "flow_code": flow.code,
+                            "step_code": step.code,
+                            "next_step_codes": unknown_next,
+                        },
+                    )
 
         for required_set_name, values in (
             ("risks", snapshot.risks),

@@ -1,4 +1,4 @@
-registry_version: 1.8.0
+registry_version: 1.9.0
 errors:
 - code: AUTH_REQUIRED
   http_status: 401
@@ -133,6 +133,15 @@ errors:
   http_status: 422
   retryable: false
 - code: CONTENT_CONFIG_REQUIRED_SET_EMPTY
+  http_status: 422
+  retryable: false
+- code: CONTENT_CONFIG_REFERENCE_UNKNOWN
+  http_status: 422
+  retryable: false
+- code: CONTENT_CONFIG_CAPABILITY_INCOMPATIBLE
+  http_status: 422
+  retryable: false
+- code: CONTENT_CONFIG_FLOW_INVALID
   http_status: 422
   retryable: false
 - code: WEIGH_SESSION_NOT_FOUND
