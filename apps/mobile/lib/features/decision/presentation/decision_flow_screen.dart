@@ -179,7 +179,8 @@ class _FlowStepSection extends ConsumerWidget {
     return _ExposureAwareContextStep(
       caseVersionId: state.caseData!.versionId,
       stepCode: step.code,
-      shouldRecordExposure: step.state == FlowStepRuntimeState.ready,
+      shouldRecordExposure:
+          step.state == FlowStepRuntimeState.ready && !state.offlineDraft,
       onExposed: () => ref
           .read(decisionControllerProvider.notifier)
           .recordContextExposure(step.code),
