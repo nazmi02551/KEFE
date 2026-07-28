@@ -57,6 +57,16 @@ class SecuredContentAuthoringService:
             actor_ref=principal.audit_actor_ref,
         )
 
+    def draft_for_edit(
+        self,
+        principal: AdminPrincipal,
+        version_id: UUID,
+        *,
+        now: datetime | None = None,
+    ) -> AuthoringCaseVersion:
+        self._security.authorize(principal, AdminCapability.CONTENT_EDIT, now=now)
+        return self._require_version(version_id)
+
     def save_draft(
         self,
         principal: AdminPrincipal,
