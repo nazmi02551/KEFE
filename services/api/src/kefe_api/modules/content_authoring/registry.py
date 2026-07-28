@@ -34,7 +34,13 @@ class InMemoryContentAuthoringRegistry:
                 self._failure("CONTENT_TITLE_REQUIRED", "Title is required", "title")
             )
         if not version.summary.strip():
-            failures.append(self._failure("CONTENT_SUMMARY_REQUIRED", "Summary is required", "summary"))
+            failures.append(
+                self._failure(
+                    "CONTENT_SUMMARY_REQUIRED",
+                    "Summary is required",
+                    "summary",
+                )
+            )
         if version.base_format_code not in self.base_formats:
             failures.append(
                 self._failure(
