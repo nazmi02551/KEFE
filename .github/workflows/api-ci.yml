@@ -72,6 +72,9 @@ jobs:
       - name: Enforce contract sync
         if: always()
         run: test '${{ steps.contract-sync.outcome }}' = 'success'
+      - name: Case Flow pinning contract
+        working-directory: services/api
+        run: python tools/check_case_flow_pinning_contract.py
       - name: Admin HTTP contract
         id: admin-http-contract
         continue-on-error: true
