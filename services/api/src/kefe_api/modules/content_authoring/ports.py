@@ -13,7 +13,10 @@ from kefe_api.modules.content_authoring.models import (
 
 
 class ContentAuthoringRegistry(Protocol):
-    def validate(self, version: AuthoringCaseVersion) -> tuple[PublicationValidationFailure, ...]: ...
+    def validate(
+        self,
+        version: AuthoringCaseVersion,
+    ) -> tuple[PublicationValidationFailure, ...]: ...
 
 
 class ContentAuthoringRepository(Protocol):
