@@ -1,0 +1,94 @@
+contract_id: content-configuration
+version: 1.0.0
+status: accepted
+updated_at: '2026-07-28'
+authority:
+  - KEFE-MPD v1.2.0
+  - KEFE-GOV v1.4.0
+  - KEFE-ENG v0.6.0
+adr: docs/adr/0018-versioned-content-configuration-registry.md
+
+lifecycle:
+  states: [DRAFT, PUBLISHED, SUPERSEDED]
+  editable_states: [DRAFT]
+  publication:
+    one_active_published_snapshot: true
+    atomic_supersede: true
+    published_immutable: true
+    rollback_strategy: publish_new_snapshot_from_historical_snapshot
+
+identity:
+  stable_code_pattern: '^[A-Z][A-Z0-9_]*$'
+  display_labels_are_identifiers: false
+  client_supplied_audit_identity: forbidden
+
+snapshot:
+  required_collections:
+    domains: {min_items: 1, unique_codes: true}
+    base_formats: {min_items: 1, unique_codes: true}
+    modifiers: {min_items: 0, unique_codes: true}
+    risks: {min_items: 1, unique_codes: true}
+    claim_states: {min_items: 1, unique_codes: true}
+  relationships:
+    modifier_compatibility:
+      key: base_format_code
+      values: modifier_codes
+      references_must_exist: true
+    review_modes_by_risk:
+      key: risk_code
+      values: review_mode_codes
+      references_must_exist: true
+
+baseline_seed:
+  domains:
+    - CIVIC_POLITICS
+    - LAW_JUSTICE
+    - SPORTS
+    - TECHNOLOGY_AI
+    - WORK_BUSINESS
+    - EDUCATION
+    - FAMILY_PARENTING
+    - RELATIONSHIPS
+    - ECONOMY_MONEY
+    - HEALTH_BIOETHICS
+    - SCIENCE_FUTURE
+    - PLANET_ANIMALS
+    - CITY_PUBLIC_LIFE
+    - CULTURE_MEDIA
+    - WORLD_GEOPOLITICS
+    - DAILY_LIFE
+  base_formats: [TODAY, DILEMMA, LAB, VS, CALL, DECIDE, RETRO]
+  risks: [L0, L1, L2, L3]
+  claim_states: [VERIFIED, CLAIMED, DISPUTED, UNKNOWN]
+  review_modes: [EDITORIAL, TRUST, CIVIC, LEGAL, SAFETY]
+
+admin_security:
+  read: authenticated_admin
+  create_draft: TAXONOMY_MANAGE
+  edit_draft: TAXONOMY_MANAGE
+  publish: TAXONOMY_MANAGE
+  mutation_transport:
+    session_cookie: kefe_admin_session
+    csrf_header: X-KEFE-CSRF
+    same_session_csrf_required: true
+  audit_actor: server_derived_admin_subject
+
+runtime_consumption:
+  consumer_of_snapshot: ContentAuthoringRegistry
+  publication_fail_closed_when_missing: true
+  domain_layer_must_not_import:
+    - sqlalchemy
+    - psycopg
+    - cms_vendor_sdk
+    - identity_provider_sdk
+
+persistence:
+  initial_adapter: PostgreSQL
+  append_only_audit: true
+  published_snapshot_reference_required_for_future_case_publication_audit: true
+
+next_extensions:
+  - source_verification_policy
+  - claim_status_review_workflow
+  - risk_and_civic_review_enforcement
+  - localization_labels
