@@ -5,7 +5,7 @@ status: implementation_contract
 
 boundary:
   route_prefix: /internal/admin/v1/content-configuration
-  application_service: ContentConfigurationService
+  application_service: SecuredContentConfigurationService
   direct_repository_mutation_from_http: forbidden
   admin_login_endpoint_in_scope: false
   consumer_credentials_accepted: false
