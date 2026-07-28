@@ -1,0 +1,114 @@
+contract_version: 1.0.0
+updated_at: '2026-07-28'
+capability: content_authoring_and_publication
+scope:
+  includes:
+    - case_identity
+    - case_version
+    - issue
+    - question
+    - context_block
+    - source_reference
+    - lifecycle_audit
+  excludes:
+    - production_admin_authentication
+    - final_admin_ui
+    - external_cms_selection
+    - autonomous_ai_publication
+lifecycle:
+  initial_state: DRAFT
+  states:
+    - DRAFT
+    - IN_REVIEW
+    - APPROVED
+    - PUBLISHED
+    - SUPERSEDED
+    - WITHDRAWN
+  concurrency: compare_and_set_expected_state
+  commands:
+    submit_for_review:
+      from: [DRAFT]
+      to: IN_REVIEW
+    approve:
+      from: [IN_REVIEW]
+      to: APPROVED
+    reject:
+      from: [IN_REVIEW, APPROVED]
+      to: DRAFT
+      rationale_required: true
+    publish:
+      from: [APPROVED]
+      to: PUBLISHED
+      atomic_supersede_previous: true
+    withdraw:
+      from: [PUBLISHED]
+      to: WITHDRAWN
+      rationale_required: true
+immutability:
+  published_case_version_mutable: false
+  correction_strategy: create_new_version
+  historical_decision_pin_preserved: true
+revision:
+  new_case_version_id_required: true
+  version_owned_nodes_reidentified:
+    - issue
+    - question
+    - context_block
+    - source_reference
+  completed_review_modes_reset: true
+  source_and_claim_review_may_require_revalidation: true
+consumer_visibility:
+  visible_states: [PUBLISHED]
+  draft_leakage_forbidden: true
+publication_validation:
+  required:
+    - stable_case_identity
+    - title
+    - summary
+    - base_format_code
+    - primary_domain_code
+    - content_risk
+    - at_least_one_issue
+    - at_least_one_active_question
+  conditional:
+    - rule: source_required_for_fact_bearing_or_real_event_content
+    - rule: claim_state_required_for_material_factual_claims
+    - rule: sensitive_or_civic_content_requires_applicable_review_mode
+    - rule: question_schema_must_match_registered_response_type
+    - rule: format_modifier_combination_must_be_compatible
+audit:
+  append_only: true
+  system_commands:
+    - supersede_on_publish
+  fields:
+    - audit_id
+    - case_id
+    - case_version_id
+    - actor_ref
+    - command
+    - previous_state
+    - new_state
+    - rationale
+    - occurred_at
+provider_independence:
+  repository_port_required: true
+  registry_port_required: true
+  domain_must_not_depend_on:
+    - cms_vendor
+    - sql_library
+    - web_framework
+    - identity_provider
+security:
+  public_authoring_endpoint_allowed: false
+  production_admin_boundary_requires_separate_threat_model_adr: true
+ai:
+  may_assist:
+    - draft_generation
+    - issue_extraction
+    - question_proposal
+    - source_classification
+    - risk_signals
+  may_not:
+    - autonomously_publish
+    - approve_high_risk_content
+    - alter_published_case_version
