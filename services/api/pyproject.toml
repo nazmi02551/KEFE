@@ -38,10 +38,3 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
-
-# Temporary narrow exceptions while the DecisionRevision vertical slice remains a draft PR.
-# Remove before marking the implementation PR ready for review.
-[tool.ruff.lint.per-file-ignores]
-"src/kefe_api/infrastructure/postgres_decision_lineage.py" = ["F401"]
-"src/kefe_api/modules/decision/in_memory.py" = ["E501"]
-"src/kefe_api/modules/decision/lineage_service.py" = ["E501"]
