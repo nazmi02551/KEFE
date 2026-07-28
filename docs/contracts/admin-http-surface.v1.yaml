@@ -1,0 +1,97 @@
+contract_version: 1.0.0
+updated_at: '2026-07-28'
+route_prefix: /internal/admin/v1
+security:
+  session_cookie:
+    name: kefe_admin_session
+    required_on: [read, write]
+    transport_requirements:
+      secure: true
+      http_only: true
+      same_site: Strict
+      path: /internal/admin
+  csrf:
+    header: X-KEFE-CSRF
+    required_on: [write]
+    bound_to_same_session: true
+    verify_before_mutation: true
+  identity:
+    source: server_resolved_admin_session
+    forbidden_request_fields:
+      - actor_ref
+      - admin_subject_id
+      - roles
+      - capabilities
+  consumer_credentials_accepted: false
+  admin_login_endpoint_in_scope: false
+application_boundary:
+  facade: SecuredContentAuthoringService
+  direct_repository_mutation_from_http: forbidden
+  audit_actor_ref: server_derived
+  provider_specific_identity_sdk_in_domain: forbidden
+operations:
+  - method: GET
+    path: /session
+    csrf: false
+    behavior: authenticated_principal_introspection
+  - method: POST
+    path: /cases
+    csrf: true
+    capability: CONTENT_CREATE
+  - method: POST
+    path: /case-versions/{version_id}/revisions
+    csrf: true
+    capability: CONTENT_EDIT
+  - method: PUT
+    path: /case-versions/{version_id}
+    csrf: true
+    capability: CONTENT_EDIT
+  - method: POST
+    path: /case-versions/{version_id}/submit
+    csrf: true
+    capability: CONTENT_SUBMIT_REVIEW
+  - method: POST
+    path: /case-versions/{version_id}/approve
+    csrf: true
+    capability: CONTENT_REVIEW
+    separation_of_duties: reviewer_must_differ_from_submitter
+  - method: POST
+    path: /case-versions/{version_id}/reject
+    csrf: true
+    capability: CONTENT_REVIEW
+    rationale_required: true
+  - method: POST
+    path: /case-versions/{version_id}/publish
+    csrf: true
+    capability: CONTENT_PUBLISH
+    recent_step_up_required: true
+  - method: POST
+    path: /case-versions/{version_id}/withdraw
+    csrf: true
+    capability: CONTENT_WITHDRAW
+    recent_step_up_required: true
+    rationale_required: true
+  - method: GET
+    path: /cases/{case_id}/audit
+    csrf: false
+    capability: AUDIT_READ
+errors:
+  csrf_missing: ADMIN_CSRF_REQUIRED
+  csrf_invalid: ADMIN_CSRF_INVALID
+  authentication:
+    - ADMIN_AUTH_REQUIRED
+    - ADMIN_SESSION_INVALID
+    - ADMIN_SESSION_EXPIRED
+    - ADMIN_SESSION_REVOKED
+    - ADMIN_MFA_REQUIRED
+  authorization:
+    - ADMIN_FORBIDDEN
+    - ADMIN_STEP_UP_REQUIRED
+    - ADMIN_SEPARATION_OF_DUTIES
+logging:
+  forbidden_secret_fields:
+    - session_cookie_value
+    - csrf_token_value
+responses:
+  may_echo_session_secret: false
+  may_echo_csrf_secret: false
