@@ -25,7 +25,8 @@ class KefeStrings {
   String get onboardingBodyOne => _tr
       ? 'KEFE sana çoğunluğun ne dediğini göstermeden önce, aynı konuya kendi gözünden bakmanı ister.'
       : 'Before showing what the crowd thinks, KEFE asks you to look at the same question through your own eyes.';
-  String get onboardingStepTwoEyebrow => _tr ? 'Farkı keşfet' : 'Discover the difference';
+  String get onboardingStepTwoEyebrow =>
+      _tr ? 'Farkı keşfet' : 'Discover the difference';
   String get onboardingTitleTwo => _tr
       ? 'Sonra neden ayrıştığını keşfet.'
       : 'Then discover why views diverge.';
@@ -34,7 +35,8 @@ class KefeStrings {
       : 'After your decision, you can inspect community results, different perspectives and how your view changes over time.';
   String get onboardingNext => _tr ? 'Devam et' : 'Continue';
   String get onboardingTryCase => _tr ? 'İlk tartımı yap' : 'Make your first weigh';
-  String get continueAsGuest => _tr ? 'Misafir olarak devam et' : 'Continue as guest';
+  String get continueAsGuest =>
+      _tr ? 'Misafir olarak devam et' : 'Continue as guest';
   String get firstRevealHelper => _tr
       ? 'İlk tartımın tamamlandı. KEFE’yi keşfetmeye misafir olarak devam edebilirsin.'
       : 'Your first weigh is complete. You can continue exploring KEFE as a guest.';
@@ -82,7 +84,8 @@ class KefeStrings {
   String get retry => _tr ? 'Tekrar dene' : 'Try again';
   String get start => _tr ? 'Başla' : 'Start';
   String get commit => _tr ? 'Kararımı Ver' : 'Commit My Decision';
-  String get retrySync => _tr ? 'Kararımı Senkronize Et' : 'Sync My Decision';
+  String get retrySync =>
+      _tr ? 'Kararımı Senkronize Et' : 'Sync My Decision';
   String get commitHelper => _tr
       ? 'Kararını kilitle ve sonucu gör.'
       : 'Lock your decision and reveal the result.';
@@ -94,7 +97,8 @@ class KefeStrings {
   String get unsupportedQuestionType => _tr
       ? 'Bu soru tipi bu sürümde desteklenmiyor.'
       : 'This question type is not supported in this version.';
-  String get reasonTitle => _tr ? 'Neden böyle düşündün?' : 'Why did you think this?';
+  String get reasonTitle =>
+      _tr ? 'Neden böyle düşündün?' : 'Why did you think this?';
   String get reasonHelper => _tr
       ? 'İstersen kararında etkili olan gerekçeleri seç. Bu sürümde gerekçen diğer kullanıcılara gösterilmez; kısa metin güvenlik amacıyla incelenebilir.'
       : 'Optionally choose what shaped your decision. In this version it is not shown to other users; short text may be reviewed for safety.';
@@ -134,15 +138,43 @@ class KefeStrings {
   String get uncertainCommit => _tr
       ? 'Bağlantı kesildi. Kararın gönderilmiş olabilir; aynı anahtarla güvenli biçimde kontrol edeceğiz.'
       : 'Connection dropped. Your decision may already be committed; we will safely check with the same key.';
-  String get revealTitle => _tr ? 'Topluluk nasıl tarttı?' : 'How did the community weigh it?';
+  String get revealTitle =>
+      _tr ? 'Topluluk nasıl tarttı?' : 'How did the community weigh it?';
   String get trustedSample => _tr ? 'Güvenilir örneklem' : 'Trusted sample';
   String get selectAnswer => _tr ? 'Bir seçenek seç' : 'Choose an option';
+
+  String get flowCapabilityPendingTitle =>
+      _tr ? 'Bu adım henüz kullanıma açılmadı' : 'This step is not available yet';
+  String flowCapabilityPendingBody(String? reasonCode) {
+    return switch (reasonCode) {
+      'FLOW_DECISION_REVISION_REQUIRED' => _tr
+          ? 'Bu akışta yeniden tartım adımı var. Karar değişimi altyapısı tamamlandığında aynı akış içinde açılacak.'
+          : 'This flow includes a re-weigh step. It will unlock here when decision revision support is available.',
+      'FLOW_REFLECTION_RUNTIME_PENDING' => _tr
+          ? 'Bu akışın yansıtma adımı hazırlanıyor. Mevcut kararın değiştirilmedi.'
+          : 'This flow’s reflection step is being prepared. Your current decision has not been changed.',
+      _ => _tr
+          ? 'Akış bu adımı tanıyor ancak bu sürüm henüz çalıştırmıyor. Diğer desteklenen adımlar aynı akışta kullanılabilir.'
+          : 'The flow recognizes this step, but this version does not execute it yet. Other supported steps remain available.',
+    };
+  }
+
+  String get flowOfflineUnavailable => _tr
+      ? 'Bu eski çevrimdışı taslakta doğrulanmış akış bilgisi yok. Bağlantı kurulunca akış sunucudan yeniden alınacak; uygulama varsayılan bir ekran dizisi uydurmayacak.'
+      : 'This older offline draft has no verified flow snapshot. The flow will be fetched from the server when connectivity returns; the app will not invent a default screen order.';
+  String get flowRuntimeUnavailable => _tr
+      ? 'Bu vaka için doğrulanmış karar akışı şu anda kullanılamıyor.'
+      : 'The verified decision flow is currently unavailable for this case.';
+  String get flowRuntimeMismatch => _tr
+      ? 'Karar akışı bu oturumun vaka sürümüyle eşleşmedi. Güvenli biçimde yeniden yükle.'
+      : 'The decision flow did not match this session’s case version. Reload safely.';
 
   String get perspectiveTitle => _tr ? 'Başka açılardan bak' : 'See other perspectives';
   String get perspectiveLoading => _tr
       ? 'Perspektifler hazırlanıyor…'
       : 'Preparing perspectives…';
-  String get perspectiveRetry => _tr ? 'Perspektifleri tekrar yükle' : 'Retry perspectives';
+  String get perspectiveRetry =>
+      _tr ? 'Perspektifleri tekrar yükle' : 'Retry perspectives';
   String get perspectiveUnavailable => _tr
       ? 'Sonucun hazır. Perspektifler şu anda yüklenemedi; kararını yeniden göndermeden tekrar deneyebilirsin.'
       : 'Your result is ready. Perspectives could not load right now; you can retry without resending your decision.';
@@ -158,13 +190,15 @@ class KefeStrings {
   String get reasonPendingModeration => _tr
       ? 'Kendi kısa gerekçen güvenlik incelemesinde. Bu, aşağıdaki perspektiflerin kaynağı olduğu anlamına gelmez.'
       : 'Your short reason is under safety review. This does not mean it is a source for the perspectives below.';
-  String get perspectiveMethodology => _tr ? 'Bu görünüm hakkında' : 'About this view';
+  String get perspectiveMethodology =>
+      _tr ? 'Bu görünüm hakkında' : 'About this view';
   String perspectiveSlotLabel(PerspectiveSlot slot) {
     return switch (slot) {
       PerspectiveSlot.near => _tr ? 'Yakın perspektif' : 'Nearby perspective',
       PerspectiveSlot.opposing => _tr ? 'Karşı perspektif' : 'Opposing perspective',
       PerspectiveSlot.bridge => _tr ? 'Köprü perspektifi' : 'Bridge perspective',
-      PerspectiveSlot.alternativeContext => _tr ? 'Alternatif bağlam' : 'Alternative context',
+      PerspectiveSlot.alternativeContext =>
+        _tr ? 'Alternatif bağlam' : 'Alternative context',
     };
   }
 
@@ -186,6 +220,10 @@ class KefeStrings {
       'DECISION_SYNC_PENDING' => decisionSyncPending,
       'WEIGH_COMMIT_UNCERTAIN' => uncertainCommit,
       'RESULT_SYNC_PENDING' => revealPending,
+      'FLOW_RUNTIME_OFFLINE_UNAVAILABLE' => flowOfflineUnavailable,
+      'FLOW_RUNTIME_UNAVAILABLE' || 'FLOW_RUNTIME_NOT_CONFIGURED' =>
+        flowRuntimeUnavailable,
+      'FLOW_RUNTIME_VERSION_MISMATCH' => flowRuntimeMismatch,
       'NETWORK_UNAVAILABLE' || 'NETWORK_TIMEOUT' => _tr
           ? 'Bağlantı kurulamadı. Cihazdaki karar korunuyor.'
           : 'Could not connect. The decision on this device is preserved.',
@@ -198,7 +236,8 @@ class KefeStringsDelegate extends LocalizationsDelegate<KefeStrings> {
   const KefeStringsDelegate();
 
   @override
-  bool isSupported(Locale locale) => const {'tr', 'en'}.contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      const {'tr', 'en'}.contains(locale.languageCode);
 
   @override
   Future<KefeStrings> load(Locale locale) async => KefeStrings(locale);
