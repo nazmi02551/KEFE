@@ -21,7 +21,14 @@ class PostgresContextRepository:
     def get_context(self, case_version_id: UUID) -> ContextSnapshot | None:
         with self._engine.connect() as connection:
             exists = connection.execute(
-                text("SELECT 1 FROM content.case_version WHERE id = :id"),
+                text(
+                    """
+                    SELECT 1
+                    FROM content.case_version
+                    WHERE id = :id
+                      AND status IN ('PUBLISHED','SUPERSEDED')
+                    """
+                ),
                 {"id": case_version_id},
             ).scalar_one_or_none()
             if not exists:
@@ -51,17 +58,21 @@ class PostgresContextRepository:
                 ),
                 {"case_version_id": case_version_id},
             ).mappings().all()
-            link_rows = connection.execute(
-                text(
-                    """
-                    SELECT context_block_id, source_id
-                    FROM content.context_block_source
-                    WHERE context_block_id = ANY(:block_ids)
-                    ORDER BY context_block_id, source_id
-                    """
-                ),
-                {"block_ids": [row["id"] for row in block_rows]},
-            ).mappings().all() if block_rows else []
+            link_rows = (
+                connection.execute(
+                    text(
+                        """
+                        SELECT context_block_id, source_id
+                        FROM content.context_block_source
+                        WHERE context_block_id = ANY(:block_ids)
+                        ORDER BY context_block_id, source_id
+                        """
+                    ),
+                    {"block_ids": [row["id"] for row in block_rows]},
+                ).mappings().all()
+                if block_rows
+                else []
+            )
 
         source_ids_by_block: dict[UUID, list[UUID]] = {}
         for row in link_rows:
