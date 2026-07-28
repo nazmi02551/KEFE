@@ -28,9 +28,11 @@ It shares the existing Admin session and CSRF machinery. No configuration-specif
 
 ### Application boundary
 
-HTTP handlers call `ContentConfigurationService`; they do not mutate `ContentConfigurationRepository` directly.
+HTTP handlers call `SecuredContentConfigurationService`; they do not mutate `ContentConfigurationRepository` directly and do not implement authorization rules themselves.
 
-The service remains responsible for:
+`SecuredContentConfigurationService` owns the Admin-facing application-security boundary and delegates lifecycle/validation mutation logic to `ContentConfigurationService`. It may use the repository for authorized version/audit reads needed by the application facade.
+
+The combined facade/domain-service boundary remains responsible for:
 - capability enforcement,
 - DRAFT-only mutation,
 - validation,
