@@ -1,4 +1,4 @@
-manifest_version: 1.27.0
+manifest_version: 1.28.0
 updated_at: '2026-07-29'
 policy:
   executable_schema_source: services/api/migrations
@@ -71,7 +71,7 @@ contracts:
     role: immutable_publication_time_configuration_and_resolved_flow_provenance_policy
   - id: generic-flow-runtime
     path: docs/contracts/generic-flow-runtime.v1.yaml
-    version: 1.0.0
+    version: 1.1.0
     role: actor_scoped_server_authoritative_caseversion_pinned_flow_runtime
   - id: mobile-flow-runtime-ui
     path: docs/contracts/mobile-flow-runtime-ui.v1.yaml
@@ -79,7 +79,7 @@ contracts:
     role: flutter_server_flow_driven_rendering_and_offline_continuity_policy
   - id: decision-revision-lineage
     path: docs/contracts/decision-revision-lineage.v1.yaml
-    version: 1.0.0
+    version: 1.1.0
     role: immutable_decision_revision_exposure_intervention_and_generic_delta_policy
   - id: signal-impact-model
     path: docs/contracts/signal-impact-model.v1.yaml
@@ -103,7 +103,7 @@ contracts:
     role: secured_composable_configuration_management_http_policy
   - id: error-registry
     path: docs/contracts/error-codes.v1.yaml
-    version: 1.11.0
+    version: 1.12.0
     role: stable_api_errors
   - id: postgresql-m0-schema
     path: docs/contracts/postgresql-m0-schema.v1.8.0.sql
@@ -117,7 +117,7 @@ contracts:
       - services/api/migrations/versions/20260727_0005_typed_questions.py
       - services/api/migrations/versions/20260727_0006_private_reason.py
       - services/api/migrations/versions/20260727_0007_perspective_card.py
-      - services/api/migrations/versions/20260727_0008_context_sources.py
+      - services/api/migrations/versions/20260728_0008_context_sources.py
       - services/api/migrations/versions/20260728_0009_content_authoring.py
       - services/api/migrations/versions/20260728_0010_admin_sessions.py
   - id: repository-structure
