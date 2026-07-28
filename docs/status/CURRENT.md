@@ -3,7 +3,7 @@
 **Updated:** 2026-07-28  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Latest verified implementation commit:** `f6e85850d0ae0dc8f6408efd92ee43d02519dc11`
+**Latest verified implementation commit:** `9416d4366650c3078d92dbf0b5533e4d1a4cdf39`
 
 This is the **single canonical durable engineering handoff**. Chat history is not a source of truth. At every continuation, read this file from `main`, inspect open PRs/recent CI, then proceed from the repository state.
 
@@ -31,6 +31,7 @@ Binding rules:
 - Guest continuation is always available through the first value loop.
 - Account Offer is optional, post-Reveal, dismissible and non-blocking.
 - My KEFE Progress is actor-scoped and server-derived; no personality, ideology or psychometric inference is authorized in the current foundation.
+- Content authoring is separate from consumer reads/writes; no public Admin authoring endpoint is authorized until a dedicated authentication/threat-model decision is approved.
 
 ## 2. Completed executable foundation
 
@@ -48,6 +49,8 @@ Backend/contracts:
 - Authenticated `GET /v1/me/progress` with memory/PostgreSQL adapters.
 - Progress fields: committed weigh count, distinct Case/domain coverage, first/last Commit and recent completed Cases.
 - Deterministic OpenAPI export/drift gate, contract fitness checks and PostgreSQL integration tests.
+- M1 provider-neutral Content Authoring core: stable Case identity; versioned Issue/Question/Context/Source aggregate; `DRAFT → IN_REVIEW → APPROVED → PUBLISHED`; rejection/withdrawal rationale; append-only audit; registry-driven publication validation; immutable published CaseVersion; isolated correction revisions; atomic supersede behavior in the first in-memory adapter.
+- Content Authoring currently has **no public HTTP/Admin endpoint** and **no PostgreSQL authoring adapter yet**; those are deliberate next slices, not hidden incompleteness.
 
 Mobile:
 
@@ -64,18 +67,19 @@ Mobile:
 - `Continue as guest` dismisses only the offer and never hides Progress.
 - Turkish/English semantic copy and accessibility-oriented controls.
 
-Most recent merged product slices:
+Most recent merged product/architecture slices:
 
-- PR #25 — bounded Perspective backend and curated fallback.
-- PR #26 — mobile Perspective consumption and isolated retry.
 - PR #27 — CaseVersion-pinned Context and Source layer.
 - PR #29 — optional Account Offer and actor-scoped My KEFE Progress foundation.
+- PR #31 — M1 Content Authoring and immutable publication core; merge commit `9416d4366650c3078d92dbf0b5533e4d1a4cdf39`.
 
 ## 3. Current executable path
 
 `Onboarding → Explore → Case Summary → Context + Sources → Typed Weigh → Optional Private Reason → Commit → Trusted Reveal → Curated Perspective → My KEFE Progress → Optional Account Offer`
 
 Failures in Context, Perspective or Progress are isolated from the trusted decision state. They cannot replay mutable answers, Reason or Commit. The current low-risk DILEMMA is a development fixture, not a product-wide default.
+
+Content authoring now has an executable domain/application core but is intentionally not connected to a public Admin surface. Consumer reads continue to use only published immutable content.
 
 ## 4. Guardrails for upcoming work
 
@@ -87,36 +91,50 @@ Failures in Context, Perspective or Progress are isolated from the trusted decis
 - Do not present activity counters as validated identity or psychological insight.
 - Do not expose functional account conversion until enrollment, ownership transfer, recovery, retention and revocation work end to end.
 - Do not silently lock final navigation or branded Commit terminology outside the approved documents.
+- Never mutate a published CaseVersion in place; corrections create a new version.
+- Do not expose authoring/Admin HTTP endpoints before a dedicated admin authentication, authorization and threat-model ADR.
+- Do not embed a CMS vendor, SQL library, identity provider or AI provider into authoring domain rules.
 
 ## 5. Recommended next sequence
 
-1. **Content/Admin foundation**
-   - Case/Issue/Question/Context/Source authoring contracts
-   - publication workflow and CaseVersion audit trail
-   - taxonomy/configuration management
-   - source verification and claim-status review
+1. **Content/Admin persistence foundation**
+   - PostgreSQL authoring repository and migrations
+   - atomic publication + previous-version supersede + append-only audit in one transaction
+   - persistence/integration tests proving drafts cannot leak into consumer reads
 
-2. **Observability and deployment baseline**
+2. **Admin security boundary before any authoring HTTP surface**
+   - authentication/authorization/threat-model ADR
+   - role/capability model, audit identity and session controls
+   - only then define authenticated Admin application endpoints
+
+3. **Content configuration and review workflows**
+   - taxonomy/format/modifier registry management
+   - source verification and claim-status review
+   - risk/Civic review-mode enforcement
+
+4. **Observability and deployment baseline**
    - request/event correlation
    - SLO, error and latency metrics
    - secrets/environment contract
    - development/staging deployment runbook
 
-3. **Account enrollment and ownership continuity**
+5. **Account enrollment and ownership continuity**
    - explicit authentication/threat-model ADR first
    - guest-to-account transfer without copying decision history
    - recovery, retention, revocation and device-change behavior
 
-4. **Share foundation**
+6. **Share foundation**
    - privacy-safe cards and deep links
    - sensitive-content restrictions
    - no hidden profile attributes or individual decision leakage
 
-5. **Milestone DOCX/PDF synchronization**
+7. **Milestone DOCX/PDF synchronization**
    - patch editable canonical sources
    - regenerate DOCX/PDF
    - visually verify every render
    - update manifest and archive superseded versions
+
+PR #31 completes the first Content Authoring domain/application slice, **not the full Content/Admin milestone**. Therefore DOCX/PDF regeneration is still deferred until the declared Content/Admin milestone boundary is reached or a product-policy change requires an earlier document revision.
 
 ## 6. Continuation protocol
 
@@ -134,4 +152,4 @@ Failures in Context, Perspective or Progress are isolated from the trusted decis
 
 ## 7. New-chat recovery prompt
 
-> Continue KEFE development from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first, then inspect open PRs, recent commits and CI. Preserve Commit First, CaseVersion pinning, pre-Commit Context without result leakage, private Reason boundaries, optional guest continuation, low-claim My KEFE Progress and provider-neutral ports/adapters. Lock the next coherent slice in an ADR and machine-readable contract before coding. Merge only with green CI and keep the milestone DOCX/PDF synchronization obligation.
+> Continue KEFE development from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first, then inspect open PRs, recent commits and CI. Preserve Commit First, CaseVersion pinning, pre-Commit Context without result leakage, private Reason boundaries, optional guest continuation, low-claim My KEFE Progress, immutable published content and provider-neutral ports/adapters. Do not expose an Admin authoring endpoint before a dedicated auth/authorization/threat-model ADR. Lock the next coherent slice in an ADR and machine-readable contract before coding. Merge only with green CI and keep the milestone DOCX/PDF synchronization obligation.
