@@ -1,0 +1,98 @@
+contract_version: 1.1.0
+updated_at: '2026-07-28'
+source_adrs:
+  - docs/adr/0018-versioned-content-configuration.md
+  - docs/adr/0020-composable-content-configuration-registry.md
+
+persistence:
+  schema: content_config
+  version_table: content_config.configuration_version
+  audit_table: content_config.configuration_audit
+  aggregate_storage: jsonb
+  executable_source: services/api/migrations
+
+configuration_version:
+  identity: uuid
+  version_no:
+    type: integer
+    unique: true
+    monotonic: true
+  lifecycle: [DRAFT, PUBLISHED, SUPERSEDED]
+  immutable_when: [PUBLISHED, SUPERSEDED]
+  one_published_version: true
+  cloned_from_version_id: nullable_uuid
+
+aggregate_document:
+  preserves:
+    - domains
+    - topics
+    - base_formats
+    - modifiers
+    - modifier_compatibility
+    - primitives
+    - capabilities
+    - flow_templates
+    - risks
+    - claim_states
+    - source_kinds
+    - disclosure_levels
+  composable_round_trip_required: true
+  primitive_fields:
+    - code
+    - label_key
+    - payload_schema_ref
+    - enabled
+  capability_fields:
+    - code
+    - label_key
+    - compatible_primitive_codes
+    - config_schema_ref
+    - enabled
+  flow_template_fields:
+    - code
+    - version_no
+    - label_key
+    - entry_step_code
+    - steps
+    - enabled
+  flow_step_fields:
+    - code
+    - primitive_code
+    - capability_codes
+    - next_step_codes
+    - payload_schema_ref
+
+publication:
+  transaction:
+    - lock target DRAFT
+    - lock current PUBLISHED if present
+    - supersede current PUBLISHED
+    - publish target
+    - append audit
+  atomic: true
+  rollback: clone_historical_to_new_draft
+
+bootstrap:
+  behavior: seed_default_only_when_no_configuration_exists
+  stable_seed_id: 77777777-7777-4777-8777-777777777777
+  seed_contains_composable_registry: true
+
+audit:
+  append_only: true
+  actor_ref: server_derived
+  commands:
+    - CREATE_DRAFT_FROM_CURRENT
+    - SAVE_DRAFT
+    - PUBLISH
+    - CREATE_ROLLBACK_DRAFT
+
+provider_boundary:
+  domain_must_not_import:
+    - sqlalchemy
+    - psycopg
+    - vendor_config_sdk
+
+historical_integrity:
+  published_rows_immutable: true
+  rollback_rewrites_history: false
+  future_live_configuration_reinterprets_historical_publication: false

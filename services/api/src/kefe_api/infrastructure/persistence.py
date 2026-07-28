@@ -4,6 +4,9 @@ from kefe_api.core.settings import Settings
 from kefe_api.infrastructure.db import build_engine
 from kefe_api.infrastructure.postgres_admin_security import PostgresAdminSessionStore
 from kefe_api.infrastructure.postgres_content_authoring import PostgresContentAuthoringRepository
+from kefe_api.infrastructure.postgres_content_configuration import (
+    PostgresContentConfigurationRepository,
+)
 from kefe_api.infrastructure.postgres_context import PostgresContextRepository
 from kefe_api.infrastructure.postgres_identity import PostgresIdentityRepository
 from kefe_api.infrastructure.postgres_perspective_decision import (
@@ -14,6 +17,11 @@ from kefe_api.modules.admin_security.in_memory import InMemoryAdminSessionStore
 from kefe_api.modules.admin_security.ports import AdminSessionStore
 from kefe_api.modules.content_authoring.in_memory import InMemoryContentAuthoringRepository
 from kefe_api.modules.content_authoring.ports import ContentAuthoringRepository
+from kefe_api.modules.content_configuration.bootstrap import build_default_content_configuration
+from kefe_api.modules.content_configuration.in_memory import (
+    InMemoryContentConfigurationRepository,
+)
+from kefe_api.modules.content_configuration.ports import ContentConfigurationRepository
 from kefe_api.modules.context.bootstrap import build_demo_context_repository
 from kefe_api.modules.context.ports import ContextRepository
 from kefe_api.modules.decision.bootstrap import build_demo_repository
@@ -78,6 +86,21 @@ def build_content_authoring_repository(settings: Settings) -> ContentAuthoringRe
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
 
     return PostgresContentAuthoringRepository(build_engine(settings.database_url))
+
+
+def build_content_configuration_repository(
+    settings: Settings,
+) -> ContentConfigurationRepository:
+    seed = build_default_content_configuration()
+    if settings.persistence_backend == "memory":
+        return InMemoryContentConfigurationRepository(seed)
+
+    if not settings.database_url:
+        raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
+
+    repository = PostgresContentConfigurationRepository(build_engine(settings.database_url))
+    repository.seed_if_empty(seed)
+    return repository
 
 
 def build_admin_session_store(settings: Settings) -> AdminSessionStore:

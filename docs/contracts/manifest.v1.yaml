@@ -1,4 +1,4 @@
-manifest_version: 1.21.0
+manifest_version: 1.22.0
 updated_at: '2026-07-28'
 policy:
   executable_schema_source: services/api/migrations
@@ -61,6 +61,10 @@ contracts:
     path: docs/contracts/composable-content-configuration.v1.yaml
     version: 1.0.0
     role: versioned_primitive_capability_and_flow_template_registry_policy
+  - id: content-configuration-persistence
+    path: docs/contracts/content-configuration-persistence.v1.yaml
+    version: 1.1.0
+    role: durable_composable_configuration_jsonb_and_audit_policy
   - id: signal-impact-model
     path: docs/contracts/signal-impact-model.v1.yaml
     version: 1.0.0
