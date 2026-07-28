@@ -7,6 +7,8 @@ import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/decision_repository.dart';
 import 'package:kefe_mobile/features/decision/domain/decision_models.dart';
 
+import 'support/flow_runtime_fixture.dart';
+
 const perspectiveCaseId = 'cccccccc-1111-4111-8111-cccccccccccc';
 const perspectiveQuestionId = 'perspective-choice';
 
@@ -36,7 +38,13 @@ const perspectiveCase = DecisionCase(
   ],
 );
 
-class PerspectiveFakeRepository implements DecisionRepository, PerspectiveRepository {
+class PerspectiveFakeRepository
+    with StandardFlowRuntimeFake
+    implements DecisionRepository, PerspectiveRepository {
+  PerspectiveFakeRepository() {
+    flowCaseVersionId = perspectiveCase.versionId;
+  }
+
   int answerCalls = 0;
   int reasonCalls = 0;
   int commitCalls = 0;
@@ -68,6 +76,7 @@ class PerspectiveFakeRepository implements DecisionRepository, PerspectiveReposi
     required String idempotencyKey,
   }) async {
     commitCalls += 1;
+    flowCommitted = true;
   }
 
   @override
