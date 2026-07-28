@@ -65,8 +65,8 @@ class DecisionRepository(Protocol):
         session_id: UUID,
         idempotency_key: str,
         required_question_ids: frozenset[UUID],
-        flow_step_code: str,
         committed_at: datetime,
+        flow_step_code: str | None = None,
     ) -> CommitAttempt: ...
 
     def get_revision_draft(
