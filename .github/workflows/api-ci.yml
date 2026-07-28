@@ -72,6 +72,21 @@ jobs:
       - name: Enforce contract sync
         if: always()
         run: test '${{ steps.contract-sync.outcome }}' = 'success'
+      - name: Admin HTTP contract
+        id: admin-http-contract
+        continue-on-error: true
+        working-directory: services/api
+        run: python tools/check_admin_http_contract.py > admin-http-contract-output.txt 2>&1
+      - name: Upload Admin HTTP diagnostics on failure
+        if: steps.admin-http-contract.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-http-contract-output
+          path: services/api/admin-http-contract-output.txt
+          if-no-files-found: error
+      - name: Enforce Admin HTTP contract
+        if: always()
+        run: test '${{ steps.admin-http-contract.outcome }}' = 'success'
       - name: OpenAPI drift gate
         working-directory: services/api
         run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
@@ -149,6 +164,7 @@ jobs:
           tests/test_progress_postgres.py
           tests/test_content_authoring_postgres.py
           tests/test_admin_sessions_postgres.py
+          tests/test_admin_http_postgres.py
           > postgres-test-output.txt 2>&1
       - name: Upload PostgreSQL diagnostics on failure
         if: steps.postgres-tests.outcome == 'failure'
