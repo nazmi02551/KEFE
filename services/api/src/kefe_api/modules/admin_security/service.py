@@ -46,22 +46,15 @@ class AdminSecurityService:
 
         current = now or datetime.now(UTC)
         resolution = self._session_resolver.resolve(session_token)
-        if resolution.status is AdminSessionStatus.INVALID or resolution.principal is None:
-            raise DomainError("ADMIN_SESSION_INVALID", "Admin session is invalid", 401)
         if resolution.status is AdminSessionStatus.REVOKED:
             raise DomainError("ADMIN_SESSION_REVOKED", "Admin session is revoked", 401)
         if resolution.status is AdminSessionStatus.EXPIRED:
             raise DomainError("ADMIN_SESSION_EXPIRED", "Admin session is expired", 401)
+        if resolution.status is AdminSessionStatus.INVALID or resolution.principal is None:
+            raise DomainError("ADMIN_SESSION_INVALID", "Admin session is invalid", 401)
 
         principal = resolution.principal
-        if current >= principal.expires_at:
-            raise DomainError("ADMIN_SESSION_EXPIRED", "Admin session is expired", 401)
-        if current - principal.authenticated_at > self._policy.absolute_lifetime:
-            raise DomainError("ADMIN_SESSION_EXPIRED", "Admin session exceeded its lifetime", 401)
-        if current - principal.last_seen_at > self._policy.idle_timeout:
-            raise DomainError("ADMIN_SESSION_EXPIRED", "Admin session is idle-expired", 401)
-        if principal.mfa_satisfied_at is None:
-            raise DomainError("ADMIN_MFA_REQUIRED", "Admin MFA assurance is required", 403)
+        self._assert_principal_assurance(principal, current=current)
         return principal
 
     def authorize(
@@ -72,6 +65,8 @@ class AdminSecurityService:
         now: datetime | None = None,
     ) -> None:
         current = now or datetime.now(UTC)
+        self._assert_principal_assurance(principal, current=current)
+
         granted = (
             self._policy.capabilities_for_roles(principal.roles)
             | principal.direct_capabilities
@@ -111,6 +106,21 @@ class AdminSecurityService:
                 "The submitting Admin cannot approve the same CaseVersion",
                 403,
             )
+
+    def _assert_principal_assurance(
+        self,
+        principal: AdminPrincipal,
+        *,
+        current: datetime,
+    ) -> None:
+        if current >= principal.expires_at:
+            raise DomainError("ADMIN_SESSION_EXPIRED", "Admin session is expired", 401)
+        if current - principal.authenticated_at > self._policy.absolute_lifetime:
+            raise DomainError("ADMIN_SESSION_EXPIRED", "Admin session exceeded its lifetime", 401)
+        if current - principal.last_seen_at > self._policy.idle_timeout:
+            raise DomainError("ADMIN_SESSION_EXPIRED", "Admin session is idle-expired", 401)
+        if principal.mfa_satisfied_at is None:
+            raise DomainError("ADMIN_MFA_REQUIRED", "Admin MFA assurance is required", 403)
 
     def _deny(
         self,
