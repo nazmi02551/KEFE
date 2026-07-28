@@ -3,7 +3,7 @@
 **Updated:** 2026-07-28  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Latest verified implementation commit:** `b9b26dddaeb9298166b28e673cb48c3c8a92e701`
+**Latest verified implementation commit:** `164a97dc43dc1c6d4b67e749326ab319d2e2e19b`
 
 This is the **single canonical durable engineering handoff**. Chat history is not a source of truth. On every continuation, read this file from `main`, inspect open PRs/recent CI, and fetch the Drive CURRENT publication artifact only when editable DOCX/PDF source detail is needed.
 
@@ -48,7 +48,7 @@ Consumer experience path:
 Platform value lifecycle:  
 `ME → WE → SIGNAL → IMPACT`
 
-ADR-0019 is binding:
+Binding architecture:
 - KEFE is a case-agnostic modular decision/public-reasoning engine.
 - canonical composition is `Primitive → Capability → FlowTemplateVersion → CaseVersion`.
 - Composition over Case Types; new cases should be content/configuration/composition, not new runtime feature families.
@@ -62,6 +62,8 @@ ADR-0019 is binding:
 - initial Claim States: VERIFIED, SUPPORTED, CLAIMED, DISPUTED, UNVERIFIED, UNRESOLVED, FALSE; semantics are methodology-versioned.
 - one source may yield multiple Claims, decision problems and Candidate Cases.
 - AI may extract/classify/normalize/suggest/compose/detect, but is not KEFE's normative/political/moral voice or final truth authority.
+- published CaseVersion pins its effective Content Configuration provenance and self-contained resolved Flow.
+- consumer Flow execution uses only the session-pinned CaseVersion + its pinned `resolved_flow`; live Content Configuration must never reinterpret historical Cases.
 
 Signal integrity:
 - Collective Result ≠ Signal.
@@ -84,7 +86,7 @@ Retained foundation:
 - actor-scoped My KEFE Progress + optional post-Reveal Account Offer.
 - provider-neutral Content Authoring lifecycle, immutable published CaseVersion, PostgreSQL editorial persistence and atomic consumer publication.
 - separate Admin security domain, capability-first authorization, MFA/session assurance, same-session CSRF, recent step-up and server-derived audit identity.
-- secured internal Admin authoring HTTP under `/internal/admin/v1`; no Admin login/SSO endpoint yet.
+- secured internal Admin authoring/configuration HTTP under `/internal/admin/v1`; no Admin login/SSO endpoint yet.
 - Flutter consumer foundation already contains Explore, Context, typed Question/Reason, Commit, Reveal, Perspective and Progress presentation paths.
 
 ### PR #47 / ADR-0020 — composable Content Configuration — COMPLETE
@@ -123,9 +125,7 @@ Implemented:
 - strict payloads forbid client lifecycle/version/admin/audit identity injection.
 - current approved policy still does not require recent step-up for `TAXONOMY_MANAGE`; changing that requires an explicit security-policy decision.
 
-Verification:
-- final API CI run `30386784064` PASS.
-- lint, contract sync, Admin HTTP fitness gate, OpenAPI drift, unit tests, migration/seed and PostgreSQL integration PASS.
+Verification: final API CI `30386784064` PASS including lint, contract sync, Admin HTTP fitness, OpenAPI drift, unit and PostgreSQL integration.
 
 ### PR #52 / ADR-0022 — CaseVersion Flow + configuration pinning — COMPLETE
 
@@ -133,31 +133,51 @@ Implementation commit: `b9b26dddaeb9298166b28e673cb48c3c8a92e701`
 
 Implemented:
 - DRAFT CaseVersion selects `flow_template_code` + `flow_template_version_no`.
-- publication resolves selection against the current PUBLISHED ContentConfiguration.
+- publication resolves selection against current PUBLISHED ContentConfiguration.
 - publication validates effective Domain/Base Format/Modifier/Flow/Primitive/Capability compatibility.
 - published CaseVersion pins server-derived `content_configuration_id`, configuration version and self-contained immutable `resolved_flow`.
-- revision preserves editorial Flow selection but clears the previous publication pin and resolves again on its own publication.
+- revision preserves editorial Flow selection but clears prior publication pin and resolves again on publication.
 - migration `20260728_0012` adds consumer provenance fields without breaking historical rows.
 - editorial JSONB and consumer materialization round-trip the same Flow/config provenance.
-- consumer CaseVersion read model carries the pinned resolved Flow and does not require future live config to reinterpret historical behavior.
-- transitional authoring default remains `STANDARD_COMMIT_REVEAL` v1; it is configuration data, not a runtime Case subclass.
+- consumer CaseVersion read model carries the pinned resolved Flow.
+
+Verification: final API CI `30391510709` PASS including migration/seed and PostgreSQL provenance round-trip.
+
+### PR #54 / ADR-0023 — generic consumer Flow runtime — COMPLETE
+
+Implementation commit: `164a97dc43dc1c6d4b67e749326ab319d2e2e19b`
+
+Implemented:
+- API/OpenAPI v0.14.0.
+- authenticated actor-scoped `GET /v1/weigh-sessions/{session_id}/flow`.
+- server-authoritative Flow Step graph/state from the session-pinned CaseVersion's immutable `resolved_flow`.
+- no live Content Configuration lookup, client-completed-Step claims or historical reinterpretation.
+- no result/Perspective/private-reason payload leakage through Flow runtime.
+- runtime Step states: READY, COMPLETED, BLOCKED, UNSUPPORTED; execution support FULL/PARTIAL.
+- `CONTEXT` is informational/non-blocking in runtime v1.
+- first `DECISION` maps to current single-Commit WeighSession.
+- `COLLECTIVE_RESULT` remains blocked pre-Commit and becomes READY post-Commit; actual result data remains behind Reveal.
+- later `DECISION` uses the same generic graph but reports `FLOW_DECISION_REVISION_REQUIRED` until DecisionRevision exists.
+- legacy CaseVersions without pinned Flow return `FLOW_RUNTIME_UNAVAILABLE`; no default/live Flow inference.
+- `STANDARD_COMMIT_REVEAL` is FULL through the generic runtime.
+- `PRINCIPLE_CONTEXT_RETEST` is parsed by the same runtime and reports PARTIAL at the exact revision capability boundary.
 
 Verification:
-- final API CI run `30391510709` PASS.
+- final API CI run `30392910874` PASS.
 - lint PASS.
 - contract sync PASS.
-- Case Flow pinning architecture gate PASS.
+- Case Flow pinning gate PASS.
+- generic Flow runtime gate PASS.
 - Admin HTTP gate PASS.
 - OpenAPI drift PASS.
 - unit tests PASS.
-- migration + seed PASS.
-- PostgreSQL integration PASS, including effective configuration-version provenance after configuration lifecycle advancement.
+- PostgreSQL integration PASS, including publish → guest session → Flow read → response → Commit → Flow read.
 
 ## 4. Current implementation gap
 
 Still implementation-pending:
-- generic Flow execution/read-state from CaseVersion-pinned `resolved_flow`.
 - consumer/mobile rendering driven by Flow Step/Primitive rather than the current fixed Context → Questions → Commit → Reveal screen composition.
+- a tangible end-to-end real stress-test Case running through the Flow-driven Flutter client.
 - Admin authoring selection/composer UX for non-default FlowTemplateVersion; current HTTP authoring remains transitional default-compatible.
 - DecisionRevision/Exposure/Intervention/Delta.
 - first-class Claim/Argument graph and normalized ingestion.
@@ -166,19 +186,16 @@ Still implementation-pending:
 
 ## 5. Recommended next sequence
 
-1. **Generic consumer Flow executor/read-state**
-   - define ADR + machine-readable contract first.
-   - execute only the CaseVersion-pinned `resolved_flow`; never live configuration.
-   - support at least the materially different `STANDARD_COMMIT_REVEAL` and `PRINCIPLE_CONTEXT_RETEST` fixtures through the same runtime path.
-   - preserve Commit First and result-leakage guardrails.
-2. **Flutter Flow-driven rendering**
-   - adapt the existing consumer UI foundation to Step/Primitive state rather than create case-specific screens.
-   - produce the first tangible live milestone with at least one real stress-test Case end-to-end.
-3. **DecisionRevision / Exposure / Intervention / Delta** for pre/post-intervention changes.
-4. **First-class Claim + Argument Graph + ingestion normalization**.
-5. **WE/Signal foundation** with contribution classes, Scope Alignment, Stakeholders and MethodologyVersion.
-6. **Impact foundation** with Target, Official Response, Action, Evidence and Verification.
-7. Continue observability/deployment, account continuity and share in architecture-compatible slices.
+1. **Flutter Flow-driven rendering — first tangible live milestone**
+   - consume `/v1/weigh-sessions/{session_id}/flow` through the existing mobile repository/controller.
+   - render existing Context/Question/Commit/Reveal components according to server Step/Primitive state rather than fixed page order.
+   - no Case type branching; unsupported runtime capability is rendered explicitly, not silently skipped.
+   - prove at least one authoring-published real stress-test Case end-to-end on the same backend/runtime.
+2. **DecisionRevision / Exposure / Intervention / Delta** to unlock Principle First + context/retest flows end-to-end.
+3. **First-class Claim + Argument Graph + ingestion normalization**.
+4. **WE/Signal foundation** with contribution classes, Scope Alignment, Stakeholders and MethodologyVersion.
+5. **Impact foundation** with Target, Official Response, Action, Evidence and Verification.
+6. Continue observability/deployment, account continuity and share in architecture-compatible slices.
 
 No implementation may leapfrog an unresolved product/domain contract.
 
@@ -198,6 +215,7 @@ No implementation may leapfrog an unresolved product/domain contract.
 - Same-session CSRF and Admin assurance ordering remain binding.
 - Runtime live config never silently reinterprets historical published objects.
 - Flow execution must use the CaseVersion-pinned resolved Flow.
+- Flow runtime may expose result readiness but never pre-Commit result payload.
 - Signal sample classes never silently mix.
 - Consensus/Signal is not formal authority and not KEFE opinion.
 
@@ -206,7 +224,7 @@ No implementation may leapfrog an unresolved product/domain contract.
 1. Read this file from `main`.
 2. Inspect open PRs, recent merges and CI.
 3. Fetch Drive CURRENT only when publication-source detail is required; verify its SHA against this checkpoint.
-4. Resolve work against MPD v1.3.0 + ADR-0019 through ADR-0022 + registered contracts.
+4. Resolve work against MPD v1.3.0 + ADR-0019 through ADR-0023 + registered contracts.
 5. One coherent branch per vertical slice.
 6. ADR + machine-readable contract before new behavior.
 7. Preserve ports/adapters, versioning, provenance and historical reproducibility.
@@ -217,4 +235,4 @@ No implementation may leapfrog an unresolved product/domain contract.
 
 ## 8. New-chat recovery prompt
 
-> Continue KEFE from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first, inspect open PRs/recent CI, and use Drive CURRENT only when publication-source detail is required. Official docs baseline is Ecosystem v3.4. The binding architecture is case-agnostic: `Primitive → Capability → FlowTemplateVersion → CaseVersion`, with `ME → WE → SIGNAL → IMPACT`. PR #51 (`a88ee763...`) provides secured Admin composable Content Configuration HTTP. PR #52 (`b9b26ddd...`) implements ADR-0022: published CaseVersion pins effective Content Configuration provenance and a self-contained immutable resolved Flow; revisions re-resolve on publication, and consumer runtime must never reinterpret historical Cases through live config. The next slice is generic consumer Flow execution/read-state from the pinned resolved Flow, then adapt the existing Flutter decision UI to Flow-driven Step rendering for the first tangible live milestone. Do not code an unlocked product decision.
+> Continue KEFE from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first and inspect open PRs/recent CI. Official docs baseline remains Ecosystem v3.4. The binding architecture is case-agnostic: `Primitive → Capability → FlowTemplateVersion → CaseVersion`, with `ME → WE → SIGNAL → IMPACT`. PR #52 (`b9b26ddd...`) pins effective Content Configuration provenance and immutable resolved Flow to published CaseVersion. PR #54 (`164a97dc...`) implements ADR-0023/API v0.14: actor-scoped generic Flow runtime from that pinned Flow; `STANDARD_COMMIT_REVEAL` is FULL, while revision-dependent Flow paths report explicit PARTIAL/unsupported capability rather than hard-code. The next slice is Flutter Flow-driven rendering using the existing consumer UI foundation, producing the first tangible live end-to-end stress-test Case. Do not code an unlocked product decision.
