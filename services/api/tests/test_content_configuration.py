@@ -27,7 +27,7 @@ from kefe_api.modules.content_configuration.models import (
 )
 from kefe_api.modules.content_configuration.service import ContentConfigurationService
 
-NOW = datetime(2026, 7, 28, 12, 0, tzinfo=UTC)
+NOW = datetime.now(UTC)
 
 
 class StaticResolver:
