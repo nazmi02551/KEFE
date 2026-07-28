@@ -1,4 +1,4 @@
-manifest_version: 1.20.0
+manifest_version: 1.21.0
 updated_at: '2026-07-28'
 policy:
   executable_schema_source: services/api/migrations
@@ -57,6 +57,10 @@ contracts:
     path: docs/contracts/composable-decision-engine.v1.yaml
     version: 1.0.0
     role: case_agnostic_primitive_capability_flow_and_decision_lineage_policy
+  - id: composable-content-configuration
+    path: docs/contracts/composable-content-configuration.v1.yaml
+    version: 1.0.0
+    role: versioned_primitive_capability_and_flow_template_registry_policy
   - id: signal-impact-model
     path: docs/contracts/signal-impact-model.v1.yaml
     version: 1.0.0
@@ -75,7 +79,7 @@ contracts:
     role: secured_cookie_csrf_admin_authoring_http_policy
   - id: error-registry
     path: docs/contracts/error-codes.v1.yaml
-    version: 1.8.0
+    version: 1.9.0
     role: stable_api_errors
   - id: postgresql-m0-schema
     path: docs/contracts/postgresql-m0-schema.v1.8.0.sql
@@ -116,3 +120,4 @@ architecture_decisions:
   - docs/adr/0017-secured-admin-http-application-surface.md
   - docs/adr/0018-versioned-content-configuration.md
   - docs/adr/0019-case-agnostic-composable-decision-engine.md
+  - docs/adr/0020-composable-content-configuration-registry.md
