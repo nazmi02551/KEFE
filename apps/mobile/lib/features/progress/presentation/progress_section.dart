@@ -29,15 +29,10 @@ class _ProgressSectionState extends ConsumerState<ProgressSection> {
           key: const ValueKey('progress-loading'),
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                const SizedBox.square(
-                  dimension: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-                const SizedBox(width: 12),
-                Expanded(child: Text(strings.progressLoading)),
-              ],
+            child: Semantics(
+              liveRegion: true,
+              label: strings.progressLoading,
+              child: Text(strings.progressLoading),
             ),
           ),
         ),
