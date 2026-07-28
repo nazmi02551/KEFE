@@ -234,11 +234,12 @@ def test_suspended_subject_invalidates_existing_admin_session() -> None:
 def test_expired_admin_session_is_not_resolved_as_active() -> None:
     engine, subject_id = _subject_with_access(roles=(AdminRole.EDITOR,))
     store = PostgresAdminSessionStore(engine)
+    wall_now = datetime.now(UTC)
     issued = store.issue(
         admin_subject_id=subject_id,
-        authenticated_at=NOW - timedelta(hours=2),
-        mfa_satisfied_at=NOW - timedelta(hours=2),
-        expires_at=NOW - timedelta(hours=1),
+        authenticated_at=wall_now - timedelta(hours=2),
+        mfa_satisfied_at=wall_now - timedelta(hours=2),
+        expires_at=wall_now - timedelta(hours=1),
     )
 
     assert store.resolve(issued.session_token).status is AdminSessionStatus.EXPIRED
