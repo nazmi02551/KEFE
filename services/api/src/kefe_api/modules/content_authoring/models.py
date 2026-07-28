@@ -99,7 +99,7 @@ class AuthoringCaseVersion:
         state: ContentLifecycle,
         *,
         published_at: datetime | None = None,
-    ) -> "AuthoringCaseVersion":
+    ) -> AuthoringCaseVersion:
         return replace(self, state=state, published_at=published_at)
 
 
@@ -126,7 +126,7 @@ class LifecycleAuditEntry:
         new_state: ContentLifecycle,
         rationale: str | None = None,
         occurred_at: datetime | None = None,
-    ) -> "LifecycleAuditEntry":
+    ) -> LifecycleAuditEntry:
         return cls(
             audit_id=uuid4(),
             case_id=version.case_id,
