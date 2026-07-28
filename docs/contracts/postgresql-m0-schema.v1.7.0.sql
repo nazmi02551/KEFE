@@ -57,7 +57,9 @@ CREATE TABLE content.case_version (
     created_at timestamptz NOT NULL DEFAULT now(),
     base_format_code text NOT NULL,
     primary_domain_code text NOT NULL,
-    content_risk text NOT NULL CHECK (content_risk IN ('L0','L1','L2','L3')),
+    content_risk text NOT NULL,
+    CONSTRAINT case_version_content_risk_check
+        CHECK (content_risk IN ('L0','L1','L2','L3')),
     UNIQUE(case_id, version_no)
 );
 
