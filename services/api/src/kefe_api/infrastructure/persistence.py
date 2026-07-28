@@ -3,11 +3,13 @@ from __future__ import annotations
 from kefe_api.core.settings import Settings
 from kefe_api.infrastructure.db import build_engine
 from kefe_api.infrastructure.postgres_admin_security import PostgresAdminSessionStore
-from kefe_api.infrastructure.postgres_content_authoring import PostgresContentAuthoringRepository
 from kefe_api.infrastructure.postgres_content_configuration import (
     PostgresContentConfigurationRepository,
 )
 from kefe_api.infrastructure.postgres_context import PostgresContextRepository
+from kefe_api.infrastructure.postgres_flow_pinned_content_authoring import (
+    PostgresFlowPinnedContentAuthoringRepository,
+)
 from kefe_api.infrastructure.postgres_identity import PostgresIdentityRepository
 from kefe_api.infrastructure.postgres_perspective_decision import (
     PostgresPerspectiveDecisionRepository,
@@ -85,7 +87,7 @@ def build_content_authoring_repository(settings: Settings) -> ContentAuthoringRe
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
 
-    return PostgresContentAuthoringRepository(build_engine(settings.database_url))
+    return PostgresFlowPinnedContentAuthoringRepository(build_engine(settings.database_url))
 
 
 def build_content_configuration_repository(
