@@ -7,9 +7,19 @@ import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/decision_repository.dart';
 import 'package:kefe_mobile/features/decision/domain/decision_models.dart';
 
-const partialCaseId = 'dddddddd-1111-4111-8111-dddddddddddd';
+const retestCaseId = 'dddddddd-1111-4111-8111-dddddddddddd';
 
-class PartialFlowRepository implements DecisionRepository, FlowRuntimeRepository {
+class RetestFlowRepository
+    implements DecisionRepository, FlowRuntimeRepository, DecisionLineageRepository {
+  bool initialCommitted = false;
+  bool contextExposed = false;
+  bool finalCommitted = false;
+  int revealCalls = 0;
+  int exposureCalls = 0;
+  int revisionAnswerCalls = 0;
+  int revisionCommitCalls = 0;
+  Object? finalAnswer;
+
   @override
   Future<void> answer({
     required String sessionId,
@@ -21,13 +31,15 @@ class PartialFlowRepository implements DecisionRepository, FlowRuntimeRepository
   Future<void> commit({
     required String sessionId,
     required String idempotencyKey,
-  }) async {}
+  }) async {
+    initialCommitted = true;
+  }
 
   @override
   Future<GuestCredential> ensureGuestCredential() async {
     return GuestCredential(
-      actorId: 'partial-actor',
-      accessToken: 'partial-token',
+      actorId: 'retest-actor',
+      accessToken: 'retest-token',
       expiresAt: DateTime.utc(2026, 8),
     );
   }
@@ -35,17 +47,17 @@ class PartialFlowRepository implements DecisionRepository, FlowRuntimeRepository
   @override
   Future<DecisionCase> fetchCase(String caseId) async {
     return const DecisionCase(
-      id: partialCaseId,
-      versionId: 'partial-version-1',
+      id: retestCaseId,
+      versionId: 'retest-version-1',
       title: 'Perspective retest fixture',
-      summary: 'Aynı generic motorun henüz desteklenmeyen retest sınırı.',
+      summary: 'Aynı generic motor Context sonrası kararı yeniden tartar.',
       format: 'DILEMMA',
       domain: 'DAILY_LIFE',
       risk: 'L0',
       questions: [
         DecisionQuestion(
-          id: 'partial-question',
-          prompt: 'İlk kararın nedir?',
+          id: 'retest-question',
+          prompt: 'Kararın nedir?',
           responseType: 'SINGLE_CHOICE',
           options: ['A', 'B'],
         ),
@@ -61,49 +73,104 @@ class PartialFlowRepository implements DecisionRepository, FlowRuntimeRepository
   Future<FlowRuntimeSnapshot> fetchFlowRuntime(String sessionId) async {
     return FlowRuntimeSnapshot(
       sessionId: sessionId,
-      caseVersionId: 'partial-version-1',
-      sessionState: 'COMMITTED',
+      caseVersionId: 'retest-version-1',
+      sessionState: initialCommitted ? 'COMMITTED' : 'DRAFT',
       templateCode: 'PRINCIPLE_CONTEXT_RETEST',
       templateVersionNo: 1,
       entryStepCode: 'PRINCIPLE',
       executionSupport: FlowExecutionSupport.partial,
-      steps: const [
+      steps: [
         FlowRuntimeStep(
           code: 'PRINCIPLE',
           primitiveCode: 'DECISION',
-          capabilityCodes: ['PRINCIPLE_FIRST'],
-          nextStepCodes: ['CONTEXT'],
-          state: FlowStepRuntimeState.completed,
+          capabilityCodes: const ['PRINCIPLE_FIRST'],
+          nextStepCodes: const ['CONTEXT'],
+          state: initialCommitted
+              ? FlowStepRuntimeState.completed
+              : FlowStepRuntimeState.ready,
         ),
         FlowRuntimeStep(
           code: 'CONTEXT',
           primitiveCode: 'CONTEXT',
-          capabilityCodes: ['COUNTERARGUMENT'],
-          nextStepCodes: ['FINAL_DECISION'],
-          state: FlowStepRuntimeState.ready,
+          capabilityCodes: const ['COUNTERARGUMENT'],
+          nextStepCodes: const ['FINAL_DECISION'],
+          state: !initialCommitted
+              ? FlowStepRuntimeState.blocked
+              : contextExposed
+                  ? FlowStepRuntimeState.completed
+                  : FlowStepRuntimeState.ready,
+          reasonCode: !initialCommitted ? 'FLOW_PREDECESSOR_PENDING' : null,
         ),
         FlowRuntimeStep(
           code: 'FINAL_DECISION',
           primitiveCode: 'DECISION',
-          capabilityCodes: ['COMMIT_FIRST'],
-          nextStepCodes: ['REFLECTION'],
-          state: FlowStepRuntimeState.unsupported,
-          reasonCode: 'FLOW_DECISION_REVISION_REQUIRED',
+          capabilityCodes: const ['COMMIT_FIRST'],
+          nextStepCodes: const ['REFLECTION'],
+          state: !contextExposed
+              ? FlowStepRuntimeState.blocked
+              : finalCommitted
+                  ? FlowStepRuntimeState.completed
+                  : FlowStepRuntimeState.ready,
+          reasonCode: !contextExposed ? 'FLOW_PREDECESSOR_PENDING' : null,
         ),
         FlowRuntimeStep(
           code: 'REFLECTION',
           primitiveCode: 'REFLECTION',
-          capabilityCodes: ['REFLECTION'],
-          nextStepCodes: [],
-          state: FlowStepRuntimeState.blocked,
-          reasonCode: 'FLOW_PREDECESSOR_PENDING',
+          capabilityCodes: const ['REFLECTION'],
+          nextStepCodes: const [],
+          state: finalCommitted
+              ? FlowStepRuntimeState.unsupported
+              : FlowStepRuntimeState.blocked,
+          reasonCode: finalCommitted
+              ? 'FLOW_REFLECTION_RUNTIME_PENDING'
+              : 'FLOW_PREDECESSOR_PENDING',
         ),
       ],
     );
   }
 
   @override
+  Future<void> recordFlowStepExposure({
+    required String sessionId,
+    required String stepCode,
+    required String idempotencyKey,
+  }) async {
+    exposureCalls += 1;
+    if (stepCode == 'CONTEXT') contextExposed = true;
+  }
+
+  @override
+  Future<void> answerRevision({
+    required String sessionId,
+    required String stepCode,
+    required String questionId,
+    required Object value,
+  }) async {
+    revisionAnswerCalls += 1;
+    finalAnswer = value;
+  }
+
+  @override
+  Future<void> saveRevisionReason({
+    required String sessionId,
+    required String stepCode,
+    required List<String> tags,
+    required String? text,
+  }) async {}
+
+  @override
+  Future<void> commitRevision({
+    required String sessionId,
+    required String stepCode,
+    required String idempotencyKey,
+  }) async {
+    revisionCommitCalls += 1;
+    finalCommitted = true;
+  }
+
+  @override
   Future<RevealResult> reveal(String sessionId) async {
+    revealCalls += 1;
     return const RevealResult(
       layer: 'TRUSTED',
       sampleSize: 12,
@@ -120,33 +187,62 @@ class PartialFlowRepository implements DecisionRepository, FlowRuntimeRepository
   }) async {}
 
   @override
-  Future<String> startSession(String caseId) async => 'partial-session';
+  Future<String> startSession(String caseId) async => 'retest-session';
+}
+
+Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.pump();
+  await tester.tap(finder);
+  await tester.pump();
 }
 
 void main() {
-  testWidgets('partial Flow exposes unsupported capability without fixed fallback', (
-    tester,
-  ) async {
-    tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
-    addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+  testWidgets(
+    'Flow UI performs initial Commit Context Exposure and DecisionRevision generically',
+    (tester) async {
+      tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
+      addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+      final repository = RetestFlowRepository();
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          decisionRepositoryProvider.overrideWithValue(PartialFlowRepository()),
-          decisionDraftStoreProvider.overrideWithValue(MemoryDecisionDraftStore()),
-        ],
-        child: const KefeApp(initialLocation: '/case/$partialCaseId'),
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            decisionRepositoryProvider.overrideWithValue(repository),
+            decisionDraftStoreProvider.overrideWithValue(MemoryDecisionDraftStore()),
+          ],
+          child: const KefeApp(initialLocation: '/case/$retestCaseId'),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey('capability-pending-FINAL_DECISION')),
-      findsOneWidget,
-    );
-    expect(find.byKey(const ValueKey('commit-button')), findsNothing);
-    expect(find.byKey(const ValueKey('option-A')), findsNothing);
-  });
+      expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
+      expect(find.byKey(const ValueKey('option-A')), findsOneWidget);
+      expect(repository.revealCalls, 0);
+
+      await tester.tap(find.byKey(const ValueKey('option-A')));
+      await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
+      await tester.pumpAndSettle();
+
+      expect(repository.initialCommitted, isTrue);
+      expect(repository.exposureCalls, 1);
+      expect(repository.contextExposed, isTrue);
+      expect(repository.revealCalls, 0);
+      expect(find.byKey(const ValueKey('option-B')), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('option-B')));
+      await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
+      await tester.pumpAndSettle();
+
+      expect(repository.revisionAnswerCalls, 1);
+      expect(repository.finalAnswer, 'B');
+      expect(repository.revisionCommitCalls, 1);
+      expect(repository.finalCommitted, isTrue);
+      expect(repository.revealCalls, 0);
+      expect(
+        find.byKey(const ValueKey('capability-pending-REFLECTION')),
+        findsOneWidget,
+      );
+    },
+  );
 }
