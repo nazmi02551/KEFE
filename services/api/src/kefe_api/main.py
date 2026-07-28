@@ -3,11 +3,19 @@ from fastapi import FastAPI
 from kefe_api.core.exception_handlers import install_exception_handlers
 from kefe_api.core.settings import get_settings
 from kefe_api.infrastructure.persistence import (
+    build_admin_session_store,
+    build_content_authoring_repository,
     build_context_repository,
     build_decision_repository,
     build_identity_repository,
     build_progress_repository,
 )
+from kefe_api.modules.admin_security.content_authoring import SecuredContentAuthoringService
+from kefe_api.modules.admin_security.policy import default_admin_security_policy
+from kefe_api.modules.admin_security.router import router as admin_router
+from kefe_api.modules.admin_security.service import AdminSecurityService
+from kefe_api.modules.content_authoring.registry import default_authoring_registry
+from kefe_api.modules.content_authoring.service import ContentAuthoringService
 from kefe_api.modules.context.router import router as context_router
 from kefe_api.modules.context.service import ContextService
 from kefe_api.modules.decision.router import router as decision_router
@@ -33,6 +41,22 @@ def create_app() -> FastAPI:
     decision_repository = build_decision_repository(settings)
     identity_repository = build_identity_repository(settings)
     progress_repository = build_progress_repository(settings, decision_repository)
+    content_authoring_repository = build_content_authoring_repository(settings)
+    admin_session_store = build_admin_session_store(settings)
+
+    admin_security_service = AdminSecurityService(
+        session_resolver=admin_session_store,
+        policy=default_admin_security_policy(),
+    )
+    content_authoring_service = ContentAuthoringService(
+        content_authoring_repository,
+        default_authoring_registry(),
+    )
+    secured_content_authoring_service = SecuredContentAuthoringService(
+        authoring=content_authoring_service,
+        repository=content_authoring_repository,
+        security=admin_security_service,
+    )
 
     app.state.context_repository = context_repository
     app.state.context_service = ContextService(context_repository)
@@ -45,6 +69,12 @@ def create_app() -> FastAPI:
     )
     app.state.progress_repository = progress_repository
     app.state.progress_service = ProgressService(progress_repository)
+    app.state.content_authoring_repository = content_authoring_repository
+    app.state.content_authoring_service = content_authoring_service
+    app.state.admin_session_store = admin_session_store
+    app.state.admin_csrf_verifier = admin_session_store
+    app.state.admin_security_service = admin_security_service
+    app.state.secured_content_authoring_service = secured_content_authoring_service
     app.state.guest_admission_guard = GuestAdmissionGuard(
         limiter=InMemoryGuestIssueRateLimiter(),
         integrity_verifier=UnconfiguredDeviceIntegrityVerifier(),
@@ -59,6 +89,7 @@ def create_app() -> FastAPI:
     app.include_router(context_router)
     app.include_router(decision_router)
     app.include_router(progress_router)
+    app.include_router(admin_router)
     return app
 
 
