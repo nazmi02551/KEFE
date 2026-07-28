@@ -6,6 +6,7 @@ from kefe_api.infrastructure.persistence import (
     build_context_repository,
     build_decision_repository,
     build_identity_repository,
+    build_progress_repository,
 )
 from kefe_api.modules.context.router import router as context_router
 from kefe_api.modules.context.service import ContextService
@@ -20,6 +21,8 @@ from kefe_api.modules.identity.admission import (
 )
 from kefe_api.modules.identity.router import router as identity_router
 from kefe_api.modules.identity.service import IdentityService
+from kefe_api.modules.progress.router import router as progress_router
+from kefe_api.modules.progress.service import ProgressService
 
 
 def create_app() -> FastAPI:
@@ -29,6 +32,7 @@ def create_app() -> FastAPI:
     context_repository = build_context_repository(settings)
     decision_repository = build_decision_repository(settings)
     identity_repository = build_identity_repository(settings)
+    progress_repository = build_progress_repository(settings, decision_repository)
 
     app.state.context_repository = context_repository
     app.state.context_service = ContextService(context_repository)
@@ -39,6 +43,8 @@ def create_app() -> FastAPI:
         repository=identity_repository,
         guest_token_ttl_days=settings.guest_token_ttl_days,
     )
+    app.state.progress_repository = progress_repository
+    app.state.progress_service = ProgressService(progress_repository)
     app.state.guest_admission_guard = GuestAdmissionGuard(
         limiter=InMemoryGuestIssueRateLimiter(),
         integrity_verifier=UnconfiguredDeviceIntegrityVerifier(),
@@ -52,6 +58,7 @@ def create_app() -> FastAPI:
     app.include_router(identity_router)
     app.include_router(context_router)
     app.include_router(decision_router)
+    app.include_router(progress_router)
     return app
 
 

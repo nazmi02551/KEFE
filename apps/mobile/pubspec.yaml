@@ -1,7 +1,7 @@
 name: kefe_mobile
 description: KEFE consumer application foundation.
 publish_to: none
-version: 0.5.0+5
+version: 0.6.0+6
 
 environment:
   sdk: '>=3.10.0 <4.0.0'

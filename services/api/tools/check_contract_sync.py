@@ -43,12 +43,17 @@ def _response_ref(operation: dict, status: str = "200") -> str | None:
     )
 
 
+def _missing_fields(schemas: dict, schema: str, required: set[str]) -> list[str]:
+    properties = schemas.get(schema, {}).get("properties", {})
+    return sorted(required - properties.keys())
+
+
 def _openapi_errors() -> list[str]:
     contract = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
     errors: list[str] = []
 
-    if contract.get("info", {}).get("version") != "0.10.0":
-        errors.append("OpenAPI checked-in version must match API v0.10.0")
+    if contract.get("info", {}).get("version") != "0.11.0":
+        errors.append("OpenAPI checked-in version must match API v0.11.0")
 
     bearer = contract.get("components", {}).get("securitySchemes", {}).get("HTTPBearer")
     if bearer != {"scheme": "bearer", "type": "http"}:
@@ -67,83 +72,86 @@ def _openapi_errors() -> list[str]:
         "ContextSourceResponse",
         "ContextBlockResponse",
         "ContextSnapshotResponse",
+        "AccountOfferResponse",
+        "RecentCaseResponse",
+        "ProgressResponse",
+        "ProgressEnvelopeResponse",
     }
     missing_schemas = sorted(required_schemas - schemas.keys())
     if missing_schemas:
         errors.append(f"OpenAPI missing schemas: {', '.join(missing_schemas)}")
 
-    question_properties = schemas.get("QuestionResponse", {}).get("properties", {})
-    required_question_fields = {
-        "question_id",
-        "prompt",
-        "response_type",
-        "required",
-        "response_schema",
-        "options",
+    field_contracts = {
+        "QuestionResponse": {
+            "question_id",
+            "prompt",
+            "response_type",
+            "required",
+            "response_schema",
+            "options",
+        },
+        "PrivateReasonResponse": {
+            "session_id",
+            "tags",
+            "text",
+            "moderation_state",
+            "visibility",
+        },
+        "PerspectiveResponse": {
+            "session_id",
+            "case_version_id",
+            "cards",
+            "methodology",
+        },
+        "ContextSnapshotResponse": {"case_version_id", "blocks", "sources"},
+        "ProgressEnvelopeResponse": {"account_offer", "progress", "methodology"},
+        "ProgressResponse": {
+            "readiness",
+            "meaningful_weigh_count",
+            "distinct_case_count",
+            "distinct_domain_count",
+            "first_committed_at",
+            "last_committed_at",
+            "recent_cases",
+        },
     }
-    missing_question_fields = sorted(required_question_fields - question_properties.keys())
-    if missing_question_fields:
-        errors.append(
-            "QuestionResponse missing typed fields: " + ", ".join(missing_question_fields)
-        )
+    for schema, required in field_contracts.items():
+        missing = _missing_fields(schemas, schema, required)
+        if missing:
+            errors.append(f"{schema} missing fields: {', '.join(missing)}")
 
-    reason_properties = schemas.get("PrivateReasonResponse", {}).get("properties", {})
-    required_reason_fields = {
-        "session_id",
-        "tags",
-        "text",
-        "moderation_state",
-        "visibility",
+    progress_properties = schemas.get("ProgressResponse", {}).get("properties", {})
+    forbidden_progress_fields = {
+        "private_reason_text",
+        "raw_response_payload",
+        "personality",
+        "ideology",
+        "political_profile",
+        "psychometric_score",
+        "streak",
+        "leaderboard",
+        "xp",
     }
-    missing_reason_fields = sorted(required_reason_fields - reason_properties.keys())
-    if missing_reason_fields:
-        errors.append(
-            "PrivateReasonResponse missing fields: " + ", ".join(missing_reason_fields)
-        )
-
-    perspective_properties = schemas.get("PerspectiveResponse", {}).get("properties", {})
-    required_perspective_fields = {
-        "session_id",
-        "case_version_id",
-        "cards",
-        "methodology",
-    }
-    missing_perspective_fields = sorted(
-        required_perspective_fields - perspective_properties.keys()
-    )
-    if missing_perspective_fields:
-        errors.append(
-            "PerspectiveResponse missing fields: " + ", ".join(missing_perspective_fields)
-        )
-
-    context_properties = schemas.get("ContextSnapshotResponse", {}).get("properties", {})
-    required_context_fields = {"case_version_id", "blocks", "sources"}
-    missing_context_fields = sorted(required_context_fields - context_properties.keys())
-    if missing_context_fields:
-        errors.append(
-            "ContextSnapshotResponse missing fields: " + ", ".join(missing_context_fields)
-        )
+    leaked = sorted(forbidden_progress_fields & progress_properties.keys())
+    if leaked:
+        errors.append("ProgressResponse leaks forbidden fields: " + ", ".join(leaked))
 
     paths = contract.get("paths", {})
-    case_operation = paths.get("/v1/cases/{case_id}", {}).get("get", {})
-    if _response_ref(case_operation) != "#/components/schemas/CaseDetailResponse":
-        errors.append("GET /v1/cases/{case_id} must return CaseDetailResponse")
-
-    reason_operation = paths.get("/v1/weigh-sessions/{session_id}/reason", {}).get("put", {})
-    if _response_ref(reason_operation) != "#/components/schemas/PrivateReasonResponse":
-        errors.append("PUT private reason must return PrivateReasonResponse")
-
-    perspective_operation = paths.get(
-        "/v1/weigh-sessions/{session_id}/perspectives", {}
-    ).get("get", {})
-    if _response_ref(perspective_operation) != "#/components/schemas/PerspectiveResponse":
-        errors.append("GET perspectives must return PerspectiveResponse")
+    response_contracts = {
+        ("/v1/cases/{case_id}", "get"): "CaseDetailResponse",
+        ("/v1/weigh-sessions/{session_id}/reason", "put"): "PrivateReasonResponse",
+        ("/v1/weigh-sessions/{session_id}/perspectives", "get"): "PerspectiveResponse",
+        ("/v1/case-versions/{case_version_id}/context", "get"): "ContextSnapshotResponse",
+        ("/v1/me/progress", "get"): "ProgressEnvelopeResponse",
+    }
+    for (path, method), schema in response_contracts.items():
+        operation = paths.get(path, {}).get(method, {})
+        if _response_ref(operation) != f"#/components/schemas/{schema}":
+            errors.append(f"{method.upper()} {path} must return {schema}")
 
     context_operation = paths.get(
         "/v1/case-versions/{case_version_id}/context", {}
     ).get("get", {})
-    if _response_ref(context_operation) != "#/components/schemas/ContextSnapshotResponse":
-        errors.append("GET CaseVersion context must return ContextSnapshotResponse")
     if context_operation.get("security"):
         errors.append("GET CaseVersion context must remain public before Commit")
 
@@ -154,6 +162,7 @@ def _openapi_errors() -> list[str]:
         ("/v1/weigh-sessions/{session_id}/commit", "post"),
         ("/v1/weigh-sessions/{session_id}/reveal", "get"),
         ("/v1/weigh-sessions/{session_id}/perspectives", "get"),
+        ("/v1/me/progress", "get"),
         ("/v1/identity/session", "delete"),
     )
     for path, method in protected_operations:
@@ -268,8 +277,8 @@ def main() -> None:
     print(
         "Contract sync OK: "
         f"{len(used)} DomainError codes registered; HTTP API, typed questions, "
-        "private reasons, Context, Perspective, identity, persistence and outbox "
-        "invariants verified."
+        "private reasons, Context, Perspective, My KEFE Progress, identity, "
+        "persistence and outbox invariants verified."
     )
 
 
