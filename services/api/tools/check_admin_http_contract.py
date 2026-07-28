@@ -48,13 +48,24 @@ EXPECTED_PATHS = {
     },
 }
 WRITE_METHODS = {"post", "put", "patch", "delete"}
-FORBIDDEN_IDENTITY_FIELDS = {
+COMMON_FORBIDDEN_IDENTITY_FIELDS = {
     "actor_ref",
     "admin_subject_id",
     "roles",
-    "capabilities",
     "audit_identity",
     "created_by",
+}
+AUTHORING_FORBIDDEN_IDENTITY_FIELDS = COMMON_FORBIDDEN_IDENTITY_FIELDS | {
+    "capabilities"
+}
+CONFIGURATION_FORBIDDEN_METADATA_FIELDS = COMMON_FORBIDDEN_IDENTITY_FIELDS | {
+    "capabilities_grant",
+    "version_no",
+    "state",
+    "lifecycle_state",
+    "created_at",
+    "published_at",
+    "cloned_from_version_id",
 }
 FORBIDDEN_SECRET_FIELDS = {"session_token", "csrf_token"}
 
@@ -172,10 +183,15 @@ def main() -> None:
             schema_name = _request_schema_name(operation)
             if schema_name:
                 properties = schemas.get(schema_name, {}).get("properties", {})
-                leaked = sorted(FORBIDDEN_IDENTITY_FIELDS & properties.keys())
+                forbidden_fields = (
+                    CONFIGURATION_FORBIDDEN_METADATA_FIELDS
+                    if path.startswith("/internal/admin/v1/content-configuration")
+                    else AUTHORING_FORBIDDEN_IDENTITY_FIELDS
+                )
+                leaked = sorted(forbidden_fields & properties.keys())
                 if leaked:
                     problems.append(
-                        f"{schema_name} accepts forbidden Admin identity fields: "
+                        f"{schema_name} accepts forbidden Admin identity/metadata fields: "
                         + ", ".join(leaked)
                     )
 
