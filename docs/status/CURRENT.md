@@ -3,7 +3,7 @@
 **Updated:** 2026-07-28  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Latest verified implementation commit:** `7223dfeef55936f2fd70922bec74d3ce56232820`
+**Latest verified implementation commit:** `ee74719c99f29230447ed7bdd4a2ea01d15eae70`
 
 This is the **single canonical durable engineering handoff**. Chat history is not a source of truth. On every continuation, read this file from `main`, inspect open PRs/recent CI, and fetch the Drive CURRENT publication artifact only when editable DOCX/PDF source detail is needed.
 
@@ -22,8 +22,7 @@ Principal versions:
 
 Specialist baseline versions are v1.2.0 for AI Architecture, Analytics Event Dictionary, Case & Scenario Library, Civic Integrity Model, Commercial & Growth Design, Content & Question Design Bible, Decision Graph Specification, Editorial Transformation Guide, Research Methodology, and Trust & Integrity Methodology.
 
-### Current publication artifact
-
+Current publication artifact:
 `KEFE_Documentation_Ecosystem_2026-07-28_v3.4_CURRENT.zip`
 
 - 18 active logical documents / 36 active DOCX+PDF files
@@ -35,18 +34,15 @@ Specialist baseline versions are v1.2.0 for AI Architecture, Analytics Event Dic
 - Drive raw readback hash: MATCHED
 
 Recovery lineage:
-- v3.3 original byte-level publication artifact was lost and is **not** falsely reconstructed as byte-identical.
-- `KEFE_Documentation_Ecosystem_2026-07-28_v3.3_RECOVERY_R1.zip`
-  - SHA-256 `760a74d91f60339c0277cf4f0b568f5865d8677ed04c41a0f276738ef079e0c7`
-  - Drive file ID `1I0n-kzYUk_p0rHTxR1IloDjUMITRVN8b`
-  - raw readback hash MATCHED
-- exact verified v3.2 remains recoverable with SHA-256 `3af400c28a9849f0714bf1e4656a5cb4b0b625164f05183caff75984ac5bc223`, Drive file ID `1joFVxCQW29e-XMdu3cVViLLESU__GM-m`.
+- v3.3 original byte-level artifact was lost and is not falsely presented as reconstructed byte-identical.
+- v3.3 recovery R1 SHA-256 `760a74d91f60339c0277cf4f0b568f5865d8677ed04c41a0f276738ef079e0c7`, Drive ID `1I0n-kzYUk_p0rHTxR1IloDjUMITRVN8b`, readback MATCHED.
+- exact verified v3.2 SHA-256 `3af400c28a9849f0714bf1e4656a5cb4b0b625164f05183caff75984ac5bc223`, Drive ID `1joFVxCQW29e-XMdu3cVViLLESU__GM-m`.
 
-Milestone completion requires render/QA + PDF preflight + manifest/audit/checksum + archive + persistent Drive upload + raw readback SHA verification.
+Milestone publication is complete only after render/QA, PDF preflight, manifest/audit/checksum, archive, persistent Drive upload and raw readback SHA verification.
 
 ## 2. Binding product architecture
 
-Consumer experience path remains:
+Consumer experience path:
 `Launch → Explore → Case → Context → Weigh → Commit → Reveal → Perspective → My KEFE Progress → Share`
 
 Platform value lifecycle:
@@ -54,29 +50,29 @@ Platform value lifecycle:
 
 ADR-0019 is binding:
 - KEFE is a case-agnostic modular decision/public-reasoning engine.
-- canonical composition: `Primitive → Capability → FlowTemplateVersion → CaseVersion`.
+- canonical composition is `Primitive → Capability → FlowTemplateVersion → CaseVersion`.
 - Composition over Case Types; new cases should be content/configuration/composition, not new runtime feature families.
 - Base Format is an editorial archetype, not a runtime Case class.
 - Schema before Screen.
-- published CaseVersion must eventually pin resolved Flow/Step plus relevant config/methodology versions.
-- Commit First remains global; Blind/Principle First variants are reusable optional methodology capabilities.
+- published CaseVersion must pin resolved Flow/Step plus relevant configuration/methodology versions once execution pinning is implemented.
+- Commit First remains global; Blind/Principle First are reusable optional methodology capabilities.
 - Context, Reveal, Exposure and Intervention are distinct.
-- generic lineage: `DecisionRevision → Exposure/Intervention → DecisionRevision → DecisionDelta`; dimension-specific delta engines are forbidden.
+- generic lineage is `DecisionRevision → Exposure/Intervention → DecisionRevision → DecisionDelta`; dimension-specific delta engines are forbidden.
 - Claim is first-class and Claim ≠ claimant.
 - initial Claim Types: FACTUAL, CAUSAL, BEHAVIORAL, MOTIVE, NORMATIVE, LEGAL, PROCESS, PREDICTION.
 - initial Claim States: VERIFIED, SUPPORTED, CLAIMED, DISPUTED, UNVERIFIED, UNRESOLVED, FALSE; semantics are methodology-versioned.
-- one source can yield multiple Claims, decision problems and Candidate Cases.
+- one source may yield multiple Claims, decision problems and Candidate Cases.
 - AI may extract/classify/normalize/suggest/compose/detect, but is not KEFE's normative/political/moral voice or final truth authority.
 
 Signal integrity:
 - Collective Result ≠ Signal.
-- Signal is not a percentage threshold; assessment includes agreement, sample strength, data quality, stability, counterargument exposure/resilience, stakeholder distribution/gap, scope alignment and freshness under MethodologyVersion.
+- Signal is not a percentage threshold; methodology includes agreement, sample strength, data quality, stability, counterargument exposure/resilience, stakeholder distribution/gap, scope alignment and freshness.
 - CORE_PRE_RESULT, EXPOSED and ADVOCACY_SUPPORT never silently mix.
 - result exposure excludes that decision from the core pre-result sample for that lineage.
 - Challenge Card and Signal/Consensus Card are semantically distinct.
 - Scope Alignment is mandatory and Stakeholder Gap may not be hidden.
 - Signal/Consensus is not formal authority and not KEFE's own opinion.
-- Impact lifecycle: Signal → Target → Institution Response → Action → Impact Evidence → Impact Verification.
+- Impact lifecycle is `Signal → Target → Institution Response → Action → Impact Evidence → Impact Verification`.
 
 ## 3. Completed executable foundation
 
@@ -90,72 +86,74 @@ Retained foundation:
 - provider-neutral Content Authoring lifecycle, immutable published CaseVersion, PostgreSQL editorial persistence and atomic consumer publication.
 - separate Admin security domain, capability-first authorization, MFA/session assurance, same-session CSRF, recent step-up and server-derived audit identity.
 - secured internal Admin authoring HTTP under `/internal/admin/v1`; no Admin login/SSO endpoint yet.
-- ADR-0018 versioned Content Configuration foundation.
 
-### PR #47 / ADR-0020 — composable configuration foundation — COMPLETE
+### PR #47 / ADR-0020 — composable Content Configuration — COMPLETE
 
 Implementation commit: `7223dfeef55936f2fd70922bec74d3ce56232820`
 
-Added:
-- ADR-0020 and `composable-content-configuration.v1.yaml`.
-- `PrimitiveDefinition` registry.
-- `CapabilityDefinition` registry with Primitive compatibility.
-- `FlowStepDefinition`.
-- versioned `FlowTemplateDefinition`.
-- ContentConfigurationSnapshot now owns Primitive/Capability/FlowTemplate registries while retaining Domain/Topic/Base Format/Modifier compatibility.
-- bootstrap generic composition examples:
-  - `STANDARD_COMMIT_REVEAL`
-  - `PRINCIPLE_CONTEXT_RETEST`
-- configuration save/publish validation for duplicate identities, unknown references, capability/primitive incompatibility, entry/transition integrity and required terminal Step.
-- error registry v1.9.0 and contract manifest v1.21.0.
+Implemented:
+- PrimitiveDefinition, CapabilityDefinition, FlowStepDefinition, versioned FlowTemplateDefinition.
+- ContentConfigurationSnapshot owns Primitive/Capability/FlowTemplate registries while retaining Domain/Topic/Base Format/Modifier.
+- generic bootstrap flows `STANDARD_COMMIT_REVEAL` and `PRINCIPLE_CONTEXT_RETEST`.
+- validation for identity uniqueness, references, Capability/Primitive compatibility, entry/transition integrity and terminal Step.
+- contract manifest v1.21.0, error registry v1.9.0.
+- API CI run `30383888427` PASS including PostgreSQL integration.
+
+### PR #49 — durable composable Content Configuration PostgreSQL persistence — COMPLETE
+
+Implementation commit: `ee74719c99f29230447ed7bdd4a2ea01d15eae70`
+
+Implemented:
+- migration `20260728_0011` with isolated `content_config` schema.
+- immutable version rows in DRAFT/PUBLISHED/SUPERSEDED lifecycle.
+- one-published-version DB guard.
+- JSONB aggregate storage.
+- append-only configuration audit.
+- clone provenance and explicit rollback-draft model.
+- atomic publish/supersede/audit transaction.
+- seed-on-empty stable configuration bootstrap.
+- PostgreSQL repository factory wiring.
+- full JSONB round-trip for Domains, Topics, Base Formats, Modifiers, Primitives, Capabilities, FlowTemplateVersions, Steps, compatibility/references and existing allow-lists.
+- persistence contract v1.1.0 and manifest v1.22.0.
 
 Verification:
-- API CI run `30383888427` PASS.
+- API CI run `30384684807` PASS.
 - lint PASS.
 - contract sync PASS.
 - Admin HTTP contract PASS.
 - OpenAPI drift PASS.
 - unit tests PASS.
+- migration + seed PASS.
 - PostgreSQL integration PASS.
+- integration test proves generic Flow DRAFT save → reload → publish → historical rollback without composition loss and exactly one PUBLISHED configuration.
 
-This proves materially different Flow compositions can share the same generic configuration schema without case-specific runtime types.
+PR #45 is **closed without merge as superseded by PR #49**. Its valid persistence mechanics were preserved in the architecture-compatible replacement; the old narrow aggregate cannot be reintroduced.
+
+## 4. Current implementation gap
 
 Still implementation-pending:
-- PostgreSQL persistence of the **expanded** ContentConfiguration aggregate.
-- Admin HTTP management of expanded registries.
-- authoring/consumer CaseVersion resolved Flow pinning and generic execution/rendering.
+- secured internal Admin HTTP management for composable configuration lifecycle and expanded registry payloads.
+- publication-time effective config/Flow provenance and resolved Flow pinning onto AuthoringCaseVersion/consumer CaseVersion.
+- generic Flow execution/rendering.
 - DecisionRevision/Exposure/Intervention/Delta.
 - first-class Claim/Argument graph and normalized ingestion.
-- WE/Signal and Impact bounded contexts.
-
-## 4. PR #45 status
-
-PR #45 remains **draft** and must not merge as-is. It was built against the pre-ADR-0019 narrow ContentConfiguration aggregate.
-
-Its reusable persistence mechanics remain valuable:
-- isolated `content_config` PostgreSQL schema,
-- immutable DRAFT/PUBLISHED/SUPERSEDED lifecycle,
-- one-published-version guard,
-- JSONB aggregate storage,
-- clone provenance,
-- append-only audit,
-- atomic publish/supersede,
-- provider-neutral repository boundary,
-- PostgreSQL integration coverage.
-
-Next work should port/rebase these mechanics onto the expanded ADR-0020 aggregate rather than discarding them or merging the old branch unchanged.
+- WE/Signal bounded context and MethodologyVersion sample/scope/stakeholder semantics.
+- Impact bounded context.
 
 ## 5. Recommended next sequence
 
-1. **Expanded Content Configuration PostgreSQL persistence**
-   - use PR #45 mechanics but serialize/deserialize Primitive/Capability/FlowTemplate definitions,
-   - retain atomic publish, audit, rollback and one-published-version guarantees,
-   - update schema/contract snapshots and PostgreSQL integration tests.
-2. **Secured Admin configuration HTTP** using existing Admin session/CSRF/TAXONOMY_MANAGE boundary.
-3. **Resolved Flow pinning** onto authoring publication and consumer CaseVersion, then one generic Flow executor/renderer slice.
+1. **Secured Admin configuration HTTP**
+   - ADR/contract before routes.
+   - existing opaque Admin session + same-session CSRF.
+   - `TAXONOMY_MANAGE` server-side capability.
+   - list/current/read version, clone current to DRAFT, save DRAFT, publish, rollback draft, audit.
+   - no client-supplied Admin/audit identity and no auth/SSO provider coupling.
+2. **Resolved Flow/config provenance at authoring publication**
+   - CaseVersion pins resolved FlowTemplateVersion/config version used for validation/publication.
+3. **Generic consumer Flow execution/rendering slice** proving multiple materially different fixtures use the same runtime path.
 4. **DecisionRevision / Exposure / Intervention / Delta**.
 5. **First-class Claim + Argument Graph + ingestion normalization**.
-6. **WE/Signal foundation** with contribution classes, scope/stakeholders and MethodologyVersion.
+6. **WE/Signal foundation** with contribution classes, scope, stakeholders and MethodologyVersion.
 7. **Impact foundation** with Target, Official Response, Action, Evidence and Verification.
 8. Resume observability/deployment, account continuity and share in architecture-compatible slices.
 
@@ -195,4 +193,4 @@ No implementation may leapfrog an unresolved product/domain contract.
 
 ## 8. New-chat recovery prompt
 
-> Continue KEFE from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first, inspect open PRs/recent CI, and use the Drive CURRENT artifact only when publication-source detail is required. Official docs baseline is Ecosystem v3.4 (MPD 1.3.0, GOV 1.5.0, PB 1.5.0, ENG 0.7.0, MVP/ADM/SEC 1.3.0, specialists 1.2.0). ADR-0019 locks the case-agnostic engine: Primitive → Capability → FlowTemplateVersion → CaseVersion; ME → WE → SIGNAL → IMPACT; generic DecisionRevision/Exposure/Intervention/Delta; Claim ≠ claimant; Result ≠ Signal; CORE_PRE_RESULT/EXPOSED/ADVOCACY_SUPPORT separation; Scope/Stakeholder integrity; verified Impact. ADR-0020 and PR #47 (`7223dfe...`) implement the first composable Content Configuration foundation with Primitive/Capability/FlowTemplate registries and validation. PR #45 remains draft; reuse its PostgreSQL persistence mechanics only after adapting them to the expanded aggregate. Do not code an unlocked product decision.
+> Continue KEFE from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first, inspect open PRs/recent CI, and use Drive CURRENT only when publication-source detail is required. Official docs baseline is Ecosystem v3.4. ADR-0019 locks the case-agnostic engine: Primitive → Capability → FlowTemplateVersion → CaseVersion; ME → WE → SIGNAL → IMPACT; generic DecisionRevision/Exposure/Intervention/Delta; Claim ≠ claimant; Result ≠ Signal; CORE_PRE_RESULT/EXPOSED/ADVOCACY_SUPPORT separation; Scope/Stakeholder integrity; verified Impact. ADR-0020 + PR #47 implement composable Content Configuration registries. PR #49 (`ee74719c...`) persists the expanded aggregate durably in PostgreSQL with atomic publish/audit/rollback and round-trip Flow semantics. PR #45 is closed superseded. Next slice is secured Admin configuration HTTP, then publication-time resolved Flow/config provenance. Do not code an unlocked product decision.
