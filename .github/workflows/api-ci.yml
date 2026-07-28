@@ -36,6 +36,10 @@ jobs:
       - name: Normalize DecisionRevision Python sources
         working-directory: services/api
         run: |
+          ruff format \
+            src/kefe_api/infrastructure/postgres_decision_lineage.py \
+            src/kefe_api/modules/decision/in_memory.py \
+            src/kefe_api/modules/decision/lineage_service.py
           ruff check \
             src/kefe_api/infrastructure/postgres_decision_lineage.py \
             src/kefe_api/modules/decision/in_memory.py \
