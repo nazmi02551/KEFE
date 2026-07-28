@@ -96,9 +96,6 @@ jobs:
       - name: Enforce Admin HTTP contract
         if: always()
         run: test '${{ steps.admin-http-contract.outcome }}' = 'success'
-      - name: OpenAPI drift gate
-        working-directory: services/api
-        run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
       - name: Unit tests
         id: unit-tests
         continue-on-error: true
@@ -114,6 +111,9 @@ jobs:
       - name: Enforce unit tests
         if: always()
         run: test '${{ steps.unit-tests.outcome }}' = 'success'
+      - name: OpenAPI drift gate
+        working-directory: services/api
+        run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
 
   postgres-integration:
     needs: lint-unit
