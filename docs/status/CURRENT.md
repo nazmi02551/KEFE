@@ -5,22 +5,37 @@
 **Default branch:** `main`  
 **Latest verified implementation commit:** `9c8ee0de2331bc4d2913dd655502b8a46fb084bd`
 
-This is the **single canonical durable engineering handoff**. Chat history is not a source of truth. At every continuation, read this file from `main`, inspect open PRs/recent CI, then proceed from the repository state.
+This is the **single canonical durable engineering handoff**. Chat history is not a source of truth. At every continuation, read this file from `main`, inspect open PRs/recent CI, then proceed from repository state.
 
-## 1. Product authority
+## 1. Product and documentation authority
 
-Current approved documentation baseline pending the milestone synchronization triggered by PR #40:
+Content/Admin milestone documentation synchronization is **complete and validation PASS**.
+
+Current official baseline:
 
 - KEFE Master Product Document v1.2.0 Approved Canonical
-- KEFE Documentation Governance v1.3.2 Approved
+- KEFE Documentation Governance v1.4.0 Approved
 - KEFE Product Bible v1.4.0 Working Baseline
-- KEFE Engineering Blueprint v0.5.0 Implementation Contract Baseline
-- KEFE Technical Contract Pack v1.0.0
-- KEFE Documentation Ecosystem package v3.2 — validation PASS
+- KEFE Engineering Blueprint v0.6.0 Implementation Baseline
+- KEFE MVP Delivery Plan v1.2.0 Approved Execution Baseline
+- KEFE Admin Studio Specification v1.2.0 Approved Baseline
+- KEFE Security & Privacy Model v1.2.0 Approved Baseline
+- KEFE Technical Contract Pack v1.0.0 plus repository-native evolved contracts/ADRs
+- KEFE Documentation Ecosystem v3.3 — validation PASS
 
-The audit records **0 open product decisions** and **0 planned official documents**. Implementation translates each coherent slice into ADRs, machine-readable contracts and tests. The declared Content/Admin milestone boundary has now been reached, so editable DOCX sources and generated PDFs are due for synchronized regeneration and visual QA before the documentation baseline is advanced.
+Milestone publication package: `KEFE_Documentation_Ecosystem_2026-07-28_v3.3_CURRENT.zip`.
 
-Binding rules:
+The v3.3 audit records **18 active logical documents / 36 active DOCX+PDF files, 0 planned official documents, 0 open product decisions and 352 Case/Scenario seeds**. The four milestone-advanced documents were fully DOCX-rendered and visually inspected; generated PDFs were separately rendered/preflighted; no high-severity accessibility issues were found. Superseded affected versions are retained in the package archive.
+
+Binding documentation policy:
+
+- DOCX is the editable publication source for the official document ecosystem.
+- PDF is the generated immutable publication artifact and must correspond to its DOCX source.
+- Git-hosted ADRs, machine-readable contracts and this checkpoint are the engineering continuation layer.
+- DOCX/PDF are regenerated at declared milestone boundaries, not after every small PR.
+- A documentation baseline advances only after render/visual QA, PDF preflight, manifest/audit update, checksums and superseded-version archive.
+
+Binding product rules:
 
 - Golden Path: `Launch → Explore → Case → Context → Weigh → Commit → Reveal → Perspective → My KEFE Progress → Share`.
 - Commit First is mandatory; it is not Blind First.
@@ -53,9 +68,9 @@ Backend/contracts:
 - Commit-gated bounded Perspective read model with curated fallback.
 - Authenticated `GET /v1/me/progress` with memory/PostgreSQL adapters.
 - Progress fields: committed weigh count, distinct Case/domain coverage, first/last Commit and recent completed Cases.
-- Deterministic OpenAPI export/drift gate, contract fitness checks and PostgreSQL integration tests.
+- Deterministic OpenAPI export/drift gate, architecture fitness checks and PostgreSQL integration tests.
 - M1 provider-neutral Content Authoring core: stable Case identity; versioned Issue/Question/Context/Source aggregate; `DRAFT → IN_REVIEW → APPROVED → PUBLISHED`; rejection/withdrawal rationale; append-only audit; registry-driven publication validation; immutable published CaseVersion; isolated correction revisions.
-- PostgreSQL Content Authoring persistence under isolated `editorial` schema using a provider-neutral JSONB aggregate representation.
+- PostgreSQL Content Authoring persistence under isolated `editorial` schema using provider-neutral aggregate persistence.
 - Atomic publication materializes only approved content into consumer `content` schema, supersedes the previous published version, appends lifecycle audit and marks the editorial version published in one transaction.
 - Consumer CaseVersion owns immutable `base_format_code`, `primary_domain_code` and `content_risk`.
 - Public Context reads allow only materialized `PUBLISHED` or `SUPERSEDED` consumer CaseVersions.
@@ -86,23 +101,24 @@ Mobile:
 - Explore and `/case/:caseId` deep links.
 - First-use onboarding through first Reveal.
 - Pre-Commit Context/Sources, typed Weigh and optional private Reason.
-- Recovery phases: `editing → syncPending → commitPending → committedAwaitingReveal`.
-- Commit retry always reuses the durable idempotency key.
+- Recovery phases preserve the same durable idempotency key across uncertain Commit retries.
 - Post-Reveal Perspective with isolated retry.
 - Post-Reveal My KEFE Progress with low-claim metrics.
 - Optional Account Offer; no fake enrollment button while enrollment is unavailable.
 - `Continue as guest` dismisses only the offer and never hides Progress.
 - Turkish/English semantic copy and accessibility-oriented controls.
 
-Most recent merged product/architecture slices:
+Most recent merged product/architecture milestones:
 
-- PR #31 — M1 Content Authoring and immutable publication core; merge `9416d4366650c3078d92dbf0b5533e4d1a4cdf39`.
-- PR #33 — PostgreSQL editorial persistence, atomic publication materialization and draft-leakage protection; merge `b36415671322dd15ea3b0a31c1203898ca0ebf58`.
-- PR #35 — Admin authentication/authorization/threat-model boundary and secured authoring facade; merge `b68cb11cc37c3d42a6040fd9e5452b1b44fd6c59`.
-- PR #37 — durable Admin subjects/sessions, role-capability persistence, MFA/session assurance and session-bound CSRF substrate; merge `34c44b073b349a61a1c027b0fceb593978a10f27`.
-- PR #40 — secured internal Admin authoring HTTP surface, OpenAPI v0.12.0, CSRF/session boundary and PostgreSQL end-to-end workflow; merge `9c8ee0de2331bc4d2913dd655502b8a46fb084bd`.
+- PR #31 — M1 Content Authoring and immutable publication core.
+- PR #33 — PostgreSQL editorial persistence, atomic publication materialization and draft-leakage protection.
+- PR #35 — Admin authentication/authorization/threat-model boundary and secured authoring facade.
+- PR #37 — durable Admin subjects/sessions, role-capability persistence, MFA/session assurance and session-bound CSRF substrate.
+- PR #40 — secured internal Admin authoring HTTP surface, OpenAPI v0.12.0, CSRF/session boundary and PostgreSQL end-to-end workflow; implementation merge `9c8ee0de2331bc4d2913dd655502b8a46fb084bd`.
+- PR #41 — checkpoint declaring the Content/Admin documentation milestone due.
+- Documentation Ecosystem v3.3 — milestone synchronization completed after PR #40/#41 checkpoint.
 
-## 3. Current executable path
+## 3. Current executable paths
 
 Consumer:
 
@@ -112,12 +128,12 @@ Admin authoring:
 
 `Authenticated Admin Session → Create/Edit DRAFT → Submit → Independent Review → Approve/Reject → Step-up Publish/Withdraw → Immutable Consumer Materialization + Audit`
 
-Failures in Context, Perspective or Progress are isolated from the trusted decision state. Consumer reads continue to use only published immutable materialized content.
+Failures in Context, Perspective or Progress remain isolated from trusted decision state. Consumer reads continue to use only published immutable materialized content.
 
 ## 4. Guardrails for upcoming work
 
 - Never expose result or Perspective before Commit.
-- Never expose another user’s private or `PENDING` reason.
+- Never expose another user's private or `PENDING` reason.
 - Do not add a raw comment feed or popularity-only ranking.
 - Keep human reasons and AI summaries distinct.
 - Preserve provenance, moderation and methodology metadata.
@@ -137,42 +153,36 @@ Failures in Context, Perspective or Progress are isolated from the trusted decis
 
 ## 5. Recommended next sequence
 
-1. **Milestone DOCX/PDF synchronization — now due**
-   - patch editable canonical sources with the completed Content/Admin architecture
-   - advance affected document versions consistently
-   - regenerate DOCX/PDF from editable sources
-   - visually verify every rendered page
-   - update document manifest/audit and archive superseded versions
-   - record new documentation baseline here after validation PASS
-
-2. **Content configuration and review workflows**
-   - taxonomy/format/modifier registry management
+1. **Content configuration and review workflows**
+   - taxonomy/domain/topic management behind stable IDs
+   - base-format and modifier registry management with compatibility validation
    - source verification and claim-status review
-   - risk/Civic review-mode enforcement
+   - content risk and Civic review-mode enforcement
+   - versioned configuration publication with audit and rollback
 
-3. **Observability and deployment baseline**
+2. **Observability and deployment baseline**
    - request/event correlation
    - SLO, error and latency metrics
    - secrets/environment contract
    - development/staging deployment runbook
 
-4. **Account enrollment and ownership continuity**
+3. **Account enrollment and ownership continuity**
    - explicit authentication/threat-model ADR first
-   - guest-to-account transfer without copying decision history
+   - guest-to-account transfer without copying decision history incorrectly
    - recovery, retention, revocation and device-change behavior
 
-5. **Share foundation**
+4. **Share foundation**
    - privacy-safe cards and deep links
    - sensitive-content restrictions
    - no hidden profile attributes or individual decision leakage
 
-PR #40 completes the previously declared **Content/Admin milestone boundary**. Documentation regeneration is therefore no longer deferred; it is the immediate next task.
+The documentation milestone is closed. The next implementation slice is **Content configuration and review workflows**, beginning with an ADR and machine-readable contract before code.
 
 ## 6. Continuation protocol
 
 1. Read this file from `main`.
 2. Inspect open PRs, recent merges and latest CI.
-3. Resolve the next slice against approved document versions above.
+3. Resolve the next slice against the approved document versions above.
 4. Create one branch for one coherent vertical slice.
 5. Lock behavior in an ADR and machine-readable contract before implementation.
 6. Preserve ports/adapters and configuration-driven boundaries.
@@ -185,4 +195,4 @@ PR #40 completes the previously declared **Content/Admin milestone boundary**. D
 
 ## 7. New-chat recovery prompt
 
-> Continue KEFE development from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first, then inspect open PRs, recent commits and CI. Preserve Commit First, CaseVersion pinning, pre-Commit Context without result leakage, private Reason boundaries, optional guest continuation, low-claim My KEFE Progress, immutable published content and provider-neutral ports/adapters. Editorial drafts live outside consumer publication. Admin identity is separate from consumer identity; capability checks, audit identity, reviewer/submitter separation, MFA/session assurance, same-session CSRF and recent step-up are server-side. Internal Admin authoring HTTP now exists only under `/internal/admin/v1` through `SecuredContentAuthoringService`; no Admin login/SSO endpoint is implemented yet. PR #40 completed the Content/Admin milestone, so perform the due DOCX/PDF milestone synchronization before the next product slice unless that synchronization is already recorded as validation PASS in this checkpoint.
+> Continue KEFE development from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first, then inspect open PRs, recent commits and CI. Current official documentation baseline is Ecosystem v3.3: MPD v1.2.0, GOV v1.4.0, PB v1.4.0, ENG v0.6.0, MVP v1.2.0, ADM v1.2.0 and SEC v1.2.0. Preserve Commit First, CaseVersion pinning, pre-Commit Context without result leakage, private Reason boundaries, optional guest continuation, low-claim My KEFE Progress, immutable published content and provider-neutral ports/adapters. Editorial drafts live outside consumer publication. Admin identity is separate from consumer identity; capability checks, audit identity, reviewer/submitter separation, MFA/session assurance, same-session CSRF and recent step-up are server-side. Internal Admin authoring HTTP exists only under `/internal/admin/v1` through `SecuredContentAuthoringService`; no Admin login/SSO endpoint is implemented yet. The Content/Admin DOCX/PDF milestone synchronization is complete and PASS. Inspect repo state, then continue with Content configuration and review workflows unless a newer checkpoint says otherwise.
