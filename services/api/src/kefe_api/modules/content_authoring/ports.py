@@ -36,7 +36,12 @@ class ContentAuthoringRepository(Protocol):
 
     def next_version_no(self, case_id: UUID) -> int: ...
 
-    def save_draft(self, version: AuthoringCaseVersion) -> None: ...
+    def save_draft(
+        self,
+        version: AuthoringCaseVersion,
+        *,
+        create_audit: LifecycleAuditEntry | None = None,
+    ) -> None: ...
 
     def transition(
         self,
