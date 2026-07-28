@@ -30,7 +30,11 @@ def _engine():
     return create_engine(os.environ["KEFE_DATABASE_URL"])
 
 
-def _subject_with_access(*, roles: tuple[AdminRole, ...], capability: AdminCapability | None = None):
+def _subject_with_access(
+    *,
+    roles: tuple[AdminRole, ...],
+    capability: AdminCapability | None = None,
+):
     engine = _engine()
     subject_id = uuid4()
     with engine.begin() as connection:
