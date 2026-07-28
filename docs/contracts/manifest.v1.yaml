@@ -1,4 +1,4 @@
-manifest_version: 1.12.0
+manifest_version: 1.13.0
 updated_at: '2026-07-28'
 policy:
   executable_schema_source: services/api/migrations
@@ -41,6 +41,10 @@ contracts:
     path: docs/contracts/my-kefe-progress-policy.v1.yaml
     version: 1.0.0
     role: actor_scoped_progress_and_optional_account_offer_policy
+  - id: content-authoring-policy
+    path: docs/contracts/content-authoring-policy.v1.yaml
+    version: 1.0.0
+    role: immutable_case_version_authoring_and_publication_policy
   - id: error-registry
     path: docs/contracts/error-codes.v1.yaml
     version: 1.4.0
@@ -75,3 +79,4 @@ architecture_decisions:
   - docs/adr/0010-mobile-perspective-consumption.md
   - docs/adr/0011-context-and-source-read-layer.md
   - docs/adr/0012-account-offer-and-my-kefe-progress-foundation.md
+  - docs/adr/0013-content-authoring-and-publication-boundary.md
