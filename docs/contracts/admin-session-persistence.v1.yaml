@@ -1,0 +1,43 @@
+contract_version: 1.0.0
+updated_at: '2026-07-28'
+capability: durable_admin_session_persistence
+storage:
+  schema: admin_security
+  subject_table: subject
+  role_assignment_table: role_assignment
+  capability_grant_table: capability_grant
+  session_table: session
+  access_audit_table: access_audit
+subject:
+  stable_identifier: admin_subject_id
+  states: [ACTIVE, SUSPENDED, DISABLED]
+  external_provider_identifier_is_authorization_key: false
+session:
+  token_entropy_source: cryptographically_secure_random
+  session_token_persisted_raw: false
+  session_token_digest: sha256
+  csrf_token_persisted_raw: false
+  csrf_token_digest: sha256
+  mfa_satisfied_at_required: true
+  server_side_revocation: true
+  last_seen_persisted: true
+  step_up_persisted: true
+  successful_authentication_marks_seen_after_idle_check: true
+csrf:
+  bound_to_same_session: true
+  cross_session_reuse_allowed: false
+roles_and_capabilities:
+  active_assignments_only: true
+  role_hierarchy: false
+  wildcard_capability: false
+issuer:
+  provider_neutral: true
+  active_subject_required: true
+  mfa_required: true
+  raw_secrets_returned_once: true
+http_surface:
+  login_endpoint_added_by_this_contract: false
+  admin_authoring_endpoint_added_by_this_contract: false
+future_access_management:
+  capability_required: ADMIN_ACCESS_MANAGE
+  append_access_audit_required: true

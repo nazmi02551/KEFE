@@ -28,6 +28,12 @@ class AdminCapability(StrEnum):
     AUDIT_READ = "AUDIT_READ"
 
 
+class AdminSubjectState(StrEnum):
+    ACTIVE = "ACTIVE"
+    SUSPENDED = "SUSPENDED"
+    DISABLED = "DISABLED"
+
+
 class AdminSessionStatus(StrEnum):
     ACTIVE = "ACTIVE"
     INVALID = "INVALID"
@@ -56,3 +62,11 @@ class AdminPrincipal:
 class AdminSessionResolution:
     status: AdminSessionStatus
     principal: AdminPrincipal | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class IssuedAdminSession:
+    session_id: UUID
+    session_token: str
+    csrf_token: str
+    expires_at: datetime

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -34,12 +34,16 @@ NOW = datetime(2026, 7, 28, 8, 0, tzinfo=UTC)
 class StaticSessionResolver:
     def __init__(self, resolutions: dict[str, AdminSessionResolution] | None = None) -> None:
         self.resolutions = resolutions or {}
+        self.seen: list[tuple[UUID, datetime]] = []
 
     def resolve(self, session_token: str) -> AdminSessionResolution:
         return self.resolutions.get(
             session_token,
             AdminSessionResolution(AdminSessionStatus.INVALID),
         )
+
+    def mark_seen(self, session_id: UUID, *, seen_at: datetime) -> None:
+        self.seen.append((session_id, seen_at))
 
 
 class CapturingSecurityAuditSink:
@@ -138,19 +142,22 @@ def test_active_admin_session_requires_mfa_and_is_separate_from_unknown_tokens()
     security = _security(resolver=resolver)
 
     assert security.authenticate("admin-session", now=NOW) == principal
+    assert resolver.seen == [(principal.session_id, NOW)]
 
     with pytest.raises(DomainError) as unknown:
         security.authenticate("consumer-or-unknown-token", now=NOW)
     assert unknown.value.code == "ADMIN_SESSION_INVALID"
+    assert resolver.seen == [(principal.session_id, NOW)]
 
-    no_mfa = replace(principal, mfa_satisfied_at=None)
+    no_mfa = replace(principal, session_id=uuid4(), mfa_satisfied_at=None)
     resolver.resolutions["no-mfa"] = AdminSessionResolution(AdminSessionStatus.ACTIVE, no_mfa)
     with pytest.raises(DomainError) as missing_mfa:
         security.authenticate("no-mfa", now=NOW)
     assert missing_mfa.value.code == "ADMIN_MFA_REQUIRED"
+    assert resolver.seen == [(principal.session_id, NOW)]
 
 
-def test_revoked_and_idle_expired_admin_sessions_are_denied() -> None:
+def test_revoked_and_idle_expired_admin_sessions_are_denied_without_touching_last_seen() -> None:
     principal = _principal(AdminRole.EDITOR)
     idle = _principal(AdminRole.EDITOR, last_seen_minutes_ago=31)
     resolver = StaticSessionResolver(
@@ -168,6 +175,7 @@ def test_revoked_and_idle_expired_admin_sessions_are_denied() -> None:
     with pytest.raises(DomainError) as expired:
         security.authenticate("idle", now=NOW)
     assert expired.value.code == "ADMIN_SESSION_EXPIRED"
+    assert resolver.seen == []
 
 
 def test_roles_are_least_privilege_and_publish_requires_recent_step_up() -> None:

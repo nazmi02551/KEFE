@@ -148,6 +148,7 @@ jobs:
           tests/test_context_postgres.py
           tests/test_progress_postgres.py
           tests/test_content_authoring_postgres.py
+          tests/test_admin_sessions_postgres.py
           > postgres-test-output.txt 2>&1
       - name: Upload PostgreSQL diagnostics on failure
         if: steps.postgres-tests.outcome == 'failure'
