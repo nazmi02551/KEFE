@@ -13,6 +13,7 @@ from kefe_api.modules.content_configuration.models import (
     ContentConfigurationAuditEntry,
     ContentConfigurationSnapshot,
 )
+from kefe_api.modules.content_configuration.policy import derive_required_review_modes
 from kefe_api.modules.content_configuration.ports import ContentConfigurationRepository
 
 
@@ -36,11 +37,17 @@ class ContentConfigurationService:
             )
         return snapshot
 
-    def list_versions(self, principal: AdminPrincipal) -> tuple[ContentConfigurationSnapshot, ...]:
+    def list_versions(
+        self,
+        principal: AdminPrincipal,
+    ) -> tuple[ContentConfigurationSnapshot, ...]:
         self._security.authorize(principal, AdminCapability.TAXONOMY_MANAGE)
         return self._repository.list_versions()
 
-    def create_draft_from_current(self, principal: AdminPrincipal) -> ContentConfigurationSnapshot:
+    def create_draft_from_current(
+        self,
+        principal: AdminPrincipal,
+    ) -> ContentConfigurationSnapshot:
         self._security.authorize(principal, AdminCapability.TAXONOMY_MANAGE)
         current = self.current()
         draft = replace(
@@ -71,7 +78,11 @@ class ContentConfigurationService:
         self._security.authorize(principal, AdminCapability.TAXONOMY_MANAGE)
         current = self._repository.get(snapshot.id)
         if current is None:
-            raise DomainError("CONTENT_CONFIG_NOT_FOUND", "Content configuration was not found", 404)
+            raise DomainError(
+                "CONTENT_CONFIG_NOT_FOUND",
+                "Content configuration was not found",
+                404,
+            )
         if current.state is not ContentConfigLifecycle.DRAFT:
             raise DomainError(
                 "CONTENT_CONFIG_IMMUTABLE",
@@ -111,7 +122,11 @@ class ContentConfigurationService:
         self._security.authorize(principal, AdminCapability.TAXONOMY_MANAGE)
         current = self._repository.get(version_id)
         if current is None:
-            raise DomainError("CONTENT_CONFIG_NOT_FOUND", "Content configuration was not found", 404)
+            raise DomainError(
+                "CONTENT_CONFIG_NOT_FOUND",
+                "Content configuration was not found",
+                404,
+            )
         if current.state is not ContentConfigLifecycle.DRAFT:
             raise DomainError(
                 "CONTENT_CONFIG_NOT_DRAFT",
@@ -130,7 +145,10 @@ class ContentConfigurationService:
             previous_state=ContentConfigLifecycle.DRAFT,
             new_state=ContentConfigLifecycle.PUBLISHED,
         )
-        result, _ = self._repository.publish_atomically(snapshot=published, audit=audit)
+        result, _ = self._repository.publish_atomically(
+            snapshot=published,
+            audit=audit,
+        )
         return result
 
     def create_rollback_draft(
@@ -143,7 +161,11 @@ class ContentConfigurationService:
         self._security.authorize(principal, AdminCapability.TAXONOMY_MANAGE)
         source = self._repository.get(source_version_id)
         if source is None:
-            raise DomainError("CONTENT_CONFIG_NOT_FOUND", "Content configuration was not found", 404)
+            raise DomainError(
+                "CONTENT_CONFIG_NOT_FOUND",
+                "Content configuration was not found",
+                404,
+            )
         if source.state not in {
             ContentConfigLifecycle.PUBLISHED,
             ContentConfigLifecycle.SUPERSEDED,
@@ -178,19 +200,7 @@ class ContentConfigurationService:
         self,
         version: AuthoringCaseVersion,
     ) -> frozenset[str]:
-        required: set[str] = set()
-        if version.is_fact_bearing or version.is_real_event:
-            required.add("SOURCE_VERIFICATION")
-        if version.content_risk in {"L2", "L3"}:
-            required.add("RISK_REVIEW")
-        if (
-            version.primary_domain_code == "CIVIC_POLITICS"
-            or "CIVIC_INTEGRITY" in version.modifiers
-        ):
-            required.add("CIVIC_REVIEW")
-        if version.content_risk == "L3":
-            required.add("EDITORIAL")
-        return frozenset(required)
+        return derive_required_review_modes(version)
 
     @staticmethod
     def _validate_snapshot(snapshot: ContentConfigurationSnapshot) -> None:
