@@ -1,4 +1,4 @@
-manifest_version: 1.15.0
+manifest_version: 1.16.0
 updated_at: '2026-07-28'
 policy:
   executable_schema_source: services/api/migrations
@@ -53,13 +53,17 @@ contracts:
     path: docs/contracts/admin-security-policy.v1.yaml
     version: 1.0.0
     role: separate_admin_principal_capability_and_session_assurance_policy
+  - id: admin-session-persistence
+    path: docs/contracts/admin-session-persistence.v1.yaml
+    version: 1.0.0
+    role: hashed_revocable_admin_session_and_csrf_binding_policy
   - id: error-registry
     path: docs/contracts/error-codes.v1.yaml
     version: 1.6.0
     role: stable_api_errors
   - id: postgresql-m0-schema
-    path: docs/contracts/postgresql-m0-schema.v1.7.0.sql
-    version: 1.7.0
+    path: docs/contracts/postgresql-m0-schema.v1.8.0.sql
+    version: 1.8.0
     role: derived_executable_schema_snapshot
     derived_from:
       - services/api/migrations/versions/20260727_0001_m0_core.py
@@ -71,6 +75,7 @@ contracts:
       - services/api/migrations/versions/20260727_0007_perspective_card.py
       - services/api/migrations/versions/20260727_0008_context_sources.py
       - services/api/migrations/versions/20260728_0009_content_authoring.py
+      - services/api/migrations/versions/20260728_0010_admin_sessions.py
   - id: repository-structure
     path: docs/contracts/repository-structure.v1.txt
     version: '1'
@@ -91,3 +96,4 @@ architecture_decisions:
   - docs/adr/0013-content-authoring-and-publication-boundary.md
   - docs/adr/0014-content-authoring-postgres-publication.md
   - docs/adr/0015-admin-authentication-authorization-threat-model.md
+  - docs/adr/0016-durable-admin-sessions-and-csrf.md
