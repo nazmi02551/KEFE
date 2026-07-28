@@ -41,6 +41,17 @@ class AdminSecurityService:
         *,
         now: datetime | None = None,
     ) -> AdminPrincipal:
+        current = now or datetime.now(UTC)
+        principal = self.resolve_session(session_token, now=current)
+        self.touch(principal, now=current)
+        return principal
+
+    def resolve_session(
+        self,
+        session_token: str | None,
+        *,
+        now: datetime | None = None,
+    ) -> AdminPrincipal:
         if not session_token:
             raise DomainError("ADMIN_AUTH_REQUIRED", "Admin authentication is required", 401)
 
@@ -55,8 +66,17 @@ class AdminSecurityService:
 
         principal = resolution.principal
         self._assert_principal_assurance(principal, current=current)
-        self._session_resolver.mark_seen(principal.session_id, seen_at=current)
         return principal
+
+    def touch(
+        self,
+        principal: AdminPrincipal,
+        *,
+        now: datetime | None = None,
+    ) -> None:
+        current = now or datetime.now(UTC)
+        self._assert_principal_assurance(principal, current=current)
+        self._session_resolver.mark_seen(principal.session_id, seen_at=current)
 
     def authorize(
         self,
