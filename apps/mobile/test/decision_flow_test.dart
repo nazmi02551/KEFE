@@ -8,6 +8,8 @@ import 'package:kefe_mobile/features/decision/data/decision_repository.dart';
 import 'package:kefe_mobile/features/decision/domain/decision_draft.dart';
 import 'package:kefe_mobile/features/decision/domain/decision_models.dart';
 
+import 'support/flow_runtime_fixture.dart';
+
 const sampleCase = DecisionCase(
   id: demoCaseId,
   versionId: 'version-1',
@@ -36,7 +38,9 @@ const sampleSummary = DecisionCaseSummary(
   risk: 'L0',
 );
 
-class FakeDecisionRepository implements DecisionRepository {
+class FakeDecisionRepository
+    with StandardFlowRuntimeFake
+    implements DecisionRepository {
   int answerCalls = 0;
   int commitCalls = 0;
   int revealCalls = 0;
@@ -73,6 +77,7 @@ class FakeDecisionRepository implements DecisionRepository {
       commitTransportFailures -= 1;
       throw const ClientTransportFailure();
     }
+    flowCommitted = true;
   }
 
   @override
@@ -241,7 +246,7 @@ void main() {
     expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
   });
 
-  testWidgets('offline startup restores the pinned local decision draft', (
+  testWidgets('offline startup restores a cached pinned Flow draft', (
     tester,
   ) async {
     useTurkishLocale(tester);
@@ -250,6 +255,7 @@ void main() {
     draftStore.drafts[demoCaseId] = DecisionDraft(
       caseData: sampleCase,
       sessionId: 'session-offline',
+      flowRuntime: standardFlowRuntime(sessionId: 'session-offline'),
       questionId: 'question-1',
       selectedOption: 'B',
       updatedAt: DateTime.utc(2026, 7, 27),
@@ -261,5 +267,23 @@ void main() {
     expect(find.byKey(const ValueKey('option-B')), findsOneWidget);
     expect(find.byKey(const ValueKey('decision-status-message')), findsOneWidget);
     expect(repository.startSessionCalls, 0);
+  });
+
+  testWidgets('legacy offline draft never invents a default Flow', (tester) async {
+    useTurkishLocale(tester);
+    final repository = FakeDecisionRepository()..fetchCaseOffline = true;
+    final draftStore = MemoryDecisionDraftStore();
+    draftStore.drafts[demoCaseId] = DecisionDraft(
+      caseData: sampleCase,
+      sessionId: 'legacy-session',
+      questionId: 'question-1',
+      selectedOption: 'B',
+      updatedAt: DateTime.utc(2026, 7, 27),
+    );
+
+    await pumpKefe(tester, repository, draftStore);
+
+    expect(find.byKey(const ValueKey('error')), findsOneWidget);
+    expect(find.byKey(const ValueKey('commit-button')), findsNothing);
   });
 }
