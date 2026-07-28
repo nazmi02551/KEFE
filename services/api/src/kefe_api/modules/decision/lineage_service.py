@@ -162,7 +162,9 @@ class DecisionLineageService:
             idempotency_key=idempotency_key,
             occurred_at=datetime.now(UTC),
             intervention_type_code=(
-                "CONTEXT_REVEAL" if between_decisions and session.state is WeighState.COMMITTED else None
+                "CONTEXT_REVEAL"
+                if between_decisions and session.state is WeighState.COMMITTED
+                else None
             ),
             intervention_metadata=(
                 {"flow_step_code": flow_step_code, "trigger": "BETWEEN_DECISIONS"}
@@ -263,11 +265,7 @@ class DecisionLineageService:
                 422,
             )
         first_decision = next(
-            (
-                item.code
-                for item in case.resolved_flow.steps
-                if item.primitive_code == "DECISION"
-            ),
+            (item.code for item in case.resolved_flow.steps if item.primitive_code == "DECISION"),
             None,
         )
         if flow_step_code == first_decision:
@@ -278,7 +276,9 @@ class DecisionLineageService:
             )
         if require_ready:
             runtime = self._flow_runtime.get_runtime(actor_id=actor_id, session_id=session_id)
-            runtime_step = next((item for item in runtime.steps if item.code == flow_step_code), None)
+            runtime_step = next(
+                (item for item in runtime.steps if item.code == flow_step_code), None
+            )
             if runtime_step is None:
                 raise DomainError("FLOW_STEP_NOT_FOUND", "Flow Step not found", 404)
             if runtime_step.state is FlowStepRuntimeState.COMPLETED:
@@ -317,7 +317,9 @@ class DecisionLineageService:
     @staticmethod
     def _flow_step(case: CaseVersion, flow_step_code: str) -> FlowStep:
         assert case.resolved_flow is not None
-        step = next((item for item in case.resolved_flow.steps if item.code == flow_step_code), None)
+        step = next(
+            (item for item in case.resolved_flow.steps if item.code == flow_step_code), None
+        )
         if step is None:
             raise DomainError("FLOW_STEP_NOT_FOUND", "Flow Step not found", 404)
         return step
@@ -385,11 +387,11 @@ class DecisionLineageService:
         if normalized_text == "":
             normalized_text = None
         if not normalized_tags and normalized_text is None:
-            raise DomainError("REASON_EMPTY", "At least one reason tag or short text is required", 422)
+            raise DomainError(
+                "REASON_EMPTY", "At least one reason tag or short text is required", 422
+            )
         allowed_tags = {
-            str(tag).strip().upper()
-            for tag in policy.get("tags", ())
-            if str(tag).strip()
+            str(tag).strip().upper() for tag in policy.get("tags", ()) if str(tag).strip()
         }
         unknown_tags = [tag for tag in normalized_tags if tag not in allowed_tags]
         if unknown_tags:
@@ -409,7 +411,9 @@ class DecisionLineageService:
             )
         text_enabled = policy.get("text_enabled", False) is True
         if normalized_text is not None and not text_enabled:
-            raise DomainError("REASON_TEXT_NOT_ALLOWED", "Short reason text is disabled for this Case", 422)
+            raise DomainError(
+                "REASON_TEXT_NOT_ALLOWED", "Short reason text is disabled for this Case", 422
+            )
         text_max_length = cls._bounded_int(
             policy.get("text_max_length", 500), default=500, minimum=1, maximum=1000
         )

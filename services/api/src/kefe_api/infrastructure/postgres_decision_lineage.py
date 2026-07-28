@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -70,22 +70,24 @@ class PostgresDecisionLineageRepository(PostgresPerspectiveDecisionRepository):
                 return CommitAttempt(CommitStatus.ALREADY_COMMITTED, session)
             raise
 
-    def get_revision_draft(
-        self, *, session_id: UUID, flow_step_code: str
-    ) -> RevisionDraft | None:
+    def get_revision_draft(self, *, session_id: UUID, flow_step_code: str) -> RevisionDraft | None:
         with self._engine.connect() as connection:
-            row = connection.execute(
-                text(
-                    """
+            row = (
+                connection.execute(
+                    text(
+                        """
                     SELECT session_id, flow_step_code, response_snapshot,
                            private_reason_snapshot, updated_at
                     FROM decision.revision_draft
                     WHERE session_id = :session_id
                       AND flow_step_code = :flow_step_code
                     """
-                ),
-                {"session_id": session_id, "flow_step_code": flow_step_code},
-            ).mappings().one_or_none()
+                    ),
+                    {"session_id": session_id, "flow_step_code": flow_step_code},
+                )
+                .mappings()
+                .one_or_none()
+            )
         if row is None:
             return None
         return self._draft_from_row(row)
@@ -142,33 +144,39 @@ class PostgresDecisionLineageRepository(PostgresPerspectiveDecisionRepository):
         intervention_metadata: dict[str, Any] | None = None,
     ) -> tuple[Exposure, Intervention | None]:
         with self._engine.begin() as connection:
-            session_row = self._lock_session(
-                connection, actor_id=actor_id, session_id=session_id
-            )
+            session_row = self._lock_session(connection, actor_id=actor_id, session_id=session_id)
             if session_row is None or session_row["case_version_id"] != case_version_id:
                 raise ValueError("session ownership mismatch")
 
-            existing = connection.execute(
-                text(
-                    """
+            existing = (
+                connection.execute(
+                    text(
+                        """
                     SELECT * FROM decision.exposure
                     WHERE session_id = :session_id
                       AND idempotency_key = :idempotency_key
                     """
-                ),
-                {"session_id": session_id, "idempotency_key": idempotency_key},
-            ).mappings().one_or_none()
+                    ),
+                    {"session_id": session_id, "idempotency_key": idempotency_key},
+                )
+                .mappings()
+                .one_or_none()
+            )
             if existing is not None:
                 exposure = self._exposure_from_row(existing)
-                intervention_row = connection.execute(
-                    text(
-                        """
+                intervention_row = (
+                    connection.execute(
+                        text(
+                            """
                         SELECT * FROM decision.intervention
                         WHERE exposure_id = :exposure_id
                         """
-                    ),
-                    {"exposure_id": exposure.id},
-                ).mappings().one_or_none()
+                        ),
+                        {"exposure_id": exposure.id},
+                    )
+                    .mappings()
+                    .one_or_none()
+                )
                 return exposure, (
                     self._intervention_from_row(intervention_row)
                     if intervention_row is not None
@@ -293,22 +301,24 @@ class PostgresDecisionLineageRepository(PostgresPerspectiveDecisionRepository):
         committed_at: datetime,
     ) -> RevisionCommitAttempt:
         with self._engine.begin() as connection:
-            session_row = self._lock_session(
-                connection, actor_id=actor_id, session_id=session_id
-            )
+            session_row = self._lock_session(connection, actor_id=actor_id, session_id=session_id)
             if session_row is None or session_row["state"] != WeighState.COMMITTED.value:
                 return RevisionCommitAttempt(RevisionCommitStatus.NOT_FOUND, None)
 
-            existing_row = connection.execute(
-                text(
-                    """
+            existing_row = (
+                connection.execute(
+                    text(
+                        """
                     SELECT * FROM decision.decision_revision
                     WHERE session_id = :session_id
                       AND flow_step_code = :flow_step_code
                     """
-                ),
-                {"session_id": session_id, "flow_step_code": flow_step_code},
-            ).mappings().one_or_none()
+                    ),
+                    {"session_id": session_id, "flow_step_code": flow_step_code},
+                )
+                .mappings()
+                .one_or_none()
+            )
             if existing_row is not None:
                 revision = self._revision_from_row(existing_row)
                 status = (
@@ -336,17 +346,21 @@ class PostgresDecisionLineageRepository(PostgresPerspectiveDecisionRepository):
             if reused:
                 return RevisionCommitAttempt(RevisionCommitStatus.IDEMPOTENCY_KEY_REUSED, None)
 
-            draft_row = connection.execute(
-                text(
-                    """
+            draft_row = (
+                connection.execute(
+                    text(
+                        """
                     SELECT * FROM decision.revision_draft
                     WHERE session_id = :session_id
                       AND flow_step_code = :flow_step_code
                     FOR UPDATE
                     """
-                ),
-                {"session_id": session_id, "flow_step_code": flow_step_code},
-            ).mappings().one_or_none()
+                    ),
+                    {"session_id": session_id, "flow_step_code": flow_step_code},
+                )
+                .mappings()
+                .one_or_none()
+            )
             draft = self._draft_from_row(draft_row) if draft_row is not None else None
             responses = draft.responses if draft else {}
             missing = tuple(sorted(required_question_ids - responses.keys(), key=str))
@@ -357,17 +371,21 @@ class PostgresDecisionLineageRepository(PostgresPerspectiveDecisionRepository):
                     missing_question_ids=missing,
                 )
 
-            previous_row = connection.execute(
-                text(
-                    """
+            previous_row = (
+                connection.execute(
+                    text(
+                        """
                     SELECT * FROM decision.decision_revision
                     WHERE session_id = :session_id
                     ORDER BY revision_no DESC
                     LIMIT 1
                     """
-                ),
-                {"session_id": session_id},
-            ).mappings().one_or_none()
+                    ),
+                    {"session_id": session_id},
+                )
+                .mappings()
+                .one_or_none()
+            )
             previous = self._revision_from_row(previous_row) if previous_row else None
             revision_no = (previous.revision_no + 1) if previous else 1
             exposure_sequence = int(
@@ -403,25 +421,27 @@ class PostgresDecisionLineageRepository(PostgresPerspectiveDecisionRepository):
 
             delta = None
             if previous is not None:
-                intervention_rows = connection.execute(
-                    text(
-                        """
+                intervention_rows = (
+                    connection.execute(
+                        text(
+                            """
                         SELECT * FROM decision.intervention
                         WHERE session_id = :session_id
                           AND occurred_at > :after
                           AND occurred_at <= :until
                         ORDER BY occurred_at, id
                         """
-                    ),
-                    {
-                        "session_id": session_id,
-                        "after": previous.committed_at,
-                        "until": committed_at,
-                    },
-                ).mappings().all()
-                interventions = tuple(
-                    self._intervention_from_row(row) for row in intervention_rows
+                        ),
+                        {
+                            "session_id": session_id,
+                            "after": previous.committed_at,
+                            "until": committed_at,
+                        },
+                    )
+                    .mappings()
+                    .all()
                 )
+                interventions = tuple(self._intervention_from_row(row) for row in intervention_rows)
                 delta = DecisionDelta(
                     id=uuid4(),
                     session_id=session_id,
@@ -489,58 +509,74 @@ class PostgresDecisionLineageRepository(PostgresPerspectiveDecisionRepository):
 
     def list_decision_revisions(self, session_id: UUID) -> tuple[DecisionRevision, ...]:
         with self._engine.connect() as connection:
-            rows = connection.execute(
-                text(
-                    """
+            rows = (
+                connection.execute(
+                    text(
+                        """
                     SELECT * FROM decision.decision_revision
                     WHERE session_id = :session_id
                     ORDER BY revision_no
                     """
-                ),
-                {"session_id": session_id},
-            ).mappings().all()
+                    ),
+                    {"session_id": session_id},
+                )
+                .mappings()
+                .all()
+            )
         return tuple(self._revision_from_row(row) for row in rows)
 
     def list_exposures(self, session_id: UUID) -> tuple[Exposure, ...]:
         with self._engine.connect() as connection:
-            rows = connection.execute(
-                text(
-                    """
+            rows = (
+                connection.execute(
+                    text(
+                        """
                     SELECT * FROM decision.exposure
                     WHERE session_id = :session_id
                     ORDER BY sequence_no
                     """
-                ),
-                {"session_id": session_id},
-            ).mappings().all()
+                    ),
+                    {"session_id": session_id},
+                )
+                .mappings()
+                .all()
+            )
         return tuple(self._exposure_from_row(row) for row in rows)
 
     def list_interventions(self, session_id: UUID) -> tuple[Intervention, ...]:
         with self._engine.connect() as connection:
-            rows = connection.execute(
-                text(
-                    """
+            rows = (
+                connection.execute(
+                    text(
+                        """
                     SELECT * FROM decision.intervention
                     WHERE session_id = :session_id
                     ORDER BY occurred_at, id
                     """
-                ),
-                {"session_id": session_id},
-            ).mappings().all()
+                    ),
+                    {"session_id": session_id},
+                )
+                .mappings()
+                .all()
+            )
         return tuple(self._intervention_from_row(row) for row in rows)
 
     def list_decision_deltas(self, session_id: UUID) -> tuple[DecisionDelta, ...]:
         with self._engine.connect() as connection:
-            rows = connection.execute(
-                text(
-                    """
+            rows = (
+                connection.execute(
+                    text(
+                        """
                     SELECT * FROM decision.decision_delta
                     WHERE session_id = :session_id
                     ORDER BY created_at, id
                     """
-                ),
-                {"session_id": session_id},
-            ).mappings().all()
+                    ),
+                    {"session_id": session_id},
+                )
+                .mappings()
+                .all()
+            )
             return tuple(self._delta_from_row(connection, row) for row in rows)
 
     def _insert_initial_revision(
@@ -565,26 +601,34 @@ class PostgresDecisionLineageRepository(PostgresPerspectiveDecisionRepository):
         ).scalar_one_or_none()
         if exists:
             return
-        response_rows = connection.execute(
-            text(
-                """
+        response_rows = (
+            connection.execute(
+                text(
+                    """
                 SELECT question_version_id, value_json
                 FROM decision.response
                 WHERE session_id = :session_id
                 """
-            ),
-            {"session_id": session_id},
-        ).mappings().all()
-        reason_row = connection.execute(
-            text(
-                """
+                ),
+                {"session_id": session_id},
+            )
+            .mappings()
+            .all()
+        )
+        reason_row = (
+            connection.execute(
+                text(
+                    """
                 SELECT tags, text_body, moderation_state, visibility
                 FROM decision.private_reason
                 WHERE session_id = :session_id
                 """
-            ),
-            {"session_id": session_id},
-        ).mappings().one_or_none()
+                ),
+                {"session_id": session_id},
+            )
+            .mappings()
+            .one_or_none()
+        )
         exposure_sequence = int(
             connection.execute(
                 text(
@@ -755,15 +799,19 @@ class PostgresDecisionLineageRepository(PostgresPerspectiveDecisionRepository):
     def _delta_for_revision(
         self, connection: Connection, revision_id: UUID
     ) -> DecisionDelta | None:
-        row = connection.execute(
-            text(
-                """
+        row = (
+            connection.execute(
+                text(
+                    """
                 SELECT * FROM decision.decision_delta
                 WHERE to_revision_id = :revision_id
                 """
-            ),
-            {"revision_id": revision_id},
-        ).mappings().one_or_none()
+                ),
+                {"revision_id": revision_id},
+            )
+            .mappings()
+            .one_or_none()
+        )
         return self._delta_from_row(connection, row) if row is not None else None
 
     @staticmethod
@@ -779,7 +827,9 @@ class PostgresDecisionLineageRepository(PostgresPerspectiveDecisionRepository):
                     """
                 ),
                 {"delta_id": row["id"]},
-            ).scalars().all()
+            )
+            .scalars()
+            .all()
         )
         return DecisionDelta(
             id=row["id"],

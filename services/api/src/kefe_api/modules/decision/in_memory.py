@@ -215,9 +215,7 @@ class InMemoryDecisionRepository:
             )
             return CommitAttempt(CommitStatus.COMMITTED, deepcopy(session))
 
-    def get_revision_draft(
-        self, *, session_id: UUID, flow_step_code: str
-    ) -> RevisionDraft | None:
+    def get_revision_draft(self, *, session_id: UUID, flow_step_code: str) -> RevisionDraft | None:
         with self._lock:
             draft = self._revision_drafts.get((session_id, flow_step_code))
             return deepcopy(draft) if draft else None
@@ -245,7 +243,11 @@ class InMemoryDecisionRepository:
     ) -> tuple[Exposure, Intervention | None]:
         with self._lock:
             session = self._sessions.get(session_id)
-            if session is None or session.actor_id != actor_id or session.case_version_id != case_version_id:
+            if (
+                session is None
+                or session.actor_id != actor_id
+                or session.case_version_id != case_version_id
+            ):
                 raise ValueError("session ownership mismatch")
             exposures = self._exposures.setdefault(session_id, [])
             existing = next(
@@ -331,7 +333,11 @@ class InMemoryDecisionRepository:
                     else RevisionCommitStatus.ALREADY_COMMITTED
                 )
                 delta = next(
-                    (item for item in self._deltas.get(session_id, []) if item.to_revision_id == existing.id),
+                    (
+                        item
+                        for item in self._deltas.get(session_id, [])
+                        if item.to_revision_id == existing.id
+                    ),
                     None,
                 )
                 return RevisionCommitAttempt(status, deepcopy(existing), deepcopy(delta))
