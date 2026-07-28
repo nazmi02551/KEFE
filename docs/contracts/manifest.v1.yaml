@@ -1,4 +1,4 @@
-manifest_version: 1.16.0
+manifest_version: 1.17.0
 updated_at: '2026-07-28'
 policy:
   executable_schema_source: services/api/migrations
@@ -11,7 +11,7 @@ contracts:
     role: conceptual_core_model
   - id: openapi
     path: docs/contracts/openapi.v1.json
-    version: 0.11.0
+    version: 0.12.0
     role: http_api_contract
   - id: event-envelope
     path: docs/contracts/event-envelope.v1.schema.json
@@ -57,9 +57,13 @@ contracts:
     path: docs/contracts/admin-session-persistence.v1.yaml
     version: 1.0.0
     role: hashed_revocable_admin_session_and_csrf_binding_policy
+  - id: admin-http-surface
+    path: docs/contracts/admin-http-surface.v1.yaml
+    version: 1.0.0
+    role: secured_cookie_csrf_admin_authoring_http_policy
   - id: error-registry
     path: docs/contracts/error-codes.v1.yaml
-    version: 1.6.0
+    version: 1.7.0
     role: stable_api_errors
   - id: postgresql-m0-schema
     path: docs/contracts/postgresql-m0-schema.v1.8.0.sql
@@ -97,3 +101,4 @@ architecture_decisions:
   - docs/adr/0014-content-authoring-postgres-publication.md
   - docs/adr/0015-admin-authentication-authorization-threat-model.md
   - docs/adr/0016-durable-admin-sessions-and-csrf.md
+  - docs/adr/0017-secured-admin-http-application-surface.md
