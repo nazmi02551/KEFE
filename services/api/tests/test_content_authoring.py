@@ -180,7 +180,10 @@ def test_published_version_is_immutable_and_revision_supersedes_atomically() -> 
     ]
     assert repository.get_version(first.id).title == first.title
     assert repository.get_version(second.id).title == "Corrected title"
-    assert any(entry.command == "supersede_on_publish" for entry in repository.list_audit(identity.id))
+    assert any(
+        entry.command == "supersede_on_publish"
+        for entry in repository.list_audit(identity.id)
+    )
 
 
 def test_reject_requires_rationale_and_returns_version_to_draft() -> None:
