@@ -104,7 +104,7 @@ def _demo_authoring_version() -> AuthoringCaseVersion:
                         stable_code="DECISION_CONFIDENCE",
                         prompt="Bu kararından ne kadar eminsin?",
                         response_type="CONFIDENCE",
-                        response_schema={"min": 1, "max": 5, "step": 1},
+                        response_schema={"min": 1, "max": 10, "step": 1},
                         is_required=False,
                         sort_order=10,
                     ),
