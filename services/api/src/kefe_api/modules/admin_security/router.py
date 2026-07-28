@@ -174,7 +174,7 @@ class AdminSessionResponse(StrictModel):
     expires_at: datetime
 
 
-class QuestionResponse(StrictModel):
+class AdminAuthoringQuestionResponse(StrictModel):
     id: UUID
     stable_code: str
     prompt: str
@@ -185,15 +185,15 @@ class QuestionResponse(StrictModel):
     sort_order: int
 
 
-class IssueResponse(StrictModel):
+class AdminAuthoringIssueResponse(StrictModel):
     id: UUID
     code: str
     title: str
-    questions: list[QuestionResponse]
+    questions: list[AdminAuthoringQuestionResponse]
     sort_order: int
 
 
-class ContextBlockResponse(StrictModel):
+class AdminAuthoringContextBlockResponse(StrictModel):
     id: UUID
     title: str
     body: str
@@ -204,7 +204,7 @@ class ContextBlockResponse(StrictModel):
     block_type: str
 
 
-class SourceResponse(StrictModel):
+class AdminAuthoringSourceResponse(StrictModel):
     id: UUID
     source_kind: str
     locator: str
@@ -225,9 +225,9 @@ class AuthoringVersionResponse(StrictModel):
     base_format_code: str
     primary_domain_code: str
     content_risk: str
-    issues: list[IssueResponse]
-    context_blocks: list[ContextBlockResponse]
-    sources: list[SourceResponse]
+    issues: list[AdminAuthoringIssueResponse]
+    context_blocks: list[AdminAuthoringContextBlockResponse]
+    sources: list[AdminAuthoringSourceResponse]
     modifiers: list[str]
     is_fact_bearing: bool
     is_real_event: bool
@@ -438,12 +438,12 @@ def _version_response(version: AuthoringCaseVersion) -> AuthoringVersionResponse
         primary_domain_code=version.primary_domain_code,
         content_risk=version.content_risk,
         issues=[
-            IssueResponse(
+            AdminAuthoringIssueResponse(
                 id=issue.id,
                 code=issue.code,
                 title=issue.title,
                 questions=[
-                    QuestionResponse(
+                    AdminAuthoringQuestionResponse(
                         id=question.id,
                         stable_code=question.stable_code,
                         prompt=question.prompt,
@@ -460,7 +460,7 @@ def _version_response(version: AuthoringCaseVersion) -> AuthoringVersionResponse
             for issue in version.issues
         ],
         context_blocks=[
-            ContextBlockResponse(
+            AdminAuthoringContextBlockResponse(
                 id=block.id,
                 title=block.title,
                 body=block.body,
@@ -473,7 +473,7 @@ def _version_response(version: AuthoringCaseVersion) -> AuthoringVersionResponse
             for block in version.context_blocks
         ],
         sources=[
-            SourceResponse(
+            AdminAuthoringSourceResponse(
                 id=source.id,
                 source_kind=source.source_kind,
                 locator=source.locator,
