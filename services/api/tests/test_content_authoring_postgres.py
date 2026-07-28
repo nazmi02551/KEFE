@@ -7,10 +7,13 @@ from uuid import uuid4
 import pytest
 from sqlalchemy import create_engine, text
 
-from kefe_api.infrastructure.postgres_content_authoring import (
-    PostgresContentAuthoringRepository,
+from kefe_api.infrastructure.postgres_content_configuration import (
+    PostgresContentConfigurationRepository,
 )
 from kefe_api.infrastructure.postgres_context import PostgresContextRepository
+from kefe_api.infrastructure.postgres_flow_pinned_content_authoring import (
+    PostgresFlowPinnedContentAuthoringRepository,
+)
 from kefe_api.infrastructure.postgres_perspective_decision import (
     PostgresPerspectiveDecisionRepository,
 )
@@ -25,6 +28,12 @@ from kefe_api.modules.content_authoring.models import (
 )
 from kefe_api.modules.content_authoring.registry import default_authoring_registry
 from kefe_api.modules.content_authoring.service import ContentAuthoringService
+from kefe_api.modules.content_configuration.bootstrap import (
+    build_default_content_configuration,
+)
+from kefe_api.modules.content_configuration.publication_resolver import (
+    ContentConfigurationPublicationResolver,
+)
 
 pytestmark = pytest.mark.skipif(
     os.getenv("KEFE_RUN_POSTGRES_TESTS") != "1",
@@ -85,8 +94,14 @@ def _aggregate(case_id):
 def _service():
     database_url = os.environ["KEFE_DATABASE_URL"]
     engine = create_engine(database_url)
-    repository = PostgresContentAuthoringRepository(engine)
-    service = ContentAuthoringService(repository, default_authoring_registry())
+    repository = PostgresFlowPinnedContentAuthoringRepository(engine)
+    configuration_repository = PostgresContentConfigurationRepository(engine)
+    configuration_repository.seed_if_empty(build_default_content_configuration())
+    service = ContentAuthoringService(
+        repository,
+        default_authoring_registry(),
+        ContentConfigurationPublicationResolver(configuration_repository),
+    )
     return engine, repository, service
 
 
