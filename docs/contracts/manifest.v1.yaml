@@ -1,4 +1,4 @@
-manifest_version: 1.17.0
+manifest_version: 1.18.0
 updated_at: '2026-07-28'
 policy:
   executable_schema_source: services/api/migrations
@@ -49,6 +49,10 @@ contracts:
     path: docs/contracts/content-authoring-persistence.v1.yaml
     version: 1.1.0
     role: editorial_postgres_and_atomic_publication_policy
+  - id: content-configuration-policy
+    path: docs/contracts/content-configuration-policy.v1.yaml
+    version: 1.0.0
+    role: versioned_taxonomy_compatibility_and_derived_review_policy
   - id: admin-security-policy
     path: docs/contracts/admin-security-policy.v1.yaml
     version: 1.0.0
@@ -63,7 +67,7 @@ contracts:
     role: secured_cookie_csrf_admin_authoring_http_policy
   - id: error-registry
     path: docs/contracts/error-codes.v1.yaml
-    version: 1.7.0
+    version: 1.8.0
     role: stable_api_errors
   - id: postgresql-m0-schema
     path: docs/contracts/postgresql-m0-schema.v1.8.0.sql
@@ -102,3 +106,4 @@ architecture_decisions:
   - docs/adr/0015-admin-authentication-authorization-threat-model.md
   - docs/adr/0016-durable-admin-sessions-and-csrf.md
   - docs/adr/0017-secured-admin-http-application-surface.md
+  - docs/adr/0018-versioned-content-configuration.md
