@@ -1,7 +1,7 @@
-contract_version: 1.0.0
+contract_version: 1.1.0
 updated_at: '2026-07-29'
 source_adr: docs/adr/0025-decision-revision-exposure-intervention-delta.md
-status: architecture_locked_implementation_pending
+status: implementation_contract
 
 scope:
   bounded_context: decision
@@ -43,6 +43,11 @@ revision_draft:
   mutable_until_commit: true
   committed_revision_mutation: forbidden
   later_decision_reopens_initial_response_rows: false
+  question_contract_v1:
+    source: case_version_active_questions
+    same_case_question_schema_reused_for_each_decision_step: true
+    step_specific_question_mapping: future_versioned_extension
+    client_question_schema_override: forbidden
 
 flow_validation:
   requested_step_must_exist_in_pinned_flow: true
@@ -132,6 +137,34 @@ decision_delta:
   legal_delta_engine: forbidden
   age_delta_engine: forbidden
   cost_delta_engine: forbidden
+
+http_v1:
+  actor_scope: bearer_principal
+  routes:
+    record_flow_step_exposure:
+      method: POST
+      path: /v1/weigh-sessions/{session_id}/flow-steps/{step_code}/exposures
+      idempotency_key_required: true
+      client_resource_category: forbidden
+      server_derives_primitive_capabilities_and_intervention: true
+    update_revision_responses:
+      method: PUT
+      path: /v1/weigh-sessions/{session_id}/decision-steps/{step_code}/responses
+    update_revision_reason:
+      method: PUT
+      path: /v1/weigh-sessions/{session_id}/decision-steps/{step_code}/reason
+    commit_revision:
+      method: POST
+      path: /v1/weigh-sessions/{session_id}/decision-steps/{step_code}/commit
+      idempotency_key_required: true
+    read_lineage:
+      method: GET
+      path: /v1/weigh-sessions/{session_id}/lineage
+      actor_scoped: true
+      private_reason_text_in_response: forbidden
+  initial_commit_route_unchanged: true
+  reveal_route_unchanged: true
+  perspective_route_unchanged: true
 
 security:
   authentication_required: true
