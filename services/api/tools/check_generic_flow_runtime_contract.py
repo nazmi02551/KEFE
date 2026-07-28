@@ -27,14 +27,20 @@ def main() -> None:
     problems: list[str] = []
 
     for fragment in {
+        "contract_version: 1.1.0",
         "live_content_configuration_lookup: forbidden",
         "actor_scope: same_actor_only",
         "result_payload_included: false",
         "perspective_payload_included: false",
         "private_reason_payload_included: false",
-        "FLOW_DECISION_REVISION_REQUIRED",
+        "context_fetch_alone_counts_as_exposure: false",
+        "predecessors_satisfied_without_revision: READY",
+        "committed_revision_exists_for_step: COMPLETED",
+        "revision_capability_intrinsically_unsupported: false",
         "FLOW_COMMIT_REQUIRED",
         "FLOW_RUNTIME_UNAVAILABLE",
+        "FLOW_REFLECTION_RUNTIME_PENDING",
+        "synthetic_revision_created_on_read: false",
     }:
         if fragment not in contract:
             problems.append(f"Generic Flow runtime contract missing: {fragment}")
@@ -42,13 +48,21 @@ def main() -> None:
     for fragment in {
         "case.resolved_flow",
         "session.actor_id != actor_id",
-        '"FLOW_DECISION_REVISION_REQUIRED"',
+        "list_decision_revisions",
+        "list_exposures",
+        "revision_step_codes",
+        "exposed_context_step_codes",
         '"FLOW_COMMIT_REQUIRED"',
         '"FLOW_RUNTIME_UNAVAILABLE"',
+        '"FLOW_REFLECTION_RUNTIME_PENDING"',
     }:
         if fragment not in service:
             problems.append(f"Generic Flow runtime service missing: {fragment}")
 
+    if "FLOW_DECISION_REVISION_REQUIRED" in service:
+        problems.append(
+            "Flow runtime v2 must not hard-code later Decision as unsupported"
+        )
     if "ContentConfiguration" in service:
         problems.append("Flow runtime must not depend on live Content Configuration")
 
@@ -73,8 +87,8 @@ def main() -> None:
         raise SystemExit("\n".join(problems))
 
     print(
-        "Generic Flow runtime contract OK: actor-scoped pinned-Flow authority, "
-        "no live config reinterpretation and no result leakage verified."
+        "Generic Flow runtime v2 contract OK: pinned Flow authority, exposure-aware "
+        "Context, revision-backed later Decisions and no result leakage verified."
     )
 
 

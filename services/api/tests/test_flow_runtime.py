@@ -148,7 +148,7 @@ def test_standard_flow_is_full_and_server_gates_result_by_commit() -> None:
     assert all(step.reason_code is None for step in after.steps)
 
 
-def test_principle_retest_uses_same_runtime_and_exposes_revision_gap() -> None:
+def test_principle_retest_uses_exposure_aware_runtime_v2() -> None:
     actor_id = uuid4()
     case = _case(_principle_retest_flow())
     draft_session = _session(case, actor_id, WeighState.DRAFT)
@@ -170,16 +170,39 @@ def test_principle_retest_uses_same_runtime_and_exposes_revision_gap() -> None:
         event_name="weigh.started",
         payload={"case_version_id": str(case.id)},
     )
-    after = service.get_runtime(actor_id=actor_id, session_id=committed.id)
+    after_commit = service.get_runtime(actor_id=actor_id, session_id=committed.id)
 
-    assert [step.state for step in after.steps] == [
+    assert [step.state for step in after_commit.steps] == [
         FlowStepRuntimeState.COMPLETED,
         FlowStepRuntimeState.READY,
-        FlowStepRuntimeState.UNSUPPORTED,
+        FlowStepRuntimeState.BLOCKED,
         FlowStepRuntimeState.BLOCKED,
     ]
-    assert after.steps[2].reason_code == "FLOW_DECISION_REVISION_REQUIRED"
-    assert after.steps[3].reason_code == "FLOW_PREDECESSOR_PENDING"
+    assert after_commit.steps[2].reason_code == "FLOW_PREDECESSOR_PENDING"
+
+    repository.record_exposure(
+        actor_id=actor_id,
+        session_id=committed.id,
+        case_version_id=case.id,
+        flow_step_code="CONTEXT",
+        resource_category="CONTEXT",
+        resource_ref=None,
+        primitive_code="CONTEXT",
+        capability_codes=("COUNTERARGUMENT",),
+        metadata={"source": "TEST"},
+        idempotency_key="runtime-context-exposure",
+        occurred_at=datetime.now(UTC),
+        intervention_type_code="CONTEXT_REVEAL",
+    )
+    after_exposure = service.get_runtime(actor_id=actor_id, session_id=committed.id)
+    assert [step.state for step in after_exposure.steps] == [
+        FlowStepRuntimeState.COMPLETED,
+        FlowStepRuntimeState.COMPLETED,
+        FlowStepRuntimeState.READY,
+        FlowStepRuntimeState.BLOCKED,
+    ]
+    assert after_exposure.steps[2].reason_code is None
+    assert after_exposure.steps[3].reason_code == "FLOW_PREDECESSOR_PENDING"
 
 
 def test_flow_runtime_is_actor_scoped_and_never_infers_legacy_flow() -> None:

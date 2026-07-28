@@ -107,7 +107,12 @@ def test_postgres_case_weigh_commit_reveal_and_outbox(monkeypatch: pytest.Monkey
                 ),
                 {"session_id": session_id},
             ).scalars().all()
-        assert names == ["weigh.started", "weigh.committed", "result.revealed"]
+        assert names == [
+            "weigh.started",
+            "weigh.committed",
+            "result.revealed",
+            "exposure.recorded",
+        ]
     finally:
         get_settings.cache_clear()
 

@@ -162,7 +162,7 @@ class _FlowStepSection extends ConsumerWidget {
     }
 
     return switch (step.primitiveCode) {
-      'CONTEXT' => _contextStep(),
+      'CONTEXT' => _contextStep(ref),
       'DECISION' => _decisionStep(context, ref),
       'COLLECTIVE_RESULT' => _resultStep(context, ref),
       _ => step.state == FlowStepRuntimeState.unsupported
@@ -171,17 +171,19 @@ class _FlowStepSection extends ConsumerWidget {
     };
   }
 
-  Widget _contextStep() {
+  Widget _contextStep(WidgetRef ref) {
     if (step.state != FlowStepRuntimeState.ready &&
         step.state != FlowStepRuntimeState.completed) {
       return const SizedBox.shrink();
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ContextSection(caseVersionId: state.caseData!.versionId),
-        const SizedBox(height: 24),
-      ],
+    return _ExposureAwareContextStep(
+      caseVersionId: state.caseData!.versionId,
+      stepCode: step.code,
+      shouldRecordExposure:
+          step.state == FlowStepRuntimeState.ready && !state.offlineDraft,
+      onExposed: () => ref
+          .read(decisionControllerProvider.notifier)
+          .recordContextExposure(step.code),
     );
   }
 
@@ -197,8 +199,7 @@ class _FlowStepSection extends ConsumerWidget {
     final caseData = state.caseData!;
     final reasonPolicy = caseData.reasonPolicy;
     final controller = ref.read(decisionControllerProvider.notifier);
-    final inputsEnabled =
-        !state.recoveryPending && !state.submitting && state.reveal == null;
+    final inputsEnabled = !state.recoveryPending && !state.submitting;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -278,6 +279,63 @@ class _FlowStepSection extends ConsumerWidget {
             onContinue: () => context.go('/explore'),
           ),
         ],
+      ],
+    );
+  }
+}
+
+class _ExposureAwareContextStep extends StatefulWidget {
+  const _ExposureAwareContextStep({
+    required this.caseVersionId,
+    required this.stepCode,
+    required this.shouldRecordExposure,
+    required this.onExposed,
+  });
+
+  final String caseVersionId;
+  final String stepCode;
+  final bool shouldRecordExposure;
+  final VoidCallback onExposed;
+
+  @override
+  State<_ExposureAwareContextStep> createState() =>
+      _ExposureAwareContextStepState();
+}
+
+class _ExposureAwareContextStepState extends State<_ExposureAwareContextStep> {
+  bool _scheduled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleExposure();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ExposureAwareContextStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.stepCode != widget.stepCode) {
+      _scheduled = false;
+    }
+    _scheduleExposure();
+  }
+
+  void _scheduleExposure() {
+    if (!widget.shouldRecordExposure || _scheduled) return;
+    _scheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      widget.onExposed();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ContextSection(caseVersionId: widget.caseVersionId),
+        const SizedBox(height: 24),
       ],
     );
   }

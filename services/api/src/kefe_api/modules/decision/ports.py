@@ -4,6 +4,14 @@ from datetime import datetime
 from typing import Any, Protocol
 from uuid import UUID
 
+from kefe_api.modules.decision.lineage_models import (
+    DecisionDelta,
+    DecisionRevision,
+    Exposure,
+    Intervention,
+    RevisionCommitAttempt,
+    RevisionDraft,
+)
 from kefe_api.modules.decision.models import (
     CaseVersion,
     CommitAttempt,
@@ -58,7 +66,51 @@ class DecisionRepository(Protocol):
         idempotency_key: str,
         required_question_ids: frozenset[UUID],
         committed_at: datetime,
+        flow_step_code: str | None = None,
     ) -> CommitAttempt: ...
+
+    def get_revision_draft(
+        self, *, session_id: UUID, flow_step_code: str
+    ) -> RevisionDraft | None: ...
+
+    def save_revision_draft(self, draft: RevisionDraft) -> None: ...
+
+    def record_exposure(
+        self,
+        *,
+        actor_id: UUID,
+        session_id: UUID,
+        case_version_id: UUID,
+        flow_step_code: str,
+        resource_category: str,
+        resource_ref: str | None,
+        primitive_code: str,
+        capability_codes: tuple[str, ...],
+        metadata: dict[str, Any],
+        idempotency_key: str,
+        occurred_at: datetime,
+        intervention_type_code: str | None = None,
+        intervention_metadata: dict[str, Any] | None = None,
+    ) -> tuple[Exposure, Intervention | None]: ...
+
+    def commit_revision(
+        self,
+        *,
+        actor_id: UUID,
+        session_id: UUID,
+        flow_step_code: str,
+        idempotency_key: str,
+        required_question_ids: frozenset[UUID],
+        committed_at: datetime,
+    ) -> RevisionCommitAttempt: ...
+
+    def list_decision_revisions(self, session_id: UUID) -> tuple[DecisionRevision, ...]: ...
+
+    def list_exposures(self, session_id: UUID) -> tuple[Exposure, ...]: ...
+
+    def list_interventions(self, session_id: UUID) -> tuple[Intervention, ...]: ...
+
+    def list_decision_deltas(self, session_id: UUID) -> tuple[DecisionDelta, ...]: ...
 
     def get_reveal(self, case_version_id: UUID) -> RevealSnapshot | None: ...
 

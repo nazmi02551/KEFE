@@ -7,13 +7,11 @@ from kefe_api.infrastructure.postgres_content_configuration import (
     PostgresContentConfigurationRepository,
 )
 from kefe_api.infrastructure.postgres_context import PostgresContextRepository
+from kefe_api.infrastructure.postgres_decision_lineage import PostgresDecisionLineageRepository
 from kefe_api.infrastructure.postgres_flow_pinned_content_authoring import (
     PostgresFlowPinnedContentAuthoringRepository,
 )
 from kefe_api.infrastructure.postgres_identity import PostgresIdentityRepository
-from kefe_api.infrastructure.postgres_perspective_decision import (
-    PostgresPerspectiveDecisionRepository,
-)
 from kefe_api.infrastructure.postgres_progress import PostgresProgressRepository
 from kefe_api.modules.admin_security.in_memory import InMemoryAdminSessionStore
 from kefe_api.modules.admin_security.ports import AdminSessionStore
@@ -27,7 +25,7 @@ from kefe_api.modules.content_configuration.ports import ContentConfigurationRep
 from kefe_api.modules.context.bootstrap import build_demo_context_repository
 from kefe_api.modules.context.ports import ContextRepository
 from kefe_api.modules.decision.bootstrap import build_demo_repository
-from kefe_api.modules.decision.in_memory import InMemoryDecisionRepository
+from kefe_api.modules.decision.lineage_in_memory import InMemoryLineageDecisionRepository
 from kefe_api.modules.decision.ports import DecisionRepository
 from kefe_api.modules.identity.in_memory import InMemoryIdentityRepository
 from kefe_api.modules.identity.ports import IdentityRepository
@@ -42,7 +40,7 @@ def build_decision_repository(settings: Settings) -> DecisionRepository:
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
 
-    return PostgresPerspectiveDecisionRepository(build_engine(settings.database_url))
+    return PostgresDecisionLineageRepository(build_engine(settings.database_url))
 
 
 def build_context_repository(settings: Settings) -> ContextRepository:
@@ -60,7 +58,7 @@ def build_progress_repository(
     decision_repository: DecisionRepository,
 ) -> ProgressRepository:
     if settings.persistence_backend == "memory":
-        if not isinstance(decision_repository, InMemoryDecisionRepository):
+        if not isinstance(decision_repository, InMemoryLineageDecisionRepository):
             raise RuntimeError("memory progress requires the in-memory decision repository")
         return InMemoryProgressRepository(decision_repository)
 

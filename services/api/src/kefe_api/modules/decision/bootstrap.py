@@ -3,9 +3,10 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import UUID
 
-from kefe_api.modules.decision.in_memory import InMemoryDecisionRepository
+from kefe_api.modules.decision.lineage_in_memory import InMemoryLineageDecisionRepository
 from kefe_api.modules.decision.models import (
     CaseVersion,
+    FlowStep,
     PerspectiveCard,
     PerspectiveMode,
     PerspectiveSlot,
@@ -13,6 +14,7 @@ from kefe_api.modules.decision.models import (
     PerspectiveSourceKind,
     Question,
     ReasonModerationState,
+    ResolvedFlow,
     RevealSnapshot,
 )
 
@@ -26,7 +28,7 @@ DEMO_BRIDGE_PERSPECTIVE_ID = UUID("90000000-0000-4000-8000-000000000003")
 DEMO_ALTERNATIVE_PERSPECTIVE_ID = UUID("90000000-0000-4000-8000-000000000004")
 
 
-def build_demo_repository() -> InMemoryDecisionRepository:
+def build_demo_repository() -> InMemoryLineageDecisionRepository:
     case = CaseVersion(
         id=DEMO_CASE_VERSION_ID,
         case_id=DEMO_CASE_ID,
@@ -62,7 +64,34 @@ def build_demo_repository() -> InMemoryDecisionRepository:
                 prompt="Bu kararından ne kadar eminsin?",
                 response_type="CONFIDENCE",
                 required=False,
-                response_schema={"min": 1, "max": 5, "step": 1},
+                response_schema={"min": 1, "max": 10, "step": 1},
+            ),
+        ),
+        resolved_flow=ResolvedFlow(
+            template_code="STANDARD_COMMIT_REVEAL",
+            template_version_no=1,
+            entry_step_code="CONTEXT",
+            steps=(
+                FlowStep(
+                    code="CONTEXT",
+                    primitive_code="CONTEXT",
+                    capability_codes=("SOURCE_REVEAL",),
+                    next_step_codes=("DECISION",),
+                ),
+                FlowStep(
+                    code="DECISION",
+                    primitive_code="DECISION",
+                    capability_codes=(
+                        "COMMIT_FIRST",
+                        "CONFIDENCE_CAPTURE",
+                        "REASON_CAPTURE",
+                    ),
+                    next_step_codes=("RESULT",),
+                ),
+                FlowStep(
+                    code="RESULT",
+                    primitive_code="COLLECTIVE_RESULT",
+                ),
             ),
         ),
     )
@@ -123,7 +152,7 @@ def build_demo_repository() -> InMemoryDecisionRepository:
             ),
         ),
     )
-    return InMemoryDecisionRepository(
+    return InMemoryLineageDecisionRepository(
         cases=[case],
         reveals=[reveal],
         perspectives=[perspective],

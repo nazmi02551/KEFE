@@ -29,8 +29,10 @@ from kefe_api.modules.content_configuration.publication_resolver import (
 from kefe_api.modules.content_configuration.service import ContentConfigurationService
 from kefe_api.modules.context.router import router as context_router
 from kefe_api.modules.context.service import ContextService
+from kefe_api.modules.decision.lineage_aware_service import LineageAwareDecisionService
+from kefe_api.modules.decision.lineage_router import router as decision_lineage_router
+from kefe_api.modules.decision.lineage_service import DecisionLineageService
 from kefe_api.modules.decision.router import router as decision_router
-from kefe_api.modules.decision.service import DecisionService
 from kefe_api.modules.flow_runtime.router import router as flow_runtime_router
 from kefe_api.modules.flow_runtime.service import FlowRuntimeService
 from kefe_api.modules.health.router import router as health_router
@@ -81,12 +83,17 @@ def create_app() -> FastAPI:
         repository=content_configuration_repository,
         security=admin_security_service,
     )
+    flow_runtime_service = FlowRuntimeService(decision_repository)
 
     app.state.context_repository = context_repository
     app.state.context_service = ContextService(context_repository)
     app.state.decision_repository = decision_repository
-    app.state.decision_service = DecisionService(decision_repository)
-    app.state.flow_runtime_service = FlowRuntimeService(decision_repository)
+    app.state.decision_service = LineageAwareDecisionService(decision_repository)
+    app.state.flow_runtime_service = flow_runtime_service
+    app.state.decision_lineage_service = DecisionLineageService(
+        decision_repository,
+        flow_runtime_service,
+    )
     app.state.identity_repository = identity_repository
     app.state.identity_service = IdentityService(
         repository=identity_repository,
@@ -116,6 +123,7 @@ def create_app() -> FastAPI:
     app.include_router(identity_router)
     app.include_router(context_router)
     app.include_router(decision_router)
+    app.include_router(decision_lineage_router)
     app.include_router(flow_runtime_router)
     app.include_router(progress_router)
     app.include_router(admin_router)

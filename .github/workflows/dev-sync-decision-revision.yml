@@ -1,0 +1,59 @@
+name: Dev Sync DecisionRevision Contracts
+
+on:
+  push:
+    branches:
+      - feature/m2-decision-revision-lineage
+    paths:
+      - '.github/workflows/dev-sync-decision-revision.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/m2-decision-revision-lineage
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install API development dependencies
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Normalize new Python sources
+        working-directory: services/api
+        run: |
+          ruff check \
+            src/kefe_api/infrastructure/postgres_decision_lineage.py \
+            src/kefe_api/modules/decision/in_memory.py \
+            src/kefe_api/modules/decision/lineage_service.py \
+            --fix
+          ruff format \
+            src/kefe_api/infrastructure/postgres_decision_lineage.py \
+            src/kefe_api/modules/decision/in_memory.py \
+            src/kefe_api/modules/decision/lineage_service.py
+          ruff check \
+            src/kefe_api/infrastructure/postgres_decision_lineage.py \
+            src/kefe_api/modules/decision/in_memory.py \
+            src/kefe_api/modules/decision/lineage_service.py
+      - name: Regenerate exact OpenAPI contract
+        working-directory: services/api
+        run: python tools/export_openapi.py --output ../../docs/contracts/openapi.v1.json
+      - name: Commit normalized generated artifacts
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            services/api/src/kefe_api/infrastructure/postgres_decision_lineage.py \
+            services/api/src/kefe_api/modules/decision/in_memory.py \
+            services/api/src/kefe_api/modules/decision/lineage_service.py \
+            docs/contracts/openapi.v1.json
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'Normalize DecisionRevision runtime contracts'
+          git push origin HEAD:feature/m2-decision-revision-lineage

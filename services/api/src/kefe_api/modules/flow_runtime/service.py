@@ -46,7 +46,18 @@ class FlowRuntimeService:
                 409,
             )
 
-        steps = self._evaluate(flow=flow, session_state=session.state)
+        revisions = self._repository.list_decision_revisions(session.id)
+        exposures = self._repository.list_exposures(session.id)
+        steps = self._evaluate(
+            flow=flow,
+            session_state=session.state,
+            revision_step_codes={item.flow_step_code for item in revisions},
+            exposed_context_step_codes={
+                item.flow_step_code
+                for item in exposures
+                if item.resource_category == "CONTEXT"
+            },
+        )
         support = self._execution_support(flow)
         return FlowRuntimeSnapshot(
             session_id=session.id,
@@ -61,16 +72,11 @@ class FlowRuntimeService:
 
     @staticmethod
     def _execution_support(flow: ResolvedFlow) -> FlowExecutionSupport:
-        decision_count = sum(
-            1 for step in flow.steps if step.primitive_code == "DECISION"
-        )
         fully_supported_primitives = {
             "CONTEXT",
             "DECISION",
             "COLLECTIVE_RESULT",
         }
-        if decision_count > 1:
-            return FlowExecutionSupport.PARTIAL
         if any(
             step.primitive_code not in fully_supported_primitives
             for step in flow.steps
@@ -83,6 +89,8 @@ class FlowRuntimeService:
         *,
         flow: ResolvedFlow,
         session_state: WeighState,
+        revision_step_codes: set[str],
+        exposed_context_step_codes: set[str],
     ) -> tuple[FlowRuntimeStep, ...]:
         step_by_code = {step.code: step for step in flow.steps}
         if flow.entry_step_code not in step_by_code:
@@ -106,6 +114,13 @@ class FlowRuntimeService:
             if step.primitive_code == "DECISION"
         ]
         first_decision_code = decision_codes[0] if decision_codes else None
+        context_exposure_required = {
+            step.code
+            for step in flow.steps
+            if step.primitive_code == "CONTEXT"
+            and self._has_decision_ancestor(step.code, predecessors, step_by_code)
+            and self._has_decision_descendant(step.code, step_by_code)
+        }
 
         satisfied: set[str] = set()
         evaluated: dict[str, FlowRuntimeStep] = {}
@@ -123,12 +138,13 @@ class FlowRuntimeService:
                 ):
                     continue
 
-                runtime_step, transition_satisfied = (
-                    self._evaluate_reachable_step(
-                        step=step,
-                        session_state=session_state,
-                        first_decision_code=first_decision_code,
-                    )
+                runtime_step, transition_satisfied = self._evaluate_reachable_step(
+                    step=step,
+                    session_state=session_state,
+                    first_decision_code=first_decision_code,
+                    revision_step_codes=revision_step_codes,
+                    exposed_context_step_codes=exposed_context_step_codes,
+                    context_exposure_required=context_exposure_required,
                 )
                 evaluated[step.code] = runtime_step
                 remaining.remove(step.code)
@@ -165,44 +181,71 @@ class FlowRuntimeService:
         step: FlowStep,
         session_state: WeighState,
         first_decision_code: str | None,
+        revision_step_codes: set[str],
+        exposed_context_step_codes: set[str],
+        context_exposure_required: set[str],
     ) -> tuple[FlowRuntimeStep, bool]:
         if step.primitive_code == "CONTEXT":
+            requires_exposure = step.code in context_exposure_required
+            exposed = step.code in exposed_context_step_codes
+            state = (
+                FlowStepRuntimeState.COMPLETED
+                if requires_exposure and exposed
+                else FlowStepRuntimeState.READY
+            )
             return (
                 FlowRuntimeStep(
                     code=step.code,
                     primitive_code=step.primitive_code,
                     capability_codes=step.capability_codes,
                     next_step_codes=step.next_step_codes,
-                    state=FlowStepRuntimeState.READY,
+                    state=state,
                 ),
-                True,
+                exposed if requires_exposure else True,
             )
 
         if step.primitive_code == "DECISION":
-            if step.code != first_decision_code:
+            if step.code == first_decision_code:
+                # Historical committed sessions predate DecisionRevision persistence.
+                initial_complete = (
+                    step.code in revision_step_codes
+                    or session_state is WeighState.COMMITTED
+                )
+                if initial_complete:
+                    return (
+                        FlowRuntimeStep(
+                            code=step.code,
+                            primitive_code=step.primitive_code,
+                            capability_codes=step.capability_codes,
+                            next_step_codes=step.next_step_codes,
+                            state=FlowStepRuntimeState.COMPLETED,
+                        ),
+                        True,
+                    )
+                if session_state is WeighState.DRAFT:
+                    return (
+                        FlowRuntimeStep(
+                            code=step.code,
+                            primitive_code=step.primitive_code,
+                            capability_codes=step.capability_codes,
+                            next_step_codes=step.next_step_codes,
+                            state=FlowStepRuntimeState.READY,
+                        ),
+                        False,
+                    )
                 return (
                     FlowRuntimeStep(
                         code=step.code,
                         primitive_code=step.primitive_code,
                         capability_codes=step.capability_codes,
                         next_step_codes=step.next_step_codes,
-                        state=FlowStepRuntimeState.UNSUPPORTED,
-                        reason_code="FLOW_DECISION_REVISION_REQUIRED",
+                        state=FlowStepRuntimeState.BLOCKED,
+                        reason_code="FLOW_SESSION_NOT_EDITABLE",
                     ),
                     False,
                 )
-            if session_state is WeighState.DRAFT:
-                return (
-                    FlowRuntimeStep(
-                        code=step.code,
-                        primitive_code=step.primitive_code,
-                        capability_codes=step.capability_codes,
-                        next_step_codes=step.next_step_codes,
-                        state=FlowStepRuntimeState.READY,
-                    ),
-                    False,
-                )
-            if session_state is WeighState.COMMITTED:
+
+            if step.code in revision_step_codes:
                 return (
                     FlowRuntimeStep(
                         code=step.code,
@@ -219,8 +262,7 @@ class FlowRuntimeService:
                     primitive_code=step.primitive_code,
                     capability_codes=step.capability_codes,
                     next_step_codes=step.next_step_codes,
-                    state=FlowStepRuntimeState.BLOCKED,
-                    reason_code="FLOW_SESSION_NOT_EDITABLE",
+                    state=FlowStepRuntimeState.READY,
                 ),
                 False,
             )
@@ -273,3 +315,45 @@ class FlowRuntimeService:
             ),
             False,
         )
+
+    @staticmethod
+    def _has_decision_ancestor(
+        step_code: str,
+        predecessors: dict[str, set[str]],
+        step_by_code: dict[str, FlowStep],
+    ) -> bool:
+        pending = list(predecessors.get(step_code, set()))
+        seen: set[str] = set()
+        while pending:
+            code = pending.pop()
+            if code in seen:
+                continue
+            seen.add(code)
+            step = step_by_code.get(code)
+            if step is not None and step.primitive_code == "DECISION":
+                return True
+            pending.extend(predecessors.get(code, set()))
+        return False
+
+    @staticmethod
+    def _has_decision_descendant(
+        step_code: str,
+        step_by_code: dict[str, FlowStep],
+    ) -> bool:
+        start = step_by_code.get(step_code)
+        if start is None:
+            return False
+        pending = list(start.next_step_codes)
+        seen: set[str] = set()
+        while pending:
+            code = pending.pop()
+            if code in seen:
+                continue
+            seen.add(code)
+            step = step_by_code.get(code)
+            if step is None:
+                continue
+            if step.primitive_code == "DECISION":
+                return True
+            pending.extend(step.next_step_codes)
+        return False
