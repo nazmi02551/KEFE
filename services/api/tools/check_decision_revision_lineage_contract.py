@@ -20,13 +20,17 @@ def main() -> None:
     problems: list[str] = []
 
     for fragment in {
+        "contract_version: 1.1.0",
+        "status: implementation_contract",
         "initial_commit_materializes_revision_one: true",
         "later_decision_reopens_initial_response_rows: false",
+        "same_case_question_schema_reused_for_each_decision_step: true",
         "context_fetch_alone_counts_as_exposure: false",
         "not_every_exposure_is_intervention: true",
         "dimension_specific_delta_engines_forbidden: true",
         "claims_causality: false",
         "advocacy_support_is_decision_revision_class: false",
+        "path: /v1/weigh-sessions/{session_id}/lineage",
         "target_flow: PRINCIPLE_CONTEXT_RETEST",
         "runtime_case_type_branching: forbidden",
     }:
@@ -57,12 +61,13 @@ def main() -> None:
             problems.append(f"Core ERD v2 missing lineage relation: {fragment}")
 
     for fragment in {
-        "manifest_version: 1.27.0",
+        "manifest_version: 1.28.0",
         "path: docs/contracts/core-erd.v2.mmd",
         "id: mobile-flow-runtime-ui",
         "path: docs/contracts/mobile-flow-runtime-ui.v1.yaml",
         "id: decision-revision-lineage",
         "path: docs/contracts/decision-revision-lineage.v1.yaml",
+        "version: 1.1.0",
         "docs/adr/0024-flutter-flow-driven-consumer-rendering.md",
         "docs/adr/0025-decision-revision-exposure-intervention-delta.md",
     }:
@@ -75,7 +80,6 @@ def main() -> None:
         "AgeDelta",
         "CostDelta",
     }
-    # ADR may mention these names only in the explicit prohibition sentence.
     for name in forbidden:
         if f"{name} or" not in adr and f"{name}," not in adr:
             problems.append(f"ADR-0025 must explicitly prohibit dimension engine {name}")
@@ -84,8 +88,8 @@ def main() -> None:
         raise SystemExit("\n".join(problems))
 
     print(
-        "DecisionRevision lineage contract OK: immutable revisions, actual Exposure, "
-        "server-validated Intervention and generic non-causal Delta are architecture-locked."
+        "DecisionRevision lineage v1.1 contract OK: immutable revisions, actual Exposure, "
+        "server-validated Intervention, generic non-causal Delta and actor-scoped HTTP are locked."
     )
 
 
