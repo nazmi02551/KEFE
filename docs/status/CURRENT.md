@@ -3,7 +3,7 @@
 **Updated:** 2026-07-28  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Latest verified implementation commit:** `b68cb11cc37c3d42a6040fd9e5452b1b44fd6c59`
+**Latest verified implementation commit:** `34c44b073b349a61a1c027b0fceb593978a10f27`
 
 This is the **single canonical durable engineering handoff**. Chat history is not a source of truth. At every continuation, read this file from `main`, inspect open PRs/recent CI, then proceed from the repository state.
 
@@ -34,6 +34,7 @@ Binding rules:
 - Content authoring is separate from consumer reads/writes.
 - Admin identity is a separate security domain from consumer Actor identity; consumer credentials cannot authenticate Admin commands.
 - Admin authorization is capability-first, server-side and least-privilege; audit identity is derived from the authenticated Admin principal.
+- Admin browser sessions are opaque and revocable; raw session/CSRF secrets are never persisted, and state-changing requests require session-bound CSRF verification.
 
 ## 2. Completed executable foundation
 
@@ -63,7 +64,13 @@ Backend/contracts:
 - Reviewer must differ from submitter for the same CaseVersion; publisher may equal reviewer in the initial operational model.
 - `SecuredContentAuthoringService` derives audit identity as `admin:<admin_subject_id>` and capability-gates authoring lifecycle commands before calling the provider-neutral authoring service.
 - Security-denial audit-sink port exists; raw Admin session tokens are not part of audit identity.
-- **No Admin/authoring HTTP endpoint exists yet.** The next slice may expose one only through the secured application boundary and the session/CSRF controls defined by the Admin security policy.
+- Durable Admin session substrate is implemented under an isolated `admin_security` schema.
+- Stable Admin subjects support `ACTIVE`, `SUSPENDED` and `DISABLED` state with explicit role assignments and direct capability grants.
+- Opaque server-side Admin sessions are immediately revocable; only SHA-256 digests of session and CSRF secrets are persisted.
+- MFA assurance, absolute expiry, idle expiry, server-authoritative `last_seen_at` and recent step-up are enforced before capability-gated commands.
+- CSRF tokens are bound to the same opaque Admin session; cross-session CSRF use is rejected.
+- `AdminSessionResolver`, `AdminSessionIssuer` and `AdminCsrfVerifier` remain provider-neutral; no SSO/IdP vendor is embedded in authorization rules.
+- **No Admin/authoring HTTP endpoint exists yet.** The next slice is the first secured internal Admin HTTP application surface over these durable session/CSRF primitives.
 
 Mobile:
 
@@ -87,6 +94,7 @@ Most recent merged product/architecture slices:
 - PR #31 — M1 Content Authoring and immutable publication core; merge commit `9416d4366650c3078d92dbf0b5533e4d1a4cdf39`.
 - PR #33 — PostgreSQL editorial persistence, atomic publication materialization and draft-leakage protection; merge commit `b36415671322dd15ea3b0a31c1203898ca0ebf58`.
 - PR #35 — Admin authentication/authorization/threat-model boundary and secured Content Authoring facade; merge commit `b68cb11cc37c3d42a6040fd9e5452b1b44fd6c59`.
+- PR #37 — durable Admin subjects/sessions, role-capability persistence, MFA/session assurance and session-bound CSRF substrate; merge commit `34c44b073b349a61a1c027b0fceb593978a10f27`.
 
 ## 3. Current executable path
 
@@ -94,7 +102,7 @@ Most recent merged product/architecture slices:
 
 Failures in Context, Perspective or Progress are isolated from the trusted decision state. They cannot replay mutable answers, Reason or Commit. The current low-risk DILEMMA is a development fixture, not a product-wide default.
 
-Content authoring now has a durable domain/application/persistence core, atomic publication boundary and secured Admin application facade. It is intentionally not yet connected to an HTTP Admin surface. Consumer reads continue to use only published immutable materialized content.
+Content authoring now has a durable domain/application/persistence core, atomic publication boundary, secured Admin application facade and durable Admin session substrate. It is intentionally not yet connected to an HTTP Admin surface. Consumer reads continue to use only published immutable materialized content.
 
 ## 4. Guardrails for upcoming work
 
@@ -112,17 +120,20 @@ Content authoring now has a durable domain/application/persistence core, atomic 
 - Consumer guest/account credentials must never be accepted as Admin credentials.
 - Do not allow client-provided Admin actor/audit identity.
 - Admin browser credentials must not be stored as long-lived JavaScript bearer tokens.
-- State-changing browser Admin requests require CSRF protection when the HTTP surface is introduced.
+- State-changing browser Admin requests require same-session CSRF verification.
 - Publication/withdrawal/access-management require recent Admin step-up authentication.
+- Admin session resolution must check revocation, subject state, MFA, absolute expiry and idle expiry before refreshing activity.
 
 ## 5. Recommended next sequence
 
-1. **Authenticated Admin application boundary**
-   - durable Admin subject/session/role-capability persistence behind provider-neutral ports
-   - opaque revocable Admin session resolution; no SSO vendor lock-in
-   - CSRF verification port for state-changing browser commands
-   - authenticated internal Admin HTTP endpoints only through `SecuredContentAuthoringService`
-   - authorization tests for every lifecycle command and no direct database mutation path from UI
+1. **Authenticated Admin HTTP application surface**
+   - expose only internal Admin workflow endpoints backed by opaque revocable Admin sessions
+   - resolve the Admin principal server-side from the session; never accept client-supplied audit identity
+   - require session-bound CSRF on every state-changing browser command
+   - route authoring lifecycle commands only through `SecuredContentAuthoringService`
+   - enforce recent step-up on publish, withdraw and access-management commands
+   - add authorization/CSRF/session-expiry tests for every exposed lifecycle command
+   - keep external SSO/login provider integration outside this slice unless an explicit provider-neutral authentication contract requires it
 
 2. **Content configuration and review workflows**
    - taxonomy/format/modifier registry management
@@ -151,7 +162,7 @@ Content authoring now has a durable domain/application/persistence core, atomic 
    - visually verify every render
    - update manifest and archive superseded versions
 
-PR #35 completes the **Admin security boundary** but the broader Content/Admin milestone is not complete until the authenticated workflow surface is implemented over durable Admin sessions and CSRF/session controls. Therefore DOCX/PDF regeneration remains deferred until that declared milestone boundary or an earlier product-policy change.
+PR #37 completes the **durable Admin session/CSRF substrate**, but the broader Content/Admin milestone is not complete until the authenticated Admin HTTP workflow surface is implemented through the secured facade. Therefore DOCX/PDF regeneration remains deferred until that declared milestone boundary or an earlier product-policy change.
 
 ## 6. Continuation protocol
 
@@ -166,7 +177,8 @@ PR #35 completes the **Admin security boundary** but the broader Content/Admin m
 9. Update this checkpoint after every meaningful merged milestone.
 10. Capture CI failure diagnostics as artifacts before speculative fixes.
 11. Synchronize DOCX/PDF only at declared milestone boundaries.
+12. Treat `docs/status/CURRENT.md` as the recovery anchor when a chat window becomes slow, interrupted or unavailable.
 
 ## 7. New-chat recovery prompt
 
-> Continue KEFE development from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first, then inspect open PRs, recent commits and CI. Preserve Commit First, CaseVersion pinning, pre-Commit Context without result leakage, private Reason boundaries, optional guest continuation, low-claim My KEFE Progress, immutable published content and provider-neutral ports/adapters. Editorial drafts live outside consumer publication. Admin identity is separate from consumer identity, capability checks are server-side, reviewer and submitter are separated, and publish/withdraw/access-management require recent step-up. Add Admin HTTP only through the secured application facade with opaque revocable Admin sessions and CSRF protection. Merge only with green CI and keep the milestone DOCX/PDF synchronization obligation.
+> Continue KEFE development from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first, then inspect open PRs, recent commits and CI. Preserve Commit First, CaseVersion pinning, pre-Commit Context without result leakage, private Reason boundaries, optional guest continuation, low-claim My KEFE Progress, immutable published content and provider-neutral ports/adapters. Editorial drafts live outside consumer publication. Admin identity is separate from consumer identity, capability checks are server-side, reviewer and submitter are separated, and publish/withdraw/access-management require recent step-up. Durable opaque Admin sessions, revocation, MFA/session assurance and same-session CSRF binding already exist; expose Admin HTTP only through those controls and `SecuredContentAuthoringService`. Merge only with green CI and keep the milestone DOCX/PDF synchronization obligation.
