@@ -1,4 +1,4 @@
-manifest_version: 1.13.0
+manifest_version: 1.13.1
 updated_at: '2026-07-28'
 policy:
   executable_schema_source: services/api/migrations
@@ -47,7 +47,7 @@ contracts:
     role: immutable_case_version_authoring_and_publication_policy
   - id: error-registry
     path: docs/contracts/error-codes.v1.yaml
-    version: 1.4.0
+    version: 1.5.0
     role: stable_api_errors
   - id: postgresql-m0-schema
     path: docs/contracts/postgresql-m0-schema.v1.6.0.sql
