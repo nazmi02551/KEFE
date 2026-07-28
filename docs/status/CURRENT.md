@@ -273,3 +273,18 @@ No implementation may leapfrog an unresolved product/domain contract.
 ## 8. New-chat recovery prompt
 
 > Continue KEFE from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first and inspect open PRs/recent CI. Official docs baseline remains Ecosystem v3.4. The binding architecture is case-agnostic: `Primitive → Capability → FlowTemplateVersion → CaseVersion`, with `ME → WE → SIGNAL → IMPACT`. PR #54 (`164a97dc...`) provides the server-authoritative generic Flow runtime from the CaseVersion-pinned resolved Flow. PR #56 (`94d31fcc...`) makes Flutter render from that Flow without Case-specific branching. PR #57 (`c45cf369...`) proves a production-authoring-published demo Case through the same architecture and produces an installable deterministic Preview APK. The next locked development target is DecisionRevision → Exposure/Intervention → DecisionDelta so revision-dependent Flow paths such as `PRINCIPLE_CONTEXT_RETEST` become FULL. Do not code an unlocked product decision.
+
+## M2 DecisionRevision Runtime Checkpoint — 2026-07-29
+
+- Main baseline: `9d5b4b4d3bccb1e2f21479c921f07a6c51357c05`
+- PR #60 delivered the first executable DecisionRevision lineage slice under ADR-0025.
+- Initial Commit materializes immutable Revision #1; later Decision Steps use separate revision drafts and immutable revisions.
+- Context between committed Decisions is recorded as actual Exposure and promoted server-side to a methodology-significant Intervention.
+- Generic DecisionDelta links predecessor revision, intervention lineage and successor revision without claiming causality.
+- Flow runtime v2 evaluates between-decision Context and later Decision readiness from server lineage state; Reflection remains explicitly pending.
+- Consumer Flutter uses the same Flow-driven screen and offline/idempotent draft state machine for initial and later Decisions; no Case/BaseFormat branching was introduced.
+- Contract baseline: API/OpenAPI 0.15.0, generic Flow runtime 1.1.0, DecisionRevision lineage 1.1.0, Mobile Flow runtime UI 1.1.0, manifest 1.29.0.
+- Durable PostgreSQL migration: `20260729_0013_decision_revision_lineage.py`.
+- Validation baseline includes API lint/contracts/unit, PostgreSQL migration/seed/integration, Flutter analyze/widget tests, `PRINCIPLE_CONTEXT_RETEST` acceptance and Preview APK build.
+- Next architecture slice: generic `REFLECTION` runtime over committed DecisionRevision/DecisionDelta lineage, preserving the same Case-agnostic composition model. Do not introduce Reflection-specific Case types or client-side delta inference.
+
