@@ -52,8 +52,8 @@ def _openapi_errors() -> list[str]:
     contract = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
     errors: list[str] = []
 
-    if contract.get("info", {}).get("version") != "0.13.0":
-        errors.append("OpenAPI checked-in version must match API v0.13.0")
+    if contract.get("info", {}).get("version") != "0.14.0":
+        errors.append("OpenAPI checked-in version must match API v0.14.0")
 
     bearer = contract.get("components", {}).get("securitySchemes", {}).get("HTTPBearer")
     if bearer != {"scheme": "bearer", "type": "http"}:
@@ -76,6 +76,8 @@ def _openapi_errors() -> list[str]:
         "RecentCaseResponse",
         "ProgressResponse",
         "ProgressEnvelopeResponse",
+        "FlowRuntimeStepResponse",
+        "FlowRuntimeResponse",
         "AdminSessionResponse",
         "AuthoringVersionResponse",
         "AuditTrailResponse",
@@ -119,6 +121,24 @@ def _openapi_errors() -> list[str]:
             "first_committed_at",
             "last_committed_at",
             "recent_cases",
+        },
+        "FlowRuntimeResponse": {
+            "session_id",
+            "case_version_id",
+            "session_state",
+            "template_code",
+            "template_version_no",
+            "entry_step_code",
+            "execution_support",
+            "steps",
+        },
+        "FlowRuntimeStepResponse": {
+            "code",
+            "primitive_code",
+            "capability_codes",
+            "next_step_codes",
+            "state",
+            "reason_code",
         },
         "AdminSessionResponse": {
             "admin_subject_id",
@@ -177,6 +197,7 @@ def _openapi_errors() -> list[str]:
         ("/v1/cases/{case_id}", "get"): "CaseDetailResponse",
         ("/v1/weigh-sessions/{session_id}/reason", "put"): "PrivateReasonResponse",
         ("/v1/weigh-sessions/{session_id}/perspectives", "get"): "PerspectiveResponse",
+        ("/v1/weigh-sessions/{session_id}/flow", "get"): "FlowRuntimeResponse",
         ("/v1/case-versions/{case_version_id}/context", "get"): "ContextSnapshotResponse",
         ("/v1/me/progress", "get"): "ProgressEnvelopeResponse",
         ("/internal/admin/v1/session", "get"): "AdminSessionResponse",
@@ -220,6 +241,7 @@ def _openapi_errors() -> list[str]:
         ("/v1/weigh-sessions/{session_id}/responses", "put"),
         ("/v1/weigh-sessions/{session_id}/reason", "put"),
         ("/v1/weigh-sessions/{session_id}/commit", "post"),
+        ("/v1/weigh-sessions/{session_id}/flow", "get"),
         ("/v1/weigh-sessions/{session_id}/reveal", "get"),
         ("/v1/weigh-sessions/{session_id}/perspectives", "get"),
         ("/v1/me/progress", "get"),
@@ -378,9 +400,9 @@ def main() -> None:
     print(
         "Contract sync OK: "
         f"{len(used)} DomainError codes registered; consumer HTTP, Admin HTTP, "
-        "typed questions, private reasons, Context, Perspective, My KEFE Progress, "
-        "identity, editorial persistence, publication, Admin sessions and outbox "
-        "invariants verified."
+        "typed questions, private reasons, Context, Perspective, Flow runtime, "
+        "My KEFE Progress, identity, editorial persistence, publication, Admin "
+        "sessions and outbox invariants verified."
     )
 
 
