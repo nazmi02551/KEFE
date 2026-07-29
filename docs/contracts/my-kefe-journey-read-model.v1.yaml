@@ -1,7 +1,7 @@
 contract_version: 1.0.0
 updated_at: '2026-07-29'
 source_adr: docs/adr/0032-my-kefe-descriptive-journey-read-model.md
-status: architecture_locked_implementation_pending
+status: implementation_ready
 bounded_context: progress
 
 endpoint:
