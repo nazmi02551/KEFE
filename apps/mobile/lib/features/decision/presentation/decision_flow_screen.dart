@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/design/kefe_theme.dart';
+import '../../../core/design/product_preview_visual_mode.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../context/presentation/context_section.dart';
 import '../../onboarding/application/onboarding_controller.dart';
 import '../application/decision_controller.dart';
 import '../domain/decision_models.dart';
+import 'case_hero_header.dart';
 import 'perspective_section.dart';
 import 'question_input.dart';
 import 'reason_input.dart';
@@ -105,17 +107,22 @@ class _DecisionContent extends ConsumerWidget {
     final strings = KefeStrings.of(context);
     final caseData = state.caseData!;
     final flowRuntime = state.flowRuntime!;
+    final productPreviewVisual = ref.watch(productPreviewVisualModeProvider);
 
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        Text(
-          caseData.title,
-          key: const ValueKey('case-title'),
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        const SizedBox(height: 12),
-        Text(caseData.summary, style: Theme.of(context).textTheme.bodyLarge),
+        if (productPreviewVisual)
+          CaseHeroHeader(caseData: caseData, flowRuntime: flowRuntime)
+        else ...[
+          Text(
+            caseData.title,
+            key: const ValueKey('case-title'),
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          const SizedBox(height: 12),
+          Text(caseData.summary, style: Theme.of(context).textTheme.bodyLarge),
+        ],
         const SizedBox(height: 20),
         for (final step in flowRuntime.steps)
           _FlowStepSection(
