@@ -77,7 +77,7 @@ class PreviewJourneyDecisionRepository extends PreviewDecisionRepository
           code: 'FINAL_DECISION',
           primitiveCode: 'DECISION',
           capabilityCodes: const ['COMMIT_FIRST', 'DECISION_REVISION'],
-          nextStepCodes: const ['RESULT', 'REFLECTION'],
+          nextStepCodes: const ['REFLECTION'],
           state: !journey.contextExposed
               ? FlowStepRuntimeState.blocked
               : journey.finalCommitted
@@ -86,17 +86,6 @@ class PreviewJourneyDecisionRepository extends PreviewDecisionRepository
           reasonCode: !journey.contextExposed
               ? 'FLOW_PREDECESSOR_PENDING'
               : null,
-        ),
-        FlowRuntimeStep(
-          code: 'RESULT',
-          primitiveCode: 'COLLECTIVE_RESULT',
-          capabilityCodes: const [],
-          nextStepCodes: const [],
-          state: journey.finalCommitted
-              ? FlowStepRuntimeState.ready
-              : FlowStepRuntimeState.blocked,
-          reasonCode:
-              journey.finalCommitted ? null : 'FLOW_PREDECESSOR_PENDING',
         ),
         FlowRuntimeStep(
           code: 'REFLECTION',
