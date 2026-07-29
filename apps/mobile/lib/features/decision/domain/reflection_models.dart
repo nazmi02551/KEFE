@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+/// Server-derived, non-causal Reflection projection for the current lineage cursor.
 @immutable
 class ReflectionReadModel {
   const ReflectionReadModel({
