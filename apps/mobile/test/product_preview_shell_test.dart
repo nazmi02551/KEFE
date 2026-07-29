@@ -117,6 +117,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('reveal-personal-decision')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('reveal-gap-insight')), findsOneWidget);
+      expect(find.text('KEFE UÇURUMU'), findsOneWidget);
       expect(find.byKey(const ValueKey('perspective-section')), findsOneWidget);
     },
   );
