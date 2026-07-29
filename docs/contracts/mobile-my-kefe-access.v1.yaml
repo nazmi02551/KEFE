@@ -1,0 +1,62 @@
+contract_version: 1.0.0
+updated_at: '2026-07-30'
+authority:
+  adr: docs/adr/0033-production-mobile-my-kefe-access.md
+  product_rule: production_actor_can_open_descriptive_my_kefe_without_preview_fallback
+production_route:
+  path: /my-kefe
+  screen: MyKefeJourneyScreen
+  repository: ProgressRepository
+  data_source: HttpProgressRepository
+  authentication_scope: current_actor
+entry_points:
+  standalone_explore_header:
+    enabled: true
+    target: /my-kefe
+    accessibility_label_required: true
+  embedded_preview_explore_header:
+    enabled: false
+    reason: preview_shell_is_navigation_authority
+navigation:
+  back_navigation: required
+  full_production_bottom_shell: deferred
+  forbidden_production_destinations_without_contract:
+    - preview_radar
+    - preview_atlas
+    - preview_weigh_hub
+isolation:
+  production_preview_repository_import: forbidden
+  network_failure_preview_fallback: forbidden
+  deterministic_preview_data_in_production: forbidden
+states:
+  - loading
+  - error_retryable
+  - empty
+  - populated
+privacy:
+  forbidden_outputs:
+    - raw_response_payload
+    - private_reason_text
+    - decision_delta_payload
+    - exposure_metadata
+    - intervention_metadata
+    - personality_inference
+    - ideology_inference
+    - psychometric_inference
+    - causal_claim
+account:
+  forced_registration: forbidden
+  guest_actor_history: allowed
+preview_build_identity:
+  visible_in_product_preview: true
+  visible_in_production: false
+  fields:
+    - preview_version
+    - short_commit
+  source: compile_time_dart_define
+compatibility:
+  existing_routes_unchanged:
+    - /welcome
+    - /explore
+    - /case/:caseId
+  product_preview_shell_unchanged: true
