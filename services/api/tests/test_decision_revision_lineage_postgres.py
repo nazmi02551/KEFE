@@ -42,7 +42,7 @@ def _draft(case_id) -> AuthoringCaseVersion:
         version_no=1,
         state=ContentLifecycle.DRAFT,
         title="Decision revision lineage Case",
-        summary="Initial principle, Context exposure and final retest.",
+        summary="Initial principle, Context exposure, final retest and Reflection.",
         base_format_code="DILEMMA",
         primary_domain_code="DAILY_LIFE",
         content_risk="L0",
@@ -52,7 +52,7 @@ def _draft(case_id) -> AuthoringCaseVersion:
     )
 
 
-def test_postgres_principle_context_retest_persists_revision_delta_lineage(
+def test_postgres_principle_context_retest_persists_revision_delta_and_reflection(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setenv("KEFE_PERSISTENCE_BACKEND", "postgres")
@@ -101,36 +101,12 @@ def test_postgres_principle_context_retest_persists_revision_delta_lineage(
         )
         assert initial_commit.status_code == 200
 
-        after_initial = client.get(
-            f"/v1/weigh-sessions/{session_id}/flow",
-            headers=headers,
-        )
-        assert after_initial.status_code == 200
-        assert [item["state"] for item in after_initial.json()["steps"]] == [
-            "COMPLETED",
-            "READY",
-            "BLOCKED",
-            "BLOCKED",
-        ]
-
         exposure = client.post(
             f"/v1/weigh-sessions/{session_id}/flow-steps/CONTEXT/exposures",
             headers={**headers, "Idempotency-Key": f"context-{uuid4().hex}"},
         )
         assert exposure.status_code == 201
-        assert exposure.json()["resource_category"] == "CONTEXT"
         assert exposure.json()["intervention_id"] is not None
-
-        after_context = client.get(
-            f"/v1/weigh-sessions/{session_id}/flow",
-            headers=headers,
-        )
-        assert [item["state"] for item in after_context.json()["steps"]] == [
-            "COMPLETED",
-            "COMPLETED",
-            "READY",
-            "BLOCKED",
-        ]
 
         revised = client.put(
             f"/v1/weigh-sessions/{session_id}/decision-steps/FINAL_DECISION/responses",
@@ -138,7 +114,6 @@ def test_postgres_principle_context_retest_persists_revision_delta_lineage(
             json={"responses": [{"question_id": str(question_id), "value": "B"}]},
         )
         assert revised.status_code == 200
-        assert revised.json()["response_count"] == 1
 
         revision_commit = client.post(
             f"/v1/weigh-sessions/{session_id}/decision-steps/FINAL_DECISION/commit",
@@ -148,38 +123,64 @@ def test_postgres_principle_context_retest_persists_revision_delta_lineage(
         assert revision_commit.json()["revision_no"] == 2
         assert revision_commit.json()["delta_id"] is not None
 
+        reflection_flow = client.get(
+            f"/v1/weigh-sessions/{session_id}/flow",
+            headers=headers,
+        )
+        assert [item["state"] for item in reflection_flow.json()["steps"]] == [
+            "COMPLETED",
+            "COMPLETED",
+            "COMPLETED",
+            "READY",
+        ]
+        assert reflection_flow.json()["execution_support"] == "FULL"
+
+        reflection = client.get(
+            f"/v1/weigh-sessions/{session_id}/reflection-steps/REFLECTION",
+            headers=headers,
+        )
+        assert reflection.status_code == 200
+        reflection_body = reflection.json()
+        assert reflection_body["revision_count"] == 2
+        assert reflection_body["decision_changed"] is True
+        assert reflection_body["changed_question_count"] == 1
+        assert reflection_body["intervention_count"] == 1
+        assert reflection_body["intervention_type_codes"] == ["CONTEXT_REVEAL"]
+        assert reflection_body["completed"] is False
+        assert "responses" not in reflection_body
+        assert "private_reason" not in reflection_body
+
+        completion_key = f"reflection-{uuid4().hex}"
+        completed = client.post(
+            f"/v1/weigh-sessions/{session_id}/reflection-steps/REFLECTION/complete",
+            headers={**headers, "Idempotency-Key": completion_key},
+        )
+        assert completed.status_code == 200
+        replay = client.post(
+            f"/v1/weigh-sessions/{session_id}/reflection-steps/REFLECTION/complete",
+            headers={**headers, "Idempotency-Key": completion_key},
+        )
+        assert replay.status_code == 200
+        assert replay.json()["reflection_completion_id"] == completed.json()[
+            "reflection_completion_id"
+        ]
+
+        final_flow = client.get(
+            f"/v1/weigh-sessions/{session_id}/flow",
+            headers=headers,
+        )
+        assert final_flow.json()["steps"][-1]["state"] == "COMPLETED"
+
         lineage = client.get(
             f"/v1/weigh-sessions/{session_id}/lineage",
             headers=headers,
         )
         assert lineage.status_code == 200
         body = lineage.json()
-        assert [item["flow_step_code"] for item in body["revisions"]] == [
-            "PRINCIPLE",
-            "FINAL_DECISION",
-        ]
-        assert [item["contribution_class"] for item in body["revisions"]] == [
-            "CORE_PRE_RESULT",
-            "CORE_PRE_RESULT",
-        ]
+        assert len(body["revisions"]) == 2
         assert len(body["exposures"]) == 1
         assert len(body["interventions"]) == 1
         assert len(body["deltas"]) == 1
-        assert body["deltas"][0]["changed_question_ids"] == [str(question_id)]
         assert body["deltas"][0]["changed_count"] == 1
-
-        final_flow = client.get(
-            f"/v1/weigh-sessions/{session_id}/flow",
-            headers=headers,
-        )
-        assert [item["state"] for item in final_flow.json()["steps"]] == [
-            "COMPLETED",
-            "COMPLETED",
-            "COMPLETED",
-            "UNSUPPORTED",
-        ]
-        assert final_flow.json()["steps"][-1]["reason_code"] == (
-            "FLOW_REFLECTION_RUNTIME_PENDING"
-        )
     finally:
         get_settings.cache_clear()

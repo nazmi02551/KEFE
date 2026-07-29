@@ -1,13 +1,14 @@
-contract_version: 1.0.0
+contract_version: 1.1.0
 updated_at: '2026-07-29'
 source_adr: docs/adr/0026-generic-reflection-runtime.md
-status: architecture_contract
+status: implementation_contract
 
 authority:
   session: actor_owned_weigh_session
   case_version: session_pinned_case_version
   flow: case_version_resolved_flow
   lineage: immutable_decision_revision_delta_intervention_lineage
+  completion_store: server_owned_immutable_reflection_completion
   client_lineage_cursor_selection: forbidden
   client_delta_classification: forbidden
 
@@ -39,16 +40,19 @@ read_model:
     - intervention_type_codes
     - from_contribution_class
     - to_contribution_class
+    - completed
   semantics:
     decision_changed: latest_delta_changed_question_count_greater_than_zero
     intervention_relationship: between_revisions_not_causal
     latest_delta_optional: true
+    completion_cursor: latest_committed_decision_revision_id
 
 completion:
   entity: ReflectionCompletion
   immutable: true
   idempotent: true
   actor_scoped: true
+  durable_postgres: true
   pinned_fields:
     - session_id
     - case_version_id
@@ -57,6 +61,9 @@ completion:
     - latest_delta_id
     - idempotency_key
     - completed_at
+  uniqueness:
+    - session_flow_step_latest_revision
+    - session_idempotency_key
   meaning: user_completed_reflection_step_at_lineage_cursor
   does_not_mean:
     - new_decision
@@ -80,8 +87,11 @@ flow_runtime_v1:
     key: latest_committed_decision_revision_id
     later_revision_reopens_reflection: true
     historical_completion_mutated: false
+  execution_support:
+    reflection_is_supported_primitive: true
 
 http:
+  api_version: 0.16.0
   authentication: consumer_actor_required
   foreign_session_behavior: not_found
   read:

@@ -3,7 +3,6 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import UUID
 
-from kefe_api.modules.decision.lineage_in_memory import InMemoryLineageDecisionRepository
 from kefe_api.modules.decision.models import (
     CaseVersion,
     FlowStep,
@@ -17,6 +16,9 @@ from kefe_api.modules.decision.models import (
     ResolvedFlow,
     RevealSnapshot,
 )
+from kefe_api.modules.decision.reflection_in_memory import (
+    InMemoryReflectionDecisionRepository,
+)
 
 DEMO_CASE_ID = UUID("11111111-1111-4111-8111-111111111111")
 DEMO_CASE_VERSION_ID = UUID("22222222-2222-4222-8222-222222222222")
@@ -28,7 +30,7 @@ DEMO_BRIDGE_PERSPECTIVE_ID = UUID("90000000-0000-4000-8000-000000000003")
 DEMO_ALTERNATIVE_PERSPECTIVE_ID = UUID("90000000-0000-4000-8000-000000000004")
 
 
-def build_demo_repository() -> InMemoryLineageDecisionRepository:
+def build_demo_repository() -> InMemoryReflectionDecisionRepository:
     case = CaseVersion(
         id=DEMO_CASE_VERSION_ID,
         case_id=DEMO_CASE_ID,
@@ -152,7 +154,7 @@ def build_demo_repository() -> InMemoryLineageDecisionRepository:
             ),
         ),
     )
-    return InMemoryLineageDecisionRepository(
+    return InMemoryReflectionDecisionRepository(
         cases=[case],
         reveals=[reveal],
         perspectives=[perspective],

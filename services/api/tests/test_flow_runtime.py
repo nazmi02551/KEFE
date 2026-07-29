@@ -4,13 +4,15 @@ from uuid import uuid4
 import pytest
 
 from kefe_api.core.errors import DomainError
-from kefe_api.modules.decision.in_memory import InMemoryDecisionRepository
 from kefe_api.modules.decision.models import (
     CaseVersion,
     FlowStep,
     ResolvedFlow,
     WeighSession,
     WeighState,
+)
+from kefe_api.modules.decision.reflection_in_memory import (
+    InMemoryReflectionDecisionRepository,
 )
 from kefe_api.modules.flow_runtime.models import (
     FlowExecutionSupport,
@@ -35,8 +37,11 @@ def _case(flow: ResolvedFlow | None) -> CaseVersion:
     )
 
 
-def _repository(case: CaseVersion, session: WeighSession) -> InMemoryDecisionRepository:
-    repository = InMemoryDecisionRepository(cases=[case], reveals=[])
+def _repository(
+    case: CaseVersion,
+    session: WeighSession,
+) -> InMemoryReflectionDecisionRepository:
+    repository = InMemoryReflectionDecisionRepository(cases=[case], reveals=[])
     repository.save_session_with_event(
         session,
         event_name="weigh.started",
@@ -148,7 +153,7 @@ def test_standard_flow_is_full_and_server_gates_result_by_commit() -> None:
     assert all(step.reason_code is None for step in after.steps)
 
 
-def test_principle_retest_uses_exposure_aware_runtime_v2() -> None:
+def test_principle_retest_uses_exposure_and_reflection_aware_runtime() -> None:
     actor_id = uuid4()
     case = _case(_principle_retest_flow())
     draft_session = _session(case, actor_id, WeighState.DRAFT)
@@ -156,7 +161,7 @@ def test_principle_retest_uses_exposure_aware_runtime_v2() -> None:
     service = FlowRuntimeService(repository)
 
     before = service.get_runtime(actor_id=actor_id, session_id=draft_session.id)
-    assert before.execution_support is FlowExecutionSupport.PARTIAL
+    assert before.execution_support is FlowExecutionSupport.FULL
     assert [step.state for step in before.steps] == [
         FlowStepRuntimeState.READY,
         FlowStepRuntimeState.BLOCKED,

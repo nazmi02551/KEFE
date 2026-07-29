@@ -1,4 +1,4 @@
-registry_version: 1.12.0
+registry_version: 1.13.0
 errors:
 - code: AUTH_REQUIRED
   http_status: 401
@@ -172,6 +172,15 @@ errors:
   http_status: 422
   retryable: false
 - code: DECISION_REVISION_ALREADY_COMMITTED
+  http_status: 409
+  retryable: false
+- code: REFLECTION_STEP_INVALID
+  http_status: 422
+  retryable: false
+- code: REFLECTION_REVISION_REQUIRED
+  http_status: 409
+  retryable: false
+- code: REFLECTION_ALREADY_COMPLETED
   http_status: 409
   retryable: false
 - code: WEIGH_SESSION_NOT_FOUND

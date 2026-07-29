@@ -1,4 +1,5 @@
 import '../domain/decision_models.dart';
+import '../domain/reflection_models.dart';
 
 class ClientTransportFailure implements Exception {
   const ClientTransportFailure({this.code = 'NETWORK_UNAVAILABLE'});
@@ -70,6 +71,19 @@ abstract interface class DecisionLineageRepository {
   });
 }
 
+abstract interface class ReflectionRepository {
+  Future<ReflectionReadModel> fetchReflection({
+    required String sessionId,
+    required String stepCode,
+  });
+
+  Future<void> completeReflection({
+    required String sessionId,
+    required String stepCode,
+    required String idempotencyKey,
+  });
+}
+
 extension FlowRuntimeRepositoryAccess on DecisionRepository {
   Future<FlowRuntimeSnapshot> fetchFlowRuntime(String sessionId) {
     final repository = this;
@@ -87,6 +101,16 @@ extension DecisionLineageRepositoryAccess on DecisionRepository {
       return repository as DecisionLineageRepository;
     }
     throw const ClientTransportFailure(code: 'DECISION_LINEAGE_NOT_CONFIGURED');
+  }
+}
+
+extension ReflectionRepositoryAccess on DecisionRepository {
+  ReflectionRepository get reflection {
+    final repository = this;
+    if (repository is ReflectionRepository) {
+      return repository as ReflectionRepository;
+    }
+    throw const ClientTransportFailure(code: 'REFLECTION_NOT_CONFIGURED');
   }
 }
 

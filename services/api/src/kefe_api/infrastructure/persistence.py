@@ -7,12 +7,14 @@ from kefe_api.infrastructure.postgres_content_configuration import (
     PostgresContentConfigurationRepository,
 )
 from kefe_api.infrastructure.postgres_context import PostgresContextRepository
-from kefe_api.infrastructure.postgres_decision_lineage import PostgresDecisionLineageRepository
 from kefe_api.infrastructure.postgres_flow_pinned_content_authoring import (
     PostgresFlowPinnedContentAuthoringRepository,
 )
 from kefe_api.infrastructure.postgres_identity import PostgresIdentityRepository
 from kefe_api.infrastructure.postgres_progress import PostgresProgressRepository
+from kefe_api.infrastructure.postgres_reflection_decision import (
+    PostgresReflectionDecisionRepository,
+)
 from kefe_api.modules.admin_security.in_memory import InMemoryAdminSessionStore
 from kefe_api.modules.admin_security.ports import AdminSessionStore
 from kefe_api.modules.content_authoring.in_memory import InMemoryContentAuthoringRepository
@@ -40,7 +42,7 @@ def build_decision_repository(settings: Settings) -> DecisionRepository:
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
 
-    return PostgresDecisionLineageRepository(build_engine(settings.database_url))
+    return PostgresReflectionDecisionRepository(build_engine(settings.database_url))
 
 
 def build_context_repository(settings: Settings) -> ContextRepository:

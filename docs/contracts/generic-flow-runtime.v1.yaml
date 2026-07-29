@@ -1,15 +1,16 @@
-contract_version: 1.1.0
+contract_version: 1.2.0
 updated_at: '2026-07-29'
 source_adrs:
   - docs/adr/0023-generic-consumer-flow-runtime.md
   - docs/adr/0025-decision-revision-exposure-intervention-delta.md
+  - docs/adr/0026-generic-reflection-runtime.md
 status: implementation_contract
 
 authority:
   session: actor_owned_weigh_session
   case_version: session_pinned_case_version
   flow: case_version_resolved_flow
-  decision_lineage: actor_owned_session_revision_and_exposure_state
+  decision_lineage: actor_owned_session_revision_exposure_and_reflection_state
   live_content_configuration_lookup: forbidden
 
 http:
@@ -20,6 +21,7 @@ http:
   result_payload_included: false
   perspective_payload_included: false
   private_reason_payload_included: false
+  reflection_payload_included: false
 
 snapshot:
   fields:
@@ -49,7 +51,7 @@ step:
     - state
     - reason_code
 
-primitive_semantics_v2:
+primitive_semantics_v3:
   CONTEXT:
     before_first_decision:
       non_blocking: true
@@ -79,8 +81,14 @@ primitive_semantics_v2:
     contains_result_payload: false
     successful_reveal_delivery_may_record_exposure: true
   REFLECTION:
-    after_predecessors: UNSUPPORTED
-    reason_code: FLOW_REFLECTION_RUNTIME_PENDING
+    predecessors_pending: BLOCKED
+    predecessor_pending_reason: FLOW_PREDECESSOR_PENDING
+    current_revision_without_completion: READY
+    completion_for_current_revision: COMPLETED
+    completion_for_older_revision_only: READY
+    completion_cursor: latest_committed_decision_revision_id
+    contains_reflection_payload: false
+    transition_satisfied_when: completion_for_current_revision_exists
   unknown:
     after_predecessors: UNSUPPORTED
     reason_code: FLOW_PRIMITIVE_UNSUPPORTED
@@ -92,13 +100,16 @@ graph:
   client_completed_step_claims_accepted: false
   client_revision_state_claims_accepted: false
   client_exposure_state_claims_accepted: false
+  client_reflection_completion_claims_accepted: false
 
 lineage:
   decision_completion_source: committed_decision_revision_for_flow_step
   context_completion_source: recorded_actual_context_exposure_when_exposure_required
   result_readiness_source: initial_commit_barrier
+  reflection_completion_source: server_persisted_completion_for_current_latest_revision
   decision_delta_payload_in_flow_runtime: false
   intervention_payload_in_flow_runtime: false
+  reflection_read_model_payload_in_flow_runtime: false
 
 legacy:
   missing_resolved_flow:
@@ -114,4 +125,5 @@ security:
   result_leak_before_commit: forbidden
   reveal_endpoint_remains_authoritative: true
   perspective_endpoint_remains_authoritative: true
+  reflection_endpoint_remains_authoritative: true
   foreign_session_behavior: not_found

@@ -10,6 +10,7 @@ import '../domain/decision_models.dart';
 import 'perspective_section.dart';
 import 'question_input.dart';
 import 'reason_input.dart';
+import 'reflection_step.dart';
 
 class DecisionFlowScreen extends ConsumerStatefulWidget {
   const DecisionFlowScreen({
@@ -165,6 +166,7 @@ class _FlowStepSection extends ConsumerWidget {
       'CONTEXT' => _contextStep(ref),
       'DECISION' => _decisionStep(context, ref),
       'COLLECTIVE_RESULT' => _resultStep(context, ref),
+      'REFLECTION' => _reflectionStep(),
       _ => step.state == FlowStepRuntimeState.unsupported
           ? _CapabilityPendingCard(step: step)
           : const SizedBox.shrink(),
@@ -250,6 +252,21 @@ class _FlowStepSection extends ConsumerWidget {
         ),
         const SizedBox(height: 20),
       ],
+    );
+  }
+
+  Widget _reflectionStep() {
+    if (step.state == FlowStepRuntimeState.unsupported) {
+      return _CapabilityPendingCard(step: step);
+    }
+    if (step.state != FlowStepRuntimeState.ready &&
+        step.state != FlowStepRuntimeState.completed) {
+      return const SizedBox.shrink();
+    }
+    return ReflectionStepCard(
+      sessionId: state.sessionId!,
+      caseVersionId: state.caseData!.versionId,
+      step: step,
     );
   }
 

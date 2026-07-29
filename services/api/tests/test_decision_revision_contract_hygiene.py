@@ -16,7 +16,9 @@ def test_decision_revision_contracts_are_final_and_strict() -> None:
     ).read_text(encoding="utf-8")
     api_ci = (WORKFLOWS / "api-ci.yml").read_text(encoding="utf-8")
 
-    assert openapi["info"]["version"] == "0.15.0"
+    # M2 owns these surfaces and invariants, not the global API/manifest version.
+    # Later compatible slices may advance both versions without invalidating M2.
+    assert openapi["info"]["version"] != "0.14.0"
     assert "/v1/weigh-sessions/{session_id}/lineage" in openapi["paths"]
     assert (
         "/v1/weigh-sessions/{session_id}/decision-steps/{step_code}/commit"
@@ -27,16 +29,10 @@ def test_decision_revision_contracts_are_final_and_strict() -> None:
         in openapi["paths"]
     )
 
-    # The global manifest may advance after M2. This test owns only the M2
-    # contract registrations and must not pin later architecture slices to 1.29.0.
-    assert (
-        "- id: openapi\n    path: docs/contracts/openapi.v1.json\n    version: 0.15.0"
-        in manifest
-    )
+    assert "- id: openapi\n    path: docs/contracts/openapi.v1.json" in manifest
     assert (
         "- id: mobile-flow-runtime-ui\n"
-        "    path: docs/contracts/mobile-flow-runtime-ui.v1.yaml\n"
-        "    version: 1.1.0"
+        "    path: docs/contracts/mobile-flow-runtime-ui.v1.yaml"
         in manifest
     )
     assert (
@@ -46,9 +42,7 @@ def test_decision_revision_contracts_are_final_and_strict() -> None:
         in manifest
     )
 
-    assert "0.15.0" in checker
     assert "0.14.0" not in checker
-
     assert "contents: read" in api_ci
     assert "sync-draft-contracts:" not in api_ci
     assert "OpenAPI drift gate" in api_ci

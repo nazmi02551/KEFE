@@ -21,6 +21,10 @@ from kefe_api.modules.decision.models import (
     RevealSnapshot,
     WeighSession,
 )
+from kefe_api.modules.decision.reflection_models import (
+    ReflectionCompletion,
+    ReflectionCompletionAttempt,
+)
 
 
 class DecisionRepository(Protocol):
@@ -111,6 +115,23 @@ class DecisionRepository(Protocol):
     def list_interventions(self, session_id: UUID) -> tuple[Intervention, ...]: ...
 
     def list_decision_deltas(self, session_id: UUID) -> tuple[DecisionDelta, ...]: ...
+
+    def list_reflection_completions(
+        self, session_id: UUID
+    ) -> tuple[ReflectionCompletion, ...]: ...
+
+    def complete_reflection(
+        self,
+        *,
+        actor_id: UUID,
+        session_id: UUID,
+        case_version_id: UUID,
+        flow_step_code: str,
+        latest_revision_id: UUID,
+        latest_delta_id: UUID | None,
+        idempotency_key: str,
+        completed_at: datetime,
+    ) -> ReflectionCompletionAttempt: ...
 
     def get_reveal(self, case_version_id: UUID) -> RevealSnapshot | None: ...
 
