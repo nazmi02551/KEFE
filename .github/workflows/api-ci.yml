@@ -16,61 +16,9 @@ on:
       - '.github/workflows/api-ci.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  sync-draft-contracts:
-    if: github.event_name == 'pull_request' && github.event.pull_request.number == 60
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          fetch-depth: 0
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Install
-        working-directory: services/api
-        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
-      - name: Normalize DecisionRevision Python sources
-        working-directory: services/api
-        run: |
-          ruff format \
-            src/kefe_api/infrastructure/postgres_decision_lineage.py \
-            src/kefe_api/modules/decision/in_memory.py \
-            src/kefe_api/modules/decision/lineage_service.py
-          ruff check \
-            src/kefe_api/infrastructure/postgres_decision_lineage.py \
-            src/kefe_api/modules/decision/in_memory.py \
-            src/kefe_api/modules/decision/lineage_service.py \
-            --fix
-          ruff format \
-            src/kefe_api/infrastructure/postgres_decision_lineage.py \
-            src/kefe_api/modules/decision/in_memory.py \
-            src/kefe_api/modules/decision/lineage_service.py
-          ruff check \
-            src/kefe_api/infrastructure/postgres_decision_lineage.py \
-            src/kefe_api/modules/decision/in_memory.py \
-            src/kefe_api/modules/decision/lineage_service.py
-      - name: Regenerate exact OpenAPI 0.15.0
-        working-directory: services/api
-        run: python tools/export_openapi.py --output ../../docs/contracts/openapi.v1.json
-      - name: Commit generated normalization
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add \
-            services/api/src/kefe_api/infrastructure/postgres_decision_lineage.py \
-            services/api/src/kefe_api/modules/decision/in_memory.py \
-            services/api/src/kefe_api/modules/decision/lineage_service.py \
-            docs/contracts/openapi.v1.json
-          if git diff --cached --quiet; then
-            exit 0
-          fi
-          git commit -m 'Normalize DecisionRevision runtime contracts'
-          git push origin HEAD:${{ github.event.pull_request.head.ref }}
-
   lint-unit:
     runs-on: ubuntu-latest
     steps:
@@ -133,6 +81,9 @@ jobs:
       - name: Decision revision lineage contract
         working-directory: services/api
         run: python tools/check_decision_revision_lineage_contract.py
+      - name: Reflection runtime contract
+        working-directory: services/api
+        run: python tools/check_reflection_runtime_contract.py
       - name: Admin HTTP contract
         id: admin-http-contract
         continue-on-error: true
@@ -163,8 +114,7 @@ jobs:
       - name: Enforce unit tests
         if: always()
         run: test '${{ steps.unit-tests.outcome }}' = 'success'
-      - name: OpenAPI drift diagnostic while draft
-        continue-on-error: true
+      - name: OpenAPI drift gate
         working-directory: services/api
         run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
 
