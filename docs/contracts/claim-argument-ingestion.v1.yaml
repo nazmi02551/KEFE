@@ -84,6 +84,7 @@ evidence_link:
     - evidence_target_id
     - relation
     - review_state
+    - provenance_ref
     - created_at
   evidence_target_kinds:
     - SOURCE_ARTIFACT
@@ -104,6 +105,7 @@ claim_relation:
     - relation_code
     - taxonomy_version
     - review_state
+    - provenance_ref
     - created_at
   relation_taxonomy:
     closed_initial_enum: false
@@ -284,7 +286,7 @@ privacy:
   psychometric_inference_from_claim_activity_forbidden: true
 
 first_implementation_slice:
-  status: implemented_pending_ci
+  status: implemented
   includes:
     - CLAIM
     - CLAIM_ASSESSMENT
