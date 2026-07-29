@@ -95,7 +95,8 @@ def main() -> None:
 
     print(
         "Generic Flow runtime v3 contract OK: pinned Flow authority, exposure-aware "
-        "Context, revision-backed Decisions, cursor-aware Reflection and no payload leakage verified."
+        "Context, revision-backed Decisions, cursor-aware Reflection and no payload "
+        "leakage verified."
     )
 
 
