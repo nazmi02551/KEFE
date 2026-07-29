@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/build/preview_build_info.dart';
 import '../core/design/kefe_theme.dart';
 import '../core/localization/kefe_strings.dart';
 import '../features/decision/presentation/decision_flow_screen.dart';
@@ -116,34 +117,79 @@ class _PreviewShell extends StatelessWidget {
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: KefeColorTokens.borderDark)),
         ),
-        child: NavigationBar(
-          selectedIndex: selectedIndex,
-          onDestinationSelected: (index) => context.go(_paths[index]),
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.explore_outlined),
-              selectedIcon: Icon(Icons.explore_rounded),
-              label: 'Keşfet',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (selectedIndex == 4) const _PreviewBuildIdentity(),
+            NavigationBar(
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (index) => context.go(_paths[index]),
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.explore_outlined),
+                  selectedIcon: Icon(Icons.explore_rounded),
+                  label: 'Keşfet',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.radar_outlined),
+                  selectedIcon: Icon(Icons.radar_rounded),
+                  label: 'Radar',
+                ),
+                NavigationDestination(
+                  icon: _ScaleNavIcon(selected: false),
+                  selectedIcon: _ScaleNavIcon(selected: true),
+                  label: 'Tartım',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.public_outlined),
+                  selectedIcon: Icon(Icons.public_rounded),
+                  label: 'Atlas',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.person_outline_rounded),
+                  selectedIcon: Icon(Icons.person_rounded),
+                  label: 'Profil',
+                ),
+              ],
             ),
-            NavigationDestination(
-              icon: Icon(Icons.radar_outlined),
-              selectedIcon: Icon(Icons.radar_rounded),
-              label: 'Radar',
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PreviewBuildIdentity extends StatelessWidget {
+  const _PreviewBuildIdentity();
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: PreviewBuildInfo.label,
+      child: Container(
+        key: const ValueKey('preview-build-identity'),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        color: KefeColorTokens.surfaceDark,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.verified_outlined,
+              size: 14,
+              color: KefeColorTokens.goldSoft,
             ),
-            NavigationDestination(
-              icon: _ScaleNavIcon(selected: false),
-              selectedIcon: _ScaleNavIcon(selected: true),
-              label: 'Tartım',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.public_outlined),
-              selectedIcon: Icon(Icons.public_rounded),
-              label: 'Atlas',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.person_outline_rounded),
-              selectedIcon: Icon(Icons.person_rounded),
-              label: 'Profil',
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                PreviewBuildInfo.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: KefeColorTokens.textMutedDark,
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
             ),
           ],
         ),
