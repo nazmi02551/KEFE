@@ -1,4 +1,4 @@
-manifest_version: 1.32.0
+manifest_version: 1.33.0
 updated_at: '2026-07-29'
 policy:
   executable_schema_source: services/api/migrations
@@ -6,8 +6,8 @@ policy:
   compatibility: contract changes require review for backward compatibility and documentation sync
 contracts:
   - id: core-erd
-    path: docs/contracts/core-erd.v2.mmd
-    version: '2'
+    path: docs/contracts/core-erd.v3.mmd
+    version: '3'
     role: conceptual_core_model
   - id: openapi
     path: docs/contracts/openapi.v1.json
@@ -87,7 +87,7 @@ contracts:
     role: actor_scoped_non_causal_reflection_and_lineage_cursor_completion_policy
   - id: claim-argument-ingestion
     path: docs/contracts/claim-argument-ingestion.v1.yaml
-    version: 1.0.0
+    version: 1.1.0
     role: first_class_claim_argument_and_provider_neutral_normalized_ingestion_policy
   - id: signal-impact-model
     path: docs/contracts/signal-impact-model.v1.yaml
