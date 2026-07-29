@@ -143,6 +143,33 @@ class KefeStrings {
   String get trustedSample => _tr ? 'Güvenilir örneklem' : 'Trusted sample';
   String get selectAnswer => _tr ? 'Bir seçenek seç' : 'Choose an option';
 
+  String get reflectionTitle =>
+      _tr ? 'Kararına bir daha bak' : 'Look at your decision again';
+  String reflectionDecisionSummary(bool changed, int count) {
+    if (changed) {
+      return _tr
+          ? 'İki kararın arasında $count yanıt değişti.'
+          : '$count response changed between your two decisions.';
+    }
+    return _tr
+        ? 'İki kararın arasında yanıt değişikliği görünmüyor.'
+        : 'No response change is visible between your two decisions.';
+  }
+  String reflectionInterventionSummary(int count) => _tr
+      ? 'İki kararın arasında $count kayıtlı karşılaşma bulunuyor.'
+      : '$count recorded encounter sits between the two decisions.';
+  String get reflectionNonCausalNote => _tr
+      ? 'Bu görünüm değişimi ve aradaki karşılaşmaları birlikte gösterir; bir karşılaşmanın karar değişimine neden olduğunu söylemez.'
+      : 'This view shows the change and intervening encounters together; it does not claim that an encounter caused the change.';
+  String get reflectionComplete =>
+      _tr ? 'Yansımayı tamamla' : 'Complete reflection';
+  String get reflectionCompleted =>
+      _tr ? 'Yansıma tamamlandı' : 'Reflection completed';
+  String get reflectionLoading =>
+      _tr ? 'Yansıma hazırlanıyor…' : 'Preparing reflection…';
+  String get reflectionRetry =>
+      _tr ? 'Yansımayı tekrar yükle' : 'Retry reflection';
+
   String get flowCapabilityPendingTitle =>
       _tr ? 'Bu adım henüz kullanıma açılmadı' : 'This step is not available yet';
   String flowCapabilityPendingBody(String? reasonCode) {
