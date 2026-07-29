@@ -1,0 +1,289 @@
+contract_version: 1.0.0
+updated_at: '2026-07-29'
+source_adr: docs/adr/0027-first-class-claim-argument-normalized-ingestion.md
+status: architecture_locked_implementation_pending
+bounded_context: claim_argument_ingestion
+
+principles:
+  claim_is_first_class: true
+  claim_is_not_claimant: true
+  claim_is_not_case_version_owned: true
+  claim_evaluation_is_versioned: true
+  source_reputation_is_not_truth_authority: true
+  claimant_reputation_is_not_truth_authority: true
+  user_votes_are_not_truth_authority: true
+  provider_specific_logic_ends_at_adapter: true
+  ai_output_is_proposal_not_final_truth: true
+  autonomous_case_publication_forbidden: true
+
+claim:
+  identity:
+    immutable: true
+    semantic_atom: true
+    reusable_across_cases: true
+  canonical_fields:
+    - claim_id
+    - normalized_text
+    - language_code
+    - created_at
+  assessments:
+    append_only: true
+    latest_projection_allowed: true
+    required_fields:
+      - assessment_id
+      - claim_id
+      - claim_type
+      - claim_state
+      - taxonomy_version
+      - review_state
+      - assessed_at
+    optional_fields:
+      - methodology_version
+      - reviewer_ref
+      - rationale_code
+      - provenance_ref
+  types:
+    - FACTUAL
+    - CAUSAL
+    - BEHAVIORAL
+    - MOTIVE
+    - NORMATIVE
+    - LEGAL
+    - PROCESS
+    - PREDICTION
+  states:
+    - VERIFIED
+    - SUPPORTED
+    - CLAIMED
+    - DISPUTED
+    - UNVERIFIED
+    - UNRESOLVED
+    - 'FALSE'
+  taxonomy_versioned: true
+
+claim_assertion:
+  semantics: claimant_or_actor_asserted_claim
+  required_fields:
+    - assertion_id
+    - claim_id
+    - claimant_kind
+    - claimant_ref
+    - asserted_at
+  optional_fields:
+    - source_artifact_id
+    - normalized_artifact_id
+    - provenance_ref
+  changes_claim_state_automatically: false
+  requires_global_identity_resolution: false
+
+evidence_link:
+  required_fields:
+    - evidence_link_id
+    - claim_id
+    - evidence_target_kind
+    - evidence_target_id
+    - relation
+    - review_state
+    - created_at
+  evidence_target_kinds:
+    - SOURCE_ARTIFACT
+    - NORMALIZED_ARTIFACT
+  relations:
+    - SUPPORTS
+    - CONTRADICTS
+    - CONTEXTUALIZES
+  creates_claim_assessment_automatically: false
+  provenance_required: true
+
+claim_relation:
+  graph_edge: true
+  required_fields:
+    - claim_relation_id
+    - from_claim_id
+    - to_claim_id
+    - relation_code
+    - taxonomy_version
+    - review_state
+    - created_at
+  relation_taxonomy:
+    closed_initial_enum: false
+    versioned_registry_required: true
+  self_relation_allowed: false
+  provenance_required: true
+
+argument:
+  immutable: true
+  required_fields:
+    - argument_id
+    - body
+    - language_code
+    - review_state
+    - created_at
+  optional_fields:
+    - normalized_artifact_id
+    - source_artifact_id
+    - author_or_claimant_ref
+    - provenance_ref
+
+argument_relation:
+  graph_edge: true
+  target_exactly_one: true
+  target_kinds:
+    - CLAIM
+    - QUESTION
+    - ARGUMENT
+  relations:
+    - SUPPORTS
+    - OPPOSES
+    - REBUTS
+    - QUALIFIES
+    - BRIDGES
+  required_fields:
+    - argument_relation_id
+    - argument_id
+    - target_kind
+    - target_ref
+    - relation
+    - taxonomy_version
+    - review_state
+    - created_at
+  reply_target_preserved_when_known: true
+  unrelated_parallel_replies_must_not_be_chained: true
+
+ingestion:
+  pipeline:
+    - SOURCE_ADAPTER
+    - SOURCE_ARTIFACT
+    - NORMALIZED_ARTIFACT
+    - CLAIMS
+    - EVIDENCE
+    - REPLIES
+    - ARGUMENTS
+    - DECISION_PROBLEMS
+    - CANDIDATE_CASES
+  one_source_may_create_multiple_claims: true
+  one_source_may_create_multiple_decision_problems: true
+  one_source_may_create_multiple_candidate_cases: true
+  source_adapter:
+    provider_specific: true
+    domain_model_dependency_on_provider_sdk_forbidden: true
+  source_artifact:
+    immutable: true
+    required_fields:
+      - source_artifact_id
+      - adapter_code
+      - external_locator
+      - captured_at
+      - content_hash
+    optional_fields:
+      - external_id
+      - canonical_url
+      - publisher_or_issuer
+      - published_at
+      - language_code
+      - jurisdiction_code
+      - raw_storage_ref
+  normalized_artifact:
+    provider_neutral: true
+    required_fields:
+      - normalized_artifact_id
+      - source_artifact_id
+      - artifact_kind
+      - normalized_at
+      - content_hash
+    optional_fields:
+      - text
+      - language_code
+      - jurisdiction_code
+      - parent_artifact_id
+      - reply_to_artifact_id
+      - media_metadata
+    artifact_kinds:
+      - ORIGINAL_CONTENT
+      - REPLY
+      - EXTERNAL_EVIDENCE
+      - MEDIA
+      - OTHER
+
+review:
+  states:
+    - PROPOSED
+    - ACCEPTED
+    - REJECTED
+  ai_proposal_is_editorial_acceptance: false
+  accepted_records_may_feed_authoring: true
+  accepted_records_publish_case_automatically: false
+
+ai_provenance:
+  required_for_ai_derived_proposal: true
+  fields_when_available:
+    - task_code
+    - taxonomy_version
+    - configuration_version
+    - prompt_version
+    - provider_code
+    - model_code
+    - model_version
+    - input_hash
+    - output_hash
+  forbidden_roles:
+    - FINAL_TRUTH_AUTHORITY
+    - NORMATIVE_VERDICT
+    - KEFE_POLITICAL_OR_MORAL_POSITION
+    - AUTONOMOUS_PUBLICATION
+
+publication_boundary:
+  upstream_of_case_authoring: true
+  existing_content_authoring_lifecycle_remains_authoritative: true
+  published_case_version_mutation_forbidden: true
+  case_version_may_reference_accepted_claims_later: true
+  automatic_consumer_visibility: false
+
+compatibility:
+  existing_context_claim_status_contract_unchanged: true
+  existing_context_claim_statuses:
+    - VERIFIED
+    - CLAIMED
+    - DISPUTED
+    - UNKNOWN
+  canonical_claim_assessment_states_are_not_context_projection_states: true
+  canonical_to_context_projection_requires_separate_contract: true
+
+persistence:
+  canonical_store: POSTGRESQL
+  graph_database_required: false
+  append_only_history_required_for:
+    - CLAIM_ASSESSMENT
+    - CLAIM_RELATION
+    - ARGUMENT_RELATION
+  provider_neutral_repository_ports_required: true
+  specialized_graph_store_requires_future_adr: true
+
+privacy:
+  minimum_necessary_claimant_metadata: true
+  implicit_sensitive_identity_resolution_forbidden: true
+  personality_inference_from_claim_activity_forbidden: true
+  ideology_inference_from_claim_activity_forbidden: true
+  psychometric_inference_from_claim_activity_forbidden: true
+
+first_implementation_slice:
+  includes:
+    - CLAIM
+    - CLAIM_ASSESSMENT
+    - CLAIM_ASSERTION
+    - EVIDENCE_LINK
+    - CLAIM_RELATION
+    - ARGUMENT
+    - ARGUMENT_RELATION
+    - SOURCE_ARTIFACT
+    - NORMALIZED_ARTIFACT
+    - REPOSITORY_PORTS
+    - IN_MEMORY_ADAPTERS
+    - POSTGRESQL_ADAPTERS
+    - CONTRACT_FITNESS_TESTS
+  excludes:
+    - CONSUMER_CLAIM_GRAPH_SCREEN
+    - CONTEXT_STATUS_MAPPING_CHANGE
+    - AUTOMATIC_CANDIDATE_CASE_PUBLICATION
+    - AI_PROVIDER_CALLS
+    - GLOBAL_CLAIMANT_IDENTITY_RESOLUTION
