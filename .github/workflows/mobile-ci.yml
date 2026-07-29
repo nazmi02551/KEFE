@@ -12,9 +12,363 @@ on:
       - '.github/workflows/mobile-ci.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
+  patch-reflection-pr63:
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 63
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.4'
+          channel: stable
+          cache: true
+      - name: Patch generic Reflection mobile runtime
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          http_repo = Path('apps/mobile/lib/features/decision/data/http_decision_repository.dart')
+          text = http_repo.read_text(encoding='utf-8')
+          text = text.replace(
+              "import '../domain/decision_models.dart';\n",
+              "import '../domain/decision_models.dart';\nimport '../domain/reflection_models.dart';\n",
+          )
+          text = text.replace(
+              "        DecisionLineageRepository,\n        PerspectiveRepository,",
+              "        DecisionLineageRepository,\n        ReflectionRepository,\n        PerspectiveRepository,",
+          )
+          marker = "  @override\n  Future<void> answer({\n"
+          methods = """  @override
+  Future<ReflectionReadModel> fetchReflection({
+    required String sessionId,
+    required String stepCode,
+  }) async {
+    final headers = await _authorizedHeaders();
+    final body = _decode(
+      await _request(
+        () => _client.get(
+          _uri('/v1/weigh-sessions/$sessionId/reflection-steps/$stepCode'),
+          headers: headers,
+        ),
+      ),
+    );
+    return ReflectionReadModel.fromJson(body);
+  }
+
+  @override
+  Future<void> completeReflection({
+    required String sessionId,
+    required String stepCode,
+    required String idempotencyKey,
+  }) async {
+    final headers = await _authorizedHeaders();
+    final response = await _request(
+      () => _client.post(
+        _uri('/v1/weigh-sessions/$sessionId/reflection-steps/$stepCode/complete'),
+        headers: {...headers, 'Idempotency-Key': idempotencyKey},
+      ),
+    );
+    _decode(response);
+  }
+
+"""
+          if 'Future<ReflectionReadModel> fetchReflection' not in text:
+              text = text.replace(marker, methods + marker)
+          http_repo.write_text(text, encoding='utf-8')
+
+          controller = Path('apps/mobile/lib/features/decision/application/decision_controller.dart')
+          text = controller.read_text(encoding='utf-8')
+          marker = "  Future<void> commit() async {\n"
+          method = """  Future<bool> completeReflection(
+    String stepCode,
+    String latestRevisionId,
+  ) async {
+    final sessionId = state.sessionId;
+    final caseData = state.caseData;
+    if (sessionId == null || caseData == null || state.submitting) return false;
+
+    state = state.copyWith(submitting: true, clearError: true);
+    try {
+      await _repository.reflection.completeReflection(
+        sessionId: sessionId,
+        stepCode: stepCode,
+        idempotencyKey:
+            'mobile-reflection-$sessionId-$stepCode-$latestRevisionId-v1',
+      );
+      final refreshed = await _repository.fetchFlowRuntime(sessionId);
+      _assertFlowMatches(
+        refreshed,
+        sessionId: sessionId,
+        caseVersionId: caseData.versionId,
+      );
+      state = state.copyWith(
+        submitting: false,
+        flowRuntime: refreshed,
+        offlineDraft: false,
+        clearError: true,
+      );
+      return true;
+    } on ClientTransportFailure catch (error) {
+      state = state.copyWith(
+        submitting: false,
+        offlineDraft: true,
+        errorCode: error.code,
+      );
+      return false;
+    } on ApiFailure catch (error) {
+      state = state.copyWith(submitting: false, errorCode: error.code);
+      return false;
+    } catch (_) {
+      state = state.copyWith(
+        submitting: false,
+        errorCode: 'UNEXPECTED_CLIENT_ERROR',
+      );
+      return false;
+    }
+  }
+
+"""
+          if 'Future<bool> completeReflection(' not in text:
+              text = text.replace(marker, method + marker)
+          controller.write_text(text, encoding='utf-8')
+
+          strings = Path('apps/mobile/lib/core/localization/kefe_strings.dart')
+          text = strings.read_text(encoding='utf-8')
+          marker = "  String get flowCapabilityPendingTitle =>\n"
+          block = """  String get reflectionTitle =>
+      _tr ? 'Kararına bir daha bak' : 'Look at your decision again';
+  String reflectionDecisionSummary(bool changed, int count) {
+    if (changed) {
+      return _tr
+          ? 'İki kararın arasında $count yanıt değişti.'
+          : '$count response changed between your two decisions.';
+    }
+    return _tr
+        ? 'İki kararın arasında yanıt değişikliği görünmüyor.'
+        : 'No response change is visible between your two decisions.';
+  }
+  String reflectionInterventionSummary(int count) => _tr
+      ? 'İki kararın arasında $count kayıtlı karşılaşma bulunuyor.'
+      : '$count recorded encounter sits between the two decisions.';
+  String get reflectionNonCausalNote => _tr
+      ? 'Bu görünüm değişimi ve aradaki karşılaşmaları birlikte gösterir; bir karşılaşmanın karar değişimine neden olduğunu söylemez.'
+      : 'This view shows the change and intervening encounters together; it does not claim that an encounter caused the change.';
+  String get reflectionComplete => _tr ? 'Yansımayı tamamla' : 'Complete reflection';
+  String get reflectionCompleted => _tr ? 'Yansıma tamamlandı' : 'Reflection completed';
+  String get reflectionLoading => _tr ? 'Yansıma hazırlanıyor…' : 'Preparing reflection…';
+  String get reflectionRetry => _tr ? 'Yansımayı tekrar yükle' : 'Retry reflection';
+
+"""
+          if 'String get reflectionTitle' not in text:
+              text = text.replace(marker, block + marker)
+          strings.write_text(text, encoding='utf-8')
+
+          screen = Path('apps/mobile/lib/features/decision/presentation/decision_flow_screen.dart')
+          text = screen.read_text(encoding='utf-8')
+          text = text.replace(
+              "import '../domain/decision_models.dart';\n",
+              "import '../domain/decision_models.dart';\nimport '../domain/reflection_models.dart';\n",
+          )
+          text = text.replace(
+              "      'COLLECTIVE_RESULT' => _resultStep(context, ref),\n",
+              "      'COLLECTIVE_RESULT' => _resultStep(context, ref),\n      'REFLECTION' => _reflectionStep(context, ref),\n",
+          )
+          marker = "  Widget _resultStep(BuildContext context, WidgetRef ref) {\n"
+          method = """  Widget _reflectionStep(BuildContext context, WidgetRef ref) {
+    if (step.state == FlowStepRuntimeState.unsupported) {
+      return _CapabilityPendingCard(step: step);
+    }
+    if (step.state != FlowStepRuntimeState.ready &&
+        step.state != FlowStepRuntimeState.completed) {
+      return const SizedBox.shrink();
+    }
+    return _ReflectionStep(
+      sessionId: state.sessionId!,
+      step: step,
+      submitting: state.submitting,
+    );
+  }
+
+"""
+          if 'Widget _reflectionStep(' not in text:
+              text = text.replace(marker, method + marker)
+          marker = "class _CapabilityPendingCard extends StatelessWidget {\n"
+          widget = r'''class _ReflectionStep extends ConsumerStatefulWidget {
+  const _ReflectionStep({
+    required this.sessionId,
+    required this.step,
+    required this.submitting,
+  });
+
+  final String sessionId;
+  final FlowRuntimeStep step;
+  final bool submitting;
+
+  @override
+  ConsumerState<_ReflectionStep> createState() => _ReflectionStepState();
+}
+
+class _ReflectionStepState extends ConsumerState<_ReflectionStep> {
+  ReflectionReadModel? _model;
+  bool _loading = false;
+  String? _errorCode;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleLoad();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ReflectionStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.sessionId != widget.sessionId ||
+        oldWidget.step.code != widget.step.code ||
+        oldWidget.step.state != widget.step.state) {
+      _model = null;
+      _scheduleLoad();
+    }
+  }
+
+  void _scheduleLoad() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _load();
+    });
+  }
+
+  Future<void> _load() async {
+    if (_loading) return;
+    setState(() {
+      _loading = true;
+      _errorCode = null;
+    });
+    try {
+      final model = await ref.read(decisionRepositoryProvider).reflection.fetchReflection(
+        sessionId: widget.sessionId,
+        stepCode: widget.step.code,
+      );
+      if (!mounted) return;
+      setState(() {
+        _model = model;
+        _loading = false;
+      });
+    } on ClientTransportFailure catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _errorCode = error.code;
+      });
+    } on ApiFailure catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _errorCode = error.code;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _errorCode = 'UNEXPECTED_CLIENT_ERROR';
+      });
+    }
+  }
+
+  Future<void> _complete() async {
+    final model = _model;
+    if (model == null || model.completed || widget.submitting) return;
+    final completed = await ref
+        .read(decisionControllerProvider.notifier)
+        .completeReflection(widget.step.code, model.latestRevisionId);
+    if (completed && mounted) await _load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
+    final model = _model;
+    return Card(
+      key: ValueKey('reflection-step-${widget.step.code}'),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(strings.reflectionTitle, style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 12),
+            if (_loading && model == null)
+              Text(strings.reflectionLoading)
+            else if (_errorCode != null && model == null) ...[
+              Text(strings.messageForCode(_errorCode)),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                key: const ValueKey('reflection-retry'),
+                onPressed: _load,
+                child: Text(strings.reflectionRetry),
+              ),
+            ] else if (model != null) ...[
+              Text(
+                strings.reflectionDecisionSummary(
+                  model.decisionChanged,
+                  model.changedQuestionCount,
+                ),
+                key: const ValueKey('reflection-summary'),
+              ),
+              if (model.interventionCount > 0) ...[
+                const SizedBox(height: 8),
+                Text(strings.reflectionInterventionSummary(model.interventionCount)),
+              ],
+              const SizedBox(height: 8),
+              Text(
+                strings.reflectionNonCausalNote,
+                key: const ValueKey('reflection-non-causal-note'),
+              ),
+              const SizedBox(height: 16),
+              if (model.completed || widget.step.state == FlowStepRuntimeState.completed)
+                Text(
+                  strings.reflectionCompleted,
+                  key: const ValueKey('reflection-completed'),
+                  textAlign: TextAlign.center,
+                )
+              else
+                FilledButton(
+                  key: const ValueKey('reflection-complete-button'),
+                  onPressed: widget.submitting ? null : _complete,
+                  child: Text(strings.reflectionComplete),
+                ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+'''
+          if 'class _ReflectionStep extends ConsumerStatefulWidget' not in text:
+              text = text.replace(marker, widget + marker)
+          screen.write_text(text, encoding='utf-8')
+          PY
+      - name: Format patched Dart sources
+        working-directory: apps/mobile
+        run: dart format lib/features/decision/data/http_decision_repository.dart lib/features/decision/application/decision_controller.dart lib/features/decision/presentation/decision_flow_screen.dart lib/core/localization/kefe_strings.dart
+      - name: Commit patch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/mobile/lib/features/decision/data/http_decision_repository.dart \
+            apps/mobile/lib/features/decision/application/decision_controller.dart \
+            apps/mobile/lib/features/decision/presentation/decision_flow_screen.dart \
+            apps/mobile/lib/core/localization/kefe_strings.dart
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Render and complete generic Reflection in Flutter'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+
   flutter:
     runs-on: ubuntu-latest
     steps:
