@@ -46,7 +46,7 @@ void main() {
   );
 
   testWidgets(
-    'Product Preview Case shows evidence, weigh controls and commit-gated result',
+    'Product Preview Case shows signature balance and commit-gated result',
     (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -77,13 +77,14 @@ void main() {
       expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
 
       await tester.scrollUntilVisible(
-        find.byKey(const ValueKey('option-Öncelikli ihtiyacı olana')),
+        find.byKey(const ValueKey('kefe-balance-visual')),
         320,
         scrollable: find.byType(Scrollable).last,
       );
       await tester.pumpAndSettle();
 
       expect(find.text('KARAR'), findsOneWidget);
+      expect(find.byKey(const ValueKey('kefe-balance-visual')), findsOneWidget);
 
       final option = find.byKey(
         const ValueKey('option-Öncelikli ihtiyacı olana'),
