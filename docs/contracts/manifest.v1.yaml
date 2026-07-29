@@ -1,4 +1,4 @@
-manifest_version: 1.28.0
+manifest_version: 1.30.0
 updated_at: '2026-07-29'
 policy:
   executable_schema_source: services/api/migrations
@@ -11,7 +11,7 @@ contracts:
     role: conceptual_core_model
   - id: openapi
     path: docs/contracts/openapi.v1.json
-    version: 0.14.0
+    version: 0.15.0
     role: http_api_contract
   - id: event-envelope
     path: docs/contracts/event-envelope.v1.schema.json
@@ -75,12 +75,16 @@ contracts:
     role: actor_scoped_server_authoritative_caseversion_pinned_flow_runtime
   - id: mobile-flow-runtime-ui
     path: docs/contracts/mobile-flow-runtime-ui.v1.yaml
-    version: 1.0.0
+    version: 1.1.0
     role: flutter_server_flow_driven_rendering_and_offline_continuity_policy
   - id: decision-revision-lineage
     path: docs/contracts/decision-revision-lineage.v1.yaml
     version: 1.1.0
     role: immutable_decision_revision_exposure_intervention_and_generic_delta_policy
+  - id: reflection-runtime
+    path: docs/contracts/reflection-runtime.v1.yaml
+    version: 1.0.0
+    role: actor_scoped_non_causal_reflection_and_lineage_cursor_completion_policy
   - id: signal-impact-model
     path: docs/contracts/signal-impact-model.v1.yaml
     version: 1.0.0
