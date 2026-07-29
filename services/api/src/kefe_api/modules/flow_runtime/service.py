@@ -47,7 +47,15 @@ class FlowRuntimeService:
             )
 
         revisions = self._repository.list_decision_revisions(session.id)
+        latest_revision_id = revisions[-1].id if revisions else None
         exposures = self._repository.list_exposures(session.id)
+        completions = self._repository.list_reflection_completions(session.id)
+        current_reflection_steps = {
+            item.flow_step_code
+            for item in completions
+            if latest_revision_id is not None
+            and item.latest_revision_id == latest_revision_id
+        }
         steps = self._evaluate(
             flow=flow,
             session_state=session.state,
@@ -57,6 +65,7 @@ class FlowRuntimeService:
                 for item in exposures
                 if item.resource_category == "CONTEXT"
             },
+            current_reflection_step_codes=current_reflection_steps,
         )
         support = self._execution_support(flow)
         return FlowRuntimeSnapshot(
@@ -76,6 +85,7 @@ class FlowRuntimeService:
             "CONTEXT",
             "DECISION",
             "COLLECTIVE_RESULT",
+            "REFLECTION",
         }
         if any(
             step.primitive_code not in fully_supported_primitives
@@ -91,6 +101,7 @@ class FlowRuntimeService:
         session_state: WeighState,
         revision_step_codes: set[str],
         exposed_context_step_codes: set[str],
+        current_reflection_step_codes: set[str],
     ) -> tuple[FlowRuntimeStep, ...]:
         step_by_code = {step.code: step for step in flow.steps}
         if flow.entry_step_code not in step_by_code:
@@ -145,6 +156,7 @@ class FlowRuntimeService:
                     revision_step_codes=revision_step_codes,
                     exposed_context_step_codes=exposed_context_step_codes,
                     context_exposure_required=context_exposure_required,
+                    current_reflection_step_codes=current_reflection_step_codes,
                 )
                 evaluated[step.code] = runtime_step
                 remaining.remove(step.code)
@@ -184,6 +196,7 @@ class FlowRuntimeService:
         revision_step_codes: set[str],
         exposed_context_step_codes: set[str],
         context_exposure_required: set[str],
+        current_reflection_step_codes: set[str],
     ) -> tuple[FlowRuntimeStep, bool]:
         if step.primitive_code == "CONTEXT":
             requires_exposure = step.code in context_exposure_required
@@ -206,7 +219,6 @@ class FlowRuntimeService:
 
         if step.primitive_code == "DECISION":
             if step.code == first_decision_code:
-                # Historical committed sessions predate DecisionRevision persistence.
                 initial_complete = (
                     step.code in revision_step_codes
                     or session_state is WeighState.COMMITTED
@@ -292,16 +304,20 @@ class FlowRuntimeService:
             )
 
         if step.primitive_code == "REFLECTION":
+            completed = step.code in current_reflection_step_codes
             return (
                 FlowRuntimeStep(
                     code=step.code,
                     primitive_code=step.primitive_code,
                     capability_codes=step.capability_codes,
                     next_step_codes=step.next_step_codes,
-                    state=FlowStepRuntimeState.UNSUPPORTED,
-                    reason_code="FLOW_REFLECTION_RUNTIME_PENDING",
+                    state=(
+                        FlowStepRuntimeState.COMPLETED
+                        if completed
+                        else FlowStepRuntimeState.READY
+                    ),
                 ),
-                False,
+                completed,
             )
 
         return (
