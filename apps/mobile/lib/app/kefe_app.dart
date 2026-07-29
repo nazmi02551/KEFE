@@ -4,10 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../core/design/kefe_theme.dart';
 import '../core/localization/kefe_strings.dart';
+import '../features/activity/presentation/activity_screen.dart';
 import '../features/decision/presentation/decision_flow_screen.dart';
 import '../features/explore/presentation/discovery_explore_screen.dart';
 import '../features/onboarding/presentation/onboarding_gate_screen.dart';
 import '../features/progress/presentation/my_kefe_journey_screen.dart';
+import '../features/weigh/presentation/weigh_hub_screen.dart';
+import 'primary_navigation_shell.dart';
 
 class KefeApp extends StatefulWidget {
   const KefeApp({this.initialLocation = '/welcome', super.key});
@@ -29,36 +32,30 @@ class _KefeAppState extends State<KefeApp> {
       ),
       GoRoute(
         path: '/explore',
-        builder: (context, state) => Scaffold(
-          body: const DiscoveryExploreScreen(embedded: true),
-          floatingActionButton: Semantics(
-            label: 'My KEFE karar yolculuğunu aç',
-            button: true,
-            child: FloatingActionButton.small(
-              key: const ValueKey('open-my-kefe'),
-              tooltip: 'My KEFE',
-              onPressed: () => context.push('/my-kefe'),
-              child: const Icon(Icons.timeline_rounded),
-            ),
-          ),
+        builder: (context, state) => const PrimaryNavigationShell(
+          selectedIndex: 0,
+          child: DiscoveryExploreScreen(embedded: true),
+        ),
+      ),
+      GoRoute(
+        path: '/weigh',
+        builder: (context, state) => const PrimaryNavigationShell(
+          selectedIndex: 1,
+          child: WeighHubScreen(embedded: true),
+        ),
+      ),
+      GoRoute(
+        path: '/activity',
+        builder: (context, state) => const PrimaryNavigationShell(
+          selectedIndex: 2,
+          child: ActivityScreen(embedded: true),
         ),
       ),
       GoRoute(
         path: '/my-kefe',
-        builder: (context, state) => Scaffold(
-          appBar: AppBar(
-            leading: BackButton(
-              onPressed: () {
-                if (context.canPop()) {
-                  context.pop();
-                } else {
-                  context.go('/explore');
-                }
-              },
-            ),
-            title: const Text('My KEFE'),
-          ),
-          body: const MyKefeJourneyScreen(embedded: true),
+        builder: (context, state) => const PrimaryNavigationShell(
+          selectedIndex: 3,
+          child: MyKefeJourneyScreen(embedded: true),
         ),
       ),
       GoRoute(
