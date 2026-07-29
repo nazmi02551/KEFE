@@ -39,7 +39,7 @@ jobs:
         run: flutter analyze > analyze-output.txt 2>&1
       - name: Upload analyze diagnostics on failure
         if: steps.analyze.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mobile-analyze-output
           path: apps/mobile/analyze-output.txt
@@ -54,7 +54,7 @@ jobs:
         run: flutter test --reporter expanded > test-output.txt 2>&1
       - name: Upload test diagnostics on failure
         if: steps.tests.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mobile-test-output
           path: apps/mobile/test-output.txt
@@ -72,7 +72,7 @@ jobs:
           --dart-define=KEFE_PREVIEW_VERSION=v8
           --dart-define=KEFE_PREVIEW_COMMIT=${GITHUB_SHA}
       - name: Upload preview APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: kefe-preview-android
           path: apps/mobile/build/app/outputs/flutter-apk/app-debug.apk
