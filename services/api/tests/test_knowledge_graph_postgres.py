@@ -120,6 +120,7 @@ def test_postgres_knowledge_graph_round_trip_and_append_only_history() -> None:
             target_id=normalized.id,
             relation=EvidenceRelation.SUPPORTS,
             review_state=ReviewState.ACCEPTED,
+            provenance_ref="review:postgres:evidence-1",
             created_at=now,
         )
     )
@@ -131,6 +132,7 @@ def test_postgres_knowledge_graph_round_trip_and_append_only_history() -> None:
             relation_code="QUALIFIES_SCOPE",
             taxonomy_version="claim-rel-v1",
             review_state=ReviewState.ACCEPTED,
+            provenance_ref="review:postgres:claim-relation-1",
             created_at=now,
         )
     )
