@@ -146,10 +146,14 @@ Future<void> pumpKefe(
   await tester.pumpAndSettle();
 }
 
-Future<void> scrollTo(WidgetTester tester, Finder finder) async {
+Future<void> scrollTo(
+  WidgetTester tester,
+  Finder finder, {
+  double delta = 260,
+}) async {
   await tester.scrollUntilVisible(
     finder,
-    260,
+    delta,
     scrollable: find.byType(Scrollable).last,
   );
   await tester.pump();
@@ -231,7 +235,7 @@ void main() {
     expect(status, findsOneWidget);
 
     final firstKey = repository.commitKeys.single;
-    await scrollTo(tester, commit);
+    await scrollTo(tester, commit, delta: -260);
     await tester.tap(commit);
     await tester.pumpAndSettle();
 
