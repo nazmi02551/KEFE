@@ -49,7 +49,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Bugün dünya\nneyi tartıyor?'), findsOneWidget);
-      expect(find.text('Trend tartımlar'), findsOneWidget);
       expect(find.text('Radar'), findsOneWidget);
       expect(
         find.byKey(
@@ -59,6 +58,14 @@ void main() {
         ),
         findsOneWidget,
       );
+
+      await tester.scrollUntilVisible(
+        find.text('Trend tartımlar'),
+        260,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Trend tartımlar'), findsOneWidget);
 
       await tester.tap(find.text('Radar'));
       await tester.pumpAndSettle();
@@ -109,8 +116,15 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.text('Olay özeti'), findsOneWidget);
       expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
+
+      await tester.scrollUntilVisible(
+        find.text('Olay özeti'),
+        260,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Olay özeti'), findsOneWidget);
 
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('kefe-balance-visual')),
