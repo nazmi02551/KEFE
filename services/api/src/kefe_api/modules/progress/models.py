@@ -39,3 +39,43 @@ class ProgressSnapshot:
     @property
     def account_offer_eligible(self) -> bool:
         return self.meaningful_weigh_count >= 1
+
+
+@dataclass(frozen=True, slots=True)
+class DomainActivity:
+    primary_domain: str
+    committed_weigh_count: int
+    last_committed_at: datetime
+
+
+@dataclass(frozen=True, slots=True)
+class RecentDecisionJourney:
+    case_id: UUID
+    case_version_id: UUID
+    title: str
+    primary_domain: str
+    initial_committed_at: datetime
+    latest_decision_at: datetime
+    decision_update_count: int
+    reflection_completed: bool
+
+
+@dataclass(frozen=True, slots=True)
+class DecisionJourneySnapshot:
+    actor_id: UUID
+    decision_update_count: int
+    revisited_case_count: int
+    reflection_completion_count: int
+    domain_activity: tuple[DomainActivity, ...]
+    recent_journeys: tuple[RecentDecisionJourney, ...]
+
+    @classmethod
+    def empty(cls, actor_id: UUID) -> DecisionJourneySnapshot:
+        return cls(
+            actor_id=actor_id,
+            decision_update_count=0,
+            revisited_case_count=0,
+            reflection_completion_count=0,
+            domain_activity=(),
+            recent_journeys=(),
+        )
