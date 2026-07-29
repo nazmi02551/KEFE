@@ -7,6 +7,8 @@ import 'features/decision/application/decision_controller.dart';
 import 'features/decision/data/preview_journey_decision_repository.dart';
 import 'features/media_presentation/application/case_media_provider.dart';
 import 'features/media_presentation/data/preview_case_media_repository.dart';
+import 'features/progress/application/progress_controller.dart';
+import 'features/progress/data/preview_progress_repository.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +20,9 @@ void main() {
         ),
         caseMediaRepositoryProvider.overrideWithValue(
           const PreviewCaseMediaRepository(),
+        ),
+        progressRepositoryProvider.overrideWithValue(
+          PreviewProgressRepository(),
         ),
         productPreviewVisualModeProvider.overrideWithValue(true),
       ],
