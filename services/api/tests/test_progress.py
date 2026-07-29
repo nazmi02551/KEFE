@@ -58,12 +58,30 @@ def test_empty_progress_is_low_claim_and_guest_safe() -> None:
     assert body["progress"]["readiness"] == "INSUFFICIENT_DATA"
     assert body["progress"]["meaningful_weigh_count"] == 0
     assert body["progress"]["recent_cases"] == []
+    assert body["journey"] == {
+        "decision_update_count": 0,
+        "revisited_case_count": 0,
+        "reflection_completion_count": 0,
+        "domain_activity": [],
+        "recent_journeys": [],
+    }
     serialized = response.text.lower()
-    for forbidden in ("token", "private_reason", "personality", "ideology", "streak", "xp"):
+    for forbidden in (
+        "token",
+        "private_reason",
+        "raw_response",
+        "personality",
+        "ideology",
+        "psychometric",
+        "streak",
+        "xp",
+        "exposure_metadata",
+        "intervention_metadata",
+    ):
         assert forbidden not in serialized
 
 
-def test_committed_decision_unlocks_optional_offer_and_progress() -> None:
+def test_committed_decision_unlocks_offer_and_descriptive_journey() -> None:
     client = TestClient(create_app())
     headers = _guest(client)
     _commit_demo(client, headers)
@@ -81,3 +99,25 @@ def test_committed_decision_unlocks_optional_offer_and_progress() -> None:
     recent = body["progress"]["recent_cases"][0]
     assert recent["case_id"] == str(DEMO_CASE_ID)
     assert recent["primary_domain"] == "DAILY_LIFE"
+
+    journey = body["journey"]
+    assert journey["decision_update_count"] == 0
+    assert journey["revisited_case_count"] == 0
+    assert journey["reflection_completion_count"] == 0
+    assert journey["domain_activity"] == [
+        {
+            "primary_domain": "DAILY_LIFE",
+            "committed_weigh_count": 1,
+            "last_committed_at": recent["committed_at"],
+        }
+    ]
+    assert len(journey["recent_journeys"]) == 1
+    item = journey["recent_journeys"][0]
+    assert item["case_id"] == str(DEMO_CASE_ID)
+    assert item["primary_domain"] == "DAILY_LIFE"
+    assert item["decision_update_count"] == 0
+    assert item["reflection_completed"] is False
+    assert item["initial_committed_at"] == recent["committed_at"]
+    assert item["latest_decision_at"] == recent["committed_at"]
+    assert body["methodology"]["journey_semantics"] == "OBSERVED_PRODUCT_HISTORY_ONLY"
+    assert body["methodology"]["causal_claims"] == "NONE"
