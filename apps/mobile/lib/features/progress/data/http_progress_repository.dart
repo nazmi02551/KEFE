@@ -70,9 +70,58 @@ class HttpProgressRepository implements ProgressRepository {
             })
             .toList(growable: false),
       ),
+      journey: _journey(body['journey']),
       methodology: methodology.map(
         (key, value) => MapEntry(key, value.toString()),
       ),
+    );
+  }
+
+  MyKefeJourney _journey(Object? raw) {
+    if (raw is! Map) return const MyKefeJourney.empty();
+    final map = raw.cast<String, Object?>();
+    final domainRaw = map['domain_activity'];
+    final recentRaw = map['recent_journeys'];
+
+    final domainActivity = domainRaw is List
+        ? domainRaw.whereType<Map>().map((item) {
+            final value = item.cast<String, Object?>();
+            return MyKefeDomainActivity(
+              primaryDomain: value['primary_domain'] as String,
+              committedWeighCount: value['committed_weigh_count'] as int,
+              lastCommittedAt: _date(value['last_committed_at']),
+            );
+          }).toList(growable: false)
+        : const <MyKefeDomainActivity>[];
+
+    final recentJourneys = recentRaw is List
+        ? recentRaw.whereType<Map>().map((item) {
+            final value = item.cast<String, Object?>();
+            final initialCommittedAt = _date(value['initial_committed_at']);
+            final latestDecisionAt = _date(value['latest_decision_at']);
+            if (initialCommittedAt == null || latestDecisionAt == null) {
+              throw const FormatException('Journey timestamps are required');
+            }
+            return MyKefeRecentJourney(
+              caseId: value['case_id'] as String,
+              caseVersionId: value['case_version_id'] as String,
+              title: value['title'] as String,
+              primaryDomain: value['primary_domain'] as String,
+              initialCommittedAt: initialCommittedAt,
+              latestDecisionAt: latestDecisionAt,
+              decisionUpdateCount: value['decision_update_count'] as int,
+              reflectionCompleted: value['reflection_completed'] as bool,
+            );
+          }).toList(growable: false)
+        : const <MyKefeRecentJourney>[];
+
+    return MyKefeJourney(
+      decisionUpdateCount: map['decision_update_count'] as int? ?? 0,
+      revisitedCaseCount: map['revisited_case_count'] as int? ?? 0,
+      reflectionCompletionCount:
+          map['reflection_completion_count'] as int? ?? 0,
+      domainActivity: domainActivity,
+      recentJourneys: recentJourneys,
     );
   }
 
