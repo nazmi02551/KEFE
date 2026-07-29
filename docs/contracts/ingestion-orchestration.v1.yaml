@@ -1,0 +1,329 @@
+contract_version: 1.0.0
+updated_at: '2026-07-29'
+source_adr: docs/adr/0028-provider-neutral-ingestion-orchestration-reviewed-proposals.md
+status: architecture_locked_implementation_pending
+bounded_context: ingestion_orchestration
+
+principles:
+  provider_specific_logic_ends_at_source_adapter: true
+  orchestration_is_not_knowledge_truth_authority: true
+  orchestration_is_not_case_publication_authority: true
+  ai_output_is_proposal_not_acceptance: true
+  review_decision_is_separate_from_proposal: true
+  retries_must_be_bounded: true
+  accepted_materialization_must_be_idempotent: true
+  published_case_version_mutation_forbidden: true
+  consumer_core_must_not_depend_on_orchestration_availability: true
+
+inputs:
+  canonical_input_kinds:
+    - SOURCE_ARTIFACT
+    - NORMALIZED_ARTIFACT
+  provider_sdk_types_allowed: false
+  provider_credentials_allowed_in_domain: false
+  source_access_must_be_technical_legal_terms_permitted: true
+  external_content_is_untrusted_input: true
+
+pipeline_registry:
+  versioned: true
+  closed_stage_enum: false
+  pipeline_identity_fields:
+    - pipeline_code
+    - pipeline_version
+  stage_definition_fields:
+    - stage_code
+    - stage_version
+    - processor_capability
+    - input_schema_ref
+    - output_schema_ref
+    - retry_policy_ref
+  initial_stage_families:
+    - NORMALIZE
+    - TREND_DETECTION
+    - EVENT_CLUSTERING
+    - DEDUPLICATION
+    - KEFE_WORTHINESS
+    - CLAIM_EXTRACTION
+    - EVIDENCE_MAPPING
+    - REPLY_ARGUMENT_EXTRACTION
+    - FACT_CHECK_ASSIST
+    - RISK_PROPOSAL
+    - DECISION_PROBLEM_PROPOSAL
+    - QUESTION_PROPOSAL
+    - CANDIDATE_CASE_COMPOSITION
+    - LOCALIZATION_PROPOSAL
+
+run:
+  entity: INGESTION_RUN
+  durable: true
+  states:
+    - QUEUED
+    - RUNNING
+    - SUCCEEDED
+    - FAILED_RETRYABLE
+    - FAILED_FINAL
+    - CANCELED
+  human_review_wait_state_forbidden: true
+  zero_proposal_success_allowed: true
+  required_pins:
+    - input_artifact_kind
+    - input_artifact_id
+    - input_content_hash
+    - pipeline_code
+    - pipeline_version
+    - configuration_hash
+  conditional_pins:
+    - taxonomy_version
+    - methodology_version
+    - locale
+    - jurisdiction_code
+  run_key_components:
+    - input_artifact_kind
+    - input_artifact_id
+    - input_content_hash
+    - pipeline_code
+    - pipeline_version
+    - configuration_hash
+    - taxonomy_version_if_applicable
+    - methodology_version_if_applicable
+    - locale_if_applicable
+    - jurisdiction_if_applicable
+  same_run_key_creates_duplicate_logical_run: false
+  changed_content_or_version_creates_new_run: true
+
+stage_execution:
+  durable: true
+  append_only_attempts: true
+  required_fields:
+    - stage_execution_id
+    - run_id
+    - stage_code
+    - stage_version
+    - attempt_no
+    - executor_kind
+    - input_hash
+    - started_at
+    - outcome
+  optional_fields:
+    - output_hash
+    - error_code
+    - completed_at
+    - execution_ref
+    - trace_id
+  executor_kinds:
+    - DETERMINISTIC
+    - AI_ASSISTED
+    - HUMAN_ASSISTED
+    - EXTERNAL_CAPABILITY
+  provider_name_is_domain_semantic: false
+
+proposal:
+  immutable: true
+  registry_versioned: true
+  required_fields:
+    - proposal_id
+    - proposal_kind
+    - payload_schema_ref
+    - payload_schema_version
+    - payload
+    - payload_hash
+    - run_id
+    - stage_execution_id
+    - created_at
+  optional_fields:
+    - taxonomy_version
+    - configuration_version
+    - methodology_version
+    - confidence
+    - risk_code
+    - ai_execution_ref
+    - provenance_ref
+    - supersedes_proposal_id
+  initial_kinds:
+    - EVENT_CANDIDATE
+    - CLAIM
+    - CLAIM_ASSESSMENT
+    - EVIDENCE_LINK
+    - ARGUMENT
+    - ARGUMENT_RELATION
+    - DECISION_PROBLEM
+    - QUESTION_DRAFT
+    - RISK_ASSESSMENT
+    - CANDIDATE_CASE
+  automatically_consumer_visible: false
+  automatically_accepted: false
+  automatically_published: false
+
+proposal_review:
+  append_only: true
+  proposal_content_mutation_forbidden: true
+  decisions:
+    - ACCEPTED
+    - REJECTED
+    - CHANGES_REQUESTED
+  required_fields:
+    - review_decision_id
+    - proposal_id
+    - decision
+    - reviewer_ref
+    - decided_at
+  conditional_fields:
+    - rationale
+    - reason_code
+    - policy_version
+    - risk_policy_version
+  reviewer_identity_source: AUTHENTICATED_ADMIN_SECURITY_BOUNDARY
+  ai_may_self_accept: false
+  provider_may_self_accept: false
+  changes_request_creates_new_proposal_revision: true
+  old_proposal_and_review_history_preserved: true
+
+ai_execution:
+  provider_neutral_task_port_required: true
+  ai_orchestrator_required_before_provider_adapter: true
+  direct_provider_sdk_dependency_in_domain_forbidden: true
+  required_lineage_when_ai_assisted:
+    - capability
+    - model_provider
+    - model_name
+    - model_version
+    - prompt_template_id
+    - prompt_version
+    - input_hash
+    - output_hash
+    - confidence
+    - created_at
+  additional_lineage_when_available:
+    - configuration_version
+    - taxonomy_version
+    - safety_labels
+    - fallback_path
+    - latency
+    - cost_metadata
+  provider_confidence_is_truth_probability: false
+  raw_pii_logging_forbidden: true
+  forbidden_roles:
+    - CLAIM_STATE_FINAL_AUTHORITY
+    - NORMATIVE_VERDICT
+    - KEFE_POLITICAL_OR_MORAL_POSITION
+    - EDITORIAL_ACCEPTANCE
+    - CASE_PUBLICATION
+
+materialization:
+  entity: PROPOSAL_MATERIALIZATION
+  requires_accepted_review: true
+  idempotent: true
+  required_fields:
+    - materialization_id
+    - proposal_id
+    - target_kind
+    - target_id
+    - materialized_at
+  unique_logical_key:
+    - proposal_id
+    - target_kind
+  review_decision_survives_materialization_failure: true
+  failure_is_retryable_operational_work: true
+  existing_knowledge_targets_allowed:
+    - CLAIM
+    - CLAIM_ASSESSMENT
+    - CLAIM_ASSERTION
+    - EVIDENCE_LINK
+    - CLAIM_RELATION
+    - ARGUMENT
+    - ARGUMENT_RELATION
+  evidence_link_may_change_claim_assessment_automatically: false
+  claim_assertion_may_change_claim_state_automatically: false
+
+candidate_handoff:
+  accepted_candidate_case_is_published_case: false
+  accepted_candidate_case_creates_authoring_draft_in_this_contract: false
+  accepted_decision_problem_creates_authoring_issue_in_this_contract: false
+  accepted_question_draft_creates_authoring_question_in_this_contract: false
+  editorial_projection_requires_future_contract: true
+  existing_content_authoring_lifecycle_remains_authoritative: true
+  direct_publish_call_from_orchestration_forbidden: true
+
+human_gates:
+  ai_derived_claim_assessment_requires_human_acceptance: true
+  high_risk_real_event_question_requires_human_review: true
+  high_risk_candidate_case_requires_human_review: true
+  publication_gates_remain_in_content_authoring: true
+  risk_policy_may_add_review_requirements: true
+  risk_policy_may_remove_binding_review_requirements: false
+
+resilience:
+  bounded_queue_required: true
+  bounded_concurrency_required: true
+  bounded_retry_required: true
+  infinite_retry_forbidden: true
+  external_call_controls:
+    - TIMEOUT
+    - EXPONENTIAL_BACKOFF
+    - JITTER
+    - CIRCUIT_BREAKER
+  exhausted_async_work_requires_operational_inspection: true
+  retryable_and_final_error_classification_required: true
+  trace_correlation_required: true
+  pii_in_trace_forbidden: true
+  ai_or_provider_outage_must_not_break_consumer_core: true
+
+security_and_privacy:
+  minimum_necessary_source_metadata: true
+  source_url_network_policy_required_when_fetching: true
+  content_size_limit_required_when_fetching: true
+  content_type_validation_required_when_fetching: true
+  prompt_injection_content_is_untrusted: true
+  identity_vault_pii_to_ai_provider_forbidden: true
+  personality_inference_from_ingestion_forbidden: true
+  ideology_inference_from_ingestion_forbidden: true
+  psychometric_inference_from_ingestion_forbidden: true
+
+admin_queue:
+  semantic_source_of_truth: false
+  derived_from:
+    - INGESTION_RUN
+    - PROPOSAL
+    - PROPOSAL_REVIEW_DECISION
+  future_read_model_capabilities:
+    - ASSIGNMENT
+    - PRIORITY
+    - SLA_INDICATOR
+    - SAVED_VIEWS
+    - FILTERS
+  bulk_acceptance_added: false
+
+compatibility:
+  claim_argument_ingestion_contract_preserved: true
+  context_four_state_claim_projection_unchanged: true
+  content_authoring_contract_unchanged: true
+  openapi_changed: false
+  consumer_ui_changed: false
+  graph_database_added: false
+
+first_implementation_slice:
+  status: pending
+  includes:
+    - INGESTION_RUN
+    - STAGE_EXECUTION
+    - PROPOSAL
+    - PROPOSAL_REVIEW_DECISION
+    - PROPOSAL_MATERIALIZATION
+    - PIPELINE_AND_STAGE_VERSION_PINS
+    - PROVIDER_NEUTRAL_PORTS
+    - IN_MEMORY_PERSISTENCE
+    - POSTGRESQL_PERSISTENCE
+    - BOUNDED_RETRY_ERROR_INVARIANTS
+    - DETERMINISTIC_FAKE_PROCESSORS_FOR_TESTS
+    - IDEMPOTENT_EXISTING_KNOWLEDGE_MATERIALIZATION
+    - CONTRACT_FITNESS_TESTS
+  excludes:
+    - EXTERNAL_SOURCE_PROVIDER_CALLS
+    - AI_PROVIDER_CALLS
+    - CONSUMER_INGESTION_UI
+    - CONSUMER_CLAIM_GRAPH_UI
+    - CANDIDATE_CASE_TO_AUTHORING_DRAFT_PROJECTION
+    - AUTOMATIC_CASE_PUBLICATION
+    - CONTEXT_CLAIM_STATUS_REMAPPING
+    - GRAPH_DATABASE
+    - ADMIN_QUEUE_UI
