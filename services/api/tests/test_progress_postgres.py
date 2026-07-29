@@ -62,10 +62,23 @@ def test_postgres_progress_is_actor_scoped_and_low_claim(
         assert body["progress"]["distinct_domain_count"] == 1
         assert len(body["progress"]["recent_cases"]) == 1
 
+        journey = body["journey"]
+        assert journey["decision_update_count"] == 0
+        assert journey["revisited_case_count"] == 0
+        assert journey["reflection_completion_count"] == 0
+        assert journey["domain_activity"][0]["primary_domain"] == "DAILY_LIFE"
+        assert journey["domain_activity"][0]["committed_weigh_count"] == 1
+        assert len(journey["recent_journeys"]) == 1
+        assert journey["recent_journeys"][0]["case_id"] == str(DEMO_CASE_ID)
+        assert journey["recent_journeys"][0]["decision_update_count"] == 0
+        assert journey["recent_journeys"][0]["reflection_completed"] is False
+
         serialized = response.text.lower()
         for forbidden in (
             "private_reason",
             "raw_response",
+            "response_snapshot",
+            "diff_snapshot",
             "personality",
             "ideology",
             "psychometric",
