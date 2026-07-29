@@ -6,7 +6,9 @@ import '../../../core/localization/kefe_strings.dart';
 import '../../context/presentation/context_section.dart';
 import '../../onboarding/application/onboarding_controller.dart';
 import '../application/decision_controller.dart';
+import '../data/decision_repository.dart';
 import '../domain/decision_models.dart';
+import '../domain/reflection_models.dart';
 import 'perspective_section.dart';
 import 'question_input.dart';
 import 'reason_input.dart';
@@ -165,6 +167,7 @@ class _FlowStepSection extends ConsumerWidget {
       'CONTEXT' => _contextStep(ref),
       'DECISION' => _decisionStep(context, ref),
       'COLLECTIVE_RESULT' => _resultStep(context, ref),
+      'REFLECTION' => _reflectionStep(),
       _ => step.state == FlowStepRuntimeState.unsupported
           ? _CapabilityPendingCard(step: step)
           : const SizedBox.shrink(),
@@ -253,6 +256,21 @@ class _FlowStepSection extends ConsumerWidget {
     );
   }
 
+  Widget _reflectionStep() {
+    if (step.state == FlowStepRuntimeState.unsupported) {
+      return _CapabilityPendingCard(step: step);
+    }
+    if (step.state != FlowStepRuntimeState.ready &&
+        step.state != FlowStepRuntimeState.completed) {
+      return const SizedBox.shrink();
+    }
+    return _ReflectionStep(
+      sessionId: state.sessionId!,
+      caseVersionId: state.caseData!.versionId,
+      step: step,
+    );
+  }
+
   Widget _resultStep(BuildContext context, WidgetRef ref) {
     if (step.state == FlowStepRuntimeState.unsupported) {
       return _CapabilityPendingCard(step: step);
@@ -337,6 +355,221 @@ class _ExposureAwareContextStepState extends State<_ExposureAwareContextStep> {
         ContextSection(caseVersionId: widget.caseVersionId),
         const SizedBox(height: 24),
       ],
+    );
+  }
+}
+
+class _ReflectionStep extends ConsumerStatefulWidget {
+  const _ReflectionStep({
+    required this.sessionId,
+    required this.caseVersionId,
+    required this.step,
+  });
+
+  final String sessionId;
+  final String caseVersionId;
+  final FlowRuntimeStep step;
+
+  @override
+  ConsumerState<_ReflectionStep> createState() => _ReflectionStepState();
+}
+
+class _ReflectionStepState extends ConsumerState<_ReflectionStep> {
+  ReflectionReadModel? _model;
+  FlowStepRuntimeState? _runtimeState;
+  bool _loading = false;
+  bool _completing = false;
+  String? _errorCode;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleLoad();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ReflectionStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.sessionId != widget.sessionId ||
+        oldWidget.caseVersionId != widget.caseVersionId ||
+        oldWidget.step.code != widget.step.code ||
+        oldWidget.step.state != widget.step.state) {
+      _model = null;
+      _runtimeState = null;
+      _scheduleLoad();
+    }
+  }
+
+  void _scheduleLoad() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _load();
+    });
+  }
+
+  Future<void> _load() async {
+    if (_loading) return;
+    setState(() {
+      _loading = true;
+      _errorCode = null;
+    });
+    try {
+      final model = await ref.read(decisionRepositoryProvider).reflection.fetchReflection(
+        sessionId: widget.sessionId,
+        stepCode: widget.step.code,
+      );
+      if (!mounted) return;
+      setState(() {
+        _model = model;
+        _loading = false;
+      });
+    } on ClientTransportFailure catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _errorCode = error.code;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _errorCode = 'UNEXPECTED_CLIENT_ERROR';
+      });
+    }
+  }
+
+  Future<void> _complete() async {
+    final model = _model;
+    if (model == null || _isCompleted || _completing) return;
+    setState(() {
+      _completing = true;
+      _errorCode = null;
+    });
+    try {
+      final repository = ref.read(decisionRepositoryProvider);
+      await repository.reflection.completeReflection(
+        sessionId: widget.sessionId,
+        stepCode: widget.step.code,
+        idempotencyKey:
+            'mobile-reflection-${widget.sessionId}-${widget.step.code}-${model.latestRevisionId}-v1',
+      );
+      final refreshed = await repository.fetchFlowRuntime(widget.sessionId);
+      if (!refreshed.matches(
+        sessionId: widget.sessionId,
+        caseVersionId: widget.caseVersionId,
+      )) {
+        throw const ClientTransportFailure(code: 'FLOW_RUNTIME_VERSION_MISMATCH');
+      }
+      FlowRuntimeStep? refreshedStep;
+      for (final item in refreshed.steps) {
+        if (item.code == widget.step.code && item.primitiveCode == 'REFLECTION') {
+          refreshedStep = item;
+          break;
+        }
+      }
+      final refreshedModel = await repository.reflection.fetchReflection(
+        sessionId: widget.sessionId,
+        stepCode: widget.step.code,
+      );
+      if (!mounted) return;
+      setState(() {
+        _model = refreshedModel;
+        _runtimeState = refreshedStep?.state;
+        _completing = false;
+      });
+    } on ClientTransportFailure catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _completing = false;
+        _errorCode = error.code;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _completing = false;
+        _errorCode = 'UNEXPECTED_CLIENT_ERROR';
+      });
+    }
+  }
+
+  bool get _isCompleted =>
+      _model?.completed == true ||
+      _runtimeState == FlowStepRuntimeState.completed ||
+      widget.step.state == FlowStepRuntimeState.completed;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
+    final model = _model;
+    return Card(
+      key: ValueKey('reflection-step-${widget.step.code}'),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              strings.reflectionTitle,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 12),
+            if (_loading && model == null)
+              Text(strings.reflectionLoading)
+            else if (_errorCode != null && model == null) ...[
+              Text(strings.messageForCode(_errorCode)),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                key: const ValueKey('reflection-retry'),
+                onPressed: _load,
+                child: Text(strings.reflectionRetry),
+              ),
+            ] else if (model != null) ...[
+              Text(
+                strings.reflectionDecisionSummary(
+                  model.decisionChanged,
+                  model.changedQuestionCount,
+                ),
+                key: const ValueKey('reflection-summary'),
+              ),
+              if (model.interventionCount > 0) ...[
+                const SizedBox(height: 8),
+                Text(
+                  strings.reflectionInterventionSummary(model.interventionCount),
+                ),
+              ],
+              const SizedBox(height: 8),
+              Text(
+                strings.reflectionNonCausalNote,
+                key: const ValueKey('reflection-non-causal-note'),
+              ),
+              if (_errorCode != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  strings.messageForCode(_errorCode),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              const SizedBox(height: 16),
+              if (_isCompleted)
+                Text(
+                  strings.reflectionCompleted,
+                  key: const ValueKey('reflection-completed'),
+                  textAlign: TextAlign.center,
+                )
+              else
+                FilledButton(
+                  key: const ValueKey('reflection-complete-button'),
+                  onPressed: _completing ? null : _complete,
+                  child: _completing
+                      ? const SizedBox.square(
+                          dimension: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(strings.reflectionComplete),
+                ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
