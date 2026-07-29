@@ -121,7 +121,8 @@ def main() -> int:
         if fragment in knowledge_source
     ]
     if leaked:
-        errors.append("provider-specific dependency leaked into knowledge domain: " + ", ".join(leaked))
+        message = "provider-specific dependency leaked into knowledge domain: "
+        errors.append(message + ", ".join(leaked))
     if "from fastapi" in knowledge_source:
         errors.append("HTTP framework leaked into knowledge domain")
 
@@ -131,8 +132,16 @@ def main() -> int:
         'DISPUTED = "DISPUTED"',
         'UNKNOWN = "UNKNOWN"',
     )
-    errors.extend(_require(context_models, expected_context_states, label="Context compatibility"))
-    if 'SUPPORTED = "SUPPORTED"' in context_models or 'FALSE = "FALSE"' in context_models:
+    errors.extend(
+        _require(
+            context_models,
+            expected_context_states,
+            label="Context compatibility",
+        )
+    )
+    has_supported = 'SUPPORTED = "SUPPORTED"' in context_models
+    has_false = 'FALSE = "FALSE"' in context_models
+    if has_supported or has_false:
         errors.append("canonical ClaimAssessment states leaked into Context presentation enum")
 
     if errors:
