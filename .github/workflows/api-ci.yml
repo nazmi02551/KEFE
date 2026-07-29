@@ -40,7 +40,7 @@ jobs:
         run: ruff check . --output-format=json > ruff-results.json
       - name: Upload lint diagnostics on failure
         if: steps.lint.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ruff-results
           path: services/api/ruff-results.json
@@ -52,7 +52,7 @@ jobs:
         working-directory: services/api
         run: python tools/export_openapi.py --output openapi.generated.json
       - name: Upload generated OpenAPI
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: openapi-generated
           path: services/api/openapi.generated.json
@@ -64,7 +64,7 @@ jobs:
         run: python tools/check_contract_sync.py > contract-sync-output.txt 2>&1
       - name: Upload contract diagnostics on failure
         if: steps.contract-sync.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: contract-sync-output
           path: services/api/contract-sync-output.txt
@@ -94,7 +94,7 @@ jobs:
         run: python tools/check_admin_http_contract.py > admin-http-contract-output.txt 2>&1
       - name: Upload Admin HTTP diagnostics on failure
         if: steps.admin-http-contract.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: admin-http-contract-output
           path: services/api/admin-http-contract-output.txt
@@ -109,7 +109,7 @@ jobs:
         run: pytest --cov=kefe_api --cov-report=term-missing > unit-test-output.txt 2>&1
       - name: Upload unit test diagnostics on failure
         if: steps.unit-tests.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: api-unit-test-output
           path: services/api/unit-test-output.txt
@@ -189,7 +189,7 @@ jobs:
           > postgres-test-output.txt 2>&1
       - name: Upload PostgreSQL diagnostics on failure
         if: steps.postgres-tests.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: postgres-test-output
           path: services/api/postgres-test-output.txt
