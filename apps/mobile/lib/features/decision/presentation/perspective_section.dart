@@ -22,9 +22,7 @@ class PerspectiveSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
-    if (state == PerspectiveUiState.idle) {
-      return const SizedBox.shrink();
-    }
+    if (state == PerspectiveUiState.idle) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -113,54 +111,47 @@ class PerspectiveSection extends StatelessWidget {
 
 class _LoadingState extends StatelessWidget {
   const _LoadingState({required this.strings});
-
   final KefeStrings strings;
 
   @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: strings.perspectiveLoading,
-      liveRegion: true,
-      child: Row(
-        children: [
-          const SizedBox.square(
-            dimension: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-          const SizedBox(width: 12),
-          Expanded(child: Text(strings.perspectiveLoading)),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Semantics(
+        label: strings.perspectiveLoading,
+        liveRegion: true,
+        child: Row(
+          children: [
+            const SizedBox.square(
+              dimension: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Text(strings.perspectiveLoading)),
+          ],
+        ),
+      );
 }
 
 class _RetryState extends StatelessWidget {
   const _RetryState({required this.strings, required this.onRetry});
-
   final KefeStrings strings;
   final VoidCallback onRetry;
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(strings.perspectiveUnavailable),
-        const SizedBox(height: 12),
-        OutlinedButton(
-          key: const ValueKey('perspective-retry'),
-          onPressed: onRetry,
-          child: Text(strings.perspectiveRetry),
-        ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(strings.perspectiveUnavailable),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            key: const ValueKey('perspective-retry'),
+            onPressed: onRetry,
+            child: Text(strings.perspectiveRetry),
+          ),
+        ],
+      );
 }
 
 class _LoadedState extends StatelessWidget {
   const _LoadedState({required this.state, required this.result});
-
   final PerspectiveUiState state;
   final PerspectiveResult? result;
 
@@ -168,9 +159,7 @@ class _LoadedState extends StatelessWidget {
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
     final snapshot = result;
-    if (snapshot == null) {
-      return Text(strings.perspectiveUnavailable);
-    }
+    if (snapshot == null) return Text(strings.perspectiveUnavailable);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -223,8 +212,7 @@ class _LoadedState extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  '${snapshot.methodology.sampleKind} · '
-                  'n=${snapshot.methodology.sampleSize}',
+                  '${snapshot.methodology.sampleKind} · n=${snapshot.methodology.sampleSize}',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: KefeColorTokens.goldSoft,
                       ),
@@ -240,40 +228,38 @@ class _LoadedState extends StatelessWidget {
 
 class _MethodNote extends StatelessWidget {
   const _MethodNote({required this.icon, required this.text});
-
   final IconData icon;
   final String text;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(11),
-      decoration: BoxDecoration(
-        color: KefeColorTokens.rules.withValues(alpha: 0.07),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: KefeColorTokens.rules.withValues(alpha: 0.18)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 17, color: KefeColorTokens.rules),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: KefeColorTokens.textMutedDark,
-                  ),
-            ),
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.all(11),
+        decoration: BoxDecoration(
+          color: KefeColorTokens.rules.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: KefeColorTokens.rules.withValues(alpha: 0.18),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 17, color: KefeColorTokens.rules),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                text,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: KefeColorTokens.textMutedDark,
+                    ),
+              ),
+            ),
+          ],
+        ),
+      );
 }
 
 class _PerspectiveCardView extends StatelessWidget {
   const _PerspectiveCardView({required this.card});
-
   final PerspectiveCard card;
 
   @override
@@ -321,8 +307,7 @@ class _PerspectiveCardView extends StatelessWidget {
           ),
           const SizedBox(height: 11),
           Text(
-            '${strings.perspectiveSourceLabel(card.sourceKind)} · '
-            '${card.provenanceLabel}',
+            '${strings.perspectiveSourceLabel(card.sourceKind)} · ${card.provenanceLabel}',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: KefeColorTokens.textMutedDark,
                 ),
@@ -345,5 +330,9 @@ class _PerspectiveCardView extends StatelessWidget {
       PerspectiveSlot.bridge => (
           color: const Color(0xFFAA9CFF),
           icon: Icons.hub_outlined,
+        ),
+      PerspectiveSlot.alternativeContext => (
+          color: KefeColorTokens.rules,
+          icon: Icons.change_circle_outlined,
         ),
     };
