@@ -165,16 +165,22 @@ class _LoadedState extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (state == PerspectiveUiState.degradedCurated) ...[
-          _MethodNote(
-            icon: Icons.verified_outlined,
-            text: strings.perspectiveCuratedNote,
+          KeyedSubtree(
+            key: const ValueKey('perspective-curated-note'),
+            child: _MethodNote(
+              icon: Icons.verified_outlined,
+              text: strings.perspectiveCuratedNote,
+            ),
           ),
           const SizedBox(height: 12),
         ],
         if (state == PerspectiveUiState.clusterPending) ...[
-          _MethodNote(
-            icon: Icons.hourglass_top_rounded,
-            text: strings.perspectiveClusterPending,
+          KeyedSubtree(
+            key: const ValueKey('perspective-cluster-pending'),
+            child: _MethodNote(
+              icon: Icons.hourglass_top_rounded,
+              text: strings.perspectiveClusterPending,
+            ),
           ),
           const SizedBox(height: 12),
         ],
