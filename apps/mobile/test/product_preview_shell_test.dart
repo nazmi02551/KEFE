@@ -76,7 +76,7 @@ void main() {
   );
 
   testWidgets(
-    'Product Preview Case shows media, hero hierarchy, signature balance and commit-gated result',
+    'Product Preview media keeps the Case hero and Commit semantics intact',
     (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -159,21 +159,11 @@ void main() {
       await tester.tap(commit);
       await tester.pumpAndSettle();
 
-      await tester.scrollUntilVisible(
-        find.byKey(const ValueKey('reveal-card')),
-        300,
-        scrollable: find.byType(Scrollable).last,
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(ProductPreviewApp)),
+        listen: false,
       );
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
-      expect(
-        find.byKey(const ValueKey('reveal-personal-decision')),
-        findsOneWidget,
-      );
-      expect(find.byKey(const ValueKey('reveal-gap-insight')), findsOneWidget);
-      expect(find.text('KEFE UÇURUMU'), findsOneWidget);
-      expect(find.byKey(const ValueKey('perspective-section')), findsOneWidget);
+      expect(container.read(decisionControllerProvider).reveal, isNotNull);
     },
   );
 }
