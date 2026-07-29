@@ -10,6 +10,8 @@ import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/preview_decision_repository.dart';
 import 'package:kefe_mobile/features/media_presentation/application/case_media_provider.dart';
 import 'package:kefe_mobile/features/media_presentation/data/preview_case_media_repository.dart';
+import 'package:kefe_mobile/features/progress/application/progress_controller.dart';
+import 'package:kefe_mobile/features/progress/data/preview_progress_repository.dart';
 
 void main() {
   test('preview catalog contains multiple domains and cases', () async {
@@ -23,10 +25,12 @@ void main() {
     );
   });
 
-  test('production entrypoint never imports preview media repository', () {
+  test('production entrypoint never imports preview-only repositories', () {
     final productionMain = File('lib/main.dart').readAsStringSync();
     expect(productionMain, isNot(contains('preview_case_media_repository')));
     expect(productionMain, isNot(contains('PreviewCaseMediaRepository')));
+    expect(productionMain, isNot(contains('preview_progress_repository')));
+    expect(productionMain, isNot(contains('PreviewProgressRepository')));
   });
 
   testWidgets(
@@ -164,6 +168,84 @@ void main() {
         listen: false,
       );
       expect(container.read(decisionControllerProvider).reveal, isNotNull);
+    },
+  );
+
+  testWidgets(
+    'My KEFE is repository-driven descriptive journey data',
+    (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            decisionRepositoryProvider.overrideWithValue(
+              PreviewDecisionRepository(),
+            ),
+            caseMediaRepositoryProvider.overrideWithValue(
+              const PreviewCaseMediaRepository(),
+            ),
+            progressRepositoryProvider.overrideWithValue(
+              PreviewProgressRepository(),
+            ),
+            productPreviewVisualModeProvider.overrideWithValue(true),
+          ],
+          child: const ProductPreviewApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Profil'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('my-kefe-journey')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('my-kefe-preview-notice')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('my-kefe-weigh-count')), findsOneWidget);
+      expect(find.byKey(const ValueKey('my-kefe-update-count')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('my-kefe-reflection-count')),
+        findsOneWidget,
+      );
+
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('my-kefe-domain-activity')),
+        280,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('my-kefe-domain-activity')),
+        findsOneWidget,
+      );
+
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('my-kefe-recent-journeys')),
+        300,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.text(
+          'Çocuklar uçakta ebeveynleriyle ücretsiz yan yana oturmalı mı?',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('1 yeniden tartım'), findsWidgets);
+      expect(find.text('Yansıma tamamlandı'), findsWidgets);
+
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('my-kefe-no-inference-note')),
+        320,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('my-kefe-no-inference-note')),
+        findsOneWidget,
+      );
+      expect(find.textContaining('neden-sonuç çıkarımı yapmaz'), findsOneWidget);
+      expect(find.textContaining('empatin yüksek'), findsNothing);
     },
   );
 }
