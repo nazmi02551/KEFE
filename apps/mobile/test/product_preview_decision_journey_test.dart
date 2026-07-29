@@ -80,9 +80,7 @@ void main() {
       await tester.tap(finalCommit);
       await tester.pumpAndSettle();
 
-      final reveal = find.byKey(const ValueKey('reveal-card'));
-      await scrollTo(tester, reveal);
-      expect(reveal, findsOneWidget);
+      expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
 
       final reflection = find.byKey(
         const ValueKey('reflection-step-REFLECTION'),
