@@ -149,7 +149,7 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
           pending.caseVersionId == widget.caseVersionId &&
           pending.latestRevisionId == model.latestRevisionId;
       final idempotencyKey = reusablePending
-          ? pending!.idempotencyKey
+          ? pending.idempotencyKey
           : 'mobile-reflection-${widget.sessionId}-${widget.step.code}-${model.latestRevisionId}-v1';
       if (!reusablePending) {
         await _completionStore.write(
