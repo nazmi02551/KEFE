@@ -12,6 +12,8 @@ import 'package:kefe_mobile/features/media_presentation/application/case_media_p
 import 'package:kefe_mobile/features/media_presentation/data/preview_case_media_repository.dart';
 import 'package:kefe_mobile/features/progress/application/progress_controller.dart';
 import 'package:kefe_mobile/features/progress/data/preview_progress_repository.dart';
+import 'package:kefe_mobile/features/saved_cases/application/saved_cases_controller.dart';
+import 'package:kefe_mobile/features/saved_cases/data/saved_case_store.dart';
 
 void main() {
   test('preview catalog contains multiple domains and cases', () async {
@@ -45,6 +47,7 @@ void main() {
             caseMediaRepositoryProvider.overrideWithValue(
               const PreviewCaseMediaRepository(),
             ),
+            savedCaseStoreProvider.overrideWithValue(MemorySavedCaseStore()),
             productPreviewVisualModeProvider.overrideWithValue(true),
           ],
           child: const ProductPreviewApp(),
@@ -63,11 +66,7 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.scrollUntilVisible(
-        find.text('Trend tartımlar'),
-        260,
-        scrollable: find.byType(Scrollable).last,
-      );
+      await tester.ensureVisible(find.text('Trend tartımlar'));
       await tester.pumpAndSettle();
       expect(find.text('Trend tartımlar'), findsOneWidget);
 
@@ -94,6 +93,7 @@ void main() {
             caseMediaRepositoryProvider.overrideWithValue(
               const PreviewCaseMediaRepository(),
             ),
+            savedCaseStoreProvider.overrideWithValue(MemorySavedCaseStore()),
             productPreviewVisualModeProvider.overrideWithValue(true),
           ],
           child: const ProductPreviewApp(),
@@ -101,13 +101,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(
-        find.byKey(
-          const ValueKey(
-            'explore-case-11111111-1111-4111-8111-111111111111',
-          ),
+      final caseCard = find.byKey(
+        const ValueKey(
+          'explore-case-11111111-1111-4111-8111-111111111111',
         ),
       );
+      await tester.ensureVisible(caseCard);
+      await tester.pumpAndSettle();
+      await tester.tap(caseCard);
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
@@ -186,6 +187,7 @@ void main() {
             progressRepositoryProvider.overrideWithValue(
               PreviewProgressRepository(),
             ),
+            savedCaseStoreProvider.overrideWithValue(MemorySavedCaseStore()),
             productPreviewVisualModeProvider.overrideWithValue(true),
           ],
           child: const ProductPreviewApp(),
@@ -206,6 +208,7 @@ void main() {
         find.byKey(const ValueKey('my-kefe-preview-notice')),
         findsOneWidget,
       );
+      expect(find.byKey(const ValueKey('saved-cases-section')), findsOneWidget);
       expect(find.byKey(const ValueKey('my-kefe-weigh-count')), findsOneWidget);
       expect(find.byKey(const ValueKey('my-kefe-update-count')), findsOneWidget);
       expect(
