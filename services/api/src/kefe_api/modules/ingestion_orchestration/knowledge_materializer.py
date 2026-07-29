@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any
 from uuid import NAMESPACE_URL, UUID, uuid5
@@ -57,7 +58,9 @@ class KnowledgeProposalMaterializer:
         }
         handler = handlers.get(kind)
         if handler is None:
-            raise ValueError(f"proposal kind is not materializable into knowledge: {kind}")
+            raise ValueError(
+                f"proposal kind is not materializable into knowledge: {kind}"
+            )
         handler(proposal, review, target_id)
         return kind, target_id
 
@@ -75,7 +78,10 @@ class KnowledgeProposalMaterializer:
             language_code=self._required_text(payload, "language_code"),
             created_at=self._datetime(payload.get("created_at"), proposal.created_at),
         )
-        self._safe_add(lambda: self._knowledge.add_claim(item))
+        self._safe_add(
+            lambda: self._knowledge.add_claim(item),
+            lambda: self._knowledge.get_claim(target_id) is not None,
+        )
 
     def _claim_assessment(
         self,
@@ -112,7 +118,13 @@ class KnowledgeProposalMaterializer:
             rationale_code=self._optional_text(payload, "rationale_code"),
             provenance_ref=self._provenance(proposal, review),
         )
-        self._safe_add(lambda: self._knowledge.add_claim_assessment(item))
+        self._safe_add(
+            lambda: self._knowledge.add_claim_assessment(item),
+            lambda: any(
+                current.id == target_id
+                for current in self._knowledge.list_claim_assessments(claim_id)
+            ),
+        )
 
     def _claim_assertion(
         self,
@@ -121,14 +133,15 @@ class KnowledgeProposalMaterializer:
         target_id: UUID,
     ) -> None:
         payload = proposal.payload
+        claim_id = self._resolve_ref(
+            payload,
+            direct_key="claim_id",
+            proposal_key="claim_proposal_id",
+            target_kind="CLAIM",
+        )
         item = ClaimAssertion(
             id=target_id,
-            claim_id=self._resolve_ref(
-                payload,
-                direct_key="claim_id",
-                proposal_key="claim_proposal_id",
-                target_kind="CLAIM",
-            ),
+            claim_id=claim_id,
             claimant_kind=self._required_text(payload, "claimant_kind"),
             claimant_ref=self._required_text(payload, "claimant_ref"),
             asserted_at=self._datetime(payload.get("asserted_at"), proposal.created_at),
@@ -138,7 +151,13 @@ class KnowledgeProposalMaterializer:
             ),
             provenance_ref=self._provenance(proposal, review),
         )
-        self._safe_add(lambda: self._knowledge.add_claim_assertion(item))
+        self._safe_add(
+            lambda: self._knowledge.add_claim_assertion(item),
+            lambda: any(
+                current.id == target_id
+                for current in self._knowledge.list_claim_assertions(claim_id)
+            ),
+        )
 
     def _evidence_link(
         self,
@@ -147,24 +166,34 @@ class KnowledgeProposalMaterializer:
         target_id: UUID,
     ) -> None:
         payload = proposal.payload
+        claim_id = self._resolve_ref(
+            payload,
+            direct_key="claim_id",
+            proposal_key="claim_proposal_id",
+            target_kind="CLAIM",
+        )
         item = EvidenceLink(
             id=target_id,
-            claim_id=self._resolve_ref(
-                payload,
-                direct_key="claim_id",
-                proposal_key="claim_proposal_id",
-                target_kind="CLAIM",
-            ),
+            claim_id=claim_id,
             target_kind=EvidenceTargetKind(
                 self._required_text(payload, "evidence_target_kind")
             ),
-            target_id=self._uuid(payload.get("evidence_target_id"), "evidence_target_id"),
+            target_id=self._uuid(
+                payload.get("evidence_target_id"),
+                "evidence_target_id",
+            ),
             relation=EvidenceRelation(self._required_text(payload, "relation")),
             review_state=ReviewState.ACCEPTED,
             provenance_ref=self._provenance(proposal, review),
             created_at=self._datetime(payload.get("created_at"), review.decided_at),
         )
-        self._safe_add(lambda: self._knowledge.add_evidence_link(item))
+        self._safe_add(
+            lambda: self._knowledge.add_evidence_link(item),
+            lambda: any(
+                current.id == target_id
+                for current in self._knowledge.list_evidence_links(claim_id)
+            ),
+        )
 
     def _claim_relation(
         self,
@@ -179,14 +208,15 @@ class KnowledgeProposalMaterializer:
         )
         if not taxonomy_version:
             raise ValueError("CLAIM_RELATION requires taxonomy_version")
+        from_claim_id = self._resolve_ref(
+            payload,
+            direct_key="from_claim_id",
+            proposal_key="from_claim_proposal_id",
+            target_kind="CLAIM",
+        )
         item = ClaimRelation(
             id=target_id,
-            from_claim_id=self._resolve_ref(
-                payload,
-                direct_key="from_claim_id",
-                proposal_key="from_claim_proposal_id",
-                target_kind="CLAIM",
-            ),
+            from_claim_id=from_claim_id,
             to_claim_id=self._resolve_ref(
                 payload,
                 direct_key="to_claim_id",
@@ -199,7 +229,13 @@ class KnowledgeProposalMaterializer:
             provenance_ref=self._provenance(proposal, review),
             created_at=self._datetime(payload.get("created_at"), review.decided_at),
         )
-        self._safe_add(lambda: self._knowledge.add_claim_relation(item))
+        self._safe_add(
+            lambda: self._knowledge.add_claim_relation(item),
+            lambda: any(
+                current.id == target_id
+                for current in self._knowledge.list_claim_relations(from_claim_id)
+            ),
+        )
 
     def _argument(
         self,
@@ -224,7 +260,10 @@ class KnowledgeProposalMaterializer:
             ),
             provenance_ref=self._provenance(proposal, review),
         )
-        self._safe_add(lambda: self._knowledge.add_argument(item))
+        self._safe_add(
+            lambda: self._knowledge.add_argument(item),
+            lambda: self._knowledge.get_argument(target_id) is not None,
+        )
 
     def _argument_relation(
         self,
@@ -275,7 +314,13 @@ class KnowledgeProposalMaterializer:
             created_at=self._datetime(payload.get("created_at"), review.decided_at),
             provenance_ref=self._provenance(proposal, review),
         )
-        self._safe_add(lambda: self._knowledge.add_argument_relation(item))
+        self._safe_add(
+            lambda: self._knowledge.add_argument_relation(item),
+            lambda: any(
+                current.id == target_id
+                for current in self._knowledge.list_argument_relations(argument_id)
+            ),
+        )
 
     def _resolve_ref(
         self,
@@ -296,7 +341,9 @@ class KnowledgeProposalMaterializer:
             target_kind=target_kind,
         )
         if materialization is None:
-            raise ValueError(f"referenced proposal is not materialized as {target_kind}")
+            raise ValueError(
+                f"referenced proposal is not materialized as {target_kind}"
+            )
         return materialization.target_id
 
     @staticmethod
@@ -356,9 +403,15 @@ class KnowledgeProposalMaterializer:
         return f"{base};review:{review.id}"
 
     @staticmethod
-    def _safe_add(action) -> None:
+    def _safe_add(
+        action: Callable[[], None],
+        exists: Callable[[], bool],
+    ) -> None:
+        if exists():
+            return
         try:
             action()
-        except ValueError as exc:
-            if "already exists" not in str(exc) and "persistence invariant" not in str(exc):
-                raise
+        except ValueError:
+            if exists():
+                return
+            raise
