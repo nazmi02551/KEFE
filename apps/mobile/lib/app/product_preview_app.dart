@@ -78,6 +78,7 @@ class _ProductPreviewAppState extends State<ProductPreviewApp> {
     return MaterialApp.router(
       title: 'KEFE Product Preview',
       debugShowCheckedModeBanner: false,
+      locale: const Locale('tr', 'TR'),
       theme: KefeTheme.light(),
       darkTheme: KefeTheme.dark(),
       themeMode: ThemeMode.dark,
