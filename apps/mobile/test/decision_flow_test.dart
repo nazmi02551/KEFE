@@ -146,6 +146,15 @@ Future<void> pumpKefe(
   await tester.pumpAndSettle();
 }
 
+Future<void> scrollTo(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(
+    finder,
+    260,
+    scrollable: find.byType(Scrollable).last,
+  );
+  await tester.pump();
+}
+
 void main() {
   testWidgets('Commit First hides result until a decision is committed', (
     tester,
@@ -158,13 +167,20 @@ void main() {
     expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
     expect(find.byKey(const ValueKey('commit-button')), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('option-A')));
+    final option = find.byKey(const ValueKey('option-A'));
+    await scrollTo(tester, option);
+    await tester.tap(option);
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('commit-button')));
+
+    final commit = find.byKey(const ValueKey('commit-button'));
+    await scrollTo(tester, commit);
+    await tester.tap(commit);
     await tester.pumpAndSettle();
 
     expect(repository.commitCalls, 1);
-    expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
+    final reveal = find.byKey(const ValueKey('reveal-card'));
+    await scrollTo(tester, reveal);
+    expect(reveal, findsOneWidget);
     expect(find.byKey(const ValueKey('reveal-methodology')), findsOneWidget);
     expect(draftStore.draftFor(demoCaseId), isNull);
   });
@@ -195,9 +211,14 @@ void main() {
     final draftStore = MemoryDecisionDraftStore();
     await pumpKefe(tester, repository, draftStore);
 
-    await tester.tap(find.byKey(const ValueKey('option-A')));
+    final option = find.byKey(const ValueKey('option-A'));
+    await scrollTo(tester, option);
+    await tester.tap(option);
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('commit-button')));
+
+    final commit = find.byKey(const ValueKey('commit-button'));
+    await scrollTo(tester, commit);
+    await tester.tap(commit);
     await tester.pumpAndSettle();
 
     expect(repository.commitCalls, 1);
@@ -205,16 +226,21 @@ void main() {
       draftStore.draftFor(demoCaseId)?.phase,
       DecisionDraftPhase.commitPending,
     );
-    expect(find.byKey(const ValueKey('decision-status-message')), findsOneWidget);
+    final status = find.byKey(const ValueKey('decision-status-message'));
+    await scrollTo(tester, status);
+    expect(status, findsOneWidget);
 
     final firstKey = repository.commitKeys.single;
-    await tester.tap(find.byKey(const ValueKey('commit-button')));
+    await scrollTo(tester, commit);
+    await tester.tap(commit);
     await tester.pumpAndSettle();
 
     expect(repository.commitCalls, 2);
     expect(repository.commitKeys, [firstKey, firstKey]);
     expect(repository.answerCalls, 1);
-    expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
+    final reveal = find.byKey(const ValueKey('reveal-card'));
+    await scrollTo(tester, reveal);
+    expect(reveal, findsOneWidget);
     expect(draftStore.draftFor(demoCaseId), isNull);
   });
 
@@ -226,9 +252,14 @@ void main() {
     final draftStore = MemoryDecisionDraftStore();
     await pumpKefe(tester, repository, draftStore);
 
-    await tester.tap(find.byKey(const ValueKey('option-A')));
+    final option = find.byKey(const ValueKey('option-A'));
+    await scrollTo(tester, option);
+    await tester.tap(option);
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('commit-button')));
+
+    final commit = find.byKey(const ValueKey('commit-button'));
+    await scrollTo(tester, commit);
+    await tester.tap(commit);
     await tester.pumpAndSettle();
 
     expect(repository.commitCalls, 1);
@@ -238,12 +269,15 @@ void main() {
       DecisionDraftPhase.committedAwaitingReveal,
     );
 
-    await tester.tap(find.byKey(const ValueKey('commit-button')));
+    await scrollTo(tester, commit);
+    await tester.tap(commit);
     await tester.pumpAndSettle();
 
     expect(repository.commitCalls, 1);
     expect(repository.revealCalls, 2);
-    expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
+    final reveal = find.byKey(const ValueKey('reveal-card'));
+    await scrollTo(tester, reveal);
+    expect(reveal, findsOneWidget);
   });
 
   testWidgets('offline startup restores a cached pinned Flow draft', (
@@ -264,8 +298,12 @@ void main() {
     await pumpKefe(tester, repository, draftStore);
 
     expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
-    expect(find.byKey(const ValueKey('option-B')), findsOneWidget);
-    expect(find.byKey(const ValueKey('decision-status-message')), findsOneWidget);
+    final option = find.byKey(const ValueKey('option-B'));
+    await scrollTo(tester, option);
+    expect(option, findsOneWidget);
+    final status = find.byKey(const ValueKey('decision-status-message'));
+    await scrollTo(tester, status);
+    expect(status, findsOneWidget);
     expect(repository.startSessionCalls, 0);
   });
 
