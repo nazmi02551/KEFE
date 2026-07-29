@@ -117,18 +117,52 @@ Verified exact-head Mobile CI:
 - Android preview APK build PASS
 - artifact upload PASS
 
-Latest preview artifact from that run:
+Preview artifact from that run:
 
 - artifact name: `kefe-preview-android`
 - artifact id: `8728968655`
 - workflow artifact digest: `sha256:2a7a100cbff7a55b371258ef2de6c033359c384b9c40d1709ad0f43553d983cf`
 - extracted APK sha256: `b1ae03acfbeb9e9847a50cf97475c294910654cd072a2b33852176339e548867`
 
+## Premium Case hero / Flow hierarchy
+
+PR #76 — `Add premium Case hero and explicit Flow journey to Product Preview`
+
+Merge commit:
+
+`ca3e865bd525c9a04071774220d9c77089a216de`
+
+Implemented:
+
+- generic `CaseHeroHeader` using existing Case and Flow runtime metadata;
+- domain / format / risk metadata, title and summary in one premium Case surface;
+- `KARAR YOLCULUĞU` rail derived from generic Flow primitives and runtime states;
+- repeated primitives are numbered rather than converted into Case-specific screens;
+- blocked, ready, completed and unsupported steps remain visually distinguishable;
+- `productPreviewVisualModeProvider` defaults false;
+- only the explicit Product Preview composition opts into the richer visual hero;
+- production `main.dart`, normal `KefeApp`, networking and failure behavior remain unchanged.
+
+Verified exact-head Mobile CI:
+
+- run `30465112912` — PASS
+- analyze PASS
+- widget/unit tests PASS
+- Android preview APK build PASS
+- artifact upload PASS
+
+Latest preview artifact:
+
+- artifact name: `kefe-preview-android`
+- artifact id: `8729454335`
+- workflow artifact digest: `sha256:44b5cd2060d2e8c2e88b5bcd25e5c8d9839082daed98b450cab6395a42fe1f16`
+- extracted APK sha256: `a81da791487a36919ec7c51ac0392bedf8ac317ab47f2c689e6a89439f06ecb4`
+
 ## What is now visibly testable
 
 The installable Product Preview now exposes a recognizable KEFE application rather than a one-Case smoke fixture:
 
-`Keşfet → Case Context → signature Tartım → Commit → premium Reveal / KEFE Uçurumu → Karşı Görüşler`
+`Keşfet → premium Case hero / Karar Yolculuğu → Case Context → signature Tartım → Commit → premium Reveal / KEFE Uçurumu → Karşı Görüşler`
 
 alongside navigable preview surfaces for:
 
@@ -147,7 +181,7 @@ This is still a Product Preview, not a Play Store release or production-data pil
 - Atlas country values are preview examples, not measured country aggregates.
 - My KEFE history is preview data, not the authenticated user's production history.
 - remote media/illustration pipeline is not yet implemented;
-- shared Case hero / step hierarchy and Reflection/DecisionRevision visual journey still need deeper visual work;
+- Reflection/DecisionRevision visual journey still needs deeper product treatment;
 - release signing/AAB/distribution optimization is deferred;
 - debug APK size is not a product-completeness metric.
 
@@ -155,13 +189,12 @@ This is still a Product Preview, not a Play Store release or production-data pil
 
 Continue the visible-product track before returning to long invisible backend sequences:
 
-1. upgrade the shared Case hero and make the Flow step hierarchy visually explicit;
-2. deepen Reflection/DecisionRevision into a visible, non-causal `Karar Yolculuğu` experience;
-3. add visual/media presentation metadata and replaceable media repository boundaries;
-4. gather phone-based product feedback against the updated Product Preview APK;
-5. only then decide which production API gaps should be connected next.
+1. deepen Reflection/DecisionRevision into a visible, non-causal `Karar Yolculuğu` experience;
+2. add visual/media presentation metadata and replaceable media repository boundaries;
+3. gather phone-based product feedback against the updated Product Preview APK;
+4. only then decide which production API gaps should be connected next.
 
-The prominent scale metaphor and the richer Results/KEFE Uçurumu surface are now implemented; future iterations should refine them without hard-coding Case types or weakening Commit-before-Reveal.
+The prominent scale metaphor, richer Results/KEFE Uçurumu and premium Case hero/Flow hierarchy are now implemented. Future iterations should refine them without hard-coding Case types, introducing preview fallback or weakening Commit-before-Reveal.
 
 ## Documentation note
 
