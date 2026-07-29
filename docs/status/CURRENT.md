@@ -3,7 +3,7 @@
 **Updated:** 2026-07-29  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Latest verified implementation commit:** `c45cf369eeda79daf884beddb25e976c88ddabc4`
+**Latest verified implementation commit:** `2e2a3df8a3f95104db4c23556107677cf186372a`
 
 This is the **single canonical durable engineering handoff**. Chat history is not a source of truth. On every continuation, read this file from `main`, inspect open PRs/recent CI, and fetch the Drive CURRENT publication artifact only when editable DOCX/PDF source detail is needed.
 
@@ -57,6 +57,7 @@ Binding architecture:
 - Commit First remains global; Blind/Principle First are reusable optional methodology capabilities.
 - Context, Reveal, Exposure and Intervention are distinct.
 - generic lineage is `DecisionRevision → Exposure/Intervention → DecisionRevision → DecisionDelta`; dimension-specific delta engines are forbidden.
+- Reflection is a bounded, server-derived, non-causal interpretation of committed lineage; it may show change and intervening encounters together but must not claim that an encounter caused the change.
 - Claim is first-class and Claim ≠ claimant.
 - initial Claim Types: FACTUAL, CAUSAL, BEHAVIORAL, MOTIVE, NORMATIVE, LEGAL, PROCESS, PREDICTION.
 - initial Claim States: VERIFIED, SUPPORTED, CLAIMED, DISPUTED, UNVERIFIED, UNRESOLVED, FALSE; semantics are methodology-versioned.
@@ -87,7 +88,7 @@ Retained foundation:
 - provider-neutral Content Authoring lifecycle, immutable published CaseVersion, PostgreSQL editorial persistence and atomic consumer publication.
 - separate Admin security domain, capability-first authorization, MFA/session assurance, same-session CSRF, recent step-up and server-derived audit identity.
 - secured internal Admin authoring/configuration HTTP under `/internal/admin/v1`; no Admin login/SSO endpoint yet.
-- Flutter consumer foundation contains Explore, Context, typed Question/Reason, Commit, Reveal, Perspective and Progress presentation paths.
+- Flutter consumer foundation contains Explore, Context, typed Question/Reason, Commit, Reveal, Perspective, Flow-driven DecisionRevision, Reflection and Progress presentation paths.
 
 ### PR #47 / ADR-0020 — composable Content Configuration — COMPLETE
 
@@ -154,24 +155,13 @@ Implemented:
 - no live Content Configuration lookup, client-completed-Step claims or historical reinterpretation.
 - no result/Perspective/private-reason payload leakage through Flow runtime.
 - runtime Step states: READY, COMPLETED, BLOCKED, UNSUPPORTED; execution support FULL/PARTIAL.
-- `CONTEXT` is informational/non-blocking in runtime v1.
-- first `DECISION` maps to current single-Commit WeighSession.
+- first `DECISION` maps to the initial WeighSession decision.
 - `COLLECTIVE_RESULT` remains blocked pre-Commit and becomes READY post-Commit; actual result data remains behind Reveal.
-- later `DECISION` uses the same generic graph but reports `FLOW_DECISION_REVISION_REQUIRED` until DecisionRevision exists.
 - legacy CaseVersions without pinned Flow return `FLOW_RUNTIME_UNAVAILABLE`; no default/live Flow inference.
-- `STANDARD_COMMIT_REVEAL` is FULL through the generic runtime.
-- `PRINCIPLE_CONTEXT_RETEST` is parsed by the same runtime and reports PARTIAL at the exact revision capability boundary.
+- `STANDARD_COMMIT_REVEAL` became FULL through the generic runtime.
+- `PRINCIPLE_CONTEXT_RETEST` initially parsed through the same runtime and stopped explicitly at the DecisionRevision capability boundary until ADR-0025.
 
-Verification:
-- final API CI run `30392910874` PASS.
-- lint PASS.
-- contract sync PASS.
-- Case Flow pinning gate PASS.
-- generic Flow runtime gate PASS.
-- Admin HTTP gate PASS.
-- OpenAPI drift PASS.
-- unit tests PASS.
-- PostgreSQL integration PASS, including publish → guest session → Flow read → response → Commit → Flow read.
+Verification: final API CI `30392910874` PASS including lint, contract sync, Case Flow pinning, generic Flow runtime, Admin HTTP, OpenAPI drift, unit and PostgreSQL integration.
 
 ### PR #56 / ADR-0024 — Flutter Flow-driven rendering — COMPLETE
 
@@ -184,7 +174,6 @@ Implemented:
 - `CONTEXT`, `DECISION` and `COLLECTIVE_RESULT` reuse the existing production UI components.
 - unsupported runtime capability is surfaced explicitly and neutrally; the client never silently emulates or skips it.
 - no Case Type/Base Format branching or default Flow inference was introduced.
-- PARTIAL `PRINCIPLE_CONTEXT_RETEST` reaches the exact DecisionRevision capability boundary without client-side hard-coding.
 - mobile architecture fitness contract: `mobile-flow-runtime-ui.v1.yaml`.
 
 ### PR #57 — authoring-published live demo + installable Flow preview — COMPLETE
@@ -206,32 +195,76 @@ Verification:
 - final Mobile CI `30401109851` PASS including analyze, widget tests and Android APK build.
 - preview artifact `kefe-preview-android`, Actions artifact ID `8704923555`, generated 2026-07-28.
 
+### PR #60 / ADR-0025 — DecisionRevision / Exposure / Intervention / DecisionDelta — COMPLETE
+
+Implementation commit: `9d5b4b4d3bccb1e2f21479c921f07a6c51357c05`
+
+Implemented:
+- Initial Commit materializes immutable Revision #1; later Decision Steps use separate revision drafts and immutable DecisionRevisions.
+- Context between committed Decisions is recorded as actual Exposure and promoted server-side to a methodology-significant Intervention.
+- generic DecisionDelta links predecessor revision, intervention lineage and successor revision without claiming causality.
+- Flow runtime evaluates between-decision Context and later Decision readiness from server lineage state.
+- Consumer Flutter reuses the same Flow-driven screen and offline/idempotent draft state machine for initial and later Decisions; no Case/BaseFormat branching.
+- PostgreSQL migration `20260729_0013_decision_revision_lineage.py`.
+- API/OpenAPI 0.15.0; generic Flow runtime 1.1.0; DecisionRevision lineage 1.1.0; Mobile Flow runtime UI 1.1.0; manifest 1.29.0.
+
+Validation includes API lint/contracts/unit, PostgreSQL migration/seed/integration, Flutter analyze/widget tests, `PRINCIPLE_CONTEXT_RETEST` acceptance and Preview APK build.
+
+Checkpoint follow-up commit `cd766fec7b04e5478344da828b575410f3109222` advanced CURRENT through this milestone.
+
+### PR #64 / ADR-0026 — generic Reflection runtime and completion — COMPLETE
+
+Merge commit: `2e2a3df8a3f95104db4c23556107677cf186372a`  
+Exact green PR head: `157dca230e60de892b8adc24e537c9d468538c1f`
+
+Implemented:
+- immutable cursor-pinned `ReflectionCompletion` with in-memory + PostgreSQL persistence.
+- migration `20260729_0014_reflection_completion.py`.
+- actor-scoped bounded Reflection read model; no raw response/private-reason leakage.
+- idempotent Reflection completion pinned to latest DecisionRevision and optional latest DecisionDelta cursor.
+- generic Flow runtime `REFLECTION` READY/COMPLETED semantics; a later DecisionRevision reopens Reflection for the new cursor.
+- reusable Flutter `REFLECTION` primitive with server-derived non-causal summary rendering.
+- persisted completion retry cursor/idempotency identity and same-session Flow recovery across restarts.
+- production Reflection HTTP repository is wired at the composition root while preview/test overrides remain isolated.
+- client adopts refreshed server Flow after Reflection completion.
+- no Case/BaseFormat-specific Reflection controller/screen or client-side delta inference.
+- API/OpenAPI 0.16.0; Reflection runtime contract 1.1; generic Flow runtime 1.2; mobile Flow runtime UI 1.2; manifest 1.31.0.
+- strict read-only API and Mobile CI restored; temporary write-enabled recovery/finalizer workflows removed.
+
+Verification:
+- exact-head API CI `30438276272` PASS, including Reflection contract, unit tests, migration/seed and PostgreSQL integration.
+- exact-head Mobile CI `30438276284` PASS, including `flutter analyze`, widget tests and Preview APK build.
+- end-to-end `PRINCIPLE_CONTEXT_RETEST` mobile coverage executes initial Decision → Context Exposure → DecisionRevision/DecisionDelta → Reflection read → idempotent completion without Reveal leakage.
+- durable Reflection completion cursor tests cover persistence across store re-instantiation.
+
+Recovery lineage:
+- original draft PR #63 is closed unmerged and retained as preserved source-history.
+- recovery PR #64 branched from the PR #63 head, completed the missing mobile/runtime recovery work, passed strict exact-head CI and was squash-merged.
+- PR #63 must not be merged independently.
+
 ## 4. Current implementation gap
 
 Still implementation-pending:
-- Admin authoring selection/composer UX for non-default FlowTemplateVersion; current HTTP authoring remains transitional default-compatible.
-- DecisionRevision/Exposure/Intervention/DecisionDelta.
-- first-class Claim/Argument graph and normalized ingestion.
+- first-class Claim + Argument Graph + normalized ingestion.
 - WE/Signal bounded context and MethodologyVersion sample/scope/stakeholder semantics.
 - Impact bounded context.
+- Admin authoring selection/composer UX for non-default FlowTemplateVersion; current HTTP authoring remains transitional default-compatible.
 - production deployment/observability and full account continuity/share maturity.
 
-The first tangible Flow-driven consumer milestone is complete: an authoring-published Case can execute through the generic server Flow and the same Flutter rendering path, with an installable deterministic Preview APK available for direct inspection.
+The complete generic retest path is now executable without a Case-specific feature family: `DecisionRevision → Exposure/Intervention → DecisionRevision → DecisionDelta → Reflection`. `PRINCIPLE_CONTEXT_RETEST` can therefore remain a composition of existing primitives/capabilities rather than becoming a dedicated runtime Case type.
 
 ## 5. Recommended next sequence
 
-1. **DecisionRevision / Exposure / Intervention / DecisionDelta**
+1. **First-class Claim + Argument Graph + ingestion normalization**.
+   - inspect canonical product/methodology documents before locking semantics.
    - lock ADR + machine-readable contract before implementation.
-   - make a DecisionRevision an immutable decision state at a defined exposure state.
-   - record actual Exposure separately from authored Reveal intent.
-   - represent methodology-significant exposures/events as Interventions.
-   - compute generic DecisionDelta between revisions; no ActorDelta/LegalDelta/etc. engines.
-   - unlock `PRINCIPLE_CONTEXT_RETEST` and future evidence/actor/source/result retest flows through the existing generic Flow runtime.
-2. **First-class Claim + Argument Graph + ingestion normalization**.
-3. **WE/Signal foundation** with contribution classes, Scope Alignment, Stakeholders and MethodologyVersion.
-4. **Impact foundation** with Target, Official Response, Action, Evidence and Verification.
-5. **Admin Flow Composer UX** over already versioned Primitive/Capability/FlowTemplate semantics.
-6. Continue observability/deployment, account continuity and share in architecture-compatible slices.
+   - preserve Claim ≠ claimant and source → multiple Claims/Candidate Cases.
+   - model provenance, claim type/state, evidence/support/contradiction and argument relationships without turning AI into truth authority.
+   - keep editorial extraction/normalization separate from consumer publication and methodology state.
+2. **WE/Signal foundation** with contribution classes, Scope Alignment, Stakeholders and MethodologyVersion.
+3. **Impact foundation** with Target, Official Response, Action, Evidence and Verification.
+4. **Admin Flow Composer UX** over already versioned Primitive/Capability/FlowTemplate semantics.
+5. Continue observability/deployment, account continuity and share in architecture-compatible slices.
 
 No implementation may leapfrog an unresolved product/domain contract.
 
@@ -252,6 +285,7 @@ No implementation may leapfrog an unresolved product/domain contract.
 - Runtime live config never silently reinterprets historical published objects.
 - Flow execution must use the CaseVersion-pinned resolved Flow.
 - Flow runtime may expose result readiness but never pre-Commit result payload.
+- Reflection must remain server-derived, bounded and non-causal; no client inference of DecisionDelta causality.
 - Preview/demo infrastructure is build-time/dev-only and must never become a production fallback path.
 - Signal sample classes never silently mix.
 - Consensus/Signal is not formal authority and not KEFE opinion.
@@ -261,7 +295,7 @@ No implementation may leapfrog an unresolved product/domain contract.
 1. Read this file from `main`.
 2. Inspect open PRs, recent merges and CI.
 3. Fetch Drive CURRENT only when publication-source detail is required; verify its SHA against this checkpoint.
-4. Resolve work against MPD v1.3.0 + ADR-0019 through ADR-0024 + registered contracts.
+4. Resolve work against MPD v1.3.0 + ADR-0019 through ADR-0026 + registered contracts.
 5. One coherent branch per vertical slice.
 6. ADR + machine-readable contract before new behavior.
 7. Preserve ports/adapters, versioning, provenance and historical reproducibility.
@@ -272,19 +306,30 @@ No implementation may leapfrog an unresolved product/domain contract.
 
 ## 8. New-chat recovery prompt
 
-> Continue KEFE from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first and inspect open PRs/recent CI. Official docs baseline remains Ecosystem v3.4. The binding architecture is case-agnostic: `Primitive → Capability → FlowTemplateVersion → CaseVersion`, with `ME → WE → SIGNAL → IMPACT`. PR #54 (`164a97dc...`) provides the server-authoritative generic Flow runtime from the CaseVersion-pinned resolved Flow. PR #56 (`94d31fcc...`) makes Flutter render from that Flow without Case-specific branching. PR #57 (`c45cf369...`) proves a production-authoring-published demo Case through the same architecture and produces an installable deterministic Preview APK. The next locked development target is DecisionRevision → Exposure/Intervention → DecisionDelta so revision-dependent Flow paths such as `PRINCIPLE_CONTEXT_RETEST` become FULL. Do not code an unlocked product decision.
+> Continue KEFE from `nazmi02551/KEFE`. Read `docs/status/CURRENT.md` on `main` first and inspect open PRs/recent CI. Official docs baseline remains Ecosystem v3.4. Binding architecture is case-agnostic: `Primitive → Capability → FlowTemplateVersion → CaseVersion`, with `ME → WE → SIGNAL → IMPACT`. PR #60 / ADR-0025 made DecisionRevision → Exposure/Intervention → DecisionDelta executable through the generic Flow runtime. PR #64 / ADR-0026, merged as `2e2a3df8...`, completed generic server-derived non-causal Reflection with durable idempotent completion and Flutter Flow rendering. Exact-head API CI `30438276272` and Mobile CI `30438276284` passed. There are no open PRs at this checkpoint. The next development target is first-class Claim + Argument Graph + normalized ingestion, but do not code it until its ADR and machine-readable contract are locked against the canonical product/methodology documents.
 
 ## M2 DecisionRevision Runtime Checkpoint — 2026-07-29
 
-- Main baseline: `9d5b4b4d3bccb1e2f21479c921f07a6c51357c05`
+- Main baseline: `9d5b4b4d3bccb1e2f21479c921f07a6c51357c05`.
 - PR #60 delivered the first executable DecisionRevision lineage slice under ADR-0025.
 - Initial Commit materializes immutable Revision #1; later Decision Steps use separate revision drafts and immutable revisions.
 - Context between committed Decisions is recorded as actual Exposure and promoted server-side to a methodology-significant Intervention.
 - Generic DecisionDelta links predecessor revision, intervention lineage and successor revision without claiming causality.
-- Flow runtime v2 evaluates between-decision Context and later Decision readiness from server lineage state; Reflection remains explicitly pending.
+- Flow runtime evaluates between-decision Context and later Decision readiness from server lineage state; Reflection was the explicit next boundary at this checkpoint.
 - Consumer Flutter uses the same Flow-driven screen and offline/idempotent draft state machine for initial and later Decisions; no Case/BaseFormat branching was introduced.
 - Contract baseline: API/OpenAPI 0.15.0, generic Flow runtime 1.1.0, DecisionRevision lineage 1.1.0, Mobile Flow runtime UI 1.1.0, manifest 1.29.0.
 - Durable PostgreSQL migration: `20260729_0013_decision_revision_lineage.py`.
 - Validation baseline includes API lint/contracts/unit, PostgreSQL migration/seed/integration, Flutter analyze/widget tests, `PRINCIPLE_CONTEXT_RETEST` acceptance and Preview APK build.
-- Next architecture slice: generic `REFLECTION` runtime over committed DecisionRevision/DecisionDelta lineage, preserving the same Case-agnostic composition model. Do not introduce Reflection-specific Case types or client-side delta inference.
 
+## M3 Reflection Runtime Checkpoint — 2026-07-29
+
+- Main baseline: `2e2a3df8a3f95104db4c23556107677cf186372a`.
+- PR #64 delivered generic Reflection under ADR-0026 after a lossless recovery from superseded draft PR #63.
+- Reflection is actor-scoped, cursor-pinned to committed lineage, bounded, server-derived and explicitly non-causal.
+- `ReflectionCompletion` is durable and idempotent; latest-revision changes reopen the Reflection cursor instead of mutating history.
+- Flutter renders `REFLECTION` as a reusable Flow primitive, persists completion retry identity/session recovery and never invents delta semantics client-side.
+- Contract baseline: API/OpenAPI 0.16.0, Reflection runtime 1.1, generic Flow runtime 1.2, Mobile Flow runtime UI 1.2, manifest 1.31.0.
+- Durable PostgreSQL migration: `20260729_0014_reflection_completion.py`.
+- Exact-head validation: API CI `30438276272` PASS and Mobile CI `30438276284` PASS, including PostgreSQL integration, Flutter analyze/widget tests and Preview APK build.
+- Open PR count at checkpoint: 0.
+- Next architecture slice: first-class Claim + Argument Graph + normalized ingestion. Lock its ADR and machine-readable contract before implementation.
