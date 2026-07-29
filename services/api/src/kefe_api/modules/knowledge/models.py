@@ -194,8 +194,11 @@ class EvidenceLink:
     target_id: UUID
     relation: EvidenceRelation
     review_state: ReviewState
+    provenance_ref: str
     created_at: datetime
-    provenance_ref: str | None = None
+
+    def __post_init__(self) -> None:
+        _require_text(self.provenance_ref, "provenance_ref")
 
 
 @dataclass(frozen=True, slots=True)
@@ -206,14 +209,15 @@ class ClaimRelation:
     relation_code: str
     taxonomy_version: str
     review_state: ReviewState
+    provenance_ref: str
     created_at: datetime
-    provenance_ref: str | None = None
 
     def __post_init__(self) -> None:
         if self.from_claim_id == self.to_claim_id:
             raise ValueError("claim relation cannot target the same claim")
         _require_text(self.relation_code, "relation_code")
         _require_text(self.taxonomy_version, "taxonomy_version")
+        _require_text(self.provenance_ref, "provenance_ref")
 
 
 @dataclass(frozen=True, slots=True)
