@@ -1,0 +1,167 @@
+contract_version: 1.0.0
+updated_at: '2026-07-29'
+source_adr: docs/adr/0030-mobile-product-preview-visual-north-star.md
+status: architecture_locked_implementation_pending
+bounded_context: mobile_product_preview
+
+principles:
+  product_preview_is_visible_milestone: true
+  preview_is_build_time_composition_mode: true
+  production_fallback_to_preview_forbidden: true
+  reuse_production_presentation_components: true
+  reuse_domain_models_and_flow_runtime: true
+  case_specific_mobile_screens_forbidden: true
+  commit_before_reveal_required: true
+  psychometric_inference_forbidden: true
+  ideology_inference_forbidden: true
+  personality_inference_forbidden: true
+
+visual_north_star:
+  theme_priority: dark_first
+  identity_accent: warm_gold
+  base_surface: deep_navy_near_black
+  semantics:
+    rule_order_side: blue_family
+    empathy_impact_side: red_coral_family
+  characteristics:
+    - PREMIUM_INFORMATION_DENSITY
+    - STRONG_CARD_HIERARCHY
+    - SCALE_DECISION_METAPHOR
+    - RESTRAINED_GRADIENT_GLOW
+    - HIGH_CONTRAST_TYPE
+    - ROUNDED_MOBILE_SURFACES
+  accessibility_over_pixel_fidelity: true
+  responsive_phone_layout_required: true
+
+primary_shell:
+  destinations:
+    - EXPLORE
+    - RADAR
+    - WEIGH
+    - ATLAS
+    - MY_KEFE
+  persistent_bottom_navigation: true
+  central_weigh_identity_allowed: true
+  unsupported_destination_must_be_honest: true
+
+core_journey:
+  ordered_concepts:
+    - EXPLORE
+    - CASE_CONTEXT
+    - WEIGH
+    - COMMIT
+    - REVEAL
+    - PERSPECTIVES
+    - REFLECTION
+  flow_runtime_remains_authoritative: true
+  collective_data_before_commit_forbidden: true
+  perspective_bias_before_commit_forbidden: true
+
+preview_composition:
+  entrypoint: apps/mobile/lib/main_preview.dart
+  deterministic_data_allowed: true
+  production_entrypoint_may_import_preview_repository: false
+  network_failure_may_activate_preview_mode: false
+  preview_specific_semantics_fork_forbidden: true
+  replaceable_repository_boundary_required: true
+
+preview_case_catalog:
+  minimum_materially_different_cases: 5
+  target_initial_case_count: 8
+  target_domains:
+    - DAILY_LIFE
+    - TECHNOLOGY
+    - CIVIC
+    - SPORTS
+    - WORK_ECONOMY
+  generic_commit_reveal_case_required: true
+  later_revision_reflection_case_required: true
+  content_type_differences_must_use:
+    - TYPED_QUESTIONS
+    - FLOW_PRIMITIVES
+    - CAPABILITIES
+    - PRESENTATION_METADATA
+
+explore_surface:
+  hero_or_featured_case: true
+  category_navigation: true
+  trending_case_cards: true
+  one_case_only_preview_forbidden: true
+  source_of_case_truth_in_preview: deterministic_preview_repository
+
+radar_surface:
+  preview_read_model_allowed: true
+  production_ingestion_dependency_required_for_final: true
+  must_not_claim_live_trending_when_preview_data: true
+
+atlas_surface:
+  preview_read_model_allowed: true
+  comparisons_may_include:
+    - COUNTRY
+    - REGION
+    - WORLD
+  production_aggregation_dependency_required_for_final: true
+  political_microtargeting_forbidden: true
+
+my_kefe_surface:
+  preview_read_model_allowed: true
+  descriptive_history_allowed:
+    - WEIGH_COUNT
+    - DOMAIN_ACTIVITY
+    - DECISION_REVISION_COUNT
+    - CASE_LEVEL_GROUP_GAP
+  derived_identity_scoring_forbidden: true
+  hidden_trait_inference_forbidden: true
+
+results:
+  descriptive_comparisons_allowed:
+    - SELF_CURRENT_CASE
+    - COMMUNITY
+    - COUNTRY
+    - WORLD
+    - VERIFIED_OR_EXPERT_GROUP
+  case_level_gap_allowed: true
+  group_methodology_must_be_identifiable: true
+  identity_or_trait_label_from_result_forbidden: true
+
+accessibility:
+  semantic_primary_controls_required: true
+  semantic_result_summary_required: true
+  mobile_touch_targets_required: true
+  text_scaling_considered: true
+  contrast_required: true
+
+build_and_distribution:
+  debug_preview_apk_allowed: true
+  debug_apk_size_is_content_completeness_metric: false
+  release_aab_deferred: true
+  release_signing_deferred: true
+
+first_implementation_slice:
+  status: pending
+  includes:
+    - DARK_GOLD_DESIGN_TOKENS
+    - PRIMARY_BOTTOM_NAVIGATION_SHELL
+    - RICH_EXPLORE_HOME
+    - MULTI_CASE_PREVIEW_REPOSITORY
+    - RESTYLED_FLOW_DRIVEN_CASE_PATH
+    - RADAR_PREVIEW_DESTINATION
+    - ATLAS_PREVIEW_DESTINATION
+    - MY_KEFE_PREVIEW_DESTINATION
+    - PREVIEW_ISOLATION_TEST
+    - PRODUCT_PREVIEW_WIDGET_TESTS
+  excludes:
+    - PRODUCTION_RADAR_API
+    - PRODUCTION_ATLAS_API
+    - PRODUCTION_MY_KEFE_API
+    - REMOTE_MEDIA_PIPELINE
+    - PLAY_STORE_RELEASE
+    - ADMIN_MOBILE_UI
+
+fitness:
+  production_main_imports_preview_code: false
+  fixed_case_type_screen_branching: false
+  reveal_before_commit: false
+  preview_network_fallback: false
+  ideological_profile_output: false
+  psychometric_profile_output: false
