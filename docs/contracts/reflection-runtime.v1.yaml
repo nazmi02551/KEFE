@@ -1,0 +1,132 @@
+contract_version: 1.0.0
+updated_at: '2026-07-29'
+source_adr: docs/adr/0026-generic-reflection-runtime.md
+status: architecture_contract
+
+authority:
+  session: actor_owned_weigh_session
+  case_version: session_pinned_case_version
+  flow: case_version_resolved_flow
+  lineage: immutable_decision_revision_delta_intervention_lineage
+  client_lineage_cursor_selection: forbidden
+  client_delta_classification: forbidden
+
+primitive:
+  code: REFLECTION
+  runtime_case_type_branching: forbidden
+  creates_decision_revision: false
+  mutates_decision_revision: false
+  creates_intervention_by_default: false
+  affects_contribution_class_by_default: false
+  affects_signal_sample_by_default: false
+
+read_model:
+  actor_scoped: true
+  server_derived: true
+  causal_claims: forbidden
+  raw_response_values_exposed: false
+  private_reason_text_exposed: false
+  fields:
+    - session_id
+    - case_version_id
+    - flow_step_code
+    - revision_count
+    - latest_revision_id
+    - latest_delta_id
+    - decision_changed
+    - changed_question_count
+    - intervention_count
+    - intervention_type_codes
+    - from_contribution_class
+    - to_contribution_class
+  semantics:
+    decision_changed: latest_delta_changed_question_count_greater_than_zero
+    intervention_relationship: between_revisions_not_causal
+    latest_delta_optional: true
+
+completion:
+  entity: ReflectionCompletion
+  immutable: true
+  idempotent: true
+  actor_scoped: true
+  pinned_fields:
+    - session_id
+    - case_version_id
+    - flow_step_code
+    - latest_revision_id
+    - latest_delta_id
+    - idempotency_key
+    - completed_at
+  meaning: user_completed_reflection_step_at_lineage_cursor
+  does_not_mean:
+    - new_decision
+    - agreement
+    - persuasion
+    - advocacy_support
+    - causal_attribution
+
+flow_runtime_v1:
+  REFLECTION:
+    predecessor_pending:
+      state: BLOCKED
+      reason_code: FLOW_PREDECESSOR_PENDING
+    predecessor_satisfied_without_current_completion:
+      state: READY
+    current_revision_completion_exists:
+      state: COMPLETED
+    older_revision_completion_only:
+      state: READY
+  lineage_cursor:
+    key: latest_committed_decision_revision_id
+    later_revision_reopens_reflection: true
+    historical_completion_mutated: false
+
+http:
+  authentication: consumer_actor_required
+  foreign_session_behavior: not_found
+  read:
+    method: GET
+    path: /v1/weigh-sessions/{session_id}/reflection-steps/{step_code}
+    side_effect_free: true
+  complete:
+    method: POST
+    path: /v1/weigh-sessions/{session_id}/reflection-steps/{step_code}/complete
+    idempotency_header_required: true
+    client_completion_timestamp_accepted: false
+    client_revision_id_accepted: false
+    client_delta_id_accepted: false
+
+privacy_and_methodology:
+  reflection_private_by_default: true
+  collective_result_sample_input: false
+  signal_qualification_input: false
+  advocacy_support_input: false
+  impact_routing_input: false
+  aggregate_research_use_requires_separate_contract: true
+
+mobile:
+  rendering_authority: server_flow_runtime
+  READY:
+    - fetch_server_reflection_read_model
+    - render_reusable_reflection_primitive
+    - allow_completion
+  COMPLETED: render_completed_state_without_mutating_history
+  after_complete: refresh_flow_runtime
+  fixed_case_reflection_screen: forbidden
+  offline:
+    pending_completion_command_allowed: true
+    idempotency_key_persisted: true
+    fabricate_unfetched_read_model: forbidden
+
+target_vertical_slice:
+  flow_template: PRINCIPLE_CONTEXT_RETEST
+  expected_sequence:
+    - PRINCIPLE_DECISION_REVISION_1
+    - CONTEXT_EXPOSURE_INTERVENTION
+    - FINAL_DECISION_REVISION_2
+    - DECISION_DELTA
+    - REFLECTION_READY
+    - REFLECTION_COMPLETION
+    - REFLECTION_COMPLETED
+  no_case_specific_backend_type: true
+  no_case_specific_flutter_controller: true

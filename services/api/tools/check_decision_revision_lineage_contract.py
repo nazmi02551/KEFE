@@ -60,8 +60,10 @@ def main() -> None:
         if fragment not in erd:
             problems.append(f"Core ERD v2 missing lineage relation: {fragment}")
 
+    # This gate owns the DecisionRevision registration, not the global manifest
+    # version. Later architecture slices must be able to advance the manifest
+    # without invalidating an already-versioned DecisionRevision contract.
     for fragment in {
-        "manifest_version: 1.28.0",
         "path: docs/contracts/core-erd.v2.mmd",
         "id: mobile-flow-runtime-ui",
         "path: docs/contracts/mobile-flow-runtime-ui.v1.yaml",

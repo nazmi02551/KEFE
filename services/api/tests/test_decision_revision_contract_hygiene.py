@@ -27,7 +27,8 @@ def test_decision_revision_contracts_are_final_and_strict() -> None:
         in openapi["paths"]
     )
 
-    assert "manifest_version: 1.29.0" in manifest
+    # The global manifest may advance after M2. This test owns only the M2
+    # contract registrations and must not pin later architecture slices to 1.29.0.
     assert (
         "- id: openapi\n    path: docs/contracts/openapi.v1.json\n    version: 0.15.0"
         in manifest

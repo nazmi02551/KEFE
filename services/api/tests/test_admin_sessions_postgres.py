@@ -23,7 +23,11 @@ pytestmark = pytest.mark.skipif(
     reason="PostgreSQL integration tests are opt-in",
 )
 
-NOW = datetime(2026, 7, 28, 12, 0, tzinfo=UTC)
+# Keep scenario-relative assertions deterministic within the module while ensuring
+# sessions created for integration tests are actually live at wall-clock resolution
+# time. A fixed calendar date eventually turns this fixture into an accidental expiry
+# test and masks the behavior each test is intended to exercise.
+NOW = datetime.now(UTC).replace(microsecond=0)
 
 
 def _engine():
