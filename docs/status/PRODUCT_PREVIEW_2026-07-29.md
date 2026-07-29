@@ -168,13 +168,13 @@ Merge commit:
 
 Implemented without adding a Case-specific runtime class or changing production networking:
 
-- Product Preview now explicitly composes `PreviewJourneyDecisionRepository` on top of the existing deterministic preview catalog;
+- Product Preview explicitly composes `PreviewJourneyDecisionRepository` on top of the deterministic preview catalog;
 - the airline child-seat Case demonstrates a generic `Decision → Counterview Context → DecisionRevision → Reflection` Flow;
-- this particular Flow intentionally has no collective-result primitive, proving that collective exposure is a composable capability rather than a mandatory screen;
+- this Flow intentionally has no collective-result primitive, proving that collective exposure is a composable capability rather than a mandatory screen;
 - first and second decision responses are retained separately in the preview lineage and Reflection derives observed change from those responses;
 - the intervening counterview is labeled Product Preview editorial material rather than live fact, research result or causal intervention;
-- shared Reflection UI now presents a visual decision journey with first/final revision nodes, recorded encounter count and observed change summary;
-- the existing non-causal disclosure remains explicit: KEFE shows change and intervening encounters together but does not claim that an encounter caused the change;
+- shared Reflection UI presents a visual decision journey with first/final revision nodes, recorded encounter count and observed change summary;
+- the non-causal disclosure remains explicit: KEFE shows change and intervening encounters together but does not claim that an encounter caused the change;
 - existing Reflection completion, idempotency and recovery behavior is preserved.
 
 The first implementation attempt expected a collective Reveal after the revision and correctly failed its widget assertion. The final slice was narrowed to the already-proven Reflection-only generic Flow rather than forcing a result primitive into the journey.
@@ -187,18 +187,83 @@ Verified exact-head Mobile CI:
 - Android preview APK build PASS
 - artifact upload PASS
 
-Latest preview artifact:
+Preview artifact from that run:
 
 - artifact name: `kefe-preview-android`
 - artifact id: `8730817374`
 - workflow artifact digest: `sha256:ba801bf3fc908d93cb77800dc267e14b6550ce1b3d368e5229064ed1f793bffd`
 - extracted APK sha256: `4cb20971bce9eaa79855782b45d561b8b99b37188cc9c3862c8880d3b6fd8bbf`
 
+## Case media presentation boundary
+
+PR #80 — `Lock provider-neutral Case media presentation boundary`
+
+Merge commit:
+
+`874e8a35e1678b461b699c411d9f3cf7a6571cb4`
+
+Added:
+
+- ADR-0031 `case-media-presentation-boundary`
+- `case-media-presentation.v1.yaml`
+
+Binding decisions include:
+
+- Case media is a separate CaseVersion-pinned presentation/read concern rather than Claim truth, evidence or Flow semantics;
+- consumer UI reads media through a provider-neutral `CaseMediaRepository` boundary;
+- semantic media identity and exposure phase are immutable presentation metadata, while delivery renditions remain replaceable infrastructure;
+- initial generic slots are `EXPLORE_CARD`, `CASE_HERO` and `CONTEXT_SUPPORTING`;
+- initial media kinds are IMAGE, ILLUSTRATION and VIDEO_POSTER;
+- informative media requires alt text and decorative media must be explicit;
+- media is `PRE_COMMIT_SAFE` or `POST_COMMIT_ONLY` and cannot bypass Flow authority;
+- displaying media does not upgrade it into evidence;
+- media failure must degrade to the text-first decision experience;
+- preview media is explicit composition data and production may never fall back to it.
+
+Object storage, CDN providers, uploads, processing workers, video playback and automated media generation/selection remain deferred.
+
+## Replaceable Product Preview media runtime
+
+PR #81 — `Add replaceable Case media presentation to Product Preview`
+
+Merge commit:
+
+`7716218761f58123c9b3613cc44c4c5783883b17`
+
+Implemented:
+
+- provider-neutral Case media presentation models and `CaseMediaRepository`;
+- production-safe `EmptyCaseMediaRepository` as the default adapter;
+- deterministic `PreviewCaseMediaRepository` injected only by `main_preview.dart`;
+- all eight preview CaseVersions receive explicit asset identities, content hashes and Turkish accessibility text;
+- reusable `CaseMediaSurface` with accessibility semantics and graceful missing/unsupported-media fallback;
+- a local Flutter-rendered `KEFE_ABSTRACT_V1` illustration family with no remote provider, CDN URL or image-host dependency;
+- featured Explore Case and premium Case hero consume the same repository boundary;
+- initial preview assets are PRE_COMMIT_SAFE only and cannot unlock any Flow step or expose collective data;
+- automated tests assert that production `main.dart` never imports the preview media repository and that decision Commit semantics remain intact after the richer visual treatment.
+
+The richer vertical layout exposed stale viewport assumptions in Product Preview widget tests. Those tests were corrected to scroll to visible content and to verify Commit/Reveal semantics from controller state where the ListView legitimately keeps post-Commit widgets outside the current viewport.
+
+Verified exact-head Mobile CI:
+
+- run `30470981100` — PASS
+- analyze PASS
+- widget/unit tests PASS
+- Android preview APK build PASS
+- artifact upload PASS
+
+Latest preview artifact:
+
+- artifact name: `kefe-preview-android`
+- artifact id: `8731906910`
+- workflow artifact digest: `sha256:657519d3d01ad86a7b728427a9aad319b8ee723dc58a5c4e811ab7fc17928974`
+- extracted APK sha256: `54dacdc835d31ac64dded87e63c3fe93d728a93ce095ba0b536fc3d0478dc910`
+
 ## What is now visibly testable
 
-The installable Product Preview now exposes multiple real product journeys on the same generic Flow renderer:
+The installable Product Preview now exposes multiple product journeys on the same generic Flow renderer:
 
-`Keşfet → premium Case hero / Karar Yolculuğu → Case Context → signature Tartım → Commit → premium Reveal / KEFE Uçurumu → Karşı Görüşler`
+`Keşfet + Case görseli → premium Case hero / Karar Yolculuğu + Case görseli → Case Context → signature Tartım → Commit → premium Reveal / KEFE Uçurumu → Karşı Görüşler`
 
 and, for the airline child-seat preview Case:
 
@@ -211,7 +276,7 @@ alongside navigable preview surfaces for:
 - Atlas
 - My KEFE
 
-The Case decision paths continue to use existing generic Flow primitives and typed decision contracts.
+The Case decision paths continue to use existing generic Flow primitives and typed decision contracts. Visual media is now replaceable presentation metadata outside those contracts.
 
 ## Important limitations
 
@@ -219,9 +284,9 @@ This is still a Product Preview, not a Play Store release or production-data pil
 
 - Radar ranking is deterministic preview data, not live trend detection.
 - Atlas country values are preview examples, not measured country aggregates.
-- My KEFE history is preview data, not the authenticated user's production history.
+- My KEFE history is still a static illustrative preview rather than a repository-backed descriptive journey read model.
 - the DecisionRevision/Reflection scenario is deterministic preview lineage, not a live study of persuasion or behavior;
-- remote media/illustration pipeline is not yet implemented;
+- provider-neutral media metadata and local abstract preview rendering exist, but production object storage/CDN/upload/processing infrastructure is not implemented;
 - release signing/AAB/distribution optimization is deferred;
 - debug APK size is not a product-completeness metric.
 
@@ -229,12 +294,12 @@ This is still a Product Preview, not a Play Store release or production-data pil
 
 Continue the visible-product track before returning to long invisible backend sequences:
 
-1. add visual/media presentation metadata and a replaceable media repository boundary without embedding media-provider concerns into Case/Flow domain models;
-2. use the latest phone-installable Product Preview to gather concrete UX feedback across both the standard Reveal journey and the new DecisionRevision/Reflection journey;
-3. refine My KEFE from static illustrative history toward a generic descriptive journey read model, without personality/ideology profiling;
-4. only then decide which production API/read-model gaps should be connected next.
+1. replace the static My KEFE preview with a generic repository-backed descriptive journey read model using only observed history fields;
+2. keep meaningful weigh count, distinct cases/domains, recent Cases and observed DecisionRevision summaries separate from any personality/ideology scoring;
+3. use the latest phone-installable Product Preview to gather concrete UX feedback across standard Reveal, DecisionRevision/Reflection and media-rich Case journeys;
+4. only then decide which production progress/media API gaps should be connected next.
 
-The scale metaphor, richer Results/KEFE Uçurumu, premium Case hero/Flow hierarchy and non-causal DecisionRevision/Reflection journey are now tangible. Future iterations should preserve generic Flow composition, explicit preview isolation and Commit-before-collective-exposure rules.
+The scale metaphor, richer Results/KEFE Uçurumu, premium Case hero/Flow hierarchy, non-causal DecisionRevision/Reflection journey and provider-neutral media presentation are now tangible. Future iterations must preserve generic Flow composition, explicit preview isolation, accessibility and Commit-before-collective-exposure rules.
 
 ## Documentation note
 
