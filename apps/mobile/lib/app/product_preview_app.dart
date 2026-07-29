@@ -6,7 +6,7 @@ import '../core/build/preview_build_info.dart';
 import '../core/design/kefe_theme.dart';
 import '../core/localization/kefe_strings.dart';
 import '../features/decision/presentation/decision_flow_screen.dart';
-import '../features/explore/presentation/explore_screen.dart';
+import '../features/explore/presentation/discovery_explore_screen.dart';
 import '../features/progress/presentation/my_kefe_journey_screen.dart';
 import 'product_preview/atlas_preview_screen.dart';
 import 'product_preview/radar_preview_screen.dart';
@@ -28,7 +28,7 @@ class _ProductPreviewAppState extends State<ProductPreviewApp> {
         path: '/explore',
         builder: (_, _) => const _PreviewShell(
           selectedIndex: 0,
-          child: ExploreScreen(embedded: true),
+          child: DiscoveryExploreScreen(embedded: true),
         ),
       ),
       GoRoute(
