@@ -117,8 +117,23 @@ def _openapi_errors() -> list[str]:
         "ContextSnapshotResponse": {"case_version_id", "blocks", "sources"},
         "ProgressEnvelopeResponse": {"account_offer", "progress", "journey", "methodology"},
         "DomainActivityResponse": {"primary_domain", "committed_weigh_count", "last_committed_at"},
-        "RecentJourneyResponse": {"case_id", "case_version_id", "title", "primary_domain", "initial_committed_at", "latest_decision_at", "decision_update_count", "reflection_completed"},
-        "JourneyResponse": {"decision_update_count", "revisited_case_count", "reflection_completion_count", "domain_activity", "recent_journeys"},
+        "RecentJourneyResponse": {
+            "case_id",
+            "case_version_id",
+            "title",
+            "primary_domain",
+            "initial_committed_at",
+            "latest_decision_at",
+            "decision_update_count",
+            "reflection_completed",
+        },
+        "JourneyResponse": {
+            "decision_update_count",
+            "revisited_case_count",
+            "reflection_completion_count",
+            "domain_activity",
+            "recent_journeys",
+        },
         "ProgressResponse": {
             "readiness",
             "meaningful_weigh_count",
@@ -236,9 +251,7 @@ def _openapi_errors() -> list[str]:
         if _response_ref(operation, status) != f"#/components/schemas/{schema}":
             errors.append(f"{method.upper()} {path} must return {schema}")
 
-    context_operation = paths.get(
-        "/v1/case-versions/{case_version_id}/context", {}
-    ).get("get", {})
+    context_operation = paths.get("/v1/case-versions/{case_version_id}/context", {}).get("get", {})
     if context_operation.get("security"):
         errors.append("GET CaseVersion context must remain public before Commit")
 
@@ -323,9 +336,7 @@ def _schema_errors() -> list[str]:
 
 
 def _authoring_contract_errors() -> list[str]:
-    policy = (CONTRACTS / "content-authoring-persistence.v1.yaml").read_text(
-        encoding="utf-8"
-    )
+    policy = (CONTRACTS / "content-authoring-persistence.v1.yaml").read_text(encoding="utf-8")
     required = {
         "authoring_schema: editorial",
         "consumer_materialization_only_on_publish: true",
