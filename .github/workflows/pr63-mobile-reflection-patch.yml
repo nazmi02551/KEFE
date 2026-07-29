@@ -1,9 +1,7 @@
-name: Finalize PR63 Mobile Reflection
+name: Finalize M3 Reflection Recovery
 
 on:
-  push:
-    branches:
-      - feature/m3-reflection-runtime
+  pull_request:
     paths:
       - '.github/workflows/pr63-mobile-reflection-patch.yml'
 
@@ -12,11 +10,12 @@ permissions:
 
 jobs:
   finalize:
+    if: github.head_ref == 'recovery/m3-reflection-runtime-finalize'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: feature/m3-reflection-runtime
+          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
       - uses: subosito/flutter-action@v2
         with:
@@ -35,28 +34,13 @@ jobs:
           start = workflow.index(start_marker) + len(start_marker)
           end = workflow.index(end_marker, start)
           script = textwrap.dedent(workflow[start:end])
-          exec(compile(script, '<pr63-reflection-patch>', 'exec'), {'__name__': '__main__'})
+          exec(compile(script, '<m3-reflection-patch>', 'exec'), {'__name__': '__main__'})
           PY
-      - name: Restore strict read-only CI and register Reflection gate
+      - name: Restore strict read-only CI
         run: |
           git fetch origin main
           git checkout origin/main -- .github/workflows/api-ci.yml .github/workflows/mobile-ci.yml
-          python - <<'PY'
-          from pathlib import Path
-
-          api_ci = Path('.github/workflows/api-ci.yml')
-          text = api_ci.read_text(encoding='utf-8')
-          marker = "      - name: Admin HTTP contract\n"
-          reflection_gate = (
-              "      - name: Reflection runtime contract\n"
-              "        working-directory: services/api\n"
-              "        run: python tools/check_reflection_runtime_contract.py\n"
-          )
-          if 'Reflection runtime contract' not in text:
-              text = text.replace(marker, reflection_gate + marker)
-          api_ci.write_text(text, encoding='utf-8')
-          PY
-      - name: Remove superseded wrapper and temporary workflow
+      - name: Remove recovery-only scaffolding
         run: |
           rm -f apps/mobile/lib/features/decision/data/http_reflection_decision_repository.dart
           git rm .github/workflows/pr63-mobile-reflection-patch.yml
@@ -70,4 +54,4 @@ jobs:
           git add -A
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'Finalize generic Reflection mobile runtime'
-          git push origin HEAD:feature/m3-reflection-runtime
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
