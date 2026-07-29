@@ -74,6 +74,9 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
             stepCode: widget.step.code,
           );
       await _reconcilePendingCompletion(model);
+      if (!model.completed) {
+        await _persistFlowRecoveryDraft();
+      }
       if (!mounted) return;
       setState(() {
         _model = model;
@@ -110,6 +113,26 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
     }
   }
 
+  Future<void> _persistFlowRecoveryDraft() async {
+    final decisionState = ref.read(decisionControllerProvider);
+    final caseData = decisionState.caseData;
+    final flowRuntime = decisionState.flowRuntime;
+    if (caseData == null ||
+        flowRuntime == null ||
+        decisionState.sessionId != widget.sessionId ||
+        caseData.versionId != widget.caseVersionId) {
+      return;
+    }
+    await ref.read(decisionDraftStoreProvider).write(
+      DecisionDraft(
+        caseData: caseData,
+        sessionId: widget.sessionId,
+        flowRuntime: flowRuntime,
+        updatedAt: DateTime.now().toUtc(),
+      ),
+    );
+  }
+
   Future<void> _complete() async {
     final model = _model;
     if (model == null || model.completed || _completing) return;
@@ -126,7 +149,7 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
           pending.caseVersionId == widget.caseVersionId &&
           pending.latestRevisionId == model.latestRevisionId;
       final idempotencyKey = reusablePending
-          ? pending.idempotencyKey
+          ? pending!.idempotencyKey
           : 'mobile-reflection-${widget.sessionId}-${widget.step.code}-${model.latestRevisionId}-v1';
       if (!reusablePending) {
         await _completionStore.write(
@@ -139,6 +162,7 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
           ),
         );
       }
+      await _persistFlowRecoveryDraft();
 
       final repository = ref.read(decisionRepositoryProvider);
       await repository.reflection.completeReflection(
@@ -202,6 +226,11 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
         break;
       }
     }
+    final flowTerminal = refreshed.steps.every(
+      (item) =>
+          item.state == FlowStepRuntimeState.completed ||
+          item.state == FlowStepRuntimeState.unsupported,
+    );
 
     final draftStore = ref.read(decisionDraftStoreProvider);
     await draftStore.write(
@@ -214,7 +243,8 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
       ),
     );
     await ref.read(decisionControllerProvider.notifier).load(caseData.id);
-    if (nextDecision == null) {
+    final adopted = ref.read(decisionControllerProvider);
+    if (flowTerminal && !adopted.offlineDraft && adopted.errorCode == null) {
       await draftStore.clearForCase(caseData.id);
     }
   }
