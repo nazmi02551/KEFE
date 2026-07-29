@@ -1,0 +1,223 @@
+contract_version: 1.0.0
+updated_at: '2026-07-29'
+source_adr: docs/adr/0029-reviewed-candidate-editorial-projection.md
+status: architecture_locked_implementation_pending
+bounded_context: editorial_projection
+
+principles:
+  candidate_case_is_not_case: true
+  proposal_acceptance_is_not_authoring_approval: true
+  projection_is_explicit_editorial_action: true
+  projection_is_atomic: true
+  projection_is_idempotent: true
+  projection_creates_draft_only: true
+  automatic_review_approval_publication_forbidden: true
+  provider_or_ai_dependency_in_projection_forbidden: true
+  published_case_version_mutation_forbidden: true
+  schema_before_screen: true
+
+source:
+  required_proposal_kind: CANDIDATE_CASE
+  terminal_review_required: ACCEPTED
+  accepted_proposal_automatically_projects: false
+  source_payload_immutable: true
+  superseding_proposal_mutates_previous_projection: false
+  dependency_kinds_supported:
+    - DECISION_PROBLEM
+    - QUESTION_DRAFT
+    - CLAIM
+    - CLAIM_ASSESSMENT
+    - CLAIM_ASSERTION
+    - EVIDENCE_LINK
+    - CLAIM_RELATION
+    - ARGUMENT
+    - ARGUMENT_RELATION
+  dependency_acceptance_required_when_profile_marks_required: true
+  dependency_materialization_required_when_profile_marks_canonical_reference: true
+
+projection_profile:
+  entity: EDITORIAL_PROJECTION_PROFILE
+  versioned: true
+  required_identity_fields:
+    - profile_code
+    - profile_version
+  mapping_may_cover:
+    - TITLE
+    - SUMMARY
+    - LOCALE
+    - DOMAIN
+    - TOPIC
+    - BASE_FORMAT
+    - MODIFIER
+    - RISK
+    - REVIEW_MODE
+    - ISSUE_STRUCTURE
+    - QUESTION_STRUCTURE
+    - RESPONSE_SCHEMA
+    - SOURCE_PROVENANCE
+    - CLAIM_ARGUMENT_PROVENANCE
+    - FLOW_TEMPLATE_SELECTION
+  hidden_default_inference_forbidden: true
+  missing_required_field_fails_projection: true
+  incompatible_schema_fails_projection: true
+
+flow_selection:
+  inferred_from_title_forbidden: true
+  inferred_from_domain_forbidden: true
+  inferred_from_base_format_forbidden: true
+  inferred_from_provider_forbidden: true
+  accepted_candidate_may_supply_explicit_selection: true
+  editorial_command_may_supply_explicit_selection_when_profile_allows: true
+  absent_required_selection_fails_projection: true
+  publication_validation_remains_authoritative: true
+  publication_pinning_remains_adr_0022_authority: true
+
+command:
+  entity: EDITORIAL_PROJECTION_COMMAND
+  authenticated_admin_identity_required: true
+  idempotency_key_required: true
+  required_fields:
+    - candidate_proposal_id
+    - proposal_review_decision_id
+    - profile_code
+    - profile_version
+    - idempotency_key
+    - requested_by_admin_ref
+  optional_editorial_inputs:
+    - explicit_flow_template_code
+    - explicit_flow_template_version
+    - risk_review_override_upward_only
+    - locale
+    - taxonomy_selection
+  ai_generated_editorial_input_forbidden: true
+
+record:
+  entity: EDITORIAL_PROJECTION_RECORD
+  durable: true
+  immutable: true
+  required_fields:
+    - projection_record_id
+    - candidate_proposal_id
+    - proposal_review_decision_id
+    - profile_code
+    - profile_version
+    - idempotency_key
+    - requested_by_admin_ref
+    - input_hash
+    - authoring_case_id
+    - authoring_case_version_id
+    - created_at
+  unique_logical_keys:
+    - candidate_proposal_id
+    - idempotency_key
+  one_candidate_creates_multiple_logical_drafts: false
+
+atomicity:
+  draft_and_projection_record_same_atomic_boundary: true
+  partial_authoring_creation_allowed: false
+  review_decision_changed_on_projection_failure: false
+  retry_reuses_idempotency_identity: true
+
+output:
+  bounded_context: CONTENT_AUTHORING
+  allowed_initial_state: DRAFT
+  created_objects_may_include:
+    - AUTHORING_CASE
+    - AUTHORING_CASE_VERSION
+    - AUTHORING_ISSUE
+    - AUTHORING_QUESTION
+    - AUTHORING_QUESTION_OPTION
+  submit_for_review_allowed: false
+  approve_allowed: false
+  publish_allowed: false
+  consumer_materialization_allowed: false
+  existing_content_authoring_validation_required: true
+  existing_content_authoring_audit_required: true
+
+question_mapping:
+  multiple_decision_problems_supported: true
+  multiple_questions_supported: true
+  candidate_order_preserved: true
+  typed_response_schema_preserved: true
+  legacy_single_answer_collapse_forbidden: true
+  schema_driven_validation_required: true
+
+knowledge_provenance:
+  stable_references_preserved: true
+  claim_assessment_recalculation_allowed: false
+  claim_state_mutation_allowed: false
+  claimant_identity_merge_allowed: false
+  canonical_claim_state_to_context_projection_allowed: false
+  context_projection_requires_separate_contract: true
+
+risk_and_review:
+  source_risk_provenance_preserved: true
+  current_policy_may_raise_review_requirement: true
+  current_policy_may_silently_lower_binding_review_requirement: false
+  high_risk_publication_gates_remain_authoring_authority: true
+
+supersession:
+  newer_candidate_automatically_updates_projected_draft: false
+  new_explicit_projection_required: true
+  published_version_mutation_forbidden: true
+  authoring_conflict_requires_editorial_resolution: true
+  silent_overwrite_forbidden: true
+
+failures:
+  durable_outcomes_required: true
+  categories:
+    - SOURCE_PROPOSAL_NOT_ACCEPTED
+    - DEPENDENCY_NOT_READY
+    - PROFILE_SCHEMA_INCOMPATIBLE
+    - REQUIRED_AUTHORING_FIELD_MISSING
+    - TAXONOMY_CONFIGURATION_REFERENCE_INVALID
+    - FLOW_REFERENCE_INVALID
+    - AUTHORING_LIFECYCLE_CONFLICT
+    - PERSISTENCE_CONCURRENCY_FAILURE
+  retryable_vs_final_classification_required: true
+
+security_and_privacy:
+  same_admin_security_boundary_as_content_authoring: true
+  client_supplied_audit_identity_forbidden: true
+  provider_credentials_allowed: false
+  provider_sdk_types_allowed: false
+  ai_provider_calls_allowed: false
+  minimum_necessary_provenance: true
+  personality_inference_forbidden: true
+  ideology_inference_forbidden: true
+  psychometric_inference_forbidden: true
+
+compatibility:
+  content_authoring_contract_remains_authoritative: true
+  case_version_flow_pinning_contract_unchanged: true
+  claim_argument_contract_unchanged: true
+  ingestion_orchestration_contract_unchanged: true
+  context_four_state_projection_unchanged: true
+  openapi_changed: false
+  consumer_ui_changed: false
+  new_runtime_case_class_added: false
+
+first_implementation_slice:
+  status: pending
+  includes:
+    - EDITORIAL_PROJECTION_PROFILE_IDENTITY
+    - EDITORIAL_PROJECTION_COMMAND
+    - EDITORIAL_PROJECTION_RECORD
+    - ACCEPTED_SOURCE_AND_DEPENDENCY_VALIDATION
+    - DETERMINISTIC_AUTHORING_DRAFT_MAPPING
+    - ATOMIC_DRAFT_AND_PROJECTION_RECORD
+    - IN_MEMORY_PERSISTENCE
+    - POSTGRESQL_PERSISTENCE
+    - IDEMPOTENCY_AND_CONFLICT_TESTS
+    - ARCHITECTURE_FITNESS_TESTS
+  excludes:
+    - EXTERNAL_PROVIDER_CALLS
+    - AI_PROVIDER_CALLS
+    - AUTOMATIC_PROJECTION_AFTER_ACCEPTANCE
+    - AUTOMATIC_AUTHORING_REVIEW
+    - AUTOMATIC_AUTHORING_APPROVAL
+    - AUTOMATIC_PUBLICATION
+    - CONSUMER_CLAIM_GRAPH_UI
+    - CONTEXT_CLAIM_STATUS_REMAPPING
+    - ADMIN_QUEUE_OR_COMPOSER_UI
+    - BULK_PROJECTION
