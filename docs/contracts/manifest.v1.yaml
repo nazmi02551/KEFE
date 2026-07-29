@@ -150,3 +150,4 @@ architecture_decisions:
   - docs/adr/0023-generic-consumer-flow-runtime.md
   - docs/adr/0024-flutter-flow-driven-consumer-rendering.md
   - docs/adr/0025-decision-revision-exposure-intervention-delta.md
+  - docs/adr/0026-generic-reflection-runtime.md
