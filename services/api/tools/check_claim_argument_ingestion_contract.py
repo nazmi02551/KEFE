@@ -115,7 +115,11 @@ def main() -> int:
         path.read_text(encoding="utf-8")
         for path in MODELS.parent.glob("*.py")
     )
-    leaked = [fragment for fragment in forbidden_provider_fragments if fragment in knowledge_source]
+    leaked = [
+        fragment
+        for fragment in forbidden_provider_fragments
+        if fragment in knowledge_source
+    ]
     if leaked:
         errors.append("provider-specific dependency leaked into knowledge domain: " + ", ".join(leaked))
     if "from fastapi" in knowledge_source:
