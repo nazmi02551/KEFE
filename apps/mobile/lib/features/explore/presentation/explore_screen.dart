@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/design/kefe_theme.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../decision/domain/decision_models.dart';
+import '../../media_presentation/domain/case_media_models.dart';
+import '../../media_presentation/presentation/case_media_surface.dart';
 import '../application/explore_controller.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
@@ -227,6 +229,12 @@ class _FeaturedCaseCard extends StatelessWidget {
                           ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 14),
+                CaseMediaSurface(
+                  caseVersionId: item.versionId,
+                  slot: CaseMediaSlot.exploreCard,
+                  borderRadius: 16,
                 ),
                 const SizedBox(height: 18),
                 Text(
