@@ -5,12 +5,14 @@ import 'package:go_router/go_router.dart';
 import '../core/build/preview_build_info.dart';
 import '../core/design/kefe_theme.dart';
 import '../core/localization/kefe_strings.dart';
+import '../features/activity/presentation/activity_screen.dart';
 import '../features/decision/presentation/decision_flow_screen.dart';
 import '../features/explore/presentation/discovery_explore_screen.dart';
 import '../features/progress/presentation/my_kefe_journey_screen.dart';
+import '../features/weigh/presentation/weigh_hub_screen.dart';
+import 'primary_navigation_shell.dart';
 import 'product_preview/atlas_preview_screen.dart';
 import 'product_preview/radar_preview_screen.dart';
-import 'product_preview/weigh_preview_screen.dart';
 
 class ProductPreviewApp extends StatefulWidget {
   const ProductPreviewApp({super.key});
@@ -26,37 +28,48 @@ class _ProductPreviewAppState extends State<ProductPreviewApp> {
       GoRoute(path: '/', redirect: (_, _) => '/explore'),
       GoRoute(
         path: '/explore',
-        builder: (_, _) => const _PreviewShell(
+        builder: (_, _) => PrimaryNavigationShell(
           selectedIndex: 0,
-          child: DiscoveryExploreScreen(embedded: true),
-        ),
-      ),
-      GoRoute(
-        path: '/radar',
-        builder: (_, _) => const _PreviewShell(
-          selectedIndex: 1,
-          child: RadarPreviewScreen(),
+          floatingActionButton: const _ExploreSecondaryActions(),
+          child: const DiscoveryExploreScreen(embedded: true),
         ),
       ),
       GoRoute(
         path: '/weigh',
-        builder: (_, _) => const _PreviewShell(
-          selectedIndex: 2,
-          child: WeighPreviewScreen(),
+        builder: (_, _) => const PrimaryNavigationShell(
+          selectedIndex: 1,
+          child: WeighHubScreen(embedded: true),
         ),
       ),
       GoRoute(
-        path: '/atlas',
-        builder: (_, _) => const _PreviewShell(
-          selectedIndex: 3,
-          child: AtlasPreviewScreen(),
+        path: '/activity',
+        builder: (_, _) => const PrimaryNavigationShell(
+          selectedIndex: 2,
+          child: ActivityScreen(embedded: true),
         ),
       ),
       GoRoute(
         path: '/my-kefe',
-        builder: (_, _) => const _PreviewShell(
-          selectedIndex: 4,
+        builder: (_, _) => const PrimaryNavigationShell(
+          selectedIndex: 3,
+          footer: _PreviewBuildIdentity(),
           child: MyKefeJourneyScreen(embedded: true),
+        ),
+      ),
+      GoRoute(
+        path: '/radar',
+        builder: (context, _) => _SecondaryPreviewPage(
+          title: 'Radar',
+          child: const RadarPreviewScreen(),
+          onBack: () => _returnToExplore(context),
+        ),
+      ),
+      GoRoute(
+        path: '/atlas',
+        builder: (context, _) => _SecondaryPreviewPage(
+          title: 'Atlas',
+          child: const AtlasPreviewScreen(),
+          onBack: () => _returnToExplore(context),
         ),
       ),
       GoRoute(
@@ -67,6 +80,14 @@ class _ProductPreviewAppState extends State<ProductPreviewApp> {
       ),
     ],
   );
+
+  static void _returnToExplore(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/explore');
+    }
+  }
 
   @override
   void dispose() {
@@ -95,66 +116,53 @@ class _ProductPreviewAppState extends State<ProductPreviewApp> {
   }
 }
 
-class _PreviewShell extends StatelessWidget {
-  const _PreviewShell({required this.selectedIndex, required this.child});
+class _ExploreSecondaryActions extends StatelessWidget {
+  const _ExploreSecondaryActions();
 
-  final int selectedIndex;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        FloatingActionButton.small(
+          key: const ValueKey('open-preview-radar'),
+          heroTag: 'preview-radar',
+          tooltip: 'Radar',
+          onPressed: () => context.push('/radar'),
+          child: const Icon(Icons.radar_rounded),
+        ),
+        const SizedBox(height: 10),
+        FloatingActionButton.small(
+          key: const ValueKey('open-preview-atlas'),
+          heroTag: 'preview-atlas',
+          tooltip: 'Atlas',
+          onPressed: () => context.push('/atlas'),
+          child: const Icon(Icons.public_rounded),
+        ),
+      ],
+    );
+  }
+}
+
+class _SecondaryPreviewPage extends StatelessWidget {
+  const _SecondaryPreviewPage({
+    required this.title,
+    required this.child,
+    required this.onBack,
+  });
+
+  final String title;
   final Widget child;
-
-  static const _paths = [
-    '/explore',
-    '/radar',
-    '/weigh',
-    '/atlas',
-    '/my-kefe',
-  ];
+  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: child,
-      bottomNavigationBar: DecoratedBox(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: KefeColorTokens.borderDark)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (selectedIndex == 4) const _PreviewBuildIdentity(),
-            NavigationBar(
-              selectedIndex: selectedIndex,
-              onDestinationSelected: (index) => context.go(_paths[index]),
-              destinations: const [
-                NavigationDestination(
-                  icon: Icon(Icons.explore_outlined),
-                  selectedIcon: Icon(Icons.explore_rounded),
-                  label: 'Keşfet',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.radar_outlined),
-                  selectedIcon: Icon(Icons.radar_rounded),
-                  label: 'Radar',
-                ),
-                NavigationDestination(
-                  icon: _ScaleNavIcon(selected: false),
-                  selectedIcon: _ScaleNavIcon(selected: true),
-                  label: 'Tartım',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.public_outlined),
-                  selectedIcon: Icon(Icons.public_rounded),
-                  label: 'Atlas',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.person_outline_rounded),
-                  selectedIcon: Icon(Icons.person_rounded),
-                  label: 'Profil',
-                ),
-              ],
-            ),
-          ],
-        ),
+      appBar: AppBar(
+        leading: BackButton(onPressed: onBack),
+        title: Text(title),
       ),
+      body: child,
     );
   }
 }
@@ -193,34 +201,6 @@ class _PreviewBuildIdentity extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ScaleNavIcon extends StatelessWidget {
-  const _ScaleNavIcon({required this.selected});
-
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 42,
-      height: 42,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: selected
-            ? KefeColorTokens.gold
-            : KefeColorTokens.gold.withValues(alpha: 0.12),
-        border: Border.all(
-          color: KefeColorTokens.gold.withValues(alpha: 0.55),
-        ),
-      ),
-      child: Icon(
-        Icons.balance_rounded,
-        color: selected ? const Color(0xFF171106) : KefeColorTokens.goldSoft,
-        size: 23,
       ),
     );
   }
