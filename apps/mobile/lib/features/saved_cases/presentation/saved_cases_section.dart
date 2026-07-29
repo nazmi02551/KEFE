@@ -9,7 +9,9 @@ import '../domain/saved_case.dart';
 import 'saved_case_strings.dart';
 
 class SavedCasesSection extends ConsumerStatefulWidget {
-  const SavedCasesSection({super.key});
+  const SavedCasesSection({this.visible = false, super.key});
+
+  final bool visible;
 
   @override
   ConsumerState<SavedCasesSection> createState() => _SavedCasesSectionState();
@@ -19,13 +21,27 @@ class _SavedCasesSectionState extends ConsumerState<SavedCasesSection> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => ref.read(savedCasesControllerProvider.notifier).load(),
-    );
+    if (widget.visible) {
+      Future.microtask(
+        () => ref.read(savedCasesControllerProvider.notifier).load(),
+      );
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant SavedCasesSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.visible && widget.visible) {
+      Future.microtask(
+        () => ref.read(savedCasesControllerProvider.notifier).load(),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.visible) return const SizedBox.shrink();
+
     final strings = KefeStrings.of(context);
     final state = ref.watch(savedCasesControllerProvider);
 
