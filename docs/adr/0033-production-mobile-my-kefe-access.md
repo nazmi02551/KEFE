@@ -22,9 +22,9 @@ No preview repository, deterministic preview data or preview fallback may be imp
 
 ### 2. Explore provides the first production entry point
 
-When `ExploreScreen` is rendered as the standalone production destination, its header exposes an accessible My KEFE action that navigates to `/my-kefe`.
+The production `/explore` route owns an accessible My KEFE action that navigates to `/my-kefe` while reusing `ExploreScreen` in embedded mode.
 
-When Explore is embedded inside the Product Preview shell, the existing shell remains the navigation authority and the extra production action is not rendered.
+The Product Preview continues to use its existing five-destination shell and does not render this additional production action.
 
 ### 3. No fake production shell
 
@@ -48,7 +48,7 @@ The production My KEFE route continues to show observed history only. It must no
 ## First implementation slice
 
 1. add `/my-kefe` to `KefeApp`;
-2. add a production-only My KEFE header action to standalone `ExploreScreen`;
+2. add an accessible production-only My KEFE action to the `/explore` route;
 3. render `MyKefeJourneyScreen` with a production app bar/back affordance;
 4. add widget tests proving production navigation and preview isolation;
 5. keep the Product Preview five-destination shell unchanged;
