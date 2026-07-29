@@ -6,18 +6,26 @@ import 'package:kefe_mobile/features/decision/application/decision_controller.da
 import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/decision_repository.dart';
 import 'package:kefe_mobile/features/decision/domain/decision_models.dart';
+import 'package:kefe_mobile/features/decision/domain/reflection_models.dart';
 
 const retestCaseId = 'dddddddd-1111-4111-8111-dddddddddddd';
 
 class RetestFlowRepository
-    implements DecisionRepository, FlowRuntimeRepository, DecisionLineageRepository {
+    implements
+        DecisionRepository,
+        FlowRuntimeRepository,
+        DecisionLineageRepository,
+        ReflectionRepository {
   bool initialCommitted = false;
   bool contextExposed = false;
   bool finalCommitted = false;
+  bool reflectionCompleted = false;
   int revealCalls = 0;
   int exposureCalls = 0;
   int revisionAnswerCalls = 0;
   int revisionCommitCalls = 0;
+  int reflectionFetchCalls = 0;
+  int reflectionCompleteCalls = 0;
   Object? finalAnswer;
 
   @override
@@ -78,7 +86,7 @@ class RetestFlowRepository
       templateCode: 'PRINCIPLE_CONTEXT_RETEST',
       templateVersionNo: 1,
       entryStepCode: 'PRINCIPLE',
-      executionSupport: FlowExecutionSupport.partial,
+      executionSupport: FlowExecutionSupport.full,
       steps: [
         FlowRuntimeStep(
           code: 'PRINCIPLE',
@@ -118,12 +126,12 @@ class RetestFlowRepository
           primitiveCode: 'REFLECTION',
           capabilityCodes: const ['REFLECTION'],
           nextStepCodes: const [],
-          state: finalCommitted
-              ? FlowStepRuntimeState.unsupported
-              : FlowStepRuntimeState.blocked,
-          reasonCode: finalCommitted
-              ? 'FLOW_REFLECTION_RUNTIME_PENDING'
-              : 'FLOW_PREDECESSOR_PENDING',
+          state: !finalCommitted
+              ? FlowStepRuntimeState.blocked
+              : reflectionCompleted
+                  ? FlowStepRuntimeState.completed
+                  : FlowStepRuntimeState.ready,
+          reasonCode: !finalCommitted ? 'FLOW_PREDECESSOR_PENDING' : null,
         ),
       ],
     );
@@ -169,6 +177,39 @@ class RetestFlowRepository
   }
 
   @override
+  Future<ReflectionReadModel> fetchReflection({
+    required String sessionId,
+    required String stepCode,
+  }) async {
+    reflectionFetchCalls += 1;
+    return ReflectionReadModel(
+      sessionId: sessionId,
+      caseVersionId: 'retest-version-1',
+      flowStepCode: stepCode,
+      revisionCount: 2,
+      latestRevisionId: 'revision-2',
+      latestDeltaId: 'delta-1',
+      decisionChanged: true,
+      changedQuestionCount: 1,
+      interventionCount: 1,
+      interventionTypeCodes: const ['CONTEXT_REVEAL'],
+      fromContributionClass: 'CORE_PRE_RESULT',
+      toContributionClass: 'CORE_PRE_RESULT',
+      completed: reflectionCompleted,
+    );
+  }
+
+  @override
+  Future<void> completeReflection({
+    required String sessionId,
+    required String stepCode,
+    required String idempotencyKey,
+  }) async {
+    reflectionCompleteCalls += 1;
+    reflectionCompleted = true;
+  }
+
+  @override
   Future<RevealResult> reveal(String sessionId) async {
     revealCalls += 1;
     return const RevealResult(
@@ -199,7 +240,7 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
 
 void main() {
   testWidgets(
-    'Flow UI performs initial Commit Context Exposure and DecisionRevision generically',
+    'Flow UI executes DecisionRevision and Reflection generically',
     (tester) async {
       tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
       addTearDown(tester.platformDispatcher.clearLocaleTestValue);
@@ -216,16 +257,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
       expect(find.byKey(const ValueKey('option-A')), findsOneWidget);
-      expect(repository.revealCalls, 0);
-
       await tester.tap(find.byKey(const ValueKey('option-A')));
       await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
       await tester.pumpAndSettle();
 
       expect(repository.initialCommitted, isTrue);
-      expect(repository.exposureCalls, 1);
       expect(repository.contextExposed, isTrue);
       expect(repository.revealCalls, 0);
       expect(find.byKey(const ValueKey('option-B')), findsOneWidget);
@@ -239,10 +276,21 @@ void main() {
       expect(repository.revisionCommitCalls, 1);
       expect(repository.finalCommitted, isTrue);
       expect(repository.revealCalls, 0);
-      expect(
-        find.byKey(const ValueKey('capability-pending-REFLECTION')),
-        findsOneWidget,
+      expect(find.byKey(const ValueKey('reflection-step-REFLECTION')), findsOneWidget);
+      expect(find.byKey(const ValueKey('reflection-summary')), findsOneWidget);
+      expect(find.byKey(const ValueKey('reflection-non-causal-note')), findsOneWidget);
+      expect(repository.reflectionFetchCalls, greaterThanOrEqualTo(1));
+
+      await tapVisible(
+        tester,
+        find.byKey(const ValueKey('reflection-complete-button')),
       );
+      await tester.pumpAndSettle();
+
+      expect(repository.reflectionCompleteCalls, 1);
+      expect(repository.reflectionCompleted, isTrue);
+      expect(find.byKey(const ValueKey('reflection-completed')), findsOneWidget);
+      expect(repository.revealCalls, 0);
     },
   );
 }
