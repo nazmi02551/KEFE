@@ -1,0 +1,130 @@
+contract_version: 1.0.0
+updated_at: '2026-07-29'
+source_adr: docs/adr/0031-case-media-presentation-boundary.md
+status: architecture_locked_implementation_pending
+bounded_context: case_media_presentation
+
+principles:
+  provider_neutral_repository_boundary: true
+  case_version_pinned_semantic_media: true
+  media_is_not_claim_truth: true
+  media_is_not_evidence_by_display: true
+  case_flow_domain_vendor_media_types_forbidden: true
+  production_preview_fallback_forbidden: true
+  media_failure_must_not_block_decision_core: true
+
+semantic_identity:
+  immutable_fields:
+    - media_presentation_id
+    - case_version_id
+    - slot
+    - media_kind
+    - asset_identity
+    - asset_content_hash
+    - alt_text_or_decorative_flag
+    - caption
+    - attribution
+    - exposure_phase
+    - editorial_review_state
+  published_semantic_change_requires_new_approved_revision: true
+  delivery_rendition_change_is_not_semantic_change: true
+
+slots:
+  initial:
+    - EXPLORE_CARD
+    - CASE_HERO
+    - CONTEXT_SUPPORTING
+  extensible: true
+  case_type_branching_forbidden: true
+  domain_branching_forbidden: true
+
+media_kinds:
+  initial:
+    - IMAGE
+    - ILLUSTRATION
+    - VIDEO_POSTER
+  extensible: true
+  video_playback_in_v1: false
+
+exposure:
+  phases:
+    - PRE_COMMIT_SAFE
+    - POST_COMMIT_ONLY
+  preview_v1_allowed_phases:
+    - PRE_COMMIT_SAFE
+  post_commit_media_before_flow_authority_forbidden: true
+  media_may_unlock_flow_step: false
+
+accessibility:
+  informative_media_requires_alt_text: true
+  decorative_media_requires_explicit_flag: true
+  media_absent_text_hierarchy_required: true
+  decode_or_network_failure_degrades_to_text: true
+
+provenance_and_rights:
+  externally_sourced_media_preserves_attribution_metadata: true
+  externally_sourced_media_preserves_available_license_metadata: true
+  presentation_projection_does_not_upgrade_evidence_status: true
+
+repository_boundary:
+  mobile_port: CaseMediaRepository
+  key: case_version_id
+  responsibilities:
+    - FETCH_APPROVED_PRESENTATION_SET
+    - FILTER_BY_EXPOSURE_PHASE
+    - RESOLVE_SUITABLE_RENDITION
+  must_not:
+    - CONSTRUCT_PROVIDER_URLS_IN_UI
+    - IMPORT_VENDOR_SDK_IN_DOMAIN
+    - ALTER_DECISION_SESSION_STATE
+    - OPEN_REVEAL_OR_PERSPECTIVE
+    - FABRICATE_MEDIA_ON_FAILURE
+
+renditions:
+  semantic_asset_identity_stable_across_renditions: true
+  delivery_variants_may_include:
+    - CARD
+    - HERO
+    - HIGH_DENSITY
+  provider_locator_is_delivery_concern: true
+  future_remote_adapter_must_validate:
+    - ALLOWED_SCHEME
+    - ALLOWED_ORIGIN
+    - CONTENT_TYPE
+
+preview_composition:
+  deterministic_preview_repository_allowed: true
+  preview_entrypoint: apps/mobile/lib/main_preview.dart
+  production_entrypoint_may_import_preview_media_repository: false
+  network_failure_may_enable_preview_media: false
+  preview_media_disclosure_required_when_material: true
+
+first_implementation_slice:
+  includes:
+    - MOBILE_MEDIA_PRESENTATION_MODELS
+    - CASE_MEDIA_REPOSITORY_PORT
+    - DETERMINISTIC_PREVIEW_MEDIA_REPOSITORY
+    - GENERIC_EXPLORE_MEDIA_SURFACE
+    - GENERIC_CASE_HERO_MEDIA_SURFACE
+    - MEDIA_ABSENT_FALLBACK
+    - ACCESSIBILITY_SEMANTICS
+    - PRE_COMMIT_SAFE_FILTERING
+    - PREVIEW_ISOLATION_TEST
+  excludes:
+    - SERVER_MEDIA_HTTP_API
+    - POSTGRES_MEDIA_PERSISTENCE
+    - OBJECT_STORAGE_PROVIDER
+    - CDN_PROVIDER
+    - ADMIN_MEDIA_UPLOAD
+    - IMAGE_PROCESSING_WORKER
+    - VIDEO_PLAYBACK
+    - AUTOMATED_MEDIA_GENERATION
+    - AUTOMATED_MEDIA_SELECTION
+
+fitness:
+  production_main_imports_preview_media_repository: false
+  case_model_contains_provider_url: false
+  flow_runtime_contains_provider_media_type: false
+  media_failure_changes_decision_semantics: false
+  post_commit_media_exposed_pre_commit: false
+  informative_media_without_alt_text: false
