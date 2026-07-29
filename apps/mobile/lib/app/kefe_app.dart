@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../core/design/kefe_theme.dart';
 import '../core/localization/kefe_strings.dart';
 import '../features/decision/presentation/decision_flow_screen.dart';
-import '../features/explore/presentation/explore_screen.dart';
+import '../features/explore/presentation/discovery_explore_screen.dart';
 import '../features/onboarding/presentation/onboarding_gate_screen.dart';
 import '../features/progress/presentation/my_kefe_journey_screen.dart';
 
@@ -30,7 +30,7 @@ class _KefeAppState extends State<KefeApp> {
       GoRoute(
         path: '/explore',
         builder: (context, state) => Scaffold(
-          body: const ExploreScreen(embedded: true),
+          body: const DiscoveryExploreScreen(embedded: true),
           floatingActionButton: Semantics(
             label: 'My KEFE karar yolculuğunu aç',
             button: true,
