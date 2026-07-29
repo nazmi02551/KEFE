@@ -127,6 +127,7 @@ def test_evidence_link_does_not_create_or_mutate_claim_assessment() -> None:
         target_id=source.id,
         relation=EvidenceRelation.SUPPORTS,
         review_state=ReviewState.ACCEPTED,
+        provenance_ref="review:fixture:evidence-1",
         created_at=datetime.now(UTC),
     )
     repository.add_evidence_link(link)
@@ -150,6 +151,7 @@ def test_claim_and_argument_graph_preserve_distinct_relation_semantics() -> None
         relation_code="NARROWS_SCOPE_OF",
         taxonomy_version="claim-rel-v1",
         review_state=ReviewState.ACCEPTED,
+        provenance_ref="review:fixture:claim-relation-1",
         created_at=now,
     )
     repository.add_claim_relation(claim_relation)
@@ -188,6 +190,7 @@ def test_graph_self_edges_are_rejected_by_domain_model() -> None:
             relation_code="SAME_AS",
             taxonomy_version="v1",
             review_state=ReviewState.PROPOSED,
+            provenance_ref="review:fixture:self-edge",
             created_at=datetime.now(UTC),
         )
 
