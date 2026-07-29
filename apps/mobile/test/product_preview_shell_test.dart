@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,6 +8,8 @@ import 'package:kefe_mobile/core/design/product_preview_visual_mode.dart';
 import 'package:kefe_mobile/features/decision/application/decision_controller.dart';
 import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/preview_decision_repository.dart';
+import 'package:kefe_mobile/features/media_presentation/application/case_media_provider.dart';
+import 'package:kefe_mobile/features/media_presentation/data/preview_case_media_repository.dart';
 
 void main() {
   test('preview catalog contains multiple domains and cases', () async {
@@ -19,14 +23,23 @@ void main() {
     );
   });
 
+  test('production entrypoint never imports preview media repository', () {
+    final productionMain = File('lib/main.dart').readAsStringSync();
+    expect(productionMain, isNot(contains('preview_case_media_repository')));
+    expect(productionMain, isNot(contains('PreviewCaseMediaRepository')));
+  });
+
   testWidgets(
-    'Product Preview opens on rich Explore and navigates to Radar',
+    'Product Preview opens on rich Explore with media and navigates to Radar',
     (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             decisionRepositoryProvider.overrideWithValue(
               PreviewDecisionRepository(),
+            ),
+            caseMediaRepositoryProvider.overrideWithValue(
+              const PreviewCaseMediaRepository(),
             ),
             productPreviewVisualModeProvider.overrideWithValue(true),
           ],
@@ -38,6 +51,14 @@ void main() {
       expect(find.text('Bugün dünya\nneyi tartıyor?'), findsOneWidget);
       expect(find.text('Trend tartımlar'), findsOneWidget);
       expect(find.text('Radar'), findsOneWidget);
+      expect(
+        find.byKey(
+          const ValueKey(
+            'case-media-EXPLORE_CARD-22222222-2222-4222-8222-222222222222',
+          ),
+        ),
+        findsOneWidget,
+      );
 
       await tester.tap(find.text('Radar'));
       await tester.pumpAndSettle();
@@ -48,7 +69,7 @@ void main() {
   );
 
   testWidgets(
-    'Product Preview Case shows hero hierarchy, signature balance and commit-gated result',
+    'Product Preview Case shows media, hero hierarchy, signature balance and commit-gated result',
     (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -58,6 +79,9 @@ void main() {
             ),
             decisionDraftStoreProvider.overrideWithValue(
               MemoryDecisionDraftStore(),
+            ),
+            caseMediaRepositoryProvider.overrideWithValue(
+              const PreviewCaseMediaRepository(),
             ),
             productPreviewVisualModeProvider.overrideWithValue(true),
           ],
@@ -77,6 +101,14 @@ void main() {
 
       expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
       expect(find.text('KARAR YOLCULUĞU'), findsOneWidget);
+      expect(
+        find.byKey(
+          const ValueKey(
+            'case-media-CASE_HERO-22222222-2222-4222-8222-222222222222',
+          ),
+        ),
+        findsOneWidget,
+      );
       expect(find.text('Olay özeti'), findsOneWidget);
       expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
 
