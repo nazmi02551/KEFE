@@ -27,8 +27,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
     final state = ref.watch(exploreControllerProvider);
-
-    final content = SafeArea(
+    final body = SafeArea(
       bottom: false,
       child: state.loading
           ? Center(
@@ -49,8 +48,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                 ),
     );
 
-    if (widget.embedded) return content;
-    return Scaffold(body: content);
+    return widget.embedded ? body : Scaffold(body: body);
   }
 }
 
@@ -97,14 +95,24 @@ class _ExploreList extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             itemCount: categories.length,
             separatorBuilder: (_, _) => const SizedBox(width: 10),
-            itemBuilder: (context, index) => _CategoryTile(domain: categories[index]),
+            itemBuilder: (_, index) => _CategoryTile(domain: categories[index]),
           ),
         ),
         const SizedBox(height: 26),
         _SectionTitle(title: 'Trend tartımlar', trailing: strings.exploreIntro),
         const SizedBox(height: 12),
         if (remaining.isEmpty)
-          _CaseCard(item: featured)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Text(
+                'Yeni tartımlar hazırlandıkça burada görünecek.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: KefeColorTokens.textMutedDark,
+                    ),
+              ),
+            ),
+          )
         else
           for (final item in remaining) ...[
             _CaseCard(item: item),
@@ -129,7 +137,11 @@ class _ExploreHeader extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.balance_rounded, color: KefeColorTokens.goldSoft, size: 26),
+                  const Icon(
+                    Icons.balance_rounded,
+                    color: KefeColorTokens.goldSoft,
+                    size: 26,
+                  ),
                   const SizedBox(width: 9),
                   Text(
                     'KEFE',
@@ -155,7 +167,9 @@ class _ExploreHeader extends StatelessWidget {
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             shape: BoxShape.circle,
-            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
           ),
           child: const Padding(
             padding: EdgeInsets.all(11),
@@ -184,7 +198,9 @@ class _FeaturedCaseCard extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: KefeColorTokens.gold.withValues(alpha: 0.28)),
+            border: Border.all(
+              color: KefeColorTokens.gold.withValues(alpha: 0.28),
+            ),
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -198,7 +214,7 @@ class _FeaturedCaseCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    _Pill(
+                    const _Pill(
                       icon: Icons.bolt_rounded,
                       label: 'ÖNE ÇIKAN',
                       color: KefeColorTokens.goldSoft,
@@ -241,13 +257,18 @@ class _FeaturedCaseCard extends StatelessWidget {
                           child: LinearProgressIndicator(
                             value: 0.72,
                             backgroundColor: Color(0xFF263A52),
-                            valueColor: AlwaysStoppedAnimation(KefeColorTokens.gold),
+                            valueColor: AlwaysStoppedAnimation(
+                              KefeColorTokens.gold,
+                            ),
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 16),
-                    const Icon(Icons.arrow_forward_rounded, color: KefeColorTokens.goldSoft),
+                    const Icon(
+                      Icons.arrow_forward_rounded,
+                      color: KefeColorTokens.goldSoft,
+                    ),
                   ],
                 ),
               ],
@@ -272,7 +293,9 @@ class _SectionTitle extends StatelessWidget {
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
         ),
         const Spacer(),
         Flexible(
@@ -308,7 +331,11 @@ class _CategoryTile extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(_domainIcon(domain), color: KefeColorTokens.goldSoft, size: 22),
+          Icon(
+            _domainIcon(domain),
+            color: KefeColorTokens.goldSoft,
+            size: 22,
+          ),
           const SizedBox(height: 8),
           Text(
             _domainLabel(domain),
@@ -331,6 +358,7 @@ class _CaseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
+    final color = _domainColor(item.domain);
     return Card(
       child: InkWell(
         key: ValueKey('explore-case-${item.id}'),
@@ -345,10 +373,10 @@ class _CaseCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: _domainColor(item.domain).withValues(alpha: 0.13),
+                  color: color.withValues(alpha: 0.13),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(_domainIcon(item.domain), color: _domainColor(item.domain)),
+                child: Icon(_domainIcon(item.domain), color: color),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -359,8 +387,11 @@ class _CaseCard extends StatelessWidget {
                       spacing: 7,
                       runSpacing: 7,
                       children: [
-                        _Pill(label: _domainLabel(item.domain), color: _domainColor(item.domain)),
-                        _Pill(label: item.format.replaceAll('_', ' '), color: KefeColorTokens.textMutedDark),
+                        _Pill(label: _domainLabel(item.domain), color: color),
+                        _Pill(
+                          label: item.format.replaceAll('_', ' '),
+                          color: KefeColorTokens.textMutedDark,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -392,7 +423,11 @@ class _CaseCard extends StatelessWidget {
                               ),
                         ),
                         const SizedBox(width: 5),
-                        const Icon(Icons.arrow_forward_rounded, size: 16, color: KefeColorTokens.goldSoft),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 16,
+                          color: KefeColorTokens.goldSoft,
+                        ),
                       ],
                     ),
                   ],
