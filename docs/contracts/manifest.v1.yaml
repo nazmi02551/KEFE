@@ -9,6 +9,10 @@ contracts:
     path: docs/contracts/core-erd.v3.mmd
     version: '3'
     role: conceptual_core_model
+  - id: core-erd-lineage-v2
+    path: docs/contracts/core-erd.v2.mmd
+    version: '2'
+    role: retained_decision_lineage_conceptual_contract
   - id: openapi
     path: docs/contracts/openapi.v1.json
     version: 0.16.0
