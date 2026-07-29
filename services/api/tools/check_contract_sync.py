@@ -52,8 +52,8 @@ def _openapi_errors() -> list[str]:
     contract = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
     errors: list[str] = []
 
-    if contract.get("info", {}).get("version") != "0.16.0":
-        errors.append("OpenAPI checked-in version must match API v0.16.0")
+    if contract.get("info", {}).get("version") != "0.17.0":
+        errors.append("OpenAPI checked-in version must match API v0.17.0")
 
     bearer = contract.get("components", {}).get("securitySchemes", {}).get("HTTPBearer")
     if bearer != {"scheme": "bearer", "type": "http"}:
@@ -76,6 +76,9 @@ def _openapi_errors() -> list[str]:
         "RecentCaseResponse",
         "ProgressResponse",
         "ProgressEnvelopeResponse",
+        "DomainActivityResponse",
+        "RecentJourneyResponse",
+        "JourneyResponse",
         "FlowRuntimeStepResponse",
         "FlowRuntimeResponse",
         "AdminSessionResponse",
@@ -112,7 +115,10 @@ def _openapi_errors() -> list[str]:
             "methodology",
         },
         "ContextSnapshotResponse": {"case_version_id", "blocks", "sources"},
-        "ProgressEnvelopeResponse": {"account_offer", "progress", "methodology"},
+        "ProgressEnvelopeResponse": {"account_offer", "progress", "journey", "methodology"},
+        "DomainActivityResponse": {"primary_domain", "committed_weigh_count", "last_committed_at"},
+        "RecentJourneyResponse": {"case_id", "case_version_id", "title", "primary_domain", "initial_committed_at", "latest_decision_at", "decision_update_count", "reflection_completed"},
+        "JourneyResponse": {"decision_update_count", "revisited_case_count", "reflection_completion_count", "domain_activity", "recent_journeys"},
         "ProgressResponse": {
             "readiness",
             "meaningful_weigh_count",
