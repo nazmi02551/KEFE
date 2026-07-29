@@ -182,5 +182,37 @@ def test_postgres_principle_context_retest_persists_revision_delta_and_reflectio
         assert len(body["interventions"]) == 1
         assert len(body["deltas"]) == 1
         assert body["deltas"][0]["changed_count"] == 1
+
+        progress = client.get("/v1/me/progress", headers=headers)
+        assert progress.status_code == 200
+        journey = progress.json()["journey"]
+        assert journey["decision_update_count"] == 1
+        assert journey["revisited_case_count"] == 1
+        assert journey["reflection_completion_count"] == 1
+        assert journey["domain_activity"] == [
+            {
+                "primary_domain": "DAILY_LIFE",
+                "committed_weigh_count": 1,
+                "last_committed_at": progress.json()["progress"]["last_committed_at"],
+            }
+        ]
+        assert len(journey["recent_journeys"]) == 1
+        recent = journey["recent_journeys"][0]
+        assert recent["case_id"] == str(case_id)
+        assert recent["decision_update_count"] == 1
+        assert recent["reflection_completed"] is True
+        assert recent["latest_decision_at"] > recent["initial_committed_at"]
+        serialized = progress.text.lower()
+        for forbidden in (
+            "response_snapshot",
+            "private_reason",
+            "diff_snapshot",
+            "exposure_metadata",
+            "intervention_metadata",
+            "personality",
+            "ideology",
+            "psychometric",
+        ):
+            assert forbidden not in serialized
     finally:
         get_settings.cache_clear()
