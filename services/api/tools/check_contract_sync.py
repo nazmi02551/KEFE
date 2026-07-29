@@ -52,8 +52,8 @@ def _openapi_errors() -> list[str]:
     contract = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
     errors: list[str] = []
 
-    if contract.get("info", {}).get("version") != "0.15.0":
-        errors.append("OpenAPI checked-in version must match API v0.15.0")
+    if contract.get("info", {}).get("version") != "0.16.0":
+        errors.append("OpenAPI checked-in version must match API v0.16.0")
 
     bearer = contract.get("components", {}).get("securitySchemes", {}).get("HTTPBearer")
     if bearer != {"scheme": "bearer", "type": "http"}:
