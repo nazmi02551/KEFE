@@ -27,19 +27,22 @@ def main() -> None:
     problems: list[str] = []
 
     for fragment in {
-        "contract_version: 1.1.0",
+        "contract_version: 1.2.0",
         "live_content_configuration_lookup: forbidden",
         "actor_scope: same_actor_only",
         "result_payload_included: false",
         "perspective_payload_included: false",
         "private_reason_payload_included: false",
+        "reflection_payload_included: false",
         "context_fetch_alone_counts_as_exposure: false",
         "predecessors_satisfied_without_revision: READY",
         "committed_revision_exists_for_step: COMPLETED",
         "revision_capability_intrinsically_unsupported: false",
+        "current_revision_without_completion: READY",
+        "completion_for_current_revision: COMPLETED",
+        "completion_for_older_revision_only: READY",
         "FLOW_COMMIT_REQUIRED",
         "FLOW_RUNTIME_UNAVAILABLE",
-        "FLOW_REFLECTION_RUNTIME_PENDING",
         "synthetic_revision_created_on_read: false",
     }:
         if fragment not in contract:
@@ -50,19 +53,23 @@ def main() -> None:
         "session.actor_id != actor_id",
         "list_decision_revisions",
         "list_exposures",
+        "list_reflection_completions",
         "revision_step_codes",
         "exposed_context_step_codes",
+        "current_reflection_step_codes",
         '"FLOW_COMMIT_REQUIRED"',
         '"FLOW_RUNTIME_UNAVAILABLE"',
-        '"FLOW_REFLECTION_RUNTIME_PENDING"',
+        'step.primitive_code == "REFLECTION"',
     }:
         if fragment not in service:
             problems.append(f"Generic Flow runtime service missing: {fragment}")
 
-    if "FLOW_DECISION_REVISION_REQUIRED" in service:
-        problems.append(
-            "Flow runtime v2 must not hard-code later Decision as unsupported"
-        )
+    for forbidden in {
+        "FLOW_DECISION_REVISION_REQUIRED",
+        "FLOW_REFLECTION_RUNTIME_PENDING",
+    }:
+        if forbidden in service:
+            problems.append(f"Flow runtime must not retain obsolete boundary {forbidden}")
     if "ContentConfiguration" in service:
         problems.append("Flow runtime must not depend on live Content Configuration")
 
@@ -87,8 +94,8 @@ def main() -> None:
         raise SystemExit("\n".join(problems))
 
     print(
-        "Generic Flow runtime v2 contract OK: pinned Flow authority, exposure-aware "
-        "Context, revision-backed later Decisions and no result leakage verified."
+        "Generic Flow runtime v3 contract OK: pinned Flow authority, exposure-aware "
+        "Context, revision-backed Decisions, cursor-aware Reflection and no payload leakage verified."
     )
 
 
