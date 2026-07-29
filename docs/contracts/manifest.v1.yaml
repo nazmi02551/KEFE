@@ -1,4 +1,4 @@
-manifest_version: 1.31.0
+manifest_version: 1.32.0
 updated_at: '2026-07-29'
 policy:
   executable_schema_source: services/api/migrations
@@ -85,6 +85,10 @@ contracts:
     path: docs/contracts/reflection-runtime.v1.yaml
     version: 1.1.0
     role: actor_scoped_non_causal_reflection_and_lineage_cursor_completion_policy
+  - id: claim-argument-ingestion
+    path: docs/contracts/claim-argument-ingestion.v1.yaml
+    version: 1.0.0
+    role: first_class_claim_argument_and_provider_neutral_normalized_ingestion_policy
   - id: signal-impact-model
     path: docs/contracts/signal-impact-model.v1.yaml
     version: 1.0.0
@@ -155,3 +159,4 @@ architecture_decisions:
   - docs/adr/0024-flutter-flow-driven-consumer-rendering.md
   - docs/adr/0025-decision-revision-exposure-intervention-delta.md
   - docs/adr/0026-generic-reflection-runtime.md
+  - docs/adr/0027-first-class-claim-argument-normalized-ingestion.md
