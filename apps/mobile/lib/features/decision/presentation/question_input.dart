@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/design/kefe_theme.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../domain/decision_models.dart';
 
@@ -20,30 +21,85 @@ class QuestionInputCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
+    final isConfidence = question.responseType == 'CONFIDENCE';
     return Card(
       key: ValueKey('question-${question.id}'),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Text(
-                    question.prompt,
-                    style: Theme.of(context).textTheme.titleLarge,
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: (isConfidence
+                            ? KefeColorTokens.gold
+                            : KefeColorTokens.rules)
+                        .withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                  child: Icon(
+                    isConfidence
+                        ? Icons.speed_rounded
+                        : Icons.balance_outlined,
+                    color: isConfidence
+                        ? KefeColorTokens.goldSoft
+                        : KefeColorTokens.rules,
+                    size: 20,
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  question.required ? strings.requiredQuestion : strings.optionalQuestion,
-                  style: Theme.of(context).textTheme.labelSmall,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isConfidence ? 'EMİNLİK' : 'KARAR',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: isConfidence
+                                  ? KefeColorTokens.goldSoft
+                                  : KefeColorTokens.rules,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.8,
+                            ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        question.prompt,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              height: 1.25,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outlineVariant
+                        .withValues(alpha: 0.24),
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                  child: Text(
+                    question.required
+                        ? strings.requiredQuestion
+                        : strings.optionalQuestion,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: KefeColorTokens.textMutedDark,
+                        ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
             _QuestionInput(
               question: question,
               value: value,
@@ -108,23 +164,72 @@ class _SingleChoiceInput extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final option in question.options)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Semantics(
-              selected: value == option,
-              button: true,
-              child: ChoiceChip(
-                key: ValueKey('option-$option'),
-                label: SizedBox(
-                  width: double.infinity,
-                  child: Text(option, textAlign: TextAlign.center),
+        for (final option in question.options) ...[
+          Semantics(
+            selected: value == option,
+            button: true,
+            child: InkWell(
+              key: ValueKey('option-$option'),
+              onTap: enabled ? () => onChanged(option) : null,
+              borderRadius: BorderRadius.circular(14),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 160),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                decoration: BoxDecoration(
+                  color: value == option
+                      ? KefeColorTokens.gold.withValues(alpha: 0.10)
+                      : KefeColorTokens.surfaceElevatedDark.withValues(alpha: 0.48),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: value == option
+                        ? KefeColorTokens.gold.withValues(alpha: 0.58)
+                        : Theme.of(context).colorScheme.outlineVariant,
+                  ),
                 ),
-                selected: value == option,
-                onSelected: enabled ? (_) => onChanged(option) : null,
+                child: Row(
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 160),
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: value == option
+                            ? KefeColorTokens.gold
+                            : Colors.transparent,
+                        border: Border.all(
+                          color: value == option
+                              ? KefeColorTokens.gold
+                              : KefeColorTokens.textMutedDark,
+                          width: 1.6,
+                        ),
+                      ),
+                      child: value == option
+                          ? const Icon(
+                              Icons.check_rounded,
+                              size: 15,
+                              color: Color(0xFF171106),
+                            )
+                          : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        option,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: value == option
+                                  ? FontWeight.w800
+                                  : FontWeight.w600,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
+          const SizedBox(height: 10),
+        ],
       ],
     );
   }
@@ -146,38 +251,80 @@ class _ConfidenceInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final values = _values();
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final item in values)
-          Semantics(
-            selected: value == item,
-            button: true,
-            child: ChoiceChip(
-              key: ValueKey('confidence-${question.id}-${_label(item)}'),
-              label: Text(_label(item)),
-              selected: value == item,
-              onSelected: enabled ? (_) => onChanged(_normalized(item)) : null,
+        Row(
+          children: [
+            Text(
+              _label(question.minimum),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: KefeColorTokens.textMutedDark,
+                  ),
             ),
-          ),
+            const Spacer(),
+            if (value != null)
+              Text(
+                '${_label((value as num).toDouble())}/10',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: KefeColorTokens.goldSoft,
+                      fontWeight: FontWeight.w900,
+                    ),
+              ),
+            const Spacer(),
+            Text(
+              _label(question.maximum),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: KefeColorTokens.textMutedDark,
+                  ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 9),
+        Wrap(
+          spacing: 6,
+          runSpacing: 8,
+          alignment: WrapAlignment.center,
+          children: [
+            for (final item in values)
+              Semantics(
+                selected: _sameValue(value, item),
+                button: true,
+                child: ChoiceChip(
+                  key: ValueKey(
+                    'confidence-${question.id}-${_label(item)}',
+                  ),
+                  label: Text(_label(item)),
+                  selected: _sameValue(value, item),
+                  onSelected: enabled ? (_) => onChanged(_normalized(item)) : null,
+                ),
+              ),
+          ],
+        ),
       ],
     );
   }
 
+  bool _sameValue(Object? current, double item) =>
+      current is num && current.toDouble() == item;
+
   List<double> _values() {
     final values = <double>[];
     final step = question.step <= 0 ? 1 : question.step;
-    for (var current = question.minimum; current <= question.maximum + 1e-9; current += step) {
+    for (var current = question.minimum;
+        current <= question.maximum + 1e-9;
+        current += step) {
       values.add(current);
       if (values.length >= 20) break;
     }
     return values;
   }
 
-  Object _normalized(double value) => value == value.roundToDouble() ? value.toInt() : value;
+  Object _normalized(double value) =>
+      value == value.roundToDouble() ? value.toInt() : value;
 
-  String _label(double value) => value == value.roundToDouble() ? '${value.toInt()}' : '$value';
+  String _label(double value) =>
+      value == value.roundToDouble() ? '${value.toInt()}' : '$value';
 }
 
 class _UnsupportedQuestion extends StatelessWidget {

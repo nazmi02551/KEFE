@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/design/kefe_theme.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../progress/presentation/progress_section.dart';
 import '../domain/decision_models.dart';
@@ -21,9 +22,7 @@ class PerspectiveSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
-    if (state == PerspectiveUiState.idle) {
-      return const SizedBox.shrink();
-    }
+    if (state == PerspectiveUiState.idle) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -31,13 +30,48 @@ class PerspectiveSection extends StatelessWidget {
         Card(
           key: const ValueKey('perspective-section'),
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  strings.perspectiveTitle,
-                  style: Theme.of(context).textTheme.titleLarge,
+                Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF8E7CFF).withValues(alpha: 0.11),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.forum_outlined,
+                        color: Color(0xFFAA9CFF),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'KARŞI GÖRÜŞLER',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: const Color(0xFFAA9CFF),
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.8,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            strings.perspectiveTitle,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
                 if (reasonPendingModeration) ...[
                   const SizedBox(height: 12),
@@ -49,7 +83,7 @@ class PerspectiveSection extends StatelessWidget {
                     ),
                   ),
                 ],
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 switch (state) {
                   PerspectiveUiState.loading => _LoadingState(strings: strings),
                   PerspectiveUiState.errorRetryable => _RetryState(
@@ -77,54 +111,47 @@ class PerspectiveSection extends StatelessWidget {
 
 class _LoadingState extends StatelessWidget {
   const _LoadingState({required this.strings});
-
   final KefeStrings strings;
 
   @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: strings.perspectiveLoading,
-      liveRegion: true,
-      child: Row(
-        children: [
-          const SizedBox.square(
-            dimension: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-          const SizedBox(width: 12),
-          Expanded(child: Text(strings.perspectiveLoading)),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Semantics(
+        label: strings.perspectiveLoading,
+        liveRegion: true,
+        child: Row(
+          children: [
+            const SizedBox.square(
+              dimension: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Text(strings.perspectiveLoading)),
+          ],
+        ),
+      );
 }
 
 class _RetryState extends StatelessWidget {
   const _RetryState({required this.strings, required this.onRetry});
-
   final KefeStrings strings;
   final VoidCallback onRetry;
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(strings.perspectiveUnavailable),
-        const SizedBox(height: 12),
-        OutlinedButton(
-          key: const ValueKey('perspective-retry'),
-          onPressed: onRetry,
-          child: Text(strings.perspectiveRetry),
-        ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(strings.perspectiveUnavailable),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            key: const ValueKey('perspective-retry'),
+            onPressed: onRetry,
+            child: Text(strings.perspectiveRetry),
+          ),
+        ],
+      );
 }
 
 class _LoadedState extends StatelessWidget {
   const _LoadedState({required this.state, required this.result});
-
   final PerspectiveUiState state;
   final PerspectiveResult? result;
 
@@ -132,24 +159,28 @@ class _LoadedState extends StatelessWidget {
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
     final snapshot = result;
-    if (snapshot == null) {
-      return Text(strings.perspectiveUnavailable);
-    }
+    if (snapshot == null) return Text(strings.perspectiveUnavailable);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (state == PerspectiveUiState.degradedCurated) ...[
-          Text(
-            strings.perspectiveCuratedNote,
+          KeyedSubtree(
             key: const ValueKey('perspective-curated-note'),
+            child: _MethodNote(
+              icon: Icons.verified_outlined,
+              text: strings.perspectiveCuratedNote,
+            ),
           ),
           const SizedBox(height: 12),
         ],
         if (state == PerspectiveUiState.clusterPending) ...[
-          Text(
-            strings.perspectiveClusterPending,
+          KeyedSubtree(
             key: const ValueKey('perspective-cluster-pending'),
+            child: _MethodNote(
+              icon: Icons.hourglass_top_rounded,
+              text: strings.perspectiveClusterPending,
+            ),
           ),
           const SizedBox(height: 12),
         ],
@@ -160,63 +191,154 @@ class _LoadedState extends StatelessWidget {
             _PerspectiveCardView(card: card),
             const SizedBox(height: 12),
           ],
-        ExpansionTile(
-          key: const ValueKey('perspective-methodology'),
-          tilePadding: EdgeInsets.zero,
-          childrenPadding: const EdgeInsets.only(bottom: 8),
-          title: Text(strings.perspectiveMethodology),
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(snapshot.methodology.provenanceNote),
+        Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            key: const ValueKey('perspective-methodology'),
+            tilePadding: const EdgeInsets.symmetric(horizontal: 2),
+            childrenPadding: const EdgeInsets.only(bottom: 8),
+            title: Text(
+              strings.perspectiveMethodology,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
             ),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                '${snapshot.methodology.sampleKind} · '
-                'n=${snapshot.methodology.sampleSize}',
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  snapshot.methodology.provenanceNote,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: KefeColorTokens.textMutedDark,
+                        height: 1.4,
+                      ),
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '${snapshot.methodology.sampleKind} · n=${snapshot.methodology.sampleSize}',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: KefeColorTokens.goldSoft,
+                      ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 }
 
+class _MethodNote extends StatelessWidget {
+  const _MethodNote({required this.icon, required this.text});
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.all(11),
+        decoration: BoxDecoration(
+          color: KefeColorTokens.rules.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: KefeColorTokens.rules.withValues(alpha: 0.18),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 17, color: KefeColorTokens.rules),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                text,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: KefeColorTokens.textMutedDark,
+                    ),
+              ),
+            ),
+          ],
+        ),
+      );
+}
+
 class _PerspectiveCardView extends StatelessWidget {
   const _PerspectiveCardView({required this.card});
-
   final PerspectiveCard card;
 
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
+    final visual = _slotVisual(card.slot);
     return Container(
       key: ValueKey('perspective-card-${card.slot.name}'),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-        borderRadius: BorderRadius.circular(12),
+        color: visual.color.withValues(alpha: 0.055),
+        border: Border.all(color: visual.color.withValues(alpha: 0.26)),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            strings.perspectiveSlotLabel(card.slot),
-            style: Theme.of(context).textTheme.labelLarge,
+          Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: visual.color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: Icon(visual.icon, size: 16, color: visual.color),
+              ),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Text(
+                  strings.perspectiveSlotLabel(card.slot),
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: visual.color,
+                        fontWeight: FontWeight.w900,
+                      ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(card.body),
-          const SizedBox(height: 10),
+          const SizedBox(height: 11),
           Text(
-            '${strings.perspectiveSourceLabel(card.sourceKind)} · '
-            '${card.provenanceLabel}',
-            style: Theme.of(context).textTheme.bodySmall,
+            card.body,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.45),
+          ),
+          const SizedBox(height: 11),
+          Text(
+            '${strings.perspectiveSourceLabel(card.sourceKind)} · ${card.provenanceLabel}',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: KefeColorTokens.textMutedDark,
+                ),
           ),
         ],
       ),
     );
   }
 }
+
+({Color color, IconData icon}) _slotVisual(PerspectiveSlot slot) => switch (slot) {
+      PerspectiveSlot.near => (
+          color: KefeColorTokens.success,
+          icon: Icons.thumb_up_alt_outlined,
+        ),
+      PerspectiveSlot.opposing => (
+          color: KefeColorTokens.empathy,
+          icon: Icons.swap_horiz_rounded,
+        ),
+      PerspectiveSlot.bridge => (
+          color: const Color(0xFFAA9CFF),
+          icon: Icons.hub_outlined,
+        ),
+      PerspectiveSlot.alternativeContext => (
+          color: KefeColorTokens.rules,
+          icon: Icons.change_circle_outlined,
+        ),
+    };
