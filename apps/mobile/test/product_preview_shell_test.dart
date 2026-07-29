@@ -198,6 +198,11 @@ void main() {
 
       expect(find.byKey(const ValueKey('my-kefe-journey')), findsOneWidget);
       expect(
+        find.byKey(const ValueKey('preview-build-identity')),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Product Preview v8'), findsOneWidget);
+      expect(
         find.byKey(const ValueKey('my-kefe-preview-notice')),
         findsOneWidget,
       );

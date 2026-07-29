@@ -10,11 +10,12 @@ production_route:
   data_source: HttpProgressRepository
   authentication_scope: current_actor
 entry_points:
-  standalone_explore_header:
+  production_explore_action:
     enabled: true
+    owner: KefeApp_/explore_route
     target: /my-kefe
     accessibility_label_required: true
-  embedded_preview_explore_header:
+  product_preview_extra_action:
     enabled: false
     reason: preview_shell_is_navigation_authority
 navigation:

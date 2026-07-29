@@ -7,6 +7,7 @@ import '../core/localization/kefe_strings.dart';
 import '../features/decision/presentation/decision_flow_screen.dart';
 import '../features/explore/presentation/explore_screen.dart';
 import '../features/onboarding/presentation/onboarding_gate_screen.dart';
+import '../features/progress/presentation/my_kefe_journey_screen.dart';
 
 class KefeApp extends StatefulWidget {
   const KefeApp({this.initialLocation = '/welcome', super.key});
@@ -28,7 +29,37 @@ class _KefeAppState extends State<KefeApp> {
       ),
       GoRoute(
         path: '/explore',
-        builder: (context, state) => const ExploreScreen(),
+        builder: (context, state) => Scaffold(
+          body: const ExploreScreen(embedded: true),
+          floatingActionButton: Semantics(
+            label: 'My KEFE karar yolculuğunu aç',
+            button: true,
+            child: FloatingActionButton.small(
+              key: const ValueKey('open-my-kefe'),
+              tooltip: 'My KEFE',
+              onPressed: () => context.push('/my-kefe'),
+              child: const Icon(Icons.timeline_rounded),
+            ),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/my-kefe',
+        builder: (context, state) => Scaffold(
+          appBar: AppBar(
+            leading: BackButton(
+              onPressed: () {
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go('/explore');
+                }
+              },
+            ),
+            title: const Text('My KEFE'),
+          ),
+          body: const MyKefeJourneyScreen(embedded: true),
+        ),
       ),
       GoRoute(
         path: '/case/:caseId',
