@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kefe_mobile/app/kefe_app.dart';
 import 'package:kefe_mobile/features/decision/application/decision_controller.dart';
+import 'package:kefe_mobile/features/decision/application/reflection_completion_provider.dart';
 import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/decision_repository.dart';
+import 'package:kefe_mobile/features/decision/data/reflection_completion_store.dart';
 import 'package:kefe_mobile/features/decision/domain/decision_models.dart';
 import 'package:kefe_mobile/features/decision/domain/reflection_models.dart';
 
@@ -245,12 +247,14 @@ void main() {
       tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
       addTearDown(tester.platformDispatcher.clearLocaleTestValue);
       final repository = RetestFlowRepository();
+      final completionStore = MemoryReflectionCompletionStore();
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             decisionRepositoryProvider.overrideWithValue(repository),
             decisionDraftStoreProvider.overrideWithValue(MemoryDecisionDraftStore()),
+            reflectionCompletionStoreProvider.overrideWithValue(completionStore),
           ],
           child: const KefeApp(initialLocation: '/case/$retestCaseId'),
         ),
@@ -290,6 +294,7 @@ void main() {
       expect(repository.reflectionCompleteCalls, 1);
       expect(repository.reflectionCompleted, isTrue);
       expect(find.byKey(const ValueKey('reflection-completed')), findsOneWidget);
+      expect(completionStore.completions, isEmpty);
       expect(repository.revealCalls, 0);
     },
   );
