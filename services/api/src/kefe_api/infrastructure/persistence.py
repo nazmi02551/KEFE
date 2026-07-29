@@ -11,6 +11,7 @@ from kefe_api.infrastructure.postgres_flow_pinned_content_authoring import (
     PostgresFlowPinnedContentAuthoringRepository,
 )
 from kefe_api.infrastructure.postgres_identity import PostgresIdentityRepository
+from kefe_api.infrastructure.postgres_knowledge import PostgresKnowledgeRepository
 from kefe_api.infrastructure.postgres_progress import PostgresProgressRepository
 from kefe_api.infrastructure.postgres_reflection_decision import (
     PostgresReflectionDecisionRepository,
@@ -31,6 +32,8 @@ from kefe_api.modules.decision.lineage_in_memory import InMemoryLineageDecisionR
 from kefe_api.modules.decision.ports import DecisionRepository
 from kefe_api.modules.identity.in_memory import InMemoryIdentityRepository
 from kefe_api.modules.identity.ports import IdentityRepository
+from kefe_api.modules.knowledge.in_memory import InMemoryKnowledgeRepository
+from kefe_api.modules.knowledge.ports import KnowledgeRepository
 from kefe_api.modules.progress.in_memory import InMemoryProgressRepository
 from kefe_api.modules.progress.ports import ProgressRepository
 
@@ -103,6 +106,16 @@ def build_content_configuration_repository(
     repository = PostgresContentConfigurationRepository(build_engine(settings.database_url))
     repository.seed_if_empty(seed)
     return repository
+
+
+def build_knowledge_repository(settings: Settings) -> KnowledgeRepository:
+    if settings.persistence_backend == "memory":
+        return InMemoryKnowledgeRepository()
+
+    if not settings.database_url:
+        raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
+
+    return PostgresKnowledgeRepository(build_engine(settings.database_url))
 
 
 def build_admin_session_store(settings: Settings) -> AdminSessionStore:

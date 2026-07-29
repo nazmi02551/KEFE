@@ -1,0 +1,73 @@
+from __future__ import annotations
+
+from typing import Protocol
+from uuid import UUID
+
+from kefe_api.modules.knowledge.models import (
+    Argument,
+    ArgumentRelation,
+    Claim,
+    ClaimAssertion,
+    ClaimAssessment,
+    ClaimRelation,
+    EvidenceLink,
+    NormalizedArtifact,
+    SourceArtifact,
+)
+
+
+class SourceAdapter(Protocol):
+    """Provider-specific edge. Provider SDK types must not cross this port."""
+
+    @property
+    def adapter_code(self) -> str: ...
+
+    def capture(self, external_locator: str) -> SourceArtifact: ...
+
+    def normalize(self, artifact: SourceArtifact) -> tuple[NormalizedArtifact, ...]: ...
+
+
+class KnowledgeRepository(Protocol):
+    def add_source_artifact(self, artifact: SourceArtifact) -> SourceArtifact: ...
+
+    def get_source_artifact(self, artifact_id: UUID) -> SourceArtifact | None: ...
+
+    def find_source_artifact(
+        self,
+        *,
+        adapter_code: str,
+        external_locator: str,
+        content_hash: str,
+    ) -> SourceArtifact | None: ...
+
+    def add_normalized_artifact(self, artifact: NormalizedArtifact) -> None: ...
+
+    def get_normalized_artifact(self, artifact_id: UUID) -> NormalizedArtifact | None: ...
+
+    def add_claim(self, claim: Claim) -> None: ...
+
+    def get_claim(self, claim_id: UUID) -> Claim | None: ...
+
+    def add_claim_assessment(self, assessment: ClaimAssessment) -> None: ...
+
+    def list_claim_assessments(self, claim_id: UUID) -> tuple[ClaimAssessment, ...]: ...
+
+    def add_claim_assertion(self, assertion: ClaimAssertion) -> None: ...
+
+    def list_claim_assertions(self, claim_id: UUID) -> tuple[ClaimAssertion, ...]: ...
+
+    def add_evidence_link(self, link: EvidenceLink) -> None: ...
+
+    def list_evidence_links(self, claim_id: UUID) -> tuple[EvidenceLink, ...]: ...
+
+    def add_claim_relation(self, relation: ClaimRelation) -> None: ...
+
+    def list_claim_relations(self, claim_id: UUID) -> tuple[ClaimRelation, ...]: ...
+
+    def add_argument(self, argument: Argument) -> None: ...
+
+    def get_argument(self, argument_id: UUID) -> Argument | None: ...
+
+    def add_argument_relation(self, relation: ArgumentRelation) -> None: ...
+
+    def list_argument_relations(self, argument_id: UUID) -> tuple[ArgumentRelation, ...]: ...
