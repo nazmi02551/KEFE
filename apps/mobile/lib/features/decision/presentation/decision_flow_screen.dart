@@ -6,7 +6,10 @@ import '../../../core/localization/kefe_strings.dart';
 import '../../context/presentation/context_section.dart';
 import '../../onboarding/application/onboarding_controller.dart';
 import '../application/decision_controller.dart';
+import '../application/reflection_completion_provider.dart';
 import '../data/decision_repository.dart';
+import '../data/reflection_completion_store.dart';
+import '../domain/decision_draft.dart';
 import '../domain/decision_models.dart';
 import '../domain/reflection_models.dart';
 import 'perspective_section.dart';
@@ -376,7 +379,6 @@ class _ReflectionStep extends ConsumerStatefulWidget {
 
 class _ReflectionStepState extends ConsumerState<_ReflectionStep> {
   ReflectionReadModel? _model;
-  FlowStepRuntimeState? _runtimeState;
   bool _loading = false;
   bool _completing = false;
   String? _errorCode;
@@ -395,10 +397,12 @@ class _ReflectionStepState extends ConsumerState<_ReflectionStep> {
         oldWidget.step.code != widget.step.code ||
         oldWidget.step.state != widget.step.state) {
       _model = null;
-      _runtimeState = null;
       _scheduleLoad();
     }
   }
+
+  ReflectionCompletionStore get _completionStore =>
+      ref.read(reflectionCompletionStoreProvider);
 
   void _scheduleLoad() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -417,6 +421,7 @@ class _ReflectionStepState extends ConsumerState<_ReflectionStep> {
         sessionId: widget.sessionId,
         stepCode: widget.step.code,
       );
+      await _reconcilePendingCompletion(model);
       if (!mounted) return;
       setState(() {
         _model = model;
@@ -437,20 +442,57 @@ class _ReflectionStepState extends ConsumerState<_ReflectionStep> {
     }
   }
 
+  Future<void> _reconcilePendingCompletion(ReflectionReadModel model) async {
+    final pending = await _completionStore.read(
+      sessionId: widget.sessionId,
+      stepCode: widget.step.code,
+    );
+    if (pending == null) return;
+    if (model.completed ||
+        pending.caseVersionId != widget.caseVersionId ||
+        pending.latestRevisionId != model.latestRevisionId) {
+      await _completionStore.clear(
+        sessionId: widget.sessionId,
+        stepCode: widget.step.code,
+      );
+    }
+  }
+
   Future<void> _complete() async {
     final model = _model;
-    if (model == null || _isCompleted || _completing) return;
+    if (model == null || model.completed || _completing) return;
     setState(() {
       _completing = true;
       _errorCode = null;
     });
     try {
+      final pending = await _completionStore.read(
+        sessionId: widget.sessionId,
+        stepCode: widget.step.code,
+      );
+      final reusablePending = pending != null &&
+          pending.caseVersionId == widget.caseVersionId &&
+          pending.latestRevisionId == model.latestRevisionId;
+      final idempotencyKey = reusablePending
+          ? pending.idempotencyKey
+          : 'mobile-reflection-${widget.sessionId}-${widget.step.code}-${model.latestRevisionId}-v1';
+      if (!reusablePending) {
+        await _completionStore.write(
+          PendingReflectionCompletion(
+            sessionId: widget.sessionId,
+            caseVersionId: widget.caseVersionId,
+            stepCode: widget.step.code,
+            latestRevisionId: model.latestRevisionId,
+            idempotencyKey: idempotencyKey,
+          ),
+        );
+      }
+
       final repository = ref.read(decisionRepositoryProvider);
       await repository.reflection.completeReflection(
         sessionId: widget.sessionId,
         stepCode: widget.step.code,
-        idempotencyKey:
-            'mobile-reflection-${widget.sessionId}-${widget.step.code}-${model.latestRevisionId}-v1',
+        idempotencyKey: idempotencyKey,
       );
       final refreshed = await repository.fetchFlowRuntime(widget.sessionId);
       if (!refreshed.matches(
@@ -459,23 +501,23 @@ class _ReflectionStepState extends ConsumerState<_ReflectionStep> {
       )) {
         throw const ClientTransportFailure(code: 'FLOW_RUNTIME_VERSION_MISMATCH');
       }
-      FlowRuntimeStep? refreshedStep;
-      for (final item in refreshed.steps) {
-        if (item.code == widget.step.code && item.primitiveCode == 'REFLECTION') {
-          refreshedStep = item;
-          break;
-        }
-      }
       final refreshedModel = await repository.reflection.fetchReflection(
         sessionId: widget.sessionId,
         stepCode: widget.step.code,
       );
-      if (!mounted) return;
-      setState(() {
-        _model = refreshedModel;
-        _runtimeState = refreshedStep?.state;
-        _completing = false;
-      });
+      if (refreshedModel.completed) {
+        await _completionStore.clear(
+          sessionId: widget.sessionId,
+          stepCode: widget.step.code,
+        );
+      }
+      if (mounted) {
+        setState(() {
+          _model = refreshedModel;
+          _completing = false;
+        });
+      }
+      await _adoptRefreshedFlow(refreshed);
     } on ClientTransportFailure catch (error) {
       if (!mounted) return;
       setState(() {
@@ -491,15 +533,46 @@ class _ReflectionStepState extends ConsumerState<_ReflectionStep> {
     }
   }
 
-  bool get _isCompleted =>
-      _model?.completed == true ||
-      _runtimeState == FlowStepRuntimeState.completed ||
-      widget.step.state == FlowStepRuntimeState.completed;
+  Future<void> _adoptRefreshedFlow(FlowRuntimeSnapshot refreshed) async {
+    final decisionState = ref.read(decisionControllerProvider);
+    final caseData = decisionState.caseData;
+    if (caseData == null ||
+        decisionState.sessionId != widget.sessionId ||
+        caseData.versionId != widget.caseVersionId) {
+      return;
+    }
+
+    FlowRuntimeStep? nextDecision;
+    for (final item in refreshed.steps) {
+      if (item.primitiveCode == 'DECISION' &&
+          item.state == FlowStepRuntimeState.ready) {
+        nextDecision = item;
+        break;
+      }
+    }
+
+    final draftStore = ref.read(decisionDraftStoreProvider);
+    await draftStore.write(
+      DecisionDraft(
+        caseData: caseData,
+        sessionId: widget.sessionId,
+        flowRuntime: refreshed,
+        flowStepCode: nextDecision?.code,
+        updatedAt: DateTime.now().toUtc(),
+      ),
+    );
+    await ref.read(decisionControllerProvider.notifier).load(caseData.id);
+    if (nextDecision == null) {
+      await draftStore.clearForCase(caseData.id);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
     final model = _model;
+    final completed = model?.completed == true ||
+        widget.step.state == FlowStepRuntimeState.completed;
     return Card(
       key: ValueKey('reflection-step-${widget.step.code}'),
       child: Padding(
@@ -549,7 +622,7 @@ class _ReflectionStepState extends ConsumerState<_ReflectionStep> {
                 ),
               ],
               const SizedBox(height: 16),
-              if (_isCompleted)
+              if (completed)
                 Text(
                   strings.reflectionCompleted,
                   key: const ValueKey('reflection-completed'),
