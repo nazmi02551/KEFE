@@ -16,7 +16,7 @@ extension ProgressStrings on KefeStrings {
   String get progressDomains => _isTurkish ? 'Alan' : 'Domains';
   String get progressRecent => _isTurkish ? 'Son tamamlananlar' : 'Recently completed';
   String get progressMethodology => _isTurkish
-      ? 'Bu görünüm yalnızca kendi tamamlanmış tartımlarına dayanır. Kişilik veya ideoloji çıkarımı yapılmaz.'
+      ? 'Bu görünüm yalnızca kendi tamamlanmış tartımlarına dayanır; kişilik veya ideoloji çıkarımı yapılmaz.'
       : 'This view uses only your completed weighs. It does not infer personality or ideology.';
 
   String progressReadiness(String readiness) {
