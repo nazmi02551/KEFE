@@ -1,4 +1,4 @@
-name: Reconcile M2 and Reflection Contract Authority
+name: Reconcile M2 Contract Checker
 
 on:
   pull_request:
@@ -17,82 +17,22 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
-      - name: Reconcile contract registry checker and strict CI
+      - name: Align contract checker with API 0.15.0
         run: |
           python - <<'PY'
           from pathlib import Path
-
-          manifest = Path('docs/contracts/manifest.v1.yaml')
-          text = manifest.read_text(encoding='utf-8')
-          text = text.replace('manifest_version: 1.28.0', 'manifest_version: 1.30.0')
-          text = text.replace(
-              "  - id: openapi\n    path: docs/contracts/openapi.v1.json\n    version: 0.14.0",
-              "  - id: openapi\n    path: docs/contracts/openapi.v1.json\n    version: 0.15.0",
-          )
-          text = text.replace(
-              "  - id: mobile-flow-runtime-ui\n    path: docs/contracts/mobile-flow-runtime-ui.v1.yaml\n    version: 1.0.0",
-              "  - id: mobile-flow-runtime-ui\n    path: docs/contracts/mobile-flow-runtime-ui.v1.yaml\n    version: 1.1.0",
-          )
-          decision = (
-              "  - id: decision-revision-lineage\n"
-              "    path: docs/contracts/decision-revision-lineage.v1.yaml\n"
-              "    version: 1.1.0\n"
-              "    role: immutable_decision_revision_exposure_intervention_and_generic_delta_policy\n"
-          )
-          reflection = (
-              "  - id: reflection-runtime\n"
-              "    path: docs/contracts/reflection-runtime.v1.yaml\n"
-              "    version: 1.0.0\n"
-              "    role: actor_scoped_non_causal_reflection_and_lineage_cursor_completion_policy\n"
-          )
-          if '  - id: reflection-runtime\n' not in text:
-              text = text.replace(decision, decision + reflection)
-          manifest.write_text(text, encoding='utf-8')
-
           checker = Path('services/api/tools/check_contract_sync.py')
-          checker_text = checker.read_text(encoding='utf-8')
-          checker_text = checker_text.replace('0.14.0', '0.15.0')
-          checker.write_text(checker_text, encoding='utf-8')
-
-          ci = Path('.github/workflows/api-ci.yml')
-          ci_text = ci.read_text(encoding='utf-8')
-          ci_text = ci_text.replace('permissions:\n  contents: write', 'permissions:\n  contents: read')
-          start = ci_text.find('  sync-draft-contracts:\n')
-          end = ci_text.find('  lint-unit:\n')
-          if start != -1 and end != -1 and start < end:
-              ci_text = ci_text[:start] + ci_text[end:]
-          ci_text = ci_text.replace(
-              '      - name: OpenAPI drift diagnostic while draft\n'
-              '        continue-on-error: true\n'
-              '        working-directory: services/api\n'
-              '        run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json',
-              '      - name: OpenAPI drift gate\n'
-              '        working-directory: services/api\n'
-              '        run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json',
-          )
-          decision_gate = (
-              '      - name: Decision revision lineage contract\n'
-              '        working-directory: services/api\n'
-              '        run: python tools/check_decision_revision_lineage_contract.py\n'
-          )
-          reflection_gate = (
-              '      - name: Reflection runtime contract\n'
-              '        working-directory: services/api\n'
-              '        run: python tools/check_reflection_runtime_contract.py\n'
-          )
-          if 'Reflection runtime contract' not in ci_text:
-              ci_text = ci_text.replace(decision_gate, decision_gate + reflection_gate)
-          ci.write_text(ci_text, encoding='utf-8')
+          text = checker.read_text(encoding='utf-8')
+          text = text.replace('0.14.0', '0.15.0')
+          checker.write_text(text, encoding='utf-8')
           PY
-      - name: Remove obsolete one-shot workflows
-        run: |
-          rm -f .github/workflows/dev-sync-decision-revision.yml
-          rm -f .github/workflows/finalize-pr60-contracts.yml
-          rm -f .github/workflows/reconcile-m2-reflection-authority.yml
-      - name: Commit reconciled authority
+      - name: Commit checker reconciliation
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A
-          git commit -m 'Reconcile M2 contract authority before Reflection runtime'
+          git add services/api/tools/check_contract_sync.py
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'Align contract checker with API 0.15.0'
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
