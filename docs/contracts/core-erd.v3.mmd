@@ -1,0 +1,74 @@
+erDiagram
+    ACTOR ||--o| ACCOUNT_REF : "may link"
+    ACTOR ||--o{ WEIGH_SESSION : starts
+    ACTOR ||--o{ REASON : writes
+    ACTOR ||--o{ REASON_REACTION : reacts
+    ACTOR ||--o{ DECISION_REVISION : owns
+
+    DOMAIN ||--o{ CASE_DOMAIN : classifies
+    TOPIC ||--o{ CASE_TOPIC : classifies
+    DOMAIN ||--o{ TOPIC : contains
+    BASE_FORMAT ||--o{ CASE : shapes
+    CASE ||--o{ CASE_MODIFIER : uses
+    MODIFIER ||--o{ CASE_MODIFIER : modifies
+
+    EVENT ||--o{ CASE : source_for
+    SCENARIO ||--o{ CASE : source_for
+    CASE ||--o{ CASE_VERSION : versions
+    CASE_VERSION ||--o{ ISSUE : contains
+    ISSUE ||--o{ QUESTION : contains
+    QUESTION ||--o{ QUESTION_VERSION : versions
+    QUESTION_VERSION ||--o{ QUESTION_OPTION : offers
+
+    CASE_VERSION ||--o{ WEIGH_SESSION : shown_in
+    WEIGH_SESSION ||--o{ RESPONSE : answers_initial_draft
+    QUESTION_VERSION ||--o{ RESPONSE : answered_by
+    WEIGH_SESSION ||--o{ DECISION_REVISION : contains
+    WEIGH_SESSION ||--o{ EXPOSURE : records
+    WEIGH_SESSION ||--o{ INTERVENTION : analyzes
+
+    EXPOSURE ||--o| INTERVENTION : may_define
+    DECISION_REVISION ||--o{ DECISION_DELTA : from
+    DECISION_REVISION ||--o{ DECISION_DELTA : to
+    INTERVENTION }o--o{ DECISION_DELTA : contextualizes
+
+    SOURCE_ARTIFACT ||--o{ NORMALIZED_ARTIFACT : normalizes_to
+    NORMALIZED_ARTIFACT ||--o{ NORMALIZED_ARTIFACT : parent_or_reply_lineage
+
+    CLAIM ||--o{ CLAIM_ASSESSMENT : evaluated_by
+    CLAIM ||--o{ CLAIM_ASSERTION : asserted_as
+    SOURCE_ARTIFACT ||--o{ CLAIM_ASSERTION : may_carry
+    NORMALIZED_ARTIFACT ||--o{ CLAIM_ASSERTION : may_carry
+
+    CLAIM ||--o{ EVIDENCE_LINK : evaluated_against
+    SOURCE_ARTIFACT ||--o{ EVIDENCE_LINK : evidence_target
+    NORMALIZED_ARTIFACT ||--o{ EVIDENCE_LINK : evidence_target
+
+    CLAIM ||--o{ CLAIM_RELATION : source_claim
+    CLAIM ||--o{ CLAIM_RELATION : target_claim
+
+    SOURCE_ARTIFACT ||--o{ ARGUMENT : may_source
+    NORMALIZED_ARTIFACT ||--o{ ARGUMENT : may_source
+    ARGUMENT ||--o{ ARGUMENT_RELATION : originates
+    CLAIM ||--o{ ARGUMENT_RELATION : claim_target
+    QUESTION ||--o{ ARGUMENT_RELATION : question_target
+    ARGUMENT ||--o{ ARGUMENT_RELATION : argument_target
+
+    CASE_VERSION ||--o{ RESULT_SNAPSHOT : aggregates
+    QUESTION_VERSION ||--o{ RESULT_SNAPSHOT : aggregates
+    SAMPLE_DEFINITION ||--o{ RESULT_SNAPSHOT : qualifies
+    METHODOLOGY_VERSION ||--o{ RESULT_SNAPSHOT : computes
+
+    WEIGH_SESSION ||--o{ INTEGRITY_ASSESSMENT : assessed
+    INTEGRITY_ASSESSMENT ||--o{ INTEGRITY_SIGNAL : has
+
+    CASE_VERSION ||--o{ REASON : contextualizes
+    REASON ||--o{ REASON_REACTION : receives
+    REASON ||--o{ REASON_CLUSTER_MEMBER : member
+    REASON_CLUSTER ||--o{ REASON_CLUSTER_MEMBER : groups
+
+    EXPERIMENT ||--o{ ASSIGNMENT : assigns
+    ACTOR ||--o{ ASSIGNMENT : receives
+
+    OUTBOX_EVENT }o--|| ACTOR : correlates
+    AUDIT_LOG }o--|| ACTOR : actor_ref
