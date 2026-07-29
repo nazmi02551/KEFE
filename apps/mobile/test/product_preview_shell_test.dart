@@ -36,7 +36,7 @@ void main() {
   });
 
   testWidgets(
-    'Product Preview opens on rich Explore with media and navigates to Radar',
+    'Product Preview opens on rich searchable Explore and navigates to Radar',
     (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -56,6 +56,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Bugün dünya\nneyi tartıyor?'), findsOneWidget);
+      expect(find.byKey(const ValueKey('explore-search-field')), findsOneWidget);
+      expect(find.byKey(const ValueKey('domain-filter-all')), findsOneWidget);
+      expect(find.byKey(const ValueKey('saved-only-filter')), findsOneWidget);
       expect(find.text('Radar'), findsOneWidget);
       expect(
         find.byKey(
@@ -65,10 +68,6 @@ void main() {
         ),
         findsOneWidget,
       );
-
-      await tester.ensureVisible(find.text('Trend tartımlar'));
-      await tester.pumpAndSettle();
-      expect(find.text('Trend tartımlar'), findsOneWidget);
 
       await tester.tap(find.text('Radar'));
       await tester.pumpAndSettle();
