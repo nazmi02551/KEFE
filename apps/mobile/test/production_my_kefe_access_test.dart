@@ -6,6 +6,8 @@ import 'package:kefe_mobile/features/decision/application/decision_controller.da
 import 'package:kefe_mobile/features/decision/data/preview_decision_repository.dart';
 import 'package:kefe_mobile/features/progress/application/progress_controller.dart';
 import 'package:kefe_mobile/features/progress/data/preview_progress_repository.dart';
+import 'package:kefe_mobile/features/saved_cases/application/saved_cases_controller.dart';
+import 'package:kefe_mobile/features/saved_cases/data/saved_case_store.dart';
 
 void main() {
   testWidgets(
@@ -20,6 +22,7 @@ void main() {
             progressRepositoryProvider.overrideWithValue(
               PreviewProgressRepository(),
             ),
+            savedCaseStoreProvider.overrideWithValue(MemorySavedCaseStore()),
           ],
           child: const KefeApp(initialLocation: '/explore'),
         ),
