@@ -74,20 +74,45 @@ void main() {
 
       expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
       expect(find.text('Olay özeti'), findsOneWidget);
-      expect(find.text('KARAR'), findsOneWidget);
-      expect(find.text('GEREKÇELER'), findsOneWidget);
       expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
+
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('option-Öncelikli ihtiyacı olana')),
+        320,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('KARAR'), findsOneWidget);
 
       final option = find.byKey(
         const ValueKey('option-Öncelikli ihtiyacı olana'),
       );
-      await tester.ensureVisible(option);
       await tester.tap(option);
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('reason-card')),
+        260,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('GEREKÇELER'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('commit-button')),
+        260,
+        scrollable: find.byType(Scrollable).last,
+      );
       final commit = find.byKey(const ValueKey('commit-button'));
-      await tester.ensureVisible(commit);
       await tester.tap(commit);
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('reveal-card')),
+        300,
+        scrollable: find.byType(Scrollable).last,
+      );
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
