@@ -185,7 +185,7 @@ class _BalanceChoiceInput extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: _BalanceOptionTile(
