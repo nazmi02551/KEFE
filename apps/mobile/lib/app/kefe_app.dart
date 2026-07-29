@@ -29,7 +29,19 @@ class _KefeAppState extends State<KefeApp> {
       ),
       GoRoute(
         path: '/explore',
-        builder: (context, state) => const ExploreScreen(),
+        builder: (context, state) => Scaffold(
+          body: const ExploreScreen(embedded: true),
+          floatingActionButton: Semantics(
+            label: 'My KEFE karar yolculuğunu aç',
+            button: true,
+            child: FloatingActionButton.small(
+              key: const ValueKey('open-my-kefe'),
+              tooltip: 'My KEFE',
+              onPressed: () => context.push('/my-kefe'),
+              child: const Icon(Icons.timeline_rounded),
+            ),
+          ),
+        ),
       ),
       GoRoute(
         path: '/my-kefe',
