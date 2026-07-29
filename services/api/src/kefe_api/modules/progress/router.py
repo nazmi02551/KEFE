@@ -38,9 +38,35 @@ class ProgressResponse(BaseModel):
     recent_cases: list[RecentCaseResponse]
 
 
+class DomainActivityResponse(BaseModel):
+    primary_domain: str
+    committed_weigh_count: int
+    last_committed_at: str
+
+
+class RecentJourneyResponse(BaseModel):
+    case_id: str
+    case_version_id: str
+    title: str
+    primary_domain: str
+    initial_committed_at: str
+    latest_decision_at: str
+    decision_update_count: int
+    reflection_completed: bool
+
+
+class JourneyResponse(BaseModel):
+    decision_update_count: int
+    revisited_case_count: int
+    reflection_completion_count: int
+    domain_activity: list[DomainActivityResponse]
+    recent_journeys: list[RecentJourneyResponse]
+
+
 class ProgressEnvelopeResponse(BaseModel):
     account_offer: AccountOfferResponse
     progress: ProgressResponse
+    journey: JourneyResponse
     methodology: dict[str, str]
 
 
@@ -57,6 +83,7 @@ def get_progress(
     service: ProgressServiceDep,
 ) -> ProgressEnvelopeResponse:
     snapshot = service.get_progress(principal.actor_id)
+    journey = service.get_journey(principal.actor_id)
     return ProgressEnvelopeResponse(
         account_offer=AccountOfferResponse(eligible=snapshot.account_offer_eligible),
         progress=ProgressResponse(
@@ -81,9 +108,37 @@ def get_progress(
                 for item in snapshot.recent_cases
             ],
         ),
+        journey=JourneyResponse(
+            decision_update_count=journey.decision_update_count,
+            revisited_case_count=journey.revisited_case_count,
+            reflection_completion_count=journey.reflection_completion_count,
+            domain_activity=[
+                DomainActivityResponse(
+                    primary_domain=item.primary_domain,
+                    committed_weigh_count=item.committed_weigh_count,
+                    last_committed_at=item.last_committed_at.isoformat(),
+                )
+                for item in journey.domain_activity
+            ],
+            recent_journeys=[
+                RecentJourneyResponse(
+                    case_id=str(item.case_id),
+                    case_version_id=str(item.case_version_id),
+                    title=item.title,
+                    primary_domain=item.primary_domain,
+                    initial_committed_at=item.initial_committed_at.isoformat(),
+                    latest_decision_at=item.latest_decision_at.isoformat(),
+                    decision_update_count=item.decision_update_count,
+                    reflection_completed=item.reflection_completed,
+                )
+                for item in journey.recent_journeys
+            ],
+        ),
         methodology={
             "sample_scope": "CURRENT_ACTOR_COMMITTED_HISTORY",
             "readiness_note": "PRESENTATION_ONLY_NOT_RESEARCH_VALIDATED",
+            "journey_semantics": "OBSERVED_PRODUCT_HISTORY_ONLY",
+            "causal_claims": "NONE",
             "advanced_insights": "DEFERRED",
         },
     )
