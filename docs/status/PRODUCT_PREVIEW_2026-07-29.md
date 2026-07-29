@@ -151,18 +151,58 @@ Verified exact-head Mobile CI:
 - Android preview APK build PASS
 - artifact upload PASS
 
-Latest preview artifact:
+Preview artifact from that run:
 
 - artifact name: `kefe-preview-android`
 - artifact id: `8729454335`
 - workflow artifact digest: `sha256:44b5cd2060d2e8c2e88b5bcd25e5c8d9839082daed98b450cab6395a42fe1f16`
 - extracted APK sha256: `a81da791487a36919ec7c51ac0392bedf8ac317ab47f2c689e6a89439f06ecb4`
 
+## DecisionRevision / Reflection journey
+
+PR #78 — `Make DecisionRevision and Reflection tangible in Product Preview`
+
+Merge commit:
+
+`63fcd6d96f7517ad86d36165743fdf014fd9a68f`
+
+Implemented without adding a Case-specific runtime class or changing production networking:
+
+- Product Preview now explicitly composes `PreviewJourneyDecisionRepository` on top of the existing deterministic preview catalog;
+- the airline child-seat Case demonstrates a generic `Decision → Counterview Context → DecisionRevision → Reflection` Flow;
+- this particular Flow intentionally has no collective-result primitive, proving that collective exposure is a composable capability rather than a mandatory screen;
+- first and second decision responses are retained separately in the preview lineage and Reflection derives observed change from those responses;
+- the intervening counterview is labeled Product Preview editorial material rather than live fact, research result or causal intervention;
+- shared Reflection UI now presents a visual decision journey with first/final revision nodes, recorded encounter count and observed change summary;
+- the existing non-causal disclosure remains explicit: KEFE shows change and intervening encounters together but does not claim that an encounter caused the change;
+- existing Reflection completion, idempotency and recovery behavior is preserved.
+
+The first implementation attempt expected a collective Reveal after the revision and correctly failed its widget assertion. The final slice was narrowed to the already-proven Reflection-only generic Flow rather than forcing a result primitive into the journey.
+
+Verified exact-head Mobile CI:
+
+- run `30468367898` — PASS
+- analyze PASS
+- widget/unit tests PASS
+- Android preview APK build PASS
+- artifact upload PASS
+
+Latest preview artifact:
+
+- artifact name: `kefe-preview-android`
+- artifact id: `8730817374`
+- workflow artifact digest: `sha256:ba801bf3fc908d93cb77800dc267e14b6550ce1b3d368e5229064ed1f793bffd`
+- extracted APK sha256: `4cb20971bce9eaa79855782b45d561b8b99b37188cc9c3862c8880d3b6fd8bbf`
+
 ## What is now visibly testable
 
-The installable Product Preview now exposes a recognizable KEFE application rather than a one-Case smoke fixture:
+The installable Product Preview now exposes multiple real product journeys on the same generic Flow renderer:
 
 `Keşfet → premium Case hero / Karar Yolculuğu → Case Context → signature Tartım → Commit → premium Reveal / KEFE Uçurumu → Karşı Görüşler`
+
+and, for the airline child-seat preview Case:
+
+`Tartım 1 → karşı görüş → yeniden tartım → non-causal Karar Yolculuğu / Reflection`
 
 alongside navigable preview surfaces for:
 
@@ -171,7 +211,7 @@ alongside navigable preview surfaces for:
 - Atlas
 - My KEFE
 
-The Case decision path continues to use the existing generic Flow-driven renderer and typed decision contracts.
+The Case decision paths continue to use existing generic Flow primitives and typed decision contracts.
 
 ## Important limitations
 
@@ -180,8 +220,8 @@ This is still a Product Preview, not a Play Store release or production-data pil
 - Radar ranking is deterministic preview data, not live trend detection.
 - Atlas country values are preview examples, not measured country aggregates.
 - My KEFE history is preview data, not the authenticated user's production history.
+- the DecisionRevision/Reflection scenario is deterministic preview lineage, not a live study of persuasion or behavior;
 - remote media/illustration pipeline is not yet implemented;
-- Reflection/DecisionRevision visual journey still needs deeper product treatment;
 - release signing/AAB/distribution optimization is deferred;
 - debug APK size is not a product-completeness metric.
 
@@ -189,12 +229,12 @@ This is still a Product Preview, not a Play Store release or production-data pil
 
 Continue the visible-product track before returning to long invisible backend sequences:
 
-1. deepen Reflection/DecisionRevision into a visible, non-causal `Karar Yolculuğu` experience;
-2. add visual/media presentation metadata and replaceable media repository boundaries;
-3. gather phone-based product feedback against the updated Product Preview APK;
-4. only then decide which production API gaps should be connected next.
+1. add visual/media presentation metadata and a replaceable media repository boundary without embedding media-provider concerns into Case/Flow domain models;
+2. use the latest phone-installable Product Preview to gather concrete UX feedback across both the standard Reveal journey and the new DecisionRevision/Reflection journey;
+3. refine My KEFE from static illustrative history toward a generic descriptive journey read model, without personality/ideology profiling;
+4. only then decide which production API/read-model gaps should be connected next.
 
-The prominent scale metaphor, richer Results/KEFE Uçurumu and premium Case hero/Flow hierarchy are now implemented. Future iterations should refine them without hard-coding Case types, introducing preview fallback or weakening Commit-before-Reveal.
+The scale metaphor, richer Results/KEFE Uçurumu, premium Case hero/Flow hierarchy and non-causal DecisionRevision/Reflection journey are now tangible. Future iterations should preserve generic Flow composition, explicit preview isolation and Commit-before-collective-exposure rules.
 
 ## Documentation note
 
