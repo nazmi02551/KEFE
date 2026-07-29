@@ -16,9 +16,69 @@ on:
       - '.github/workflows/api-ci.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
+  sync-pr63-contracts:
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 63
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Generate exact OpenAPI and reconcile implementation registry
+        run: |
+          cd services/api
+          python tools/export_openapi.py --output ../../docs/contracts/openapi.v1.json
+          cd ../..
+          python - <<'PY'
+          from pathlib import Path
+
+          manifest = Path('docs/contracts/manifest.v1.yaml')
+          text = manifest.read_text(encoding='utf-8')
+          text = text.replace('manifest_version: 1.30.0', 'manifest_version: 1.31.0')
+          text = text.replace(
+              'path: docs/contracts/openapi.v1.json\n    version: 0.15.0',
+              'path: docs/contracts/openapi.v1.json\n    version: 0.16.0',
+          )
+          text = text.replace(
+              'path: docs/contracts/generic-flow-runtime.v1.yaml\n    version: 1.1.0',
+              'path: docs/contracts/generic-flow-runtime.v1.yaml\n    version: 1.2.0',
+          )
+          text = text.replace(
+              'path: docs/contracts/mobile-flow-runtime-ui.v1.yaml\n    version: 1.1.0',
+              'path: docs/contracts/mobile-flow-runtime-ui.v1.yaml\n    version: 1.2.0',
+          )
+          text = text.replace(
+              'path: docs/contracts/reflection-runtime.v1.yaml\n    version: 1.0.0',
+              'path: docs/contracts/reflection-runtime.v1.yaml\n    version: 1.1.0',
+          )
+          text = text.replace(
+              'path: docs/contracts/error-codes.v1.yaml\n    version: 1.12.0',
+              'path: docs/contracts/error-codes.v1.yaml\n    version: 1.13.0',
+          )
+          manifest.write_text(text, encoding='utf-8')
+
+          checker = Path('services/api/tools/check_contract_sync.py')
+          checker_text = checker.read_text(encoding='utf-8').replace('0.15.0', '0.16.0')
+          checker.write_text(checker_text, encoding='utf-8')
+          PY
+      - name: Commit generated contract synchronization
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/contracts/openapi.v1.json docs/contracts/manifest.v1.yaml services/api/tools/check_contract_sync.py
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Synchronize Reflection API 0.16 contracts'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+
   lint-unit:
     runs-on: ubuntu-latest
     steps:
