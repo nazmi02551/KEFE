@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kefe_mobile/app/product_preview_app.dart';
+import 'package:kefe_mobile/core/design/product_preview_visual_mode.dart';
 import 'package:kefe_mobile/features/decision/application/decision_controller.dart';
 import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/preview_decision_repository.dart';
@@ -27,6 +28,7 @@ void main() {
             decisionRepositoryProvider.overrideWithValue(
               PreviewDecisionRepository(),
             ),
+            productPreviewVisualModeProvider.overrideWithValue(true),
           ],
           child: const ProductPreviewApp(),
         ),
@@ -46,7 +48,7 @@ void main() {
   );
 
   testWidgets(
-    'Product Preview Case shows signature balance and commit-gated result',
+    'Product Preview Case shows hero hierarchy, signature balance and commit-gated result',
     (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -57,6 +59,7 @@ void main() {
             decisionDraftStoreProvider.overrideWithValue(
               MemoryDecisionDraftStore(),
             ),
+            productPreviewVisualModeProvider.overrideWithValue(true),
           ],
           child: const ProductPreviewApp(),
         ),
@@ -73,6 +76,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
+      expect(find.text('KARAR YOLCULUĞU'), findsOneWidget);
       expect(find.text('Olay özeti'), findsOneWidget);
       expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
 
