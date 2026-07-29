@@ -1,0 +1,170 @@
+contract_version: 1.0.0
+updated_at: '2026-07-29'
+source_adr: docs/adr/0032-my-kefe-descriptive-journey-read-model.md
+status: architecture_locked_implementation_pending
+bounded_context: progress
+
+endpoint:
+  method: GET
+  path: /v1/me/progress
+  authentication: required
+  ownership: current_actor_only
+  mutation: false
+  compatibility:
+    existing_members_preserved:
+      - account_offer
+      - progress
+      - methodology
+    additive_member: journey
+    breaking_replacement_forbidden: true
+
+sources_of_truth:
+  baseline_history: decision.weigh_session where state=COMMITTED
+  case_metadata:
+    - content.case_item
+    - content.case_version
+  optional_enrichment:
+    - decision.decision_revision
+    - decision.reflection_completion
+  decision_delta_payload_exposed: false
+  exposure_payload_exposed: false
+  intervention_payload_exposed: false
+
+journey:
+  fields:
+    decision_update_count:
+      definition: actor-owned committed DecisionRevision rows where revision_no > 1
+      interpretation: later_committed_decision_count_not_answer_change_count
+    revisited_case_count:
+      definition: distinct actor-owned committed sessions with a DecisionRevision where revision_no > 1
+      interpretation: revisited_session_count_not_trait
+    reflection_completion_count:
+      definition: actor-owned ReflectionCompletion count
+      interpretation: completed_product_reflection_count
+    domain_activity:
+      maximum_items: 12
+      fields:
+        - primary_domain
+        - committed_weigh_count
+        - last_committed_at
+      semantic_rule: activity_only_not_preference_or_identity
+    recent_journeys:
+      maximum_items: 5
+      fields:
+        - case_id
+        - case_version_id
+        - title
+        - primary_domain
+        - initial_committed_at
+        - latest_decision_at
+        - decision_update_count
+        - reflection_completed
+      ordering: initial_committed_at_desc_then_session_id_desc
+      semantic_rule: direct_observation_only
+
+historical_compatibility:
+  weigh_session_remains_authoritative: true
+  lineage_rows_optional: true
+  missing_revision_rows:
+    decision_update_count: 0
+    latest_decision_at: initial_committed_at
+  missing_reflection_rows:
+    reflection_completed: false
+  migration_or_backfill_required: false
+
+privacy:
+  forbidden_response_data:
+    - raw_response_payload
+    - private_reason_text
+    - private_reason_tags
+    - decision_revision_response_snapshot
+    - decision_delta_diff_snapshot
+    - exposure_metadata
+    - intervention_metadata
+    - bearer_token
+    - token_hash
+    - integrity_evidence
+    - email
+    - phone
+
+forbidden_inference:
+  - personality_label
+  - ideology_or_party_inference
+  - political_profile
+  - psychometric_score
+  - psychological_state_inference
+  - bias_diagnosis
+  - causal_effect_of_exposure_or_intervention
+  - domain_activity_as_interest_or_preference
+  - community_similarity_score
+  - country_similarity_score
+
+forbidden_gamification:
+  - streak
+  - xp
+  - virtual_currency
+  - leaderboard
+  - scarcity_pressure
+  - loss_framed_nudge
+
+methodology:
+  scope: current_actor_observed_product_history
+  inferential_claims: none
+  causal_claims: none
+  cross_user_comparisons: deferred
+  advanced_personal_insights: separate_methodology_and_privacy_contract_required
+
+mobile:
+  repository_boundary: ProgressRepository
+  reusable_shared_screen_required: true
+  case_specific_ui_branching_forbidden: true
+  production_repository: HttpProgressRepository
+  preview_repository_allowed: true
+  production_import_of_preview_repository: false
+  production_fallback_to_preview: false
+  empty_journey_must_render_safely: true
+  preview_data_disclosure_required: true
+  language:
+    allowed_examples:
+      - yeniden_tarttin
+      - yansimayi_tamamladin
+      - bu_alanda_x_tartim_var
+    forbidden_examples:
+      - fikrin_degismeye_yatkin
+      - su_gorustesin
+      - empatin_yuksek
+      - bu_icerik_seni_etkiledi
+
+first_runtime_slice:
+  includes:
+    - ADDITIVE_PROGRESS_JOURNEY_MODELS
+    - MEMORY_AGGREGATION
+    - POSTGRES_AGGREGATION_NO_SCHEMA_CHANGE
+    - ADDITIVE_HTTP_RESPONSE
+    - OPENAPI_AND_CONTRACT_TESTS
+    - FLUTTER_TYPED_JOURNEY_MODELS
+    - FLUTTER_HTTP_PARSING
+    - DETERMINISTIC_PREVIEW_PROGRESS_REPOSITORY
+    - SHARED_MY_KEFE_JOURNEY_SCREEN
+    - HISTORICAL_COMPATIBILITY_TESTS
+    - PRIVACY_EXCLUSION_TESTS
+    - PREVIEW_ISOLATION_TESTS
+  excludes:
+    - PERSONALITY_OR_PSYCHOMETRIC_MODEL
+    - IDEOLOGY_OR_PARTY_INFERENCE
+    - CROSS_USER_SIMILARITY
+    - TARGETING_FROM_DECISION_HISTORY
+    - CAUSAL_ATTRIBUTION
+    - RAW_RESPONSE_OR_REASON_HISTORY
+    - STREAK_XP_LEADERBOARD
+    - ACCOUNT_ENROLLMENT
+
+fitness:
+  actor_scope_required: true
+  backward_compatible_existing_progress_fields: true
+  weigh_history_survives_missing_lineage_rows: true
+  raw_decision_payload_exposed: false
+  private_reason_exposed: false
+  causal_claim_emitted: false
+  personality_or_ideology_output: false
+  production_preview_fallback: false
