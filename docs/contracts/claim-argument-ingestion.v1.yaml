@@ -1,7 +1,7 @@
-contract_version: 1.0.0
+contract_version: 1.1.0
 updated_at: '2026-07-29'
 source_adr: docs/adr/0027-first-class-claim-argument-normalized-ingestion.md
-status: architecture_locked_implementation_pending
+status: implementation_contract
 bounded_context: claim_argument_ingestion
 
 principles:
@@ -169,6 +169,10 @@ ingestion:
     domain_model_dependency_on_provider_sdk_forbidden: true
   source_artifact:
     immutable: true
+    idempotency_fingerprint:
+      - adapter_code
+      - external_locator
+      - content_hash
     required_fields:
       - source_artifact_id
       - adapter_code
@@ -251,6 +255,8 @@ compatibility:
 
 persistence:
   canonical_store: POSTGRESQL
+  schema: knowledge
+  migration: services/api/migrations/versions/20260729_0015_claim_argument_knowledge.py
   graph_database_required: false
   append_only_history_required_for:
     - CLAIM_ASSESSMENT
@@ -258,6 +264,17 @@ persistence:
     - ARGUMENT_RELATION
   provider_neutral_repository_ports_required: true
   specialized_graph_store_requires_future_adr: true
+
+implementation:
+  domain_package: services/api/src/kefe_api/modules/knowledge
+  postgres_adapter: services/api/src/kefe_api/infrastructure/postgres_knowledge.py
+  repository_builder: services/api/src/kefe_api/infrastructure/persistence.py
+  conceptual_erd: docs/contracts/core-erd.v3.mmd
+  http_surface_added: false
+  consumer_ui_added: false
+  context_projection_changed: false
+  provider_sdk_added: false
+  graph_database_added: false
 
 privacy:
   minimum_necessary_claimant_metadata: true
@@ -267,6 +284,7 @@ privacy:
   psychometric_inference_from_claim_activity_forbidden: true
 
 first_implementation_slice:
+  status: implemented_pending_ci
   includes:
     - CLAIM
     - CLAIM_ASSESSMENT
