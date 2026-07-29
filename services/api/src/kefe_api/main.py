@@ -32,6 +32,8 @@ from kefe_api.modules.context.service import ContextService
 from kefe_api.modules.decision.lineage_aware_service import LineageAwareDecisionService
 from kefe_api.modules.decision.lineage_router import router as decision_lineage_router
 from kefe_api.modules.decision.lineage_service import DecisionLineageService
+from kefe_api.modules.decision.reflection_router import router as reflection_router
+from kefe_api.modules.decision.reflection_service import ReflectionService
 from kefe_api.modules.decision.router import router as decision_router
 from kefe_api.modules.flow_runtime.router import router as flow_runtime_router
 from kefe_api.modules.flow_runtime.service import FlowRuntimeService
@@ -94,6 +96,10 @@ def create_app() -> FastAPI:
         decision_repository,
         flow_runtime_service,
     )
+    app.state.reflection_service = ReflectionService(
+        decision_repository,
+        flow_runtime_service,
+    )
     app.state.identity_repository = identity_repository
     app.state.identity_service = IdentityService(
         repository=identity_repository,
@@ -124,6 +130,7 @@ def create_app() -> FastAPI:
     app.include_router(context_router)
     app.include_router(decision_router)
     app.include_router(decision_lineage_router)
+    app.include_router(reflection_router)
     app.include_router(flow_runtime_router)
     app.include_router(progress_router)
     app.include_router(admin_router)
