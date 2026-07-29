@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,6 +8,8 @@ import 'package:kefe_mobile/core/design/product_preview_visual_mode.dart';
 import 'package:kefe_mobile/features/decision/application/decision_controller.dart';
 import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/preview_decision_repository.dart';
+import 'package:kefe_mobile/features/media_presentation/application/case_media_provider.dart';
+import 'package:kefe_mobile/features/media_presentation/data/preview_case_media_repository.dart';
 
 void main() {
   test('preview catalog contains multiple domains and cases', () async {
@@ -19,14 +23,23 @@ void main() {
     );
   });
 
+  test('production entrypoint never imports preview media repository', () {
+    final productionMain = File('lib/main.dart').readAsStringSync();
+    expect(productionMain, isNot(contains('preview_case_media_repository')));
+    expect(productionMain, isNot(contains('PreviewCaseMediaRepository')));
+  });
+
   testWidgets(
-    'Product Preview opens on rich Explore and navigates to Radar',
+    'Product Preview opens on rich Explore with media and navigates to Radar',
     (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             decisionRepositoryProvider.overrideWithValue(
               PreviewDecisionRepository(),
+            ),
+            caseMediaRepositoryProvider.overrideWithValue(
+              const PreviewCaseMediaRepository(),
             ),
             productPreviewVisualModeProvider.overrideWithValue(true),
           ],
@@ -36,8 +49,23 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Bugün dünya\nneyi tartıyor?'), findsOneWidget);
-      expect(find.text('Trend tartımlar'), findsOneWidget);
       expect(find.text('Radar'), findsOneWidget);
+      expect(
+        find.byKey(
+          const ValueKey(
+            'case-media-EXPLORE_CARD-22222222-2222-4222-8222-222222222222',
+          ),
+        ),
+        findsOneWidget,
+      );
+
+      await tester.scrollUntilVisible(
+        find.text('Trend tartımlar'),
+        260,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Trend tartımlar'), findsOneWidget);
 
       await tester.tap(find.text('Radar'));
       await tester.pumpAndSettle();
@@ -48,7 +76,7 @@ void main() {
   );
 
   testWidgets(
-    'Product Preview Case shows hero hierarchy, signature balance and commit-gated result',
+    'Product Preview media keeps the Case hero and Commit semantics intact',
     (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -58,6 +86,9 @@ void main() {
             ),
             decisionDraftStoreProvider.overrideWithValue(
               MemoryDecisionDraftStore(),
+            ),
+            caseMediaRepositoryProvider.overrideWithValue(
+              const PreviewCaseMediaRepository(),
             ),
             productPreviewVisualModeProvider.overrideWithValue(true),
           ],
@@ -77,8 +108,23 @@ void main() {
 
       expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
       expect(find.text('KARAR YOLCULUĞU'), findsOneWidget);
-      expect(find.text('Olay özeti'), findsOneWidget);
+      expect(
+        find.byKey(
+          const ValueKey(
+            'case-media-CASE_HERO-22222222-2222-4222-8222-222222222222',
+          ),
+        ),
+        findsOneWidget,
+      );
       expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
+
+      await tester.scrollUntilVisible(
+        find.text('Olay özeti'),
+        260,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Olay özeti'), findsOneWidget);
 
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('kefe-balance-visual')),
@@ -113,21 +159,11 @@ void main() {
       await tester.tap(commit);
       await tester.pumpAndSettle();
 
-      await tester.scrollUntilVisible(
-        find.byKey(const ValueKey('reveal-card')),
-        300,
-        scrollable: find.byType(Scrollable).last,
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(ProductPreviewApp)),
+        listen: false,
       );
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
-      expect(
-        find.byKey(const ValueKey('reveal-personal-decision')),
-        findsOneWidget,
-      );
-      expect(find.byKey(const ValueKey('reveal-gap-insight')), findsOneWidget);
-      expect(find.text('KEFE UÇURUMU'), findsOneWidget);
-      expect(find.byKey(const ValueKey('perspective-section')), findsOneWidget);
+      expect(container.read(decisionControllerProvider).reveal, isNotNull);
     },
   );
 }

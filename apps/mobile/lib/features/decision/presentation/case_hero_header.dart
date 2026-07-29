@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/design/kefe_theme.dart';
+import '../../media_presentation/domain/case_media_models.dart';
+import '../../media_presentation/presentation/case_media_surface.dart';
 import '../domain/decision_models.dart';
 
 class CaseHeroHeader extends StatelessWidget {
@@ -55,6 +57,12 @@ class CaseHeroHeader extends StatelessWidget {
                 color: _riskColor(caseData.risk),
               ),
             ],
+          ),
+          const SizedBox(height: 16),
+          CaseMediaSurface(
+            caseVersionId: caseData.versionId,
+            slot: CaseMediaSlot.caseHero,
+            borderRadius: 18,
           ),
           const SizedBox(height: 18),
           Text(
