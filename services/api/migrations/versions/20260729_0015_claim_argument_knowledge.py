@@ -139,7 +139,7 @@ def upgrade() -> None:
                 REFERENCES knowledge.normalized_artifact(id) ON DELETE RESTRICT,
             relation text NOT NULL CHECK (relation IN ('SUPPORTS','CONTRADICTS','CONTEXTUALIZES')),
             review_state text NOT NULL CHECK (review_state IN ('PROPOSED','ACCEPTED','REJECTED')),
-            provenance_ref text,
+            provenance_ref text NOT NULL CHECK (btrim(provenance_ref) <> ''),
             created_at timestamptz NOT NULL,
             CHECK (num_nonnulls(source_artifact_id, normalized_artifact_id) = 1)
         )
@@ -160,7 +160,7 @@ def upgrade() -> None:
             relation_code text NOT NULL CHECK (btrim(relation_code) <> ''),
             taxonomy_version text NOT NULL CHECK (btrim(taxonomy_version) <> ''),
             review_state text NOT NULL CHECK (review_state IN ('PROPOSED','ACCEPTED','REJECTED')),
-            provenance_ref text,
+            provenance_ref text NOT NULL CHECK (btrim(provenance_ref) <> ''),
             created_at timestamptz NOT NULL,
             CHECK (from_claim_id <> to_claim_id)
         )
