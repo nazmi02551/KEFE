@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/design/kefe_theme.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../domain/decision_models.dart';
+import 'kefe_balance_visual.dart';
 
 class QuestionInputCard extends StatelessWidget {
   const QuestionInputCard({
@@ -128,6 +129,16 @@ class _QuestionInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (question.responseType == 'SINGLE_CHOICE' &&
+        question.options.length == 2) {
+      return _BalanceChoiceInput(
+        question: question,
+        value: value,
+        enabled: enabled,
+        onChanged: onChanged,
+      );
+    }
+
     return switch (question.responseType) {
       'SINGLE_CHOICE' => _SingleChoiceInput(
           question: question,
@@ -143,6 +154,145 @@ class _QuestionInput extends StatelessWidget {
         ),
       _ => _UnsupportedQuestion(responseType: question.responseType),
     };
+  }
+}
+
+class _BalanceChoiceInput extends StatelessWidget {
+  const _BalanceChoiceInput({
+    required this.question,
+    required this.value,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final DecisionQuestion question;
+  final Object? value;
+  final bool enabled;
+  final ValueChanged<Object> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedIndex = question.options.indexWhere((option) => option == value);
+    final effectiveIndex = selectedIndex < 0 ? null : selectedIndex;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        KefeBalanceVisual(
+          leftLabel: question.options[0],
+          rightLabel: question.options[1],
+          selectedIndex: effectiveIndex,
+        ),
+        const SizedBox(height: 14),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _BalanceOptionTile(
+                option: question.options[0],
+                color: KefeColorTokens.rules,
+                selected: effectiveIndex == 0,
+                enabled: enabled,
+                onTap: () => onChanged(question.options[0]),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _BalanceOptionTile(
+                option: question.options[1],
+                color: KefeColorTokens.empathy,
+                selected: effectiveIndex == 1,
+                enabled: enabled,
+                onTap: () => onChanged(question.options[1]),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _BalanceOptionTile extends StatelessWidget {
+  const _BalanceOptionTile({
+    required this.option,
+    required this.color,
+    required this.selected,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final String option;
+  final Color color;
+  final bool selected;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      selected: selected,
+      button: true,
+      child: InkWell(
+        key: ValueKey('option-$option'),
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(15),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          constraints: const BoxConstraints(minHeight: 82),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+          decoration: BoxDecoration(
+            color: selected
+                ? color.withValues(alpha: 0.13)
+                : KefeColorTokens.surfaceElevatedDark.withValues(alpha: 0.46),
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(
+              color: selected
+                  ? color.withValues(alpha: 0.72)
+                  : Theme.of(context).colorScheme.outlineVariant,
+              width: selected ? 1.6 : 1,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                width: 25,
+                height: 25,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: selected ? color : Colors.transparent,
+                  border: Border.all(
+                    color: selected ? color : KefeColorTokens.textMutedDark,
+                    width: 1.5,
+                  ),
+                ),
+                child: selected
+                    ? const Icon(
+                        Icons.check_rounded,
+                        size: 17,
+                        color: Color(0xFF07111F),
+                      )
+                    : null,
+              ),
+              const SizedBox(height: 9),
+              Text(
+                option,
+                textAlign: TextAlign.center,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: selected ? color : null,
+                      fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
+                      height: 1.22,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

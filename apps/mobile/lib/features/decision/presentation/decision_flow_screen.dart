@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/design/kefe_theme.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../context/presentation/context_section.dart';
 import '../../onboarding/application/onboarding_controller.dart';
@@ -395,39 +396,266 @@ class _RevealCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
     final reveal = state.reveal!;
+    final entries = reveal.values.entries.toList(growable: false);
+    final selectedOption = state.selectedOption;
+    final selectedShare = selectedOption == null ? null : reveal.values[selectedOption];
+    final topEntry = entries.isEmpty
+        ? null
+        : entries.reduce((a, b) => a.value >= b.value ? a : b);
+    final gapPoints = selectedShare == null || topEntry == null
+        ? null
+        : ((topEntry.value - selectedShare).abs() * 100).round();
+
     return Card(
       key: const ValueKey('reveal-card'),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              strings.revealTitle,
-              style: Theme.of(context).textTheme.titleLarge,
+            Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: KefeColorTokens.gold.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child: const Icon(
+                    Icons.insights_rounded,
+                    color: KefeColorTokens.goldSoft,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'SONUÇLAR',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: KefeColorTokens.goldSoft,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.9,
+                            ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        strings.revealTitle,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w900,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            for (final entry in reveal.values.entries)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            if (selectedOption != null) ...[
+              const SizedBox(height: 16),
+              Container(
+                key: const ValueKey('reveal-personal-decision'),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: KefeColorTokens.gold.withValues(alpha: 0.07),
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
+                    color: KefeColorTokens.gold.withValues(alpha: 0.24),
+                  ),
+                ),
+                child: Row(
                   children: [
-                    Text('${entry.key} · ${(entry.value * 100).round()}%'),
-                    const SizedBox(height: 6),
-                    LinearProgressIndicator(value: entry.value),
+                    const Icon(
+                      Icons.person_outline_rounded,
+                      color: KefeColorTokens.goldSoft,
+                      size: 21,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'SENİN KARARIN',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: KefeColorTokens.goldSoft,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            selectedOption,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-            const SizedBox(height: 8),
+            ],
+            const SizedBox(height: 18),
+            Text(
+              'TOPLULUK DAĞILIMI',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: KefeColorTokens.textMutedDark,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            for (var index = 0; index < entries.length; index++) ...[
+              _RevealDistributionRow(
+                label: entries[index].key,
+                value: entries[index].value,
+                color: _distributionColor(index),
+                selected: entries[index].key == selectedOption,
+              ),
+              if (index != entries.length - 1) const SizedBox(height: 13),
+            ],
+            if (selectedShare != null && topEntry != null && gapPoints != null) ...[
+              const SizedBox(height: 18),
+              Container(
+                key: const ValueKey('reveal-gap-insight'),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: KefeColorTokens.surfaceElevatedDark.withValues(alpha: 0.72),
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      topEntry.key == selectedOption
+                          ? Icons.balance_rounded
+                          : Icons.compare_arrows_rounded,
+                      color: topEntry.key == selectedOption
+                          ? KefeColorTokens.success
+                          : KefeColorTokens.attention,
+                    ),
+                    const SizedBox(width: 11),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'KEFE UÇURUMU',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: KefeColorTokens.goldSoft,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.7,
+                                ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            topEntry.key == selectedOption
+                                ? 'Seçimin toplulukta en yüksek paya sahip. Katılımcıların %${(selectedShare * 100).round()} kadarı aynı seçeneği tercih etti.'
+                                : 'Seçtiğin seçenek toplulukta %${(selectedShare * 100).round()}. En yüksek paya sahip seçenekle fark $gapPoints yüzde puan.',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  height: 1.4,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 14),
             Text(
               '${strings.trustedSample} · '
               'n=${reveal.sampleSize} · ${reveal.confidence}',
               key: const ValueKey('reveal-methodology'),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: KefeColorTokens.textMutedDark,
+                  ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Color _distributionColor(int index) => switch (index % 4) {
+        0 => KefeColorTokens.rules,
+        1 => KefeColorTokens.empathy,
+        2 => KefeColorTokens.gold,
+        _ => KefeColorTokens.success,
+      };
+}
+
+class _RevealDistributionRow extends StatelessWidget {
+  const _RevealDistributionRow({
+    required this.label,
+    required this.value,
+    required this.color,
+    required this.selected,
+  });
+
+  final String label;
+  final double value;
+  final Color color;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
+                    ),
+              ),
+            ),
+            if (selected) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: KefeColorTokens.gold.withValues(alpha: 0.11),
+                  borderRadius: BorderRadius.circular(99),
+                ),
+                child: Text(
+                  'Sen',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: KefeColorTokens.goldSoft,
+                        fontWeight: FontWeight.w900,
+                      ),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
+            Text(
+              '%${(value * 100).round()}',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w900,
+                  ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 7),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(99),
+          child: LinearProgressIndicator(
+            minHeight: 8,
+            value: value,
+            backgroundColor: KefeColorTokens.surfaceSoftDark,
+            valueColor: AlwaysStoppedAnimation(color),
+          ),
+        ),
+      ],
     );
   }
 }
