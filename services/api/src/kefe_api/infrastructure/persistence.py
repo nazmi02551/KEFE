@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from kefe_api.core.settings import Settings
 from kefe_api.infrastructure.db import build_engine
+from kefe_api.infrastructure.postgres_account_continuity import PostgresAccountContinuityRepository
 from kefe_api.infrastructure.postgres_admin_security import PostgresAdminSessionStore
+from kefe_api.infrastructure.postgres_community_reason import PostgresCommunityReasonRepository
 from kefe_api.infrastructure.postgres_consensus import PostgresConsensusRepository
 from kefe_api.infrastructure.postgres_content_configuration import (
     PostgresContentConfigurationRepository,
@@ -13,12 +15,16 @@ from kefe_api.infrastructure.postgres_flow_pinned_content_authoring import (
 )
 from kefe_api.infrastructure.postgres_identity import PostgresIdentityRepository
 from kefe_api.infrastructure.postgres_knowledge import PostgresKnowledgeRepository
+from kefe_api.infrastructure.postgres_privacy import PostgresPrivacyRepository
 from kefe_api.infrastructure.postgres_progress import PostgresProgressRepository
 from kefe_api.infrastructure.postgres_reflection_decision import (
     PostgresReflectionDecisionRepository,
 )
+from kefe_api.infrastructure.postgres_sharing import PostgresShareRepository
 from kefe_api.modules.admin_security.in_memory import InMemoryAdminSessionStore
 from kefe_api.modules.admin_security.ports import AdminSessionStore
+from kefe_api.modules.community_reason.in_memory import InMemoryCommunityReasonRepository
+from kefe_api.modules.community_reason.ports import CommunityReasonRepository
 from kefe_api.modules.consensus.in_memory import build_demo_consensus_repository
 from kefe_api.modules.consensus.ports import ConsensusRepository
 from kefe_api.modules.content_authoring.in_memory import InMemoryContentAuthoringRepository
@@ -31,14 +37,21 @@ from kefe_api.modules.content_configuration.ports import ContentConfigurationRep
 from kefe_api.modules.context.bootstrap import build_demo_context_repository
 from kefe_api.modules.context.ports import ContextRepository
 from kefe_api.modules.decision.bootstrap import build_demo_repository
+from kefe_api.modules.decision.in_memory import InMemoryDecisionRepository
 from kefe_api.modules.decision.lineage_in_memory import InMemoryLineageDecisionRepository
 from kefe_api.modules.decision.ports import DecisionRepository
+from kefe_api.modules.identity.account_in_memory import InMemoryAccountContinuityRepository
+from kefe_api.modules.identity.account_ports import AccountContinuityRepository
 from kefe_api.modules.identity.in_memory import InMemoryIdentityRepository
 from kefe_api.modules.identity.ports import IdentityRepository
 from kefe_api.modules.knowledge.in_memory import InMemoryKnowledgeRepository
 from kefe_api.modules.knowledge.ports import KnowledgeRepository
+from kefe_api.modules.privacy.in_memory import InMemoryPrivacyRepository
+from kefe_api.modules.privacy.ports import PrivacyRepository
 from kefe_api.modules.progress.in_memory import InMemoryProgressRepository
 from kefe_api.modules.progress.ports import ProgressRepository
+from kefe_api.modules.sharing.in_memory import InMemoryShareRepository
+from kefe_api.modules.sharing.ports import ShareRepository
 
 
 def build_decision_repository(settings: Settings) -> DecisionRepository:
@@ -94,6 +107,54 @@ def build_identity_repository(settings: Settings) -> IdentityRepository:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
 
     return PostgresIdentityRepository(build_engine(settings.database_url))
+
+
+def build_account_continuity_repository(
+    settings: Settings,
+    identity_repository: IdentityRepository,
+) -> AccountContinuityRepository:
+    if settings.persistence_backend == "memory":
+        if not isinstance(identity_repository, InMemoryIdentityRepository):
+            raise RuntimeError("memory account continuity requires in-memory identity")
+        return InMemoryAccountContinuityRepository(identity_repository)
+    if not settings.database_url:
+        raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
+    return PostgresAccountContinuityRepository(build_engine(settings.database_url))
+
+
+def build_share_repository(settings: Settings) -> ShareRepository:
+    if settings.persistence_backend == "memory":
+        return InMemoryShareRepository()
+    if not settings.database_url:
+        raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
+    return PostgresShareRepository(build_engine(settings.database_url))
+
+
+def build_community_reason_repository(settings: Settings) -> CommunityReasonRepository:
+    if settings.persistence_backend == "memory":
+        return InMemoryCommunityReasonRepository()
+    if not settings.database_url:
+        raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
+    return PostgresCommunityReasonRepository(build_engine(settings.database_url))
+
+
+def build_privacy_repository(
+    settings: Settings,
+    decision_repository: DecisionRepository,
+    identity_repository: IdentityRepository,
+) -> PrivacyRepository:
+    if settings.persistence_backend == "memory":
+        if not isinstance(decision_repository, InMemoryDecisionRepository):
+            raise RuntimeError("memory privacy requires in-memory decision repository")
+        if not isinstance(identity_repository, InMemoryIdentityRepository):
+            raise RuntimeError("memory privacy requires in-memory identity repository")
+        return InMemoryPrivacyRepository(
+            decision_repository=decision_repository,
+            identity_repository=identity_repository,
+        )
+    if not settings.database_url:
+        raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
+    return PostgresPrivacyRepository(build_engine(settings.database_url))
 
 
 def build_content_authoring_repository(settings: Settings) -> ContentAuthoringRepository:
