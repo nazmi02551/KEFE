@@ -169,7 +169,9 @@ void main() {
 
       final confidence = await makeVisible(
         tester,
-        find.byKey(const ValueKey('confidence-$confidenceQuestionId-4')),
+        find.byKey(
+          const ValueKey(('confidence', confidenceQuestionId, '4')),
+        ),
       );
       await tester.tap(confidence);
       await tester.pump();
