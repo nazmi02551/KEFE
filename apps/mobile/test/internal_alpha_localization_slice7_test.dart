@@ -57,10 +57,10 @@ void main() {
     );
     expect(strings.consensusStanceLabel('AGREE'), 'Agree');
     expect(strings.domainName('TECHNOLOGY_AI'), 'Technology');
-    expect(
-      KefeStrings.supportedLocales,
-      const [Locale('tr', 'TR'), Locale('en', 'US')],
-    );
+    expect(KefeStrings.supportedLocales, const [
+      Locale('tr', 'TR'),
+      Locale('en', 'US'),
+    ]);
   });
 
   test('Internal Alpha public behavior preserves Turkish and English copy', () {
@@ -79,10 +79,7 @@ void main() {
       tr.consensusUnavailable('TEMP'),
       'Konsensüs geçici olarak kullanılamıyor · TEMP',
     );
-    expect(
-      en.consensusUnavailable(null),
-      'Consensus temporarily unavailable',
-    );
+    expect(en.consensusUnavailable(null), 'Consensus temporarily unavailable');
     expect(tr.consensusReasonLimit(3), 'Gerekçeni en fazla 3 etiketle belirt');
     expect(en.consensusReasonLimit(3), 'Choose up to 3 reason tags');
   });
@@ -115,10 +112,7 @@ void main() {
       tr.gapDifferenceInsight(selectedPercent: 37, gapPoints: 18),
       'Seçtiğin seçenek toplulukta %37. En yüksek paya sahip seçenekle fark 18 yüzde puan.',
     );
-    expect(
-      en.balanceSemantics('Option A'),
-      'KEFE balance. Option A',
-    );
+    expect(en.balanceSemantics('Option A'), 'KEFE balance. Option A');
     expect(
       tr.resultMethodology(sampleSize: 120, confidence: 'HIGH'),
       'Güvenilir örneklem · n=120 · Yüksek güven',

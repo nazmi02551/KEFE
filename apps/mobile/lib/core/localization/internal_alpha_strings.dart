@@ -3,15 +3,13 @@ import 'kefe_locale_catalog.dart';
 import 'kefe_strings.dart';
 
 extension InternalAlphaStrings on KefeStrings {
-  String _iaText(
-    String key, {
-    Map<String, Object?> placeholders = const {},
-  }) => KefeLocaleCatalog.resolve(
-    locale: locale,
-    resources: InternalAlphaStringCatalog.resources,
-    key: key,
-    placeholders: placeholders,
-  );
+  String _iaText(String key, {Map<String, Object?> placeholders = const {}}) =>
+      KefeLocaleCatalog.resolve(
+        locale: locale,
+        resources: InternalAlphaStringCatalog.resources,
+        key: key,
+        placeholders: placeholders,
+      );
 
   String get primaryNavExplore => _iaText('primary_nav.explore');
   String get primaryNavWeigh => _iaText('primary_nav.weigh');
@@ -111,8 +109,7 @@ extension InternalAlphaStrings on KefeStrings {
 
   String get consensusLoading => _iaText('consensus.loading');
   String get consensusCommitFirst => _iaText('consensus.commit_first');
-  String get consensusCommitFirstBody =>
-      _iaText('consensus.commit_first_body');
+  String get consensusCommitFirstBody => _iaText('consensus.commit_first_body');
   String get consensusRetry => _iaText('consensus.retry');
   String get consensusExposed => _iaText('consensus.exposed');
   String get consensusPrompt => _iaText('consensus.prompt');
@@ -128,7 +125,10 @@ extension InternalAlphaStrings on KefeStrings {
   String get consensusCardTitle => _iaText('consensus.card_title');
   String consensusUnavailable(String? code) => code == null
       ? _iaText('consensus.unavailable')
-      : _iaText('consensus.unavailable_with_code', placeholders: {'code': code});
+      : _iaText(
+          'consensus.unavailable_with_code',
+          placeholders: {'code': code},
+        );
 
   String consensusStanceLabel(String code) => switch (code) {
     'AGREE' => _iaText('consensus.stance.agree'),
@@ -168,8 +168,7 @@ extension InternalAlphaStrings on KefeStrings {
   String get stepCompleted => _iaText('step.completed');
   String get resultEyebrow => _iaText('result.eyebrow');
   String get yourDecision => _iaText('result.your_decision');
-  String get communityDistribution =>
-      _iaText('result.community_distribution');
+  String get communityDistribution => _iaText('result.community_distribution');
   String get kefeGap => _iaText('result.kefe_gap');
 
   String gapInsight({required bool selectedIsTop, required int percent}) =>
@@ -183,10 +182,7 @@ extension InternalAlphaStrings on KefeStrings {
     required int gapPoints,
   }) => _iaText(
     'result.gap.difference',
-    placeholders: {
-      'selectedPercent': selectedPercent,
-      'gapPoints': gapPoints,
-    },
+    placeholders: {'selectedPercent': selectedPercent, 'gapPoints': gapPoints},
   );
 
   String get decisionYou => _iaText('result.decision_you');
