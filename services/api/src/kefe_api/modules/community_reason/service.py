@@ -49,16 +49,26 @@ class CommunityReasonService:
             raise DomainError("CASE_VERSION_STALE", "Case version is no longer available", 409)
         policy = self._reason_policy(case.questions)
         if policy is None:
-            raise DomainError("COMMUNITY_REASON_NOT_SUPPORTED", "Reason tags are not configured", 422)
+            raise DomainError(
+                "COMMUNITY_REASON_NOT_SUPPORTED",
+                "Reason tags are not configured",
+                422,
+            )
 
         allowed_tags = {
             str(tag).strip().upper()
             for tag in policy.get("tags", ())
             if str(tag).strip()
         }
-        normalized_tags = tuple(dict.fromkeys(tag.strip().upper() for tag in tags if tag.strip()))
+        normalized_tags = tuple(
+            dict.fromkeys(tag.strip().upper() for tag in tags if tag.strip())
+        )
         if not normalized_tags:
-            raise DomainError("COMMUNITY_REASON_EMPTY", "At least one reason tag is required", 422)
+            raise DomainError(
+                "COMMUNITY_REASON_EMPTY",
+                "At least one reason tag is required",
+                422,
+            )
         unknown = [tag for tag in normalized_tags if tag not in allowed_tags]
         if unknown:
             raise DomainError(
@@ -118,11 +128,19 @@ class CommunityReasonService:
         )
         return reason
 
-    def snapshot(self, *, case_version_id: UUID, limit: int = 20) -> CommunityReasonSnapshot:
+    def snapshot(
+        self,
+        *,
+        case_version_id: UUID,
+        limit: int = 20,
+    ) -> CommunityReasonSnapshot:
         case = self._decision.get_case_version(case_version_id)
         if case is None:
             raise DomainError("CASE_NOT_FOUND", "Case version not found", 404)
-        return self._repo.public_snapshot(case_version_id, limit=min(max(limit, 1), 50))
+        return self._repo.public_snapshot(
+            case_version_id,
+            limit=min(max(limit, 1), 50),
+        )
 
     def react(
         self,
@@ -133,7 +151,11 @@ class CommunityReasonService:
     ) -> None:
         reason = self._repo.get(reason_id)
         if reason is None or not reason.publicly_readable:
-            raise DomainError("COMMUNITY_REASON_NOT_FOUND", "Community Reason not found", 404)
+            raise DomainError(
+                "COMMUNITY_REASON_NOT_FOUND",
+                "Community Reason not found",
+                404,
+            )
         if reason.actor_id == actor_id:
             raise DomainError(
                 "COMMUNITY_REASON_SELF_REACTION",
@@ -156,7 +178,11 @@ class CommunityReasonService:
     ) -> None:
         reason = self._repo.get(reason_id)
         if reason is None:
-            raise DomainError("COMMUNITY_REASON_NOT_FOUND", "Community Reason not found", 404)
+            raise DomainError(
+                "COMMUNITY_REASON_NOT_FOUND",
+                "Community Reason not found",
+                404,
+            )
         self._repo.report(
             report_id=uuid4(),
             reason_id=reason_id,
@@ -171,15 +197,26 @@ class CommunityReasonService:
         reason_id: UUID,
         state: CommunityReasonModeration,
     ) -> CommunityReason:
-        if state not in {CommunityReasonModeration.ALLOWED, CommunityReasonModeration.BLOCKED}:
-            raise DomainError("COMMUNITY_REASON_MODERATION_INVALID", "Invalid moderation state", 422)
+        if state not in {
+            CommunityReasonModeration.ALLOWED,
+            CommunityReasonModeration.BLOCKED,
+        }:
+            raise DomainError(
+                "COMMUNITY_REASON_MODERATION_INVALID",
+                "Invalid moderation state",
+                422,
+            )
         reason = self._repo.moderate(
             reason_id=reason_id,
             state=state,
             updated_at=datetime.now(UTC),
         )
         if reason is None:
-            raise DomainError("COMMUNITY_REASON_NOT_FOUND", "Community Reason not found", 404)
+            raise DomainError(
+                "COMMUNITY_REASON_NOT_FOUND",
+                "Community Reason not found",
+                404,
+            )
         return reason
 
     @staticmethod
