@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/kefe_strings.dart';
 import '../application/progress_controller.dart';
@@ -143,12 +144,23 @@ class _ProgressReady extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Text(strings.accountOfferBody),
                   const SizedBox(height: 12),
-                  if (!offer.accountCreationAvailable)
+                  if (offer.accountCreationAvailable)
+                    FilledButton.icon(
+                      key: const ValueKey('account-offer-create'),
+                      onPressed: () => context.push('/account'),
+                      icon: const Icon(Icons.verified_user_outlined),
+                      label: Text(
+                        Localizations.localeOf(context).languageCode == 'tr'
+                            ? 'Geçmişimi koru'
+                            : 'Protect my history',
+                      ),
+                    )
+                  else
                     Text(
                       strings.accountOfferUnavailable,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   OutlinedButton(
                     key: const ValueKey('account-offer-continue-guest'),
                     onPressed: ref.read(progressControllerProvider.notifier).dismissOffer,
