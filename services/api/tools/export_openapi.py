@@ -10,7 +10,6 @@ from kefe_api.main import create_app
 OPENAPI_OVERLAYS = (
     "openapi-consensus.v0.18.overlay.json",
     "openapi-mvp.v0.19.overlay.json",
-    "openapi-global.v0.20.overlay.json",
 )
 
 
