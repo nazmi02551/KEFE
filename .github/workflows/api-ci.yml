@@ -186,6 +186,7 @@ jobs:
           tests/test_flow_runtime_postgres.py
           tests/test_decision_revision_lineage_postgres.py
           tests/test_knowledge_graph_postgres.py
+          tests/test_consensus_postgres.py
           > postgres-test-output.txt 2>&1
       - name: Upload PostgreSQL diagnostics on failure
         if: steps.postgres-tests.outcome == 'failure'
