@@ -289,6 +289,78 @@ class PostgresAccountContinuityRepository:
                 ),
                 {"guest_actor_id": guest_actor_id, "account_actor_id": account_actor_id},
             )
+
+            # Shares are actor-owned controls and can be transferred without changing tokens.
+            connection.execute(
+                text(
+                    """
+                    UPDATE sharing.share_record
+                    SET actor_id = :account_actor_id
+                    WHERE actor_id = :guest_actor_id
+                    """
+                ),
+                {"guest_actor_id": guest_actor_id, "account_actor_id": account_actor_id},
+            )
+
+            # Community Reason ownership follows the merged actor. Per-session uniqueness
+            # cannot collide because imported sessions retain distinct session ids.
+            connection.execute(
+                text(
+                    """
+                    UPDATE community.reason
+                    SET actor_id = :account_actor_id
+                    WHERE actor_id = :guest_actor_id
+                    """
+                ),
+                {"guest_actor_id": guest_actor_id, "account_actor_id": account_actor_id},
+            )
+            # Reactions/reports can collide when both identities touched the same reason.
+            connection.execute(
+                text(
+                    """
+                    DELETE FROM community.reason_reaction guest
+                    USING community.reason_reaction account
+                    WHERE guest.actor_id = :guest_actor_id
+                      AND account.actor_id = :account_actor_id
+                      AND guest.reason_id = account.reason_id
+                    """
+                ),
+                {"guest_actor_id": guest_actor_id, "account_actor_id": account_actor_id},
+            )
+            connection.execute(
+                text(
+                    """
+                    UPDATE community.reason_reaction
+                    SET actor_id = :account_actor_id
+                    WHERE actor_id = :guest_actor_id
+                    """
+                ),
+                {"guest_actor_id": guest_actor_id, "account_actor_id": account_actor_id},
+            )
+            connection.execute(
+                text(
+                    """
+                    DELETE FROM community.reason_report guest
+                    USING community.reason_report account
+                    WHERE guest.reporter_actor_id = :guest_actor_id
+                      AND account.reporter_actor_id = :account_actor_id
+                      AND guest.reason_id = account.reason_id
+                      AND guest.report_code = account.report_code
+                    """
+                ),
+                {"guest_actor_id": guest_actor_id, "account_actor_id": account_actor_id},
+            )
+            connection.execute(
+                text(
+                    """
+                    UPDATE community.reason_report
+                    SET reporter_actor_id = :account_actor_id
+                    WHERE reporter_actor_id = :guest_actor_id
+                    """
+                ),
+                {"guest_actor_id": guest_actor_id, "account_actor_id": account_actor_id},
+            )
+
             connection.execute(
                 text(
                     """
