@@ -57,10 +57,10 @@ void main() {
     expect(delegate.isSupported(const Locale('fr', 'FR')), isFalse);
     expect(delegate.isSupported(const Locale('tr', 'TR')), isTrue);
     expect(delegate.isSupported(const Locale('en', 'US')), isTrue);
-    expect(
-      KefeStrings.supportedLocales,
-      const [Locale('tr', 'TR'), Locale('en', 'US')],
-    );
+    expect(KefeStrings.supportedLocales, const [
+      Locale('tr', 'TR'),
+      Locale('en', 'US'),
+    ]);
   });
 
   test('representative core Turkish and English copy stays unchanged', () {
@@ -71,8 +71,10 @@ void main() {
     expect(en.promise, 'Weigh your decision. See why people differ.');
     expect(tr.onboardingTryCase, 'İlk tartımı yap');
     expect(en.onboardingTryCase, 'Make your first weigh');
-    expect(tr.contextUnavailable,
-        'Bağlam şu anda yüklenemedi. Sonuç veya topluluk bilgisi gösterilmedi.');
+    expect(
+      tr.contextUnavailable,
+      'Bağlam şu anda yüklenemedi. Sonuç veya topluluk bilgisi gösterilmedi.',
+    );
     expect(en.commitHelper, 'Lock your decision and reveal the result.');
     expect(tr.trustedSample, 'Güvenilir örneklem');
     expect(en.trustedSample, 'Trusted sample');
@@ -146,6 +148,9 @@ void main() {
     expect(source, isNot(contains("'Context'")));
     expect(source, isNot(contains("'Doğrulandı'")));
     expect(source, isNot(contains("'Verified'")));
-    expect(source, contains("const {'tr', 'en'}.contains(locale.languageCode)"));
+    expect(
+      source,
+      contains("const {'tr', 'en'}.contains(locale.languageCode)"),
+    );
   });
 }
