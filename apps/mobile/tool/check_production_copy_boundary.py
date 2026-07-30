@@ -55,13 +55,19 @@ def is_technical_literal(value: str, line: str) -> bool:
     if TECHNICAL_UPPER_TOKEN.fullmatch(value):
         return True
     if TECHNICAL_LOWER_TOKEN.fullmatch(value):
-        # Lowercase tokens are implementation identifiers, stable keys or field names.
         return True
-    if value.startswith("${") and re.sub(r"\$\{[^}]+\}", "", value).strip(" ·:%()/+-") == "":
+    if value.startswith("mobile-reflection-"):
         return True
     if "ValueKey" in line or "key:" in line:
         return True
     if "pathParameters" in line or "queryParameters" in line:
+        return True
+
+    residual = re.sub(r"\$\{[^}]+\}", "", value)
+    residual = re.sub(r"\$[A-Za-z_][A-Za-z0-9_.]*", "", residual)
+    if not re.search(r"[A-Za-zÇĞİÖŞÜçğıöşü]", residual):
+        return True
+    if re.fullmatch(r"[\s·:%()/+\-=,.]*n[\s=:+\-0-9.,%]*", residual):
         return True
     return False
 
