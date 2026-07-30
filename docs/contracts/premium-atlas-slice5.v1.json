@@ -1,0 +1,75 @@
+{
+  "contract": "premium-atlas-slice5.v1",
+  "version": "1.0.0",
+  "status": "accepted",
+  "tracks_issue": 106,
+  "stack_base": "dfa4c4d74f4cde28cad02a7b1f4c1981eade7a5a",
+  "inherited_verified_radar_runtime": "e1da8aeeff1cad6de60849a6d8d5b9cf834cb19f",
+  "slice": "ATLAS_PRODUCT_PREVIEW",
+  "governed_files": [
+    "apps/mobile/lib/app/product_preview/atlas_preview_screen.dart",
+    "apps/mobile/lib/app/product_preview/atlas_preview_fixture.dart",
+    "apps/mobile/lib/app/product_preview/atlas_preview_strings.dart"
+  ],
+  "truthfulness": {
+    "product_preview_only": true,
+    "representative_country_averages_only": true,
+    "real_country_result_claim": false,
+    "live_update_claim": false,
+    "sample_claim": false,
+    "inferred_geography": false,
+    "three_dimensional_globe_engine": false,
+    "existing_values_must_remain_exact": true
+  },
+  "continuum": {
+    "minimum": 0,
+    "maximum": 10,
+    "left_role": "RULES_RIGHTS",
+    "right_role": "EMPATHY_COMPASSION",
+    "derived_percentage_split_allowed": false,
+    "additional_metric_allowed": false
+  },
+  "localization": {
+    "atlas_chrome_resource_catalog_required": true,
+    "catalog_keyed_by_locale_and_string_id": true,
+    "selected_case_title_via_content_localizer": true,
+    "presentation_locale_branching_forbidden": true,
+    "third_locale_requires_presentation_refactor": false
+  },
+  "presentation": {
+    "semantic_kefe_surfaces_required": true,
+    "direct_dark_only_surface_tokens_forbidden": true,
+    "static_flutter_native_world_decoration_allowed": true,
+    "decorative_world_has_data_semantics": false,
+    "country_cards_show_existing_average_only": true,
+    "text_first_accessibility_required": true
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "case_agnostic_runtime": true,
+    "preview_production_isolation": true,
+    "signal_in_scope": false,
+    "impact_in_scope": false,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "bias_inference": false,
+    "causal_inference": false
+  },
+  "verification": {
+    "exact_head_required": true,
+    "production_copy_boundary": true,
+    "flutter_analyze": true,
+    "all_mobile_regressions": true,
+    "atlas_fixture_exact_values": true,
+    "atlas_tr_en_light_dark_render": true,
+    "product_preview_navigation_regressions": true,
+    "phone_acceptance": true,
+    "api_ci": true,
+    "mobile_ci": true,
+    "mvp_beta_gates": true,
+    "global_readiness": true
+  }
+}
