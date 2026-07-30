@@ -66,23 +66,22 @@ final communityReasonControllerProvider =
 class CommunityReasonController extends Notifier<CommunityReasonState> {
   CommunityReasonRepository get _repository =>
       ref.read(communityReasonRepositoryProvider);
-  String? _caseVersionId;
+  String? _sessionId;
 
   @override
   CommunityReasonState build() => const CommunityReasonState();
 
-  Future<void> load(String caseVersionId) async {
-    if (_caseVersionId == caseVersionId &&
-        state.uiState == CommunityReasonUiState.ready) {
+  Future<void> load(String sessionId) async {
+    if (_sessionId == sessionId && state.uiState == CommunityReasonUiState.ready) {
       return;
     }
-    _caseVersionId = caseVersionId;
+    _sessionId = sessionId;
     state = state.copyWith(
       uiState: CommunityReasonUiState.loading,
       clearError: true,
     );
     try {
-      final snapshot = await _repository.fetch(caseVersionId);
+      final snapshot = await _repository.fetch(sessionId);
       state = state.copyWith(
         uiState: CommunityReasonUiState.ready,
         snapshot: snapshot,
@@ -119,6 +118,7 @@ class CommunityReasonController extends Notifier<CommunityReasonState> {
         state.uiState == CommunityReasonUiState.submitting) {
       return;
     }
+    _sessionId = sessionId;
     state = state.copyWith(
       uiState: CommunityReasonUiState.submitting,
       clearError: true,
@@ -129,11 +129,7 @@ class CommunityReasonController extends Notifier<CommunityReasonState> {
         tags: state.selectedTags.toList(growable: false),
         text: state.text.trim().isEmpty ? null : state.text.trim(),
       );
-      final caseVersionId = _caseVersionId;
-      CommunityReasonSnapshot? snapshot = state.snapshot;
-      if (caseVersionId != null) {
-        snapshot = await _repository.fetch(caseVersionId);
-      }
+      final snapshot = await _repository.fetch(sessionId);
       state = state.copyWith(
         uiState: CommunityReasonUiState.ready,
         receipt: receipt,
@@ -158,8 +154,9 @@ class CommunityReasonController extends Notifier<CommunityReasonState> {
   Future<void> react(String reasonId, String reaction) async {
     try {
       await _repository.react(reasonId: reasonId, reaction: reaction);
-      if (_caseVersionId != null) {
-        final snapshot = await _repository.fetch(_caseVersionId!);
+      final sessionId = _sessionId;
+      if (sessionId != null) {
+        final snapshot = await _repository.fetch(sessionId);
         state = state.copyWith(snapshot: snapshot, clearError: true);
       }
     } on ApiFailure catch (error) {
@@ -184,7 +181,7 @@ class _DisabledCommunityReasonRepository implements CommunityReasonRepository {
   const _DisabledCommunityReasonRepository();
 
   @override
-  Future<CommunityReasonSnapshot> fetch(String caseVersionId) async =>
+  Future<CommunityReasonSnapshot> fetch(String sessionId) async =>
       const CommunityReasonSnapshot(
         items: [],
         tagPatternCounts: {},
@@ -197,8 +194,7 @@ class _DisabledCommunityReasonRepository implements CommunityReasonRepository {
     required String sessionId,
     required List<String> tags,
     String? text,
-  }) =>
-      throw const ClientTransportFailure(code: 'COMMUNITY_REASON_NOT_ENABLED');
+  }) => throw const ClientTransportFailure(code: 'COMMUNITY_REASON_NOT_ENABLED');
 
   @override
   Future<void> react({required String reasonId, required String reaction}) =>
