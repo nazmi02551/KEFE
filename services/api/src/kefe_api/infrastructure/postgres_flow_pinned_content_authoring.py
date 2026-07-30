@@ -9,7 +9,9 @@ from sqlalchemy import Connection, text
 
 from kefe_api.infrastructure.postgres_content_authoring import PostgresContentAuthoringRepository
 from kefe_api.modules.content_authoring.models import (
+    AuthoringCaseLocalization,
     AuthoringCaseVersion,
+    MarketScope,
     ResolvedFlowDefinition,
     ResolvedFlowStep,
 )
@@ -18,7 +20,7 @@ from kefe_api.modules.content_authoring.models import (
 class PostgresFlowPinnedContentAuthoringRepository(
     PostgresContentAuthoringRepository
 ):
-    """Extends the proven authoring adapter with immutable Flow/config provenance."""
+    """Extends authoring with immutable Flow/config and global distribution provenance."""
 
     @staticmethod
     def _resolved_flow_document(
@@ -64,6 +66,40 @@ class PostgresFlowPinnedContentAuthoringRepository(
             ),
         )
 
+    @staticmethod
+    def _localization_document(
+        localization: AuthoringCaseLocalization,
+    ) -> dict[str, Any]:
+        return {
+            "locale": localization.locale,
+            "title": localization.title,
+            "summary": localization.summary,
+            "question_prompts": dict(localization.question_prompts),
+            "option_labels": {
+                code: dict(labels)
+                for code, labels in localization.option_labels.items()
+            },
+            "cultural_context_note": localization.cultural_context_note,
+            "legal_context_note": localization.legal_context_note,
+        }
+
+    @staticmethod
+    def _localization_from_document(
+        document: dict[str, Any],
+    ) -> AuthoringCaseLocalization:
+        return AuthoringCaseLocalization(
+            locale=document["locale"],
+            title=document["title"],
+            summary=document["summary"],
+            question_prompts=dict(document.get("question_prompts", {})),
+            option_labels={
+                code: dict(labels)
+                for code, labels in document.get("option_labels", {}).items()
+            },
+            cultural_context_note=document.get("cultural_context_note"),
+            legal_context_note=document.get("legal_context_note"),
+        )
+
     @classmethod
     def _document(cls, version: AuthoringCaseVersion) -> dict[str, Any]:
         document = PostgresContentAuthoringRepository._document(version)
@@ -80,6 +116,14 @@ class PostgresFlowPinnedContentAuthoringRepository(
                     version.content_configuration_version_no
                 ),
                 "resolved_flow": cls._resolved_flow_document(version.resolved_flow),
+                "content_locale": version.content_locale,
+                "market_scope": version.market_scope.value,
+                "country_codes": list(version.country_codes),
+                "cultural_context_note": version.cultural_context_note,
+                "legal_context_note": version.legal_context_note,
+                "localizations": [
+                    cls._localization_document(item) for item in version.localizations
+                ],
             }
         )
         return document
@@ -105,6 +149,15 @@ class PostgresFlowPinnedContentAuthoringRepository(
             resolved_flow=cls._resolved_flow_from_document(
                 document.get("resolved_flow")
             ),
+            content_locale=document.get("content_locale", "tr-TR"),
+            market_scope=MarketScope(document.get("market_scope", "GLOBAL")),
+            country_codes=tuple(document.get("country_codes", [])),
+            cultural_context_note=document.get("cultural_context_note"),
+            legal_context_note=document.get("legal_context_note"),
+            localizations=tuple(
+                cls._localization_from_document(item)
+                for item in document.get("localizations", [])
+            ),
         )
 
     def _materialize_consumer(
@@ -122,6 +175,10 @@ class PostgresFlowPinnedContentAuthoringRepository(
                 "published CaseVersion requires resolved Flow/configuration provenance"
             )
 
+        localization_map = {
+            item.locale: self._localization_document(item)
+            for item in version.localizations
+        }
         connection.execute(
             text(
                 """
@@ -130,7 +187,13 @@ class PostgresFlowPinnedContentAuthoringRepository(
                     content_configuration_version_no = :content_configuration_version_no,
                     flow_template_code = :flow_template_code,
                     flow_template_version_no = :flow_template_version_no,
-                    resolved_flow = CAST(:resolved_flow AS jsonb)
+                    resolved_flow = CAST(:resolved_flow AS jsonb),
+                    content_locale = :content_locale,
+                    market_scope = :market_scope,
+                    country_codes = CAST(:country_codes AS text[]),
+                    cultural_context_note = :cultural_context_note,
+                    legal_context_note = :legal_context_note,
+                    localizations = CAST(:localizations AS jsonb)
                 WHERE id = :version_id
                 """
             ),
@@ -145,5 +208,11 @@ class PostgresFlowPinnedContentAuthoringRepository(
                 "resolved_flow": json.dumps(
                     self._resolved_flow_document(version.resolved_flow)
                 ),
+                "content_locale": version.content_locale,
+                "market_scope": version.market_scope.value,
+                "country_codes": list(version.country_codes),
+                "cultural_context_note": version.cultural_context_note,
+                "legal_context_note": version.legal_context_note,
+                "localizations": json.dumps(localization_map),
             },
         )
