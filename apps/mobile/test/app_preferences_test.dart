@@ -33,15 +33,18 @@ void main() {
     expect(restored.resolvedThemeMode, ThemeMode.dark);
   });
 
-  test('persists Turkish and light preferences independently of account', () async {
-    SharedPreferences.setMockInitialValues({});
-    final store = SharedPreferencesAppPreferencesStore();
+  test(
+    'persists Turkish and light preferences independently of account',
+    () async {
+      SharedPreferences.setMockInitialValues({});
+      final store = SharedPreferencesAppPreferencesStore();
 
-    await store.writeLocale(AppLocalePreference.tr);
-    await store.writeTheme(AppThemePreference.light);
+      await store.writeLocale(AppLocalePreference.tr);
+      await store.writeTheme(AppThemePreference.light);
 
-    final restored = await store.read();
-    expect(restored.resolvedLocale, const Locale('tr', 'TR'));
-    expect(restored.resolvedThemeMode, ThemeMode.light);
-  });
+      final restored = await store.read();
+      expect(restored.resolvedLocale, const Locale('tr', 'TR'));
+      expect(restored.resolvedThemeMode, ThemeMode.light);
+    },
+  );
 }
