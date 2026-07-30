@@ -31,16 +31,10 @@ jobs:
       - name: Normalize Dart sources
         working-directory: apps/mobile
         run: dart format lib test
-      - name: Restore final workflow and remove one-shot assets
-        run: |
-          cp docs/migrations/global-readiness-final.yml .github/workflows/global-readiness.yml
-          rm docs/migrations/global-readiness-final.yml
-          rm docs/migrations/internal-alpha-fix.patch
-          rm -f .github/workflows/internal-alpha-fix.yml
-      - name: Commit normalized runtime
+      - name: Commit source-only fixup
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A
+          git add apps/mobile
           git commit -m 'fix: normalize Internal Alpha localization runtime'
           git push origin HEAD:feature/internal-alpha-hardening
