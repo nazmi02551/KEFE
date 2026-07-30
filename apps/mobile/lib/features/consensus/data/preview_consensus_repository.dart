@@ -16,22 +16,21 @@ class PreviewConsensusRepository implements ConsensusRepository {
   Future<List<ConsensusCard>> fetchCards({
     required String sessionId,
     required String caseVersionId,
-  }) async {
-    final card = _card(sessionId: sessionId, caseVersionId: caseVersionId);
-    return [card];
-  }
+  }) async => [_card(sessionId: sessionId, caseVersionId: caseVersionId)];
 
   @override
   Future<ConsensusCard> participate({
     required String sessionId,
     required String caseVersionId,
+    required String cardId,
     required String cardVersionId,
     required String stanceCode,
     required List<String> reasonTagCodes,
     required String idempotencyKey,
   }) async {
-    final expectedVersion = _versionId(caseVersionId);
-    if (cardVersionId != expectedVersion || !_stanceCodes.contains(stanceCode)) {
+    if (cardId != _cardId(caseVersionId) ||
+        cardVersionId != _versionId(caseVersionId) ||
+        !_stanceCodes.contains(stanceCode)) {
       throw StateError('Invalid Product Preview Consensus participation');
     }
     if (reasonTagCodes.length > 2 ||
@@ -39,8 +38,7 @@ class PreviewConsensusRepository implements ConsensusRepository {
       throw StateError('Invalid Product Preview Consensus reason tags');
     }
     final key = '$sessionId::$cardVersionId';
-    final existing = _participations[key];
-    if (existing != null) {
+    if (_participations[key] != null) {
       return _card(sessionId: sessionId, caseVersionId: caseVersionId);
     }
     _participations[key] = ConsensusParticipation(
@@ -56,10 +54,11 @@ class PreviewConsensusRepository implements ConsensusRepository {
     required String sessionId,
     required String caseVersionId,
   }) {
+    final cardId = _cardId(caseVersionId);
     final versionId = _versionId(caseVersionId);
     final participation = _participations['$sessionId::$versionId'];
     return ConsensusCard(
-      id: versionId,
+      id: cardId,
       versionId: versionId,
       caseVersionId: caseVersionId,
       proposition:
@@ -77,11 +76,7 @@ class PreviewConsensusRepository implements ConsensusRepository {
   }
 
   ConsensusAggregate _aggregate(ConsensusParticipation participation) {
-    final stanceCounts = <String, int>{
-      'AGREE': 214,
-      'MIXED': 126,
-      'DISAGREE': 72,
-    };
+    final stanceCounts = <String, int>{'AGREE': 214, 'MIXED': 126, 'DISAGREE': 72};
     stanceCounts[participation.stanceCode] =
         (stanceCounts[participation.stanceCode] ?? 0) + 1;
     final reasonCounts = <String, int>{
@@ -111,5 +106,6 @@ class PreviewConsensusRepository implements ConsensusRepository {
     );
   }
 
-  String _versionId(String caseVersionId) => 'preview-consensus-$caseVersionId-v1';
+  String _cardId(String caseVersionId) => 'preview-consensus-$caseVersionId';
+  String _versionId(String caseVersionId) => '${_cardId(caseVersionId)}-v1';
 }
