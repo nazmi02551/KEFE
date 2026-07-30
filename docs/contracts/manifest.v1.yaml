@@ -1,5 +1,5 @@
-# OpenAPI 0.18.0 synchronized from the exact generated API contract.
-manifest_version: 1.36.0
+# OpenAPI 0.18.0 is the exact composition of the stable base snapshot and the reviewed Consensus overlay.
+manifest_version: 1.37.0
 updated_at: '2026-07-30'
 policy:
   executable_schema_source: services/api/migrations
@@ -16,8 +16,12 @@ contracts:
     role: retained_decision_lineage_conceptual_contract
   - id: openapi
     path: docs/contracts/openapi.v1.json
+    version: 0.17.0
+    role: stable_http_api_base_contract
+  - id: openapi-consensus-overlay
+    path: docs/contracts/openapi-consensus.v0.18.overlay.json
     version: 0.18.0
-    role: http_api_contract
+    role: additive_consensus_http_api_overlay
   - id: event-envelope
     path: docs/contracts/event-envelope.v1.schema.json
     version: '1'
