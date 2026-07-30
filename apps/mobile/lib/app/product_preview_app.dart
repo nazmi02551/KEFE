@@ -69,18 +69,12 @@ class _ProductPreviewAppState extends ConsumerState<ProductPreviewApp> {
           child: const MyKefeJourneyScreen(embedded: true),
         ),
       ),
-      GoRoute(
-        path: '/settings',
-        builder: (_, _) => const SettingsScreen(),
-      ),
+      GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
       GoRoute(
         path: '/account',
         builder: (_, _) => const AccountConversionScreen(),
       ),
-      GoRoute(
-        path: '/privacy',
-        builder: (_, _) => const PrivacyScreen(),
-      ),
+      GoRoute(path: '/privacy', builder: (_, _) => const PrivacyScreen()),
       GoRoute(
         path: '/share/:token',
         builder: (_, state) =>
