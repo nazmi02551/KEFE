@@ -1,0 +1,45 @@
+version: 1.0.0
+status: IMPLEMENTATION_BASELINE
+authority:
+  adr: ADR-0037
+invariants:
+  production_preview_isolation: true
+  production_preview_fallback_forbidden: true
+  phone_candidate_entrypoint: lib/main_preview.dart
+  my_kefe_inference_forbidden: true
+  case_specific_runtime_classes_forbidden: true
+presentation_preferences:
+  locale_modes: [SYSTEM, EXPLICIT]
+  theme_modes: [SYSTEM, LIGHT, DARK]
+  persistence: DEVICE_LOCAL
+  guest_available: true
+localization:
+  minimum_ui_locales: [tr-TR, en-US]
+  user_facing_literals_outside_localization_boundary_forbidden: true
+content_globalization:
+  case_version_pinned_fields:
+    content_locale:
+      type: language_tag
+      required: true
+    market_scope:
+      enum: [GLOBAL, COUNTRY_SET]
+      required: true
+    country_codes:
+      type: iso_3166_alpha2_set
+      max_items: 32
+      required_when: market_scope == COUNTRY_SET
+    cultural_context_note:
+      type: optional_editorial_text
+    legal_context_note:
+      type: optional_editorial_text
+  generic_discovery_filters: [locale, country]
+  country_specific_runtime_class_forbidden: true
+phone_candidate:
+  production_api_may_be_unavailable: true
+  preview_fixture_usage: EXPLICIT_INTERNAL_ENTRYPOINT_ONLY
+  production_artifact_must_not_claim_phone_usability: true
+ci_gates:
+  - localization_hardcode_scan
+  - locale_theme_widget_tests
+  - global_metadata_contract_tests
+  - phone_candidate_android_build
