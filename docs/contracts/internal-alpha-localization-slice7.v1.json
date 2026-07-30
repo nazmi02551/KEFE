@@ -1,0 +1,51 @@
+{
+  "contract": "internal-alpha-localization-slice7.v1",
+  "tracks_issue": 110,
+  "extends_adr": "ADR-0045",
+  "stack_base_pr": 109,
+  "scope": {
+    "shared_locale_resolver_reused": true,
+    "internal_alpha_strings_migrated": true,
+    "core_kefe_strings_migrated": false,
+    "third_locale_enabled": false,
+    "copy_semantics_changed": false,
+    "visual_redesign": false
+  },
+  "localization": {
+    "catalog_keyed_by_language_and_string_id": true,
+    "english_fallback": true,
+    "tr_en_key_parity_required": true,
+    "presentation_locale_branching_forbidden": true,
+    "placeholder_interpolation_centralized": true,
+    "unknown_locale_declared_supported": false
+  },
+  "behavior": {
+    "public_extension_api_preserved": true,
+    "unknown_code_fallback_preserved": true,
+    "count_semantics_preserved": true,
+    "domain_aliases_preserved": true,
+    "result_methodology_format_preserved": true,
+    "locale_preference_behavior_preserved": true,
+    "theme_preference_behavior_preserved": true
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "signal_in_scope": false,
+    "impact_in_scope": false,
+    "personality_inference": false,
+    "ideology_inference": false
+  },
+  "acceptance": {
+    "catalog_parity_test": true,
+    "unknown_locale_fallback_test": true,
+    "dynamic_placeholder_test": true,
+    "unknown_code_fallback_test": true,
+    "no_locale_branching_source_guard": true,
+    "existing_mobile_regressions": true,
+    "production_copy_boundary": true,
+    "phone_acceptance": true,
+    "same_sha_api_mobile_mvp_global_success": true
+  }
+}
