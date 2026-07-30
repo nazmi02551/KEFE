@@ -7,6 +7,13 @@ import '../data/consensus_repository.dart';
 import '../data/http_consensus_repository.dart';
 import '../domain/consensus_models.dart';
 
+/// Product composition switch for the first explicit WE capability.
+///
+/// The core decision widgets remain reusable without starting network work on
+/// their own. Production and Product Preview entrypoints explicitly enable the
+/// experience and provide their respective repository adapters.
+final consensusExperienceEnabledProvider = Provider<bool>((ref) => false);
+
 enum ConsensusUiState {
   idle,
   loading,
@@ -147,7 +154,9 @@ class ConsensusController extends Notifier<ConsensusState> {
 
   void selectStance(String stanceCode) {
     final card = state.activeCard;
-    if (card == null || card.participated || !card.stanceCodes.contains(stanceCode)) {
+    if (card == null ||
+        card.participated ||
+        !card.stanceCodes.contains(stanceCode)) {
       return;
     }
     state = state.copyWith(selectedStance: stanceCode, clearError: true);
@@ -155,7 +164,9 @@ class ConsensusController extends Notifier<ConsensusState> {
 
   void toggleReasonTag(String tagCode) {
     final card = state.activeCard;
-    if (card == null || card.participated || !card.reasonTagCodes.contains(tagCode)) {
+    if (card == null ||
+        card.participated ||
+        !card.reasonTagCodes.contains(tagCode)) {
       return;
     }
     final next = {...state.selectedReasonTags};
@@ -173,7 +184,10 @@ class ConsensusController extends Notifier<ConsensusState> {
     final caseVersionId = state.caseVersionId!;
     _submissionKey ??=
         'mobile-consensus-${DateTime.now().toUtc().microsecondsSinceEpoch}';
-    state = state.copyWith(uiState: ConsensusUiState.submitting, clearError: true);
+    state = state.copyWith(
+      uiState: ConsensusUiState.submitting,
+      clearError: true,
+    );
     try {
       final updated = await _repository.participate(
         sessionId: sessionId,
@@ -187,13 +201,17 @@ class ConsensusController extends Notifier<ConsensusState> {
         for (final item in state.cards)
           if (item.versionId == updated.versionId) updated else item,
       ];
+      _submissionKey = null;
       state = state.copyWith(
         uiState: _resolvedState(cards),
         cards: cards,
+        clearSelectedStance: true,
+        selectedReasonTags: const {},
         clearError: true,
       );
     } on ApiFailure catch (error) {
       if (error.code == 'CONSENSUS_ALREADY_PARTICIPATED') {
+        _submissionKey = null;
         await load(
           sessionId: sessionId,
           caseVersionId: caseVersionId,
@@ -222,12 +240,21 @@ class ConsensusController extends Notifier<ConsensusState> {
     final sessionId = state.sessionId;
     final caseVersionId = state.caseVersionId;
     if (sessionId == null || caseVersionId == null) return;
-    if (_submissionKey != null && state.selectedStance != null && state.cards.isNotEmpty) {
-      state = state.copyWith(uiState: ConsensusUiState.eligible, clearError: true);
+    if (_submissionKey != null &&
+        state.selectedStance != null &&
+        state.cards.isNotEmpty) {
+      state = state.copyWith(
+        uiState: ConsensusUiState.eligible,
+        clearError: true,
+      );
       await submit();
       return;
     }
-    await load(sessionId: sessionId, caseVersionId: caseVersionId, force: true);
+    await load(
+      sessionId: sessionId,
+      caseVersionId: caseVersionId,
+      force: true,
+    );
   }
 
   ConsensusUiState _resolvedState(List<ConsensusCard> cards) {
