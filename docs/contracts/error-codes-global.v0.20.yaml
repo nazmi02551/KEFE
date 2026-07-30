@@ -1,0 +1,9 @@
+registry_version: 0.20.0
+authority: ADR-0037
+errors:
+- code: DISCOVERY_LOCALE_INVALID
+  http_status: 422
+  retryable: false
+- code: DISCOVERY_COUNTRY_INVALID
+  http_status: 422
+  retryable: false
