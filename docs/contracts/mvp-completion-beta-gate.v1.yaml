@@ -1,0 +1,78 @@
+contract_version: 1.0.0
+updated_at: '2026-07-30'
+authority:
+  adr: docs/adr/0036-mvp-code-completion-and-beta-gate.md
+  issue: 93
+  documentation_ecosystem: v3.4
+  mvp_delivery_plan: 1.3.0
+states:
+  MVP_CODE_COMPLETE:
+    repository_owned: true
+    may_imply_public_launch_ready: false
+  BETA_GATE_PASSED:
+    repository_owned: false
+    requires_external_and_human_evidence: true
+binding_invariants:
+  commit_first: true
+  case_agnostic_runtime: true
+  preview_fallback_in_production: forbidden
+  guest_continuation_always_available: true
+  my_kefe_sensitive_inference: forbidden
+  private_reason_implicit_publication: forbidden
+  consensus_exposed_into_core_pre_result: forbidden
+mvp_code_requirements:
+  account_continuity:
+    provider_neutral_otp_port: required
+    otp_plaintext_persistence: forbidden
+    explicit_guest_merge: required
+    client_side_history_copy: forbidden
+    merge_idempotency: required
+  sharing:
+    commit_required: true
+    opaque_token: true
+    expiration: required
+    revoke: required
+    decision_inclusion_default: false
+    private_reason: forbidden
+    pre_commit_result: forbidden
+  community_reason:
+    explicit_publication: true
+    source_private_reason_reuse: forbidden
+    bounded_tags: required
+    optional_bounded_text: true
+    moderation: required
+    public_pending_or_blocked_text: forbidden
+    reactions_controlled: true
+    report_route: required
+    popularity_truth_inference: forbidden
+    basic_pattern_counts: required
+  privacy:
+    actor_export: required
+    actor_delete: required
+    security_secret_export: forbidden
+    retention_metadata: required
+    retained_aggregate_reidentification: forbidden
+  offline:
+    uncommitted_draft_ttl_days: 7
+    encrypted_at_rest_store: required
+    uncertain_commit_replay_only_same_idempotency_key: true
+  catalog:
+    minimum_l0_dilemma: 20
+    minimum_l0_call: 4
+    case_specific_runtime_classes: forbidden
+  quality:
+    api_contract_drift_gate: required
+    postgres_integration: required
+    flutter_analyze_and_tests: required
+    accessibility_locale_theme_smoke: required
+    critical_path_performance_harness: required
+    rollback_and_kill_switch_runbook: required
+external_beta_gates:
+  - PRODUCTION_OTP_DELIVERY
+  - HUMAN_PHONE_USABILITY
+  - STORE_COMPLIANCE_REVIEW
+  - EDITORIAL_CQB_ACCEPTANCE
+  - PRODUCTION_SLO_MEASUREMENT
+completion_claim:
+  allowed_before_external_gates: MVP_CODE_COMPLETE_BETA_GATE_PENDING
+  public_release_ready_before_external_gates: forbidden
