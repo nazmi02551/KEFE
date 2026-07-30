@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/design/kefe_surface.dart';
 import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/internal_alpha_strings.dart';
+import '../../../core/localization/kefe_content_localizer.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../decision/domain/decision_models.dart';
 import '../../explore/application/explore_controller.dart';
@@ -28,6 +29,7 @@ class _WeighHubScreenState extends ConsumerState<WeighHubScreen> {
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
+    final content = ref.watch(kefeContentLocalizerProvider);
     final state = ref.watch(exploreControllerProvider);
     final body = SafeArea(
       bottom: false,
@@ -57,7 +59,11 @@ class _WeighHubScreenState extends ConsumerState<WeighHubScreen> {
                 child: Text(strings.weighHubEmpty),
               )
             else ...[
-              _FeaturedWeigh(item: state.items.first, strings: strings),
+              _FeaturedWeigh(
+                item: state.items.first,
+                strings: strings,
+                content: content,
+              ),
               const SizedBox(height: 28),
               Row(
                 children: [
@@ -79,7 +85,11 @@ class _WeighHubScreenState extends ConsumerState<WeighHubScreen> {
               ),
               const SizedBox(height: 14),
               for (final item in state.items.skip(1)) ...[
-                _WeighCaseTile(item: item, strings: strings),
+                _WeighCaseTile(
+                  item: item,
+                  locale: strings.locale,
+                  content: content,
+                ),
                 const SizedBox(height: 12),
               ],
             ],
@@ -145,14 +155,32 @@ class _Header extends StatelessWidget {
 }
 
 class _FeaturedWeigh extends StatelessWidget {
-  const _FeaturedWeigh({required this.item, required this.strings});
+  const _FeaturedWeigh({
+    required this.item,
+    required this.strings,
+    required this.content,
+  });
 
   final DecisionCaseSummary item;
   final KefeStrings strings;
+  final KefeContentLocalizer content;
 
   @override
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
+    final title = content.text(
+      namespace: KefeContentNamespace.caseTitle,
+      id: item.id,
+      locale: strings.locale,
+      fallback: item.title,
+    );
+    final summary = content.text(
+      namespace: KefeContentNamespace.caseSummary,
+      id: item.id,
+      locale: strings.locale,
+      fallback: item.summary,
+    );
+
     return KefeSurface(
       key: const ValueKey('weigh-hub-featured'),
       tone: KefeSurfaceTone.premium,
@@ -167,7 +195,7 @@ class _FeaturedWeigh extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            item.title,
+            title,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               color: visual.onSurfaceStrong,
               fontWeight: FontWeight.w900,
@@ -177,7 +205,7 @@ class _FeaturedWeigh extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            item.summary,
+            summary,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: visual.onSurfaceStrong.withValues(alpha: 0.74),
               height: 1.46,
@@ -197,14 +225,32 @@ class _FeaturedWeigh extends StatelessWidget {
 }
 
 class _WeighCaseTile extends StatelessWidget {
-  const _WeighCaseTile({required this.item, required this.strings});
+  const _WeighCaseTile({
+    required this.item,
+    required this.locale,
+    required this.content,
+  });
 
   final DecisionCaseSummary item;
-  final KefeStrings strings;
+  final Locale locale;
+  final KefeContentLocalizer content;
 
   @override
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
+    final title = content.text(
+      namespace: KefeContentNamespace.caseTitle,
+      id: item.id,
+      locale: locale,
+      fallback: item.title,
+    );
+    final summary = content.text(
+      namespace: KefeContentNamespace.caseSummary,
+      id: item.id,
+      locale: locale,
+      fallback: item.summary,
+    );
+
     return KefeSurface(
       tone: KefeSurfaceTone.raised,
       padding: EdgeInsets.zero,
@@ -233,15 +279,15 @@ class _WeighCaseTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item.title,
+                      title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w850,
+                        fontWeight: FontWeight.w800,
                         height: 1.24,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      item.summary,
+                      summary,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
