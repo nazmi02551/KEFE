@@ -22,7 +22,7 @@ class CreatedShare {
   final DateTime expiresAt;
   final bool includeDecision;
 
-  String get deepLink => 'kefe://share/$token';
+  String get deepLink => 'kefe:///share/$token';
 }
 
 class PublicShare {
@@ -35,7 +35,6 @@ class PublicShare {
     required this.primaryDomain,
     required this.createdAt,
     required this.expiresAt,
-    this.decision,
   });
 
   final String id;
@@ -44,7 +43,6 @@ class PublicShare {
   final String title;
   final String summary;
   final String primaryDomain;
-  final Map<String, Object?>? decision;
   final DateTime createdAt;
   final DateTime expiresAt;
 }
