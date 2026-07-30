@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import json
 import re
 from pathlib import Path
+
+from export_openapi import load_expected_contract
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 API_SRC = REPO_ROOT / "services" / "api" / "src"
@@ -49,10 +50,10 @@ def _missing_fields(schemas: dict, schema: str, required: set[str]) -> list[str]
 
 
 def _openapi_errors() -> list[str]:
-    contract = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
+    contract = load_expected_contract(CONTRACTS / "openapi.v1.json")
     errors: list[str] = []
     if contract.get("info", {}).get("version") != "0.18.0":
-        errors.append("OpenAPI checked-in version must match API v0.18.0")
+        errors.append("Composed OpenAPI version must match API v0.18.0")
 
     bearer = contract.get("components", {}).get("securitySchemes", {}).get("HTTPBearer")
     if bearer != {"scheme": "bearer", "type": "http"}:
