@@ -157,10 +157,7 @@ class _PromisePage extends StatelessWidget {
         padding: padding,
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            minHeight: math.max(
-              0,
-              constraints.maxHeight - padding.vertical,
-            ),
+            minHeight: math.max(0, constraints.maxHeight - padding.vertical),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
