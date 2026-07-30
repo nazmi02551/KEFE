@@ -530,9 +530,7 @@ class _ConfidenceInput extends StatelessWidget {
                 button: true,
                 enabled: enabled,
                 child: ChoiceChip(
-                  key: ValueKey(
-                    'confidence-${question.id}-${_label(item)}',
-                  ),
+                  key: ValueKey(('confidence', question.id, _label(item))),
                   label: Text(_label(item)),
                   selected: _sameValue(value, item),
                   onSelected: enabled
