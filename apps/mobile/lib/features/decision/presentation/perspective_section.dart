@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design/kefe_theme.dart';
 import '../../../core/localization/kefe_strings.dart';
+import '../../community_reason/presentation/community_reason_section.dart';
 import '../../consensus/presentation/consensus_section.dart';
 import '../../progress/presentation/progress_section.dart';
+import '../../sharing/presentation/share_section.dart';
 import '../application/decision_controller.dart';
 import '../domain/decision_models.dart';
 
@@ -28,17 +30,38 @@ class PerspectiveSection extends ConsumerWidget {
     final decision = ref.watch(decisionControllerProvider);
     final sessionId = decision.sessionId;
     final caseVersionId = decision.caseData?.versionId;
-    final consensus = decision.reveal != null &&
-            sessionId != null &&
-            caseVersionId != null
+    final hasCommittedContext =
+        decision.reveal != null && sessionId != null && caseVersionId != null;
+    final consensus = hasCommittedContext
         ? ConsensusSection(
             sessionId: sessionId,
             caseVersionId: caseVersionId,
           )
         : null;
+    final community = hasCommittedContext
+        ? CommunityReasonSection(
+            sessionId: sessionId,
+            caseVersionId: caseVersionId,
+          )
+        : null;
+    final share = hasCommittedContext ? ShareSection(sessionId: sessionId) : null;
 
     if (state == PerspectiveUiState.idle) {
-      return consensus ?? const SizedBox.shrink();
+      if (!hasCommittedContext) return const SizedBox.shrink();
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (consensus != null) consensus,
+          if (community != null) ...[
+            const SizedBox(height: 20),
+            community,
+          ],
+          if (share != null) ...[
+            const SizedBox(height: 20),
+            share,
+          ],
+        ],
+      );
     }
 
     return Column(
@@ -123,8 +146,16 @@ class PerspectiveSection extends ConsumerWidget {
           const SizedBox(height: 20),
           consensus,
         ],
+        if (community != null) ...[
+          const SizedBox(height: 20),
+          community,
+        ],
         const SizedBox(height: 20),
         const ProgressSection(),
+        if (share != null) ...[
+          const SizedBox(height: 20),
+          share,
+        ],
       ],
     );
   }
@@ -218,37 +249,56 @@ class _LoadedState extends StatelessWidget {
             key: const ValueKey('perspective-methodology'),
             tilePadding: const EdgeInsets.symmetric(horizontal: 2),
             childrenPadding: const EdgeInsets.only(bottom: 8),
-            title: Text(
-              strings.perspectiveMethodology,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-            ),
+            title: Text(strings.perspectiveMethodologyTitle),
             children: [
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   snapshot.methodology.provenanceNote,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: KefeColorTokens.textMutedDark,
-                        height: 1.4,
-                      ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '${snapshot.methodology.sampleKind} · n=${snapshot.methodology.sampleSize}',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: KefeColorTokens.goldSoft,
-                      ),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PerspectiveCardView extends StatelessWidget {
+  const _PerspectiveCardView({required this.card});
+  final PerspectiveCard card;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: KefeColorTokens.surfaceDark.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: KefeColorTokens.borderDark),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            strings.perspectiveSlot(card.slot),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: KefeColorTokens.goldSoft,
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+          const SizedBox(height: 6),
+          Text(card.body),
+          const SizedBox(height: 8),
+          Text(
+            card.provenanceLabel,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -260,106 +310,17 @@ class _MethodNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(11),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: KefeColorTokens.rules.withValues(alpha: 0.07),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: KefeColorTokens.rules.withValues(alpha: 0.18),
-          ),
+          borderRadius: BorderRadius.circular(14),
+          color: KefeColorTokens.surfaceDark.withValues(alpha: 0.62),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 17, color: KefeColorTokens.rules),
+            Icon(icon, size: 18),
             const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                text,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: KefeColorTokens.textMutedDark,
-                    ),
-              ),
-            ),
+            Expanded(child: Text(text)),
           ],
         ),
       );
 }
-
-class _PerspectiveCardView extends StatelessWidget {
-  const _PerspectiveCardView({required this.card});
-  final PerspectiveCard card;
-
-  @override
-  Widget build(BuildContext context) {
-    final strings = KefeStrings.of(context);
-    final visual = _slotVisual(card.slot);
-    return Container(
-      key: ValueKey('perspective-card-${card.slot.name}'),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: visual.color.withValues(alpha: 0.055),
-        border: Border.all(color: visual.color.withValues(alpha: 0.26)),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: visual.color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: Icon(visual.icon, size: 16, color: visual.color),
-              ),
-              const SizedBox(width: 9),
-              Expanded(
-                child: Text(
-                  strings.perspectiveSlotLabel(card.slot),
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: visual.color,
-                        fontWeight: FontWeight.w900,
-                      ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 11),
-          Text(
-            card.body,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.45),
-          ),
-          const SizedBox(height: 11),
-          Text(
-            '${strings.perspectiveSourceLabel(card.sourceKind)} · ${card.provenanceLabel}',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: KefeColorTokens.textMutedDark,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-({Color color, IconData icon}) _slotVisual(PerspectiveSlot slot) => switch (slot) {
-      PerspectiveSlot.near => (
-          color: KefeColorTokens.success,
-          icon: Icons.thumb_up_alt_outlined,
-        ),
-      PerspectiveSlot.opposing => (
-          color: KefeColorTokens.empathy,
-          icon: Icons.swap_horiz_rounded,
-        ),
-      PerspectiveSlot.bridge => (
-          color: const Color(0xFFAA9CFF),
-          icon: Icons.hub_outlined,
-        ),
-      PerspectiveSlot.alternativeContext => (
-          color: KefeColorTokens.rules,
-          icon: Icons.change_circle_outlined,
-        ),
-    };
