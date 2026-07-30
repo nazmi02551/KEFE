@@ -89,17 +89,25 @@ def main() -> None:
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
 
+    overlay = build_overlay()
     rendered = json.dumps(
-        build_overlay(),
+        overlay,
         ensure_ascii=False,
         indent=2,
         sort_keys=True,
     ) + "\n"
     if args.check:
-        if not args.output.exists() or args.output.read_text(encoding="utf-8") != rendered:
-            raise SystemExit("Checked-in OpenAPI 0.20 overlay is stale or missing")
+        if not args.output.exists():
+            raise SystemExit("Checked-in OpenAPI 0.20 overlay is missing")
+        try:
+            checked = json.loads(args.output.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            raise SystemExit("Checked-in OpenAPI 0.20 overlay is invalid JSON") from exc
+        if checked != overlay:
+            raise SystemExit("Checked-in OpenAPI 0.20 overlay is stale")
         print(f"OpenAPI 0.20 overlay matches {args.output}")
         return
+
     args.output.write_text(rendered, encoding="utf-8")
     print(f"OpenAPI 0.20 overlay written to {args.output}")
 
