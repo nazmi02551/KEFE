@@ -1,13 +1,14 @@
 {
   "contract": "premium-reveal-slice2.v1",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "accepted",
   "tracks_issue": 100,
   "stack_base": "d9168a72116cb20563d3868f38f8a8f53184dc3c",
   "inherited_verified_visual_runtime": "21cc0faf76e5dfcf1c54953dd965b026c204865d",
   "slice": "REVEAL_COMMUNITY_KEFE_GAP",
   "governed_files": [
-    "apps/mobile/lib/features/decision/presentation/decision_flow_screen.dart"
+    "apps/mobile/lib/features/decision/presentation/decision_flow_screen.dart",
+    "apps/mobile/lib/features/decision/presentation/reveal_result_card.dart"
   ],
   "presentation": {
     "theme_adaptive_semantic_surfaces_required": true,
