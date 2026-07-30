@@ -59,7 +59,9 @@ class QuestionInputCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isConfidence ? strings.questionConfidence : strings.questionDecision,
+                        isConfidence
+                            ? strings.questionConfidence
+                            : strings.questionDecision,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: isConfidence
                               ? KefeColorTokens.goldSoft

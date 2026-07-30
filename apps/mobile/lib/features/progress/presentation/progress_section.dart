@@ -119,7 +119,9 @@ class _ProgressReady extends ConsumerWidget {
                   for (final item in progress.recentCases)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 6),
-                      child: Text('• ${item.title} · ${strings.domainName(item.primaryDomain)}'),
+                      child: Text(
+                        '• ${item.title} · ${strings.domainName(item.primaryDomain)}',
+                      ),
                     ),
                 ],
                 const SizedBox(height: 12),

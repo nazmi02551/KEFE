@@ -96,9 +96,7 @@ class _PublicShareScreenState extends ConsumerState<PublicShareScreen> {
               const SizedBox(height: 12),
               Chip(label: Text(strings.domainName(_share!.primaryDomain))),
               const SizedBox(height: 18),
-              Text(
-                strings.publicShareBlindFirst,
-              ),
+              Text(strings.publicShareBlindFirst),
               const SizedBox(height: 16),
               FilledButton.icon(
                 key: const ValueKey('public-share-weigh'),

@@ -43,9 +43,7 @@ class ShareSection extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              strings.shareCaseOnlyNote,
-            ),
+            Text(strings.shareCaseOnlyNote),
             const SizedBox(height: 12),
             if (created == null) ...[
               FilledButton.icon(
@@ -77,11 +75,7 @@ class ShareSection extends ConsumerWidget {
                         );
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              strings.shareCopied,
-                            ),
-                          ),
+                          SnackBar(content: Text(strings.shareCopied)),
                         );
                       },
                       icon: const Icon(Icons.copy_rounded),

@@ -326,12 +326,7 @@ class _Domains extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      _domainLabel(
-                        items[i].primaryDomain,
-                        strings.locale.languageCode,
-                      ),
-                    ),
+                    child: Text(strings.domainName(items[i].primaryDomain)),
                   ),
                   Text(
                     strings.journeyWeighCount(items[i].committedWeighCount),
@@ -376,7 +371,7 @@ class _Journeys extends StatelessWidget {
           const SizedBox(height: 12),
           for (var i = 0; i < items.length; i++) ...[
             Text(
-              _domainLabel(items[i].primaryDomain, strings.locale.languageCode),
+              strings.domainName(items[i].primaryDomain),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: KefeColorTokens.goldSoft,
                 fontWeight: FontWeight.w800,

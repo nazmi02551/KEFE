@@ -40,7 +40,7 @@ class CaseHeroHeader extends StatelessWidget {
             children: [
               _MetaPill(
                 icon: _domainIcon(caseData.domain),
-                label: _humanize(caseData.domain),
+                label: strings.domainName(caseData.domain),
                 color: KefeColorTokens.rules,
               ),
               _MetaPill(

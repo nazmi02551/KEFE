@@ -579,7 +579,8 @@ class _RevealCard extends StatelessWidget {
                                     percent: (selectedShare * 100).round(),
                                   )
                                 : strings.gapDifferenceInsight(
-                                    selectedPercent: (selectedShare * 100).round(),
+                                    selectedPercent: (selectedShare * 100)
+                                        .round(),
                                     gapPoints: gapPoints,
                                   ),
                             style: Theme.of(

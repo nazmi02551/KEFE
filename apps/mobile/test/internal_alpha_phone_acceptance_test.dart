@@ -59,124 +59,130 @@ Future<void> _openSettings(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('locale and theme switch persist through the shared preference store', (
-    tester,
-  ) async {
-    final preferences = MemoryAppPreferencesStore(
-      const AppPreferencesState(
-        locale: AppLocalePreference.tr,
-        theme: AppThemePreference.system,
-        loaded: true,
-      ),
-    );
+  testWidgets(
+    'locale and theme switch persist through the shared preference store',
+    (tester) async {
+      final preferences = MemoryAppPreferencesStore(
+        const AppPreferencesState(
+          locale: AppLocalePreference.tr,
+          theme: AppThemePreference.system,
+          loaded: true,
+        ),
+      );
 
-    await tester.pumpWidget(
-      _previewScope(preferences: preferences, privacy: true),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        _previewScope(preferences: preferences, privacy: true),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Keşfet'), findsOneWidget);
-    await _openSettings(tester);
+      expect(find.text('Keşfet'), findsOneWidget);
+      await _openSettings(tester);
 
-    await tester.tap(find.text('English'));
-    await tester.pumpAndSettle();
-    expect(preferences.value.locale, AppLocalePreference.en);
-    expect(find.text('Settings'), findsOneWidget);
+      await tester.tap(find.text('English'));
+      await tester.pumpAndSettle();
+      expect(preferences.value.locale, AppLocalePreference.en);
+      expect(find.text('Settings'), findsOneWidget);
 
-    await tester.tap(find.text('Dark'));
-    await tester.pumpAndSettle();
-    expect(preferences.value.theme, AppThemePreference.dark);
-    expect(
-      Theme.of(tester.element(find.byType(Scaffold).first)).brightness,
-      Brightness.dark,
-    );
+      await tester.tap(find.text('Dark'));
+      await tester.pumpAndSettle();
+      expect(preferences.value.theme, AppThemePreference.dark);
+      expect(
+        Theme.of(tester.element(find.byType(Scaffold).first)).brightness,
+        Brightness.dark,
+      );
 
-    await tester.tap(find.text('Privacy and data'));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('privacy-controls')), findsOneWidget);
-  });
+      await tester.tap(find.text('Privacy and data'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('privacy-controls')), findsOneWidget);
+    },
+  );
 
-  testWidgets('Explore save continuity and Weigh Commit Reveal survive together', (
-    tester,
-  ) async {
-    final preferences = MemoryAppPreferencesStore(
-      const AppPreferencesState(
-        locale: AppLocalePreference.tr,
-        theme: AppThemePreference.light,
-        loaded: true,
-      ),
-    );
-    final savedCases = MemorySavedCaseStore();
-    const caseId = PreviewDecisionRepository.caseId;
+  testWidgets(
+    'Explore save continuity and Weigh Commit Reveal survive together',
+    (tester) async {
+      final preferences = MemoryAppPreferencesStore(
+        const AppPreferencesState(
+          locale: AppLocalePreference.tr,
+          theme: AppThemePreference.light,
+          loaded: true,
+        ),
+      );
+      final savedCases = MemorySavedCaseStore();
+      const caseId = PreviewDecisionRepository.caseId;
 
-    await tester.pumpWidget(
-      _previewScope(preferences: preferences, savedCases: savedCases),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        _previewScope(preferences: preferences, savedCases: savedCases),
+      );
+      await tester.pumpAndSettle();
 
-    final save = find.byKey(const ValueKey('save-case-$caseId'));
-    await tester.ensureVisible(save);
-    await tester.tap(save);
-    await tester.pumpAndSettle();
+      final save = find.byKey(const ValueKey('save-case-$caseId'));
+      await tester.ensureVisible(save);
+      await tester.tap(save);
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Aktivite'));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('saved-cases-section')), findsOneWidget);
-    expect(find.byKey(const ValueKey('open-saved-case-$caseId')), findsOneWidget);
+      await tester.tap(find.text('Aktivite'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('saved-cases-section')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('open-saved-case-$caseId')),
+        findsOneWidget,
+      );
 
-    await tester.tap(find.text('Keşfet'));
-    await tester.pumpAndSettle();
-    final caseCard = find.byKey(const ValueKey('explore-case-$caseId'));
-    await tester.ensureVisible(caseCard);
-    await tester.tap(caseCard);
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Keşfet'));
+      await tester.pumpAndSettle();
+      final caseCard = find.byKey(const ValueKey('explore-case-$caseId'));
+      await tester.ensureVisible(caseCard);
+      await tester.tap(caseCard);
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
-    final option = find.byKey(
-      const ValueKey('option-Öncelikli ihtiyacı olana'),
-    );
-    await tester.ensureVisible(option);
-    await tester.tap(option);
-    await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
+      final option = find.byKey(
+        const ValueKey('option-Öncelikli ihtiyacı olana'),
+      );
+      await tester.ensureVisible(option);
+      await tester.tap(option);
+      await tester.pumpAndSettle();
 
-    final commit = find.byKey(const ValueKey('commit-button'));
-    await tester.ensureVisible(commit);
-    await tester.tap(commit);
-    await tester.pumpAndSettle();
+      final commit = find.byKey(const ValueKey('commit-button'));
+      await tester.ensureVisible(commit);
+      await tester.tap(commit);
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
-  });
+      expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
+    },
+  );
 
-  testWidgets('shared Case deep link remains Blind First before receiver Commit', (
-    tester,
-  ) async {
-    final preferences = MemoryAppPreferencesStore(
-      const AppPreferencesState(
-        locale: AppLocalePreference.en,
-        theme: AppThemePreference.system,
-        loaded: true,
-      ),
-    );
+  testWidgets(
+    'shared Case deep link remains Blind First before receiver Commit',
+    (tester) async {
+      final preferences = MemoryAppPreferencesStore(
+        const AppPreferencesState(
+          locale: AppLocalePreference.en,
+          theme: AppThemePreference.system,
+          loaded: true,
+        ),
+      );
 
-    await tester.pumpWidget(
-      _previewScope(preferences: preferences, sharing: true),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        _previewScope(preferences: preferences, sharing: true),
+      );
+      await tester.pumpAndSettle();
 
-    final routerContext = tester.element(
-      find.byKey(const ValueKey('primary-navigation')),
-    );
-    GoRouter.of(routerContext).go('/share/inbound-phone-acceptance');
-    await tester.pumpAndSettle();
+      final routerContext = tester.element(
+        find.byKey(const ValueKey('primary-navigation')),
+      );
+      GoRouter.of(routerContext).go('/share/inbound-phone-acceptance');
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('public-share-weigh')), findsOneWidget);
-    expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
-    expect(find.text('A KEFE case was shared'), findsOneWidget);
+      expect(find.byKey(const ValueKey('public-share-weigh')), findsOneWidget);
+      expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
+      expect(find.text('A KEFE case was shared'), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('public-share-weigh')));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('public-share-weigh')));
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
-    expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
-  });
+      expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
+      expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
+    },
+  );
 }

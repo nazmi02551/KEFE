@@ -76,9 +76,7 @@ class _CommunityReasonSectionState
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              strings.communityPrivateNote,
-            ),
+            Text(strings.communityPrivateNote),
             if (state.snapshot != null &&
                 state.snapshot!.tagPatternCounts.isNotEmpty) ...[
               const SizedBox(height: 14),
@@ -167,9 +165,7 @@ class _CommunityReasonSectionState
             ],
             if (state.errorCode != null) ...[
               const SizedBox(height: 10),
-              Text(
-                strings.communityUnavailable(state.errorCode!),
-              ),
+              Text(strings.communityUnavailable(state.errorCode!)),
             ],
             if (state.snapshot != null && state.snapshot!.items.isNotEmpty) ...[
               const SizedBox(height: 18),

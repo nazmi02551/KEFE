@@ -65,11 +65,7 @@ class _ConsensusSectionState extends ConsumerState<ConsensusSection> {
                 child: CircularProgressIndicator(strokeWidth: 2.5),
               ),
               const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  strings.consensusLoading,
-                ),
-              ),
+              Expanded(child: Text(strings.consensusLoading)),
             ],
           ),
         );
@@ -141,9 +137,7 @@ class _ConsensusParticipationCard extends ConsumerWidget {
         children: [
           const _ConsensusHeader(),
           const SizedBox(height: 14),
-          _IntegrityBadge(
-            text: strings.consensusExposed,
-          ),
+          _IntegrityBadge(text: strings.consensusExposed),
           const SizedBox(height: 16),
           Text(
             card.proposition,
@@ -216,9 +210,7 @@ class _ConsensusParticipationCard extends ConsumerWidget {
                   )
                 : const Icon(Icons.how_to_vote_outlined),
             label: Text(
-              submitting
-                  ? strings.consensusSubmitting
-                  : strings.consensusJoin,
+              submitting ? strings.consensusSubmitting : strings.consensusJoin,
             ),
           ),
           const SizedBox(height: 10),

@@ -117,8 +117,7 @@ extension InternalAlphaStrings on KefeStrings {
       _iaTr ? 'Vaka bağlantısı oluştur' : 'Create case link';
   String get shareCopied => _iaTr ? 'Bağlantı kopyalandı.' : 'Link copied.';
   String get shareCopy => _iaTr ? 'Kopyala' : 'Copy';
-  String get shareRevoke =>
-      _iaTr ? 'Bağlantıyı iptal et' : 'Revoke link';
+  String get shareRevoke => _iaTr ? 'Bağlantıyı iptal et' : 'Revoke link';
   String shareFailure(String code) =>
       '${_iaTr ? 'Paylaşım oluşturulamadı' : 'Share failed'} · $code';
   String get publicShareUnavailable => _iaTr
@@ -130,17 +129,15 @@ extension InternalAlphaStrings on KefeStrings {
   String get publicShareBlindFirst => _iaTr
       ? 'Paylaşan kişinin kararı burada gösterilmez. Önce aynı vakayı kendin tart ve kararını sabitle; topluluk sonucu ancak kendi Commit’inden sonra açılır.'
       : 'The sender’s decision is never shown here. Weigh the same case and Commit first; collective results unlock only after your own Commit.';
-  String get publicShareWeigh =>
-      _iaTr ? 'Ben de tartayım' : 'Weigh it myself';
+  String get publicShareWeigh => _iaTr ? 'Ben de tartayım' : 'Weigh it myself';
 
   String get communityTitle =>
       _iaTr ? 'Topluluk gerekçeleri' : 'Community reasons';
   String get communityPrivateNote => _iaTr
       ? 'Özel gerekçen burada otomatik yayınlanmaz. Topluluğa katkı ayrı bir eylemdir; metinli katkılar moderasyondan geçer.'
       : 'Your private reason is never published here automatically. Community contribution is a separate action; text contributions are moderated.';
-  String get communityPublishHeading => _iaTr
-      ? 'Sen de ayrı bir gerekçe yayınla'
-      : 'Publish a separate reason';
+  String get communityPublishHeading =>
+      _iaTr ? 'Sen de ayrı bir gerekçe yayınla' : 'Publish a separate reason';
   String get communityOptionalText =>
       _iaTr ? 'İsteğe bağlı kısa metin' : 'Optional short text';
   String get communityModerationNote => _iaTr
@@ -159,14 +156,12 @@ extension InternalAlphaStrings on KefeStrings {
       '${_iaTr ? 'Topluluk verisi kullanılamıyor' : 'Community data unavailable'} · $code';
   String get communityPublished =>
       _iaTr ? 'Yayınlanan gerekçeler' : 'Published reasons';
-  String get communityResonates =>
-      _iaTr ? 'Bende yankılandı' : 'Resonates';
+  String get communityResonates => _iaTr ? 'Bende yankılandı' : 'Resonates';
   String get communityUseful => _iaTr ? 'Faydalı' : 'Useful';
   String get communityReport => _iaTr ? 'Raporla' : 'Report';
 
-  String get consensusLoading => _iaTr
-      ? 'Konsensüs kartı hazırlanıyor…'
-      : 'Preparing consensus card…';
+  String get consensusLoading =>
+      _iaTr ? 'Konsensüs kartı hazırlanıyor…' : 'Preparing consensus card…';
   String get consensusCommitFirst =>
       _iaTr ? 'Önce kararını sabitle' : 'Commit your decision first';
   String get consensusCommitFirstBody => _iaTr
@@ -194,8 +189,7 @@ extension InternalAlphaStrings on KefeStrings {
       _iaTr ? 'GEREKÇE ÖRÜNTÜLERİ' : 'REASON PATTERNS';
   String get consensusEyebrow =>
       _iaTr ? 'WE · ORTAK ZEMİN' : 'WE · COMMON GROUND';
-  String get consensusCardTitle =>
-      _iaTr ? 'Konsensüs Kartı' : 'Consensus Card';
+  String get consensusCardTitle => _iaTr ? 'Konsensüs Kartı' : 'Consensus Card';
   String consensusUnavailable(String? code) =>
       '${_iaTr ? 'Konsensüs geçici olarak kullanılamıyor' : 'Consensus temporarily unavailable'}${code == null ? '' : ' · $code'}';
   String consensusStanceLabel(String code) => switch (code) {
@@ -218,11 +212,10 @@ extension InternalAlphaStrings on KefeStrings {
     'TECHNOLOGY' || 'TECHNOLOGY_AI' => _iaTr ? 'Teknoloji' : 'Technology',
     'SPORTS' => _iaTr ? 'Spor' : 'Sports',
     'CIVIC' || 'CITY_PUBLIC_LIFE' => _iaTr ? 'Kamusal' : 'Civic',
-    'WORK_ECONOMY' || 'WORK_BUSINESS' =>
-      _iaTr ? 'İş & Ekonomi' : 'Work & Economy',
+    'WORK_ECONOMY' ||
+    'WORK_BUSINESS' => _iaTr ? 'İş & Ekonomi' : 'Work & Economy',
     'EDUCATION' => _iaTr ? 'Eğitim' : 'Education',
-    'FAMILY_PARENTING' =>
-      _iaTr ? 'Aile & Ebeveynlik' : 'Family & Parenting',
+    'FAMILY_PARENTING' => _iaTr ? 'Aile & Ebeveynlik' : 'Family & Parenting',
     'CULTURE_MEDIA' => _iaTr ? 'Kültür & Medya' : 'Culture & Media',
     _ => code.replaceAll('_', ' '),
   };
@@ -230,8 +223,7 @@ extension InternalAlphaStrings on KefeStrings {
   String get contextEventSummary => _iaTr ? 'Olay özeti' : 'Event summary';
   String get contextInformationStatus =>
       _iaTr ? 'Bilgi durumu' : 'Information status';
-  String get journeyLabel =>
-      _iaTr ? 'KARAR YOLCULUĞU' : 'DECISION JOURNEY';
+  String get journeyLabel => _iaTr ? 'KARAR YOLCULUĞU' : 'DECISION JOURNEY';
   String get stepCase => _iaTr ? 'Olay' : 'Case';
   String get stepWeigh => _iaTr ? 'Tartım' : 'Weigh';
   String get stepResult => _iaTr ? 'Sonuç' : 'Result';
@@ -259,21 +251,19 @@ extension InternalAlphaStrings on KefeStrings {
   String get decisionYou => _iaTr ? 'Sen' : 'You';
   String get balanceNoSelection =>
       _iaTr ? 'Henüz seçim yok' : 'No selection yet';
-  String balanceSemantics(String selectedLabel) => _iaTr
-      ? 'KEFE terazisi. $selectedLabel'
-      : 'KEFE balance. $selectedLabel';
+  String balanceSemantics(String selectedLabel) =>
+      _iaTr ? 'KEFE terazisi. $selectedLabel' : 'KEFE balance. $selectedLabel';
   String resultMethodology({
     required int sampleSize,
     required String confidence,
-  }) => '${trustedSample} · n=$sampleSize · ${confidenceLabel(confidence)}';
+  }) => '$trustedSample · n=$sampleSize · ${confidenceLabel(confidence)}';
   String confidenceLabel(String code) => switch (code) {
     'HIGH' => _iaTr ? 'Yüksek güven' : 'High confidence',
     'MEDIUM' => _iaTr ? 'Orta güven' : 'Medium confidence',
     'LOW' => _iaTr ? 'Düşük güven' : 'Low confidence',
     _ => code.replaceAll('_', ' '),
   };
-  String get perspectiveEyebrow =>
-      _iaTr ? 'KARŞI GÖRÜŞLER' : 'COUNTER VIEWS';
+  String get perspectiveEyebrow => _iaTr ? 'KARŞI GÖRÜŞLER' : 'COUNTER VIEWS';
   String get questionConfidence => _iaTr ? 'EMİNLİK' : 'CONFIDENCE';
   String get questionDecision => _iaTr ? 'KARAR' : 'DECISION';
   String get reasonsEyebrow => _iaTr ? 'GEREKÇELER' : 'REASONS';

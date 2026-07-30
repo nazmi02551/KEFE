@@ -83,9 +83,7 @@ class PrivacyControlsSection extends ConsumerWidget {
             ),
             if (state.errorCode != null) ...[
               const SizedBox(height: 8),
-              Text(
-                strings.privacyFailure(state.errorCode!),
-              ),
+              Text(strings.privacyFailure(state.errorCode!)),
             ],
           ],
         ),

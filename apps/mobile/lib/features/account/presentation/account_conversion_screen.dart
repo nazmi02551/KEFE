@@ -33,9 +33,7 @@ class _AccountConversionScreenState
     final controller = ref.read(accountControllerProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(strings.accountTitle),
-      ),
+      appBar: AppBar(title: Text(strings.accountTitle)),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(20),
@@ -48,9 +46,7 @@ class _AccountConversionScreenState
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              strings.accountBody,
-            ),
+            Text(strings.accountBody),
             const SizedBox(height: 20),
             if (state.uiState == AccountUiState.enterIdentifier ||
                 state.uiState == AccountUiState.requesting ||
@@ -94,9 +90,7 @@ class _AccountConversionScreenState
                 onPressed: state.uiState == AccountUiState.requesting
                     ? null
                     : controller.requestOtp,
-                child: Text(
-                  strings.accountSendCode,
-                ),
+                child: Text(strings.accountSendCode),
               ),
             ],
             if (state.uiState == AccountUiState.enterCode ||
