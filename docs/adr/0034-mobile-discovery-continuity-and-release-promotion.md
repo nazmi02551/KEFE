@@ -18,13 +18,24 @@ The Drive v3.4 canonical product documents define four primary consumer destinat
 
 The next milestone should materially improve how a person finds a relevant Case and returns to it later while correcting the Product Preview shell to the canonical navigation model. Search, domain filtering, saved Cases and Activity continuity form one coherent user journey and can be shared by production and Product Preview without changing Commit-before-Reveal or introducing preview fallback.
 
+A phone-test acceptance gate also requires an installable binary. Treating every installable artifact as an already promoted numbered release creates a circular dependency: the build cannot be promoted before phone testing, but phone testing cannot occur without a build. This ADR therefore distinguishes an explicitly labelled release candidate from the promoted v9 release.
+
 ## Decision
 
-### 1. CI artifact generation and APK promotion are separate
+### 1. CI artifacts, release candidates and promoted APKs are distinct
 
-Mobile CI may continue to generate an Android artifact for every relevant branch or main build. A numbered phone-test APK is promoted to the user only after a milestone acceptance gate is complete.
+Mobile CI may continue to generate an Android artifact for every relevant branch or main build. Those continuous artifacts are internal engineering evidence and are not automatically distributed.
 
-The next promoted version is v9. Documentation-only, navigation-only or single-control changes do not independently justify a new numbered APK.
+A human phone-test candidate may be distributed only when all automated gates pass on the exact commit and the binary is explicitly labelled `v9-rcN`. A release candidate:
+
+- is an installable test artifact;
+- is not the promoted v9 release;
+- uses an Android prerelease version such as `0.9.0-rc.1+9`;
+- visibly identifies itself as `Product Preview v9-rc1`;
+- records its workflow run, artifact id and SHA-256 values;
+- is accompanied by the v9 phone-test checklist.
+
+The next promoted version is v9. It may be named and presented as v9 only after the human phone-test checklist and final promotion record pass. Documentation-only, navigation-only or single-control changes do not independently justify a new numbered release.
 
 ### 2. v9 is the Discovery, Activity and Continuity milestone
 
@@ -87,17 +98,28 @@ Product Preview may expose Radar and Atlas through clearly secondary controls fo
 
 `docs/contracts/mobile-discovery-analytics.v1.yaml` defines the versioned event vocabulary for search, filters, save/unsave, Activity opening and saved-Case continuation. A provider-neutral delivery adapter is deferred, but no non-noop analytics delivery may be added without schema validation and the stated privacy constraints.
 
-## APK promotion gate
+## Release-candidate gate
+
+A `v9-rcN` candidate may be supplied for phone testing only when:
+
+- all eleven milestone capabilities are implemented;
+- Mobile CI analysis, tests and Android build pass on the exact candidate commit;
+- API CI and production preview-isolation checks pass;
+- the Drive v3.4 alignment checkpoint and phone-test checklist exist;
+- the candidate artifact identity, ZIP digest and extracted APK SHA-256 are recorded;
+- the application and Android package both identify the build as a prerelease candidate.
+
+## v9 promotion gate
 
 v9 is promoted only when:
 
-- all eleven milestone capabilities are complete;
-- Mobile CI analysis, tests and Android build pass;
-- production preview-isolation checks pass;
-- the Drive v3.4 alignment checkpoint and phone-test checklist are recorded;
-- the resulting artifact identity and SHA-256 are captured.
+- the release-candidate gate has passed;
+- all applicable human phone-test checklist items pass;
+- blocking phone feedback is fixed and reverified;
+- the final merge commit and promoted artifact identity are captured;
+- the visible prerelease suffix is removed.
 
-Until then, generated artifacts remain internal CI outputs and are not presented as a new numbered APK.
+Until that final gate passes, a distributed build must be described as a release candidate, never as the promoted v9 release.
 
 ## Deferred
 
@@ -114,6 +136,8 @@ Until then, generated artifacts remain internal CI outputs and are not presented
 
 - release versions represent meaningful user-visible milestones;
 - CI remains frequent without forcing frequent public APK delivery;
+- phone testing can occur without falsely promoting an unfinished release;
+- release-candidate binaries are traceable and visibly distinct from promoted builds;
 - users can find and resume Cases with durable device-local continuity;
 - Activity becomes the canonical place for return-later and decision-history behavior;
 - My KEFE remains methodologically clean and descriptive;
