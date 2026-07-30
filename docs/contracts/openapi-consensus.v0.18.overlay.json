@@ -1,0 +1,231 @@
+{
+  "components": {
+    "schemas": {
+      "ConsensusAggregateResponse": {
+        "properties": {
+          "contribution_class": {"title": "Contribution Class", "type": "string"},
+          "generated_at": {"format": "date-time", "title": "Generated At", "type": "string"},
+          "methodology_version": {"title": "Methodology Version", "type": "string"},
+          "provenance_note": {"title": "Provenance Note", "type": "string"},
+          "reason_pattern_distribution": {
+            "additionalProperties": {"type": "number"},
+            "title": "Reason Pattern Distribution",
+            "type": "object"
+          },
+          "sample_size": {"title": "Sample Size", "type": "integer"},
+          "stance_distribution": {
+            "additionalProperties": {"type": "number"},
+            "title": "Stance Distribution",
+            "type": "object"
+          }
+        },
+        "required": [
+          "sample_size",
+          "stance_distribution",
+          "reason_pattern_distribution",
+          "contribution_class",
+          "methodology_version",
+          "generated_at",
+          "provenance_note"
+        ],
+        "title": "ConsensusAggregateResponse",
+        "type": "object"
+      },
+      "ConsensusCardResponse": {
+        "properties": {
+          "aggregate": {
+            "anyOf": [
+              {"$ref": "#/components/schemas/ConsensusAggregateResponse"},
+              {"type": "null"}
+            ]
+          },
+          "card_id": {"format": "uuid", "title": "Card Id", "type": "string"},
+          "card_version_id": {"format": "uuid", "title": "Card Version Id", "type": "string"},
+          "case_version_id": {"format": "uuid", "title": "Case Version Id", "type": "string"},
+          "contribution_class": {"title": "Contribution Class", "type": "string"},
+          "max_reason_tags": {"title": "Max Reason Tags", "type": "integer"},
+          "methodology_version": {"title": "Methodology Version", "type": "string"},
+          "participation": {
+            "anyOf": [
+              {"$ref": "#/components/schemas/ConsensusParticipationResponse"},
+              {"type": "null"}
+            ]
+          },
+          "participation_state": {"title": "Participation State", "type": "string"},
+          "proposition": {"title": "Proposition", "type": "string"},
+          "reason_tag_codes": {
+            "items": {"type": "string"},
+            "title": "Reason Tag Codes",
+            "type": "array"
+          },
+          "stance_codes": {
+            "items": {"type": "string"},
+            "title": "Stance Codes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "card_id",
+          "card_version_id",
+          "case_version_id",
+          "proposition",
+          "stance_codes",
+          "reason_tag_codes",
+          "max_reason_tags",
+          "methodology_version",
+          "participation_state",
+          "contribution_class"
+        ],
+        "title": "ConsensusCardResponse",
+        "type": "object"
+      },
+      "ConsensusCardsResponse": {
+        "properties": {
+          "items": {
+            "items": {"$ref": "#/components/schemas/ConsensusCardResponse"},
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": ["items"],
+        "title": "ConsensusCardsResponse",
+        "type": "object"
+      },
+      "ConsensusParticipationRequest": {
+        "properties": {
+          "reason_tag_codes": {
+            "items": {"type": "string"},
+            "maxItems": 10,
+            "title": "Reason Tag Codes",
+            "type": "array"
+          },
+          "stance_code": {
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Stance Code",
+            "type": "string"
+          }
+        },
+        "required": ["stance_code"],
+        "title": "ConsensusParticipationRequest",
+        "type": "object"
+      },
+      "ConsensusParticipationResponse": {
+        "properties": {
+          "contribution_class": {"title": "Contribution Class", "type": "string"},
+          "participated_at": {"format": "date-time", "title": "Participated At", "type": "string"},
+          "reason_tag_codes": {
+            "items": {"type": "string"},
+            "title": "Reason Tag Codes",
+            "type": "array"
+          },
+          "stance_code": {"title": "Stance Code", "type": "string"}
+        },
+        "required": [
+          "stance_code",
+          "reason_tag_codes",
+          "contribution_class",
+          "participated_at"
+        ],
+        "title": "ConsensusParticipationResponse",
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/v1/weigh-sessions/{session_id}/consensus-cards": {
+      "get": {
+        "operationId": "list_consensus_cards_v1_weigh_sessions__session_id__consensus_cards_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {"format": "uuid", "title": "Session Id", "type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ConsensusCardsResponse"}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/HTTPValidationError"}
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [{"HTTPBearer": []}],
+        "summary": "List Consensus Cards",
+        "tags": ["Consensus"]
+      }
+    },
+    "/v1/weigh-sessions/{session_id}/consensus-cards/{card_id}/participation": {
+      "post": {
+        "operationId": "participate_in_consensus_v1_weigh_sessions__session_id__consensus_cards__card_id__participation_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {"format": "uuid", "title": "Session Id", "type": "string"}
+          },
+          {
+            "in": "path",
+            "name": "card_id",
+            "required": true,
+            "schema": {"format": "uuid", "title": "Card Id", "type": "string"}
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 8,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/ConsensusParticipationRequest"}
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ConsensusCardResponse"}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/HTTPValidationError"}
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [{"HTTPBearer": []}],
+        "summary": "Participate In Consensus",
+        "tags": ["Consensus"]
+      }
+    }
+  },
+  "target_version": "0.18.0"
+}
