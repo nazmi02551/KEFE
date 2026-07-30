@@ -1,11 +1,13 @@
 import 'package:flutter/widgets.dart';
 
+import '../../core/localization/kefe_locale_catalog.dart';
+
 class AtlasPreviewStrings {
-  const AtlasPreviewStrings._(this._values);
+  const AtlasPreviewStrings._(this._locale);
 
-  final Map<String, String> _values;
+  final Locale _locale;
 
-  static const _catalog = <String, Map<String, String>>{
+  static const KefeLocaleResources _catalog = {
     'tr': {
       'eyebrow': 'KEFE ATLAS',
       'title': 'Aynı soru,\nfarklı dünyalar.',
@@ -46,14 +48,13 @@ class AtlasPreviewStrings {
     },
   };
 
-  static AtlasPreviewStrings of(BuildContext context) {
-    final locale = Localizations.localeOf(context);
-    return AtlasPreviewStrings._(
-      _catalog[locale.languageCode] ?? _catalog['en']!,
-    );
-  }
+  static KefeLocaleResources get resources => _catalog;
 
-  String _text(String id) => _values[id] ?? _catalog['en']![id] ?? id;
+  static AtlasPreviewStrings of(BuildContext context) =>
+      AtlasPreviewStrings._(Localizations.localeOf(context));
+
+  String _text(String id) =>
+      KefeLocaleCatalog.resolve(locale: _locale, resources: _catalog, key: id);
 
   String get eyebrow => _text('eyebrow');
   String get title => _text('title');

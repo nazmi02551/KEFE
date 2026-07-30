@@ -1,11 +1,13 @@
 import 'package:flutter/widgets.dart';
 
+import '../../core/localization/kefe_locale_catalog.dart';
+
 class RadarPreviewStrings {
-  const RadarPreviewStrings._(this._values);
+  const RadarPreviewStrings._(this._locale);
 
-  final Map<String, String> _values;
+  final Locale _locale;
 
-  static const _catalog = <String, Map<String, String>>{
+  static const KefeLocaleResources _catalog = {
     'tr': {
       'eyebrow': 'KEFE RADAR',
       'title': 'Dünya şu an\nneyi tartışıyor?',
@@ -48,13 +50,13 @@ class RadarPreviewStrings {
     },
   };
 
-  static RadarPreviewStrings of(BuildContext context) {
-    final locale = Localizations.localeOf(context);
-    final values = _catalog[locale.languageCode] ?? _catalog['en']!;
-    return RadarPreviewStrings._(values);
-  }
+  static KefeLocaleResources get resources => _catalog;
 
-  String _text(String id) => _values[id] ?? _catalog['en']![id] ?? id;
+  static RadarPreviewStrings of(BuildContext context) =>
+      RadarPreviewStrings._(Localizations.localeOf(context));
+
+  String _text(String id) =>
+      KefeLocaleCatalog.resolve(locale: _locale, resources: _catalog, key: id);
 
   String get eyebrow => _text('eyebrow');
   String get title => _text('title');
