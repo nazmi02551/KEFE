@@ -6,12 +6,11 @@ import 'package:kefe_mobile/features/decision/application/decision_controller.da
 import 'package:kefe_mobile/features/decision/data/preview_decision_repository.dart';
 import 'package:kefe_mobile/features/progress/application/progress_controller.dart';
 import 'package:kefe_mobile/features/progress/data/preview_progress_repository.dart';
-import 'package:kefe_mobile/features/saved_cases/application/saved_cases_controller.dart';
 import 'package:kefe_mobile/features/saved_cases/data/saved_case_store.dart';
 
 void main() {
   testWidgets(
-    'standalone production Explore opens actor-scoped My KEFE without preview shell',
+    'production exposes four canonical destinations without preview shell data',
     (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -29,21 +28,29 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final openMyKefe = find.byKey(const ValueKey('open-my-kefe'));
-      expect(openMyKefe, findsOneWidget);
+      expect(find.byKey(const ValueKey('primary-navigation')), findsOneWidget);
+      expect(find.byType(NavigationDestination), findsNWidgets(4));
+      expect(find.text('Keşfet'), findsOneWidget);
+      expect(find.text('Tartım'), findsOneWidget);
+      expect(find.text('Aktivite'), findsOneWidget);
+      expect(find.text('My KEFE'), findsOneWidget);
       expect(find.byKey(const ValueKey('preview-build-identity')), findsNothing);
+      expect(find.byKey(const ValueKey('open-preview-radar')), findsNothing);
+      expect(find.byKey(const ValueKey('open-preview-atlas')), findsNothing);
 
-      await tester.tap(openMyKefe);
+      await tester.tap(find.text('My KEFE'));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('my-kefe-journey')), findsOneWidget);
-      expect(find.text('My KEFE'), findsOneWidget);
+      expect(find.byKey(const ValueKey('saved-cases-section')), findsNothing);
       expect(find.byKey(const ValueKey('preview-build-identity')), findsNothing);
 
-      await tester.tap(find.byType(BackButton));
+      await tester.tap(find.text('Aktivite'));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('open-my-kefe')), findsOneWidget);
+      expect(find.byKey(const ValueKey('activity-screen')), findsOneWidget);
+      expect(find.byKey(const ValueKey('saved-cases-section')), findsOneWidget);
+      expect(find.byKey(const ValueKey('preview-build-identity')), findsNothing);
     },
   );
 }
