@@ -8,11 +8,10 @@ class PreviewPrivacyRepository implements PrivacyRepository {
     return {
       'preview': true,
       'deleted': _deleted,
-      'retention': {
-        'mode': 'PRODUCT_PREVIEW_SAMPLE_ONLY',
-      },
+      'retention': {'mode': 'PRODUCT_PREVIEW_SAMPLE_ONLY'},
       'product_data': {
-        'note': 'No production credentials or another actor data are present in Product Preview.',
+        'note':
+            'No production credentials or another actor data are present in Product Preview.',
       },
     };
   }
