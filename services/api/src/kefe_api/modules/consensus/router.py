@@ -70,7 +70,7 @@ def _response(view: ConsensusCardView) -> ConsensusCardResponse:
     participation = view.participation
     aggregate = view.aggregate
     return ConsensusCardResponse(
-        card_id=view.card.id,
+        card_id=view.card.card_id,
         card_version_id=view.card.id,
         case_version_id=view.card.case_version_id,
         proposition=view.card.proposition,
@@ -144,7 +144,7 @@ def participate_in_consensus(
         service.participate(
             actor_id=principal.actor_id,
             session_id=session_id,
-            card_version_id=card_id,
+            card_id=card_id,
             stance_code=body.stance_code,
             reason_tag_codes=body.reason_tag_codes,
             idempotency_key=idempotency_key,
