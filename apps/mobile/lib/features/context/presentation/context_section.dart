@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/design/kefe_surface.dart';
 import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/internal_alpha_strings.dart';
+import '../../../core/localization/kefe_content_localizer.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../application/context_controller.dart';
 import '../domain/context_models.dart';
@@ -37,7 +38,8 @@ class ContextSection extends ConsumerWidget {
             Text(strings.contextUnavailable, key: const ValueKey('context-error')),
             const SizedBox(height: 12),
             OutlinedButton(
-              onPressed: () => ref.invalidate(contextSnapshotProvider(caseVersionId)),
+              onPressed: () =>
+                  ref.invalidate(contextSnapshotProvider(caseVersionId)),
               child: Text(strings.contextRetry),
             ),
           ],
@@ -58,18 +60,23 @@ class ContextSection extends ConsumerWidget {
   }
 }
 
-class _ContextContent extends StatelessWidget {
+class _ContextContent extends ConsumerWidget {
   const _ContextContent({required this.snapshot});
 
   final CaseContextSnapshot snapshot;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final strings = KefeStrings.of(context);
     final visual = context.kefeVisual;
+    final content = ref.watch(kefeContentLocalizerProvider);
     final counts = <String, int>{};
     for (final block in snapshot.blocks) {
-      counts.update(block.claimStatus, (value) => value + 1, ifAbsent: () => 1);
+      counts.update(
+        block.claimStatus,
+        (value) => value + 1,
+        ifAbsent: () => 1,
+      );
     }
 
     return Column(
@@ -83,7 +90,9 @@ class _ContextContent extends StatelessWidget {
               decoration: BoxDecoration(
                 color: visual.subtleGoldSurface,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: visual.gold.withValues(alpha: 0.18)),
+                border: Border.all(
+                  color: visual.gold.withValues(alpha: 0.18),
+                ),
               ),
               child: Icon(Icons.article_outlined, color: visual.goldSoft),
             ),
@@ -130,7 +139,12 @@ class _ContextContent extends StatelessWidget {
         ],
         const SizedBox(height: 18),
         for (final block in snapshot.essentialBlocks) ...[
-          _ContextBlockTile(block: block, snapshot: snapshot),
+          _ContextBlockTile(
+            block: block,
+            snapshot: snapshot,
+            content: content,
+            locale: strings.locale,
+          ),
           const SizedBox(height: 12),
         ],
         if (snapshot.detailBlocks.isNotEmpty)
@@ -150,7 +164,12 @@ class _ContextContent extends StatelessWidget {
               ),
               children: [
                 for (final block in snapshot.detailBlocks) ...[
-                  _ContextBlockTile(block: block, snapshot: snapshot),
+                  _ContextBlockTile(
+                    block: block,
+                    snapshot: snapshot,
+                    content: content,
+                    locale: strings.locale,
+                  ),
                   const SizedBox(height: 12),
                 ],
               ],
@@ -193,9 +212,16 @@ class _ContextContent extends StatelessWidget {
                         size: 20,
                       ),
                     ),
-                    title: Text(source.title),
+                    title: Text(
+                      content.text(
+                        namespace: KefeContentNamespace.contextSourceTitle,
+                        id: source.id,
+                        locale: strings.locale,
+                        fallback: source.title,
+                      ),
+                    ),
                     subtitle: Text(
-                      '${source.publisher} · ${strings.contextSourceKind(source.sourceKind)}',
+                      '${content.text(namespace: KefeContentNamespace.contextPublisher, id: source.publisher, locale: strings.locale, fallback: source.publisher)} · ${strings.contextSourceKind(source.sourceKind)}',
                       style: TextStyle(color: visual.mutedForeground),
                     ),
                   ),
@@ -250,10 +276,17 @@ class _StatusSummary extends StatelessWidget {
 }
 
 class _ContextBlockTile extends StatelessWidget {
-  const _ContextBlockTile({required this.block, required this.snapshot});
+  const _ContextBlockTile({
+    required this.block,
+    required this.snapshot,
+    required this.content,
+    required this.locale,
+  });
 
   final CaseContextBlock block;
   final CaseContextSnapshot snapshot;
+  final KefeContentLocalizer content;
+  final Locale locale;
 
   @override
   Widget build(BuildContext context) {
@@ -264,11 +297,25 @@ class _ContextBlockTile extends StatelessWidget {
         .whereType<CaseContextSource>()
         .toList(growable: false);
     final statusColor = _statusColor(context, block.claimStatus);
+    final title = content.text(
+      namespace: KefeContentNamespace.contextBlockTitle,
+      id: block.id,
+      locale: locale,
+      fallback: block.title,
+    );
+    final body = content.text(
+      namespace: KefeContentNamespace.contextBlockBody,
+      id: block.id,
+      locale: locale,
+      fallback: block.body,
+    );
 
     return Container(
       decoration: BoxDecoration(
         color: visual.surfaceSunken,
-        border: Border.all(color: visual.border.withValues(alpha: 0.86)),
+        border: Border.all(
+          color: visual.border.withValues(alpha: 0.86),
+        ),
         borderRadius: BorderRadius.circular(17),
       ),
       child: Padding(
@@ -281,7 +328,7 @@ class _ContextBlockTile extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    block.title,
+                    title,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w900,
                     ),
@@ -289,7 +336,10 @@ class _ContextBlockTile extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(99),
@@ -306,7 +356,7 @@ class _ContextBlockTile extends StatelessWidget {
             ),
             const SizedBox(height: 9),
             Text(
-              block.body,
+              body,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 height: 1.48,
                 color: visual.foreground.withValues(alpha: 0.90),
@@ -316,11 +366,25 @@ class _ContextBlockTile extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Icon(Icons.link_rounded, size: 15, color: visual.mutedForeground),
+                  Icon(
+                    Icons.link_rounded,
+                    size: 15,
+                    color: visual.mutedForeground,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      linkedSources.map((source) => source.publisher).join(' · '),
+                      linkedSources
+                          .map(
+                            (source) => content.text(
+                              namespace:
+                                  KefeContentNamespace.contextPublisher,
+                              id: source.publisher,
+                              locale: locale,
+                              fallback: source.publisher,
+                            ),
+                          )
+                          .join(' · '),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: visual.mutedForeground,
                       ),
