@@ -89,7 +89,9 @@ class SharedPreferencesAppPreferencesStore implements AppPreferencesStore {
 }
 
 class MemoryAppPreferencesStore implements AppPreferencesStore {
-  MemoryAppPreferencesStore([this.value = const AppPreferencesState(loaded: true)]);
+  MemoryAppPreferencesStore([
+    this.value = const AppPreferencesState(loaded: true),
+  ]);
 
   AppPreferencesState value;
 
