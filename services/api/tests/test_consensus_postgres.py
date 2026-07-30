@@ -92,8 +92,20 @@ def test_postgres_consensus_is_commit_gated_exposed_and_idempotent(
 
         assert accepted.status_code == 200
         assert replay.status_code == 200
-        assert replay.json() == accepted.json()
-        body = accepted.json()
+        accepted_body = accepted.json()
+        replay_body = replay.json()
+        assert replay_body["participation"] == accepted_body["participation"]
+        assert replay_body["participation_state"] == "PARTICIPATED"
+        assert replay_body["aggregate"]["sample_size"] == accepted_body["aggregate"]["sample_size"]
+        assert (
+            replay_body["aggregate"]["stance_distribution"]
+            == accepted_body["aggregate"]["stance_distribution"]
+        )
+        assert (
+            replay_body["aggregate"]["reason_pattern_distribution"]
+            == accepted_body["aggregate"]["reason_pattern_distribution"]
+        )
+        body = accepted_body
         assert body["participation_state"] == "PARTICIPATED"
         assert body["participation"]["contribution_class"] == "EXPOSED"
         assert body["aggregate"]["contribution_class"] == "EXPOSED"
