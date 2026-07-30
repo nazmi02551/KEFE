@@ -32,6 +32,9 @@ void main() {
   testWidgets(
     'post-commit Consensus hides distribution until participation then reveals EXPOSED WE data',
     (tester) async {
+      tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
+      addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
