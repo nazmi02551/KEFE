@@ -16,8 +16,9 @@ from kefe_api.modules.consensus.models import (
 
 class InMemoryConsensusRepository:
     def __init__(self, cards: tuple[ConsensusCardVersion, ...] = ()) -> None:
-        self._cards = {card.id: card for card in cards}
-        self._participations_by_actor_card: dict[
+        self._versions = {card.id: card for card in cards}
+        self._published_by_card = {card.card_id: card for card in cards}
+        self._participations_by_actor_card_version: dict[
             tuple[UUID, UUID], ConsensusParticipation
         ] = {}
         self._participations_by_actor_idempotency: dict[
@@ -29,10 +30,10 @@ class InMemoryConsensusRepository:
             sorted(
                 (
                     card
-                    for card in self._cards.values()
+                    for card in self._published_by_card.values()
                     if card.case_version_id == case_version_id
                 ),
-                key=lambda card: (card.published_at, str(card.id)),
+                key=lambda card: (card.published_at, str(card.card_id)),
             )
         )
 
@@ -40,9 +41,9 @@ class InMemoryConsensusRepository:
         self,
         *,
         case_version_id: UUID,
-        card_version_id: UUID,
+        card_id: UUID,
     ) -> ConsensusCardVersion | None:
-        card = self._cards.get(card_version_id)
+        card = self._published_by_card.get(card_id)
         if card is None or card.case_version_id != case_version_id:
             return None
         return card
@@ -53,7 +54,9 @@ class InMemoryConsensusRepository:
         actor_id: UUID,
         card_version_id: UUID,
     ) -> ConsensusParticipation | None:
-        return self._participations_by_actor_card.get((actor_id, card_version_id))
+        return self._participations_by_actor_card_version.get(
+            (actor_id, card_version_id)
+        )
 
     def create_participation(
         self,
@@ -74,7 +77,7 @@ class InMemoryConsensusRepository:
                 replay,
             )
 
-        existing = self._participations_by_actor_card.get(
+        existing = self._participations_by_actor_card_version.get(
             (participation.actor_id, participation.card_version_id)
         )
         if existing is not None:
@@ -83,7 +86,7 @@ class InMemoryConsensusRepository:
                 existing,
             )
 
-        self._participations_by_actor_card[
+        self._participations_by_actor_card_version[
             (participation.actor_id, participation.card_version_id)
         ] = participation
         self._participations_by_actor_idempotency[
@@ -103,7 +106,7 @@ class InMemoryConsensusRepository:
     ) -> ConsensusAggregate:
         rows = tuple(
             participation
-            for participation in self._participations_by_actor_card.values()
+            for participation in self._participations_by_actor_card_version.values()
             if participation.card_version_id == card.id
             and participation.contribution_class == contribution_class
         )
@@ -139,6 +142,7 @@ class InMemoryConsensusRepository:
 
 
 DEMO_CONSENSUS_CARD_ID = UUID("91000000-0000-4000-8000-000000000001")
+DEMO_CONSENSUS_CARD_VERSION_ID = UUID("91000000-0000-4000-8000-000000000101")
 DEMO_CONSENSUS_CASE_VERSION_ID = UUID("22222222-2222-4222-8222-222222222222")
 
 
@@ -146,7 +150,9 @@ def build_demo_consensus_repository() -> InMemoryConsensusRepository:
     return InMemoryConsensusRepository(
         cards=(
             ConsensusCardVersion(
-                id=DEMO_CONSENSUS_CARD_ID,
+                id=DEMO_CONSENSUS_CARD_VERSION_ID,
+                card_id=DEMO_CONSENSUS_CARD_ID,
+                version_no=1,
                 case_version_id=DEMO_CONSENSUS_CASE_VERSION_ID,
                 proposition=(
                     "Sınırlı bir kaynak dağıtılırken açıkça daha acil ihtiyaç, "
@@ -169,6 +175,7 @@ def build_demo_consensus_repository() -> InMemoryConsensusRepository:
 
 __all__ = [
     "DEMO_CONSENSUS_CARD_ID",
+    "DEMO_CONSENSUS_CARD_VERSION_ID",
     "InMemoryConsensusRepository",
     "build_demo_consensus_repository",
     "ConsensusContributionClass",
