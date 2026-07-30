@@ -36,22 +36,15 @@ class ShareService:
             raise DomainError("WEIGH_SESSION_NOT_FOUND", "Weigh session not found", 404)
         if session.state is not WeighState.COMMITTED:
             raise DomainError("SHARE_COMMIT_REQUIRED", "Commit is required before sharing", 403)
+        if include_decision:
+            raise DomainError(
+                "SHARE_DECISION_EXPOSURE_NOT_SUPPORTED",
+                "MVP Share is case-only; sender decision exposure is not supported",
+                422,
+            )
         case = self._decision.get_case_version(session.case_version_id)
         if case is None:
             raise DomainError("CASE_VERSION_STALE", "Case version is no longer available", 409)
-
-        decision_snapshot = None
-        if include_decision:
-            for question in case.questions:
-                if question.response_type != "SINGLE_CHOICE":
-                    continue
-                if question.id not in session.responses:
-                    continue
-                decision_snapshot = {
-                    "question_id": str(question.id),
-                    "value": session.responses[question.id],
-                }
-                break
 
         now = datetime.now(UTC)
         token = f"kefe_s_{secrets.token_urlsafe(24)}"
@@ -62,8 +55,8 @@ class ShareService:
             session_id=session.id,
             case_id=session.case_id,
             case_version_id=session.case_version_id,
-            include_decision=include_decision,
-            decision_snapshot=decision_snapshot,
+            include_decision=False,
+            decision_snapshot=None,
             created_at=now,
             expires_at=now + self._ttl,
         )
@@ -74,7 +67,7 @@ class ShareService:
             {
                 "share_id": str(record.id),
                 "case_version_id": str(record.case_version_id),
-                "include_decision": include_decision,
+                "include_decision": False,
             },
         )
         return record, token
@@ -94,7 +87,6 @@ class ShareService:
             title=case.title,
             summary=case.summary,
             primary_domain=case.primary_domain,
-            decision=record.decision_snapshot if record.include_decision else None,
             created_at=record.created_at,
             expires_at=record.expires_at,
         )
