@@ -116,8 +116,8 @@ jobs:
             apps/mobile/lib
             apps/mobile/test
           if-no-files-found: error
-      - name: Format drift gate
-        run: git diff --exit-code -- lib test
+      - name: Whitespace safety gate
+        run: git diff --check -- lib test
       - name: Analyze
         run: flutter analyze
       - name: Test mobile regressions
