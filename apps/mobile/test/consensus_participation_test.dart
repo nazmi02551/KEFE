@@ -63,6 +63,7 @@ void main() {
         280,
         scrollable: find.byType(Scrollable).last,
       );
+      await tester.ensureVisible(caseCard);
       await tester.pumpAndSettle();
       await tester.tap(caseCard);
       await tester.pumpAndSettle();
@@ -75,6 +76,8 @@ void main() {
         320,
         scrollable: find.byType(Scrollable).last,
       );
+      await tester.ensureVisible(option);
+      await tester.pumpAndSettle();
       await tester.tap(option);
       await tester.pumpAndSettle();
 
@@ -84,6 +87,9 @@ void main() {
         320,
         scrollable: find.byType(Scrollable).last,
       );
+      await tester.ensureVisible(commit);
+      await tester.pumpAndSettle();
+      expect(tester.widget<FilledButton>(commit).onPressed, isNotNull);
       await tester.tap(commit);
       await tester.pumpAndSettle();
 
@@ -93,6 +99,7 @@ void main() {
         360,
         scrollable: find.byType(Scrollable).last,
       );
+      await tester.ensureVisible(consensus);
       await tester.pumpAndSettle();
 
       expect(consensus, findsOneWidget);
@@ -102,13 +109,18 @@ void main() {
 
       final stance = find.byKey(const ValueKey('consensus-stance-AGREE'));
       await tester.ensureVisible(stance);
+      await tester.pumpAndSettle();
       await tester.tap(stance);
       await tester.pump();
       final reason = find.byKey(const ValueKey('consensus-reason-FAIRNESS'));
+      await tester.ensureVisible(reason);
+      await tester.pumpAndSettle();
       await tester.tap(reason);
       await tester.pump();
 
       final submit = find.byKey(const ValueKey('consensus-submit'));
+      await tester.ensureVisible(submit);
+      await tester.pumpAndSettle();
       expect(tester.widget<FilledButton>(submit).onPressed, isNotNull);
       await tester.tap(submit);
       await tester.pumpAndSettle();
