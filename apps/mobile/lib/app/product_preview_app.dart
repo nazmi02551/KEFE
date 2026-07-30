@@ -1,27 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/build/preview_build_info.dart';
 import '../core/design/kefe_theme.dart';
 import '../core/localization/kefe_strings.dart';
+import '../core/localization/settings_strings.dart';
+import '../core/preferences/app_preferences.dart';
 import '../features/activity/presentation/activity_screen.dart';
 import '../features/decision/presentation/decision_flow_screen.dart';
 import '../features/explore/presentation/discovery_explore_screen.dart';
 import '../features/progress/presentation/my_kefe_journey_screen.dart';
+import '../features/settings/presentation/settings_screen.dart';
 import '../features/weigh/presentation/weigh_hub_screen.dart';
 import 'primary_navigation_shell.dart';
 import 'product_preview/atlas_preview_screen.dart';
 import 'product_preview/radar_preview_screen.dart';
 
-class ProductPreviewApp extends StatefulWidget {
+class ProductPreviewApp extends ConsumerStatefulWidget {
   const ProductPreviewApp({super.key});
 
   @override
-  State<ProductPreviewApp> createState() => _ProductPreviewAppState();
+  ConsumerState<ProductPreviewApp> createState() => _ProductPreviewAppState();
 }
 
-class _ProductPreviewAppState extends State<ProductPreviewApp> {
+class _ProductPreviewAppState extends ConsumerState<ProductPreviewApp> {
   late final GoRouter _router = GoRouter(
     initialLocation: '/explore',
     routes: [
@@ -50,11 +54,21 @@ class _ProductPreviewAppState extends State<ProductPreviewApp> {
       ),
       GoRoute(
         path: '/my-kefe',
-        builder: (_, _) => const PrimaryNavigationShell(
+        builder: (context, _) => PrimaryNavigationShell(
           selectedIndex: 3,
-          footer: _PreviewBuildIdentity(),
-          child: MyKefeJourneyScreen(embedded: true),
+          floatingActionButton: FloatingActionButton.small(
+            key: const ValueKey('open-preview-settings'),
+            onPressed: () => context.push('/settings'),
+            tooltip: KefeStrings.of(context).settingsTitle,
+            child: const Icon(Icons.settings_outlined),
+          ),
+          footer: const _PreviewBuildIdentity(),
+          child: const MyKefeJourneyScreen(embedded: true),
         ),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (_, _) => const SettingsScreen(showPrivacyControls: false),
       ),
       GoRoute(
         path: '/radar',
@@ -89,6 +103,14 @@ class _ProductPreviewAppState extends State<ProductPreviewApp> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    Future<void>.microtask(
+      () => ref.read(appPreferencesControllerProvider.notifier).load(),
+    );
+  }
+
+  @override
   void dispose() {
     _router.dispose();
     super.dispose();
@@ -96,13 +118,14 @@ class _ProductPreviewAppState extends State<ProductPreviewApp> {
 
   @override
   Widget build(BuildContext context) {
+    final preferences = ref.watch(appPreferencesControllerProvider);
     return MaterialApp.router(
-      title: 'KEFE Product Preview',
+      title: 'KEFE',
       debugShowCheckedModeBanner: false,
-      locale: const Locale('tr', 'TR'),
+      locale: preferences.resolvedLocale,
       theme: KefeTheme.light(),
       darkTheme: KefeTheme.dark(),
-      themeMode: ThemeMode.dark,
+      themeMode: preferences.resolvedThemeMode,
       routerConfig: _router,
       supportedLocales: KefeStrings.supportedLocales,
       localizationsDelegates: const [
