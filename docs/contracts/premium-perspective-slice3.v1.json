@@ -1,0 +1,84 @@
+{
+  "contract": "premium-perspective-slice3.v1",
+  "version": "1.0.0",
+  "status": "accepted",
+  "tracks_issue": 102,
+  "stack_base": "dc1e4615b2988808edc4510afe5b7175d283b513",
+  "inherited_verified_reveal_runtime": "08f9122a1aa9519bfd6045345c836aa3173d831b",
+  "slice": "PERSPECTIVE_COUNTER_VIEWS",
+  "governed_files": [
+    "apps/mobile/lib/features/decision/presentation/perspective_section.dart",
+    "apps/mobile/lib/core/localization/kefe_content_localizer.dart",
+    "apps/mobile/lib/app/product_preview/preview_content_localizer.dart"
+  ],
+  "presentation": {
+    "theme_adaptive_semantic_surfaces_required": true,
+    "direct_dark_only_surface_tokens_forbidden": true,
+    "fixed_ad_hoc_purple_dependency_forbidden": true,
+    "generic_slot_hierarchy_required": true,
+    "objective_correctness_implication_forbidden": true,
+    "user_profile_distance_implication_forbidden": true,
+    "methodology_readable": true,
+    "degraded_and_pending_states_visible": true,
+    "flutter_native_lightweight_rendering": true,
+    "future_landscape_seam_may_be_presentation_only": true
+  },
+  "localization": {
+    "display_perspective_body_via_content_localizer": true,
+    "display_perspective_provenance_via_content_localizer": true,
+    "display_methodology_provenance_via_content_localizer": true,
+    "raw_perspective_values_must_not_change": true,
+    "production_content_passthrough": true,
+    "presentation_locale_branching_forbidden": true,
+    "preview_catalog_must_not_be_production_fallback": true
+  },
+  "runtime": {
+    "post_commit_only": true,
+    "load_after_reveal_boundary_unchanged": true,
+    "retry_perspective_only": true,
+    "answer_replay_on_retry": false,
+    "reason_replay_on_retry": false,
+    "commit_replay_on_retry": false,
+    "reveal_replay_on_retry": false,
+    "perspective_domain_model_change": false,
+    "perspective_repository_semantics_change": false,
+    "adjacent_consensus_community_progress_share_semantics_change": false
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "case_agnostic_runtime": true,
+    "preview_production_isolation": true,
+    "preview_fixture_is_production_fallback": false,
+    "my_kefe_observed_descriptive_only": true,
+    "signal_in_scope": false,
+    "impact_in_scope": false,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "bias_inference": false,
+    "causal_inference": false
+  },
+  "deferred": [
+    "PERSPECTIVE_LANDSCAPE_ADVANCED_VISUAL",
+    "RADAR_PREMIUM",
+    "ATLAS_PREMIUM",
+    "REPO_WIDE_MULTI_LOCALE_RESOURCE_MIGRATION"
+  ],
+  "verification": {
+    "exact_head_required": true,
+    "production_copy_boundary": true,
+    "flutter_analyze": true,
+    "all_mobile_regressions": true,
+    "perspective_consumption_regressions": true,
+    "light_dark_visual_contract": true,
+    "preview_localization_without_raw_mutation": true,
+    "phone_acceptance": true,
+    "api_ci": true,
+    "mobile_ci": true,
+    "mvp_beta_gates": true,
+    "global_readiness": true,
+    "human_visual_review_is_ci_pass": false
+  }
+}

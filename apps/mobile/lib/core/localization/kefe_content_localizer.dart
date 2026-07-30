@@ -45,4 +45,7 @@ abstract final class KefeContentNamespace {
   static const contextBlockBody = 'context.block.body';
   static const perspectiveBody = 'perspective.body';
   static const perspectiveProvenance = 'perspective.provenance';
+  static const perspectiveMethodologyProvenance =
+      'perspective.methodology.provenance';
+  static const perspectiveSampleKind = 'perspective.methodology.sample_kind';
 }
