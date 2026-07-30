@@ -130,20 +130,21 @@ void main() {
         reason: entry.key,
       );
       if (entry.value) {
-        expect(source, isNot(contains('locale.languageCode')), reason: entry.key);
+        expect(
+          source,
+          isNot(contains('locale.languageCode')),
+          reason: entry.key,
+        );
       }
     }
 
     final core = File(
       'lib/core/localization/kefe_strings.dart',
     ).readAsStringSync();
-    expect(
-      core,
-      contains("const {'tr', 'en'}.contains(locale.languageCode)"),
-    );
-    expect(
-      KefeStrings.supportedLocales,
-      const [Locale('tr', 'TR'), Locale('en', 'US')],
-    );
+    expect(core, contains("const {'tr', 'en'}.contains(locale.languageCode)"));
+    expect(KefeStrings.supportedLocales, const [
+      Locale('tr', 'TR'),
+      Locale('en', 'US'),
+    ]);
   });
 }

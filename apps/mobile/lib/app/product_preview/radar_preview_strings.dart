@@ -55,11 +55,8 @@ class RadarPreviewStrings {
   static RadarPreviewStrings of(BuildContext context) =>
       RadarPreviewStrings._(Localizations.localeOf(context));
 
-  String _text(String id) => KefeLocaleCatalog.resolve(
-    locale: _locale,
-    resources: _catalog,
-    key: id,
-  );
+  String _text(String id) =>
+      KefeLocaleCatalog.resolve(locale: _locale, resources: _catalog, key: id);
 
   String get eyebrow => _text('eyebrow');
   String get title => _text('title');

@@ -22,12 +22,10 @@ extension KefeExploreStrings on KefeStrings {
 
   String domainLabel(String domain) => switch (domain) {
     'DAILY_LIFE' => _exploreText('domain.daily_life'),
-    'TECHNOLOGY' || 'TECHNOLOGY_AI' =>
-      _exploreText('domain.technology_ai'),
+    'TECHNOLOGY' || 'TECHNOLOGY_AI' => _exploreText('domain.technology_ai'),
     'SPORTS' => _exploreText('domain.sports'),
     'CIVIC' || 'CITY_PUBLIC_LIFE' => _exploreText('domain.public_life'),
-    'WORK_ECONOMY' || 'WORK_BUSINESS' =>
-      _exploreText('domain.work_economy'),
+    'WORK_ECONOMY' || 'WORK_BUSINESS' => _exploreText('domain.work_economy'),
     'EDUCATION' => _exploreText('domain.education'),
     'FAMILY_PARENTING' => _exploreText('domain.family_parenting'),
     'CULTURE_MEDIA' => _exploreText('domain.culture_media'),
