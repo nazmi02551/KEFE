@@ -109,7 +109,10 @@ void main() {
       expect(raw.cards.first.provenanceLabel, rawFirstProvenance);
       expect(raw.methodology.provenanceNote, rawMethodology);
       expect(provenance, 'KEFE Preview · Editorial example');
-      expect(methodology, 'Fixed editorial demo perspectives for Product Preview.');
+      expect(
+        methodology,
+        'Fixed editorial demo perspectives for Product Preview.',
+      );
       expect(sampleKind, 'Curated fallback');
       expect(
         localizer.text(

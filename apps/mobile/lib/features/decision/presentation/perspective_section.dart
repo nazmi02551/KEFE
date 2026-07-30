@@ -184,9 +184,9 @@ class _LoadingState extends StatelessWidget {
             Expanded(
               child: Text(
                 strings.perspectiveLoading,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: visual.mutedForeground,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: visual.mutedForeground),
               ),
             ),
           ],
@@ -288,9 +288,9 @@ class _LoadedState extends ConsumerWidget {
             borderRadius: 17,
             child: Text(
               strings.perspectiveEmpty,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: visual.mutedForeground,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: visual.mutedForeground),
             ),
           )
         else
@@ -336,9 +336,9 @@ class _LoadedState extends ConsumerWidget {
               leading: Icon(Icons.policy_outlined, color: visual.goldSoft),
               title: Text(
                 strings.perspectiveMethodology,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
               ),
               children: [
                 Align(
@@ -454,7 +454,9 @@ class _PerspectiveCardView extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: visual.color.withValues(alpha: theme.isDark ? 0.06 : 0.035),
+              color: visual.color.withValues(
+                alpha: theme.isDark ? 0.06 : 0.035,
+              ),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -505,9 +507,7 @@ class _PerspectiveCardView extends StatelessWidget {
               decoration: BoxDecoration(
                 color: theme.surfaceSunken.withValues(alpha: 0.72),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: theme.border.withValues(alpha: 0.78),
-                ),
+                border: Border.all(color: theme.border.withValues(alpha: 0.78)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -575,18 +575,12 @@ class _MethodologyPill extends StatelessWidget {
   KefeVisualTheme visual,
   PerspectiveSlot slot,
 ) => switch (slot) {
-  PerspectiveSlot.near => (
-    color: visual.success,
-    icon: Icons.near_me_outlined,
-  ),
+  PerspectiveSlot.near => (color: visual.success, icon: Icons.near_me_outlined),
   PerspectiveSlot.opposing => (
     color: visual.empathy,
     icon: Icons.swap_horiz_rounded,
   ),
-  PerspectiveSlot.bridge => (
-    color: visual.gold,
-    icon: Icons.hub_outlined,
-  ),
+  PerspectiveSlot.bridge => (color: visual.gold, icon: Icons.hub_outlined),
   PerspectiveSlot.alternativeContext => (
     color: visual.rules,
     icon: Icons.change_circle_outlined,
