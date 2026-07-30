@@ -22,46 +22,64 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
         children: [
-          Text(strings.languageTitle, style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            strings.languageTitle,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 8),
-          _ChoiceTile<AppLocalePreference>(
-            value: AppLocalePreference.system,
+          RadioGroup<AppLocalePreference>(
             groupValue: preferences.locale,
-            title: strings.languageSystem,
-            onChanged: controller.setLocale,
-          ),
-          _ChoiceTile<AppLocalePreference>(
-            value: AppLocalePreference.tr,
-            groupValue: preferences.locale,
-            title: strings.languageTurkish,
-            onChanged: controller.setLocale,
-          ),
-          _ChoiceTile<AppLocalePreference>(
-            value: AppLocalePreference.en,
-            groupValue: preferences.locale,
-            title: strings.languageEnglish,
-            onChanged: controller.setLocale,
+            onChanged: (value) {
+              if (value != null) {
+                controller.setLocale(value);
+              }
+            },
+            child: Column(
+              children: [
+                _ChoiceTile<AppLocalePreference>(
+                  value: AppLocalePreference.system,
+                  title: strings.languageSystem,
+                ),
+                _ChoiceTile<AppLocalePreference>(
+                  value: AppLocalePreference.tr,
+                  title: strings.languageTurkish,
+                ),
+                _ChoiceTile<AppLocalePreference>(
+                  value: AppLocalePreference.en,
+                  title: strings.languageEnglish,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 24),
-          Text(strings.appearanceTitle, style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            strings.appearanceTitle,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 8),
-          _ChoiceTile<AppThemePreference>(
-            value: AppThemePreference.system,
+          RadioGroup<AppThemePreference>(
             groupValue: preferences.theme,
-            title: strings.themeSystem,
-            onChanged: controller.setTheme,
-          ),
-          _ChoiceTile<AppThemePreference>(
-            value: AppThemePreference.light,
-            groupValue: preferences.theme,
-            title: strings.themeLight,
-            onChanged: controller.setTheme,
-          ),
-          _ChoiceTile<AppThemePreference>(
-            value: AppThemePreference.dark,
-            groupValue: preferences.theme,
-            title: strings.themeDark,
-            onChanged: controller.setTheme,
+            onChanged: (value) {
+              if (value != null) {
+                controller.setTheme(value);
+              }
+            },
+            child: Column(
+              children: [
+                _ChoiceTile<AppThemePreference>(
+                  value: AppThemePreference.system,
+                  title: strings.themeSystem,
+                ),
+                _ChoiceTile<AppThemePreference>(
+                  value: AppThemePreference.light,
+                  title: strings.themeLight,
+                ),
+                _ChoiceTile<AppThemePreference>(
+                  value: AppThemePreference.dark,
+                  title: strings.themeDark,
+                ),
+              ],
+            ),
           ),
           if (showPrivacyControls) ...[
             const SizedBox(height: 24),
@@ -81,30 +99,17 @@ class SettingsScreen extends ConsumerWidget {
 }
 
 class _ChoiceTile<T> extends StatelessWidget {
-  const _ChoiceTile({
-    required this.value,
-    required this.groupValue,
-    required this.title,
-    required this.onChanged,
-  });
+  const _ChoiceTile({required this.value, required this.title});
 
   final T value;
-  final T groupValue;
   final String title;
-  final Future<void> Function(T value) onChanged;
 
   @override
   Widget build(BuildContext context) {
     return RadioListTile<T>(
       contentPadding: EdgeInsets.zero,
       value: value,
-      groupValue: groupValue,
       title: Text(title),
-      onChanged: (selected) {
-        if (selected != null) {
-          onChanged(selected);
-        }
-      },
     );
   }
 }
