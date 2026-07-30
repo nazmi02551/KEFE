@@ -1,40 +1,13 @@
-name: Slice7 Format Fix
+name: Slice7 Format Fix (disabled)
 
 on:
-  push:
-    branches: [feature/internal-alpha-localization-slice7]
-    paths:
-      - '.github/workflows/slice7-format-fix.yml'
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  format:
-    if: github.actor != 'github-actions[bot]'
+  disabled:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: feature/internal-alpha-localization-slice7
-          fetch-depth: 0
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-      - name: Format Slice 7 Dart sources
-        working-directory: apps/mobile
-        run: dart format lib/core/localization/internal_alpha_string_catalog.dart lib/core/localization/internal_alpha_strings.dart test/internal_alpha_localization_slice7_test.dart
-      - name: Commit source-only formatting
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add apps/mobile/lib/core/localization/internal_alpha_string_catalog.dart apps/mobile/lib/core/localization/internal_alpha_strings.dart apps/mobile/test/internal_alpha_localization_slice7_test.dart
-          if git diff --cached --quiet; then
-            echo 'No formatting changes.'
-            exit 0
-          fi
-          git commit -m 'style: normalize Internal Alpha localization slice 7'
-          git push origin HEAD:feature/internal-alpha-localization-slice7
-
-# trigger
+      - run: echo 'Temporary Slice 7 formatter is disabled; source formatting is already canonical.'
