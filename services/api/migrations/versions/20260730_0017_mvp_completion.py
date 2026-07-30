@@ -81,7 +81,7 @@ def upgrade() -> None:
     # own committed session for the same CaseVersion without weakening normal
     # single-session semantics for newly committed sessions.
     op.execute("ALTER TABLE decision.weigh_session ADD COLUMN merged_from_actor_id uuid REFERENCES identity.actor(id) ON DELETE RESTRICT")
-    op.execute("DROP INDEX IF EXISTS committed_actor_case_version_idx")
+    op.execute("DROP INDEX IF EXISTS decision.committed_actor_case_version_idx")
     op.execute(
         """
         CREATE UNIQUE INDEX committed_actor_case_version_idx
