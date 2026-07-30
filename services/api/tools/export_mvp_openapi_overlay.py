@@ -7,6 +7,7 @@ from copy import deepcopy
 from pathlib import Path
 
 from export_openapi import _merge_overlay, build_openapi
+
 from kefe_api.core.settings import get_settings
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
