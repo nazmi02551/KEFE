@@ -102,6 +102,7 @@ void main() {
             ),
           ],
           child: MaterialApp(
+            key: ValueKey(locale),
             theme: theme,
             locale: locale,
             supportedLocales: KefeStrings.supportedLocales,
