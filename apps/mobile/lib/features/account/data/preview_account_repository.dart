@@ -34,7 +34,9 @@ class PreviewAccountRepository implements AccountRepository {
   }
 
   @override
-  Future<AccountConversion> mergeGuest({required String verificationToken}) async {
+  Future<AccountConversion> mergeGuest({
+    required String verificationToken,
+  }) async {
     if (verificationToken != 'preview-verification-token') {
       throw StateError('PREVIEW_VERIFICATION_INVALID');
     }
