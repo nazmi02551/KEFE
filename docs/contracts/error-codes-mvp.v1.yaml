@@ -28,6 +28,9 @@ errors:
 - code: SHARE_COMMIT_REQUIRED
   http_status: 403
   retryable: false
+- code: SHARE_DECISION_EXPOSURE_NOT_SUPPORTED
+  http_status: 422
+  retryable: false
 - code: SHARE_NOT_FOUND
   http_status: 404
   retryable: false
