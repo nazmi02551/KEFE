@@ -54,11 +54,7 @@ class RevealResultCard extends ConsumerWidget {
             const SizedBox(height: 18),
             _PersonalDecision(
               label: optionLabel(selectedOption!),
-              accent: _accentForRawOption(
-                visual,
-                entries,
-                selectedOption!,
-              ),
+              accent: _accentForRawOption(visual, entries, selectedOption!),
             ),
           ],
           const SizedBox(height: 22),
@@ -285,7 +281,9 @@ class _RevealDistributionRow extends StatelessWidget {
                     child: Text(
                       displayLabel,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: selected ? FontWeight.w900 : FontWeight.w750,
+                        fontWeight: selected
+                            ? FontWeight.w900
+                            : FontWeight.w700,
                       ),
                     ),
                   ),
@@ -334,7 +332,10 @@ class _RevealDistributionRow extends StatelessWidget {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0, end: value.clamp(0, 1)),
+                        tween: Tween(
+                          begin: 0,
+                          end: value.clamp(0.0, 1.0).toDouble(),
+                        ),
                         duration: duration,
                         curve: Curves.easeOutCubic,
                         builder: (context, animatedValue, _) => SizedBox(
@@ -342,10 +343,7 @@ class _RevealDistributionRow extends StatelessWidget {
                           child: DecoratedBox(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [
-                                  color.withValues(alpha: 0.74),
-                                  color,
-                                ],
+                                colors: [color.withValues(alpha: 0.74), color],
                               ),
                             ),
                           ),
@@ -380,10 +378,7 @@ class _GapInsight extends StatelessWidget {
     final visual = context.kefeVisual;
     final accent = selectedIsTop ? visual.success : visual.attention;
     final message = selectedIsTop
-        ? strings.gapInsight(
-            selectedIsTop: true,
-            percent: selectedPercent,
-          )
+        ? strings.gapInsight(selectedIsTop: true, percent: selectedPercent)
         : strings.gapDifferenceInsight(
             selectedPercent: selectedPercent,
             gapPoints: gapPoints,
