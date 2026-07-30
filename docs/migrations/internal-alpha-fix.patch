@@ -1,0 +1,45 @@
+--- a/apps/mobile/lib/core/localization/internal_alpha_strings.dart
++++ b/apps/mobile/lib/core/localization/internal_alpha_strings.dart
+@@ -256,7 +256,7 @@ extension InternalAlphaStrings on KefeStrings {
+   String resultMethodology({
+     required int sampleSize,
+     required String confidence,
+-  }) => '${trustedSample} · n=$sampleSize · ${confidenceLabel(confidence)}';
++  }) => '$trustedSample · n=$sampleSize · ${confidenceLabel(confidence)}';
+   String confidenceLabel(String code) => switch (code) {
+     'HIGH' => _iaTr ? 'Yüksek güven' : 'High confidence',
+     'MEDIUM' => _iaTr ? 'Orta güven' : 'Medium confidence',
+--- a/apps/mobile/lib/features/decision/presentation/case_hero_header.dart
++++ b/apps/mobile/lib/features/decision/presentation/case_hero_header.dart
+@@ -42,7 +42,7 @@ class CaseHeroHeader extends StatelessWidget {
+             children: [
+               _MetaPill(
+                 icon: _domainIcon(caseData.domain),
+-                label: _humanize(caseData.domain),
++                label: strings.domainName(caseData.domain),
+                 color: KefeColorTokens.rules,
+               ),
+               _MetaPill(
+--- a/apps/mobile/lib/features/progress/presentation/my_kefe_journey_screen.dart
++++ b/apps/mobile/lib/features/progress/presentation/my_kefe_journey_screen.dart
+@@ -329,12 +329,7 @@ class _Domains extends StatelessWidget {
+                 children: [
+                   Expanded(
+                     child: Text(
+-                      _domainLabel(
+-                        items[i].primaryDomain,
+-                        strings.locale.languageCode,
+-                      ),
++                      strings.domainName(items[i].primaryDomain),
+                     ),
+                   ),
+                   Text(
+@@ -378,7 +373,7 @@ class _Journeys extends StatelessWidget {
+           const SizedBox(height: 12),
+           for (var i = 0; i < items.length; i++) ...[
+             Text(
+-              _domainLabel(items[i].primaryDomain, strings.locale.languageCode),
++              strings.domainName(items[i].primaryDomain),
+               style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                 color: KefeColorTokens.goldSoft,
+                 fontWeight: FontWeight.w800,
