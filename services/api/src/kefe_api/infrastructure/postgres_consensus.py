@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime
 from uuid import UUID
 
@@ -25,18 +26,13 @@ class PostgresConsensusRepository:
                 text(
                     """
                     SELECT
-                        id,
-                        case_version_id,
-                        proposition,
-                        stance_codes,
-                        reason_tag_codes,
-                        max_reason_tags,
-                        methodology_version,
-                        published_at
+                        id, card_id, version_no, case_version_id, proposition,
+                        stance_codes, reason_tag_codes, max_reason_tags,
+                        methodology_version, published_at
                     FROM collective.consensus_card_version
                     WHERE case_version_id = :case_version_id
                       AND status = 'PUBLISHED'
-                    ORDER BY published_at ASC, id ASC
+                    ORDER BY published_at ASC, card_id ASC
                     """
                 ),
                 {"case_version_id": case_version_id},
@@ -47,31 +43,23 @@ class PostgresConsensusRepository:
         self,
         *,
         case_version_id: UUID,
-        card_version_id: UUID,
+        card_id: UUID,
     ) -> ConsensusCardVersion | None:
         with self._engine.connect() as connection:
             row = connection.execute(
                 text(
                     """
                     SELECT
-                        id,
-                        case_version_id,
-                        proposition,
-                        stance_codes,
-                        reason_tag_codes,
-                        max_reason_tags,
-                        methodology_version,
-                        published_at
+                        id, card_id, version_no, case_version_id, proposition,
+                        stance_codes, reason_tag_codes, max_reason_tags,
+                        methodology_version, published_at
                     FROM collective.consensus_card_version
-                    WHERE id = :card_version_id
+                    WHERE card_id = :card_id
                       AND case_version_id = :case_version_id
                       AND status = 'PUBLISHED'
                     """
                 ),
-                {
-                    "card_version_id": card_version_id,
-                    "case_version_id": case_version_id,
-                },
+                {"card_id": card_id, "case_version_id": case_version_id},
             ).mappings().one_or_none()
         return None if row is None else self._card(row)
 
@@ -83,25 +71,21 @@ class PostgresConsensusRepository:
     ) -> ConsensusParticipation | None:
         with self._engine.connect() as connection:
             row = connection.execute(
-                text(
-                    """
-                    SELECT
-                        id,
-                        card_version_id,
-                        session_id,
-                        actor_id,
-                        case_version_id,
-                        stance_code,
-                        reason_tag_codes,
-                        contribution_class,
-                        idempotency_key,
-                        participated_at
-                    FROM collective.consensus_participation
-                    WHERE actor_id = :actor_id
-                      AND card_version_id = :card_version_id
-                    """
-                ),
+                text(self._participation_select() + " WHERE actor_id = :actor_id AND card_version_id = :card_version_id"),
                 {"actor_id": actor_id, "card_version_id": card_version_id},
+            ).mappings().one_or_none()
+        return None if row is None else self._participation(row)
+
+    def _get_by_idempotency(
+        self,
+        *,
+        actor_id: UUID,
+        idempotency_key: str,
+    ) -> ConsensusParticipation | None:
+        with self._engine.connect() as connection:
+            row = connection.execute(
+                text(self._participation_select() + " WHERE actor_id = :actor_id AND idempotency_key = :idempotency_key"),
+                {"actor_id": actor_id, "idempotency_key": idempotency_key},
             ).mappings().one_or_none()
         return None if row is None else self._participation(row)
 
@@ -114,23 +98,8 @@ class PostgresConsensusRepository:
             with self._engine.begin() as connection:
                 replay = connection.execute(
                     text(
-                        """
-                        SELECT
-                            id,
-                            card_version_id,
-                            session_id,
-                            actor_id,
-                            case_version_id,
-                            stance_code,
-                            reason_tag_codes,
-                            contribution_class,
-                            idempotency_key,
-                            participated_at
-                        FROM collective.consensus_participation
-                        WHERE actor_id = :actor_id
-                          AND idempotency_key = :idempotency_key
-                        FOR UPDATE
-                        """
+                        self._participation_select()
+                        + " WHERE actor_id = :actor_id AND idempotency_key = :idempotency_key FOR UPDATE"
                     ),
                     {
                         "actor_id": participation.actor_id,
@@ -139,32 +108,17 @@ class PostgresConsensusRepository:
                 ).mappings().one_or_none()
                 if replay is not None:
                     stored = self._participation(replay)
-                    status = (
+                    return ConsensusParticipationAttempt(
                         ConsensusParticipationStatus.IDEMPOTENT_REPLAY
                         if stored.card_version_id == participation.card_version_id
-                        else ConsensusParticipationStatus.IDEMPOTENCY_KEY_REUSED
+                        else ConsensusParticipationStatus.IDEMPOTENCY_KEY_REUSED,
+                        stored,
                     )
-                    return ConsensusParticipationAttempt(status, stored)
 
                 existing = connection.execute(
                     text(
-                        """
-                        SELECT
-                            id,
-                            card_version_id,
-                            session_id,
-                            actor_id,
-                            case_version_id,
-                            stance_code,
-                            reason_tag_codes,
-                            contribution_class,
-                            idempotency_key,
-                            participated_at
-                        FROM collective.consensus_participation
-                        WHERE actor_id = :actor_id
-                          AND card_version_id = :card_version_id
-                        FOR UPDATE
-                        """
+                        self._participation_select()
+                        + " WHERE actor_id = :actor_id AND card_version_id = :card_version_id FOR UPDATE"
                     ),
                     {
                         "actor_id": participation.actor_id,
@@ -181,28 +135,13 @@ class PostgresConsensusRepository:
                     text(
                         """
                         INSERT INTO collective.consensus_participation (
-                            id,
-                            card_version_id,
-                            session_id,
-                            actor_id,
-                            case_version_id,
-                            stance_code,
-                            reason_tag_codes,
-                            contribution_class,
-                            idempotency_key,
-                            participated_at
-                        )
-                        VALUES (
-                            :id,
-                            :card_version_id,
-                            :session_id,
-                            :actor_id,
-                            :case_version_id,
-                            :stance_code,
-                            CAST(:reason_tag_codes AS jsonb),
-                            :contribution_class,
-                            :idempotency_key,
-                            :participated_at
+                            id, card_version_id, session_id, actor_id, case_version_id,
+                            stance_code, reason_tag_codes, contribution_class,
+                            idempotency_key, participated_at
+                        ) VALUES (
+                            :id, :card_version_id, :session_id, :actor_id, :case_version_id,
+                            :stance_code, CAST(:reason_tag_codes AS jsonb), :contribution_class,
+                            :idempotency_key, :participated_at
                         )
                         """
                     ),
@@ -213,7 +152,7 @@ class PostgresConsensusRepository:
                         "actor_id": participation.actor_id,
                         "case_version_id": participation.case_version_id,
                         "stance_code": participation.stance_code,
-                        "reason_tag_codes": self._json_array(participation.reason_tag_codes),
+                        "reason_tag_codes": json.dumps(list(participation.reason_tag_codes), separators=(",", ":")),
                         "contribution_class": participation.contribution_class,
                         "idempotency_key": participation.idempotency_key,
                         "participated_at": participation.participated_at,
@@ -224,17 +163,26 @@ class PostgresConsensusRepository:
                     participation,
                 )
         except IntegrityError:
+            replay = self._get_by_idempotency(
+                actor_id=participation.actor_id,
+                idempotency_key=participation.idempotency_key,
+            )
+            if replay is not None:
+                return ConsensusParticipationAttempt(
+                    ConsensusParticipationStatus.IDEMPOTENT_REPLAY
+                    if replay.card_version_id == participation.card_version_id
+                    else ConsensusParticipationStatus.IDEMPOTENCY_KEY_REUSED,
+                    replay,
+                )
             existing = self.get_participation(
                 actor_id=participation.actor_id,
                 card_version_id=participation.card_version_id,
             )
             if existing is not None:
-                status = (
-                    ConsensusParticipationStatus.IDEMPOTENT_REPLAY
-                    if existing.idempotency_key == participation.idempotency_key
-                    else ConsensusParticipationStatus.ALREADY_PARTICIPATED
+                return ConsensusParticipationAttempt(
+                    ConsensusParticipationStatus.ALREADY_PARTICIPATED,
+                    existing,
                 )
-                return ConsensusParticipationAttempt(status, existing)
             raise
 
     def aggregate(
@@ -255,10 +203,7 @@ class PostgresConsensusRepository:
                     GROUP BY stance_code
                     """
                 ),
-                {
-                    "card_version_id": card.id,
-                    "contribution_class": contribution_class,
-                },
+                {"card_version_id": card.id, "contribution_class": contribution_class},
             ).mappings().all()
             reason_rows = connection.execute(
                 text(
@@ -271,16 +216,13 @@ class PostgresConsensusRepository:
                     GROUP BY tag
                     """
                 ),
-                {
-                    "card_version_id": card.id,
-                    "contribution_class": contribution_class,
-                },
+                {"card_version_id": card.id, "contribution_class": contribution_class},
             ).mappings().all()
 
         stance_counts = {row["stance_code"]: int(row["count"]) for row in stance_rows}
+        reason_counts = {row["tag"]: int(row["count"]) for row in reason_rows}
         sample_size = sum(stance_counts.values())
         divisor = sample_size if sample_size > 0 else 1
-        reason_counts = {row["tag"]: int(row["count"]) for row in reason_rows}
         return ConsensusAggregate.create(
             card_version_id=card.id,
             case_version_id=card.case_version_id,
@@ -303,9 +245,20 @@ class PostgresConsensusRepository:
         )
 
     @staticmethod
+    def _participation_select() -> str:
+        return """
+            SELECT id, card_version_id, session_id, actor_id, case_version_id,
+                   stance_code, reason_tag_codes, contribution_class,
+                   idempotency_key, participated_at
+            FROM collective.consensus_participation
+        """
+
+    @staticmethod
     def _card(row) -> ConsensusCardVersion:
         return ConsensusCardVersion(
             id=row["id"],
+            card_id=row["card_id"],
+            version_no=row["version_no"],
             case_version_id=row["case_version_id"],
             proposition=row["proposition"],
             stance_codes=tuple(row["stance_codes"]),
@@ -329,9 +282,3 @@ class PostgresConsensusRepository:
             idempotency_key=row["idempotency_key"],
             participated_at=row["participated_at"],
         )
-
-    @staticmethod
-    def _json_array(values: tuple[str, ...]) -> str:
-        import json
-
-        return json.dumps(list(values), separators=(",", ":"))
