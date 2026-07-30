@@ -1,0 +1,76 @@
+{
+  "contract": "premium-visual-localization-slice1.v1",
+  "version": "1.0.0",
+  "status": "accepted",
+  "tracks_issue": 98,
+  "stack_base": "3f989bc74d894ef128aa933e814bdf08415af5f2",
+  "inherited_verified_runtime": "f7ab9b9d3db235bd9fdcc0c12950e5c181791018",
+  "slice": "DECISION_JOURNEY_FOUNDATION",
+  "visual_system": {
+    "flutter_native_only": true,
+    "dark_first_identity": true,
+    "valid_light_theme_required": true,
+    "semantic_theme_extension_required": true,
+    "forbid_dark_only_surface_tokens_in_governed_light_capable_presentation": true,
+    "governed_files": [
+      "apps/mobile/lib/features/weigh/presentation/weigh_hub_screen.dart",
+      "apps/mobile/lib/features/decision/presentation/question_input.dart",
+      "apps/mobile/lib/features/decision/presentation/kefe_balance_visual.dart",
+      "apps/mobile/lib/features/decision/presentation/reason_input.dart",
+      "apps/mobile/lib/features/context/presentation/context_section.dart",
+      "apps/mobile/lib/features/decision/presentation/decision_flow_screen.dart"
+    ],
+    "reduce_motion_required": true,
+    "screen_reader_semantics_required": true,
+    "core_journey_must_not_depend_on_renderer_success": true
+  },
+  "localization": {
+    "adr_0038_still_authoritative": true,
+    "presentation_locale_branching_forbidden": true,
+    "future_locale_requires_no_decision_screen_logic_change": true,
+    "product_preview_chrome_governed": true,
+    "preview_fixture_content_must_remain_preview_only": true,
+    "first_slice_catalog_scope": [
+      "weigh_hub",
+      "decision_question_chrome",
+      "balance_accessibility",
+      "confidence_chrome",
+      "reason_chrome",
+      "context_chrome",
+      "commit_chrome"
+    ]
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "case_agnostic_runtime": true,
+    "preview_production_isolation": true,
+    "preview_fixture_is_production_fallback": false,
+    "my_kefe_observed_descriptive_only": true,
+    "signal_in_scope": false,
+    "impact_in_scope": false,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "bias_inference": false,
+    "causal_inference": false
+  },
+  "deferred_surfaces": [
+    "REVEAL_KEFE_GAP_ADVANCED_VISUAL",
+    "PERSPECTIVE_LANDSCAPE",
+    "RADAR_PREMIUM",
+    "ATLAS_PREMIUM"
+  ],
+  "verification": {
+    "exact_head_required": true,
+    "flutter_analyze": true,
+    "all_mobile_regressions": true,
+    "phone_acceptance": true,
+    "api_ci": true,
+    "mobile_ci": true,
+    "mvp_beta_gates": true,
+    "global_readiness": true,
+    "human_usability_is_ci_pass": false
+  }
+}
