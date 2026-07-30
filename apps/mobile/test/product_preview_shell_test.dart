@@ -14,8 +14,13 @@ import 'package:kefe_mobile/features/progress/application/progress_controller.da
 import 'package:kefe_mobile/features/progress/data/preview_progress_repository.dart';
 import 'package:kefe_mobile/features/saved_cases/application/saved_cases_controller.dart';
 import 'package:kefe_mobile/features/saved_cases/data/saved_case_store.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void _useTurkishLocale(WidgetTester tester) {
+  SharedPreferences.setMockInitialValues({
+    'kefe.preferences.locale.v1': 'tr',
+    'kefe.preferences.theme.v1': 'system',
+  });
   tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
   addTearDown(tester.platformDispatcher.clearLocaleTestValue);
 }
