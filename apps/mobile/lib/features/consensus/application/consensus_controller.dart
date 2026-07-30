@@ -9,9 +9,8 @@ import '../domain/consensus_models.dart';
 
 /// Product composition switch for the first explicit WE capability.
 ///
-/// The core decision widgets remain reusable without starting network work on
-/// their own. Production and Product Preview entrypoints explicitly enable the
-/// experience and provide their respective repository adapters.
+/// Reusable decision widgets do not start Consensus network work by default.
+/// Production and Product Preview entrypoints explicitly enable the feature.
 final consensusExperienceEnabledProvider = Provider<bool>((ref) => false);
 
 enum ConsensusUiState {
@@ -85,6 +84,9 @@ class ConsensusState {
 }
 
 final consensusRepositoryProvider = Provider<ConsensusRepository>((ref) {
+  if (!ref.watch(consensusExperienceEnabledProvider)) {
+    return const _DisabledConsensusRepository();
+  }
   return HttpConsensusRepository(
     config: ref.watch(appConfigProvider),
     client: ref.watch(httpClientProvider),
@@ -263,5 +265,27 @@ class ConsensusController extends Notifier<ConsensusState> {
       return ConsensusUiState.participated;
     }
     return ConsensusUiState.eligible;
+  }
+}
+
+class _DisabledConsensusRepository implements ConsensusRepository {
+  const _DisabledConsensusRepository();
+
+  @override
+  Future<List<ConsensusCard>> fetchCards({
+    required String sessionId,
+    required String caseVersionId,
+  }) async => const [];
+
+  @override
+  Future<ConsensusCard> participate({
+    required String sessionId,
+    required String caseVersionId,
+    required String cardVersionId,
+    required String stanceCode,
+    required List<String> reasonTagCodes,
+    required String idempotencyKey,
+  }) {
+    throw const ClientTransportFailure(code: 'CONSENSUS_NOT_ENABLED');
   }
 }
