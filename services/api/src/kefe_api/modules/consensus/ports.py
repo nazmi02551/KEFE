@@ -19,7 +19,7 @@ class ConsensusRepository(Protocol):
         self,
         *,
         case_version_id: UUID,
-        card_version_id: UUID,
+        card_id: UUID,
     ) -> ConsensusCardVersion | None: ...
 
     def get_participation(
