@@ -1,4 +1,4 @@
-contract_version: 1.0.0
+contract_version: 1.1.0
 updated_at: '2026-07-30'
 authority:
   adr: docs/adr/0035-post-commit-consensus-participation.md
@@ -9,6 +9,7 @@ capability:
   case_subtype: forbidden
   statement_runtime_generation: forbidden
   zero_or_more_cards_per_case_version: true
+  explicit_product_composition_required: true
 eligibility:
   bearer_identity_required: true
   actor_must_own_session: true
@@ -73,17 +74,49 @@ http:
     method: POST
     path: /v1/weigh-sessions/{session_id}/consensus-cards/{card_id}/participation
     idempotency_header: Idempotency-Key
+events:
+  card_viewed:
+    name: consensus.card_viewed
+    case_copy: forbidden
+    private_reason_text: forbidden
+  participated:
+    name: consensus.participated
+    exactly_once_for_created_participation: true
+    allowed_fields:
+      - case_version_id
+      - card_version_id
+      - stance_code
+      - reason_tag_codes
+      - reason_tag_count
+      - contribution_class
+    case_copy: forbidden
+    private_reason_text: forbidden
+  aggregate_viewed:
+    name: consensus.aggregate_viewed
+    allowed_fields:
+      - case_version_id
+      - card_version_id
+      - sample_size
+      - contribution_class
+      - methodology_version
+    case_copy: forbidden
+    private_reason_text: forbidden
 mobile:
   repository_port: ConsensusRepository
   production_adapter: HTTP
   preview_adapter: deterministic
   preview_fallback_in_production: forbidden
+  experience_provider_default: disabled
+  production_entrypoint_enables: true
+  preview_entrypoint_enables: true
+  reusable_decision_widget_starts_network_by_default: false
   ui_states:
     - LOADING
     - BLOCKED
     - ELIGIBLE
     - SUBMITTING
     - PARTICIPATED
+    - EMPTY
     - ERROR_RETRYABLE
   placement: POST_COLLECTIVE_RESULT
 privacy:
