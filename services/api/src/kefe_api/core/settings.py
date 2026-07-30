@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     environment: str = "development"
     api_title: str = "KEFE API"
-    api_version: str = "0.19.0"
+    api_version: str = "0.20.0"
     persistence_backend: Literal["memory", "postgres"] = "memory"
     database_url: str | None = None
 
@@ -36,5 +36,6 @@ class Settings(BaseSettings):
 
 
 @lru_cache
+
 def get_settings() -> Settings:
     return Settings()
