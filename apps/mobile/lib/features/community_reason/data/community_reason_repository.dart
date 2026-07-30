@@ -5,7 +5,7 @@ abstract interface class CommunityReasonRepository {
     String? text,
   });
 
-  Future<CommunityReasonSnapshot> fetch(String caseVersionId);
+  Future<CommunityReasonSnapshot> fetch(String sessionId);
 
   Future<void> react({required String reasonId, required String reaction});
 
