@@ -20,6 +20,7 @@ void main() {
         decisionRepositoryProvider.overrideWithValue(
           PreviewJourneyDecisionRepository(),
         ),
+        consensusExperienceEnabledProvider.overrideWithValue(true),
         consensusRepositoryProvider.overrideWithValue(
           PreviewConsensusRepository(),
         ),
