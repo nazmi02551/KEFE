@@ -17,7 +17,9 @@ A Consensus Card must therefore remain distinct from the original Weigh decision
 ### 1. Consensus is a reusable post-commit capability
 
 - `CONSENSUS_PARTICIPATION` is a reusable capability over the common Flow/runtime architecture; it is not a Case subtype.
-- A Consensus Card definition is pinned to the actor's session `case_version_id` and a methodology version.
+- A Consensus Card has a stable `card_id`; each authored publication has an immutable `card_version_id` and positive `version_no`.
+- At most one version of a stable card may be `PUBLISHED` at a time. Participation is pinned to the immutable card version, not merely the stable card identity.
+- A Consensus Card version is pinned to the actor's session `case_version_id` and a methodology version.
 - The proposition is authored/configured before publication. The mobile client does not invent, summarize or normatively rewrite the proposition at runtime.
 - This slice supports zero or more Consensus Cards per CaseVersion; the initial fixtures may expose one card.
 
@@ -55,7 +57,7 @@ A Consensus Card must therefore remain distinct from the original Weigh decision
 
 A revealed Consensus aggregate contains only methodology-qualified descriptive fields:
 
-- card/version identity and CaseVersion identity;
+- stable card identity, immutable card-version identity and CaseVersion identity;
 - contribution class (`EXPOSED` in this slice);
 - sample size;
 - stance distribution;
@@ -71,10 +73,11 @@ No `Signal`, Signal score, recommendation, institutional authority or Impact sta
 ### 7. Architecture boundary
 
 - A dedicated Consensus application service owns eligibility, CaseVersion pinning, idempotency and aggregate disclosure.
-- A provider-neutral `ConsensusRepository` owns card definitions, participation receipts and aggregate reads.
+- A provider-neutral `ConsensusRepository` owns card versions, participation receipts and aggregate reads.
 - The Decision repository remains the source of WeighSession ownership/state; Consensus does not duplicate session authority.
 - Mobile consumes a dedicated `ConsensusRepository` port with production HTTP and deterministic Product Preview implementations.
 - Production must never fall back to Product Preview Consensus data.
+- Reusable decision widgets do not start Consensus network work by default; production and Product Preview composition roots explicitly enable the capability.
 
 ### 8. Events and privacy
 
@@ -84,7 +87,7 @@ The implementation may emit bounded events such as:
 - `consensus.participated`;
 - `consensus.aggregate_viewed`.
 
-Events may carry ids, stance code, contribution class, selected reason-tag codes and bounded counts. They must not contain Case copy, actor profile attributes, original private reason text or any inferred ideology/personality/psychometric label.
+Events may carry stable card/version ids, stance code, contribution class, selected reason-tag codes and bounded counts. They must not contain Case copy, actor profile attributes, original private reason text or any inferred ideology/personality/psychometric label.
 
 ## HTTP contract
 
@@ -93,9 +96,9 @@ Initial endpoints:
 - `GET /v1/weigh-sessions/{session_id}/consensus-cards`
 - `POST /v1/weigh-sessions/{session_id}/consensus-cards/{card_id}/participation`
 
-The GET response exposes card definition and viewer participation state. Aggregate fields are absent/null until participation exists for the viewer.
+The GET response exposes stable card identity, immutable card-version identity, card definition and viewer participation state. Aggregate fields are absent/null until participation exists for the viewer.
 
-The POST requires `Idempotency-Key`, accepts one stance plus bounded reason tags, persists an immutable participation, and returns the participation receipt plus now-visible aggregate.
+The POST path resolves the currently published version of the stable `card_id`, requires `Idempotency-Key`, accepts one stance plus bounded reason tags, persists an immutable version-pinned participation, and returns the participation receipt plus now-visible aggregate.
 
 ## Acceptance gate
 
@@ -103,14 +106,17 @@ This slice is complete when:
 
 1. machine-readable contract exists and matches this ADR;
 2. API models/port/service/in-memory implementation/routes are covered by unit/API tests;
-3. Commit ownership and contribution-class isolation are tested;
-4. idempotent duplicate submission is tested;
-5. mobile production HTTP repository and deterministic Preview repository share one domain contract;
-6. controller covers loading, blocked, eligible, submitting, participated and retryable error states;
-7. Consensus UI appears only after the result stage and hides its aggregate before participation;
-8. aggregate and reason patterns appear after participation with methodology/provenance copy;
-9. production preview-isolation tests pass;
-10. existing Commit → Reveal → Perspective → Revision/Reflection flows regress green.
+3. stable card identity and immutable card-version identity are distinct and persistence-tested;
+4. Commit ownership and contribution-class isolation are tested;
+5. idempotent duplicate submission and idempotency-key collision behavior are tested;
+6. PostgreSQL migration, seed, persistence, aggregate and outbox behavior pass integration CI;
+7. mobile production HTTP repository and deterministic Preview repository share one domain contract;
+8. controller covers loading, blocked, eligible, submitting, participated, empty and retryable error states, including multi-card advancement;
+9. Consensus UI appears only after the result stage and hides its aggregate before participation;
+10. aggregate and reason patterns appear after participation with methodology/provenance copy;
+11. production preview-isolation tests pass;
+12. existing Commit → Reveal → Perspective → Revision/Reflection flows regress green;
+13. API 0.18 generated OpenAPI exactly matches the composed base + additive Consensus overlay contract.
 
 ## Deferred
 
@@ -129,5 +135,6 @@ This slice is complete when:
 
 - KEFE gains its first explicit WE participation primitive without becoming a generic poll product.
 - Commit First and sample integrity remain intact.
+- Stable card identity supports future versioning without mutating historical participation.
 - The system can later build Signal on reproducible, contribution-class-aware data rather than raw percentages.
 - Product Preview can demonstrate the full interaction immediately while production uses the same mobile boundary and API contract.
