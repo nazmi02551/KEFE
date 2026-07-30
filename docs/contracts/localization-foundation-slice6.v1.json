@@ -1,0 +1,76 @@
+{
+  "contract": "localization-foundation-slice6.v1",
+  "version": "1.0.0",
+  "status": "accepted",
+  "tracks_issue": 108,
+  "stack_base": "5e3db35870eb885d188e77249c3f8e145cb05a0e",
+  "inherited_verified_atlas_runtime": "50d22ad336e42196b88579faaa9fb84c3615ffe8",
+  "slice": "LOCALIZATION_RESOURCE_FOUNDATION_PROGRESS",
+  "governed_files": [
+    "apps/mobile/lib/core/localization/kefe_locale_catalog.dart",
+    "apps/mobile/lib/features/progress/presentation/progress_string_catalog.dart",
+    "apps/mobile/lib/features/progress/presentation/progress_strings.dart"
+  ],
+  "resolver": {
+    "fallback_language_code": "en",
+    "missing_localized_key_falls_back_to_english": true,
+    "missing_english_key_crashes_runtime": false,
+    "placeholder_interpolation_centralized": true,
+    "locale_inspection_allowed_only_in_localization_infrastructure": true
+  },
+  "catalogs": {
+    "feature_owned_catalogs_allowed": true,
+    "english_defines_canonical_keys": true,
+    "supported_locale_key_parity_required": true,
+    "current_supported_languages": ["tr", "en"],
+    "third_locale_requires_presentation_refactor": false,
+    "unknown_locale_fallback_is_support_claim": false
+  },
+  "migration": {
+    "progress_strings_migrated": true,
+    "progress_public_getter_api_preserved": true,
+    "core_kefe_strings_migrated": false,
+    "internal_alpha_strings_migrated": false,
+    "repo_wide_localization_complete": false,
+    "direct_locale_branching_allowed_in_progress_strings": false,
+    "copy_semantics_change": false,
+    "locale_preference_behavior_change": false,
+    "theme_preference_behavior_change": false
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "case_agnostic_runtime": true,
+    "preview_production_isolation": true,
+    "signal_in_scope": false,
+    "impact_in_scope": false,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "bias_inference": false,
+    "causal_inference": false
+  },
+  "deferred": [
+    "CORE_KEFE_STRINGS_CATALOG_MIGRATION",
+    "INTERNAL_ALPHA_CATALOG_MIGRATION",
+    "REPO_WIDE_LOCALIZATION_COMPLETE_CLAIM",
+    "NEW_PRODUCTION_LOCALE_ENABLEMENT"
+  ],
+  "verification": {
+    "exact_head_required": true,
+    "progress_catalog_tr_en_key_parity": true,
+    "unknown_locale_english_fallback": true,
+    "placeholder_interpolation": true,
+    "progress_source_has_no_locale_branching": true,
+    "app_preferences_regression": true,
+    "progress_regressions": true,
+    "production_copy_boundary": true,
+    "flutter_analyze": true,
+    "all_mobile_regressions": true,
+    "api_ci": true,
+    "mobile_ci": true,
+    "mvp_beta_gates": true,
+    "global_readiness": true
+  }
+}
