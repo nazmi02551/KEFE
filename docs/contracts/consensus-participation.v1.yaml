@@ -1,0 +1,107 @@
+contract_version: 1.0.0
+updated_at: '2026-07-30'
+authority:
+  adr: docs/adr/0035-post-commit-consensus-participation.md
+  issue: 91
+  platform_lifecycle: ME_WE_SIGNAL_IMPACT
+capability:
+  code: CONSENSUS_PARTICIPATION
+  case_subtype: forbidden
+  statement_runtime_generation: forbidden
+  zero_or_more_cards_per_case_version: true
+eligibility:
+  bearer_identity_required: true
+  actor_must_own_session: true
+  session_state_required: COMMITTED
+  missing_or_other_actor_error: WEIGH_SESSION_NOT_FOUND
+  uncommitted_error: CONSENSUS_COMMIT_REQUIRED
+  case_version_source: pinned_weigh_session
+contribution:
+  class_for_this_slice: EXPOSED
+  pool_into_core_pre_result: forbidden
+  pool_into_original_collective_result: forbidden
+  signal_qualification_from_this_slice: forbidden
+disclosure:
+  proposition_visible_before_participation: true
+  aggregate_visible_before_participation: false
+  reason_patterns_visible_before_participation: false
+  aggregate_visible_after_participation: true
+response:
+  stance_codes:
+    - AGREE
+    - MIXED
+    - DISAGREE
+  reason_tags:
+    configured_per_card: true
+    free_text: forbidden
+    bounded_selection_required: true
+  one_participation_per_actor_per_card_version: true
+  idempotency_key_required: true
+  change_after_submit: deferred
+read_model:
+  card:
+    required_fields:
+      - card_id
+      - card_version_id
+      - case_version_id
+      - proposition
+      - stance_codes
+      - reason_tag_codes
+      - max_reason_tags
+      - methodology_version
+      - participation_state
+      - contribution_class
+  aggregate:
+    disclosure: after_participation_only
+    required_fields:
+      - sample_size
+      - stance_distribution
+      - reason_pattern_distribution
+      - contribution_class
+      - methodology_version
+      - generated_at
+      - provenance_note
+    actor_identity: forbidden
+    free_text_reason: forbidden
+    demographic_segmentation: forbidden
+    persuasion_score: forbidden
+http:
+  list_cards:
+    method: GET
+    path: /v1/weigh-sessions/{session_id}/consensus-cards
+  participate:
+    method: POST
+    path: /v1/weigh-sessions/{session_id}/consensus-cards/{card_id}/participation
+    idempotency_header: Idempotency-Key
+mobile:
+  repository_port: ConsensusRepository
+  production_adapter: HTTP
+  preview_adapter: deterministic
+  preview_fallback_in_production: forbidden
+  ui_states:
+    - LOADING
+    - BLOCKED
+    - ELIGIBLE
+    - SUBMITTING
+    - PARTICIPATED
+    - ERROR_RETRYABLE
+  placement: POST_COLLECTIVE_RESULT
+privacy:
+  case_copy_in_analytics: forbidden
+  private_weigh_reason_text_reuse: forbidden
+  ideology_inference: forbidden
+  personality_inference: forbidden
+  psychometric_inference: forbidden
+  targeting: forbidden
+deferred:
+  - SIGNAL_QUALIFICATION
+  - CORE_PRE_RESULT_CONSENSUS
+  - STAKEHOLDER_SEGMENTATION
+  - PARTICIPATION_REVISION
+  - FREE_TEXT_REASON
+  - REACTIONS
+  - COMMENTS
+  - SOCIAL_RANKING
+  - INSTITUTION_RESPONSE
+  - IMPACT
+  - AI_PROPOSITION_GENERATION
