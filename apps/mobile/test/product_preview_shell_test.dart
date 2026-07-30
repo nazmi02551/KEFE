@@ -12,6 +12,7 @@ import 'package:kefe_mobile/features/media_presentation/application/case_media_p
 import 'package:kefe_mobile/features/media_presentation/data/preview_case_media_repository.dart';
 import 'package:kefe_mobile/features/progress/application/progress_controller.dart';
 import 'package:kefe_mobile/features/progress/data/preview_progress_repository.dart';
+import 'package:kefe_mobile/features/saved_cases/application/saved_cases_controller.dart';
 import 'package:kefe_mobile/features/saved_cases/data/saved_case_store.dart';
 
 void main() {
