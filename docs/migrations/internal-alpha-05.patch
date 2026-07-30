@@ -1,0 +1,64 @@
+--- a/apps/mobile/lib/features/progress/presentation/my_kefe_journey_screen.dart
++++ b/apps/mobile/lib/features/progress/presentation/my_kefe_journey_screen.dart
+@@ -2,6 +2,7 @@
+ import 'package:flutter_riverpod/flutter_riverpod.dart';
+ 
+ import '../../../core/design/kefe_theme.dart';
++import '../../../core/localization/internal_alpha_strings.dart';
+ import '../../../core/localization/kefe_strings.dart';
+ import '../../saved_cases/presentation/saved_cases_section.dart';
+ import '../application/progress_controller.dart';
+@@ -437,7 +438,7 @@
+             Padding(
+               padding: const EdgeInsets.only(bottom: 7),
+               child: Text(
+-                '• ${item.title} · ${_domainLabel(item.primaryDomain, strings.locale.languageCode)}',
++                '• ${item.title} · ${strings.domainName(item.primaryDomain)}',
+               ),
+             ),
+         ],
+@@ -491,16 +492,3 @@
+     ),
+   );
+ }
+-
+-String _domainLabel(String domain, String languageCode) {
+-  final tr = languageCode == 'tr';
+-  return switch (domain) {
+-    'DAILY_LIFE' => tr ? 'Günlük yaşam' : 'Daily life',
+-    'TECHNOLOGY' => tr ? 'Teknoloji' : 'Technology',
+-    'SPORTS' => tr ? 'Spor' : 'Sports',
+-    'CIVIC' => tr ? 'Kamusal' : 'Civic',
+-    'WORK_ECONOMY' => tr ? 'İş & Ekonomi' : 'Work & Economy',
+-    'EDUCATION' => tr ? 'Eğitim' : 'Education',
+-    _ => domain.replaceAll('_', ' '),
+-  };
+-}
+--- a/apps/mobile/lib/features/context/presentation/context_section.dart
++++ b/apps/mobile/lib/features/context/presentation/context_section.dart
+@@ -2,6 +2,7 @@
+ import 'package:flutter_riverpod/flutter_riverpod.dart';
+ 
+ import '../../../core/design/kefe_theme.dart';
++import '../../../core/localization/internal_alpha_strings.dart';
+ import '../../../core/localization/kefe_strings.dart';
+ import '../application/context_controller.dart';
+ import '../domain/context_models.dart';
+@@ -100,7 +101,7 @@
+                 crossAxisAlignment: CrossAxisAlignment.start,
+                 children: [
+                   Text(
+-                    'Olay özeti',
++                    strings.contextEventSummary,
+                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                       color: KefeColorTokens.goldSoft,
+                       fontWeight: FontWeight.w900,
+@@ -123,7 +124,7 @@
+         if (counts.isNotEmpty) ...[
+           const SizedBox(height: 18),
+           Text(
+-            'Bilgi durumu',
++            strings.contextInformationStatus,
+             style: Theme.of(
+               context,
+             ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
