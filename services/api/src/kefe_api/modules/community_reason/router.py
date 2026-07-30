@@ -82,14 +82,15 @@ def publish_reason(
 
 
 @router.get(
-    "/case-versions/{case_version_id}/community-reasons",
+    "/weigh-sessions/{session_id}/community-reasons",
     response_model=CommunityReasonSnapshotResponse,
 )
 def read_reasons(
-    case_version_id: UUID,
+    session_id: UUID,
+    principal: PrincipalDep,
     service: CommunityReasonServiceDep,
 ) -> CommunityReasonSnapshotResponse:
-    snapshot = service.snapshot(case_version_id=case_version_id)
+    snapshot = service.snapshot(actor_id=principal.actor_id, session_id=session_id)
     return CommunityReasonSnapshotResponse(
         items=[
             CommunityReasonItem(
