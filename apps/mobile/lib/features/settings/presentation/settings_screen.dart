@@ -7,7 +7,9 @@ import '../../../core/localization/settings_strings.dart';
 import '../../../core/preferences/app_preferences.dart';
 
 class SettingsScreen extends ConsumerWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({this.showPrivacyControls = true, super.key});
+
+  final bool showPrivacyControls;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -61,15 +63,17 @@ class SettingsScreen extends ConsumerWidget {
             title: strings.themeDark,
             onChanged: controller.setTheme,
           ),
-          const SizedBox(height: 24),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.privacy_tip_outlined),
-            title: Text(strings.privacyAndData),
-            subtitle: Text(strings.privacyAndDataHelper),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/privacy'),
-          ),
+          if (showPrivacyControls) ...[
+            const SizedBox(height: 24),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.privacy_tip_outlined),
+              title: Text(strings.privacyAndData),
+              subtitle: Text(strings.privacyAndDataHelper),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/privacy'),
+            ),
+          ],
         ],
       ),
     );
