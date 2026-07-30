@@ -63,7 +63,6 @@ class HttpShareRepository implements ShareRepository {
       title: body['title'] as String,
       summary: body['summary'] as String,
       primaryDomain: body['primary_domain'] as String,
-      decision: (body['decision'] as Map?)?.cast<String, Object?>(),
       createdAt: DateTime.parse(body['created_at'] as String),
       expiresAt: DateTime.parse(body['expires_at'] as String),
     );
