@@ -131,14 +131,24 @@ class CommunityReasonService:
     def snapshot(
         self,
         *,
-        case_version_id: UUID,
+        actor_id: UUID,
+        session_id: UUID,
         limit: int = 20,
     ) -> CommunityReasonSnapshot:
-        case = self._decision.get_case_version(case_version_id)
+        session = self._decision.get_session(session_id)
+        if session is None or session.actor_id != actor_id:
+            raise DomainError("WEIGH_SESSION_NOT_FOUND", "Weigh session not found", 404)
+        if session.state is not WeighState.COMMITTED:
+            raise DomainError(
+                "COMMUNITY_REASON_COMMIT_REQUIRED",
+                "Commit is required before reading Community Reasons",
+                403,
+            )
+        case = self._decision.get_case_version(session.case_version_id)
         if case is None:
-            raise DomainError("CASE_NOT_FOUND", "Case version not found", 404)
+            raise DomainError("CASE_VERSION_STALE", "Case version is no longer available", 409)
         return self._repo.public_snapshot(
-            case_version_id,
+            session.case_version_id,
             limit=min(max(limit, 1), 50),
         )
 
