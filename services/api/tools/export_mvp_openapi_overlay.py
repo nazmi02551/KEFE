@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from copy import deepcopy
 from pathlib import Path
 
 from export_openapi import _merge_overlay, build_openapi
+from kefe_api.core.settings import get_settings
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACTS = REPO_ROOT / "docs" / "contracts"
@@ -20,9 +22,23 @@ def _load_pre_mvp_contract() -> dict[str, object]:
     return expected
 
 
+def _build_mvp_runtime_openapi() -> dict[str, object]:
+    previous = os.environ.get("KEFE_API_VERSION")
+    os.environ["KEFE_API_VERSION"] = "0.19.0"
+    get_settings.cache_clear()
+    try:
+        return build_openapi()
+    finally:
+        if previous is None:
+            os.environ.pop("KEFE_API_VERSION", None)
+        else:
+            os.environ["KEFE_API_VERSION"] = previous
+        get_settings.cache_clear()
+
+
 def build_overlay() -> dict[str, object]:
     before = _load_pre_mvp_contract()
-    generated = build_openapi()
+    generated = _build_mvp_runtime_openapi()
     if generated.get("info", {}).get("version") != "0.19.0":
         raise SystemExit("MVP OpenAPI overlay generator expects runtime API version 0.19.0")
 
