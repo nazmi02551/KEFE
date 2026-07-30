@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
 from kefe_api.modules.content_authoring.models import (
     AuthoringCaseVersion,
+    MarketScope,
     PublicationValidationFailure,
 )
 
@@ -13,6 +15,8 @@ SchemaValidator = Callable[[dict[str, Any]], bool]
 
 _SOURCE_KINDS = frozenset({"OFFICIAL", "NEWS", "RESEARCH", "EDITORIAL", "OTHER"})
 _DISCLOSURE_LEVELS = frozenset({"ESSENTIAL", "DETAIL"})
+_LANGUAGE_TAG = re.compile(r"^[a-z]{2,3}(?:-[A-Z]{2})?$")
+_COUNTRY_CODE = re.compile(r"^[A-Z]{2}$")
 
 
 @dataclass(slots=True)
@@ -36,6 +40,7 @@ class InMemoryContentAuthoringRegistry:
         self._validate_questions(version, failures)
         self._validate_modifiers(version, failures)
         self._validate_sources_and_context(version, failures)
+        self._validate_globalization(version, failures)
         self._validate_reviews(version, failures)
         return tuple(failures)
 
@@ -205,6 +210,117 @@ class InMemoryContentAuthoringRegistry:
                         f"context:{block.id}",
                     )
                 )
+
+    def _validate_globalization(
+        self,
+        version: AuthoringCaseVersion,
+        failures: list[PublicationValidationFailure],
+    ) -> None:
+        if not _LANGUAGE_TAG.fullmatch(version.content_locale):
+            failures.append(
+                self._failure(
+                    "CONTENT_LOCALE_INVALID",
+                    "content_locale must be a normalized language tag such as tr-TR or en-US",
+                    "content_locale",
+                )
+            )
+
+        normalized_countries = tuple(dict.fromkeys(version.country_codes))
+        invalid_countries = [
+            code for code in normalized_countries if not _COUNTRY_CODE.fullmatch(code)
+        ]
+        if invalid_countries:
+            failures.append(
+                self._failure(
+                    "CONTENT_COUNTRY_CODE_INVALID",
+                    "Invalid ISO-3166 alpha-2 country codes: " + ", ".join(invalid_countries),
+                    "country_codes",
+                )
+            )
+        if len(normalized_countries) > 32:
+            failures.append(
+                self._failure(
+                    "CONTENT_COUNTRY_SCOPE_TOO_LARGE",
+                    "A CaseVersion may target at most 32 explicit countries",
+                    "country_codes",
+                )
+            )
+        if version.market_scope is MarketScope.GLOBAL and normalized_countries:
+            failures.append(
+                self._failure(
+                    "CONTENT_GLOBAL_COUNTRY_SET_FORBIDDEN",
+                    "GLOBAL content cannot also provide country_codes",
+                    "country_codes",
+                )
+            )
+        if version.market_scope is MarketScope.COUNTRY_SET and not normalized_countries:
+            failures.append(
+                self._failure(
+                    "CONTENT_COUNTRY_SET_REQUIRED",
+                    "COUNTRY_SET content requires at least one country code",
+                    "country_codes",
+                )
+            )
+
+        active_questions = {question.stable_code: question for question in version.active_questions}
+        seen_locales: set[str] = set()
+        for localization in version.localizations:
+            path = f"localizations:{localization.locale}"
+            if not _LANGUAGE_TAG.fullmatch(localization.locale):
+                failures.append(
+                    self._failure(
+                        "CONTENT_LOCALIZATION_LOCALE_INVALID",
+                        f"Invalid localization locale: {localization.locale}",
+                        path,
+                    )
+                )
+            if localization.locale in seen_locales:
+                failures.append(
+                    self._failure(
+                        "CONTENT_LOCALIZATION_DUPLICATE",
+                        f"Duplicate localization locale: {localization.locale}",
+                        path,
+                    )
+                )
+            seen_locales.add(localization.locale)
+            if not localization.title.strip() or not localization.summary.strip():
+                failures.append(
+                    self._failure(
+                        "CONTENT_LOCALIZATION_COPY_REQUIRED",
+                        "Localized title and summary are required",
+                        path,
+                    )
+                )
+            unknown_questions = sorted(
+                set(localization.question_prompts) | set(localization.option_labels)
+                - set(active_questions)
+            )
+            if unknown_questions:
+                failures.append(
+                    self._failure(
+                        "CONTENT_LOCALIZATION_QUESTION_UNKNOWN",
+                        "Localization references unknown stable question codes: "
+                        + ", ".join(unknown_questions),
+                        path,
+                    )
+                )
+            for stable_code, labels in localization.option_labels.items():
+                question = active_questions.get(stable_code)
+                if question is None:
+                    continue
+                canonical_options = {
+                    str(value) for value in question.response_schema.get("options", [])
+                }
+                unknown_values = sorted(set(labels) - canonical_options)
+                if unknown_values:
+                    failures.append(
+                        self._failure(
+                            "CONTENT_LOCALIZATION_OPTION_UNKNOWN",
+                            "Localized labels reference unknown canonical option values: "
+                            + ", ".join(unknown_values),
+                            f"{path}.option_labels.{stable_code}",
+                        )
+                    )
 
     @staticmethod
     def _validate_reviews(
