@@ -41,3 +41,5 @@ jobs:
           git add -A
           git commit -m 'fix: normalize Internal Alpha localization runtime'
           git push origin HEAD:feature/internal-alpha-hardening
+
+# trigger: workflow pre-exists on branch
