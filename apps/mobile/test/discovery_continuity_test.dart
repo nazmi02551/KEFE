@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kefe_mobile/app/product_preview_app.dart';
 import 'package:kefe_mobile/core/design/product_preview_visual_mode.dart';
+import 'package:kefe_mobile/core/preferences/app_preferences.dart';
 import 'package:kefe_mobile/features/decision/application/decision_controller.dart';
 import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/preview_decision_repository.dart';
@@ -15,6 +16,16 @@ import 'package:kefe_mobile/features/saved_cases/data/saved_case_store.dart';
 
 const caseId = '11111111-1111-4111-8111-111111111111';
 
+MemoryAppPreferencesStore _turkishPreferences() {
+  return MemoryAppPreferencesStore(
+    const AppPreferencesState(
+      locale: AppLocalePreference.tr,
+      theme: AppThemePreference.system,
+      loaded: true,
+    ),
+  );
+}
+
 void main() {
   testWidgets('searches, filters, saves and continues a Case from Activity', (
     tester,
@@ -22,6 +33,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          appPreferencesStoreProvider.overrideWithValue(_turkishPreferences()),
           decisionRepositoryProvider.overrideWithValue(
             PreviewDecisionRepository(),
           ),

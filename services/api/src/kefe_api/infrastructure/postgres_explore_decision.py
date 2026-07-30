@@ -5,7 +5,13 @@ from uuid import UUID
 from sqlalchemy import text
 
 from kefe_api.infrastructure.postgres_decision import PostgresDecisionRepository
-from kefe_api.modules.decision.models import CaseVersion, FlowStep, Question, ResolvedFlow
+from kefe_api.modules.decision.models import (
+    CaseLocalization,
+    CaseVersion,
+    FlowStep,
+    Question,
+    ResolvedFlow,
+)
 
 
 class PostgresExploreDecisionRepository(PostgresDecisionRepository):
@@ -48,7 +54,13 @@ class PostgresExploreDecisionRepository(PostgresDecisionRepository):
                         cv.content_risk,
                         cv.content_configuration_id,
                         cv.content_configuration_version_no,
-                        cv.resolved_flow
+                        cv.resolved_flow,
+                        cv.content_locale,
+                        cv.market_scope,
+                        cv.country_codes,
+                        cv.cultural_context_note,
+                        cv.legal_context_note,
+                        cv.localizations
                     FROM content.case_version cv
                     WHERE cv.id = :version_id
                     """
@@ -62,6 +74,7 @@ class PostgresExploreDecisionRepository(PostgresDecisionRepository):
                 text(
                     """
                     SELECT
+                        q.stable_code,
                         qv.id,
                         qv.prompt,
                         qv.response_type,
@@ -96,6 +109,7 @@ class PostgresExploreDecisionRepository(PostgresDecisionRepository):
                 response_type=question_row["response_type"],
                 required=question_row["is_required"],
                 response_schema=question_row["response_schema"] or {},
+                stable_code=question_row["stable_code"],
             )
             for question_row in question_rows
         )
@@ -119,6 +133,19 @@ class PostgresExploreDecisionRepository(PostgresDecisionRepository):
             if resolved_flow_document is not None
             else None
         )
+        localization_document = row["localizations"] or {}
+        localizations = {
+            locale: CaseLocalization(
+                locale=locale,
+                title=document["title"],
+                summary=document["summary"],
+                question_prompts=document.get("question_prompts", {}),
+                option_labels=document.get("option_labels", {}),
+                cultural_context_note=document.get("cultural_context_note"),
+                legal_context_note=document.get("legal_context_note"),
+            )
+            for locale, document in localization_document.items()
+        }
         return CaseVersion(
             id=row["id"],
             case_id=row["case_id"],
@@ -133,4 +160,10 @@ class PostgresExploreDecisionRepository(PostgresDecisionRepository):
             content_configuration_id=row["content_configuration_id"],
             content_configuration_version_no=row["content_configuration_version_no"],
             resolved_flow=resolved_flow,
+            content_locale=row["content_locale"],
+            market_scope=row["market_scope"],
+            country_codes=tuple(row["country_codes"] or ()),
+            cultural_context_note=row["cultural_context_note"],
+            legal_context_note=row["legal_context_note"],
+            localizations=localizations,
         )

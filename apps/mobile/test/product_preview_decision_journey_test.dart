@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kefe_mobile/app/product_preview_app.dart';
 import 'package:kefe_mobile/core/design/product_preview_visual_mode.dart';
+import 'package:kefe_mobile/core/preferences/app_preferences.dart';
 import 'package:kefe_mobile/features/decision/application/decision_controller.dart';
 import 'package:kefe_mobile/features/decision/application/reflection_completion_provider.dart';
 import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
@@ -29,10 +30,18 @@ void main() {
     'Product Preview executes principle, counterview, revision and Reflection journey',
     (tester) async {
       final repository = PreviewJourneyDecisionRepository();
+      final preferences = MemoryAppPreferencesStore(
+        const AppPreferencesState(
+          locale: AppLocalePreference.tr,
+          theme: AppThemePreference.system,
+          loaded: true,
+        ),
+      );
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            appPreferencesStoreProvider.overrideWithValue(preferences),
             decisionRepositoryProvider.overrideWithValue(repository),
             decisionDraftStoreProvider.overrideWithValue(
               MemoryDecisionDraftStore(),

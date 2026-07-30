@@ -16,6 +16,11 @@ class ContentLifecycle(StrEnum):
     WITHDRAWN = "WITHDRAWN"
 
 
+class MarketScope(StrEnum):
+    GLOBAL = "GLOBAL"
+    COUNTRY_SET = "COUNTRY_SET"
+
+
 @dataclass(frozen=True, slots=True)
 class AuthoringQuestion:
     id: UUID
@@ -59,6 +64,23 @@ class AuthoringSourceReference:
     published_at: datetime | None = None
     claim_status: str | None = None
     verified: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class AuthoringCaseLocalization:
+    """Editorial display copy pinned to the immutable CaseVersion.
+
+    Canonical response option values remain unchanged; option_labels only localize
+    their display labels. Question prompts are keyed by stable question code.
+    """
+
+    locale: str
+    title: str
+    summary: str
+    question_prompts: dict[str, str] = field(default_factory=dict)
+    option_labels: dict[str, dict[str, str]] = field(default_factory=dict)
+    cultural_context_note: str | None = None
+    legal_context_note: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -116,6 +138,12 @@ class AuthoringCaseVersion:
     content_configuration_id: UUID | None = None
     content_configuration_version_no: int | None = None
     resolved_flow: ResolvedFlowDefinition | None = None
+    content_locale: str = "tr-TR"
+    market_scope: MarketScope = MarketScope.GLOBAL
+    country_codes: tuple[str, ...] = ()
+    cultural_context_note: str | None = None
+    legal_context_note: str | None = None
+    localizations: tuple[AuthoringCaseLocalization, ...] = ()
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     published_at: datetime | None = None
 

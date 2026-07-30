@@ -66,11 +66,23 @@ class Question:
     response_type: str
     required: bool = True
     response_schema: Mapping[str, Any] = field(default_factory=dict)
+    stable_code: str = ""
 
     @property
     def options(self) -> tuple[str, ...]:
         raw_options = self.response_schema.get("options", ())
         return tuple(str(option) for option in raw_options)
+
+
+@dataclass(frozen=True, slots=True)
+class CaseLocalization:
+    locale: str
+    title: str
+    summary: str
+    question_prompts: Mapping[str, str] = field(default_factory=dict)
+    option_labels: Mapping[str, Mapping[str, str]] = field(default_factory=dict)
+    cultural_context_note: str | None = None
+    legal_context_note: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -105,6 +117,12 @@ class CaseVersion:
     content_configuration_id: UUID | None = None
     content_configuration_version_no: int | None = None
     resolved_flow: ResolvedFlow | None = None
+    content_locale: str = "tr-TR"
+    market_scope: str = "GLOBAL"
+    country_codes: tuple[str, ...] = ()
+    cultural_context_note: str | None = None
+    legal_context_note: str | None = None
+    localizations: Mapping[str, CaseLocalization] = field(default_factory=dict)
 
 
 @dataclass(slots=True)

@@ -47,6 +47,8 @@ from kefe_api.modules.decision.reflection_service import ReflectionService
 from kefe_api.modules.decision.router import router as decision_router
 from kefe_api.modules.flow_runtime.router import router as flow_runtime_router
 from kefe_api.modules.flow_runtime.service import FlowRuntimeService
+from kefe_api.modules.global_discovery.router import router as global_discovery_router
+from kefe_api.modules.global_discovery.service import GlobalDiscoveryService
 from kefe_api.modules.health.router import router as health_router
 from kefe_api.modules.identity.account_router import router as account_router
 from kefe_api.modules.identity.account_service import AccountContinuityService
@@ -65,6 +67,14 @@ from kefe_api.modules.progress.router import router as progress_router
 from kefe_api.modules.progress.service import ProgressService
 from kefe_api.modules.sharing.router import router as sharing_router
 from kefe_api.modules.sharing.service import ShareService
+
+
+def _api_at_least(version: str, major: int, minor: int) -> bool:
+    try:
+        parts = version.split(".")
+        return (int(parts[0]), int(parts[1])) >= (major, minor)
+    except (ValueError, IndexError):
+        return False
 
 
 def create_app() -> FastAPI:
@@ -125,6 +135,7 @@ def create_app() -> FastAPI:
     app.state.context_service = ContextService(context_repository)
     app.state.decision_repository = decision_repository
     app.state.decision_service = LineageAwareDecisionService(decision_repository)
+    app.state.global_discovery_service = GlobalDiscoveryService(decision_repository)
     app.state.consensus_repository = consensus_repository
     app.state.consensus_service = ConsensusService(
         consensus_repository=consensus_repository,
@@ -192,6 +203,8 @@ def create_app() -> FastAPI:
     app.include_router(account_router)
     app.include_router(context_router)
     app.include_router(decision_router)
+    if _api_at_least(settings.api_version, 0, 20):
+        app.include_router(global_discovery_router)
     app.include_router(consensus_router)
     app.include_router(community_reason_router)
     app.include_router(sharing_router)
