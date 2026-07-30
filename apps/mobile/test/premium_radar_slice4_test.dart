@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kefe_mobile/app/product_preview/preview_content_localizer.dart';
@@ -95,7 +96,12 @@ void main() {
             theme: theme,
             locale: locale,
             supportedLocales: KefeStrings.supportedLocales,
-            localizationsDelegates: const [KefeStringsDelegate()],
+            localizationsDelegates: const [
+              KefeStringsDelegate(),
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
             home: const Scaffold(body: RadarPreviewScreen()),
           ),
         ),
