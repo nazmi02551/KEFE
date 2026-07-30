@@ -1,0 +1,43 @@
+name: Internal Alpha Fixup
+
+on:
+  push:
+    branches: [feature/internal-alpha-hardening]
+    paths:
+      - '.github/workflows/internal-alpha-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fixup:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/internal-alpha-hardening
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.4'
+          channel: stable
+          cache: true
+      - name: Apply semantic fixes
+        run: |
+          git apply --check docs/migrations/internal-alpha-fix.patch
+          git apply docs/migrations/internal-alpha-fix.patch
+      - name: Normalize Dart sources
+        working-directory: apps/mobile
+        run: dart format lib test
+      - name: Remove one-shot fixup assets
+        run: |
+          rm docs/migrations/internal-alpha-fix.patch
+          rm .github/workflows/internal-alpha-fix.yml
+      - name: Commit fixed sources
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'fix: normalize Internal Alpha localization runtime'
+          git push origin HEAD:feature/internal-alpha-hardening
