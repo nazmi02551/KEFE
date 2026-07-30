@@ -53,7 +53,8 @@ def test_consensus_requires_owned_committed_session() -> None:
 
 
 def test_consensus_hides_aggregate_until_participation() -> None:
-    client = TestClient(create_app())
+    app = create_app()
+    client = TestClient(app)
     headers = _guest(client)
     session_id = _start(client, headers)
     _commit(client, session_id, headers)
@@ -70,6 +71,10 @@ def test_consensus_hides_aggregate_until_participation() -> None:
     assert card["contribution_class"] == "EXPOSED"
     assert card["aggregate"] is None
     assert card["participation"] is None
+    assert not any(
+        event["name"] == "consensus.aggregate_viewed"
+        for event in app.state.decision_repository.events
+    )
 
 
 def test_consensus_participation_is_exposed_idempotent_and_reveals_aggregate() -> None:
@@ -118,16 +123,26 @@ def test_consensus_participation_is_exposed_idempotent_and_reveals_aggregate() -
     }
     assert "Signal" in body["aggregate"]["provenance_note"]
 
-    events = [
+    participated = [
         event
         for event in app.state.decision_repository.events
         if event["name"] == "consensus.participated"
     ]
-    assert len(events) == 2
-    assert events[0]["payload"]["contribution_class"] == "EXPOSED"
-    assert events[0]["payload"]["stance_code"] == "AGREE"
-    assert events[1]["payload"]["idempotent_replay"] is True
-    assert "proposition" not in events[0]["payload"]
+    aggregate_views = [
+        event
+        for event in app.state.decision_repository.events
+        if event["name"] == "consensus.aggregate_viewed"
+    ]
+    assert len(participated) == 1
+    assert participated[0]["payload"]["contribution_class"] == "EXPOSED"
+    assert participated[0]["payload"]["stance_code"] == "AGREE"
+    assert "proposition" not in participated[0]["payload"]
+    assert len(aggregate_views) == 2
+    assert all(
+        event["payload"]["contribution_class"] == "EXPOSED"
+        for event in aggregate_views
+    )
+    assert all("proposition" not in event["payload"] for event in aggregate_views)
 
 
 def test_consensus_rejects_invalid_tags_and_second_participation() -> None:
