@@ -249,56 +249,37 @@ class _LoadedState extends StatelessWidget {
             key: const ValueKey('perspective-methodology'),
             tilePadding: const EdgeInsets.symmetric(horizontal: 2),
             childrenPadding: const EdgeInsets.only(bottom: 8),
-            title: Text(strings.perspectiveMethodologyTitle),
+            title: Text(
+              strings.perspectiveMethodology,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+            ),
             children: [
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   snapshot.methodology.provenanceNote,
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: KefeColorTokens.textMutedDark,
+                        height: 1.4,
+                      ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '${snapshot.methodology.sampleKind} · n=${snapshot.methodology.sampleSize}',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: KefeColorTokens.goldSoft,
+                      ),
                 ),
               ),
             ],
           ),
         ),
       ],
-    );
-  }
-}
-
-class _PerspectiveCardView extends StatelessWidget {
-  const _PerspectiveCardView({required this.card});
-  final PerspectiveCard card;
-
-  @override
-  Widget build(BuildContext context) {
-    final strings = KefeStrings.of(context);
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: KefeColorTokens.surfaceDark.withValues(alpha: 0.55),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: KefeColorTokens.borderDark),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            strings.perspectiveSlot(card.slot),
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: KefeColorTokens.goldSoft,
-                  fontWeight: FontWeight.w800,
-                ),
-          ),
-          const SizedBox(height: 6),
-          Text(card.body),
-          const SizedBox(height: 8),
-          Text(
-            card.provenanceLabel,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
     );
   }
 }
@@ -310,17 +291,106 @@ class _MethodNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(11),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          color: KefeColorTokens.surfaceDark.withValues(alpha: 0.62),
+          color: KefeColorTokens.rules.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: KefeColorTokens.rules.withValues(alpha: 0.18),
+          ),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 18),
+            Icon(icon, size: 17, color: KefeColorTokens.rules),
             const SizedBox(width: 8),
-            Expanded(child: Text(text)),
+            Expanded(
+              child: Text(
+                text,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: KefeColorTokens.textMutedDark,
+                    ),
+              ),
+            ),
           ],
         ),
       );
 }
+
+class _PerspectiveCardView extends StatelessWidget {
+  const _PerspectiveCardView({required this.card});
+  final PerspectiveCard card;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
+    final visual = _slotVisual(card.slot);
+    return Container(
+      key: ValueKey('perspective-card-${card.slot.name}'),
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: visual.color.withValues(alpha: 0.055),
+        border: Border.all(color: visual.color.withValues(alpha: 0.26)),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: visual.color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: Icon(visual.icon, size: 16, color: visual.color),
+              ),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Text(
+                  strings.perspectiveSlotLabel(card.slot),
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: visual.color,
+                        fontWeight: FontWeight.w900,
+                      ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 11),
+          Text(
+            card.body,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.45),
+          ),
+          const SizedBox(height: 11),
+          Text(
+            '${strings.perspectiveSourceLabel(card.sourceKind)} · ${card.provenanceLabel}',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: KefeColorTokens.textMutedDark,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+({Color color, IconData icon}) _slotVisual(PerspectiveSlot slot) => switch (slot) {
+      PerspectiveSlot.near => (
+          color: KefeColorTokens.success,
+          icon: Icons.thumb_up_alt_outlined,
+        ),
+      PerspectiveSlot.opposing => (
+          color: KefeColorTokens.empathy,
+          icon: Icons.swap_horiz_rounded,
+        ),
+      PerspectiveSlot.bridge => (
+          color: const Color(0xFFAA9CFF),
+          icon: Icons.hub_outlined,
+        ),
+      PerspectiveSlot.alternativeContext => (
+          color: KefeColorTokens.rules,
+          icon: Icons.change_circle_outlined,
+        ),
+    };
