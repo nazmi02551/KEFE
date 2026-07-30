@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
 from types import MappingProxyType
-from typing import Mapping
 from uuid import UUID
 
 
@@ -82,7 +82,7 @@ class ConsensusAggregate:
         methodology_version: str,
         generated_at: datetime,
         provenance_note: str,
-    ) -> "ConsensusAggregate":
+    ) -> ConsensusAggregate:
         return cls(
             card_version_id=card_version_id,
             case_version_id=case_version_id,
