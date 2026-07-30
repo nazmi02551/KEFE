@@ -1,4 +1,4 @@
-registry_version: 1.13.0
+registry_version: 1.14.0
 errors:
 - code: AUTH_REQUIRED
   http_status: 401
@@ -227,6 +227,24 @@ errors:
   retryable: false
 - code: REASON_BLOCKED_BY_POLICY
   http_status: 422
+  retryable: false
+- code: CONSENSUS_COMMIT_REQUIRED
+  http_status: 403
+  retryable: false
+- code: CONSENSUS_CARD_NOT_FOUND
+  http_status: 404
+  retryable: false
+- code: CONSENSUS_STANCE_INVALID
+  http_status: 422
+  retryable: false
+- code: CONSENSUS_REASON_TAG_INVALID
+  http_status: 422
+  retryable: false
+- code: CONSENSUS_REASON_TAG_LIMIT_EXCEEDED
+  http_status: 422
+  retryable: false
+- code: CONSENSUS_ALREADY_PARTICIPATED
+  http_status: 409
   retryable: false
 - code: RESULT_COMMIT_REQUIRED
   http_status: 403
