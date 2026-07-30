@@ -38,7 +38,7 @@ class PrimaryNavigationShell extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (footer != null) footer!,
+            ?footer,
             NavigationBar(
               key: const ValueKey('primary-navigation'),
               selectedIndex: selectedIndex,
