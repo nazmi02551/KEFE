@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/internal_alpha_strings.dart';
+import '../../../core/localization/kefe_strings.dart';
 import '../application/privacy_controller.dart';
 
 class PrivacyControlsSection extends ConsumerWidget {
@@ -15,7 +17,7 @@ class PrivacyControlsSection extends ConsumerWidget {
     if (!ref.watch(privacyExperienceEnabledProvider)) {
       return const SizedBox.shrink();
     }
-    final tr = Localizations.localeOf(context).languageCode == 'tr';
+    final strings = KefeStrings.of(context);
     final state = ref.watch(privacyControllerProvider);
     final controller = ref.read(privacyControllerProvider.notifier);
 
@@ -31,7 +33,7 @@ class PrivacyControlsSection extends ConsumerWidget {
                 const Icon(Icons.privacy_tip_outlined),
                 const SizedBox(width: 10),
                 Text(
-                  tr ? 'Verilerin ve gizliliğin' : 'Your data and privacy',
+                  strings.privacyHeading,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
@@ -39,11 +41,7 @@ class PrivacyControlsSection extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              tr
-                  ? 'Kendi ürün geçmişinin makine-okunur kopyasını alabilir veya hesabındaki/misafir kimliğindeki özel verileri silebilirsin.'
-                  : 'Export a machine-readable copy of your product history or delete private data attached to your account/guest identity.',
-            ),
+            Text(strings.privacyBody),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               key: const ValueKey('privacy-export'),
@@ -60,27 +58,19 @@ class PrivacyControlsSection extends ConsumerWidget {
                       showDialog<void>(
                         context: context,
                         builder: (dialogContext) => AlertDialog(
-                          title: Text(
-                            tr
-                                ? 'Veri kopyan hazır'
-                                : 'Your data copy is ready',
-                          ),
-                          content: Text(
-                            tr
-                                ? 'Makine-okunur JSON panoya kopyalandı. Güvenlik tokenları ve başka kullanıcıların verileri bu dışa aktarıma dahil değildir.'
-                                : 'Machine-readable JSON was copied to the clipboard. Security tokens and other users’ data are excluded.',
-                          ),
+                          title: Text(strings.privacyExportReady),
+                          content: Text(strings.privacyExportCopied),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(dialogContext),
-                              child: Text(tr ? 'Tamam' : 'OK'),
+                              child: Text(strings.privacyDone),
                             ),
                           ],
                         ),
                       );
                     },
               icon: const Icon(Icons.download_outlined),
-              label: Text(tr ? 'Verilerimi dışa aktar' : 'Export my data'),
+              label: Text(strings.privacyExport),
             ),
             const SizedBox(height: 8),
             TextButton.icon(
@@ -89,12 +79,12 @@ class PrivacyControlsSection extends ConsumerWidget {
                   ? null
                   : () => _confirmDelete(context, ref),
               icon: const Icon(Icons.delete_forever_outlined),
-              label: Text(tr ? 'Verilerimi sil' : 'Delete my data'),
+              label: Text(strings.privacyDelete),
             ),
             if (state.errorCode != null) ...[
               const SizedBox(height: 8),
               Text(
-                '${tr ? 'Gizlilik işlemi başarısız' : 'Privacy action failed'} · ${state.errorCode}',
+                strings.privacyFailure(state.errorCode!),
               ),
             ],
           ],
@@ -104,23 +94,17 @@ class PrivacyControlsSection extends ConsumerWidget {
   }
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
-    final tr = Localizations.localeOf(context).languageCode == 'tr';
+    final strings = KefeStrings.of(context);
     final typed = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(
-          tr ? 'Verileri kalıcı olarak sil?' : 'Delete data permanently?',
-        ),
+        title: Text(strings.privacyDeleteTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              tr
-                  ? 'Bu işlem geri alınamaz. Devam etmek için DELETE yaz.'
-                  : 'This cannot be undone. Type DELETE to continue.',
-            ),
+            Text(strings.privacyDeleteBody),
             const SizedBox(height: 12),
             TextField(
               key: const ValueKey('privacy-delete-confirmation'),
@@ -133,12 +117,12 @@ class PrivacyControlsSection extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(tr ? 'Vazgeç' : 'Cancel'),
+            child: Text(strings.privacyCancel),
           ),
           FilledButton(
             onPressed: () =>
                 Navigator.pop(dialogContext, typed.text.trim() == 'DELETE'),
-            child: Text(tr ? 'Kalıcı olarak sil' : 'Delete permanently'),
+            child: Text(strings.privacyDeletePermanently),
           ),
         ],
       ),

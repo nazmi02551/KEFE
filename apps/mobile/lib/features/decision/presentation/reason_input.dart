@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/design/kefe_theme.dart';
+import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../domain/decision_models.dart';
 
@@ -54,7 +55,7 @@ class ReasonInputCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'GEREKÇELER',
+                        strings.reasonsEyebrow,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: const Color(0xFFAA9CFF),
                           fontWeight: FontWeight.w900,

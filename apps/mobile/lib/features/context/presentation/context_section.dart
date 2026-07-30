@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design/kefe_theme.dart';
+import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../application/context_controller.dart';
 import '../domain/context_models.dart';
@@ -100,7 +101,7 @@ class _ContextContent extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Olay özeti',
+                    strings.contextEventSummary,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: KefeColorTokens.goldSoft,
                       fontWeight: FontWeight.w900,
@@ -123,7 +124,7 @@ class _ContextContent extends StatelessWidget {
         if (counts.isNotEmpty) ...[
           const SizedBox(height: 18),
           Text(
-            'Bilgi durumu',
+            strings.contextInformationStatus,
             style: Theme.of(
               context,
             ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),

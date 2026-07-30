@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design/kefe_theme.dart';
+import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../community_reason/presentation/community_reason_section.dart';
 import '../../consensus/presentation/consensus_section.dart';
@@ -87,7 +88,7 @@ class PerspectiveSection extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'KARŞI GÖRÜŞLER',
+                            strings.perspectiveEyebrow,
                             style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   color: const Color(0xFFAA9CFF),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../application/progress_controller.dart';
 import 'progress_strings.dart';
@@ -118,7 +119,7 @@ class _ProgressReady extends ConsumerWidget {
                   for (final item in progress.recentCases)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 6),
-                      child: Text('• ${item.title} · ${item.primaryDomain}'),
+                      child: Text('• ${item.title} · ${strings.domainName(item.primaryDomain)}'),
                     ),
                 ],
                 const SizedBox(height: 12),
@@ -151,11 +152,7 @@ class _ProgressReady extends ConsumerWidget {
                       key: const ValueKey('account-offer-create'),
                       onPressed: () => context.push('/account'),
                       icon: const Icon(Icons.verified_user_outlined),
-                      label: Text(
-                        Localizations.localeOf(context).languageCode == 'tr'
-                            ? 'Geçmişimi koru'
-                            : 'Protect my history',
-                      ),
+                      label: Text(strings.accountProtectAction),
                     )
                   else
                     Text(

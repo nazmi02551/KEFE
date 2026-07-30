@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design/kefe_theme.dart';
+import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../saved_cases/presentation/saved_cases_section.dart';
 import '../application/progress_controller.dart';
@@ -437,7 +438,7 @@ class _LegacyRecent extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 7),
               child: Text(
-                '• ${item.title} · ${_domainLabel(item.primaryDomain, strings.locale.languageCode)}',
+                '• ${item.title} · ${strings.domainName(item.primaryDomain)}',
               ),
             ),
         ],
@@ -490,17 +491,4 @@ class _Footnote extends StatelessWidget {
       ),
     ),
   );
-}
-
-String _domainLabel(String domain, String languageCode) {
-  final tr = languageCode == 'tr';
-  return switch (domain) {
-    'DAILY_LIFE' => tr ? 'Günlük yaşam' : 'Daily life',
-    'TECHNOLOGY' => tr ? 'Teknoloji' : 'Technology',
-    'SPORTS' => tr ? 'Spor' : 'Sports',
-    'CIVIC' => tr ? 'Kamusal' : 'Civic',
-    'WORK_ECONOMY' => tr ? 'İş & Ekonomi' : 'Work & Economy',
-    'EDUCATION' => tr ? 'Eğitim' : 'Education',
-    _ => domain.replaceAll('_', ' '),
-  };
 }

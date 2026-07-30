@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/internal_alpha_strings.dart';
+import '../../../core/localization/kefe_strings.dart';
 import 'privacy_controls_section.dart';
 
 class PrivacyScreen extends StatelessWidget {
@@ -7,11 +9,9 @@ class PrivacyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tr = Localizations.localeOf(context).languageCode == 'tr';
+    final strings = KefeStrings.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(tr ? 'Gizlilik ve veriler' : 'Privacy and data'),
-      ),
+      appBar: AppBar(title: Text(strings.privacyTitle)),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(18),

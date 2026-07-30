@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/design/kefe_theme.dart';
+import '../../../core/localization/internal_alpha_strings.dart';
+import '../../../core/localization/kefe_strings.dart';
 
 class KefeBalanceVisual extends StatelessWidget {
   const KefeBalanceVisual({
@@ -18,14 +20,15 @@ class KefeBalanceVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
     final selectedLabel = switch (selectedIndex) {
       0 => leftLabel,
       1 => rightLabel,
-      _ => 'Henüz seçim yok',
+      _ => strings.balanceNoSelection,
     };
 
     return Semantics(
-      label: 'KEFE terazisi. $selectedLabel',
+      label: strings.balanceSemantics(selectedLabel),
       child: Container(
         key: const ValueKey('kefe-balance-visual'),
         padding: EdgeInsets.fromLTRB(14, compact ? 10 : 16, 14, 12),

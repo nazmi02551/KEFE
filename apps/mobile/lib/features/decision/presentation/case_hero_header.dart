@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/design/kefe_theme.dart';
+import '../../../core/localization/internal_alpha_strings.dart';
+import '../../../core/localization/kefe_strings.dart';
 import '../../media_presentation/domain/case_media_models.dart';
 import '../../media_presentation/presentation/case_media_surface.dart';
 import '../domain/decision_models.dart';
@@ -17,6 +19,7 @@ class CaseHeroHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -90,6 +93,7 @@ class _FlowProgressRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
     final steps = flowRuntime.steps;
     if (steps.isEmpty) return const SizedBox.shrink();
 
@@ -109,7 +113,7 @@ class _FlowProgressRail extends StatelessWidget {
         Row(
           children: [
             Text(
-              'KARAR YOLCULUĞU',
+              strings.journeyLabel,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: KefeColorTokens.goldSoft,
                 fontWeight: FontWeight.w900,
@@ -118,7 +122,7 @@ class _FlowProgressRail extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              _progressText(steps),
+              _progressText(steps, strings),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: KefeColorTokens.textMutedDark,
                 fontWeight: FontWeight.w700,
@@ -143,6 +147,7 @@ class _FlowProgressRail extends StatelessWidget {
                         steps[index],
                         counts: counts,
                         totals: totals,
+                        strings: strings,
                       ),
                     ),
                   ),
@@ -160,6 +165,7 @@ class _FlowProgressRail extends StatelessWidget {
     FlowRuntimeStep step, {
     required Map<String, int> counts,
     required Map<String, int> totals,
+    required KefeStrings strings,
   }) {
     final order = counts.update(
       step.primitiveCode,
@@ -167,23 +173,23 @@ class _FlowProgressRail extends StatelessWidget {
       ifAbsent: () => 1,
     );
     final base = switch (step.primitiveCode) {
-      'CONTEXT' => 'Olay',
-      'DECISION' => 'Tartım',
-      'COLLECTIVE_RESULT' => 'Sonuç',
-      'REFLECTION' => 'Yansıma',
+      'CONTEXT' => strings.stepCase,
+      'DECISION' => strings.stepWeigh,
+      'COLLECTIVE_RESULT' => strings.stepResult,
+      'REFLECTION' => strings.stepReflection,
       _ => _humanize(step.primitiveCode),
     };
     return (totals[step.primitiveCode] ?? 0) > 1 ? '$base $order' : base;
   }
 
-  String _progressText(List<FlowRuntimeStep> steps) {
+  String _progressText(List<FlowRuntimeStep> steps, KefeStrings strings) {
     final completed = steps
         .where((step) => step.state == FlowStepRuntimeState.completed)
         .length;
     final ready = steps
         .where((step) => step.state == FlowStepRuntimeState.ready)
         .length;
-    if (completed == steps.length) return 'Tamamlandı';
+    if (completed == steps.length) return strings.stepCompleted;
     if (ready > 0) return '${completed + 1}/${steps.length}';
     return '$completed/${steps.length}';
   }
