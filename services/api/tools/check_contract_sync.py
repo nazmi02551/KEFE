@@ -51,7 +51,6 @@ def _missing_fields(schemas: dict, schema: str, required: set[str]) -> list[str]
 def _openapi_errors() -> list[str]:
     contract = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
     errors: list[str] = []
-
     if contract.get("info", {}).get("version") != "0.18.0":
         errors.append("OpenAPI checked-in version must match API v0.18.0")
 
@@ -113,12 +112,7 @@ def _openapi_errors() -> list[str]:
             "moderation_state",
             "visibility",
         },
-        "PerspectiveResponse": {
-            "session_id",
-            "case_version_id",
-            "cards",
-            "methodology",
-        },
+        "PerspectiveResponse": {"session_id", "case_version_id", "cards", "methodology"},
         "ContextSnapshotResponse": {"case_version_id", "blocks", "sources"},
         "ProgressEnvelopeResponse": {"account_offer", "progress", "journey", "methodology"},
         "DomainActivityResponse": {"primary_domain", "committed_weigh_count", "last_committed_at"},
@@ -233,8 +227,8 @@ def _openapi_errors() -> list[str]:
         if missing:
             errors.append(f"{schema} missing fields: {', '.join(missing)}")
 
-    progress_properties = schemas.get("ProgressResponse", {}).get("properties", {})
-    forbidden_progress_fields = {
+    progress = schemas.get("ProgressResponse", {}).get("properties", {})
+    forbidden_progress = {
         "private_reason_text",
         "raw_response_payload",
         "personality",
@@ -245,12 +239,12 @@ def _openapi_errors() -> list[str]:
         "leaderboard",
         "xp",
     }
-    leaked = sorted(forbidden_progress_fields & progress_properties.keys())
+    leaked = sorted(forbidden_progress & progress.keys())
     if leaked:
         errors.append("ProgressResponse leaks forbidden fields: " + ", ".join(leaked))
 
-    aggregate_properties = schemas.get("ConsensusAggregateResponse", {}).get("properties", {})
-    forbidden_consensus_fields = {
+    aggregate = schemas.get("ConsensusAggregateResponse", {}).get("properties", {})
+    forbidden_consensus = {
         "actor_id",
         "demographic_segment",
         "private_reason_text",
@@ -260,7 +254,7 @@ def _openapi_errors() -> list[str]:
         "signal_score",
         "persuasion_score",
     }
-    consensus_leaks = sorted(forbidden_consensus_fields & aggregate_properties.keys())
+    consensus_leaks = sorted(forbidden_consensus & aggregate.keys())
     if consensus_leaks:
         errors.append(
             "ConsensusAggregateResponse leaks forbidden fields: "
@@ -310,11 +304,11 @@ def _openapi_errors() -> list[str]:
         if _response_ref(operation, status) != f"#/components/schemas/{schema}":
             errors.append(f"{method.upper()} {path} must return {schema}")
 
-    context_operation = paths.get("/v1/case-versions/{case_version_id}/context", {}).get("get", {})
-    if context_operation.get("security"):
+    context_path = "/v1/case-versions/{case_version_id}/context"
+    if paths.get(context_path, {}).get("get", {}).get("security"):
         errors.append("GET CaseVersion context must remain public before Commit")
 
-    protected_operations = (
+    protected = (
         ("/v1/cases/{case_id}/weigh-sessions", "post"),
         ("/v1/weigh-sessions/{session_id}/responses", "put"),
         ("/v1/weigh-sessions/{session_id}/reason", "put"),
@@ -330,7 +324,7 @@ def _openapi_errors() -> list[str]:
         ("/v1/me/progress", "get"),
         ("/v1/identity/session", "delete"),
     )
-    for path, method in protected_operations:
+    for path, method in protected:
         operation = paths.get(path, {}).get(method, {})
         if {"HTTPBearer": []} not in operation.get("security", []):
             errors.append(f"{method.upper()} {path} must require Bearer auth")
@@ -345,14 +339,16 @@ def _openapi_errors() -> list[str]:
                 continue
             for parameter in operation.get("parameters", []):
                 if parameter.get("name", "").lower() == "x-actor-id":
-                    errors.append(f"OpenAPI must not expose X-Actor-Id ({method.upper()} {path})")
-
+                    errors.append(
+                        "OpenAPI must not expose X-Actor-Id "
+                        f"({method.upper()} {path})"
+                    )
     return errors
 
 
 def _schema_errors() -> list[str]:
     schema = (CONTRACTS / "postgresql-m0-schema.v1.8.0.sql").read_text(encoding="utf-8")
-    required_fragments = {
+    required = {
         "commit_idempotency_key text": "explicit Commit idempotency",
         "commit_idempotency_actor_key_idx": "actor-scoped Commit idempotency",
         "outbox_decision_lifecycle_once_idx": "lifecycle outbox uniqueness",
@@ -394,13 +390,15 @@ def _schema_errors() -> list[str]:
     }
     return [
         f"Schema missing {description}"
-        for fragment, description in required_fragments.items()
+        for fragment, description in required.items()
         if fragment not in schema
     ]
 
 
 def _authoring_contract_errors() -> list[str]:
-    policy = (CONTRACTS / "content-authoring-persistence.v1.yaml").read_text(encoding="utf-8")
+    policy = (CONTRACTS / "content-authoring-persistence.v1.yaml").read_text(
+        encoding="utf-8"
+    )
     required = {
         "authoring_schema: editorial",
         "consumer_materialization_only_on_publish: true",
@@ -426,7 +424,9 @@ def _authoring_contract_errors() -> list[str]:
 
 def _configuration_errors() -> list[str]:
     config = (CONTRACTS / "config-registry.v1.2.0.yaml").read_text(encoding="utf-8")
-    admission = (CONTRACTS / "identity-admission-policy.v1.yaml").read_text(encoding="utf-8")
+    admission = (CONTRACTS / "identity-admission-policy.v1.yaml").read_text(
+        encoding="utf-8"
+    )
     required_config = {
         "identity.guest_token_ttl_days",
         "events.transport",
@@ -443,7 +443,9 @@ def _configuration_errors() -> list[str]:
         "identity.device_integrity_mode",
     }
     errors: list[str] = []
-    missing_config = sorted(key for key in required_config if f"- key: {key}\n" not in config)
+    missing_config = sorted(
+        key for key in required_config if f"- key: {key}\n" not in config
+    )
     missing_admission = sorted(
         key for key in required_admission if f"- key: {key}\n" not in admission
     )
@@ -455,7 +457,9 @@ def _configuration_errors() -> list[str]:
 
 
 def _consensus_contract_errors() -> list[str]:
-    policy = (CONTRACTS / "consensus-participation.v1.yaml").read_text(encoding="utf-8")
+    policy = (CONTRACTS / "consensus-participation.v1.yaml").read_text(
+        encoding="utf-8"
+    )
     required = {
         "code: CONSENSUS_PARTICIPATION",
         "case_subtype: forbidden",
@@ -478,7 +482,10 @@ def _consensus_contract_errors() -> list[str]:
         errors.append("Consensus application service is missing")
     if not _source_contains("class PostgresConsensusRepository"):
         errors.append("PostgreSQL ConsensusRepository adapter is missing")
-    migration = REPO_ROOT / "services/api/migrations/versions/20260730_0015_consensus_participation.py"
+    migration = (
+        REPO_ROOT
+        / "services/api/migrations/versions/20260730_0015_consensus_participation.py"
+    )
     if not migration.exists():
         errors.append("Consensus persistence migration is missing")
     return errors
