@@ -22,7 +22,7 @@
                _MetaPill(
 --- a/apps/mobile/lib/features/progress/presentation/my_kefe_journey_screen.dart
 +++ b/apps/mobile/lib/features/progress/presentation/my_kefe_journey_screen.dart
-@@ -329,12 +329,7 @@ class _Domains extends StatelessWidget {
+@@ -329,10 +329,7 @@ class _Domains extends StatelessWidget {
                  children: [
                    Expanded(
                      child: Text(
@@ -34,7 +34,7 @@
                      ),
                    ),
                    Text(
-@@ -378,7 +373,7 @@ class _Journeys extends StatelessWidget {
+@@ -378,7 +375,7 @@ class _Journeys extends StatelessWidget {
            const SizedBox(height: 12),
            for (var i = 0; i < items.length; i++) ...[
              Text(
