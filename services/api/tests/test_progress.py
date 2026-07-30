@@ -53,7 +53,7 @@ def test_empty_progress_is_low_claim_and_guest_safe() -> None:
         "blocking": False,
         "dismissible": True,
         "continue_as_guest_available": True,
-        "account_creation_available": False,
+        "account_creation_available": True,
     }
     assert body["progress"]["readiness"] == "INSUFFICIENT_DATA"
     assert body["progress"]["meaningful_weigh_count"] == 0
@@ -90,7 +90,7 @@ def test_committed_decision_unlocks_offer_and_descriptive_journey() -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["account_offer"]["eligible"] is True
-    assert body["account_offer"]["account_creation_available"] is False
+    assert body["account_offer"]["account_creation_available"] is True
     assert body["progress"]["meaningful_weigh_count"] == 1
     assert body["progress"]["distinct_case_count"] == 1
     assert body["progress"]["distinct_domain_count"] == 1
