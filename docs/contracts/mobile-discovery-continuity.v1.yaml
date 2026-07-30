@@ -1,6 +1,11 @@
-contract_version: 1.0.0
+contract_version: 1.1.0
 updated_at: '2026-07-30'
 authority:
+  documentation_package: KEFE_Documentation_Ecosystem_2026-07-28_v3.4_CURRENT
+  master_product_document: KEFE_Master_Product_Document_v1.3.0
+  product_bible: KEFE_Product_Bible_v1.5.0
+  documentation_governance: KEFE_Documentation_Governance_v1.5.0
+  analytics_dictionary: KEFE_Analytics_Event_Dictionary_v1.2.0
   adr: docs/adr/0034-mobile-discovery-continuity-and-release-promotion.md
   issue: 89
 release:
@@ -11,9 +16,21 @@ release:
     - all_capabilities_complete
     - mobile_ci_pass
     - production_preview_isolation_pass
-    - checkpoint_recorded
+    - drive_v3_4_alignment_checkpoint_recorded
     - phone_test_checklist_recorded
     - artifact_identity_and_sha256_recorded
+navigation:
+  primary_destinations:
+    - EXPLORE
+    - WEIGH
+    - ACTIVITY
+    - MY_KEFE
+  shared_between_production_and_preview: true
+  radar_primary_destination: forbidden
+  atlas_primary_destination: forbidden
+  preview_secondary_surfaces:
+    - RADAR
+    - ATLAS
 capabilities:
   explore_search:
     scope: currently_fetched_case_collection
@@ -41,16 +58,33 @@ capabilities:
       - format
       - risk
       - saved_at
-  my_kefe_continuation:
-    visually_separate_from_decision_metrics: true
+  activity_continuation:
+    saved_cases_visible: true
+    recent_committed_decisions_visible: true
+    decision_update_markers_visible: true
+    reflection_completion_markers_visible: true
     saved_case_route: /case/:caseId
+    historical_case_route: /case/:caseId
     saving_does_not_count_as:
       - weigh
       - revisit
       - reflection
+  my_kefe:
+    saved_cases_visible: false
+    responsibility: descriptive_progress_and_insights
+    forbidden_inferences:
+      - personality
+      - ideology
+      - psychometrics
+      - causality
 sharing:
   production_and_preview_use_same_feature: true
+  production_and_preview_use_same_primary_shell: true
   preview_fallback_in_production: forbidden
+analytics:
+  schema: docs/contracts/mobile-discovery-analytics.v1.yaml
+  raw_search_query: forbidden
+  provider_neutral_port_required_before_delivery: true
 privacy:
   account_sync_claim: forbidden
   cross_device_claim: forbidden
@@ -66,4 +100,7 @@ deferred:
   - ranking
   - recommendations
   - saved_case_notifications
+  - production_radar_contract
+  - production_atlas_contract
+  - non_noop_analytics_delivery
   - consensus_card_participation
