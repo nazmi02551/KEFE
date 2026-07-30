@@ -9,6 +9,8 @@ import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/preview_journey_decision_repository.dart';
 import 'package:kefe_mobile/features/decision/data/reflection_completion_store.dart';
 
+const airlineCaseId = '11111111-1111-4111-8111-111111111116';
+
 Future<void> scrollTo(
   WidgetTester tester,
   Finder finder, {
@@ -47,11 +49,12 @@ void main() {
 
       await tester.tap(find.text('Tartım'));
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.text(
-          'Çocuklar uçakta ebeveynleriyle ücretsiz yan yana oturmalı mı?',
-        ),
+
+      final airlineCase = find.byKey(
+        const ValueKey('weigh-case-$airlineCaseId'),
       );
+      await scrollTo(tester, airlineCase);
+      await tester.tap(airlineCase);
       await tester.pumpAndSettle();
 
       expect(find.text('KARAR YOLCULUĞU'), findsOneWidget);
