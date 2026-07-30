@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Annotated, Any
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Request
@@ -32,7 +32,6 @@ class PublicShareResponse(BaseModel):
     title: str
     summary: str
     primary_domain: str
-    decision: dict[str, Any] | None
     created_at: datetime
     expires_at: datetime
 
@@ -73,7 +72,6 @@ def read_share(token: str, service: ShareServiceDep) -> PublicShareResponse:
         title=share.title,
         summary=share.summary,
         primary_domain=share.primary_domain,
-        decision=share.decision,
         created_at=share.created_at,
         expires_at=share.expires_at,
     )
