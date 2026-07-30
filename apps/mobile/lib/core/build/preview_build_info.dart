@@ -3,7 +3,7 @@ class PreviewBuildInfo {
 
   static const version = String.fromEnvironment(
     'KEFE_PREVIEW_VERSION',
-    defaultValue: 'v9-rc1-local',
+    defaultValue: 'v8-local',
   );
 
   static const commit = String.fromEnvironment(
