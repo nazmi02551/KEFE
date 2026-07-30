@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'app/product_preview/preview_content_localizer.dart';
 import 'app/product_preview_app.dart';
 import 'core/design/product_preview_visual_mode.dart';
+import 'core/localization/kefe_content_localizer.dart';
 import 'features/account/application/account_controller.dart';
 import 'features/account/data/preview_account_repository.dart';
 import 'features/community_reason/application/community_reason_controller.dart';
@@ -27,6 +29,9 @@ void main() {
       overrides: [
         decisionRepositoryProvider.overrideWithValue(
           PreviewJourneyDecisionRepository(),
+        ),
+        kefeContentLocalizerProvider.overrideWithValue(
+          const PreviewContentLocalizer(),
         ),
         consensusExperienceEnabledProvider.overrideWithValue(true),
         consensusRepositoryProvider.overrideWithValue(
