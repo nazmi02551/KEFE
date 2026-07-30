@@ -14,52 +14,60 @@ import 'package:kefe_mobile/core/localization/kefe_content_localizer.dart';
 import 'package:kefe_mobile/core/localization/kefe_strings.dart';
 
 void main() {
-  test('Atlas slice 5 contract keeps representative-data boundaries closed', () {
-    final contractFile = File('../../docs/contracts/premium-atlas-slice5.v1.json');
-    expect(contractFile.existsSync(), isTrue);
+  test(
+    'Atlas slice 5 contract keeps representative-data boundaries closed',
+    () {
+      final contractFile = File(
+        '../../docs/contracts/premium-atlas-slice5.v1.json',
+      );
+      expect(contractFile.existsSync(), isTrue);
 
-    final contract =
-        jsonDecode(contractFile.readAsStringSync()) as Map<String, Object?>;
-    final truthfulness = contract['truthfulness']! as Map<String, Object?>;
-    final continuum = contract['continuum']! as Map<String, Object?>;
-    final invariants = contract['invariants']! as Map<String, Object?>;
+      final contract =
+          jsonDecode(contractFile.readAsStringSync()) as Map<String, Object?>;
+      final truthfulness = contract['truthfulness']! as Map<String, Object?>;
+      final continuum = contract['continuum']! as Map<String, Object?>;
+      final invariants = contract['invariants']! as Map<String, Object?>;
 
-    expect(truthfulness['product_preview_only'], isTrue);
-    expect(truthfulness['representative_country_averages_only'], isTrue);
-    expect(truthfulness['real_country_result_claim'], isFalse);
-    expect(truthfulness['live_update_claim'], isFalse);
-    expect(truthfulness['sample_claim'], isFalse);
-    expect(truthfulness['inferred_geography'], isFalse);
-    expect(truthfulness['three_dimensional_globe_engine'], isFalse);
-    expect(continuum['minimum'], 0);
-    expect(continuum['maximum'], 10);
-    expect(continuum['derived_percentage_split_allowed'], isFalse);
-    expect(continuum['additional_metric_allowed'], isFalse);
-    expect(invariants['commit_first'], isTrue);
-    expect(invariants['blind_first'], isTrue);
-    expect(invariants['signal_in_scope'], isFalse);
-    expect(invariants['impact_in_scope'], isFalse);
-  });
+      expect(truthfulness['product_preview_only'], isTrue);
+      expect(truthfulness['representative_country_averages_only'], isTrue);
+      expect(truthfulness['real_country_result_claim'], isFalse);
+      expect(truthfulness['live_update_claim'], isFalse);
+      expect(truthfulness['sample_claim'], isFalse);
+      expect(truthfulness['inferred_geography'], isFalse);
+      expect(truthfulness['three_dimensional_globe_engine'], isFalse);
+      expect(continuum['minimum'], 0);
+      expect(continuum['maximum'], 10);
+      expect(continuum['derived_percentage_split_allowed'], isFalse);
+      expect(continuum['additional_metric_allowed'], isFalse);
+      expect(invariants['commit_first'], isTrue);
+      expect(invariants['blind_first'], isTrue);
+      expect(invariants['signal_in_scope'], isFalse);
+      expect(invariants['impact_in_scope'], isFalse);
+    },
+  );
 
-  test('Atlas fixture preserves exact selected Case and representative values', () {
-    expect(
-      AtlasPreviewFixture.selectedCaseId,
-      '11111111-1111-4111-8111-111111111112',
-    );
-    expect(
-      AtlasPreviewFixture.countries
-          .map((country) => (country.countryCode, country.value))
-          .toList(),
-      const [
-        ('TR', 7.1),
-        ('DE', 5.4),
-        ('US', 6.2),
-        ('JP', 4.8),
-        ('BR', 6.7),
-        ('ID', 7.3),
-      ],
-    );
-  });
+  test(
+    'Atlas fixture preserves exact selected Case and representative values',
+    () {
+      expect(
+        AtlasPreviewFixture.selectedCaseId,
+        '11111111-1111-4111-8111-111111111112',
+      );
+      expect(
+        AtlasPreviewFixture.countries
+            .map((country) => (country.countryCode, country.value))
+            .toList(),
+        const [
+          ('TR', 7.1),
+          ('DE', 5.4),
+          ('US', 6.2),
+          ('JP', 4.8),
+          ('BR', 6.7),
+          ('ID', 7.3),
+        ],
+      );
+    },
+  );
 
   test('Atlas presentation consumes semantic/localized boundaries', () {
     final source = File(
@@ -111,7 +119,9 @@ void main() {
     }
 
     await pump(theme: KefeTheme.light(), locale: const Locale('en', 'US'));
-    var context = tester.element(find.byKey(const ValueKey('atlas-preview-list')));
+    var context = tester.element(
+      find.byKey(const ValueKey('atlas-preview-list')),
+    );
     expect(context.kefeVisual.isDark, isFalse);
     expect(find.text('Same question,\ndifferent worlds.'), findsOneWidget);
     expect(
@@ -140,7 +150,9 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.text('Yapay zekâ şirketlerinin veri toplaması sınırlandırılmalı mı?'),
+      find.text(
+        'Yapay zekâ şirketlerinin veri toplaması sınırlandırılmalı mı?',
+      ),
       findsOneWidget,
     );
     expect(find.text('Ülkelere göre ortalamalar'), findsOneWidget);

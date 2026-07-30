@@ -42,16 +42,13 @@ class AtlasPreviewScreen extends ConsumerWidget {
             text: strings.notice,
           ),
           const SizedBox(height: 18),
-          _AtlasHero(
-            selectedCaseTitle: selectedCaseTitle,
-            strings: strings,
-          ),
+          _AtlasHero(selectedCaseTitle: selectedCaseTitle, strings: strings),
           const SizedBox(height: 24),
           Text(
             strings.countryAverages,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w900,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 12),
           GridView.builder(
@@ -286,16 +283,16 @@ class _CountryAverageCard extends StatelessWidget {
           children: [
             Text(
               country,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 5),
             Text(
               averageLabel,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: visual.mutedForeground,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: visual.mutedForeground),
             ),
             const SizedBox(height: 5),
             Text(
@@ -393,19 +390,11 @@ class _AtlasWorldPainter extends CustomPainter {
 
     canvas.drawCircle(center, radius, linePaint);
     canvas.drawOval(
-      Rect.fromCenter(
-        center: center,
-        width: radius * 2,
-        height: radius * 0.72,
-      ),
+      Rect.fromCenter(center: center, width: radius * 2, height: radius * 0.72),
       linePaint,
     );
     canvas.drawOval(
-      Rect.fromCenter(
-        center: center,
-        width: radius * 0.78,
-        height: radius * 2,
-      ),
+      Rect.fromCenter(center: center, width: radius * 0.78, height: radius * 2),
       linePaint,
     );
     canvas.drawArc(
