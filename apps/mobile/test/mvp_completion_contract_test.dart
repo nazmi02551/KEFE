@@ -96,23 +96,25 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          onboardingStoreProvider.overrideWithValue(MemoryOnboardingStore()),
-        ],
-        child: const MediaQuery(
-          data: MediaQueryData(textScaler: TextScaler.linear(1.5)),
-          child: KefeApp(initialLocation: '/welcome'),
+    try {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            onboardingStoreProvider.overrideWithValue(MemoryOnboardingStore()),
+          ],
+          child: const MediaQuery(
+            data: MediaQueryData(textScaler: TextScaler.linear(1.5)),
+            child: KefeApp(initialLocation: '/welcome'),
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.byType(Scaffold), findsOneWidget);
-    expect(find.text('KEFE'), findsWidgets);
-    expect(tester.takeException(), isNull);
+      expect(find.byType(Scaffold), findsOneWidget);
+      expect(find.text('KEFE'), findsWidgets);
+      expect(tester.takeException(), isNull);
+    } finally {
+      semantics.dispose();
+    }
   });
 }
