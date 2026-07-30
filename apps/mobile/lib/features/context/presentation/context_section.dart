@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/design/kefe_theme.dart';
+import '../../../core/design/kefe_surface.dart';
+import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../application/context_controller.dart';
@@ -18,47 +19,39 @@ class ContextSection extends ConsumerWidget {
     final contextValue = ref.watch(contextSnapshotProvider(caseVersionId));
 
     return contextValue.when(
-      loading: () => Card(
+      loading: () => KefeSurface(
         key: const ValueKey('context-section'),
-        child: Padding(
-          padding: const EdgeInsets.all(22),
-          child: Semantics(
-            label: strings.contextLoading,
-            child: const Center(child: CircularProgressIndicator()),
-          ),
+        tone: KefeSurfaceTone.raised,
+        padding: const EdgeInsets.all(24),
+        child: Semantics(
+          label: strings.contextLoading,
+          child: const Center(child: CircularProgressIndicator()),
         ),
       ),
-      error: (_, _) => Card(
+      error: (_, _) => KefeSurface(
         key: const ValueKey('context-section'),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                strings.contextUnavailable,
-                key: const ValueKey('context-error'),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () =>
-                    ref.invalidate(contextSnapshotProvider(caseVersionId)),
-                child: Text(strings.contextRetry),
-              ),
-            ],
-          ),
+        tone: KefeSurfaceTone.raised,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(strings.contextUnavailable, key: const ValueKey('context-error')),
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: () => ref.invalidate(contextSnapshotProvider(caseVersionId)),
+              child: Text(strings.contextRetry),
+            ),
+          ],
         ),
       ),
       data: (snapshot) {
         if (snapshot.blocks.isEmpty && snapshot.sources.isEmpty) {
           return const SizedBox.shrink();
         }
-        return Card(
+        return KefeSurface(
           key: const ValueKey('context-section'),
-          child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: _ContextContent(snapshot: snapshot),
-          ),
+          tone: KefeSurfaceTone.raised,
+          padding: const EdgeInsets.all(19),
+          child: _ContextContent(snapshot: snapshot),
         );
       },
     );
@@ -73,6 +66,7 @@ class _ContextContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
     final counts = <String, int>{};
     for (final block in snapshot.blocks) {
       counts.update(block.claimStatus, (value) => value + 1, ifAbsent: () => 1);
@@ -84,36 +78,27 @@ class _ContextContent extends StatelessWidget {
         Row(
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
-                color: KefeColorTokens.gold.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(12),
+                color: visual.subtleGoldSurface,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: visual.gold.withValues(alpha: 0.18)),
               ),
-              child: const Icon(
-                Icons.article_outlined,
-                color: KefeColorTokens.goldSoft,
-              ),
+              child: Icon(Icons.article_outlined, color: visual.goldSoft),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 13),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    strings.contextEventSummary,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: KefeColorTokens.goldSoft,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.6,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
+                  KefeEyebrow(strings.contextEventSummary),
+                  const SizedBox(height: 4),
                   Text(
                     strings.contextHelper,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: KefeColorTokens.textMutedDark,
-                      height: 1.35,
+                      color: visual.mutedForeground,
+                      height: 1.42,
                     ),
                   ),
                 ],
@@ -122,14 +107,14 @@ class _ContextContent extends StatelessWidget {
           ],
         ),
         if (counts.isNotEmpty) ...[
-          const SizedBox(height: 18),
+          const SizedBox(height: 20),
           Text(
             strings.contextInformationStatus,
-            style: Theme.of(
-              context,
-            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w900,
+            ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 11),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -138,7 +123,7 @@ class _ContextContent extends StatelessWidget {
                 _StatusSummary(
                   label: strings.contextClaimStatus(entry.key),
                   count: entry.value,
-                  color: _statusColor(entry.key),
+                  color: _statusColor(context, entry.key),
                 ),
             ],
           ),
@@ -155,11 +140,13 @@ class _ContextContent extends StatelessWidget {
               key: const ValueKey('context-details'),
               tilePadding: const EdgeInsets.symmetric(horizontal: 4),
               childrenPadding: const EdgeInsets.only(top: 8),
+              iconColor: visual.goldSoft,
+              collapsedIconColor: visual.mutedForeground,
               title: Text(
                 strings.contextDetails,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               children: [
                 for (final block in snapshot.detailBlocks) ...[
@@ -175,6 +162,8 @@ class _ContextContent extends StatelessWidget {
             child: ExpansionTile(
               key: const ValueKey('context-sources'),
               tilePadding: const EdgeInsets.symmetric(horizontal: 4),
+              iconColor: visual.goldSoft,
+              collapsedIconColor: visual.mutedForeground,
               title: Row(
                 children: [
                   Text(
@@ -192,22 +181,22 @@ class _ContextContent extends StatelessWidget {
                   ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 4),
                     leading: Container(
-                      width: 38,
-                      height: 38,
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
-                        color: KefeColorTokens.rules.withValues(alpha: 0.09),
-                        borderRadius: BorderRadius.circular(10),
+                        color: visual.subtleRulesSurface,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.verified_outlined,
-                        color: KefeColorTokens.rules,
+                        color: visual.rules,
                         size: 20,
                       ),
                     ),
                     title: Text(source.title),
                     subtitle: Text(
-                      '${source.publisher} · '
-                      '${strings.contextSourceKind(source.sourceKind)}',
+                      '${source.publisher} · ${strings.contextSourceKind(source.sourceKind)}',
+                      style: TextStyle(color: visual.mutedForeground),
                     ),
                   ),
               ],
@@ -235,8 +224,8 @@ class _StatusSummary extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.09),
-        borderRadius: BorderRadius.circular(11),
-        border: Border.all(color: color.withValues(alpha: 0.22)),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.24)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -269,20 +258,21 @@ class _ContextBlockTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
     final linkedSources = block.sourceIds
         .map(snapshot.sourceById)
         .whereType<CaseContextSource>()
         .toList(growable: false);
-    final statusColor = _statusColor(block.claimStatus);
+    final statusColor = _statusColor(context, block.claimStatus);
 
     return Container(
       decoration: BoxDecoration(
-        color: KefeColorTokens.surfaceElevatedDark.withValues(alpha: 0.72),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-        borderRadius: BorderRadius.circular(16),
+        color: visual.surfaceSunken,
+        border: Border.all(color: visual.border.withValues(alpha: 0.86)),
+        borderRadius: BorderRadius.circular(17),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(15),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -293,16 +283,13 @@ class _ContextBlockTile extends StatelessWidget {
                   child: Text(
                     block.title,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 5,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(99),
@@ -320,27 +307,22 @@ class _ContextBlockTile extends StatelessWidget {
             const SizedBox(height: 9),
             Text(
               block.body,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(height: 1.45),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                height: 1.48,
+                color: visual.foreground.withValues(alpha: 0.90),
+              ),
             ),
             if (linkedSources.isNotEmpty) ...[
-              const SizedBox(height: 11),
+              const SizedBox(height: 12),
               Row(
                 children: [
-                  const Icon(
-                    Icons.link_rounded,
-                    size: 15,
-                    color: KefeColorTokens.textMutedDark,
-                  ),
-                  const SizedBox(width: 5),
+                  Icon(Icons.link_rounded, size: 15, color: visual.mutedForeground),
+                  const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      linkedSources
-                          .map((source) => source.publisher)
-                          .join(' · '),
+                      linkedSources.map((source) => source.publisher).join(' · '),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: KefeColorTokens.textMutedDark,
+                        color: visual.mutedForeground,
                       ),
                     ),
                   ),
@@ -361,16 +343,17 @@ class _CountBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: KefeColorTokens.gold.withValues(alpha: 0.12),
+        color: visual.subtleGoldSurface,
         borderRadius: BorderRadius.circular(99),
       ),
       child: Text(
         '$value',
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: KefeColorTokens.goldSoft,
+          color: visual.goldSoft,
           fontWeight: FontWeight.w900,
         ),
       ),
@@ -378,10 +361,13 @@ class _CountBadge extends StatelessWidget {
   }
 }
 
-Color _statusColor(String status) => switch (status) {
-  'VERIFIED' => KefeColorTokens.success,
-  'CLAIMED' => KefeColorTokens.attention,
-  'DISPUTED' => KefeColorTokens.empathy,
-  'UNKNOWN' => const Color(0xFF9AA9BC),
-  _ => const Color(0xFF9AA9BC),
-};
+Color _statusColor(BuildContext context, String status) {
+  final visual = context.kefeVisual;
+  return switch (status) {
+    'VERIFIED' => visual.success,
+    'CLAIMED' => visual.attention,
+    'DISPUTED' => visual.empathy,
+    'UNKNOWN' => visual.mutedForeground,
+    _ => visual.mutedForeground,
+  };
+}
