@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/localization/internal_alpha_strings.dart';
+import '../../../core/localization/kefe_strings.dart';
 import '../application/share_controller.dart';
 
 class ShareSection extends ConsumerWidget {
@@ -14,7 +16,7 @@ class ShareSection extends ConsumerWidget {
     if (!ref.watch(shareExperienceEnabledProvider)) {
       return const SizedBox.shrink();
     }
-    final tr = Localizations.localeOf(context).languageCode == 'tr';
+    final strings = KefeStrings.of(context);
     final state = ref.watch(shareControllerProvider);
     final controller = ref.read(shareControllerProvider.notifier);
     final created = state.created;
@@ -32,7 +34,7 @@ class ShareSection extends ConsumerWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    tr ? 'Bu vakayı paylaş' : 'Share this case',
+                    strings.shareTitle,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
@@ -41,11 +43,7 @@ class ShareSection extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              tr
-                  ? 'MVP paylaşımı yalnız vakayı içerir. Kararın, güven puanın ve özel gerekçen bağlantıya eklenmez.'
-                  : 'MVP sharing is case-only. Your decision, confidence, and private reason are never included in the link.',
-            ),
+            Text(strings.shareCaseOnlyNote),
             const SizedBox(height: 12),
             if (created == null) ...[
               FilledButton.icon(
@@ -56,8 +54,8 @@ class ShareSection extends ConsumerWidget {
                 icon: const Icon(Icons.link_rounded),
                 label: Text(
                   state.uiState == ShareUiState.creating
-                      ? (tr ? 'Bağlantı hazırlanıyor…' : 'Preparing link…')
-                      : (tr ? 'Vaka bağlantısı oluştur' : 'Create case link'),
+                      ? strings.sharePreparing
+                      : strings.shareCreate,
                 ),
               ),
             ] else ...[
@@ -77,22 +75,18 @@ class ShareSection extends ConsumerWidget {
                         );
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              tr ? 'Bağlantı kopyalandı.' : 'Link copied.',
-                            ),
-                          ),
+                          SnackBar(content: Text(strings.shareCopied)),
                         );
                       },
                       icon: const Icon(Icons.copy_rounded),
-                      label: Text(tr ? 'Kopyala' : 'Copy'),
+                      label: Text(strings.shareCopy),
                     ),
                   ),
                   const SizedBox(width: 8),
                   IconButton(
                     key: const ValueKey('share-revoke'),
                     onPressed: controller.revoke,
-                    tooltip: tr ? 'Bağlantıyı iptal et' : 'Revoke link',
+                    tooltip: strings.shareRevoke,
                     icon: const Icon(Icons.link_off_rounded),
                   ),
                 ],
@@ -101,7 +95,7 @@ class ShareSection extends ConsumerWidget {
             if (state.errorCode != null) ...[
               const SizedBox(height: 10),
               Text(
-                '${tr ? 'Paylaşım oluşturulamadı' : 'Share failed'} · ${state.errorCode}',
+                strings.shareFailure(state.errorCode!),
                 key: const ValueKey('share-error'),
               ),
             ],

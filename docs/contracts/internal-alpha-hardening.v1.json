@@ -1,0 +1,55 @@
+{
+  "contract": "internal-alpha-hardening.v1",
+  "version": "1.0.0",
+  "status": "accepted",
+  "tracks_issue": 96,
+  "base_checkpoint": "135b781a0fe3e9ff059d130acccd913304623f2b",
+  "production_copy_boundary": {
+    "scopes": [
+      "apps/mobile/lib/app/kefe_app.dart",
+      "apps/mobile/lib/app/primary_navigation_shell.dart",
+      "apps/mobile/lib/features/**/presentation/*.dart"
+    ],
+    "excluded_suffixes": ["_strings.dart"],
+    "forbid_direct_locale_branching": true,
+    "allowed_literal_categories": [
+      "imports",
+      "routes",
+      "stable_keys",
+      "enum_error_and_methodology_codes",
+      "protocol_confirmation_tokens",
+      "interpolation_only_formatting",
+      "KEFE_brand"
+    ],
+    "required_violation_count": 0
+  },
+  "preferences": {
+    "locale": ["system", "tr", "en"],
+    "theme": ["system", "light", "dark"],
+    "persistent": true,
+    "shared_by_production_and_preview": true
+  },
+  "phone_acceptance": {
+    "required": [
+      "launch_primary_navigation",
+      "locale_switch_and_persistence",
+      "theme_switch_and_persistence",
+      "explore_search_filter_save",
+      "weigh_commit_reveal",
+      "activity_my_kefe_continuity",
+      "privacy_settings_entry",
+      "share_deep_link_blind_first"
+    ],
+    "automated_evidence_is_human_usability": false
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "case_agnostic_runtime": true,
+    "preview_production_isolation": true,
+    "my_kefe_observed_descriptive_only": true,
+    "signal_in_scope": false,
+    "impact_in_scope": false
+  }
+}

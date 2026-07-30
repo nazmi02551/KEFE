@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/design/kefe_theme.dart';
+import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../progress/application/progress_controller.dart';
 import '../../progress/domain/progress_models.dart';
@@ -318,37 +319,4 @@ class _PreviewNotice extends StatelessWidget {
       ).textTheme.bodySmall?.copyWith(color: KefeColorTokens.textMutedDark),
     ),
   );
-}
-
-extension ActivityStrings on KefeStrings {
-  bool get _activityIsTurkish => locale.languageCode == 'tr';
-
-  String get activityEyebrow => _activityIsTurkish ? 'AKTİVİTE' : 'ACTIVITY';
-  String get activityTitle => _activityIsTurkish
-      ? 'Kararlarına geri dön.'
-      : 'Return to your decisions.';
-  String get activitySubtitle => _activityIsTurkish
-      ? 'Kaydettiğin vakalar, geçmiş kararların ve yeniden tartım izlerin burada birbirinden ayrı görünür.'
-      : 'Saved Cases, past decisions and revisit history stay distinct here.';
-  String get activityLoading =>
-      _activityIsTurkish ? 'Aktiviten yükleniyor…' : 'Loading your activity…';
-  String get activityUnavailable => _activityIsTurkish
-      ? 'Aktivite şu anda yüklenemedi.'
-      : 'Activity is currently unavailable.';
-  String get activityRetry => _activityIsTurkish ? 'Tekrar dene' : 'Retry';
-  String get activityEmpty => _activityIsTurkish
-      ? 'Henüz geçmiş bir tartımın yok. İlk kararından sonra burada görünecek.'
-      : 'You have no past weighs yet. They will appear after your first decision.';
-  String get activityHistoryTitle =>
-      _activityIsTurkish ? 'Karar geçmişin' : 'Decision history';
-  String get activityCommitted =>
-      _activityIsTurkish ? 'Karar verildi' : 'Decision committed';
-  String get activityReflected =>
-      _activityIsTurkish ? 'Yansıma tamamlandı' : 'Reflection completed';
-  String activityUpdateCount(int count) => _activityIsTurkish
-      ? '$count yeniden tartım'
-      : '$count decision update${count == 1 ? '' : 's'}';
-  String get activityPreviewNotice => _activityIsTurkish
-      ? 'Bu ekrandaki karar geçmişi Product Preview örnek verisidir; canlı kullanıcı verisi değildir.'
-      : 'Decision history on this screen is Product Preview sample data, not live user data.';
 }

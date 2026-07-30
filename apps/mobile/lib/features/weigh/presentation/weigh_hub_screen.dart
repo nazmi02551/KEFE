@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/design/kefe_theme.dart';
+import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../decision/domain/decision_models.dart';
 import '../../explore/application/explore_controller.dart';
@@ -244,25 +245,4 @@ class _ErrorCard extends StatelessWidget {
       ),
     ),
   );
-}
-
-extension WeighHubStrings on KefeStrings {
-  bool get _weighHubIsTurkish => locale.languageCode == 'tr';
-
-  String get weighHubEyebrow => _weighHubIsTurkish ? 'TARTIM' : 'WEIGH';
-  String get weighHubTitle => _weighHubIsTurkish
-      ? 'Sıradaki kararını seç.'
-      : 'Choose your next decision.';
-  String get weighHubSubtitle => _weighHubIsTurkish
-      ? 'Önce kendi kararını ver; topluluk sonucu yalnız Commit sonrasında açılır.'
-      : 'Decide first; collective results unlock only after Commit.';
-  String get weighHubRecommended =>
-      _weighHubIsTurkish ? 'ÖNERİLEN TARTIM' : 'RECOMMENDED WEIGH';
-  String get weighHubStart =>
-      _weighHubIsTurkish ? 'Tartıma başla' : 'Start weighing';
-  String get weighHubMore =>
-      _weighHubIsTurkish ? 'Diğer tartımlar' : 'More Cases';
-  String get weighHubEmpty => _weighHubIsTurkish
-      ? 'Şu anda tartıma açık bir vaka yok.'
-      : 'No Cases are currently open for weighing.';
 }

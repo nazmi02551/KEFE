@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/design/kefe_theme.dart';
 import '../../../core/design/product_preview_visual_mode.dart';
+import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../context/presentation/context_section.dart';
 import '../../onboarding/application/onboarding_controller.dart';
@@ -446,7 +447,7 @@ class _RevealCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'SONUÇLAR',
+                        strings.resultEyebrow,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: KefeColorTokens.goldSoft,
                           fontWeight: FontWeight.w900,
@@ -490,7 +491,7 @@ class _RevealCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'SENİN KARARIN',
+                            strings.yourDecision,
                             style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   color: KefeColorTokens.goldSoft,
@@ -512,7 +513,7 @@ class _RevealCard extends StatelessWidget {
             ],
             const SizedBox(height: 18),
             Text(
-              'TOPLULUK DAĞILIMI',
+              strings.communityDistribution,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: KefeColorTokens.textMutedDark,
                 fontWeight: FontWeight.w900,
@@ -562,7 +563,7 @@ class _RevealCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'KEFE UÇURUMU',
+                            strings.kefeGap,
                             style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   color: KefeColorTokens.goldSoft,
@@ -573,8 +574,15 @@ class _RevealCard extends StatelessWidget {
                           const SizedBox(height: 5),
                           Text(
                             topEntry.key == selectedOption
-                                ? 'Seçimin toplulukta en yüksek paya sahip. Katılımcıların %${(selectedShare * 100).round()} kadarı aynı seçeneği tercih etti.'
-                                : 'Seçtiğin seçenek toplulukta %${(selectedShare * 100).round()}. En yüksek paya sahip seçenekle fark $gapPoints yüzde puan.',
+                                ? strings.gapInsight(
+                                    selectedIsTop: true,
+                                    percent: (selectedShare * 100).round(),
+                                  )
+                                : strings.gapDifferenceInsight(
+                                    selectedPercent: (selectedShare * 100)
+                                        .round(),
+                                    gapPoints: gapPoints,
+                                  ),
                             style: Theme.of(
                               context,
                             ).textTheme.bodyMedium?.copyWith(height: 1.4),
@@ -588,8 +596,10 @@ class _RevealCard extends StatelessWidget {
             ],
             const SizedBox(height: 14),
             Text(
-              '${strings.trustedSample} · '
-              'n=${reveal.sampleSize} · ${reveal.confidence}',
+              strings.resultMethodology(
+                sampleSize: reveal.sampleSize,
+                confidence: reveal.confidence,
+              ),
               key: const ValueKey('reveal-methodology'),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: KefeColorTokens.textMutedDark,
@@ -624,6 +634,7 @@ class _RevealDistributionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -645,7 +656,7 @@ class _RevealDistributionRow extends StatelessWidget {
                   borderRadius: BorderRadius.circular(99),
                 ),
                 child: Text(
-                  'Sen',
+                  strings.decisionYou,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: KefeColorTokens.goldSoft,
                     fontWeight: FontWeight.w900,

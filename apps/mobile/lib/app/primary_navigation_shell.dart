@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/design/kefe_theme.dart';
+import '../core/localization/internal_alpha_strings.dart';
 import '../core/localization/kefe_strings.dart';
 
 class PrimaryNavigationShell extends StatelessWidget {
@@ -66,16 +67,4 @@ class PrimaryNavigationShell extends StatelessWidget {
       ),
     );
   }
-}
-
-extension PrimaryNavigationStrings on KefeStrings {
-  bool get _primaryNavigationIsTurkish => locale.languageCode == 'tr';
-
-  String get primaryNavExplore =>
-      _primaryNavigationIsTurkish ? 'Keşfet' : 'Explore';
-  String get primaryNavWeigh =>
-      _primaryNavigationIsTurkish ? 'Tartım' : 'Weigh';
-  String get primaryNavActivity =>
-      _primaryNavigationIsTurkish ? 'Aktivite' : 'Activity';
-  String get primaryNavMyKefe => 'My KEFE';
 }

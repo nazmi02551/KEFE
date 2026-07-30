@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/design/kefe_theme.dart';
+import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../domain/decision_models.dart';
 import 'kefe_balance_visual.dart';
@@ -58,7 +59,9 @@ class QuestionInputCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isConfidence ? 'EMİNLİK' : 'KARAR',
+                        isConfidence
+                            ? strings.questionConfidence
+                            : strings.questionDecision,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: isConfidence
                               ? KefeColorTokens.goldSoft

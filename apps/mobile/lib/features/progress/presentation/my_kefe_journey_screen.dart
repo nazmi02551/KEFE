@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design/kefe_theme.dart';
+import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../saved_cases/presentation/saved_cases_section.dart';
 import '../application/progress_controller.dart';
@@ -325,12 +326,7 @@ class _Domains extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      _domainLabel(
-                        items[i].primaryDomain,
-                        strings.locale.languageCode,
-                      ),
-                    ),
+                    child: Text(strings.domainName(items[i].primaryDomain)),
                   ),
                   Text(
                     strings.journeyWeighCount(items[i].committedWeighCount),
@@ -375,7 +371,7 @@ class _Journeys extends StatelessWidget {
           const SizedBox(height: 12),
           for (var i = 0; i < items.length; i++) ...[
             Text(
-              _domainLabel(items[i].primaryDomain, strings.locale.languageCode),
+              strings.domainName(items[i].primaryDomain),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: KefeColorTokens.goldSoft,
                 fontWeight: FontWeight.w800,
@@ -437,7 +433,7 @@ class _LegacyRecent extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 7),
               child: Text(
-                '• ${item.title} · ${_domainLabel(item.primaryDomain, strings.locale.languageCode)}',
+                '• ${item.title} · ${strings.domainName(item.primaryDomain)}',
               ),
             ),
         ],
@@ -490,17 +486,4 @@ class _Footnote extends StatelessWidget {
       ),
     ),
   );
-}
-
-String _domainLabel(String domain, String languageCode) {
-  final tr = languageCode == 'tr';
-  return switch (domain) {
-    'DAILY_LIFE' => tr ? 'Günlük yaşam' : 'Daily life',
-    'TECHNOLOGY' => tr ? 'Teknoloji' : 'Technology',
-    'SPORTS' => tr ? 'Spor' : 'Sports',
-    'CIVIC' => tr ? 'Kamusal' : 'Civic',
-    'WORK_ECONOMY' => tr ? 'İş & Ekonomi' : 'Work & Economy',
-    'EDUCATION' => tr ? 'Eğitim' : 'Education',
-    _ => domain.replaceAll('_', ' '),
-  };
 }

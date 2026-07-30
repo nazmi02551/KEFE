@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/design/kefe_theme.dart';
+import '../../../core/localization/explore_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../decision/domain/decision_models.dart';
 import '../../media_presentation/domain/case_media_models.dart';
@@ -119,8 +120,8 @@ class _DiscoveryExploreScreenState
                     ),
                     const SizedBox(height: 24),
                     _SectionTitle(
-                      title: 'Trend tartımlar',
-                      trailing: '${filtered.length} vaka',
+                      title: strings.exploreTrendingWeighs,
+                      trailing: strings.exploreCaseCount(filtered.length),
                     ),
                     const SizedBox(height: 12),
                     if (filtered.length == 1)
@@ -128,7 +129,7 @@ class _DiscoveryExploreScreenState
                         child: Padding(
                           padding: const EdgeInsets.all(18),
                           child: Text(
-                            'Yeni tartımlar hazırlandıkça burada görünecek.',
+                            strings.exploreMoreComing,
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
                                   color: KefeColorTokens.textMutedDark,
@@ -238,7 +239,7 @@ class _DiscoveryControls extends StatelessWidget {
                   const SizedBox(width: 8),
                   ChoiceChip(
                     key: ValueKey('domain-filter-$domain'),
-                    label: Text(_domainLabel(domain)),
+                    label: Text(strings.domainLabel(domain)),
                     selected: selectedDomain == domain,
                     onSelected: (_) => onDomainChanged(domain),
                   ),
@@ -277,6 +278,7 @@ class _ExploreHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -303,7 +305,7 @@ class _ExploreHeader extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Bugün dünya\nneyi tartıyor?',
+                strings.exploreWorldQuestion,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   height: 1.08,
                   fontWeight: FontWeight.w800,
@@ -330,6 +332,7 @@ class _FeaturedCaseCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final strings = KefeStrings.of(context);
     return Semantics(
       button: true,
       label: item.title,
@@ -356,7 +359,7 @@ class _FeaturedCaseCard extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    const Chip(label: Text('ÖNE ÇIKAN')),
+                    Chip(label: Text(strings.exploreFeatured)),
                     const Spacer(),
                     _SaveButton(item: item, saved: saved),
                   ],
@@ -389,7 +392,7 @@ class _FeaturedCaseCard extends ConsumerWidget {
                 Row(
                   children: [
                     Text(
-                      _domainLabel(item.domain),
+                      strings.domainLabel(item.domain),
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
                         color: KefeColorTokens.goldSoft,
                         fontWeight: FontWeight.w800,
@@ -419,6 +422,7 @@ class _CaseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
     return Card(
       child: InkWell(
         key: ValueKey('explore-case-${item.id}'),
@@ -447,7 +451,7 @@ class _CaseCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _domainLabel(item.domain),
+                      strings.domainLabel(item.domain),
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: KefeColorTokens.goldSoft,
                         fontWeight: FontWeight.w800,
@@ -595,16 +599,6 @@ class _ExploreError extends StatelessWidget {
     );
   }
 }
-
-String _domainLabel(String domain) => switch (domain) {
-  'DAILY_LIFE' => 'Günlük yaşam',
-  'TECHNOLOGY' => 'Teknoloji',
-  'SPORTS' => 'Spor',
-  'CIVIC' => 'Kamusal',
-  'WORK_ECONOMY' => 'İş & Ekonomi',
-  'EDUCATION' => 'Eğitim',
-  _ => domain.replaceAll('_', ' '),
-};
 
 IconData _domainIcon(String domain) => switch (domain) {
   'DAILY_LIFE' => Icons.people_alt_outlined,
