@@ -1,10 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kefe_mobile/app/kefe_app.dart';
 import 'package:kefe_mobile/core/design/kefe_theme.dart';
 import 'package:kefe_mobile/core/localization/kefe_strings.dart';
+import 'package:kefe_mobile/features/onboarding/application/onboarding_controller.dart';
+import 'package:kefe_mobile/features/onboarding/data/onboarding_store.dart';
+import 'package:kefe_mobile/features/sharing/data/share_repository.dart';
 
 void main() {
   test(
@@ -48,9 +52,34 @@ void main() {
     },
   );
 
+  test('Share MVP is case-only with the canonical deep link', () {
+    final share = CreatedShare(
+      id: 'share-1',
+      token: 'opaque-token',
+      expiresAt: DateTime.utc(2026, 8, 1),
+      includeDecision: false,
+    );
+    final section = File(
+      'lib/features/sharing/presentation/share_section.dart',
+    ).readAsStringSync();
+    final controller = File(
+      'lib/features/sharing/application/share_controller.dart',
+    ).readAsStringSync();
+    final publicModel = File(
+      'lib/features/sharing/data/share_repository.dart',
+    ).readAsStringSync();
+
+    expect(share.deepLink, 'kefe:///share/opaque-token');
+    expect(section, isNot(contains('share-include-decision')));
+    expect(controller, contains('includeDecision: false'));
+    expect(publicModel, isNot(contains('final Map<String, Object?>? decision')));
+  });
+
   test('locale and theme contract includes MVP minimum surfaces', () {
-    expect(KefeStrings.supportedLocales, contains(const Locale('tr')));
-    expect(KefeStrings.supportedLocales, contains(const Locale('en')));
+    final languageCodes = KefeStrings.supportedLocales
+        .map((locale) => locale.languageCode)
+        .toSet();
+    expect(languageCodes, containsAll(<String>{'tr', 'en'}));
     expect(KefeTheme.light().brightness, Brightness.light);
     expect(KefeTheme.dark().brightness, Brightness.dark);
   });
@@ -67,9 +96,14 @@ void main() {
     addTearDown(semantics.dispose);
 
     await tester.pumpWidget(
-      const MediaQuery(
-        data: MediaQueryData(textScaler: TextScaler.linear(1.5)),
-        child: KefeApp(initialLocation: '/welcome'),
+      ProviderScope(
+        overrides: [
+          onboardingStoreProvider.overrideWithValue(MemoryOnboardingStore()),
+        ],
+        child: const MediaQuery(
+          data: MediaQueryData(textScaler: TextScaler.linear(1.5)),
+          child: KefeApp(initialLocation: '/welcome'),
+        ),
       ),
     );
     await tester.pumpAndSettle();
