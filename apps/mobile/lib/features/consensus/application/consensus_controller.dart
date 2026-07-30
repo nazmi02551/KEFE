@@ -7,10 +7,6 @@ import '../data/consensus_repository.dart';
 import '../data/http_consensus_repository.dart';
 import '../domain/consensus_models.dart';
 
-/// Product composition switch for the first explicit WE capability.
-///
-/// Reusable decision widgets do not start Consensus network work by default.
-/// Production and Product Preview entrypoints explicitly enable the feature.
 final consensusExperienceEnabledProvider = Provider<bool>((ref) => false);
 
 enum ConsensusUiState {
@@ -69,18 +65,16 @@ class ConsensusState {
     Set<String>? selectedReasonTags,
     String? errorCode,
     bool clearError = false,
-  }) {
-    return ConsensusState(
-      uiState: uiState ?? this.uiState,
-      sessionId: sessionId ?? this.sessionId,
-      caseVersionId: caseVersionId ?? this.caseVersionId,
-      cards: cards ?? this.cards,
-      selectedStance:
-          clearSelectedStance ? null : selectedStance ?? this.selectedStance,
-      selectedReasonTags: selectedReasonTags ?? this.selectedReasonTags,
-      errorCode: clearError ? null : errorCode ?? this.errorCode,
-    );
-  }
+  }) => ConsensusState(
+        uiState: uiState ?? this.uiState,
+        sessionId: sessionId ?? this.sessionId,
+        caseVersionId: caseVersionId ?? this.caseVersionId,
+        cards: cards ?? this.cards,
+        selectedStance:
+            clearSelectedStance ? null : selectedStance ?? this.selectedStance,
+        selectedReasonTags: selectedReasonTags ?? this.selectedReasonTags,
+        errorCode: clearError ? null : errorCode ?? this.errorCode,
+      );
 }
 
 final consensusRepositoryProvider = Provider<ConsensusRepository>((ref) {
@@ -156,9 +150,7 @@ class ConsensusController extends Notifier<ConsensusState> {
 
   void selectStance(String stanceCode) {
     final card = state.activeCard;
-    if (card == null ||
-        card.participated ||
-        !card.stanceCodes.contains(stanceCode)) {
+    if (card == null || card.participated || !card.stanceCodes.contains(stanceCode)) {
       return;
     }
     state = state.copyWith(selectedStance: stanceCode, clearError: true);
@@ -166,9 +158,7 @@ class ConsensusController extends Notifier<ConsensusState> {
 
   void toggleReasonTag(String tagCode) {
     final card = state.activeCard;
-    if (card == null ||
-        card.participated ||
-        !card.reasonTagCodes.contains(tagCode)) {
+    if (card == null || card.participated || !card.reasonTagCodes.contains(tagCode)) {
       return;
     }
     final next = {...state.selectedReasonTags};
@@ -186,14 +176,12 @@ class ConsensusController extends Notifier<ConsensusState> {
     final caseVersionId = state.caseVersionId!;
     _submissionKey ??=
         'mobile-consensus-${DateTime.now().toUtc().microsecondsSinceEpoch}';
-    state = state.copyWith(
-      uiState: ConsensusUiState.submitting,
-      clearError: true,
-    );
+    state = state.copyWith(uiState: ConsensusUiState.submitting, clearError: true);
     try {
       final updated = await _repository.participate(
         sessionId: sessionId,
         caseVersionId: caseVersionId,
+        cardId: card.id,
         cardVersionId: card.versionId,
         stanceCode: state.selectedStance!,
         reasonTagCodes: state.selectedReasonTags.toList(growable: false),
@@ -242,21 +230,12 @@ class ConsensusController extends Notifier<ConsensusState> {
     final sessionId = state.sessionId;
     final caseVersionId = state.caseVersionId;
     if (sessionId == null || caseVersionId == null) return;
-    if (_submissionKey != null &&
-        state.selectedStance != null &&
-        state.cards.isNotEmpty) {
-      state = state.copyWith(
-        uiState: ConsensusUiState.eligible,
-        clearError: true,
-      );
+    if (_submissionKey != null && state.selectedStance != null && state.cards.isNotEmpty) {
+      state = state.copyWith(uiState: ConsensusUiState.eligible, clearError: true);
       await submit();
       return;
     }
-    await load(
-      sessionId: sessionId,
-      caseVersionId: caseVersionId,
-      force: true,
-    );
+    await load(sessionId: sessionId, caseVersionId: caseVersionId, force: true);
   }
 
   ConsensusUiState _resolvedState(List<ConsensusCard> cards) {
@@ -281,6 +260,7 @@ class _DisabledConsensusRepository implements ConsensusRepository {
   Future<ConsensusCard> participate({
     required String sessionId,
     required String caseVersionId,
+    required String cardId,
     required String cardVersionId,
     required String stanceCode,
     required List<String> reasonTagCodes,
