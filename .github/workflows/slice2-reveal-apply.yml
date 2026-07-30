@@ -1,0 +1,40 @@
+name: Slice2 Reveal Apply
+
+on:
+  push:
+    branches: [feature/premium-reveal-slice2]
+    paths:
+      - '.github/workflows/slice2-reveal-apply.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/premium-reveal-slice2
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Apply deterministic Reveal extraction
+        run: python docs/migrations/apply-premium-reveal-slice2.py
+      - name: Format migrated Dart sources
+        working-directory: apps/mobile
+        run: dart format lib/features/decision/presentation/decision_flow_screen.dart lib/features/decision/presentation/reveal_result_card.dart
+      - name: Commit source-only migration
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/mobile/lib/features/decision/presentation/decision_flow_screen.dart apps/mobile/lib/features/decision/presentation/reveal_result_card.dart
+          if git diff --cached --quiet; then
+            echo 'No migration changes.'
+            exit 0
+          fi
+          git commit -m 'feat: extract premium Reveal result component'
+          git push origin HEAD:feature/premium-reveal-slice2
