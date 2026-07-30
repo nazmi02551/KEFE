@@ -1,0 +1,61 @@
+{
+  "contract": "premium-reveal-slice2.v1",
+  "version": "1.0.0",
+  "status": "accepted",
+  "tracks_issue": 100,
+  "stack_base": "d9168a72116cb20563d3868f38f8a8f53184dc3c",
+  "inherited_verified_visual_runtime": "21cc0faf76e5dfcf1c54953dd965b026c204865d",
+  "slice": "REVEAL_COMMUNITY_KEFE_GAP",
+  "governed_files": [
+    "apps/mobile/lib/features/decision/presentation/decision_flow_screen.dart"
+  ],
+  "presentation": {
+    "theme_adaptive_semantic_surfaces_required": true,
+    "direct_dark_only_surface_tokens_forbidden": true,
+    "personal_choice_distinct_from_community": true,
+    "leading_option_must_not_imply_objective_correctness": true,
+    "kefe_gap_descriptive_only": true,
+    "methodology_readable": true,
+    "flutter_native_lightweight_rendering": true,
+    "reduce_motion_required_for_nonessential_animation": true
+  },
+  "localization": {
+    "display_option_labels_via_content_localizer": true,
+    "raw_selected_option_must_not_change": true,
+    "raw_reveal_keys_must_not_change": true,
+    "presentation_locale_branching_forbidden": true
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "case_agnostic_runtime": true,
+    "preview_production_isolation": true,
+    "preview_fixture_is_production_fallback": false,
+    "my_kefe_observed_descriptive_only": true,
+    "signal_in_scope": false,
+    "impact_in_scope": false,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "bias_inference": false,
+    "causal_inference": false
+  },
+  "deferred": [
+    "PERSPECTIVE_LANDSCAPE_ADVANCED_VISUAL",
+    "RADAR_PREMIUM",
+    "ATLAS_PREMIUM"
+  ],
+  "verification": {
+    "exact_head_required": true,
+    "production_copy_boundary": true,
+    "flutter_analyze": true,
+    "all_mobile_regressions": true,
+    "phone_acceptance": true,
+    "api_ci": true,
+    "mobile_ci": true,
+    "mvp_beta_gates": true,
+    "global_readiness": true,
+    "human_visual_review_is_ci_pass": false
+  }
+}
