@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 
 from kefe_api.modules.identity.models import ActorPrincipal
-from kefe_api.modules.privacy.models import PrivacyExport, PrivacyDeletionReceipt
+from kefe_api.modules.privacy.models import PrivacyDeletionReceipt, PrivacyExport
 from kefe_api.modules.privacy.ports import PrivacyRepository
 
 
@@ -22,8 +22,12 @@ class PrivacyService:
             retention={
                 "guest_unclaimed_history_days": 30,
                 "uncommitted_local_draft_days": 7,
-                "security_telemetry": "shortest necessary retention; excluded from this export",
-                "audit_exception": "security/legal audit records may be retained without reusable profile data",
+                "security_telemetry": (
+                    "shortest necessary retention; excluded from this export"
+                ),
+                "audit_exception": (
+                    "security/legal audit records may be retained without reusable profile data"
+                ),
             },
             product_data=self._repo.export_actor_data(principal.actor_id),
         )
