@@ -28,6 +28,9 @@ void main() {
   testWidgets(
     'Product Preview executes principle, counterview, revision and Reflection journey',
     (tester) async {
+      tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
+      addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+
       final repository = PreviewJourneyDecisionRepository();
 
       await tester.pumpWidget(
