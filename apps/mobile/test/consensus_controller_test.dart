@@ -19,7 +19,8 @@ void main() {
     await controller.load(sessionId: 'session-1', caseVersionId: 'version-1');
 
     expect(container.read(consensusControllerProvider).uiState, ConsensusUiState.eligible);
-    expect(container.read(consensusControllerProvider).activeCard?.versionId, 'card-1');
+    expect(container.read(consensusControllerProvider).activeCard?.id, 'card-1');
+    expect(container.read(consensusControllerProvider).activeCard?.versionId, 'card-1-v1');
 
     controller.selectStance('AGREE');
     controller.toggleReasonTag('FAIRNESS');
@@ -27,7 +28,8 @@ void main() {
 
     final afterFirst = container.read(consensusControllerProvider);
     expect(afterFirst.uiState, ConsensusUiState.eligible);
-    expect(afterFirst.activeCard?.versionId, 'card-2');
+    expect(afterFirst.activeCard?.id, 'card-2');
+    expect(afterFirst.activeCard?.versionId, 'card-2-v1');
     expect(afterFirst.selectedStance, isNull);
     expect(afterFirst.selectedReasonTags, isEmpty);
 
@@ -59,13 +61,15 @@ class _TwoCardConsensusRepository implements ConsensusRepository {
   Future<ConsensusCard> participate({
     required String sessionId,
     required String caseVersionId,
+    required String cardId,
     required String cardVersionId,
     required String stanceCode,
     required List<String> reasonTagCodes,
     required String idempotencyKey,
   }) async {
     idempotencyKeys.add(idempotencyKey);
-    final current = _cards[cardVersionId]!;
+    final current = _cards[cardId]!;
+    expect(current.versionId, cardVersionId);
     final participation = ConsensusParticipation(
       stanceCode: stanceCode,
       reasonTagCodes: List.unmodifiable(reasonTagCodes),
@@ -91,14 +95,14 @@ class _TwoCardConsensusRepository implements ConsensusRepository {
         provenanceNote: 'test',
       ),
     );
-    _cards[cardVersionId] = updated;
+    _cards[cardId] = updated;
     return updated;
   }
 }
 
 ConsensusCard _eligibleCard(String id) => ConsensusCard(
       id: id,
-      versionId: id,
+      versionId: '$id-v1',
       caseVersionId: 'version-1',
       proposition: 'Proposition $id',
       stanceCodes: const ['AGREE', 'MIXED', 'DISAGREE'],
