@@ -1,0 +1,38 @@
+name: Slice5 Format Fix
+
+on:
+  push:
+    branches: [feature/premium-atlas-slice5]
+    paths:
+      - '.github/workflows/slice5-format-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/premium-atlas-slice5
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Format Slice 5 Dart sources
+        working-directory: apps/mobile
+        run: dart format lib/app/product_preview/atlas_preview_screen.dart lib/app/product_preview/atlas_preview_fixture.dart lib/app/product_preview/atlas_preview_strings.dart test/premium_atlas_slice5_test.dart
+      - name: Commit source-only formatting
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/mobile/lib/app/product_preview/atlas_preview_screen.dart apps/mobile/lib/app/product_preview/atlas_preview_fixture.dart apps/mobile/lib/app/product_preview/atlas_preview_strings.dart apps/mobile/test/premium_atlas_slice5_test.dart
+          if git diff --cached --quiet; then
+            echo 'No formatting changes.'
+            exit 0
+          fi
+          git commit -m 'style: normalize Atlas slice 5 formatting'
+          git push origin HEAD:feature/premium-atlas-slice5
