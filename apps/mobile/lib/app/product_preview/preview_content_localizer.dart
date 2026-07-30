@@ -128,6 +128,35 @@ class PreviewContentLocalizer implements KefeContentLocalizer {
         );
       }
     }
+    if (namespace == KefeContentNamespace.perspectiveBody) {
+      if (id.startsWith('preview-near-')) {
+        return 'This perspective prioritizes the practical effect the decision may have on the people directly affected.';
+      }
+      if (id.startsWith('preview-opposing-')) {
+        return 'The opposing view argues that even a well-intentioned exception can weaken a general rule, and that predictability can also be part of fairness.';
+      }
+      if (id.startsWith('preview-bridge-')) {
+        return 'The bridge perspective suggests combining a clear baseline rule with narrow, reviewable exceptions.';
+      }
+      if (id.startsWith('preview-alternative-')) {
+        return 'This perspective asks how the decision might change when the surrounding context or constraints change.';
+      }
+    }
+    if (namespace == KefeContentNamespace.perspectiveProvenance &&
+        id.startsWith('preview-')) {
+      return 'KEFE Preview · Editorial example';
+    }
+    if (namespace == KefeContentNamespace.perspectiveMethodologyProvenance) {
+      return 'Fixed editorial demo perspectives for Product Preview.';
+    }
+    if (namespace == KefeContentNamespace.perspectiveSampleKind) {
+      return switch (fallback) {
+        'CURATED_FALLBACK' => 'Curated fallback',
+        'CURATED' => 'Curated sample',
+        'CLUSTERED' => 'Clustered sample',
+        _ => fallback.replaceAll('_', ' ').toLowerCase(),
+      };
+    }
 
     return fallback;
   }
