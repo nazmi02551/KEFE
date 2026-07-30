@@ -13,6 +13,9 @@ void main() {
   testWidgets(
     'production exposes four canonical destinations without preview shell data',
     (tester) async {
+      tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
+      addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
