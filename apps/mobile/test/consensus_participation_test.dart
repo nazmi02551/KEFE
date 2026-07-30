@@ -16,15 +16,18 @@ import 'package:kefe_mobile/features/progress/application/progress_controller.da
 import 'package:kefe_mobile/features/progress/data/preview_progress_repository.dart';
 
 void main() {
-  test('production enables Consensus without importing preview Consensus data', () {
-    final productionMain = File('lib/main.dart').readAsStringSync();
-    expect(
-      productionMain,
-      contains('consensusExperienceEnabledProvider.overrideWithValue(true)'),
-    );
-    expect(productionMain, isNot(contains('preview_consensus_repository')));
-    expect(productionMain, isNot(contains('PreviewConsensusRepository')));
-  });
+  test(
+    'production enables Consensus without importing preview Consensus data',
+    () {
+      final productionMain = File('lib/main.dart').readAsStringSync();
+      expect(
+        productionMain,
+        contains('consensusExperienceEnabledProvider.overrideWithValue(true)'),
+      );
+      expect(productionMain, isNot(contains('preview_consensus_repository')));
+      expect(productionMain, isNot(contains('PreviewConsensusRepository')));
+    },
+  );
 
   testWidgets(
     'post-commit Consensus hides distribution until participation then reveals EXPOSED WE data',
@@ -105,7 +108,10 @@ void main() {
       expect(consensus, findsOneWidget);
       expect(find.text('Konsensüs Kartı'), findsOneWidget);
       expect(find.textContaining('EXPOSED'), findsWidgets);
-      expect(find.byKey(const ValueKey('consensus-methodology-note')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('consensus-methodology-note')),
+        findsNothing,
+      );
 
       final stance = find.byKey(const ValueKey('consensus-stance-AGREE'));
       await tester.ensureVisible(stance);
@@ -125,7 +131,10 @@ void main() {
       await tester.tap(submit);
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('consensus-methodology-note')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('consensus-methodology-note')),
+        findsOneWidget,
+      );
       expect(find.text('KONSENSÜS DAĞILIMI'), findsOneWidget);
       expect(find.textContaining('Signal değildir'), findsOneWidget);
       expect(find.textContaining('n=413'), findsOneWidget);

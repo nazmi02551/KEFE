@@ -68,10 +68,11 @@ class PreviewJourneyDecisionRepository extends PreviewDecisionRepository
           state: !journey.initialCommitted
               ? FlowStepRuntimeState.blocked
               : journey.contextExposed
-                  ? FlowStepRuntimeState.completed
-                  : FlowStepRuntimeState.ready,
-          reasonCode:
-              !journey.initialCommitted ? 'FLOW_PREDECESSOR_PENDING' : null,
+              ? FlowStepRuntimeState.completed
+              : FlowStepRuntimeState.ready,
+          reasonCode: !journey.initialCommitted
+              ? 'FLOW_PREDECESSOR_PENDING'
+              : null,
         ),
         FlowRuntimeStep(
           code: 'FINAL_DECISION',
@@ -81,8 +82,8 @@ class PreviewJourneyDecisionRepository extends PreviewDecisionRepository
           state: !journey.contextExposed
               ? FlowStepRuntimeState.blocked
               : journey.finalCommitted
-                  ? FlowStepRuntimeState.completed
-                  : FlowStepRuntimeState.ready,
+              ? FlowStepRuntimeState.completed
+              : FlowStepRuntimeState.ready,
           reasonCode: !journey.contextExposed
               ? 'FLOW_PREDECESSOR_PENDING'
               : null,
@@ -95,10 +96,11 @@ class PreviewJourneyDecisionRepository extends PreviewDecisionRepository
           state: !journey.finalCommitted
               ? FlowStepRuntimeState.blocked
               : journey.reflectionCompleted
-                  ? FlowStepRuntimeState.completed
-                  : FlowStepRuntimeState.ready,
-          reasonCode:
-              !journey.finalCommitted ? 'FLOW_PREDECESSOR_PENDING' : null,
+              ? FlowStepRuntimeState.completed
+              : FlowStepRuntimeState.ready,
+          reasonCode: !journey.finalCommitted
+              ? 'FLOW_PREDECESSOR_PENDING'
+              : null,
         ),
       ],
     );
@@ -128,10 +130,7 @@ class PreviewJourneyDecisionRepository extends PreviewDecisionRepository
     if (_isJourney(sessionId)) {
       _journey(sessionId).initialCommitted = true;
     }
-    await super.commit(
-      sessionId: sessionId,
-      idempotencyKey: idempotencyKey,
-    );
+    await super.commit(sessionId: sessionId, idempotencyKey: idempotencyKey);
   }
 
   @override
@@ -218,8 +217,9 @@ class PreviewJourneyDecisionRepository extends PreviewDecisionRepository
       decisionChanged: changedCount > 0,
       changedQuestionCount: changedCount,
       interventionCount: journey.contextExposed ? 1 : 0,
-      interventionTypeCodes:
-          journey.contextExposed ? const ['CONTEXT_REVEAL'] : const [],
+      interventionTypeCodes: journey.contextExposed
+          ? const ['CONTEXT_REVEAL']
+          : const [],
       fromContributionClass: 'CORE_PRE_RESULT',
       toContributionClass: 'CORE_PRE_RESULT',
       completed: journey.reflectionCompleted,

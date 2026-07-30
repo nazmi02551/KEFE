@@ -25,7 +25,8 @@ class RadarPreviewScreen extends StatelessWidget {
     (
       rank: '3',
       domain: 'WORK',
-      title: 'YZ nedeniyle işten çıkarma öncesi yeniden eğitim zorunlu olmalı mı?',
+      title:
+          'YZ nedeniyle işten çıkarma öncesi yeniden eğitim zorunlu olmalı mı?',
       signal: 'İş & ekonomi',
       caseId: '11111111-1111-4111-8111-111111111117',
     ),
@@ -59,7 +60,8 @@ class RadarPreviewScreen extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           const PreviewNotice(
-            text: 'Canlı trend verisi değil · Product Preview için temsili sıralama',
+            text:
+                'Canlı trend verisi değil · Product Preview için temsili sıralama',
           ),
           const SizedBox(height: 18),
           const Wrap(
@@ -106,7 +108,8 @@ class RadarPreviewScreen extends StatelessWidget {
                           children: [
                             Text(
                               item.domain,
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
                                     color: KefeColorTokens.goldSoft,
                                     fontWeight: FontWeight.w800,
                                   ),
@@ -114,7 +117,8 @@ class RadarPreviewScreen extends StatelessWidget {
                             const SizedBox(height: 7),
                             Text(
                               item.title,
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
                                     fontWeight: FontWeight.w800,
                                     height: 1.2,
                                   ),
@@ -130,7 +134,8 @@ class RadarPreviewScreen extends StatelessWidget {
                                 const SizedBox(width: 5),
                                 Text(
                                   item.signal,
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
                                         color: KefeColorTokens.textMutedDark,
                                       ),
                                 ),

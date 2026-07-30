@@ -50,26 +50,29 @@ void main() {
     expect(restored.effectiveResponses, {'q1': 'A'});
   });
 
-  test('legacy DecisionDraft without Flow remains readable but has no Flow authority', () {
-    final restored = DecisionDraft.fromJson({
-      'case': {
-        'id': 'case-1',
-        'version_id': 'version-1',
-        'title': 'Legacy fixture',
-        'summary': 'Legacy draft',
-        'format': 'DILEMMA',
-        'domain': 'DAILY_LIFE',
-        'risk': 'L0',
-        'questions': <Object?>[],
-      },
-      'session_id': 'legacy-session',
-      'responses': {'q1': 'B'},
-      'reason_tags': <Object?>[],
-      'phase': 'editing',
-      'updated_at': DateTime.utc(2026, 7, 27).toIso8601String(),
-    });
+  test(
+    'legacy DecisionDraft without Flow remains readable but has no Flow authority',
+    () {
+      final restored = DecisionDraft.fromJson({
+        'case': {
+          'id': 'case-1',
+          'version_id': 'version-1',
+          'title': 'Legacy fixture',
+          'summary': 'Legacy draft',
+          'format': 'DILEMMA',
+          'domain': 'DAILY_LIFE',
+          'risk': 'L0',
+          'questions': <Object?>[],
+        },
+        'session_id': 'legacy-session',
+        'responses': {'q1': 'B'},
+        'reason_tags': <Object?>[],
+        'phase': 'editing',
+        'updated_at': DateTime.utc(2026, 7, 27).toIso8601String(),
+      });
 
-    expect(restored.flowRuntime, isNull);
-    expect(restored.effectiveResponses, {'q1': 'B'});
-  });
+      expect(restored.flowRuntime, isNull);
+      expect(restored.effectiveResponses, {'q1': 'B'});
+    },
+  );
 }

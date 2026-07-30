@@ -40,7 +40,8 @@ class SavedCase {
       domain: json['domain']?.toString() ?? '',
       format: json['format']?.toString() ?? '',
       risk: json['risk']?.toString() ?? '',
-      savedAt: DateTime.tryParse(json['saved_at']?.toString() ?? '')?.toUtc() ??
+      savedAt:
+          DateTime.tryParse(json['saved_at']?.toString() ?? '')?.toUtc() ??
           DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
     );
   }
@@ -61,13 +62,13 @@ class SavedCase {
       domain.isNotEmpty;
 
   Map<String, Object?> toJson() => {
-        'case_id': caseId,
-        'case_version_id': caseVersionId,
-        'title': title,
-        'summary': summary,
-        'domain': domain,
-        'format': format,
-        'risk': risk,
-        'saved_at': savedAt.toIso8601String(),
-      };
+    'case_id': caseId,
+    'case_version_id': caseVersionId,
+    'title': title,
+    'summary': summary,
+    'domain': domain,
+    'format': format,
+    'risk': risk,
+    'saved_at': savedAt.toIso8601String(),
+  };
 }

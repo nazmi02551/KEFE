@@ -4,11 +4,14 @@ import 'package:go_router/go_router.dart';
 
 import '../core/design/kefe_theme.dart';
 import '../core/localization/kefe_strings.dart';
+import '../features/account/presentation/account_conversion_screen.dart';
 import '../features/activity/presentation/activity_screen.dart';
 import '../features/decision/presentation/decision_flow_screen.dart';
 import '../features/explore/presentation/discovery_explore_screen.dart';
 import '../features/onboarding/presentation/onboarding_gate_screen.dart';
+import '../features/privacy/presentation/privacy_screen.dart';
 import '../features/progress/presentation/my_kefe_journey_screen.dart';
+import '../features/sharing/presentation/public_share_screen.dart';
 import '../features/weigh/presentation/weigh_hub_screen.dart';
 import 'primary_navigation_shell.dart';
 
@@ -53,10 +56,31 @@ class _KefeAppState extends State<KefeApp> {
       ),
       GoRoute(
         path: '/my-kefe',
-        builder: (context, state) => const PrimaryNavigationShell(
+        builder: (context, state) => PrimaryNavigationShell(
           selectedIndex: 3,
-          child: MyKefeJourneyScreen(embedded: true),
+          floatingActionButton: FloatingActionButton.small(
+            key: const ValueKey('open-privacy-settings'),
+            onPressed: () => context.push('/privacy'),
+            tooltip: Localizations.localeOf(context).languageCode == 'tr'
+                ? 'Gizlilik ve veriler'
+                : 'Privacy and data',
+            child: const Icon(Icons.privacy_tip_outlined),
+          ),
+          child: const MyKefeJourneyScreen(embedded: true),
         ),
+      ),
+      GoRoute(
+        path: '/account',
+        builder: (context, state) => const AccountConversionScreen(),
+      ),
+      GoRoute(
+        path: '/privacy',
+        builder: (context, state) => const PrivacyScreen(),
+      ),
+      GoRoute(
+        path: '/share/:token',
+        builder: (context, state) =>
+            PublicShareScreen(token: state.pathParameters['token']!),
       ),
       GoRoute(
         path: '/case/:caseId',

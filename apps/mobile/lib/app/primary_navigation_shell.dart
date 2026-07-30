@@ -18,12 +18,7 @@ class PrimaryNavigationShell extends StatelessWidget {
   final Widget? footer;
   final Widget? floatingActionButton;
 
-  static const paths = <String>[
-    '/explore',
-    '/weigh',
-    '/activity',
-    '/my-kefe',
-  ];
+  static const paths = <String>['/explore', '/weigh', '/activity', '/my-kefe'];
 
   @override
   Widget build(BuildContext context) {

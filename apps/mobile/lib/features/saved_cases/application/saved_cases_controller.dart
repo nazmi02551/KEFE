@@ -24,8 +24,8 @@ class SavedCasesState {
 
 final savedCasesControllerProvider =
     NotifierProvider<SavedCasesController, SavedCasesState>(
-  SavedCasesController.new,
-);
+      SavedCasesController.new,
+    );
 
 class SavedCasesController extends Notifier<SavedCasesState> {
   SavedCaseStore get _store => ref.read(savedCaseStoreProvider);

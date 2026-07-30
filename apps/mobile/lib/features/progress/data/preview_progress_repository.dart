@@ -61,7 +61,8 @@ class PreviewProgressRepository implements ProgressRepository {
       MyKefeRecentJourney(
         caseId: '11111111-1111-4111-8111-111111111117',
         caseVersionId: '22222222-2222-4222-8222-222222222228',
-        title: 'YZ nedeniyle işten çıkarma öncesi yeniden eğitim zorunlu olmalı mı?',
+        title:
+            'YZ nedeniyle işten çıkarma öncesi yeniden eğitim zorunlu olmalı mı?',
         primaryDomain: 'WORK_ECONOMY',
         initialCommittedAt: DateTime.utc(2026, 7, 28, 19, 48),
         latestDecisionAt: DateTime.utc(2026, 7, 28, 20, 10),

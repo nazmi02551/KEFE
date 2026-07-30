@@ -28,10 +28,7 @@ void main() {
     expect(model.decisionChanged, isTrue);
     expect(model.changedQuestionCount, 1);
     expect(model.interventionCount, 2);
-    expect(
-      model.interventionTypeCodes,
-      ['CONTEXT_REVEAL', 'SOURCE_EXPOSURE'],
-    );
+    expect(model.interventionTypeCodes, ['CONTEXT_REVEAL', 'SOURCE_EXPOSURE']);
     expect(model.fromContributionClass, 'CORE_PRE_RESULT');
     expect(model.toContributionClass, 'EXPOSED');
     expect(model.completed, isFalse);

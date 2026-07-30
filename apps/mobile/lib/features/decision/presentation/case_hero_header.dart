@@ -21,17 +21,11 @@ class CaseHeroHeader extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: KefeColorTokens.gold.withValues(alpha: 0.23),
-        ),
+        border: Border.all(color: KefeColorTokens.gold.withValues(alpha: 0.23)),
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF10233A),
-            Color(0xFF0D1726),
-            Color(0xFF211A24),
-          ],
+          colors: [Color(0xFF10233A), Color(0xFF0D1726), Color(0xFF211A24)],
         ),
       ),
       child: Column(
@@ -69,17 +63,17 @@ class CaseHeroHeader extends StatelessWidget {
             caseData.title,
             key: const ValueKey('case-title'),
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  height: 1.12,
-                ),
+              fontWeight: FontWeight.w900,
+              height: 1.12,
+            ),
           ),
           const SizedBox(height: 10),
           Text(
             caseData.summary,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: KefeColorTokens.textMutedDark,
-                  height: 1.45,
-                ),
+              color: KefeColorTokens.textMutedDark,
+              height: 1.45,
+            ),
           ),
           const SizedBox(height: 20),
           _FlowProgressRail(flowRuntime: flowRuntime),
@@ -102,7 +96,11 @@ class _FlowProgressRail extends StatelessWidget {
     final counts = <String, int>{};
     final totals = <String, int>{};
     for (final step in steps) {
-      totals.update(step.primitiveCode, (value) => value + 1, ifAbsent: () => 1);
+      totals.update(
+        step.primitiveCode,
+        (value) => value + 1,
+        ifAbsent: () => 1,
+      );
     }
 
     return Column(
@@ -113,26 +111,26 @@ class _FlowProgressRail extends StatelessWidget {
             Text(
               'KARAR YOLCULUĞU',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: KefeColorTokens.goldSoft,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.85,
-                  ),
+                color: KefeColorTokens.goldSoft,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.85,
+              ),
             ),
             const Spacer(),
             Text(
               _progressText(steps),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: KefeColorTokens.textMutedDark,
-                    fontWeight: FontWeight.w700,
-                  ),
+                color: KefeColorTokens.textMutedDark,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ],
         ),
         const SizedBox(height: 12),
         LayoutBuilder(
           builder: (context, constraints) {
-            final itemWidth = (constraints.maxWidth - (steps.length - 1) * 6) /
-                steps.length;
+            final itemWidth =
+                (constraints.maxWidth - (steps.length - 1) * 6) / steps.length;
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -223,11 +221,11 @@ class _ProgressStep extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: visual.color,
-                      fontWeight: visual.emphasized
-                          ? FontWeight.w900
-                          : FontWeight.w600,
-                    ),
+                  color: visual.color,
+                  fontWeight: visual.emphasized
+                      ? FontWeight.w900
+                      : FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -265,9 +263,9 @@ class _MetaPill extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w800,
-                ),
+              color: color,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ],
       ),
@@ -277,45 +275,44 @@ class _MetaPill extends StatelessWidget {
 
 ({Color color, IconData icon, bool emphasized}) _visualFor(
   FlowStepRuntimeState state,
-) =>
-    switch (state) {
-      FlowStepRuntimeState.completed => (
-          color: KefeColorTokens.success,
-          icon: Icons.check_circle_rounded,
-          emphasized: false,
-        ),
-      FlowStepRuntimeState.ready => (
-          color: KefeColorTokens.goldSoft,
-          icon: Icons.radio_button_checked_rounded,
-          emphasized: true,
-        ),
-      FlowStepRuntimeState.blocked => (
-          color: KefeColorTokens.textMutedDark.withValues(alpha: 0.48),
-          icon: Icons.lock_outline_rounded,
-          emphasized: false,
-        ),
-      FlowStepRuntimeState.unsupported => (
-          color: KefeColorTokens.attention,
-          icon: Icons.info_outline_rounded,
-          emphasized: false,
-        ),
-    };
+) => switch (state) {
+  FlowStepRuntimeState.completed => (
+    color: KefeColorTokens.success,
+    icon: Icons.check_circle_rounded,
+    emphasized: false,
+  ),
+  FlowStepRuntimeState.ready => (
+    color: KefeColorTokens.goldSoft,
+    icon: Icons.radio_button_checked_rounded,
+    emphasized: true,
+  ),
+  FlowStepRuntimeState.blocked => (
+    color: KefeColorTokens.textMutedDark.withValues(alpha: 0.48),
+    icon: Icons.lock_outline_rounded,
+    emphasized: false,
+  ),
+  FlowStepRuntimeState.unsupported => (
+    color: KefeColorTokens.attention,
+    icon: Icons.info_outline_rounded,
+    emphasized: false,
+  ),
+};
 
 Color _riskColor(String risk) => switch (risk.toUpperCase()) {
-      'L0' => KefeColorTokens.success,
-      'L1' => KefeColorTokens.attention,
-      _ => KefeColorTokens.empathy,
-    };
+  'L0' => KefeColorTokens.success,
+  'L1' => KefeColorTokens.attention,
+  _ => KefeColorTokens.empathy,
+};
 
 IconData _domainIcon(String domain) => switch (domain) {
-      'SPORTS' => Icons.sports_soccer_rounded,
-      'CIVIC' => Icons.account_balance_outlined,
-      'TECHNOLOGY' => Icons.memory_rounded,
-      'WORK_ECONOMY' => Icons.work_outline_rounded,
-      'EDUCATION' => Icons.school_outlined,
-      'DAILY_LIFE' => Icons.people_alt_outlined,
-      _ => Icons.public_rounded,
-    };
+  'SPORTS' => Icons.sports_soccer_rounded,
+  'CIVIC' => Icons.account_balance_outlined,
+  'TECHNOLOGY' => Icons.memory_rounded,
+  'WORK_ECONOMY' => Icons.work_outline_rounded,
+  'EDUCATION' => Icons.school_outlined,
+  'DAILY_LIFE' => Icons.people_alt_outlined,
+  _ => Icons.public_rounded,
+};
 
 String _humanize(String value) {
   final words = value

@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 
 from kefe_api.modules.identity.dependencies import PrincipalDep
+from kefe_api.modules.identity.models import ActorKind
 from kefe_api.modules.progress.service import ProgressService
 
 router = APIRouter(prefix="/v1/me", tags=["Progress"])
@@ -84,8 +85,12 @@ def get_progress(
 ) -> ProgressEnvelopeResponse:
     snapshot = service.get_progress(principal.actor_id)
     journey = service.get_journey(principal.actor_id)
+    guest = principal.actor_kind is ActorKind.GUEST
     return ProgressEnvelopeResponse(
-        account_offer=AccountOfferResponse(eligible=snapshot.account_offer_eligible),
+        account_offer=AccountOfferResponse(
+            eligible=snapshot.account_offer_eligible and guest,
+            account_creation_available=guest,
+        ),
         progress=ProgressResponse(
             readiness=snapshot.readiness.value,
             meaningful_weigh_count=snapshot.meaningful_weigh_count,

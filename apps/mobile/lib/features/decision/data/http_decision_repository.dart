@@ -147,9 +147,7 @@ class HttpDecisionRepository
   Future<CaseContextSnapshot> fetchContext(String caseVersionId) async {
     final body = _decode(
       await _request(
-        () => _client.get(
-          _uri('/v1/case-versions/$caseVersionId/context'),
-        ),
+        () => _client.get(_uri('/v1/case-versions/$caseVersionId/context')),
       ),
     );
     return CaseContextSnapshot(
@@ -240,7 +238,9 @@ class HttpDecisionRepository
     final headers = await _authorizedHeaders(json: true);
     final response = await _request(
       () => _client.put(
-        _uri('/v1/weigh-sessions/$sessionId/decision-steps/$stepCode/responses'),
+        _uri(
+          '/v1/weigh-sessions/$sessionId/decision-steps/$stepCode/responses',
+        ),
         headers: headers,
         body: jsonEncode({
           'responses': [

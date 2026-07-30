@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +12,8 @@ class OnboardingGateScreen extends ConsumerStatefulWidget {
   const OnboardingGateScreen({super.key});
 
   @override
-  ConsumerState<OnboardingGateScreen> createState() => _OnboardingGateScreenState();
+  ConsumerState<OnboardingGateScreen> createState() =>
+      _OnboardingGateScreenState();
 }
 
 class _OnboardingGateScreenState extends ConsumerState<OnboardingGateScreen> {
@@ -25,7 +28,9 @@ class _OnboardingGateScreenState extends ConsumerState<OnboardingGateScreen> {
   }
 
   Future<void> _resolveState() async {
-    final completed = await ref.read(onboardingControllerProvider).isCompleted();
+    final completed = await ref
+        .read(onboardingControllerProvider)
+        .isCompleted();
     if (!mounted) return;
     if (completed) {
       context.go('/explore');
@@ -112,12 +117,14 @@ class _OnboardingGateScreenState extends ConsumerState<OnboardingGateScreen> {
                     key: const ValueKey('onboarding-primary-button'),
                     onPressed: _page == 0
                         ? () => _pageController.nextPage(
-                              duration: const Duration(milliseconds: 220),
-                              curve: Curves.easeOut,
-                            )
+                            duration: const Duration(milliseconds: 220),
+                            curve: Curves.easeOut,
+                          )
                         : () => context.go('/case/$demoCaseId?firstUse=1'),
                     child: Text(
-                      _page == 0 ? strings.onboardingNext : strings.onboardingTryCase,
+                      _page == 0
+                          ? strings.onboardingNext
+                          : strings.onboardingTryCase,
                     ),
                   ),
                 ],
@@ -144,23 +151,31 @@ class _PromisePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(28),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            eyebrow,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+    const padding = EdgeInsets.all(28);
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        padding: padding,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: math.max(0, constraints.maxHeight - padding.vertical),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                eyebrow,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: Theme.of(context).colorScheme.primary,
                 ),
+              ),
+              const SizedBox(height: 16),
+              Text(title, style: Theme.of(context).textTheme.displaySmall),
+              const SizedBox(height: 20),
+              Text(body, style: Theme.of(context).textTheme.bodyLarge),
+            ],
           ),
-          const SizedBox(height: 16),
-          Text(title, style: Theme.of(context).textTheme.displaySmall),
-          const SizedBox(height: 20),
-          Text(body, style: Theme.of(context).textTheme.bodyLarge),
-        ],
+        ),
       ),
     );
   }

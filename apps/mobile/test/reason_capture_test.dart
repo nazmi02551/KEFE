@@ -190,38 +190,45 @@ void main() {
     expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
   });
 
-  testWidgets('schema-driven private reason is persisted and synced before Commit', (
-    tester,
-  ) async {
-    useTurkishLocale(tester);
-    final repository = ReasonFakeRepository();
-    final draftStore = await pumpReasonCase(tester, repository);
+  testWidgets(
+    'schema-driven private reason is persisted and synced before Commit',
+    (tester) async {
+      useTurkishLocale(tester);
+      final repository = ReasonFakeRepository();
+      final draftStore = await pumpReasonCase(tester, repository);
 
-    await tapVisible(tester, find.byKey(const ValueKey('option-A')));
-    await tapVisible(tester, find.byKey(const ValueKey('reason-tag-FAIRNESS')));
-    await tapVisible(tester, find.byKey(const ValueKey('reason-tag-NEED')));
-    final reasonText = find.byKey(const ValueKey('reason-text'));
-    await tester.scrollUntilVisible(
-      reasonText,
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.enterText(reasonText, 'Adalet ve ihtiyaç birlikte etkili oldu.');
-    await tester.pumpAndSettle();
+      await tapVisible(tester, find.byKey(const ValueKey('option-A')));
+      await tapVisible(
+        tester,
+        find.byKey(const ValueKey('reason-tag-FAIRNESS')),
+      );
+      await tapVisible(tester, find.byKey(const ValueKey('reason-tag-NEED')));
+      final reasonText = find.byKey(const ValueKey('reason-text'));
+      await tester.scrollUntilVisible(
+        reasonText,
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.enterText(
+        reasonText,
+        'Adalet ve ihtiyaç birlikte etkili oldu.',
+      );
+      await tester.pumpAndSettle();
 
-    final localDraft = draftStore.draftFor(reasonCaseId)!;
-    expect(localDraft.reasonTags, containsAll(['FAIRNESS', 'NEED']));
-    expect(localDraft.reasonText, 'Adalet ve ihtiyaç birlikte etkili oldu.');
-    expect(localDraft.flowRuntime?.templateCode, 'STANDARD_COMMIT_REVEAL');
+      final localDraft = draftStore.draftFor(reasonCaseId)!;
+      expect(localDraft.reasonTags, containsAll(['FAIRNESS', 'NEED']));
+      expect(localDraft.reasonText, 'Adalet ve ihtiyaç birlikte etkili oldu.');
+      expect(localDraft.flowRuntime?.templateCode, 'STANDARD_COMMIT_REVEAL');
 
-    await tapCommit(tester);
+      await tapCommit(tester);
 
-    expect(repository.lastTags, ['FAIRNESS', 'NEED']);
-    expect(repository.lastText, 'Adalet ve ihtiyaç birlikte etkili oldu.');
-    expect(repository.events, ['answer', 'reason', 'commit', 'reveal']);
-    expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
-    expect(draftStore.draftFor(reasonCaseId), isNull);
-  });
+      expect(repository.lastTags, ['FAIRNESS', 'NEED']);
+      expect(repository.lastText, 'Adalet ve ihtiyaç birlikte etkili oldu.');
+      expect(repository.events, ['answer', 'reason', 'commit', 'reveal']);
+      expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
+      expect(draftStore.draftFor(reasonCaseId), isNull);
+    },
+  );
 
   testWidgets('reason tag selection respects the CaseVersion max_tags policy', (
     tester,
@@ -232,7 +239,10 @@ void main() {
 
     await tapVisible(tester, find.byKey(const ValueKey('reason-tag-FAIRNESS')));
     await tapVisible(tester, find.byKey(const ValueKey('reason-tag-NEED')));
-    await tapVisible(tester, find.byKey(const ValueKey('reason-tag-RESPONSIBILITY')));
+    await tapVisible(
+      tester,
+      find.byKey(const ValueKey('reason-tag-RESPONSIBILITY')),
+    );
     await tester.pumpAndSettle();
 
     final tags = draftStore.draftFor(reasonCaseId)!.reasonTags;
@@ -241,30 +251,34 @@ void main() {
     expect(tags, isNot(contains('RESPONSIBILITY')));
   });
 
-  testWidgets('sync failure stays pre-Commit and safely retries draft plus reason', (
-    tester,
-  ) async {
-    useTurkishLocale(tester);
-    final repository = ReasonFakeRepository()..reasonTransportFailures = 1;
-    final draftStore = await pumpReasonCase(tester, repository);
+  testWidgets(
+    'sync failure stays pre-Commit and safely retries draft plus reason',
+    (tester) async {
+      useTurkishLocale(tester);
+      final repository = ReasonFakeRepository()..reasonTransportFailures = 1;
+      final draftStore = await pumpReasonCase(tester, repository);
 
-    await tapVisible(tester, find.byKey(const ValueKey('option-A')));
-    await tapVisible(tester, find.byKey(const ValueKey('reason-tag-FAIRNESS')));
-    await tapCommit(tester);
+      await tapVisible(tester, find.byKey(const ValueKey('option-A')));
+      await tapVisible(
+        tester,
+        find.byKey(const ValueKey('reason-tag-FAIRNESS')),
+      );
+      await tapCommit(tester);
 
-    final pending = draftStore.draftFor(reasonCaseId)!;
-    expect(pending.phase, DecisionDraftPhase.syncPending);
-    expect(repository.commitCalls, 0);
+      final pending = draftStore.draftFor(reasonCaseId)!;
+      expect(pending.phase, DecisionDraftPhase.syncPending);
+      expect(repository.commitCalls, 0);
 
-    final idempotencyKey = pending.commitIdempotencyKey;
-    await tapCommit(tester);
+      final idempotencyKey = pending.commitIdempotencyKey;
+      await tapCommit(tester);
 
-    expect(repository.answerCalls, 2);
-    expect(repository.reasonCalls, 2);
-    expect(repository.commitCalls, 1);
-    expect(repository.commitKeys.single, idempotencyKey);
-    expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
-  });
+      expect(repository.answerCalls, 2);
+      expect(repository.reasonCalls, 2);
+      expect(repository.commitCalls, 1);
+      expect(repository.commitKeys.single, idempotencyKey);
+      expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
+    },
+  );
 
   testWidgets('uncertain Commit retries only Commit with the same key', (
     tester,
@@ -274,10 +288,16 @@ void main() {
     final draftStore = await pumpReasonCase(tester, repository);
 
     await tapVisible(tester, find.byKey(const ValueKey('option-B')));
-    await tapVisible(tester, find.byKey(const ValueKey('reason-tag-RESPONSIBILITY')));
+    await tapVisible(
+      tester,
+      find.byKey(const ValueKey('reason-tag-RESPONSIBILITY')),
+    );
     await tapCommit(tester);
 
-    expect(draftStore.draftFor(reasonCaseId)?.phase, DecisionDraftPhase.commitPending);
+    expect(
+      draftStore.draftFor(reasonCaseId)?.phase,
+      DecisionDraftPhase.commitPending,
+    );
     expect(repository.answerCalls, 1);
     expect(repository.reasonCalls, 1);
     expect(repository.commitCalls, 1);

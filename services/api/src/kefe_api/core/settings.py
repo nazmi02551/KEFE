@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     environment: str = "development"
     api_title: str = "KEFE API"
-    api_version: str = "0.18.0"
+    api_version: str = "0.19.0"
     persistence_backend: Literal["memory", "postgres"] = "memory"
     database_url: str | None = None
 
@@ -19,6 +19,12 @@ class Settings(BaseSettings):
     guest_issue_rate_limit: int = 10
     guest_issue_rate_window_seconds: int = 60
     device_integrity_mode: Literal["OFF", "OPTIONAL", "REQUIRED"] = "OPTIONAL"
+
+    otp_challenge_ttl_minutes: int = 10
+    otp_verification_ttl_minutes: int = 15
+    otp_max_attempts: int = 5
+    account_token_ttl_days: int = 30
+    share_ttl_days: int = 30
 
     event_transport: Literal["logging"] = "logging"
     outbox_batch_size: int = 100

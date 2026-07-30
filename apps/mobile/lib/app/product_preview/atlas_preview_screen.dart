@@ -29,7 +29,8 @@ class AtlasPreviewScreen extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           const PreviewNotice(
-            text: 'Atlas sayıları temsili Product Preview verisidir · gerçek ülke sonucu değildir',
+            text:
+                'Atlas sayıları temsili Product Preview verisidir · gerçek ülke sonucu değildir',
           ),
           const SizedBox(height: 18),
           Container(
@@ -85,9 +86,9 @@ class AtlasPreviewScreen extends StatelessWidget {
           const SizedBox(height: 22),
           Text(
             'Ülkelere göre ortalamalar',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 12),
           GridView.builder(
@@ -115,7 +116,8 @@ class AtlasPreviewScreen extends StatelessWidget {
                       const SizedBox(height: 7),
                       Text(
                         item.$2.toStringAsFixed(1),
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(
                               color: item.$2 >= 6.5
                                   ? KefeColorTokens.empathy
                                   : KefeColorTokens.rules,

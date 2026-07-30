@@ -55,7 +55,10 @@ class _DecisionFlowScreenState extends ConsumerState<DecisionFlowScreen> {
     final strings = KefeStrings.of(context);
     final state = ref.watch(decisionControllerProvider);
 
-    ref.listen<DecisionState>(decisionControllerProvider, (previous, next) async {
+    ref.listen<DecisionState>(decisionControllerProvider, (
+      previous,
+      next,
+    ) async {
       if (widget.firstUse && previous?.reveal == null && next.reveal != null) {
         await ref.read(onboardingControllerProvider).complete();
       }
@@ -75,17 +78,17 @@ class _DecisionFlowScreenState extends ConsumerState<DecisionFlowScreen> {
                   ),
                 )
               : state.caseData == null || state.flowRuntime == null
-                  ? _ErrorState(
-                      key: const ValueKey('error'),
-                      message: strings.messageForCode(state.errorCode),
-                      retryLabel: strings.retry,
-                      onRetry: _load,
-                    )
-                  : _DecisionContent(
-                      key: ValueKey('content-${state.caseData!.id}'),
-                      state: state,
-                      firstUse: widget.firstUse,
-                    ),
+              ? _ErrorState(
+                  key: const ValueKey('error'),
+                  message: strings.messageForCode(state.errorCode),
+                  retryLabel: strings.retry,
+                  onRetry: _load,
+                )
+              : _DecisionContent(
+                  key: ValueKey('content-${state.caseData!.id}'),
+                  state: state,
+                  firstUse: widget.firstUse,
+                ),
         ),
       ),
     );
@@ -175,9 +178,10 @@ class _FlowStepSection extends ConsumerWidget {
       'DECISION' => _decisionStep(context, ref),
       'COLLECTIVE_RESULT' => _resultStep(context, ref),
       'REFLECTION' => _reflectionStep(),
-      _ => step.state == FlowStepRuntimeState.unsupported
-          ? _CapabilityPendingCard(step: step)
-          : const SizedBox.shrink(),
+      _ =>
+        step.state == FlowStepRuntimeState.unsupported
+            ? _CapabilityPendingCard(step: step)
+            : const SizedBox.shrink(),
     };
   }
 
@@ -240,22 +244,24 @@ class _FlowStepSection extends ConsumerWidget {
           onPressed: !state.hasRequiredResponses || state.submitting
               ? null
               : state.recoveryPending
-                  ? controller.retryPending
-                  : controller.commit,
+              ? controller.retryPending
+              : controller.commit,
           child: state.submitting
               ? const SizedBox.square(
                   dimension: 22,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : Text(state.recoveryPending ? strings.retrySync : strings.commit),
+              : Text(
+                  state.recoveryPending ? strings.retrySync : strings.commit,
+                ),
         ),
         const SizedBox(height: 8),
         Text(
           !state.hasRequiredResponses
               ? strings.completeRequired
               : state.recoveryPending
-                  ? strings.pendingHelper
-                  : strings.commitHelper,
+              ? strings.pendingHelper
+              : strings.commitHelper,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 20),
@@ -300,9 +306,7 @@ class _FlowStepSection extends ConsumerWidget {
         ),
         if (firstUse) ...[
           const SizedBox(height: 20),
-          _FirstUseCompletionCard(
-            onContinue: () => context.go('/explore'),
-          ),
+          _FirstUseCompletionCard(onContinue: () => context.go('/explore')),
         ],
       ],
     );
@@ -405,7 +409,9 @@ class _RevealCard extends StatelessWidget {
     final reveal = state.reveal!;
     final entries = reveal.values.entries.toList(growable: false);
     final selectedOption = state.selectedOption;
-    final selectedShare = selectedOption == null ? null : reveal.values[selectedOption];
+    final selectedShare = selectedOption == null
+        ? null
+        : reveal.values[selectedOption];
     final topEntry = entries.isEmpty
         ? null
         : entries.reduce((a, b) => a.value >= b.value ? a : b);
@@ -442,17 +448,17 @@ class _RevealCard extends StatelessWidget {
                       Text(
                         'SONUÇLAR',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: KefeColorTokens.goldSoft,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.9,
-                            ),
+                          color: KefeColorTokens.goldSoft,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.9,
+                        ),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         strings.revealTitle,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w900,
-                            ),
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ],
                   ),
@@ -485,7 +491,8 @@ class _RevealCard extends StatelessWidget {
                         children: [
                           Text(
                             'SENİN KARARIN',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
                                   color: KefeColorTokens.goldSoft,
                                   fontWeight: FontWeight.w900,
                                 ),
@@ -493,9 +500,8 @@ class _RevealCard extends StatelessWidget {
                           const SizedBox(height: 3),
                           Text(
                             selectedOption,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                ),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w800),
                           ),
                         ],
                       ),
@@ -508,10 +514,10 @@ class _RevealCard extends StatelessWidget {
             Text(
               'TOPLULUK DAĞILIMI',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: KefeColorTokens.textMutedDark,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.8,
-                  ),
+                color: KefeColorTokens.textMutedDark,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.8,
+              ),
             ),
             const SizedBox(height: 12),
             for (var index = 0; index < entries.length; index++) ...[
@@ -523,13 +529,17 @@ class _RevealCard extends StatelessWidget {
               ),
               if (index != entries.length - 1) const SizedBox(height: 13),
             ],
-            if (selectedShare != null && topEntry != null && gapPoints != null) ...[
+            if (selectedShare != null &&
+                topEntry != null &&
+                gapPoints != null) ...[
               const SizedBox(height: 18),
               Container(
                 key: const ValueKey('reveal-gap-insight'),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: KefeColorTokens.surfaceElevatedDark.withValues(alpha: 0.72),
+                  color: KefeColorTokens.surfaceElevatedDark.withValues(
+                    alpha: 0.72,
+                  ),
                   borderRadius: BorderRadius.circular(15),
                   border: Border.all(
                     color: Theme.of(context).colorScheme.outlineVariant,
@@ -553,7 +563,8 @@ class _RevealCard extends StatelessWidget {
                         children: [
                           Text(
                             'KEFE UÇURUMU',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
                                   color: KefeColorTokens.goldSoft,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 0.7,
@@ -564,9 +575,9 @@ class _RevealCard extends StatelessWidget {
                             topEntry.key == selectedOption
                                 ? 'Seçimin toplulukta en yüksek paya sahip. Katılımcıların %${(selectedShare * 100).round()} kadarı aynı seçeneği tercih etti.'
                                 : 'Seçtiğin seçenek toplulukta %${(selectedShare * 100).round()}. En yüksek paya sahip seçenekle fark $gapPoints yüzde puan.',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  height: 1.4,
-                                ),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(height: 1.4),
                           ),
                         ],
                       ),
@@ -581,8 +592,8 @@ class _RevealCard extends StatelessWidget {
               'n=${reveal.sampleSize} · ${reveal.confidence}',
               key: const ValueKey('reveal-methodology'),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: KefeColorTokens.textMutedDark,
-                  ),
+                color: KefeColorTokens.textMutedDark,
+              ),
             ),
           ],
         ),
@@ -591,11 +602,11 @@ class _RevealCard extends StatelessWidget {
   }
 
   Color _distributionColor(int index) => switch (index % 4) {
-        0 => KefeColorTokens.rules,
-        1 => KefeColorTokens.empathy,
-        2 => KefeColorTokens.gold,
-        _ => KefeColorTokens.success,
-      };
+    0 => KefeColorTokens.rules,
+    1 => KefeColorTokens.empathy,
+    2 => KefeColorTokens.gold,
+    _ => KefeColorTokens.success,
+  };
 }
 
 class _RevealDistributionRow extends StatelessWidget {
@@ -622,8 +633,8 @@ class _RevealDistributionRow extends StatelessWidget {
               child: Text(
                 label,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
-                    ),
+                  fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
+                ),
               ),
             ),
             if (selected) ...[
@@ -636,9 +647,9 @@ class _RevealDistributionRow extends StatelessWidget {
                 child: Text(
                   'Sen',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: KefeColorTokens.goldSoft,
-                        fontWeight: FontWeight.w900,
-                      ),
+                    color: KefeColorTokens.goldSoft,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -646,9 +657,9 @@ class _RevealDistributionRow extends StatelessWidget {
             Text(
               '%${(value * 100).round()}',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w900,
-                  ),
+                color: color,
+                fontWeight: FontWeight.w900,
+              ),
             ),
           ],
         ),

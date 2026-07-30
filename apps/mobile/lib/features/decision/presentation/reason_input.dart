@@ -56,17 +56,16 @@ class ReasonInputCard extends StatelessWidget {
                       Text(
                         'GEREKÇELER',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: const Color(0xFFAA9CFF),
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.8,
-                            ),
+                          color: const Color(0xFFAA9CFF),
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.8,
+                        ),
                       ),
                       const SizedBox(height: 5),
                       Text(
                         strings.reasonTitle,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w800),
                       ),
                     ],
                   ),
@@ -77,9 +76,9 @@ class ReasonInputCard extends StatelessWidget {
             Text(
               strings.reasonHelper,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: KefeColorTokens.textMutedDark,
-                    height: 1.4,
-                  ),
+                color: KefeColorTokens.textMutedDark,
+                height: 1.4,
+              ),
             ),
             if (policy.tags.isNotEmpty) ...[
               const SizedBox(height: 16),
@@ -108,8 +107,8 @@ class ReasonInputCard extends StatelessWidget {
               Text(
                 strings.reasonSelectionLimit(policy.maxTags),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: KefeColorTokens.textMutedDark,
-                    ),
+                  color: KefeColorTokens.textMutedDark,
+                ),
               ),
             ],
             if (policy.textEnabled) ...[
@@ -125,10 +124,14 @@ class ReasonInputCard extends StatelessWidget {
                   labelText: strings.reasonTextLabel,
                   hintText: strings.reasonTextHint,
                   filled: true,
-                  fillColor: KefeColorTokens.surfaceElevatedDark.withValues(alpha: 0.55),
+                  fillColor: KefeColorTokens.surfaceElevatedDark.withValues(
+                    alpha: 0.55,
+                  ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: KefeColorTokens.borderDark),
+                    borderSide: const BorderSide(
+                      color: KefeColorTokens.borderDark,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),

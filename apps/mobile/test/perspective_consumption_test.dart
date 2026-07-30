@@ -178,7 +178,9 @@ Future<void> pumpPerspectiveCase(
     ProviderScope(
       overrides: [
         decisionRepositoryProvider.overrideWithValue(repository),
-        decisionDraftStoreProvider.overrideWithValue(MemoryDecisionDraftStore()),
+        decisionDraftStoreProvider.overrideWithValue(
+          MemoryDecisionDraftStore(),
+        ),
       ],
       child: const KefeApp(initialLocation: '/case/$perspectiveCaseId'),
     ),
@@ -205,7 +207,9 @@ Future<void> commitChoice(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('Perspective is not requested or visible before Commit', (tester) async {
+  testWidgets('Perspective is not requested or visible before Commit', (
+    tester,
+  ) async {
     useTurkishLocale(tester);
     final repository = PerspectiveFakeRepository();
     await pumpPerspectiveCase(tester, repository);
@@ -214,83 +218,102 @@ void main() {
     expect(find.byKey(const ValueKey('perspective-section')), findsNothing);
   });
 
-  testWidgets('Reveal automatically continues into bounded curated Perspective', (
-    tester,
-  ) async {
-    useTurkishLocale(tester);
-    final repository = PerspectiveFakeRepository();
-    await pumpPerspectiveCase(tester, repository);
-    await commitChoice(tester);
+  testWidgets(
+    'Reveal automatically continues into bounded curated Perspective',
+    (tester) async {
+      useTurkishLocale(tester);
+      final repository = PerspectiveFakeRepository();
+      await pumpPerspectiveCase(tester, repository);
+      await commitChoice(tester);
 
-    expect(repository.commitCalls, 1);
-    expect(repository.revealCalls, 1);
-    expect(repository.perspectiveCalls, 1);
-    expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
+      expect(repository.commitCalls, 1);
+      expect(repository.revealCalls, 1);
+      expect(repository.perspectiveCalls, 1);
+      expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
 
-    final section = find.byKey(const ValueKey('perspective-section'));
-    await makeVisible(tester, section);
-    expect(section, findsOneWidget);
-    expect(find.byKey(const ValueKey('perspective-curated-note')), findsOneWidget);
-    expect(find.byKey(const ValueKey('perspective-card-near')), findsOneWidget);
-    expect(find.byKey(const ValueKey('perspective-card-opposing')), findsOneWidget);
-    expect(find.byKey(const ValueKey('perspective-card-bridge')), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey('perspective-card-alternativeContext')),
-      findsOneWidget,
-    );
-  });
+      final section = find.byKey(const ValueKey('perspective-section'));
+      await makeVisible(tester, section);
+      expect(section, findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('perspective-curated-note')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('perspective-card-near')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('perspective-card-opposing')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('perspective-card-bridge')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('perspective-card-alternativeContext')),
+        findsOneWidget,
+      );
+    },
+  );
 
-  testWidgets('pending private reason is labeled without becoming a Perspective source', (
-    tester,
-  ) async {
-    useTurkishLocale(tester);
-    final repository = PerspectiveFakeRepository();
-    await pumpPerspectiveCase(tester, repository);
+  testWidgets(
+    'pending private reason is labeled without becoming a Perspective source',
+    (tester) async {
+      useTurkishLocale(tester);
+      final repository = PerspectiveFakeRepository();
+      await pumpPerspectiveCase(tester, repository);
 
-    await tester.tap(find.byKey(const ValueKey('option-A')));
-    final reason = find.byKey(const ValueKey('reason-text'));
-    await makeVisible(tester, reason);
-    await tester.enterText(reason, 'Bu yalnızca benim özel gerekçem.');
-    await tester.pump();
-    await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('option-A')));
+      final reason = find.byKey(const ValueKey('reason-text'));
+      await makeVisible(tester, reason);
+      await tester.enterText(reason, 'Bu yalnızca benim özel gerekçem.');
+      await tester.pump();
+      await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
+      await tester.pumpAndSettle();
 
-    expect(repository.reasonCalls, 1);
-    final pending = find.byKey(const ValueKey('reason-pending-moderation'));
-    await makeVisible(tester, pending);
-    expect(pending, findsOneWidget);
-    expect(
-      find.descendant(
-        of: find.byKey(const ValueKey('perspective-section')),
-        matching: find.textContaining('Bu yalnızca benim özel gerekçem.'),
-      ),
-      findsNothing,
-    );
-  });
+      expect(repository.reasonCalls, 1);
+      final pending = find.byKey(const ValueKey('reason-pending-moderation'));
+      await makeVisible(tester, pending);
+      expect(pending, findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('perspective-section')),
+          matching: find.textContaining('Bu yalnızca benim özel gerekçem.'),
+        ),
+        findsNothing,
+      );
+    },
+  );
 
-  testWidgets('Perspective retry never replays answer reason Commit or Reveal', (
-    tester,
-  ) async {
-    useTurkishLocale(tester);
-    final repository = PerspectiveFakeRepository()..perspectiveTransportFailures = 1;
-    await pumpPerspectiveCase(tester, repository);
-    await commitChoice(tester);
+  testWidgets(
+    'Perspective retry never replays answer reason Commit or Reveal',
+    (tester) async {
+      useTurkishLocale(tester);
+      final repository = PerspectiveFakeRepository()
+        ..perspectiveTransportFailures = 1;
+      await pumpPerspectiveCase(tester, repository);
+      await commitChoice(tester);
 
-    expect(repository.answerCalls, 1);
-    expect(repository.commitCalls, 1);
-    expect(repository.revealCalls, 1);
-    expect(repository.perspectiveCalls, 1);
+      expect(repository.answerCalls, 1);
+      expect(repository.commitCalls, 1);
+      expect(repository.revealCalls, 1);
+      expect(repository.perspectiveCalls, 1);
 
-    final retry = find.byKey(const ValueKey('perspective-retry'));
-    await makeVisible(tester, retry);
-    await tester.tap(retry);
-    await tester.pumpAndSettle();
+      final retry = find.byKey(const ValueKey('perspective-retry'));
+      await makeVisible(tester, retry);
+      await tester.tap(retry);
+      await tester.pumpAndSettle();
 
-    expect(repository.answerCalls, 1);
-    expect(repository.reasonCalls, 0);
-    expect(repository.commitCalls, 1);
-    expect(repository.revealCalls, 1);
-    expect(repository.perspectiveCalls, 2);
-    expect(find.byKey(const ValueKey('perspective-card-opposing')), findsOneWidget);
-  });
+      expect(repository.answerCalls, 1);
+      expect(repository.reasonCalls, 0);
+      expect(repository.commitCalls, 1);
+      expect(repository.revealCalls, 1);
+      expect(repository.perspectiveCalls, 2);
+      expect(
+        find.byKey(const ValueKey('perspective-card-opposing')),
+        findsOneWidget,
+      );
+    },
+  );
 }

@@ -1,0 +1,31 @@
+manifest_overlay_version: 1.0.0
+extends: docs/contracts/manifest.v1.yaml
+updated_at: '2026-07-30'
+release_label: MVP_CODE_COMPLETE_CANDIDATE
+contracts:
+  - id: openapi-mvp-overlay
+    path: docs/contracts/openapi-mvp.v0.19.overlay.json
+    version: 0.19.0
+    role: additive_mvp_completion_http_api_overlay
+  - id: mvp-error-registry-overlay
+    path: docs/contracts/error-codes-mvp.v1.yaml
+    version: 1.0.2
+    role: account_share_community_privacy_errors
+  - id: mvp-config-registry-overlay
+    path: docs/contracts/config-registry-mvp.v1.yaml
+    version: 1.0.0
+    role: typed_mvp_completion_configuration
+  - id: mvp-completion-beta-gate
+    path: docs/contracts/mvp-completion-beta-gate.v1.yaml
+    version: 1.1.0
+    role: canonical_repository_completion_and_external_gate_policy
+  - id: mvp-postgres-migration
+    path: services/api/migrations/versions/20260730_0017_mvp_completion.py
+    version: '20260730_0017'
+    role: account_share_community_privacy_persistence
+architecture_decisions:
+  - docs/adr/0036-mvp-code-completion-and-beta-gate.md
+operational_evidence:
+  - docs/runbooks/MVP_BETA_OPERATIONS.md
+  - docs/status/MVP_BETA_GATE_CHECKLIST_2026-07-30.md
+  - docs/status/MVP_COMPLETION_WORKING_2026-07-30.md

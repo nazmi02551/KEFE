@@ -232,11 +232,7 @@ class FlowRuntimeSnapshot {
           : FlowExecutionSupport.partial,
       steps: (json['steps'] as List<Object?>)
           .cast<Map>()
-          .map(
-            (raw) => FlowRuntimeStep.fromJson(
-              raw.cast<String, Object?>(),
-            ),
-          )
+          .map((raw) => FlowRuntimeStep.fromJson(raw.cast<String, Object?>()))
           .toList(growable: false),
     );
   }
@@ -266,12 +262,7 @@ enum PerspectiveUiState {
   errorRetryable,
 }
 
-enum PerspectiveSlot {
-  near,
-  opposing,
-  bridge,
-  alternativeContext,
-}
+enum PerspectiveSlot { near, opposing, bridge, alternativeContext }
 
 @immutable
 class PerspectiveCard {

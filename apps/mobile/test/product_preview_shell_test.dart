@@ -56,7 +56,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Bugün dünya\nneyi tartıyor?'), findsOneWidget);
-      expect(find.byKey(const ValueKey('explore-search-field')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('explore-search-field')),
+        findsOneWidget,
+      );
       expect(find.byKey(const ValueKey('domain-filter-all')), findsOneWidget);
       expect(find.byKey(const ValueKey('saved-only-filter')), findsOneWidget);
       expect(find.byType(NavigationDestination), findsNWidgets(4));
@@ -108,9 +111,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final caseCard = find.byKey(
-        const ValueKey(
-          'explore-case-11111111-1111-4111-8111-111111111111',
-        ),
+        const ValueKey('explore-case-11111111-1111-4111-8111-111111111111'),
       );
       await tester.ensureVisible(caseCard);
       await tester.pumpAndSettle();
@@ -178,34 +179,36 @@ void main() {
     },
   );
 
-  testWidgets(
-    'Activity owns saved Cases and decision continuation',
-    (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            decisionRepositoryProvider.overrideWithValue(
-              PreviewDecisionRepository(),
-            ),
-            progressRepositoryProvider.overrideWithValue(
-              PreviewProgressRepository(),
-            ),
-            savedCaseStoreProvider.overrideWithValue(MemorySavedCaseStore()),
-          ],
-          child: const ProductPreviewApp(),
-        ),
-      );
-      await tester.pumpAndSettle();
+  testWidgets('Activity owns saved Cases and decision continuation', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          decisionRepositoryProvider.overrideWithValue(
+            PreviewDecisionRepository(),
+          ),
+          progressRepositoryProvider.overrideWithValue(
+            PreviewProgressRepository(),
+          ),
+          savedCaseStoreProvider.overrideWithValue(MemorySavedCaseStore()),
+        ],
+        child: const ProductPreviewApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Aktivite'));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text('Aktivite'));
+    await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('activity-screen')), findsOneWidget);
-      expect(find.byKey(const ValueKey('saved-cases-section')), findsOneWidget);
-      expect(find.byKey(const ValueKey('activity-history')), findsOneWidget);
-      expect(find.byKey(const ValueKey('activity-preview-notice')), findsOneWidget);
-    },
-  );
+    expect(find.byKey(const ValueKey('activity-screen')), findsOneWidget);
+    expect(find.byKey(const ValueKey('saved-cases-section')), findsOneWidget);
+    expect(find.byKey(const ValueKey('activity-history')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('activity-preview-notice')),
+      findsOneWidget,
+    );
+  });
 
   testWidgets(
     'My KEFE remains repository-driven insights without saved Cases',
@@ -245,7 +248,10 @@ void main() {
       );
       expect(find.byKey(const ValueKey('saved-cases-section')), findsNothing);
       expect(find.byKey(const ValueKey('my-kefe-weigh-count')), findsOneWidget);
-      expect(find.byKey(const ValueKey('my-kefe-update-count')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('my-kefe-update-count')),
+        findsOneWidget,
+      );
       expect(
         find.byKey(const ValueKey('my-kefe-reflection-count')),
         findsOneWidget,
@@ -272,7 +278,10 @@ void main() {
         find.byKey(const ValueKey('my-kefe-no-inference-note')),
         findsOneWidget,
       );
-      expect(find.textContaining('neden-sonuç çıkarımı yapmaz'), findsOneWidget);
+      expect(
+        find.textContaining('neden-sonuç çıkarımı yapmaz'),
+        findsOneWidget,
+      );
       expect(find.textContaining('empatin yüksek'), findsNothing);
     },
   );

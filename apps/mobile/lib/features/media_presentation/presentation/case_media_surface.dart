@@ -71,10 +71,7 @@ class _CaseMediaSurfaceState extends ConsumerState<CaseMediaSurface> {
           return const SizedBox.shrink();
         }
 
-        return _MediaRenderer(
-          item: item,
-          borderRadius: widget.borderRadius,
-        );
+        return _MediaRenderer(item: item, borderRadius: widget.borderRadius);
       },
     );
   }
@@ -150,9 +147,9 @@ class _MediaRenderer extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: KefeColorTokens.textMutedDark,
-                              fontSize: 9,
-                            ),
+                          color: KefeColorTokens.textMutedDark,
+                          fontSize: 9,
+                        ),
                       ),
                     ),
                   ),
@@ -166,11 +163,7 @@ class _MediaRenderer extends StatelessWidget {
     if (item.decorative) {
       return ExcludeSemantics(child: media);
     }
-    return Semantics(
-      image: true,
-      label: item.altText,
-      child: media,
-    );
+    return Semantics(image: true, label: item.altText, child: media);
   }
 }
 
@@ -215,54 +208,52 @@ class _AbstractMediaPainter extends CustomPainter {
       oldDelegate.accent != accent;
 }
 
-({IconData icon, Color accent, List<Color> colors}) _visualFor(
-  String locator,
-) {
+({IconData icon, Color accent, List<Color> colors}) _visualFor(String locator) {
   return switch (locator) {
     'RESOURCE_PRIORITY' => (
-        icon: Icons.airline_seat_recline_normal_rounded,
-        accent: KefeColorTokens.empathy,
-        colors: const [Color(0xFF162C49), Color(0xFF241C38), Color(0xFF3A2027)],
-      ),
+      icon: Icons.airline_seat_recline_normal_rounded,
+      accent: KefeColorTokens.empathy,
+      colors: const [Color(0xFF162C49), Color(0xFF241C38), Color(0xFF3A2027)],
+    ),
     'DATA_NETWORK' => (
-        icon: Icons.hub_rounded,
-        accent: KefeColorTokens.rules,
-        colors: const [Color(0xFF102D4D), Color(0xFF18243A), Color(0xFF28223B)],
-      ),
+      icon: Icons.hub_rounded,
+      accent: KefeColorTokens.rules,
+      colors: const [Color(0xFF102D4D), Color(0xFF18243A), Color(0xFF28223B)],
+    ),
     'SPORTS_DECISION' => (
-        icon: Icons.sports_soccer_rounded,
-        accent: KefeColorTokens.success,
-        colors: const [Color(0xFF123B34), Color(0xFF172A38), Color(0xFF241D30)],
-      ),
+      icon: Icons.sports_soccer_rounded,
+      accent: KefeColorTokens.success,
+      colors: const [Color(0xFF123B34), Color(0xFF172A38), Color(0xFF241D30)],
+    ),
     'CIVIC_TRANSPARENCY' => (
-        icon: Icons.account_balance_outlined,
-        accent: KefeColorTokens.gold,
-        colors: const [Color(0xFF30311E), Color(0xFF172B3C), Color(0xFF251C2D)],
-      ),
+      icon: Icons.account_balance_outlined,
+      accent: KefeColorTokens.gold,
+      colors: const [Color(0xFF30311E), Color(0xFF172B3C), Color(0xFF251C2D)],
+    ),
     'REMOTE_WORK' => (
-        icon: Icons.laptop_mac_rounded,
-        accent: KefeColorTokens.rules,
-        colors: const [Color(0xFF15324B), Color(0xFF19243A), Color(0xFF312235)],
-      ),
+      icon: Icons.laptop_mac_rounded,
+      accent: KefeColorTokens.rules,
+      colors: const [Color(0xFF15324B), Color(0xFF19243A), Color(0xFF312235)],
+    ),
     'AIR_TRAVEL' => (
-        icon: Icons.airplanemode_active_rounded,
-        accent: KefeColorTokens.gold,
-        colors: const [Color(0xFF173A5B), Color(0xFF17233A), Color(0xFF3A242A)],
-      ),
+      icon: Icons.airplanemode_active_rounded,
+      accent: KefeColorTokens.gold,
+      colors: const [Color(0xFF173A5B), Color(0xFF17233A), Color(0xFF3A242A)],
+    ),
     'WORK_TRANSITION' => (
-        icon: Icons.model_training_rounded,
-        accent: KefeColorTokens.attention,
-        colors: const [Color(0xFF34301E), Color(0xFF20283A), Color(0xFF38222C)],
-      ),
+      icon: Icons.model_training_rounded,
+      accent: KefeColorTokens.attention,
+      colors: const [Color(0xFF34301E), Color(0xFF20283A), Color(0xFF38222C)],
+    ),
     'EDUCATION_AI' => (
-        icon: Icons.school_rounded,
-        accent: KefeColorTokens.empathy,
-        colors: const [Color(0xFF232A51), Color(0xFF16263C), Color(0xFF3A202D)],
-      ),
+      icon: Icons.school_rounded,
+      accent: KefeColorTokens.empathy,
+      colors: const [Color(0xFF232A51), Color(0xFF16263C), Color(0xFF3A202D)],
+    ),
     _ => (
-        icon: Icons.image_outlined,
-        accent: KefeColorTokens.gold,
-        colors: const [Color(0xFF14273C), Color(0xFF171C2A), Color(0xFF2B2029)],
-      ),
+      icon: Icons.image_outlined,
+      accent: KefeColorTokens.gold,
+      colors: const [Color(0xFF14273C), Color(0xFF171C2A), Color(0xFF2B2029)],
+    ),
   };
 }

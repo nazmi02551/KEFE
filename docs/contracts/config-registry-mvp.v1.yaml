@@ -1,0 +1,45 @@
+registry_version: 1.0.0
+extends: config-registry.v1.2.0.yaml
+updated_at: '2026-07-30'
+keys:
+- key: identity.otp_challenge_ttl_minutes
+  type: integer
+  default: 10
+  minimum: 1
+  maximum: 30
+- key: identity.otp_verification_ttl_minutes
+  type: integer
+  default: 15
+  minimum: 1
+  maximum: 60
+- key: identity.otp_max_attempts
+  type: integer
+  default: 5
+  minimum: 1
+  maximum: 10
+- key: identity.account_token_ttl_days
+  type: integer
+  default: 30
+  minimum: 1
+  maximum: 90
+- key: sharing.ttl_days
+  type: integer
+  default: 30
+  minimum: 1
+  maximum: 90
+- key: mobile.uncommitted_draft_ttl_days
+  type: integer
+  default: 7
+  minimum: 1
+  maximum: 30
+  note: commit_pending and committed_awaiting_reveal recovery states are exempt
+- key: community_reason.text_max_chars
+  type: integer
+  default: 300
+  minimum: 0
+  maximum: 1000
+- key: community_reason.public_limit
+  type: integer
+  default: 20
+  minimum: 1
+  maximum: 50

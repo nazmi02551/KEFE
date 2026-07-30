@@ -107,8 +107,8 @@ class RetestFlowRepository
           state: !initialCommitted
               ? FlowStepRuntimeState.blocked
               : contextExposed
-                  ? FlowStepRuntimeState.completed
-                  : FlowStepRuntimeState.ready,
+              ? FlowStepRuntimeState.completed
+              : FlowStepRuntimeState.ready,
           reasonCode: !initialCommitted ? 'FLOW_PREDECESSOR_PENDING' : null,
         ),
         FlowRuntimeStep(
@@ -119,8 +119,8 @@ class RetestFlowRepository
           state: !contextExposed
               ? FlowStepRuntimeState.blocked
               : finalCommitted
-                  ? FlowStepRuntimeState.completed
-                  : FlowStepRuntimeState.ready,
+              ? FlowStepRuntimeState.completed
+              : FlowStepRuntimeState.ready,
           reasonCode: !contextExposed ? 'FLOW_PREDECESSOR_PENDING' : null,
         ),
         FlowRuntimeStep(
@@ -131,8 +131,8 @@ class RetestFlowRepository
           state: !finalCommitted
               ? FlowStepRuntimeState.blocked
               : reflectionCompleted
-                  ? FlowStepRuntimeState.completed
-                  : FlowStepRuntimeState.ready,
+              ? FlowStepRuntimeState.completed
+              : FlowStepRuntimeState.ready,
           reasonCode: !finalCommitted ? 'FLOW_PREDECESSOR_PENDING' : null,
         ),
       ],
@@ -241,61 +241,68 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
 }
 
 void main() {
-  testWidgets(
-    'Flow UI executes DecisionRevision and Reflection generically',
-    (tester) async {
-      tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
-      addTearDown(tester.platformDispatcher.clearLocaleTestValue);
-      final repository = RetestFlowRepository();
-      final completionStore = MemoryReflectionCompletionStore();
+  testWidgets('Flow UI executes DecisionRevision and Reflection generically', (
+    tester,
+  ) async {
+    tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
+    addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+    final repository = RetestFlowRepository();
+    final completionStore = MemoryReflectionCompletionStore();
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            decisionRepositoryProvider.overrideWithValue(repository),
-            decisionDraftStoreProvider.overrideWithValue(MemoryDecisionDraftStore()),
-            reflectionCompletionStoreProvider.overrideWithValue(completionStore),
-          ],
-          child: const KefeApp(initialLocation: '/case/$retestCaseId'),
-        ),
-      );
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          decisionRepositoryProvider.overrideWithValue(repository),
+          decisionDraftStoreProvider.overrideWithValue(
+            MemoryDecisionDraftStore(),
+          ),
+          reflectionCompletionStoreProvider.overrideWithValue(completionStore),
+        ],
+        child: const KefeApp(initialLocation: '/case/$retestCaseId'),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('option-A')), findsOneWidget);
-      await tester.tap(find.byKey(const ValueKey('option-A')));
-      await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
-      await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('option-A')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('option-A')));
+    await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
+    await tester.pumpAndSettle();
 
-      expect(repository.initialCommitted, isTrue);
-      expect(repository.contextExposed, isTrue);
-      expect(repository.revealCalls, 0);
-      expect(find.byKey(const ValueKey('option-B')), findsOneWidget);
+    expect(repository.initialCommitted, isTrue);
+    expect(repository.contextExposed, isTrue);
+    expect(repository.revealCalls, 0);
+    expect(find.byKey(const ValueKey('option-B')), findsOneWidget);
 
-      await tester.tap(find.byKey(const ValueKey('option-B')));
-      await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
-      await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('option-B')));
+    await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
+    await tester.pumpAndSettle();
 
-      expect(repository.revisionAnswerCalls, 1);
-      expect(repository.finalAnswer, 'B');
-      expect(repository.revisionCommitCalls, 1);
-      expect(repository.finalCommitted, isTrue);
-      expect(repository.revealCalls, 0);
-      expect(find.byKey(const ValueKey('reflection-step-REFLECTION')), findsOneWidget);
-      expect(find.byKey(const ValueKey('reflection-summary')), findsOneWidget);
-      expect(find.byKey(const ValueKey('reflection-non-causal-note')), findsOneWidget);
-      expect(repository.reflectionFetchCalls, greaterThanOrEqualTo(1));
+    expect(repository.revisionAnswerCalls, 1);
+    expect(repository.finalAnswer, 'B');
+    expect(repository.revisionCommitCalls, 1);
+    expect(repository.finalCommitted, isTrue);
+    expect(repository.revealCalls, 0);
+    expect(
+      find.byKey(const ValueKey('reflection-step-REFLECTION')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('reflection-summary')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('reflection-non-causal-note')),
+      findsOneWidget,
+    );
+    expect(repository.reflectionFetchCalls, greaterThanOrEqualTo(1));
 
-      await tapVisible(
-        tester,
-        find.byKey(const ValueKey('reflection-complete-button')),
-      );
-      await tester.pumpAndSettle();
+    await tapVisible(
+      tester,
+      find.byKey(const ValueKey('reflection-complete-button')),
+    );
+    await tester.pumpAndSettle();
 
-      expect(repository.reflectionCompleteCalls, 1);
-      expect(repository.reflectionCompleted, isTrue);
-      expect(find.byKey(const ValueKey('reflection-completed')), findsOneWidget);
-      expect(completionStore.completions, isEmpty);
-      expect(repository.revealCalls, 0);
-    },
-  );
+    expect(repository.reflectionCompleteCalls, 1);
+    expect(repository.reflectionCompleted, isTrue);
+    expect(find.byKey(const ValueKey('reflection-completed')), findsOneWidget);
+    expect(completionStore.completions, isEmpty);
+    expect(repository.revealCalls, 0);
+  });
 }

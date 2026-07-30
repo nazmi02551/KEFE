@@ -124,14 +124,16 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
         caseData.versionId != widget.caseVersionId) {
       return;
     }
-    await ref.read(decisionDraftStoreProvider).write(
-      DecisionDraft(
-        caseData: caseData,
-        sessionId: widget.sessionId,
-        flowRuntime: flowRuntime,
-        updatedAt: DateTime.now().toUtc(),
-      ),
-    );
+    await ref
+        .read(decisionDraftStoreProvider)
+        .write(
+          DecisionDraft(
+            caseData: caseData,
+            sessionId: widget.sessionId,
+            flowRuntime: flowRuntime,
+            updatedAt: DateTime.now().toUtc(),
+          ),
+        );
   }
 
   Future<void> _complete() async {
@@ -146,7 +148,8 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
         sessionId: widget.sessionId,
         stepCode: widget.step.code,
       );
-      final reusablePending = pending != null &&
+      final reusablePending =
+          pending != null &&
           pending.caseVersionId == widget.caseVersionId &&
           pending.latestRevisionId == model.latestRevisionId;
       final idempotencyKey = reusablePending
@@ -176,7 +179,9 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
         sessionId: widget.sessionId,
         caseVersionId: widget.caseVersionId,
       )) {
-        throw const ClientTransportFailure(code: 'FLOW_RUNTIME_VERSION_MISMATCH');
+        throw const ClientTransportFailure(
+          code: 'FLOW_RUNTIME_VERSION_MISMATCH',
+        );
       }
       final refreshedModel = await repository.reflection.fetchReflection(
         sessionId: widget.sessionId,
@@ -254,7 +259,8 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
     final model = _model;
-    final completed = model?.completed == true ||
+    final completed =
+        model?.completed == true ||
         widget.step.state == FlowStepRuntimeState.completed;
 
     return Card(
@@ -290,8 +296,8 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
                       Text(
                         strings.reflectionTitle,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w900,
-                            ),
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                       if (model != null) ...[
                         const SizedBox(height: 4),
@@ -301,7 +307,8 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
                             model.changedQuestionCount,
                           ),
                           key: const ValueKey('reflection-summary'),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
                                 color: KefeColorTokens.textMutedDark,
                                 height: 1.35,
                               ),
@@ -317,10 +324,11 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: (model.decisionChanged
-                              ? KefeColorTokens.attention
-                              : KefeColorTokens.success)
-                          .withValues(alpha: 0.10),
+                      color:
+                          (model.decisionChanged
+                                  ? KefeColorTokens.attention
+                                  : KefeColorTokens.success)
+                              .withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(99),
                     ),
                     child: Icon(
@@ -374,9 +382,9 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
                           strings.reflectionInterventionSummary(
                             model.interventionCount,
                           ),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                height: 1.4,
-                              ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(height: 1.4),
                         ),
                       ),
                     ],
@@ -387,7 +395,9 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
               Container(
                 padding: const EdgeInsets.all(13),
                 decoration: BoxDecoration(
-                  color: KefeColorTokens.surfaceElevatedDark.withValues(alpha: 0.72),
+                  color: KefeColorTokens.surfaceElevatedDark.withValues(
+                    alpha: 0.72,
+                  ),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: Theme.of(context).colorScheme.outlineVariant,
@@ -407,9 +417,9 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
                         strings.reflectionNonCausalNote,
                         key: const ValueKey('reflection-non-causal-note'),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: KefeColorTokens.textMutedDark,
-                              height: 1.45,
-                            ),
+                          color: KefeColorTokens.textMutedDark,
+                          height: 1.45,
+                        ),
                       ),
                     ),
                   ],
@@ -443,9 +453,9 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
                       Text(
                         strings.reflectionCompleted,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: KefeColorTokens.success,
-                              fontWeight: FontWeight.w800,
-                            ),
+                          color: KefeColorTokens.success,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ],
                   ),
@@ -495,9 +505,7 @@ class _DecisionJourneyGraphic extends StatelessWidget {
             changedColor.withValues(alpha: 0.08),
           ],
         ),
-        border: Border.all(
-          color: KefeColorTokens.gold.withValues(alpha: 0.18),
-        ),
+        border: Border.all(color: KefeColorTokens.gold.withValues(alpha: 0.18)),
       ),
       child: Row(
         children: [
@@ -546,9 +554,9 @@ class _DecisionJourneyGraphic extends StatelessWidget {
                     Text(
                       '${model.interventionCount}',
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: KefeColorTokens.textMutedDark,
-                            fontWeight: FontWeight.w800,
-                          ),
+                        color: KefeColorTokens.textMutedDark,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ],
                 ),
@@ -597,9 +605,9 @@ class _RevisionNode extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w900,
-                ),
+              color: color,
+              fontWeight: FontWeight.w900,
+            ),
           ),
         ],
       ),

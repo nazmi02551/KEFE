@@ -1,0 +1,74 @@
+from __future__ import annotations
+
+from typing import Annotated, Any
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, Header, Request
+from pydantic import BaseModel
+
+from kefe_api.core.errors import DomainError
+from kefe_api.modules.identity.dependencies import PrincipalDep
+from kefe_api.modules.privacy.service import PrivacyService
+
+router = APIRouter(prefix="/v1/me", tags=["Privacy"])
+
+
+class PrivacyExportResponse(BaseModel):
+    actor_id: UUID
+    actor_kind: str
+    generated_at: str
+    retention: dict[str, Any]
+    product_data: dict[str, Any]
+
+
+class PrivacyDeletionResponse(BaseModel):
+    receipt_id: UUID
+    deleted_at: str
+    policy_version: str
+    private_data_deleted: bool
+    aggregate_contributions_anonymized: bool
+
+
+def get_service(request: Request) -> PrivacyService:
+    return request.app.state.privacy_service
+
+
+PrivacyServiceDep = Annotated[PrivacyService, Depends(get_service)]
+DeleteConfirm = Annotated[str | None, Header(alias="X-KEFE-Delete-Confirm")]
+
+
+@router.get("/privacy-export", response_model=PrivacyExportResponse)
+def export_privacy(
+    principal: PrincipalDep,
+    service: PrivacyServiceDep,
+) -> PrivacyExportResponse:
+    bundle = service.export(principal)
+    return PrivacyExportResponse(
+        actor_id=bundle.actor_id,
+        actor_kind=bundle.actor_kind,
+        generated_at=bundle.generated_at.isoformat(),
+        retention=bundle.retention,
+        product_data=bundle.product_data,
+    )
+
+
+@router.delete("", response_model=PrivacyDeletionResponse)
+def delete_me(
+    principal: PrincipalDep,
+    service: PrivacyServiceDep,
+    confirm: DeleteConfirm = None,
+) -> PrivacyDeletionResponse:
+    if confirm != "DELETE":
+        raise DomainError(
+            "PRIVACY_DELETE_CONFIRMATION_REQUIRED",
+            "Explicit deletion confirmation is required",
+            422,
+        )
+    receipt = service.delete(principal)
+    return PrivacyDeletionResponse(
+        receipt_id=receipt.receipt_id,
+        deleted_at=receipt.deleted_at.isoformat(),
+        policy_version=receipt.policy_version,
+        private_data_deleted=receipt.private_data_deleted,
+        aggregate_contributions_anonymized=receipt.aggregate_contributions_anonymized,
+    )

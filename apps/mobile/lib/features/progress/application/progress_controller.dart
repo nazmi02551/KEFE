@@ -46,9 +46,8 @@ class ProgressState {
   }
 }
 
-final progressControllerProvider = NotifierProvider<ProgressController, ProgressState>(
-  ProgressController.new,
-);
+final progressControllerProvider =
+    NotifierProvider<ProgressController, ProgressState>(ProgressController.new);
 
 class ProgressController extends Notifier<ProgressState> {
   ProgressRepository get _repository => ref.read(progressRepositoryProvider);

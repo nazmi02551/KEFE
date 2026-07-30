@@ -16,78 +16,83 @@ import 'package:kefe_mobile/features/saved_cases/data/saved_case_store.dart';
 const caseId = '11111111-1111-4111-8111-111111111111';
 
 void main() {
-  testWidgets(
-    'searches, filters, saves and continues a Case from Activity',
-    (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            decisionRepositoryProvider.overrideWithValue(
-              PreviewDecisionRepository(),
-            ),
-            decisionDraftStoreProvider.overrideWithValue(
-              MemoryDecisionDraftStore(),
-            ),
-            caseMediaRepositoryProvider.overrideWithValue(
-              const PreviewCaseMediaRepository(),
-            ),
-            progressRepositoryProvider.overrideWithValue(
-              PreviewProgressRepository(),
-            ),
-            savedCaseStoreProvider.overrideWithValue(MemorySavedCaseStore()),
-            productPreviewVisualModeProvider.overrideWithValue(true),
-          ],
-          child: const ProductPreviewApp(),
-        ),
-      );
-      await tester.pumpAndSettle();
+  testWidgets('searches, filters, saves and continues a Case from Activity', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          decisionRepositoryProvider.overrideWithValue(
+            PreviewDecisionRepository(),
+          ),
+          decisionDraftStoreProvider.overrideWithValue(
+            MemoryDecisionDraftStore(),
+          ),
+          caseMediaRepositoryProvider.overrideWithValue(
+            const PreviewCaseMediaRepository(),
+          ),
+          progressRepositoryProvider.overrideWithValue(
+            PreviewProgressRepository(),
+          ),
+          savedCaseStoreProvider.overrideWithValue(MemorySavedCaseStore()),
+          productPreviewVisualModeProvider.overrideWithValue(true),
+        ],
+        child: const ProductPreviewApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('explore-search-field')), findsOneWidget);
-      expect(find.byKey(const ValueKey('domain-filter-all')), findsOneWidget);
+    expect(find.byKey(const ValueKey('explore-search-field')), findsOneWidget);
+    expect(find.byKey(const ValueKey('domain-filter-all')), findsOneWidget);
 
-      await tester.enterText(
-        find.byKey(const ValueKey('explore-search-field')),
-        'son koltuk',
-      );
-      await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('explore-search-field')),
+      'son koltuk',
+    );
+    await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('explore-case-$caseId')), findsOneWidget);
+    expect(find.byKey(const ValueKey('explore-case-$caseId')), findsOneWidget);
 
-      await tester.tap(find.byKey(const ValueKey('save-case-$caseId')));
-      await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('save-case-$caseId')));
+    await tester.pumpAndSettle();
 
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(ProductPreviewApp)),
-        listen: false,
-      );
-      expect(container.read(savedCasesControllerProvider).contains(caseId), isTrue);
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(ProductPreviewApp)),
+      listen: false,
+    );
+    expect(
+      container.read(savedCasesControllerProvider).contains(caseId),
+      isTrue,
+    );
 
-      await tester.tap(find.byKey(const ValueKey('saved-only-filter')));
-      await tester.pumpAndSettle();
-      expect(find.byKey(const ValueKey('explore-case-$caseId')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('saved-only-filter')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('explore-case-$caseId')), findsOneWidget);
 
-      await tester.enterText(
-        find.byKey(const ValueKey('explore-search-field')),
-        'eşleşmeyen ifade',
-      );
-      await tester.pumpAndSettle();
-      expect(find.byKey(const ValueKey('explore-no-results')), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const ValueKey('explore-search-field')),
+      'eşleşmeyen ifade',
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('explore-no-results')), findsOneWidget);
 
-      await tester.tap(find.byKey(const ValueKey('clear-explore-filters')));
-      await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('clear-explore-filters')));
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Aktivite'));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text('Aktivite'));
+    await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('activity-screen')), findsOneWidget);
-      expect(find.byKey(const ValueKey('saved-cases-section')), findsOneWidget);
-      expect(find.text('Son koltuk kime verilmeli?'), findsWidgets);
-      expect(find.byKey(const ValueKey('open-saved-case-$caseId')), findsOneWidget);
+    expect(find.byKey(const ValueKey('activity-screen')), findsOneWidget);
+    expect(find.byKey(const ValueKey('saved-cases-section')), findsOneWidget);
+    expect(find.text('Son koltuk kime verilmeli?'), findsWidgets);
+    expect(
+      find.byKey(const ValueKey('open-saved-case-$caseId')),
+      findsOneWidget,
+    );
 
-      await tester.tap(find.byKey(const ValueKey('open-saved-case-$caseId')));
-      await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('open-saved-case-$caseId')));
+    await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
-    },
-  );
+    expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
+  });
 }

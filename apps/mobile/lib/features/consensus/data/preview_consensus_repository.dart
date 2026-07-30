@@ -5,12 +5,7 @@ class PreviewConsensusRepository implements ConsensusRepository {
   final Map<String, ConsensusParticipation> _participations = {};
 
   static const _stanceCodes = ['AGREE', 'MIXED', 'DISAGREE'];
-  static const _reasonCodes = [
-    'FAIRNESS',
-    'NEED',
-    'RULES',
-    'PRACTICAL_IMPACT',
-  ];
+  static const _reasonCodes = ['FAIRNESS', 'NEED', 'RULES', 'PRACTICAL_IMPACT'];
 
   @override
   Future<List<ConsensusCard>> fetchCards({
@@ -76,7 +71,11 @@ class PreviewConsensusRepository implements ConsensusRepository {
   }
 
   ConsensusAggregate _aggregate(ConsensusParticipation participation) {
-    final stanceCounts = <String, int>{'AGREE': 214, 'MIXED': 126, 'DISAGREE': 72};
+    final stanceCounts = <String, int>{
+      'AGREE': 214,
+      'MIXED': 126,
+      'DISAGREE': 72,
+    };
     stanceCounts[participation.stanceCode] =
         (stanceCounts[participation.stanceCode] ?? 0) + 1;
     final reasonCounts = <String, int>{
@@ -88,7 +87,10 @@ class PreviewConsensusRepository implements ConsensusRepository {
     for (final tag in participation.reasonTagCodes) {
       reasonCounts[tag] = (reasonCounts[tag] ?? 0) + 1;
     }
-    final sampleSize = stanceCounts.values.fold<int>(0, (sum, value) => sum + value);
+    final sampleSize = stanceCounts.values.fold<int>(
+      0,
+      (sum, value) => sum + value,
+    );
     return ConsensusAggregate(
       sampleSize: sampleSize,
       stanceDistribution: {

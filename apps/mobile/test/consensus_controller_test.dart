@@ -5,43 +5,55 @@ import 'package:kefe_mobile/features/consensus/data/consensus_repository.dart';
 import 'package:kefe_mobile/features/consensus/domain/consensus_models.dart';
 
 void main() {
-  test('Consensus controller clears per-card draft and advances across cards', () async {
-    final repository = _TwoCardConsensusRepository();
-    final container = ProviderContainer(
-      overrides: [
-        consensusExperienceEnabledProvider.overrideWithValue(true),
-        consensusRepositoryProvider.overrideWithValue(repository),
-      ],
-    );
-    addTearDown(container.dispose);
+  test(
+    'Consensus controller clears per-card draft and advances across cards',
+    () async {
+      final repository = _TwoCardConsensusRepository();
+      final container = ProviderContainer(
+        overrides: [
+          consensusExperienceEnabledProvider.overrideWithValue(true),
+          consensusRepositoryProvider.overrideWithValue(repository),
+        ],
+      );
+      addTearDown(container.dispose);
 
-    final controller = container.read(consensusControllerProvider.notifier);
-    await controller.load(sessionId: 'session-1', caseVersionId: 'version-1');
+      final controller = container.read(consensusControllerProvider.notifier);
+      await controller.load(sessionId: 'session-1', caseVersionId: 'version-1');
 
-    expect(container.read(consensusControllerProvider).uiState, ConsensusUiState.eligible);
-    expect(container.read(consensusControllerProvider).activeCard?.id, 'card-1');
-    expect(container.read(consensusControllerProvider).activeCard?.versionId, 'card-1-v1');
+      expect(
+        container.read(consensusControllerProvider).uiState,
+        ConsensusUiState.eligible,
+      );
+      expect(
+        container.read(consensusControllerProvider).activeCard?.id,
+        'card-1',
+      );
+      expect(
+        container.read(consensusControllerProvider).activeCard?.versionId,
+        'card-1-v1',
+      );
 
-    controller.selectStance('AGREE');
-    controller.toggleReasonTag('FAIRNESS');
-    await controller.submit();
+      controller.selectStance('AGREE');
+      controller.toggleReasonTag('FAIRNESS');
+      await controller.submit();
 
-    final afterFirst = container.read(consensusControllerProvider);
-    expect(afterFirst.uiState, ConsensusUiState.eligible);
-    expect(afterFirst.activeCard?.id, 'card-2');
-    expect(afterFirst.activeCard?.versionId, 'card-2-v1');
-    expect(afterFirst.selectedStance, isNull);
-    expect(afterFirst.selectedReasonTags, isEmpty);
+      final afterFirst = container.read(consensusControllerProvider);
+      expect(afterFirst.uiState, ConsensusUiState.eligible);
+      expect(afterFirst.activeCard?.id, 'card-2');
+      expect(afterFirst.activeCard?.versionId, 'card-2-v1');
+      expect(afterFirst.selectedStance, isNull);
+      expect(afterFirst.selectedReasonTags, isEmpty);
 
-    controller.selectStance('MIXED');
-    await controller.submit();
+      controller.selectStance('MIXED');
+      await controller.submit();
 
-    final completed = container.read(consensusControllerProvider);
-    expect(completed.uiState, ConsensusUiState.participated);
-    expect(completed.cards.every((card) => card.participated), isTrue);
-    expect(repository.idempotencyKeys.length, 2);
-    expect(repository.idempotencyKeys.toSet().length, 2);
-  });
+      final completed = container.read(consensusControllerProvider);
+      expect(completed.uiState, ConsensusUiState.participated);
+      expect(completed.cards.every((card) => card.participated), isTrue);
+      expect(repository.idempotencyKeys.length, 2);
+      expect(repository.idempotencyKeys.toSet().length, 2);
+    },
+  );
 }
 
 class _TwoCardConsensusRepository implements ConsensusRepository {
@@ -86,9 +98,7 @@ class _TwoCardConsensusRepository implements ConsensusRepository {
           'MIXED': stanceCode == 'MIXED' ? 1 : 0,
           'DISAGREE': stanceCode == 'DISAGREE' ? 1 : 0,
         },
-        reasonPatternDistribution: {
-          for (final tag in reasonTagCodes) tag: 1,
-        },
+        reasonPatternDistribution: {for (final tag in reasonTagCodes) tag: 1},
         contributionClass: 'EXPOSED',
         methodologyVersion: 'TEST_V1',
         generatedAt: DateTime.utc(2026, 7, 30),
@@ -101,14 +111,14 @@ class _TwoCardConsensusRepository implements ConsensusRepository {
 }
 
 ConsensusCard _eligibleCard(String id) => ConsensusCard(
-      id: id,
-      versionId: '$id-v1',
-      caseVersionId: 'version-1',
-      proposition: 'Proposition $id',
-      stanceCodes: const ['AGREE', 'MIXED', 'DISAGREE'],
-      reasonTagCodes: const ['FAIRNESS'],
-      maxReasonTags: 1,
-      methodologyVersion: 'TEST_V1',
-      participationState: 'ELIGIBLE',
-      contributionClass: 'EXPOSED',
-    );
+  id: id,
+  versionId: '$id-v1',
+  caseVersionId: 'version-1',
+  proposition: 'Proposition $id',
+  stanceCodes: const ['AGREE', 'MIXED', 'DISAGREE'],
+  reasonTagCodes: const ['FAIRNESS'],
+  maxReasonTags: 1,
+  methodologyVersion: 'TEST_V1',
+  participationState: 'ELIGIBLE',
+  contributionClass: 'EXPOSED',
+);

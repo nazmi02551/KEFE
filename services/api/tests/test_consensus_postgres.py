@@ -98,40 +98,54 @@ def test_postgres_consensus_is_commit_gated_exposed_and_idempotent(
         assert replay_body["participation"] == accepted_body["participation"]
         assert replay_body["participation_state"] == "PARTICIPATED"
         assert replay_body["aggregate"]["sample_size"] == accepted_body["aggregate"]["sample_size"]
-        assert replay_body["aggregate"]["stance_distribution"] == accepted_body["aggregate"]["stance_distribution"]
-        assert replay_body["aggregate"]["reason_pattern_distribution"] == accepted_body["aggregate"]["reason_pattern_distribution"]
+        assert (
+            replay_body["aggregate"]["stance_distribution"]
+            == accepted_body["aggregate"]["stance_distribution"]
+        )
+        assert (
+            replay_body["aggregate"]["reason_pattern_distribution"]
+            == accepted_body["aggregate"]["reason_pattern_distribution"]
+        )
         assert accepted_body["participation"]["contribution_class"] == "EXPOSED"
         assert accepted_body["aggregate"]["contribution_class"] == "EXPOSED"
         assert accepted_body["aggregate"]["sample_size"] >= 1
 
         engine = create_engine(database_url)
         with engine.connect() as connection:
-            row = connection.execute(
-                text(
-                    """
+            row = (
+                connection.execute(
+                    text(
+                        """
                     SELECT stance_code, reason_tag_codes, contribution_class, idempotency_key
                     FROM collective.consensus_participation
                     WHERE session_id = :session_id
                       AND card_version_id = :card_version_id
                     """
-                ),
-                {
-                    "session_id": session_id,
-                    "card_version_id": DEMO_CONSENSUS_CARD_VERSION_ID,
-                },
-            ).mappings().one()
-            participation_events = connection.execute(
-                text(
-                    """
+                    ),
+                    {
+                        "session_id": session_id,
+                        "card_version_id": DEMO_CONSENSUS_CARD_VERSION_ID,
+                    },
+                )
+                .mappings()
+                .one()
+            )
+            participation_events = (
+                connection.execute(
+                    text(
+                        """
                     SELECT payload
                     FROM analytics.outbox_event
                     WHERE aggregate_id = :session_id
                       AND event_name = 'consensus.participated'
                     ORDER BY created_at ASC
                     """
-                ),
-                {"session_id": session_id},
-            ).scalars().all()
+                    ),
+                    {"session_id": session_id},
+                )
+                .scalars()
+                .all()
+            )
 
         assert row["stance_code"] == "MIXED"
         assert row["contribution_class"] == "EXPOSED"

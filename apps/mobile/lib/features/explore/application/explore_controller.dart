@@ -17,9 +17,8 @@ class ExploreState {
   final String? errorCode;
 }
 
-final exploreControllerProvider = NotifierProvider<ExploreController, ExploreState>(
-  ExploreController.new,
-);
+final exploreControllerProvider =
+    NotifierProvider<ExploreController, ExploreState>(ExploreController.new);
 
 class ExploreController extends Notifier<ExploreState> {
   DecisionRepository get _repository => ref.read(decisionRepositoryProvider);

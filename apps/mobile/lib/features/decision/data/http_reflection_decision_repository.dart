@@ -123,20 +123,14 @@ class HttpReflectionDecisionRepository
     required String sessionId,
     required List<String> tags,
     required String? text,
-  }) => _delegate.savePrivateReason(
-    sessionId: sessionId,
-    tags: tags,
-    text: text,
-  );
+  }) =>
+      _delegate.savePrivateReason(sessionId: sessionId, tags: tags, text: text);
 
   @override
   Future<void> commit({
     required String sessionId,
     required String idempotencyKey,
-  }) => _delegate.commit(
-    sessionId: sessionId,
-    idempotencyKey: idempotencyKey,
-  );
+  }) => _delegate.commit(sessionId: sessionId, idempotencyKey: idempotencyKey);
 
   @override
   Future<RevealResult> reveal(String sessionId) => _delegate.reveal(sessionId);
