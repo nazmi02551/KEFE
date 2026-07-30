@@ -56,13 +56,9 @@ class CommunityReasonService:
             )
 
         allowed_tags = {
-            str(tag).strip().upper()
-            for tag in policy.get("tags", ())
-            if str(tag).strip()
+            str(tag).strip().upper() for tag in policy.get("tags", ()) if str(tag).strip()
         }
-        normalized_tags = tuple(
-            dict.fromkeys(tag.strip().upper() for tag in tags if tag.strip())
-        )
+        normalized_tags = tuple(dict.fromkeys(tag.strip().upper() for tag in tags if tag.strip()))
         if not normalized_tags:
             raise DomainError(
                 "COMMUNITY_REASON_EMPTY",

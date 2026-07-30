@@ -22,7 +22,11 @@ final shareRepositoryProvider = Provider<ShareRepository>((ref) {
 enum ShareUiState { idle, creating, ready, error }
 
 class ShareState {
-  const ShareState({this.uiState = ShareUiState.idle, this.created, this.errorCode});
+  const ShareState({
+    this.uiState = ShareUiState.idle,
+    this.created,
+    this.errorCode,
+  });
 
   final ShareUiState uiState;
   final CreatedShare? created;

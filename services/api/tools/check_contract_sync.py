@@ -122,7 +122,6 @@ def _openapi_errors() -> list[str]:
             "title",
             "summary",
             "primary_domain",
-            "decision",
             "created_at",
             "expires_at",
         },
@@ -193,7 +192,15 @@ def _openapi_errors() -> list[str]:
 
     share = schemas.get("PublicShareResponse", {}).get("properties", {})
     share_leaks = sorted(
-        {"actor_id", "private_reason", "reason_text", "confidence", "raw_response_payload"}
+        {
+            "actor_id",
+            "decision",
+            "decision_snapshot",
+            "private_reason",
+            "reason_text",
+            "confidence",
+            "raw_response_payload",
+        }
         & share.keys()
     )
     if share_leaks:
@@ -224,7 +231,7 @@ def _openapi_errors() -> list[str]:
             "200",
             "CommunityReasonReceipt",
         ),
-        ("/v1/case-versions/{case_version_id}/community-reasons", "get"): (
+        ("/v1/weigh-sessions/{session_id}/community-reasons", "get"): (
             "200",
             "CommunityReasonSnapshotResponse",
         ),
@@ -264,7 +271,6 @@ def _openapi_errors() -> list[str]:
         ("/v1/auth/otp/request", "post"),
         ("/v1/auth/otp/verify", "post"),
         ("/v1/shares/{token}", "get"),
-        ("/v1/case-versions/{case_version_id}/community-reasons", "get"),
     )
     for path, method in public_unprotected:
         if paths.get(path, {}).get(method, {}).get("security"):
@@ -284,6 +290,7 @@ def _openapi_errors() -> list[str]:
         ("/v1/shares", "post"),
         ("/v1/shares/{share_id}", "delete"),
         ("/v1/weigh-sessions/{session_id}/community-reason", "post"),
+        ("/v1/weigh-sessions/{session_id}/community-reasons", "get"),
         ("/v1/community-reasons/{reason_id}/reaction", "put"),
         ("/v1/community-reasons/{reason_id}/reports", "post"),
         ("/v1/me/progress", "get"),
@@ -361,8 +368,14 @@ def _contract_errors() -> list[str]:
         "provider_neutral_otp_port: required",
         "explicit_guest_merge: required",
         "commit_required: true",
-        "private_reason: forbidden",
+        "case_only: true",
+        "include_decision_true_error: SHARE_DECISION_EXPOSURE_NOT_SUPPORTED",
+        "sender_decision_public_payload: forbidden",
+        "sender_confidence_public_payload: forbidden",
+        "sender_private_reason_public_payload: forbidden",
         "explicit_publication: true",
+        "read_requires_actor_owned_committed_session: true",
+        "public_case_version_read_route: forbidden",
         "public_pending_or_blocked_text: forbidden",
         "actor_export: required",
         "actor_delete: required",

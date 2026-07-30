@@ -30,7 +30,7 @@ class _CommunityReasonSectionState
     Future.microtask(
       () => ref
           .read(communityReasonControllerProvider.notifier)
-          .load(widget.caseVersionId),
+          .load(widget.sessionId),
     );
   }
 

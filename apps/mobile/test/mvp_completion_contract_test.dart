@@ -72,7 +72,10 @@ void main() {
     expect(share.deepLink, 'kefe:///share/opaque-token');
     expect(section, isNot(contains('share-include-decision')));
     expect(controller, contains('includeDecision: false'));
-    expect(publicModel, isNot(contains('final Map<String, Object?>? decision')));
+    expect(
+      publicModel,
+      isNot(contains('final Map<String, Object?>? decision')),
+    );
   });
 
   test('locale and theme contract includes MVP minimum surfaces', () {

@@ -72,7 +72,8 @@ class CommunityReasonController extends Notifier<CommunityReasonState> {
   CommunityReasonState build() => const CommunityReasonState();
 
   Future<void> load(String sessionId) async {
-    if (_sessionId == sessionId && state.uiState == CommunityReasonUiState.ready) {
+    if (_sessionId == sessionId &&
+        state.uiState == CommunityReasonUiState.ready) {
       return;
     }
     _sessionId = sessionId;
@@ -194,7 +195,8 @@ class _DisabledCommunityReasonRepository implements CommunityReasonRepository {
     required String sessionId,
     required List<String> tags,
     String? text,
-  }) => throw const ClientTransportFailure(code: 'COMMUNITY_REASON_NOT_ENABLED');
+  }) =>
+      throw const ClientTransportFailure(code: 'COMMUNITY_REASON_NOT_ENABLED');
 
   @override
   Future<void> react({required String reasonId, required String reaction}) =>

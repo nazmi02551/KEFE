@@ -228,9 +228,7 @@ def test_privacy_export_excludes_credentials_then_delete_revokes_identity() -> N
     assert exported.status_code == 200
     body = exported.json()
     assert body["product_data"]["weigh_sessions"][0]["session_id"] == session_id
-    assert body["product_data"]["private_reasons"][0]["text"] == (
-        "owner-visible private reason"
-    )
+    assert body["product_data"]["private_reasons"][0]["text"] == ("owner-visible private reason")
     serialized = str(body).lower()
     assert "token_hash" not in serialized
     assert "access_token" not in serialized

@@ -57,9 +57,7 @@ class ShareSection extends ConsumerWidget {
                 label: Text(
                   state.uiState == ShareUiState.creating
                       ? (tr ? 'Bağlantı hazırlanıyor…' : 'Preparing link…')
-                      : (tr
-                            ? 'Vaka bağlantısı oluştur'
-                            : 'Create case link'),
+                      : (tr ? 'Vaka bağlantısı oluştur' : 'Create case link'),
                 ),
               ),
             ] else ...[
