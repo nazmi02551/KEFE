@@ -29,6 +29,5 @@ class PublicShare:
     title: str
     summary: str
     primary_domain: str
-    decision: dict[str, Any] | None
     created_at: datetime
     expires_at: datetime
