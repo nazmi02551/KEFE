@@ -21,7 +21,8 @@ abstract final class RadarPreviewFixture {
       caseId: '11111111-1111-4111-8111-111111111112',
       domainCode: 'TECH_GLOBAL',
       signalCode: 'RISING_DISCUSSION',
-      fallbackTitle: 'Yapay zekâ şirketlerinin veri toplaması sınırlandırılmalı mı?',
+      fallbackTitle:
+          'Yapay zekâ şirketlerinin veri toplaması sınırlandırılmalı mı?',
     ),
     RadarPreviewItem(
       rank: 2,
@@ -43,14 +44,16 @@ abstract final class RadarPreviewFixture {
       caseId: '11111111-1111-4111-8111-111111111116',
       domainCode: 'DAILY_LIFE',
       signalCode: 'DAILY_DILEMMA',
-      fallbackTitle: 'Çocuklar uçakta ebeveynleriyle ücretsiz yan yana oturmalı mı?',
+      fallbackTitle:
+          'Çocuklar uçakta ebeveynleriyle ücretsiz yan yana oturmalı mı?',
     ),
     RadarPreviewItem(
       rank: 5,
       caseId: '11111111-1111-4111-8111-111111111118',
       domainCode: 'EDUCATION',
       signalCode: 'EDUCATION',
-      fallbackTitle: 'Üniversitelerde üretken YZ kullanımı sınırlandırılmalı mı?',
+      fallbackTitle:
+          'Üniversitelerde üretken YZ kullanımı sınırlandırılmalı mı?',
     ),
   ];
 }

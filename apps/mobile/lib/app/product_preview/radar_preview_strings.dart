@@ -29,7 +29,8 @@ class RadarPreviewStrings {
     'en': {
       'eyebrow': 'KEFE RADAR',
       'title': 'What is the world\nweighing right now?',
-      'notice': 'Not live trend data · Representative ranking for Product Preview',
+      'notice':
+          'Not live trend data · Representative ranking for Product Preview',
       'view.trends': 'Trends',
       'view.rising': 'Rising',
       'view.global': 'Global',

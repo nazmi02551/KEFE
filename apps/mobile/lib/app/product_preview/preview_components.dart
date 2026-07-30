@@ -46,7 +46,9 @@ class PreviewPageHeader extends StatelessWidget {
             border: Border.all(color: visual.gold.withValues(alpha: 0.26)),
             boxShadow: [
               BoxShadow(
-                color: visual.gold.withValues(alpha: visual.isDark ? 0.08 : 0.05),
+                color: visual.gold.withValues(
+                  alpha: visual.isDark ? 0.08 : 0.05,
+                ),
                 blurRadius: 18,
               ),
             ],
@@ -117,7 +119,9 @@ class PreviewFilterPill extends StatelessWidget {
           color: selected ? visual.gold : visual.surfaceSunken,
           borderRadius: BorderRadius.circular(99),
           border: Border.all(
-            color: selected ? visual.gold : visual.border.withValues(alpha: 0.90),
+            color: selected
+                ? visual.gold
+                : visual.border.withValues(alpha: 0.90),
           ),
         ),
         child: Text(
@@ -235,10 +239,11 @@ class PreviewActionCaseCard extends StatelessWidget {
                       const SizedBox(height: 7),
                       Text(
                         title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          height: 1.2,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              height: 1.2,
+                            ),
                       ),
                       const SizedBox(height: 6),
                       Text(
@@ -251,7 +256,10 @@ class PreviewActionCaseCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded, color: visual.mutedForeground),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: visual.mutedForeground,
+                ),
               ],
             ),
           ),

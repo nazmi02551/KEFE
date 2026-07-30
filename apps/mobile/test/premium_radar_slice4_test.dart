@@ -13,49 +13,51 @@ import 'package:kefe_mobile/core/localization/kefe_content_localizer.dart';
 import 'package:kefe_mobile/core/localization/kefe_strings.dart';
 
 void main() {
-  test('Radar slice 4 contract keeps preview truthfulness boundaries closed', () {
-    final contractFile = File('../../docs/contracts/premium-radar-slice4.v1.json');
-    expect(contractFile.existsSync(), isTrue);
+  test(
+    'Radar slice 4 contract keeps preview truthfulness boundaries closed',
+    () {
+      final contractFile = File(
+        '../../docs/contracts/premium-radar-slice4.v1.json',
+      );
+      expect(contractFile.existsSync(), isTrue);
 
-    final contract =
-        jsonDecode(contractFile.readAsStringSync()) as Map<String, Object?>;
-    final truthfulness = contract['truthfulness']! as Map<String, Object?>;
-    final localization = contract['localization']! as Map<String, Object?>;
-    final runtime = contract['runtime']! as Map<String, Object?>;
-    final invariants = contract['invariants']! as Map<String, Object?>;
+      final contract =
+          jsonDecode(contractFile.readAsStringSync()) as Map<String, Object?>;
+      final truthfulness = contract['truthfulness']! as Map<String, Object?>;
+      final localization = contract['localization']! as Map<String, Object?>;
+      final runtime = contract['runtime']! as Map<String, Object?>;
+      final invariants = contract['invariants']! as Map<String, Object?>;
 
-    expect(truthfulness['product_preview_only'], isTrue);
-    expect(truthfulness['representative_ranking_only'], isTrue);
-    expect(truthfulness['live_trend_claim'], isFalse);
-    expect(truthfulness['personalization_claim'], isFalse);
-    expect(
-      truthfulness['for_you_label_allowed_without_personalization'],
-      isFalse,
-    );
-    expect(localization['catalog_keyed_by_locale_and_string_id'], isTrue);
-    expect(localization['presentation_locale_branching_forbidden'], isTrue);
-    expect(runtime['canonical_case_route_preserved'], isTrue);
-    expect(runtime['stable_case_ids_preserved'], isTrue);
-    expect(runtime['case_specific_runtime_added'], isFalse);
-    expect(invariants['commit_first'], isTrue);
-    expect(invariants['blind_first'], isTrue);
-    expect(invariants['signal_in_scope'], isFalse);
-    expect(invariants['impact_in_scope'], isFalse);
-    expect(invariants['personality_inference'], isFalse);
-  });
+      expect(truthfulness['product_preview_only'], isTrue);
+      expect(truthfulness['representative_ranking_only'], isTrue);
+      expect(truthfulness['live_trend_claim'], isFalse);
+      expect(truthfulness['personalization_claim'], isFalse);
+      expect(
+        truthfulness['for_you_label_allowed_without_personalization'],
+        isFalse,
+      );
+      expect(localization['catalog_keyed_by_locale_and_string_id'], isTrue);
+      expect(localization['presentation_locale_branching_forbidden'], isTrue);
+      expect(runtime['canonical_case_route_preserved'], isTrue);
+      expect(runtime['stable_case_ids_preserved'], isTrue);
+      expect(runtime['case_specific_runtime_added'], isFalse);
+      expect(invariants['commit_first'], isTrue);
+      expect(invariants['blind_first'], isTrue);
+      expect(invariants['signal_in_scope'], isFalse);
+      expect(invariants['impact_in_scope'], isFalse);
+      expect(invariants['personality_inference'], isFalse);
+    },
+  );
 
   test('Radar fixture keeps canonical stable Case ids', () {
     expect(RadarPreviewFixture.items, hasLength(5));
-    expect(
-      RadarPreviewFixture.items.map((item) => item.caseId).toSet(),
-      {
-        '11111111-1111-4111-8111-111111111112',
-        '11111111-1111-4111-8111-111111111113',
-        '11111111-1111-4111-8111-111111111117',
-        '11111111-1111-4111-8111-111111111116',
-        '11111111-1111-4111-8111-111111111118',
-      },
-    );
+    expect(RadarPreviewFixture.items.map((item) => item.caseId).toSet(), {
+      '11111111-1111-4111-8111-111111111112',
+      '11111111-1111-4111-8111-111111111113',
+      '11111111-1111-4111-8111-111111111117',
+      '11111111-1111-4111-8111-111111111116',
+      '11111111-1111-4111-8111-111111111118',
+    });
   });
 
   test('Radar presentation consumes semantic/localized boundaries', () {
@@ -102,12 +104,16 @@ void main() {
     }
 
     await pump(theme: KefeTheme.light(), locale: const Locale('en', 'US'));
-    var context = tester.element(find.byKey(const ValueKey('radar-preview-list')));
+    var context = tester.element(
+      find.byKey(const ValueKey('radar-preview-list')),
+    );
     expect(context.kefeVisual.isDark, isFalse);
     expect(find.text('KEFE RADAR'), findsOneWidget);
     expect(find.text('What is the world\nweighing right now?'), findsOneWidget);
     expect(
-      find.text('Not live trend data · Representative ranking for Product Preview'),
+      find.text(
+        'Not live trend data · Representative ranking for Product Preview',
+      ),
       findsOneWidget,
     );
     expect(find.text('Trends'), findsOneWidget);
@@ -131,7 +137,9 @@ void main() {
     );
     expect(find.text('Senin için'), findsNothing);
     expect(
-      find.text('Yapay zekâ şirketlerinin veri toplaması sınırlandırılmalı mı?'),
+      find.text(
+        'Yapay zekâ şirketlerinin veri toplaması sınırlandırılmalı mı?',
+      ),
       findsOneWidget,
     );
   });

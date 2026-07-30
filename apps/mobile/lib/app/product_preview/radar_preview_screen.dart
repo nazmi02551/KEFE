@@ -30,7 +30,10 @@ class RadarPreviewScreen extends ConsumerWidget {
             icon: Icons.radar_rounded,
           ),
           const SizedBox(height: 14),
-          PreviewNotice(key: const ValueKey('radar-preview-notice'), text: strings.notice),
+          PreviewNotice(
+            key: const ValueKey('radar-preview-notice'),
+            text: strings.notice,
+          ),
           const SizedBox(height: 18),
           Wrap(
             key: const ValueKey('radar-preview-views'),
@@ -128,7 +131,9 @@ class _RadarRankingCard extends StatelessWidget {
                         shape: BoxShape.circle,
                         color: accent.withValues(alpha: featured ? 0.24 : 0.12),
                         border: Border.all(
-                          color: accent.withValues(alpha: featured ? 0.58 : 0.32),
+                          color: accent.withValues(
+                            alpha: featured ? 0.58 : 0.32,
+                          ),
                         ),
                         boxShadow: featured
                             ? [
@@ -141,10 +146,11 @@ class _RadarRankingCard extends StatelessWidget {
                       ),
                       child: Text(
                         '${item.rank}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: featured ? visual.goldSoft : accent,
-                          fontWeight: FontWeight.w900,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: featured ? visual.goldSoft : accent,
+                              fontWeight: FontWeight.w900,
+                            ),
                       ),
                     ),
                   ),
@@ -165,11 +171,12 @@ class _RadarRankingCard extends StatelessWidget {
                       const SizedBox(height: 7),
                       Text(
                         title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: foreground,
-                          fontWeight: FontWeight.w900,
-                          height: 1.22,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: foreground,
+                              fontWeight: FontWeight.w900,
+                              height: 1.22,
+                            ),
                       ),
                       const SizedBox(height: 10),
                       Row(
@@ -183,10 +190,11 @@ class _RadarRankingCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               signal,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: muted,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: muted,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                             ),
                           ),
                         ],
