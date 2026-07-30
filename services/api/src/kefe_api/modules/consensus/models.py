@@ -28,6 +28,8 @@ class ConsensusParticipationStatus(StrEnum):
 @dataclass(frozen=True, slots=True)
 class ConsensusCardVersion:
     id: UUID
+    card_id: UUID
+    version_no: int
     case_version_id: UUID
     proposition: str
     stance_codes: tuple[str, ...]
