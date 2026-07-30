@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/product_preview_app.dart';
 import 'core/design/product_preview_visual_mode.dart';
+import 'features/consensus/application/consensus_controller.dart';
+import 'features/consensus/data/preview_consensus_repository.dart';
 import 'features/decision/application/decision_controller.dart';
 import 'features/decision/data/preview_journey_decision_repository.dart';
 import 'features/media_presentation/application/case_media_provider.dart';
@@ -17,6 +19,9 @@ void main() {
       overrides: [
         decisionRepositoryProvider.overrideWithValue(
           PreviewJourneyDecisionRepository(),
+        ),
+        consensusRepositoryProvider.overrideWithValue(
+          PreviewConsensusRepository(),
         ),
         caseMediaRepositoryProvider.overrideWithValue(
           const PreviewCaseMediaRepository(),
