@@ -29,11 +29,14 @@ def _guest(client: TestClient) -> dict[str, str]:
 
 def main() -> None:
     client = TestClient(create_app())
+    headers = _guest(client)
     feed_samples: list[float] = []
     commit_samples: list[float] = []
     reveal_samples: list[float] = []
 
     # This is a deterministic in-process regression harness, not a production SLO claim.
+    # Guest admission throttling has its own contract tests; reuse one actor here so the
+    # performance loop measures feed/Commit/Reveal rather than rate-limit behavior.
     for index in range(20):
         start = perf_counter()
         response = client.get("/v1/cases")
@@ -41,7 +44,6 @@ def main() -> None:
         response.raise_for_status()
         feed_samples.append(elapsed)
 
-        headers = _guest(client)
         session = client.post(f"/v1/cases/{DEMO_CASE_ID}/weigh-sessions", headers=headers)
         session.raise_for_status()
         session_id = session.json()["session_id"]
