@@ -65,11 +65,20 @@ jobs:
       - name: Generate transient Android host
         working-directory: apps/mobile
         run: flutter create --platforms=android --project-name kefe_mobile .
+      - name: Resolve preview identity
+        id: preview_identity
+        shell: bash
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            echo "version=v9-rc1" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=v9-internal" >> "$GITHUB_OUTPUT"
+          fi
       - name: Build preview APK
         working-directory: apps/mobile
         run: >-
           flutter build apk --debug -t lib/main_preview.dart
-          --dart-define=KEFE_PREVIEW_VERSION=v8
+          --dart-define=KEFE_PREVIEW_VERSION=${{ steps.preview_identity.outputs.version }}
           --dart-define=KEFE_PREVIEW_COMMIT=${GITHUB_SHA}
       - name: Upload preview APK
         uses: actions/upload-artifact@v4
