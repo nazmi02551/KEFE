@@ -33,26 +33,22 @@ class KefeSurface extends StatelessWidget {
       KefeSurfaceTone.premium => visual.surfaceStrong,
     };
     final resolvedAccent = accent ?? visual.gold;
+    final radius = BorderRadius.circular(borderRadius);
+    final content = premium
+        ? DefaultTextStyle.merge(
+            style: TextStyle(color: visual.onSurfaceStrong),
+            child: IconTheme.merge(
+              data: IconThemeData(color: visual.onSurfaceStrong),
+              child: child,
+            ),
+          )
+        : child;
 
     return Semantics(
       container: semanticContainer,
-      child: Container(
-        padding: padding,
+      child: DecoratedBox(
         decoration: BoxDecoration(
-          color: premium ? null : background,
-          gradient: premium
-              ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: visual.premiumGradient,
-                )
-              : null,
-          borderRadius: BorderRadius.circular(borderRadius),
-          border: Border.all(
-            color: premium
-                ? resolvedAccent.withValues(alpha: 0.34)
-                : visual.border.withValues(alpha: 0.88),
-          ),
+          borderRadius: radius,
           boxShadow: [
             BoxShadow(
               color: visual.shadow.withValues(alpha: premium ? 0.20 : 0.07),
@@ -67,15 +63,30 @@ class KefeSurface extends StatelessWidget {
               ),
           ],
         ),
-        child: premium
-            ? DefaultTextStyle.merge(
-                style: TextStyle(color: visual.onSurfaceStrong),
-                child: IconTheme.merge(
-                  data: IconThemeData(color: visual.onSurfaceStrong),
-                  child: child,
-                ),
-              )
-            : child,
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: radius,
+          clipBehavior: Clip.antiAlias,
+          child: Ink(
+            decoration: BoxDecoration(
+              color: premium ? null : background,
+              gradient: premium
+                  ? LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: visual.premiumGradient,
+                    )
+                  : null,
+              borderRadius: radius,
+              border: Border.all(
+                color: premium
+                    ? resolvedAccent.withValues(alpha: 0.34)
+                    : visual.border.withValues(alpha: 0.88),
+              ),
+            ),
+            child: Padding(padding: padding, child: content),
+          ),
+        ),
       ),
     );
   }
