@@ -27,22 +27,30 @@ def _app(monkeypatch: pytest.MonkeyPatch):
 def _guest(client: TestClient) -> tuple[dict[str, str], str]:
     response = client.post("/v1/identity/guest")
     assert response.status_code == 201
-    return {"Authorization": f"Bearer {response.json()['access_token']}"}, response.json()["actor_id"]
+    return {"Authorization": f"Bearer {response.json()['access_token']}"}, response.json()[
+        "actor_id"
+    ]
 
 
 def _commit(client: TestClient, headers: dict[str, str], key: str) -> str:
     start = client.post(f"/v1/cases/{DEMO_CASE_ID}/weigh-sessions", headers=headers)
     assert start.status_code == 201
     session_id = start.json()["session_id"]
-    assert client.put(
-        f"/v1/weigh-sessions/{session_id}/responses",
-        headers=headers,
-        json={"responses": [{"question_id": str(DEMO_QUESTION_ID), "value": "A"}]},
-    ).status_code == 200
-    assert client.post(
-        f"/v1/weigh-sessions/{session_id}/commit",
-        headers={**headers, "Idempotency-Key": key},
-    ).status_code == 200
+    assert (
+        client.put(
+            f"/v1/weigh-sessions/{session_id}/responses",
+            headers=headers,
+            json={"responses": [{"question_id": str(DEMO_QUESTION_ID), "value": "A"}]},
+        ).status_code
+        == 200
+    )
+    assert (
+        client.post(
+            f"/v1/weigh-sessions/{session_id}/commit",
+            headers={**headers, "Idempotency-Key": key},
+        ).status_code
+        == 200
+    )
     return session_id
 
 
@@ -106,10 +114,13 @@ def test_postgres_existing_account_merge_preserves_product_history_and_controls(
     assert progress.json()["progress"]["meaningful_weigh_count"] == 2
 
     # Transferred Share remains revocable by the account actor after merge.
-    assert client.delete(
-        f"/v1/shares/{share.json()['share_id']}",
-        headers=merged_headers,
-    ).status_code == 204
+    assert (
+        client.delete(
+            f"/v1/shares/{share.json()['share_id']}",
+            headers=merged_headers,
+        ).status_code
+        == 204
+    )
 
     exported = client.get("/v1/me/privacy-export", headers=merged_headers)
     assert exported.status_code == 200
@@ -120,16 +131,20 @@ def test_postgres_existing_account_merge_preserves_product_history_and_controls(
 
     engine = create_engine(database_url)
     with engine.connect() as connection:
-        merge_row = connection.execute(
-            text(
-                """
+        merge_row = (
+            connection.execute(
+                text(
+                    """
                 SELECT guest_actor_id, account_actor_id
                 FROM identity.actor_merge
                 WHERE guest_actor_id = :guest_actor_id
                 """
-            ),
-            {"guest_actor_id": second_guest_id},
-        ).mappings().one()
+                ),
+                {"guest_actor_id": second_guest_id},
+            )
+            .mappings()
+            .one()
+        )
         community_owner = connection.execute(
             text("SELECT actor_id FROM community.reason WHERE id = :id"),
             {"id": reason.json()["reason_id"]},

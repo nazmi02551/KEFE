@@ -62,7 +62,9 @@ class HttpPrivacyRepository implements PrivacyRepository {
     return {'authorization': 'Bearer $token'};
   }
 
-  Future<http.Response> _request(Future<http.Response> Function() action) async {
+  Future<http.Response> _request(
+    Future<http.Response> Function() action,
+  ) async {
     try {
       return await action().timeout(_config.requestTimeout);
     } on TimeoutException {

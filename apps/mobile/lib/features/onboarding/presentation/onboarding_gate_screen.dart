@@ -10,7 +10,8 @@ class OnboardingGateScreen extends ConsumerStatefulWidget {
   const OnboardingGateScreen({super.key});
 
   @override
-  ConsumerState<OnboardingGateScreen> createState() => _OnboardingGateScreenState();
+  ConsumerState<OnboardingGateScreen> createState() =>
+      _OnboardingGateScreenState();
 }
 
 class _OnboardingGateScreenState extends ConsumerState<OnboardingGateScreen> {
@@ -25,7 +26,9 @@ class _OnboardingGateScreenState extends ConsumerState<OnboardingGateScreen> {
   }
 
   Future<void> _resolveState() async {
-    final completed = await ref.read(onboardingControllerProvider).isCompleted();
+    final completed = await ref
+        .read(onboardingControllerProvider)
+        .isCompleted();
     if (!mounted) return;
     if (completed) {
       context.go('/explore');
@@ -112,12 +115,14 @@ class _OnboardingGateScreenState extends ConsumerState<OnboardingGateScreen> {
                     key: const ValueKey('onboarding-primary-button'),
                     onPressed: _page == 0
                         ? () => _pageController.nextPage(
-                              duration: const Duration(milliseconds: 220),
-                              curve: Curves.easeOut,
-                            )
+                            duration: const Duration(milliseconds: 220),
+                            curve: Curves.easeOut,
+                          )
                         : () => context.go('/case/$demoCaseId?firstUse=1'),
                     child: Text(
-                      _page == 0 ? strings.onboardingNext : strings.onboardingTryCase,
+                      _page == 0
+                          ? strings.onboardingNext
+                          : strings.onboardingTryCase,
                     ),
                   ),
                 ],
@@ -153,8 +158,8 @@ class _PromisePage extends StatelessWidget {
           Text(
             eyebrow,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
           const SizedBox(height: 16),
           Text(title, style: Theme.of(context).textTheme.displaySmall),

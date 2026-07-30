@@ -34,8 +34,8 @@ class ShareSection extends ConsumerWidget {
                   child: Text(
                     tr ? 'Bu vakayı paylaş' : 'Share this case',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ],
@@ -71,7 +71,9 @@ class ShareSection extends ConsumerWidget {
                 label: Text(
                   state.uiState == ShareUiState.creating
                       ? (tr ? 'Bağlantı hazırlanıyor…' : 'Preparing link…')
-                      : (tr ? 'Paylaşım bağlantısı oluştur' : 'Create share link'),
+                      : (tr
+                            ? 'Paylaşım bağlantısı oluştur'
+                            : 'Create share link'),
                 ),
               ),
             ] else ...[

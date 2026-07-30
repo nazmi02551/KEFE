@@ -33,8 +33,8 @@ class PrivacyControlsSection extends ConsumerWidget {
                 Text(
                   tr ? 'Verilerin ve gizliliğin' : 'Your data and privacy',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ],
             ),
@@ -52,13 +52,19 @@ class PrivacyControlsSection extends ConsumerWidget {
                   : () async {
                       final data = await controller.export();
                       if (data == null || !context.mounted) return;
-                      final text = const JsonEncoder.withIndent('  ').convert(data);
+                      final text = const JsonEncoder.withIndent(
+                        '  ',
+                      ).convert(data);
                       await Clipboard.setData(ClipboardData(text: text));
                       if (!context.mounted) return;
                       showDialog<void>(
                         context: context,
                         builder: (dialogContext) => AlertDialog(
-                          title: Text(tr ? 'Veri kopyan hazır' : 'Your data copy is ready'),
+                          title: Text(
+                            tr
+                                ? 'Veri kopyan hazır'
+                                : 'Your data copy is ready',
+                          ),
                           content: Text(
                             tr
                                 ? 'Makine-okunur JSON panoya kopyalandı. Güvenlik tokenları ve başka kullanıcıların verileri bu dışa aktarıma dahil değildir.'
@@ -87,7 +93,9 @@ class PrivacyControlsSection extends ConsumerWidget {
             ),
             if (state.errorCode != null) ...[
               const SizedBox(height: 8),
-              Text('${tr ? 'Gizlilik işlemi başarısız' : 'Privacy action failed'} · ${state.errorCode}'),
+              Text(
+                '${tr ? 'Gizlilik işlemi başarısız' : 'Privacy action failed'} · ${state.errorCode}',
+              ),
             ],
           ],
         ),
@@ -101,7 +109,9 @@ class PrivacyControlsSection extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(tr ? 'Verileri kalıcı olarak sil?' : 'Delete data permanently?'),
+        title: Text(
+          tr ? 'Verileri kalıcı olarak sil?' : 'Delete data permanently?',
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -126,7 +136,8 @@ class PrivacyControlsSection extends ConsumerWidget {
             child: Text(tr ? 'Vazgeç' : 'Cancel'),
           ),
           FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, typed.text.trim() == 'DELETE'),
+            onPressed: () =>
+                Navigator.pop(dialogContext, typed.text.trim() == 'DELETE'),
             child: Text(tr ? 'Kalıcı olarak sil' : 'Delete permanently'),
           ),
         ],

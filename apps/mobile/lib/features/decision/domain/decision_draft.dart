@@ -128,7 +128,8 @@ class DecisionDraft {
             options: (question['options'] as List<Object?>? ?? const [])
                 .cast<String>(),
             responseSchema:
-                (question['response_schema'] as Map?)?.cast<String, Object?>() ??
+                (question['response_schema'] as Map?)
+                    ?.cast<String, Object?>() ??
                 const {},
           );
         })

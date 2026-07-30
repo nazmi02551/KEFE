@@ -40,9 +40,8 @@ class ContextSection extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               OutlinedButton(
-                onPressed: () => ref.invalidate(
-                  contextSnapshotProvider(caseVersionId),
-                ),
+                onPressed: () =>
+                    ref.invalidate(contextSnapshotProvider(caseVersionId)),
                 child: Text(strings.contextRetry),
               ),
             ],
@@ -103,18 +102,18 @@ class _ContextContent extends StatelessWidget {
                   Text(
                     'Olay özeti',
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: KefeColorTokens.goldSoft,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.6,
-                        ),
+                      color: KefeColorTokens.goldSoft,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.6,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     strings.contextHelper,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: KefeColorTokens.textMutedDark,
-                          height: 1.35,
-                        ),
+                      color: KefeColorTokens.textMutedDark,
+                      height: 1.35,
+                    ),
                   ),
                 ],
               ),
@@ -125,9 +124,9 @@ class _ContextContent extends StatelessWidget {
           const SizedBox(height: 18),
           Text(
             'Bilgi durumu',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 10),
           Wrap(
@@ -157,9 +156,9 @@ class _ContextContent extends StatelessWidget {
               childrenPadding: const EdgeInsets.only(top: 8),
               title: Text(
                 strings.contextDetails,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
               ),
               children: [
                 for (final block in snapshot.detailBlocks) ...[
@@ -180,8 +179,8 @@ class _ContextContent extends StatelessWidget {
                   Text(
                     strings.contextSources,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   _CountBadge(value: snapshot.sources.length),
@@ -250,9 +249,9 @@ class _StatusSummary extends StatelessWidget {
           Text(
             '$label $count',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w800,
-                ),
+              color: color,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ],
       ),
@@ -261,10 +260,7 @@ class _StatusSummary extends StatelessWidget {
 }
 
 class _ContextBlockTile extends StatelessWidget {
-  const _ContextBlockTile({
-    required this.block,
-    required this.snapshot,
-  });
+  const _ContextBlockTile({required this.block, required this.snapshot});
 
   final CaseContextBlock block;
   final CaseContextSnapshot snapshot;
@@ -296,13 +292,16 @@ class _ContextBlockTile extends StatelessWidget {
                   child: Text(
                     block.title,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(99),
@@ -310,9 +309,9 @@ class _ContextBlockTile extends StatelessWidget {
                   child: Text(
                     strings.contextClaimStatus(block.claimStatus),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: statusColor,
-                          fontWeight: FontWeight.w800,
-                        ),
+                      color: statusColor,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ],
@@ -320,7 +319,9 @@ class _ContextBlockTile extends StatelessWidget {
             const SizedBox(height: 9),
             Text(
               block.body,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.45),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(height: 1.45),
             ),
             if (linkedSources.isNotEmpty) ...[
               const SizedBox(height: 11),
@@ -334,10 +335,12 @@ class _ContextBlockTile extends StatelessWidget {
                   const SizedBox(width: 5),
                   Expanded(
                     child: Text(
-                      linkedSources.map((source) => source.publisher).join(' · '),
+                      linkedSources
+                          .map((source) => source.publisher)
+                          .join(' · '),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: KefeColorTokens.textMutedDark,
-                          ),
+                        color: KefeColorTokens.textMutedDark,
+                      ),
                     ),
                   ),
                 ],
@@ -366,18 +369,18 @@ class _CountBadge extends StatelessWidget {
       child: Text(
         '$value',
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: KefeColorTokens.goldSoft,
-              fontWeight: FontWeight.w900,
-            ),
+          color: KefeColorTokens.goldSoft,
+          fontWeight: FontWeight.w900,
+        ),
       ),
     );
   }
 }
 
 Color _statusColor(String status) => switch (status) {
-      'VERIFIED' => KefeColorTokens.success,
-      'CLAIMED' => KefeColorTokens.attention,
-      'DISPUTED' => KefeColorTokens.empathy,
-      'UNKNOWN' => const Color(0xFF9AA9BC),
-      _ => const Color(0xFF9AA9BC),
-    };
+  'VERIFIED' => KefeColorTokens.success,
+  'CLAIMED' => KefeColorTokens.attention,
+  'DISPUTED' => KefeColorTokens.empathy,
+  'UNKNOWN' => const Color(0xFF9AA9BC),
+  _ => const Color(0xFF9AA9BC),
+};

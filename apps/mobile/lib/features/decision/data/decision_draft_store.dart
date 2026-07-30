@@ -137,10 +137,7 @@ class SharedPreferencesDecisionDraftStore implements DecisionDraftStore {
   @override
   Future<void> write(DecisionDraft draft) async {
     final preferences = await _prefs();
-    await preferences.setString(
-      _key(draft.caseId),
-      jsonEncode(draft.toJson()),
-    );
+    await preferences.setString(_key(draft.caseId), jsonEncode(draft.toJson()));
   }
 }
 

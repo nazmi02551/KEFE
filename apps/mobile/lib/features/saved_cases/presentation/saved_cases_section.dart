@@ -65,16 +65,15 @@ class _SavedCasesSectionState extends ConsumerState<SavedCasesSection> {
                     children: [
                       Text(
                         strings.savedCasesTitle,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w900,
-                            ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w900),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         strings.savedCasesSubtitle,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: KefeColorTokens.textMutedDark,
-                            ),
+                          color: KefeColorTokens.textMutedDark,
+                        ),
                       ),
                     ],
                   ),
@@ -83,9 +82,9 @@ class _SavedCasesSectionState extends ConsumerState<SavedCasesSection> {
                   Text(
                     '${state.items.length}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: KefeColorTokens.goldSoft,
-                          fontWeight: FontWeight.w900,
-                        ),
+                      color: KefeColorTokens.goldSoft,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
               ],
             ),
@@ -98,14 +97,13 @@ class _SavedCasesSectionState extends ConsumerState<SavedCasesSection> {
                 strings.savedCasesEmpty,
                 key: const ValueKey('saved-cases-empty'),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: KefeColorTokens.textMutedDark,
-                    ),
+                  color: KefeColorTokens.textMutedDark,
+                ),
               )
             else
               for (var index = 0; index < state.items.length; index++) ...[
                 _SavedCaseTile(item: state.items[index]),
-                if (index != state.items.length - 1)
-                  const Divider(height: 22),
+                if (index != state.items.length - 1) const Divider(height: 22),
               ],
           ],
         ),
@@ -130,9 +128,9 @@ class _SavedCaseTile extends ConsumerWidget {
         children: [
           Text(
             item.title,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 5),
           Text(
@@ -140,8 +138,8 @@ class _SavedCaseTile extends ConsumerWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: KefeColorTokens.textMutedDark,
-                ),
+              color: KefeColorTokens.textMutedDark,
+            ),
           ),
           const SizedBox(height: 10),
           Wrap(

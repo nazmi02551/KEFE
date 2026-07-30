@@ -68,9 +68,15 @@ class PrivacyController extends Notifier<PrivacyState> {
       );
       return data;
     } on ApiFailure catch (error) {
-      state = state.copyWith(uiState: PrivacyUiState.error, errorCode: error.code);
+      state = state.copyWith(
+        uiState: PrivacyUiState.error,
+        errorCode: error.code,
+      );
     } on ClientTransportFailure catch (error) {
-      state = state.copyWith(uiState: PrivacyUiState.error, errorCode: error.code);
+      state = state.copyWith(
+        uiState: PrivacyUiState.error,
+        errorCode: error.code,
+      );
     }
     return null;
   }
@@ -86,9 +92,15 @@ class PrivacyController extends Notifier<PrivacyState> {
       );
       return true;
     } on ApiFailure catch (error) {
-      state = state.copyWith(uiState: PrivacyUiState.error, errorCode: error.code);
+      state = state.copyWith(
+        uiState: PrivacyUiState.error,
+        errorCode: error.code,
+      );
     } on ClientTransportFailure catch (error) {
-      state = state.copyWith(uiState: PrivacyUiState.error, errorCode: error.code);
+      state = state.copyWith(
+        uiState: PrivacyUiState.error,
+        errorCode: error.code,
+      );
     }
     return false;
   }

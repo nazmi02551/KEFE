@@ -9,7 +9,9 @@ class PrivacyScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final tr = Localizations.localeOf(context).languageCode == 'tr';
     return Scaffold(
-      appBar: AppBar(title: Text(tr ? 'Gizlilik ve veriler' : 'Privacy and data')),
+      appBar: AppBar(
+        title: Text(tr ? 'Gizlilik ve veriler' : 'Privacy and data'),
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(18),

@@ -48,8 +48,9 @@ class ShareState {
   );
 }
 
-final shareControllerProvider =
-    NotifierProvider<ShareController, ShareState>(ShareController.new);
+final shareControllerProvider = NotifierProvider<ShareController, ShareState>(
+  ShareController.new,
+);
 
 class ShareController extends Notifier<ShareState> {
   ShareRepository get _repository => ref.read(shareRepositoryProvider);
@@ -76,9 +77,15 @@ class ShareController extends Notifier<ShareState> {
         clearError: true,
       );
     } on ApiFailure catch (error) {
-      state = state.copyWith(uiState: ShareUiState.error, errorCode: error.code);
+      state = state.copyWith(
+        uiState: ShareUiState.error,
+        errorCode: error.code,
+      );
     } on ClientTransportFailure catch (error) {
-      state = state.copyWith(uiState: ShareUiState.error, errorCode: error.code);
+      state = state.copyWith(
+        uiState: ShareUiState.error,
+        errorCode: error.code,
+      );
     }
   }
 
@@ -89,9 +96,15 @@ class ShareController extends Notifier<ShareState> {
       await _repository.revoke(created.id);
       state = ShareState(includeDecision: state.includeDecision);
     } on ApiFailure catch (error) {
-      state = state.copyWith(uiState: ShareUiState.error, errorCode: error.code);
+      state = state.copyWith(
+        uiState: ShareUiState.error,
+        errorCode: error.code,
+      );
     } on ClientTransportFailure catch (error) {
-      state = state.copyWith(uiState: ShareUiState.error, errorCode: error.code);
+      state = state.copyWith(
+        uiState: ShareUiState.error,
+        errorCode: error.code,
+      );
     }
   }
 }

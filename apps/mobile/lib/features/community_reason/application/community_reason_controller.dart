@@ -8,7 +8,9 @@ import '../data/http_community_reason_repository.dart';
 
 final communityReasonExperienceEnabledProvider = Provider<bool>((ref) => false);
 
-final communityReasonRepositoryProvider = Provider<CommunityReasonRepository>((ref) {
+final communityReasonRepositoryProvider = Provider<CommunityReasonRepository>((
+  ref,
+) {
   if (!ref.watch(communityReasonExperienceEnabledProvider)) {
     return const _DisabledCommunityReasonRepository();
   }
@@ -56,12 +58,14 @@ class CommunityReasonState {
   );
 }
 
-final communityReasonControllerProvider = NotifierProvider<
-    CommunityReasonController,
-    CommunityReasonState>(CommunityReasonController.new);
+final communityReasonControllerProvider =
+    NotifierProvider<CommunityReasonController, CommunityReasonState>(
+      CommunityReasonController.new,
+    );
 
 class CommunityReasonController extends Notifier<CommunityReasonState> {
-  CommunityReasonRepository get _repository => ref.read(communityReasonRepositoryProvider);
+  CommunityReasonRepository get _repository =>
+      ref.read(communityReasonRepositoryProvider);
   String? _caseVersionId;
 
   @override
@@ -73,7 +77,10 @@ class CommunityReasonController extends Notifier<CommunityReasonState> {
       return;
     }
     _caseVersionId = caseVersionId;
-    state = state.copyWith(uiState: CommunityReasonUiState.loading, clearError: true);
+    state = state.copyWith(
+      uiState: CommunityReasonUiState.loading,
+      clearError: true,
+    );
     try {
       final snapshot = await _repository.fetch(caseVersionId);
       state = state.copyWith(
@@ -82,9 +89,15 @@ class CommunityReasonController extends Notifier<CommunityReasonState> {
         clearError: true,
       );
     } on ApiFailure catch (error) {
-      state = state.copyWith(uiState: CommunityReasonUiState.error, errorCode: error.code);
+      state = state.copyWith(
+        uiState: CommunityReasonUiState.error,
+        errorCode: error.code,
+      );
     } on ClientTransportFailure catch (error) {
-      state = state.copyWith(uiState: CommunityReasonUiState.error, errorCode: error.code);
+      state = state.copyWith(
+        uiState: CommunityReasonUiState.error,
+        errorCode: error.code,
+      );
     }
   }
 
@@ -102,10 +115,14 @@ class CommunityReasonController extends Notifier<CommunityReasonState> {
   }
 
   Future<void> publish(String sessionId) async {
-    if (state.selectedTags.isEmpty || state.uiState == CommunityReasonUiState.submitting) {
+    if (state.selectedTags.isEmpty ||
+        state.uiState == CommunityReasonUiState.submitting) {
       return;
     }
-    state = state.copyWith(uiState: CommunityReasonUiState.submitting, clearError: true);
+    state = state.copyWith(
+      uiState: CommunityReasonUiState.submitting,
+      clearError: true,
+    );
     try {
       final receipt = await _repository.publish(
         sessionId: sessionId,
@@ -126,9 +143,15 @@ class CommunityReasonController extends Notifier<CommunityReasonState> {
         clearError: true,
       );
     } on ApiFailure catch (error) {
-      state = state.copyWith(uiState: CommunityReasonUiState.error, errorCode: error.code);
+      state = state.copyWith(
+        uiState: CommunityReasonUiState.error,
+        errorCode: error.code,
+      );
     } on ClientTransportFailure catch (error) {
-      state = state.copyWith(uiState: CommunityReasonUiState.error, errorCode: error.code);
+      state = state.copyWith(
+        uiState: CommunityReasonUiState.error,
+        errorCode: error.code,
+      );
     }
   }
 
@@ -174,7 +197,8 @@ class _DisabledCommunityReasonRepository implements CommunityReasonRepository {
     required String sessionId,
     required List<String> tags,
     String? text,
-  }) => throw const ClientTransportFailure(code: 'COMMUNITY_REASON_NOT_ENABLED');
+  }) =>
+      throw const ClientTransportFailure(code: 'COMMUNITY_REASON_NOT_ENABLED');
 
   @override
   Future<void> react({required String reasonId, required String reaction}) =>

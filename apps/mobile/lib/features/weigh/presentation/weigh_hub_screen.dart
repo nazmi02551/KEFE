@@ -63,9 +63,9 @@ class _WeighHubScreenState extends ConsumerState<WeighHubScreen> {
               const SizedBox(height: 22),
               Text(
                 strings.weighHubMore,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 12),
               for (final item in state.items.skip(1)) ...[
@@ -89,46 +89,46 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  strings.weighHubEyebrow,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: KefeColorTokens.goldSoft,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.1,
-                      ),
-                ),
-                const SizedBox(height: 7),
-                Text(
-                  strings.weighHubTitle,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        height: 1.08,
-                        fontWeight: FontWeight.w900,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  strings.weighHubSubtitle,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: KefeColorTokens.textMutedDark,
-                        height: 1.4,
-                      ),
-                ),
-              ],
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              strings.weighHubEyebrow,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: KefeColorTokens.goldSoft,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.1,
+              ),
             ),
-          ),
-          const CircleAvatar(
-            backgroundColor: Color(0x222CC9BC),
-            foregroundColor: KefeColorTokens.goldSoft,
-            child: Icon(Icons.balance_rounded),
-          ),
-        ],
-      );
+            const SizedBox(height: 7),
+            Text(
+              strings.weighHubTitle,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                height: 1.08,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              strings.weighHubSubtitle,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: KefeColorTokens.textMutedDark,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
+      ),
+      const CircleAvatar(
+        backgroundColor: Color(0x222CC9BC),
+        foregroundColor: KefeColorTokens.goldSoft,
+        child: Icon(Icons.balance_rounded),
+      ),
+    ],
+  );
 }
 
 class _FeaturedWeigh extends StatelessWidget {
@@ -139,55 +139,53 @@ class _FeaturedWeigh extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        key: const ValueKey('weigh-hub-featured'),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: KefeColorTokens.gold.withValues(alpha: 0.3),
-          ),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF132B4D), Color(0xFF151927), Color(0xFF3A1D25)],
+    key: const ValueKey('weigh-hub-featured'),
+    padding: const EdgeInsets.all(20),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(color: KefeColorTokens.gold.withValues(alpha: 0.3)),
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF132B4D), Color(0xFF151927), Color(0xFF3A1D25)],
+      ),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          strings.weighHubRecommended,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: KefeColorTokens.goldSoft,
+            fontWeight: FontWeight.w900,
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              strings.weighHubRecommended,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: KefeColorTokens.goldSoft,
-                    fontWeight: FontWeight.w900,
-                  ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              item.title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    height: 1.2,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              item.summary,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: KefeColorTokens.textMutedDark,
-                    height: 1.4,
-                  ),
-            ),
-            const SizedBox(height: 18),
-            FilledButton.icon(
-              key: ValueKey('start-weigh-${item.id}'),
-              onPressed: () => context.push('/case/${item.id}'),
-              icon: const Icon(Icons.balance_rounded),
-              label: Text(strings.weighHubStart),
-            ),
-          ],
+        const SizedBox(height: 10),
+        Text(
+          item.title,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            height: 1.2,
+          ),
         ),
-      );
+        const SizedBox(height: 8),
+        Text(
+          item.summary,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: KefeColorTokens.textMutedDark,
+            height: 1.4,
+          ),
+        ),
+        const SizedBox(height: 18),
+        FilledButton.icon(
+          key: ValueKey('start-weigh-${item.id}'),
+          onPressed: () => context.push('/case/${item.id}'),
+          icon: const Icon(Icons.balance_rounded),
+          label: Text(strings.weighHubStart),
+        ),
+      ],
+    ),
+  );
 }
 
 class _WeighCaseTile extends StatelessWidget {
@@ -198,27 +196,27 @@ class _WeighCaseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-        child: ListTile(
-          key: ValueKey('weigh-case-${item.id}'),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          leading: const CircleAvatar(
-            backgroundColor: Color(0x1FD9B66F),
-            foregroundColor: KefeColorTokens.goldSoft,
-            child: Icon(Icons.balance_outlined),
-          ),
-          title: Text(
-            item.title,
-            style: const TextStyle(fontWeight: FontWeight.w800),
-          ),
-          subtitle: Text(
-            item.summary,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          trailing: const Icon(Icons.arrow_forward_rounded),
-          onTap: () => context.push('/case/${item.id}'),
-        ),
-      );
+    child: ListTile(
+      key: ValueKey('weigh-case-${item.id}'),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      leading: const CircleAvatar(
+        backgroundColor: Color(0x1FD9B66F),
+        foregroundColor: KefeColorTokens.goldSoft,
+        child: Icon(Icons.balance_outlined),
+      ),
+      title: Text(
+        item.title,
+        style: const TextStyle(fontWeight: FontWeight.w800),
+      ),
+      subtitle: Text(
+        item.summary,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: const Icon(Icons.arrow_forward_rounded),
+      onTap: () => context.push('/case/${item.id}'),
+    ),
+  );
 }
 
 class _ErrorCard extends StatelessWidget {
@@ -234,26 +232,27 @@ class _ErrorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(message),
-              const SizedBox(height: 12),
-              OutlinedButton(onPressed: onRetry, child: Text(retryLabel)),
-            ],
-          ),
-        ),
-      );
+    child: Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(message),
+          const SizedBox(height: 12),
+          OutlinedButton(onPressed: onRetry, child: Text(retryLabel)),
+        ],
+      ),
+    ),
+  );
 }
 
 extension WeighHubStrings on KefeStrings {
   bool get _weighHubIsTurkish => locale.languageCode == 'tr';
 
   String get weighHubEyebrow => _weighHubIsTurkish ? 'TARTIM' : 'WEIGH';
-  String get weighHubTitle =>
-      _weighHubIsTurkish ? 'Sıradaki kararını seç.' : 'Choose your next decision.';
+  String get weighHubTitle => _weighHubIsTurkish
+      ? 'Sıradaki kararını seç.'
+      : 'Choose your next decision.';
   String get weighHubSubtitle => _weighHubIsTurkish
       ? 'Önce kendi kararını ver; topluluk sonucu yalnız Commit sonrasında açılır.'
       : 'Decide first; collective results unlock only after Commit.';

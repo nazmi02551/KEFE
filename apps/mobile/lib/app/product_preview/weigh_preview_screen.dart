@@ -67,9 +67,9 @@ class WeighPreviewScreen extends StatelessWidget {
                   'Her tartımda önce kendi kararını ver. Topluluk sonucu Commit’ten sonra açılır.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: KefeColorTokens.textMutedDark,
-                        height: 1.45,
-                      ),
+                    color: KefeColorTokens.textMutedDark,
+                    height: 1.45,
+                  ),
                 ),
               ],
             ),
@@ -77,32 +77,33 @@ class WeighPreviewScreen extends StatelessWidget {
           const SizedBox(height: 18),
           PreviewActionCaseCard(
             label: 'GÜNLÜK İKİLEM',
-            title: 'Çocuklar uçakta ebeveynleriyle ücretsiz yan yana oturmalı mı?',
-            subtitle: 'Kural, fiyatlandırma, aile bütünlüğü ve orantılılığı birlikte tart.',
+            title:
+                'Çocuklar uçakta ebeveynleriyle ücretsiz yan yana oturmalı mı?',
+            subtitle:
+                'Kural, fiyatlandırma, aile bütünlüğü ve orantılılığı birlikte tart.',
             icon: Icons.airplanemode_active_rounded,
-            onTap: () => context.push(
-              '/case/11111111-1111-4111-8111-111111111116',
-            ),
+            onTap: () =>
+                context.push('/case/11111111-1111-4111-8111-111111111116'),
           ),
           const SizedBox(height: 12),
           PreviewActionCaseCard(
             label: 'SPORTS CALL',
             title: 'Bu pozisyonda penaltı kararı doğru muydu?',
-            subtitle: 'Hakem kararı, temasın etkisi ve VAR eşiğini değerlendir.',
+            subtitle:
+                'Hakem kararı, temasın etkisi ve VAR eşiğini değerlendir.',
             icon: Icons.sports_soccer_rounded,
-            onTap: () => context.push(
-              '/case/11111111-1111-4111-8111-111111111113',
-            ),
+            onTap: () =>
+                context.push('/case/11111111-1111-4111-8111-111111111113'),
           ),
           const SizedBox(height: 12),
           PreviewActionCaseCard(
             label: 'TEKNOLOJİ',
             title: 'YZ şirketlerinin veri toplaması sınırlandırılmalı mı?',
-            subtitle: 'Mahremiyet ve inovasyon arasındaki sınırı kendi kefe değerlerinle tart.',
+            subtitle:
+                'Mahremiyet ve inovasyon arasındaki sınırı kendi kefe değerlerinle tart.',
             icon: Icons.psychology_alt_rounded,
-            onTap: () => context.push(
-              '/case/11111111-1111-4111-8111-111111111112',
-            ),
+            onTap: () =>
+                context.push('/case/11111111-1111-4111-8111-111111111112'),
           ),
         ],
       ),

@@ -66,15 +66,16 @@ class ConsensusState {
     String? errorCode,
     bool clearError = false,
   }) => ConsensusState(
-        uiState: uiState ?? this.uiState,
-        sessionId: sessionId ?? this.sessionId,
-        caseVersionId: caseVersionId ?? this.caseVersionId,
-        cards: cards ?? this.cards,
-        selectedStance:
-            clearSelectedStance ? null : selectedStance ?? this.selectedStance,
-        selectedReasonTags: selectedReasonTags ?? this.selectedReasonTags,
-        errorCode: clearError ? null : errorCode ?? this.errorCode,
-      );
+    uiState: uiState ?? this.uiState,
+    sessionId: sessionId ?? this.sessionId,
+    caseVersionId: caseVersionId ?? this.caseVersionId,
+    cards: cards ?? this.cards,
+    selectedStance: clearSelectedStance
+        ? null
+        : selectedStance ?? this.selectedStance,
+    selectedReasonTags: selectedReasonTags ?? this.selectedReasonTags,
+    errorCode: clearError ? null : errorCode ?? this.errorCode,
+  );
 }
 
 final consensusRepositoryProvider = Provider<ConsensusRepository>((ref) {
@@ -89,7 +90,9 @@ final consensusRepositoryProvider = Provider<ConsensusRepository>((ref) {
 });
 
 final consensusControllerProvider =
-    NotifierProvider<ConsensusController, ConsensusState>(ConsensusController.new);
+    NotifierProvider<ConsensusController, ConsensusState>(
+      ConsensusController.new,
+    );
 
 class ConsensusController extends Notifier<ConsensusState> {
   ConsensusRepository get _repository => ref.read(consensusRepositoryProvider);
@@ -150,7 +153,9 @@ class ConsensusController extends Notifier<ConsensusState> {
 
   void selectStance(String stanceCode) {
     final card = state.activeCard;
-    if (card == null || card.participated || !card.stanceCodes.contains(stanceCode)) {
+    if (card == null ||
+        card.participated ||
+        !card.stanceCodes.contains(stanceCode)) {
       return;
     }
     state = state.copyWith(selectedStance: stanceCode, clearError: true);
@@ -158,7 +163,9 @@ class ConsensusController extends Notifier<ConsensusState> {
 
   void toggleReasonTag(String tagCode) {
     final card = state.activeCard;
-    if (card == null || card.participated || !card.reasonTagCodes.contains(tagCode)) {
+    if (card == null ||
+        card.participated ||
+        !card.reasonTagCodes.contains(tagCode)) {
       return;
     }
     final next = {...state.selectedReasonTags};
@@ -176,7 +183,10 @@ class ConsensusController extends Notifier<ConsensusState> {
     final caseVersionId = state.caseVersionId!;
     _submissionKey ??=
         'mobile-consensus-${DateTime.now().toUtc().microsecondsSinceEpoch}';
-    state = state.copyWith(uiState: ConsensusUiState.submitting, clearError: true);
+    state = state.copyWith(
+      uiState: ConsensusUiState.submitting,
+      clearError: true,
+    );
     try {
       final updated = await _repository.participate(
         sessionId: sessionId,
@@ -230,8 +240,13 @@ class ConsensusController extends Notifier<ConsensusState> {
     final sessionId = state.sessionId;
     final caseVersionId = state.caseVersionId;
     if (sessionId == null || caseVersionId == null) return;
-    if (_submissionKey != null && state.selectedStance != null && state.cards.isNotEmpty) {
-      state = state.copyWith(uiState: ConsensusUiState.eligible, clearError: true);
+    if (_submissionKey != null &&
+        state.selectedStance != null &&
+        state.cards.isNotEmpty) {
+      state = state.copyWith(
+        uiState: ConsensusUiState.eligible,
+        clearError: true,
+      );
       await submit();
       return;
     }

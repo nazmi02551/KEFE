@@ -118,7 +118,9 @@ Future<void> pumpOnboardingApp(
     ProviderScope(
       overrides: [
         decisionRepositoryProvider.overrideWithValue(repository),
-        decisionDraftStoreProvider.overrideWithValue(MemoryDecisionDraftStore()),
+        decisionDraftStoreProvider.overrideWithValue(
+          MemoryDecisionDraftStore(),
+        ),
         onboardingStoreProvider.overrideWithValue(onboardingStore),
       ],
       child: const KefeApp(),
@@ -168,47 +170,51 @@ void main() {
     expect(repository.caseCalls, 1);
   });
 
-  testWidgets('first Reveal persists onboarding completion before continuation', (
-    tester,
-  ) async {
-    useTurkishLocale(tester);
-    final repository = OnboardingFakeRepository();
-    final onboardingStore = MemoryOnboardingStore();
+  testWidgets(
+    'first Reveal persists onboarding completion before continuation',
+    (tester) async {
+      useTurkishLocale(tester);
+      final repository = OnboardingFakeRepository();
+      final onboardingStore = MemoryOnboardingStore();
 
-    await pumpOnboardingApp(
-      tester,
-      repository: repository,
-      onboardingStore: onboardingStore,
-    );
+      await pumpOnboardingApp(
+        tester,
+        repository: repository,
+        onboardingStore: onboardingStore,
+      );
 
-    await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const ValueKey('option-A')));
-    await tester.pump();
-    await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
+      await tester.tap(find.byKey(const ValueKey('option-A')));
+      await tester.pump();
+      await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
 
-    expect(repository.commitCalls, 1);
-    expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
-    expect(onboardingStore.completed, isTrue);
+      expect(repository.commitCalls, 1);
+      expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
+      expect(onboardingStore.completed, isTrue);
 
-    final continueButton = find.byKey(const ValueKey('continue-as-guest'));
-    await tester.scrollUntilVisible(
-      continueButton,
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('first-use-completion')), findsOneWidget);
+      final continueButton = find.byKey(const ValueKey('continue-as-guest'));
+      await tester.scrollUntilVisible(
+        continueButton,
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('first-use-completion')),
+        findsOneWidget,
+      );
 
-    await tester.tap(continueButton);
-    await tester.pumpAndSettle();
+      await tester.tap(continueButton);
+      await tester.pumpAndSettle();
 
-    expect(onboardingStore.completed, isTrue);
-    expect(find.byKey(const ValueKey('explore-list')), findsOneWidget);
-  });
+      expect(onboardingStore.completed, isTrue);
+      expect(find.byKey(const ValueKey('explore-list')), findsOneWidget);
+    },
+  );
 
   testWidgets('completed user enters Explore without replaying onboarding', (
     tester,

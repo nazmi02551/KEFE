@@ -88,25 +88,31 @@ Future<void> pumpProgress(
 }
 
 void main() {
-  testWidgets('shows low-claim progress and a non-blocking guest account offer', (
-    tester,
-  ) async {
-    await pumpProgress(tester, sampleProgress());
+  testWidgets(
+    'shows low-claim progress and a non-blocking guest account offer',
+    (tester) async {
+      await pumpProgress(tester, sampleProgress());
 
-    expect(find.byKey(const ValueKey('my-kefe-progress')), findsOneWidget);
-    expect(find.text('1'), findsNWidgets(3));
-    expect(find.byKey(const ValueKey('account-offer')), findsOneWidget);
-    expect(find.byType(FilledButton), findsNothing);
-    expect(find.byKey(const ValueKey('account-offer-continue-guest')), findsOneWidget);
-    expect(find.textContaining('kişilik veya ideoloji'), findsOneWidget);
-  });
+      expect(find.byKey(const ValueKey('my-kefe-progress')), findsOneWidget);
+      expect(find.text('1'), findsNWidgets(3));
+      expect(find.byKey(const ValueKey('account-offer')), findsOneWidget);
+      expect(find.byType(FilledButton), findsNothing);
+      expect(
+        find.byKey(const ValueKey('account-offer-continue-guest')),
+        findsOneWidget,
+      );
+      expect(find.textContaining('kişilik veya ideoloji'), findsOneWidget);
+    },
+  );
 
   testWidgets('continue as guest dismisses only the offer, never progress', (
     tester,
   ) async {
     await pumpProgress(tester, sampleProgress());
 
-    await tester.tap(find.byKey(const ValueKey('account-offer-continue-guest')));
+    await tester.tap(
+      find.byKey(const ValueKey('account-offer-continue-guest')),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('account-offer')), findsNothing);

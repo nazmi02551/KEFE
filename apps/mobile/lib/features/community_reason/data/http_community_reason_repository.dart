@@ -50,7 +50,9 @@ class HttpCommunityReasonRepository implements CommunityReasonRepository {
   Future<CommunityReasonSnapshot> fetch(String caseVersionId) async {
     final body = _decode(
       await _request(
-        () => _client.get(_uri('/v1/case-versions/$caseVersionId/community-reasons')),
+        () => _client.get(
+          _uri('/v1/case-versions/$caseVersionId/community-reasons'),
+        ),
       ),
     );
     final items = (body['items'] as List<Object?>? ?? const [])
@@ -60,24 +62,25 @@ class HttpCommunityReasonRepository implements CommunityReasonRepository {
             id: item['reason_id'] as String,
             tags: (item['tags'] as List<Object?>).cast<String>(),
             text: item['text'] as String?,
-            reactionCounts: (item['reaction_counts'] as Map<String, Object?>).map(
-              (key, value) => MapEntry(key, value as int),
-            ),
+            reactionCounts: (item['reaction_counts'] as Map<String, Object?>)
+                .map((key, value) => MapEntry(key, value as int)),
           ),
         )
         .toList(growable: false);
     return CommunityReasonSnapshot(
       items: items,
-      tagPatternCounts: (body['tag_pattern_counts'] as Map<String, Object?>).map(
-        (key, value) => MapEntry(key, value as int),
-      ),
+      tagPatternCounts: (body['tag_pattern_counts'] as Map<String, Object?>)
+          .map((key, value) => MapEntry(key, value as int)),
       sampleSize: body['sample_size'] as int,
       methodologyNote: body['methodology_note'] as String,
     );
   }
 
   @override
-  Future<void> react({required String reasonId, required String reaction}) async {
+  Future<void> react({
+    required String reasonId,
+    required String reaction,
+  }) async {
     final response = await _request(
       () async => _client.put(
         _uri('/v1/community-reasons/$reasonId/reaction'),
@@ -111,7 +114,9 @@ class HttpCommunityReasonRepository implements CommunityReasonRepository {
     };
   }
 
-  Future<http.Response> _request(Future<http.Response> Function() action) async {
+  Future<http.Response> _request(
+    Future<http.Response> Function() action,
+  ) async {
     try {
       return await action().timeout(_config.requestTimeout);
     } on TimeoutException {

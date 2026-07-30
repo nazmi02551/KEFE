@@ -74,9 +74,8 @@ class _ProductPreviewAppState extends State<ProductPreviewApp> {
       ),
       GoRoute(
         path: '/case/:caseId',
-        builder: (_, state) => DecisionFlowScreen(
-          caseId: state.pathParameters['caseId']!,
-        ),
+        builder: (_, state) =>
+            DecisionFlowScreen(caseId: state.pathParameters['caseId']!),
       ),
     ],
   );
@@ -194,9 +193,9 @@ class _PreviewBuildIdentity extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: KefeColorTokens.textMutedDark,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  color: KefeColorTokens.textMutedDark,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],

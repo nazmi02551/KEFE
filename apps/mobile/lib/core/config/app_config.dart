@@ -2,10 +2,7 @@ import 'package:flutter/foundation.dart';
 
 @immutable
 class AppConfig {
-  const AppConfig({
-    required this.apiBaseUri,
-    required this.requestTimeout,
-  });
+  const AppConfig({required this.apiBaseUri, required this.requestTimeout});
 
   factory AppConfig.fromEnvironment() {
     const raw = String.fromEnvironment(

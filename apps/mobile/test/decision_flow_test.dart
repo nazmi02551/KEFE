@@ -189,23 +189,24 @@ void main() {
     expect(draftStore.draftFor(demoCaseId), isNull);
   });
 
-  testWidgets('application supports dark theme without changing flow semantics', (
-    tester,
-  ) async {
-    useTurkishLocale(tester);
-    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
-    addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+  testWidgets(
+    'application supports dark theme without changing flow semantics',
+    (tester) async {
+      useTurkishLocale(tester);
+      tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+      addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
 
-    await pumpKefe(
-      tester,
-      FakeDecisionRepository(),
-      MemoryDecisionDraftStore(),
-    );
+      await pumpKefe(
+        tester,
+        FakeDecisionRepository(),
+        MemoryDecisionDraftStore(),
+      );
 
-    final material = tester.widget<MaterialApp>(find.byType(MaterialApp));
-    expect(material.themeMode, ThemeMode.system);
-    expect(find.byKey(const ValueKey('commit-button')), findsOneWidget);
-  });
+      final material = tester.widget<MaterialApp>(find.byType(MaterialApp));
+      expect(material.themeMode, ThemeMode.system);
+      expect(find.byKey(const ValueKey('commit-button')), findsOneWidget);
+    },
+  );
 
   testWidgets('uncertain commit retries with the exact same idempotency key', (
     tester,
@@ -311,7 +312,9 @@ void main() {
     expect(repository.startSessionCalls, 0);
   });
 
-  testWidgets('legacy offline draft never invents a default Flow', (tester) async {
+  testWidgets('legacy offline draft never invents a default Flow', (
+    tester,
+  ) async {
     useTurkishLocale(tester);
     final repository = FakeDecisionRepository()..fetchCaseOffline = true;
     final draftStore = MemoryDecisionDraftStore();

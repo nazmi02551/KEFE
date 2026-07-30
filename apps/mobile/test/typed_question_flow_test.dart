@@ -110,7 +110,9 @@ Future<void> pumpTypedCase(
     ProviderScope(
       overrides: [
         decisionRepositoryProvider.overrideWithValue(repository),
-        decisionDraftStoreProvider.overrideWithValue(MemoryDecisionDraftStore()),
+        decisionDraftStoreProvider.overrideWithValue(
+          MemoryDecisionDraftStore(),
+        ),
       ],
       child: const KefeApp(initialLocation: '/case/$typedCaseId'),
     ),
@@ -129,57 +131,59 @@ Future<Finder> makeVisible(WidgetTester tester, Finder finder) async {
 }
 
 void main() {
-  testWidgets('required choice enables Commit while Confidence stays optional', (
-    tester,
-  ) async {
-    final repository = TypedQuestionRepository();
-    await pumpTypedCase(tester, repository);
+  testWidgets(
+    'required choice enables Commit while Confidence stays optional',
+    (tester) async {
+      final repository = TypedQuestionRepository();
+      await pumpTypedCase(tester, repository);
 
-    final commit = await makeVisible(
-      tester,
-      find.byKey(const ValueKey('commit-button')),
-    );
-    expect(tester.widget<FilledButton>(commit).onPressed, isNull);
+      final commit = await makeVisible(
+        tester,
+        find.byKey(const ValueKey('commit-button')),
+      );
+      expect(tester.widget<FilledButton>(commit).onPressed, isNull);
 
-    final option = await makeVisible(
-      tester,
-      find.byKey(const ValueKey('option-A')),
-    );
-    await tester.tap(option);
-    await tester.pump();
-    await makeVisible(tester, commit);
-    expect(tester.widget<FilledButton>(commit).onPressed, isNotNull);
-  });
+      final option = await makeVisible(
+        tester,
+        find.byKey(const ValueKey('option-A')),
+      );
+      await tester.tap(option);
+      await tester.pump();
+      await makeVisible(tester, commit);
+      expect(tester.widget<FilledButton>(commit).onPressed, isNotNull);
+    },
+  );
 
-  testWidgets('Confidence is rendered from schema and submitted with the choice', (
-    tester,
-  ) async {
-    final repository = TypedQuestionRepository();
-    await pumpTypedCase(tester, repository);
+  testWidgets(
+    'Confidence is rendered from schema and submitted with the choice',
+    (tester) async {
+      final repository = TypedQuestionRepository();
+      await pumpTypedCase(tester, repository);
 
-    final option = await makeVisible(
-      tester,
-      find.byKey(const ValueKey('option-B')),
-    );
-    await tester.tap(option);
-    await tester.pump();
+      final option = await makeVisible(
+        tester,
+        find.byKey(const ValueKey('option-B')),
+      );
+      await tester.tap(option);
+      await tester.pump();
 
-    final confidence = await makeVisible(
-      tester,
-      find.byKey(const ValueKey('confidence-$confidenceQuestionId-4')),
-    );
-    await tester.tap(confidence);
-    await tester.pump();
+      final confidence = await makeVisible(
+        tester,
+        find.byKey(const ValueKey('confidence-$confidenceQuestionId-4')),
+      );
+      await tester.tap(confidence);
+      await tester.pump();
 
-    final commit = await makeVisible(
-      tester,
-      find.byKey(const ValueKey('commit-button')),
-    );
-    await tester.tap(commit);
-    await tester.pumpAndSettle();
+      final commit = await makeVisible(
+        tester,
+        find.byKey(const ValueKey('commit-button')),
+      );
+      await tester.tap(commit);
+      await tester.pumpAndSettle();
 
-    expect(repository.submitted[choiceQuestionId], 'B');
-    expect(repository.submitted[confidenceQuestionId], 4);
-    expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
-  });
+      expect(repository.submitted[choiceQuestionId], 'B');
+      expect(repository.submitted[confidenceQuestionId], 4);
+      expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
+    },
+  );
 }

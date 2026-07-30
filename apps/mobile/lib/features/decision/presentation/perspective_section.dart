@@ -33,10 +33,7 @@ class PerspectiveSection extends ConsumerWidget {
     final hasCommittedContext =
         decision.reveal != null && sessionId != null && caseVersionId != null;
     final consensus = hasCommittedContext
-        ? ConsensusSection(
-            sessionId: sessionId,
-            caseVersionId: caseVersionId,
-          )
+        ? ConsensusSection(sessionId: sessionId, caseVersionId: caseVersionId)
         : null;
     final community = hasCommittedContext
         ? CommunityReasonSection(
@@ -44,22 +41,18 @@ class PerspectiveSection extends ConsumerWidget {
             caseVersionId: caseVersionId,
           )
         : null;
-    final share = hasCommittedContext ? ShareSection(sessionId: sessionId) : null;
+    final share = hasCommittedContext
+        ? ShareSection(sessionId: sessionId)
+        : null;
 
     if (state == PerspectiveUiState.idle) {
       if (!hasCommittedContext) return const SizedBox.shrink();
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (consensus != null) consensus,
-          if (community != null) ...[
-            const SizedBox(height: 20),
-            community,
-          ],
-          if (share != null) ...[
-            const SizedBox(height: 20),
-            share,
-          ],
+          ?consensus,
+          if (community != null) ...[const SizedBox(height: 20), community],
+          if (share != null) ...[const SizedBox(height: 20), share],
         ],
       );
     }
@@ -95,7 +88,8 @@ class PerspectiveSection extends ConsumerWidget {
                         children: [
                           Text(
                             'KARŞI GÖRÜŞLER',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
                                   color: const Color(0xFFAA9CFF),
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 0.8,
@@ -104,9 +98,8 @@ class PerspectiveSection extends ConsumerWidget {
                           const SizedBox(height: 4),
                           Text(
                             strings.perspectiveTitle,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                ),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w800),
                           ),
                         ],
                       ),
@@ -127,35 +120,26 @@ class PerspectiveSection extends ConsumerWidget {
                 switch (state) {
                   PerspectiveUiState.loading => _LoadingState(strings: strings),
                   PerspectiveUiState.errorRetryable => _RetryState(
-                      strings: strings,
-                      onRetry: onRetry,
-                    ),
+                    strings: strings,
+                    onRetry: onRetry,
+                  ),
                   PerspectiveUiState.ready ||
                   PerspectiveUiState.clusterPending ||
                   PerspectiveUiState.degradedCurated => _LoadedState(
-                      state: state,
-                      result: result,
-                    ),
+                    state: state,
+                    result: result,
+                  ),
                   PerspectiveUiState.idle => const SizedBox.shrink(),
                 },
               ],
             ),
           ),
         ),
-        if (consensus != null) ...[
-          const SizedBox(height: 20),
-          consensus,
-        ],
-        if (community != null) ...[
-          const SizedBox(height: 20),
-          community,
-        ],
+        if (consensus != null) ...[const SizedBox(height: 20), consensus],
+        if (community != null) ...[const SizedBox(height: 20), community],
         const SizedBox(height: 20),
         const ProgressSection(),
-        if (share != null) ...[
-          const SizedBox(height: 20),
-          share,
-        ],
+        if (share != null) ...[const SizedBox(height: 20), share],
       ],
     );
   }
@@ -167,19 +151,19 @@ class _LoadingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        label: strings.perspectiveLoading,
-        liveRegion: true,
-        child: Row(
-          children: [
-            const SizedBox.square(
-              dimension: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            const SizedBox(width: 12),
-            Expanded(child: Text(strings.perspectiveLoading)),
-          ],
+    label: strings.perspectiveLoading,
+    liveRegion: true,
+    child: Row(
+      children: [
+        const SizedBox.square(
+          dimension: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
         ),
-      );
+        const SizedBox(width: 12),
+        Expanded(child: Text(strings.perspectiveLoading)),
+      ],
+    ),
+  );
 }
 
 class _RetryState extends StatelessWidget {
@@ -189,17 +173,17 @@ class _RetryState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(strings.perspectiveUnavailable),
-          const SizedBox(height: 12),
-          OutlinedButton(
-            key: const ValueKey('perspective-retry'),
-            onPressed: onRetry,
-            child: Text(strings.perspectiveRetry),
-          ),
-        ],
-      );
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Text(strings.perspectiveUnavailable),
+      const SizedBox(height: 12),
+      OutlinedButton(
+        key: const ValueKey('perspective-retry'),
+        onPressed: onRetry,
+        child: Text(strings.perspectiveRetry),
+      ),
+    ],
+  );
 }
 
 class _LoadedState extends StatelessWidget {
@@ -251,9 +235,9 @@ class _LoadedState extends StatelessWidget {
             childrenPadding: const EdgeInsets.only(bottom: 8),
             title: Text(
               strings.perspectiveMethodology,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
             ),
             children: [
               Align(
@@ -261,9 +245,9 @@ class _LoadedState extends StatelessWidget {
                 child: Text(
                   snapshot.methodology.provenanceNote,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: KefeColorTokens.textMutedDark,
-                        height: 1.4,
-                      ),
+                    color: KefeColorTokens.textMutedDark,
+                    height: 1.4,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -272,8 +256,8 @@ class _LoadedState extends StatelessWidget {
                 child: Text(
                   '${snapshot.methodology.sampleKind} · n=${snapshot.methodology.sampleSize}',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: KefeColorTokens.goldSoft,
-                      ),
+                    color: KefeColorTokens.goldSoft,
+                  ),
                 ),
               ),
             ],
@@ -291,29 +275,27 @@ class _MethodNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(11),
-        decoration: BoxDecoration(
-          color: KefeColorTokens.rules.withValues(alpha: 0.07),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: KefeColorTokens.rules.withValues(alpha: 0.18),
+    padding: const EdgeInsets.all(11),
+    decoration: BoxDecoration(
+      color: KefeColorTokens.rules.withValues(alpha: 0.07),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: KefeColorTokens.rules.withValues(alpha: 0.18)),
+    ),
+    child: Row(
+      children: [
+        Icon(icon, size: 17, color: KefeColorTokens.rules),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: KefeColorTokens.textMutedDark,
+            ),
           ),
         ),
-        child: Row(
-          children: [
-            Icon(icon, size: 17, color: KefeColorTokens.rules),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                text,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: KefeColorTokens.textMutedDark,
-                    ),
-              ),
-            ),
-          ],
-        ),
-      );
+      ],
+    ),
+  );
 }
 
 class _PerspectiveCardView extends StatelessWidget {
@@ -351,9 +333,9 @@ class _PerspectiveCardView extends StatelessWidget {
                 child: Text(
                   strings.perspectiveSlotLabel(card.slot),
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: visual.color,
-                        fontWeight: FontWeight.w900,
-                      ),
+                    color: visual.color,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
             ],
@@ -361,14 +343,16 @@ class _PerspectiveCardView extends StatelessWidget {
           const SizedBox(height: 11),
           Text(
             card.body,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.45),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(height: 1.45),
           ),
           const SizedBox(height: 11),
           Text(
             '${strings.perspectiveSourceLabel(card.sourceKind)} · ${card.provenanceLabel}',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: KefeColorTokens.textMutedDark,
-                ),
+              color: KefeColorTokens.textMutedDark,
+            ),
           ),
         ],
       ),
@@ -376,21 +360,22 @@ class _PerspectiveCardView extends StatelessWidget {
   }
 }
 
-({Color color, IconData icon}) _slotVisual(PerspectiveSlot slot) => switch (slot) {
+({Color color, IconData icon}) _slotVisual(PerspectiveSlot slot) =>
+    switch (slot) {
       PerspectiveSlot.near => (
-          color: KefeColorTokens.success,
-          icon: Icons.thumb_up_alt_outlined,
-        ),
+        color: KefeColorTokens.success,
+        icon: Icons.thumb_up_alt_outlined,
+      ),
       PerspectiveSlot.opposing => (
-          color: KefeColorTokens.empathy,
-          icon: Icons.swap_horiz_rounded,
-        ),
+        color: KefeColorTokens.empathy,
+        icon: Icons.swap_horiz_rounded,
+      ),
       PerspectiveSlot.bridge => (
-          color: const Color(0xFFAA9CFF),
-          icon: Icons.hub_outlined,
-        ),
+        color: const Color(0xFFAA9CFF),
+        icon: Icons.hub_outlined,
+      ),
       PerspectiveSlot.alternativeContext => (
-          color: KefeColorTokens.rules,
-          icon: Icons.change_circle_outlined,
-        ),
+        color: KefeColorTokens.rules,
+        icon: Icons.change_circle_outlined,
+      ),
     };

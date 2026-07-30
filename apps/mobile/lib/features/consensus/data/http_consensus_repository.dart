@@ -86,7 +86,8 @@ class HttpConsensusRepository implements ConsensusRepository {
   ConsensusCard _parseCard(Map<String, Object?> item) {
     final participationJson = item['participation'] as Map<String, Object?>?;
     final aggregateJson = item['aggregate'] as Map<String, Object?>?;
-    final contributionClass = item['contribution_class'] as String? ?? 'EXPOSED';
+    final contributionClass =
+        item['contribution_class'] as String? ?? 'EXPOSED';
     if (contributionClass != 'EXPOSED') {
       throw const ClientTransportFailure(code: 'CONSENSUS_CONTRACT_INVALID');
     }
@@ -96,7 +97,8 @@ class HttpConsensusRepository implements ConsensusRepository {
       caseVersionId: item['case_version_id'] as String,
       proposition: item['proposition'] as String,
       stanceCodes: (item['stance_codes'] as List<Object?>).cast<String>(),
-      reasonTagCodes: (item['reason_tag_codes'] as List<Object?>).cast<String>(),
+      reasonTagCodes: (item['reason_tag_codes'] as List<Object?>)
+          .cast<String>(),
       maxReasonTags: item['max_reason_tags'] as int,
       methodologyVersion: item['methodology_version'] as String,
       participationState: item['participation_state'] as String,
@@ -125,8 +127,7 @@ class HttpConsensusRepository implements ConsensusRepository {
                 aggregateJson['reason_pattern_distribution']
                     as Map<String, Object?>,
               ),
-              contributionClass:
-                  aggregateJson['contribution_class'] as String,
+              contributionClass: aggregateJson['contribution_class'] as String,
               methodologyVersion:
                   aggregateJson['methodology_version'] as String,
               generatedAt: DateTime.parse(
@@ -137,9 +138,8 @@ class HttpConsensusRepository implements ConsensusRepository {
     );
   }
 
-  Map<String, double> _doubleMap(Map<String, Object?> values) => values.map(
-        (key, value) => MapEntry(key, (value as num).toDouble()),
-      );
+  Map<String, double> _doubleMap(Map<String, Object?> values) =>
+      values.map((key, value) => MapEntry(key, (value as num).toDouble()));
 
   Future<Map<String, String>> _authorizedHeaders({bool json = false}) async {
     final token = await _credentialStore.read();
@@ -152,7 +152,9 @@ class HttpConsensusRepository implements ConsensusRepository {
     };
   }
 
-  Future<http.Response> _request(Future<http.Response> Function() action) async {
+  Future<http.Response> _request(
+    Future<http.Response> Function() action,
+  ) async {
     try {
       return await action().timeout(_config.requestTimeout);
     } on TimeoutException {

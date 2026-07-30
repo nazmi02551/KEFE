@@ -6,6 +6,6 @@ import '../domain/context_models.dart';
 
 final contextSnapshotProvider = FutureProvider.autoDispose
     .family<CaseContextSnapshot, String>((ref, caseVersionId) async {
-  final repository = ref.read(decisionRepositoryProvider);
-  return repository.fetchContext(caseVersionId);
-});
+      final repository = ref.read(decisionRepositoryProvider);
+      return repository.fetchContext(caseVersionId);
+    });

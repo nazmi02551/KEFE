@@ -17,7 +17,9 @@ class _ProgressSectionState extends ConsumerState<ProgressSection> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.read(progressControllerProvider.notifier).load());
+    Future.microtask(
+      () => ref.read(progressControllerProvider.notifier).load(),
+    );
   }
 
   @override
@@ -27,33 +29,33 @@ class _ProgressSectionState extends ConsumerState<ProgressSection> {
 
     return switch (state.uiState) {
       ProgressUiState.idle || ProgressUiState.loading => Card(
-          key: const ValueKey('progress-loading'),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Semantics(
-              liveRegion: true,
-              label: strings.progressLoading,
-              child: Text(strings.progressLoading),
-            ),
+        key: const ValueKey('progress-loading'),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Semantics(
+            liveRegion: true,
+            label: strings.progressLoading,
+            child: Text(strings.progressLoading),
           ),
         ),
+      ),
       ProgressUiState.errorRetryable => Card(
-          key: const ValueKey('progress-error'),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(strings.progressUnavailable),
-                const SizedBox(height: 12),
-                OutlinedButton(
-                  onPressed: ref.read(progressControllerProvider.notifier).load,
-                  child: Text(strings.progressRetry),
-                ),
-              ],
-            ),
+        key: const ValueKey('progress-error'),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(strings.progressUnavailable),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: ref.read(progressControllerProvider.notifier).load,
+                child: Text(strings.progressRetry),
+              ),
+            ],
           ),
         ),
+      ),
       ProgressUiState.ready => _ProgressReady(state: state),
     };
   }
@@ -163,7 +165,9 @@ class _ProgressReady extends ConsumerWidget {
                   const SizedBox(height: 8),
                   OutlinedButton(
                     key: const ValueKey('account-offer-continue-guest'),
-                    onPressed: ref.read(progressControllerProvider.notifier).dismissOffer,
+                    onPressed: ref
+                        .read(progressControllerProvider.notifier)
+                        .dismissOffer,
                     child: Text(strings.continueAsGuest),
                   ),
                 ],
@@ -190,7 +194,9 @@ class _ProgressMetric extends StatelessWidget {
         constraints: const BoxConstraints(minWidth: 92),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(

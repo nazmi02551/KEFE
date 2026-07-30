@@ -104,11 +104,11 @@ class MyKefeJourney {
   });
 
   const MyKefeJourney.empty()
-      : decisionUpdateCount = 0,
-        revisitedCaseCount = 0,
-        reflectionCompletionCount = 0,
-        domainActivity = const [],
-        recentJourneys = const [];
+    : decisionUpdateCount = 0,
+      revisitedCaseCount = 0,
+      reflectionCompletionCount = 0,
+      domainActivity = const [],
+      recentJourneys = const [];
 
   final int decisionUpdateCount;
   final int revisitedCaseCount;

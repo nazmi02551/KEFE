@@ -101,10 +101,10 @@ class _SideLabel extends StatelessWidget {
     return AnimatedDefaultTextStyle(
       duration: const Duration(milliseconds: 180),
       style: Theme.of(context).textTheme.labelMedium!.copyWith(
-            color: selected ? color : KefeColorTokens.textMutedDark,
-            fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
-            height: 1.25,
-          ),
+        color: selected ? color : KefeColorTokens.textMutedDark,
+        fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
+        height: 1.25,
+      ),
       child: Text(
         label,
         textAlign: alignment,

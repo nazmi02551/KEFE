@@ -65,7 +65,9 @@ class HttpAccountRepository implements AccountRepository {
   }
 
   @override
-  Future<AccountConversion> mergeGuest({required String verificationToken}) async {
+  Future<AccountConversion> mergeGuest({
+    required String verificationToken,
+  }) async {
     final guestToken = await _credentialStore.read();
     if (guestToken == null || guestToken.isEmpty) {
       throw const ClientTransportFailure(code: 'AUTH_REQUIRED');
@@ -90,7 +92,9 @@ class HttpAccountRepository implements AccountRepository {
     );
   }
 
-  Future<http.Response> _request(Future<http.Response> Function() action) async {
+  Future<http.Response> _request(
+    Future<http.Response> Function() action,
+  ) async {
     try {
       return await action().timeout(_config.requestTimeout);
     } on TimeoutException {

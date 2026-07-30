@@ -6,7 +6,14 @@ import '../../decision/data/http_decision_repository.dart';
 import '../data/account_repository.dart';
 import '../data/http_account_repository.dart';
 
-enum AccountUiState { enterIdentifier, requesting, enterCode, verifying, complete, error }
+enum AccountUiState {
+  enterIdentifier,
+  requesting,
+  enterCode,
+  verifying,
+  complete,
+  error,
+}
 
 class AccountState {
   const AccountState({
@@ -75,7 +82,10 @@ class AccountController extends Notifier<AccountState> {
 
   Future<void> requestOtp() async {
     if (state.identifier.trim().isEmpty) return;
-    state = state.copyWith(uiState: AccountUiState.requesting, clearError: true);
+    state = state.copyWith(
+      uiState: AccountUiState.requesting,
+      clearError: true,
+    );
     try {
       final challenge = await _repository.requestOtp(
         channel: state.channel,
@@ -87,9 +97,15 @@ class AccountController extends Notifier<AccountState> {
         clearError: true,
       );
     } on ApiFailure catch (error) {
-      state = state.copyWith(uiState: AccountUiState.error, errorCode: error.code);
+      state = state.copyWith(
+        uiState: AccountUiState.error,
+        errorCode: error.code,
+      );
     } on ClientTransportFailure catch (error) {
-      state = state.copyWith(uiState: AccountUiState.error, errorCode: error.code);
+      state = state.copyWith(
+        uiState: AccountUiState.error,
+        errorCode: error.code,
+      );
     }
   }
 
@@ -112,16 +128,19 @@ class AccountController extends Notifier<AccountState> {
         clearError: true,
       );
     } on ApiFailure catch (error) {
-      state = state.copyWith(uiState: AccountUiState.error, errorCode: error.code);
+      state = state.copyWith(
+        uiState: AccountUiState.error,
+        errorCode: error.code,
+      );
     } on ClientTransportFailure catch (error) {
-      state = state.copyWith(uiState: AccountUiState.error, errorCode: error.code);
+      state = state.copyWith(
+        uiState: AccountUiState.error,
+        errorCode: error.code,
+      );
     }
   }
 
   void retry() {
-    state = AccountState(
-      channel: state.channel,
-      identifier: state.identifier,
-    );
+    state = AccountState(channel: state.channel, identifier: state.identifier);
   }
 }

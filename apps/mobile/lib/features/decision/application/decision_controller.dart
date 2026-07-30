@@ -13,7 +13,9 @@ import '../domain/decision_models.dart';
 
 const demoCaseId = '11111111-1111-4111-8111-111111111111';
 
-final appConfigProvider = Provider<AppConfig>((ref) => AppConfig.fromEnvironment());
+final appConfigProvider = Provider<AppConfig>(
+  (ref) => AppConfig.fromEnvironment(),
+);
 final httpClientProvider = Provider<http.Client>((ref) {
   final client = http.Client();
   ref.onDispose(client.close);
@@ -158,9 +160,8 @@ class DecisionState {
   }
 }
 
-final decisionControllerProvider = NotifierProvider<DecisionController, DecisionState>(
-  DecisionController.new,
-);
+final decisionControllerProvider =
+    NotifierProvider<DecisionController, DecisionState>(DecisionController.new);
 
 class DecisionController extends Notifier<DecisionState> {
   DecisionRepository get _repository => ref.read(decisionRepositoryProvider);
@@ -189,14 +190,15 @@ class DecisionController extends Notifier<DecisionState> {
           sessionId: draft.sessionId,
           caseVersionId: caseData.versionId,
         );
-        final flowStepCode = draft.flowStepCode ??
-            _readyDecisionStep(flowRuntime)?.code;
+        final flowStepCode =
+            draft.flowStepCode ?? _readyDecisionStep(flowRuntime)?.code;
         final refreshedDraft = draft.copyWith(
           flowRuntime: flowRuntime,
           flowStepCode: flowStepCode,
           updatedAt: DateTime.now().toUtc(),
         );
-        final compatible = draft.phase != DecisionDraftPhase.editing ||
+        final compatible =
+            draft.phase != DecisionDraftPhase.editing ||
             flowStepCode == null ||
             _stepIsReady(flowRuntime, flowStepCode);
         if (!compatible) {
@@ -365,7 +367,9 @@ class DecisionController extends Notifier<DecisionState> {
     final flowRuntime = state.flowRuntime;
     if (sessionId == null || caseData == null || flowRuntime == null) return;
     final step = flowRuntime.steps
-        .where((item) => item.code == stepCode && item.primitiveCode == 'CONTEXT')
+        .where(
+          (item) => item.code == stepCode && item.primitiveCode == 'CONTEXT',
+        )
         .firstOrNull;
     if (step == null || step.state != FlowStepRuntimeState.ready) return;
 
@@ -385,7 +389,8 @@ class DecisionController extends Notifier<DecisionState> {
         caseVersionId: caseData.versionId,
       );
       final afterReady = _readyDecisionStep(refreshed)?.code;
-      final enteredNewDecision = afterReady != null && afterReady != beforeReady;
+      final enteredNewDecision =
+          afterReady != null && afterReady != beforeReady;
       if (enteredNewDecision) {
         await _draftStore.clearForCase(caseData.id);
       }
@@ -400,10 +405,7 @@ class DecisionController extends Notifier<DecisionState> {
       );
     } on ClientTransportFailure catch (error) {
       _exposureInFlight.remove(marker);
-      state = state.copyWith(
-        offlineDraft: true,
-        errorCode: error.code,
-      );
+      state = state.copyWith(offlineDraft: true, errorCode: error.code);
     } on ApiFailure catch (error) {
       _exposureInFlight.remove(marker);
       state = state.copyWith(errorCode: error.code);
@@ -415,9 +417,7 @@ class DecisionController extends Notifier<DecisionState> {
 
   Future<void> commit() async {
     final readyStep = state.readyDecisionStep;
-    if (state.submitting ||
-        !state.hasRequiredResponses ||
-        readyStep == null) {
+    if (state.submitting || !state.hasRequiredResponses || readyStep == null) {
       return;
     }
 
@@ -598,12 +598,12 @@ class DecisionController extends Notifier<DecisionState> {
         flowRuntime: current.flowRuntime,
         errorCode: switch (current.phase) {
           DecisionDraftPhase.syncPending => 'DECISION_SYNC_PENDING',
-          DecisionDraftPhase.commitPending => revision
-              ? 'DECISION_REVISION_COMMIT_UNCERTAIN'
-              : 'WEIGH_COMMIT_UNCERTAIN',
-          DecisionDraftPhase.committedAwaitingReveal => revision
-              ? 'FLOW_CONTINUATION_PENDING'
-              : 'RESULT_SYNC_PENDING',
+          DecisionDraftPhase.commitPending =>
+            revision
+                ? 'DECISION_REVISION_COMMIT_UNCERTAIN'
+                : 'WEIGH_COMMIT_UNCERTAIN',
+          DecisionDraftPhase.committedAwaitingReveal =>
+            revision ? 'FLOW_CONTINUATION_PENDING' : 'RESULT_SYNC_PENDING',
           DecisionDraftPhase.editing => 'NETWORK_UNAVAILABLE',
         },
       );
@@ -669,13 +669,12 @@ class DecisionController extends Notifier<DecisionState> {
     }
   }
 
-  Future<void> _syncDraft(
-    DecisionDraft draft, {
-    required bool revision,
-  }) async {
+  Future<void> _syncDraft(DecisionDraft draft, {required bool revision}) async {
     final stepCode = draft.flowStepCode;
     if (stepCode == null) {
-      throw const ClientTransportFailure(code: 'FLOW_DECISION_STEP_UNAVAILABLE');
+      throw const ClientTransportFailure(
+        code: 'FLOW_DECISION_STEP_UNAVAILABLE',
+      );
     }
     for (final response in draft.effectiveResponses.entries) {
       final value = response.value;

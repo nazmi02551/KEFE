@@ -49,7 +49,10 @@ class _DiscoveryExploreScreenState
     final strings = KefeStrings.of(context);
     final explore = ref.watch(exploreControllerProvider);
     final saved = ref.watch(savedCasesControllerProvider);
-    final filtered = _filter(explore.items, saved.items.map((e) => e.caseId).toSet());
+    final filtered = _filter(
+      explore.items,
+      saved.items.map((e) => e.caseId).toSet(),
+    );
     final domains = explore.items.map((item) => item.domain).toSet().toList()
       ..sort();
 
@@ -63,90 +66,85 @@ class _DiscoveryExploreScreenState
               ),
             )
           : explore.errorCode != null && explore.items.isEmpty
-              ? _ExploreError(
-                  message: strings.messageForCode(explore.errorCode),
-                  retryLabel: strings.retry,
-                  onRetry: ref.read(exploreControllerProvider.notifier).load,
-                )
-              : RefreshIndicator(
-                  onRefresh: () async {
-                    await Future.wait([
-                      ref.read(exploreControllerProvider.notifier).load(),
-                      ref.read(savedCasesControllerProvider.notifier).load(),
-                    ]);
-                  },
-                  child: ListView(
-                    key: const ValueKey('explore-list'),
-                    padding: const EdgeInsets.fromLTRB(18, 12, 18, 28),
-                    children: [
-                      const _ExploreHeader(),
-                      const SizedBox(height: 20),
-                      _DiscoveryControls(
-                        queryController: _queryController,
-                        domains: domains,
-                        selectedDomain: _domain,
-                        savedOnly: _savedOnly,
-                        onQueryChanged: (_) => setState(() {}),
-                        onDomainChanged: (value) => setState(() => _domain = value),
-                        onSavedOnlyChanged: (value) =>
-                            setState(() => _savedOnly = value),
-                        onClear: () {
-                          _queryController.clear();
-                          setState(() {
-                            _domain = null;
-                            _savedOnly = false;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      if (filtered.isEmpty)
-                        _NoResults(
-                          onClear: () {
-                            _queryController.clear();
-                            setState(() {
-                              _domain = null;
-                              _savedOnly = false;
-                            });
-                          },
-                        )
-                      else ...[
-                        _FeaturedCaseCard(
-                          item: filtered.first,
-                          saved: saved.contains(filtered.first.id),
-                        ),
-                        const SizedBox(height: 24),
-                        _SectionTitle(
-                          title: 'Trend tartımlar',
-                          trailing: '${filtered.length} vaka',
-                        ),
-                        const SizedBox(height: 12),
-                        if (filtered.length == 1)
-                          Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(18),
-                              child: Text(
-                                'Yeni tartımlar hazırlandıkça burada görünecek.',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      color: KefeColorTokens.textMutedDark,
-                                    ),
-                              ),
-                            ),
-                          )
-                        else
-                          for (final item in filtered.skip(1)) ...[
-                            _CaseCard(
-                              item: item,
-                              saved: saved.contains(item.id),
-                            ),
-                            const SizedBox(height: 12),
-                          ],
-                      ],
-                    ],
+          ? _ExploreError(
+              message: strings.messageForCode(explore.errorCode),
+              retryLabel: strings.retry,
+              onRetry: ref.read(exploreControllerProvider.notifier).load,
+            )
+          : RefreshIndicator(
+              onRefresh: () async {
+                await Future.wait([
+                  ref.read(exploreControllerProvider.notifier).load(),
+                  ref.read(savedCasesControllerProvider.notifier).load(),
+                ]);
+              },
+              child: ListView(
+                key: const ValueKey('explore-list'),
+                padding: const EdgeInsets.fromLTRB(18, 12, 18, 28),
+                children: [
+                  const _ExploreHeader(),
+                  const SizedBox(height: 20),
+                  _DiscoveryControls(
+                    queryController: _queryController,
+                    domains: domains,
+                    selectedDomain: _domain,
+                    savedOnly: _savedOnly,
+                    onQueryChanged: (_) => setState(() {}),
+                    onDomainChanged: (value) => setState(() => _domain = value),
+                    onSavedOnlyChanged: (value) =>
+                        setState(() => _savedOnly = value),
+                    onClear: () {
+                      _queryController.clear();
+                      setState(() {
+                        _domain = null;
+                        _savedOnly = false;
+                      });
+                    },
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  if (filtered.isEmpty)
+                    _NoResults(
+                      onClear: () {
+                        _queryController.clear();
+                        setState(() {
+                          _domain = null;
+                          _savedOnly = false;
+                        });
+                      },
+                    )
+                  else ...[
+                    _FeaturedCaseCard(
+                      item: filtered.first,
+                      saved: saved.contains(filtered.first.id),
+                    ),
+                    const SizedBox(height: 24),
+                    _SectionTitle(
+                      title: 'Trend tartımlar',
+                      trailing: '${filtered.length} vaka',
+                    ),
+                    const SizedBox(height: 12),
+                    if (filtered.length == 1)
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(18),
+                          child: Text(
+                            'Yeni tartımlar hazırlandıkça burada görünecek.',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: KefeColorTokens.textMutedDark,
+                                ),
+                          ),
+                        ),
+                      )
+                    else
+                      for (final item in filtered.skip(1)) ...[
+                        _CaseCard(item: item, saved: saved.contains(item.id)),
+                        const SizedBox(height: 12),
+                      ],
+                  ],
+                ],
+              ),
+            ),
     );
 
     return widget.embedded ? body : Scaffold(body: body);
@@ -157,14 +155,17 @@ class _DiscoveryExploreScreenState
     Set<String> savedIds,
   ) {
     final query = _queryController.text.trim().toLowerCase();
-    return items.where((item) {
-      final matchesQuery = query.isEmpty ||
-          item.title.toLowerCase().contains(query) ||
-          item.summary.toLowerCase().contains(query);
-      final matchesDomain = _domain == null || item.domain == _domain;
-      final matchesSaved = !_savedOnly || savedIds.contains(item.id);
-      return matchesQuery && matchesDomain && matchesSaved;
-    }).toList(growable: false);
+    return items
+        .where((item) {
+          final matchesQuery =
+              query.isEmpty ||
+              item.title.toLowerCase().contains(query) ||
+              item.summary.toLowerCase().contains(query);
+          final matchesDomain = _domain == null || item.domain == _domain;
+          final matchesSaved = !_savedOnly || savedIds.contains(item.id);
+          return matchesQuery && matchesDomain && matchesSaved;
+        })
+        .toList(growable: false);
   }
 }
 
@@ -192,9 +193,8 @@ class _DiscoveryControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
-    final hasFilters = queryController.text.isNotEmpty ||
-        selectedDomain != null ||
-        savedOnly;
+    final hasFilters =
+        queryController.text.isNotEmpty || selectedDomain != null || savedOnly;
     return Semantics(
       container: true,
       label: strings.exploreDiscoveryLabel,
@@ -295,9 +295,9 @@ class _ExploreHeader extends StatelessWidget {
                   Text(
                     'KEFE',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.6,
-                        ),
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.6,
+                    ),
                   ),
                 ],
               ),
@@ -305,9 +305,9 @@ class _ExploreHeader extends StatelessWidget {
               Text(
                 'Bugün dünya\nneyi tartıyor?',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      height: 1.08,
-                      fontWeight: FontWeight.w800,
-                    ),
+                  height: 1.08,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ],
           ),
@@ -371,9 +371,9 @@ class _FeaturedCaseCard extends ConsumerWidget {
                 Text(
                   item.title,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        height: 1.18,
-                      ),
+                    fontWeight: FontWeight.w800,
+                    height: 1.18,
+                  ),
                 ),
                 const SizedBox(height: 9),
                 Text(
@@ -381,9 +381,9 @@ class _FeaturedCaseCard extends ConsumerWidget {
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: KefeColorTokens.textMutedDark,
-                        height: 1.35,
-                      ),
+                    color: KefeColorTokens.textMutedDark,
+                    height: 1.35,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -391,9 +391,9 @@ class _FeaturedCaseCard extends ConsumerWidget {
                     Text(
                       _domainLabel(item.domain),
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: KefeColorTokens.goldSoft,
-                            fontWeight: FontWeight.w800,
-                          ),
+                        color: KefeColorTokens.goldSoft,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     const Spacer(),
                     const Icon(
@@ -449,17 +449,17 @@ class _CaseCard extends StatelessWidget {
                     Text(
                       _domainLabel(item.domain),
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: KefeColorTokens.goldSoft,
-                            fontWeight: FontWeight.w800,
-                          ),
+                        color: KefeColorTokens.goldSoft,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     const SizedBox(height: 7),
                     Text(
                       item.title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            height: 1.2,
-                          ),
+                        fontWeight: FontWeight.w800,
+                        height: 1.2,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -467,9 +467,9 @@ class _CaseCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: KefeColorTokens.textMutedDark,
-                            height: 1.35,
-                          ),
+                        color: KefeColorTokens.textMutedDark,
+                        height: 1.35,
+                      ),
                     ),
                   ],
                 ),
@@ -499,9 +499,8 @@ class _SaveButton extends ConsumerWidget {
       child: IconButton(
         key: ValueKey('save-case-${item.id}'),
         tooltip: saved ? strings.savedCasesRemove : strings.savedCasesSave,
-        onPressed: () => ref
-            .read(savedCasesControllerProvider.notifier)
-            .toggle(item),
+        onPressed: () =>
+            ref.read(savedCasesControllerProvider.notifier).toggle(item),
         icon: Icon(
           saved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
           color: KefeColorTokens.goldSoft,
@@ -552,16 +551,16 @@ class _SectionTitle extends StatelessWidget {
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
         const Spacer(),
         Text(
           trailing,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: KefeColorTokens.textMutedDark,
-              ),
+            color: KefeColorTokens.textMutedDark,
+          ),
         ),
       ],
     );
@@ -598,21 +597,21 @@ class _ExploreError extends StatelessWidget {
 }
 
 String _domainLabel(String domain) => switch (domain) {
-      'DAILY_LIFE' => 'Günlük yaşam',
-      'TECHNOLOGY' => 'Teknoloji',
-      'SPORTS' => 'Spor',
-      'CIVIC' => 'Kamusal',
-      'WORK_ECONOMY' => 'İş & Ekonomi',
-      'EDUCATION' => 'Eğitim',
-      _ => domain.replaceAll('_', ' '),
-    };
+  'DAILY_LIFE' => 'Günlük yaşam',
+  'TECHNOLOGY' => 'Teknoloji',
+  'SPORTS' => 'Spor',
+  'CIVIC' => 'Kamusal',
+  'WORK_ECONOMY' => 'İş & Ekonomi',
+  'EDUCATION' => 'Eğitim',
+  _ => domain.replaceAll('_', ' '),
+};
 
 IconData _domainIcon(String domain) => switch (domain) {
-      'DAILY_LIFE' => Icons.people_alt_outlined,
-      'TECHNOLOGY' => Icons.memory_rounded,
-      'SPORTS' => Icons.sports_soccer_rounded,
-      'CIVIC' => Icons.account_balance_outlined,
-      'WORK_ECONOMY' => Icons.work_outline_rounded,
-      'EDUCATION' => Icons.school_outlined,
-      _ => Icons.balance_outlined,
-    };
+  'DAILY_LIFE' => Icons.people_alt_outlined,
+  'TECHNOLOGY' => Icons.memory_rounded,
+  'SPORTS' => Icons.sports_soccer_rounded,
+  'CIVIC' => Icons.account_balance_outlined,
+  'WORK_ECONOMY' => Icons.work_outline_rounded,
+  'EDUCATION' => Icons.school_outlined,
+  _ => Icons.balance_outlined,
+};

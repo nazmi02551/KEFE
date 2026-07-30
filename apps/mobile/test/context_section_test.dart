@@ -51,12 +51,17 @@ class ContextFakeRepository implements DecisionRepository, ContextRepository {
   }
 
   @override
-  Future<void> answer({required String sessionId, required String questionId, required Object value}) =>
-      throw UnimplementedError();
+  Future<void> answer({
+    required String sessionId,
+    required String questionId,
+    required Object value,
+  }) => throw UnimplementedError();
 
   @override
-  Future<void> commit({required String sessionId, required String idempotencyKey}) =>
-      throw UnimplementedError();
+  Future<void> commit({
+    required String sessionId,
+    required String idempotencyKey,
+  }) => throw UnimplementedError();
 
   @override
   Future<GuestCredential> ensureGuestCredential() => throw UnimplementedError();
@@ -83,47 +88,53 @@ class ContextFakeRepository implements DecisionRepository, ContextRepository {
 }
 
 void main() {
-  testWidgets('Context is visible before Commit with details and sources collapsed', (
-    tester,
-  ) async {
-    tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
-    addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+  testWidgets(
+    'Context is visible before Commit with details and sources collapsed',
+    (tester) async {
+      tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
+      addTearDown(tester.platformDispatcher.clearLocaleTestValue);
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          decisionRepositoryProvider.overrideWithValue(ContextFakeRepository()),
-        ],
-        child: MaterialApp(
-          locale: const Locale('tr', 'TR'),
-          supportedLocales: KefeStrings.supportedLocales,
-          localizationsDelegates: const [
-            KefeStringsDelegate(),
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            decisionRepositoryProvider.overrideWithValue(
+              ContextFakeRepository(),
+            ),
           ],
-          home: const Scaffold(
-            body: ContextSection(caseVersionId: caseVersionId),
+          child: MaterialApp(
+            locale: const Locale('tr', 'TR'),
+            supportedLocales: KefeStrings.supportedLocales,
+            localizationsDelegates: const [
+              KefeStringsDelegate(),
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: const Scaffold(
+              body: ContextSection(caseVersionId: caseVersionId),
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('context-section')), findsOneWidget);
-    expect(find.text('Temel bağlam.'), findsOneWidget);
-    expect(find.text('Doğrulandı'), findsOneWidget);
-    expect(find.text('Ek bağlam.'), findsNothing);
-    expect(find.byKey(const ValueKey('context-details')), findsOneWidget);
-    expect(find.byKey(const ValueKey('context-sources')), findsOneWidget);
+      expect(find.byKey(const ValueKey('context-section')), findsOneWidget);
+      expect(find.text('Temel bağlam.'), findsOneWidget);
+      expect(find.text('Doğrulandı'), findsOneWidget);
+      expect(find.text('Ek bağlam.'), findsNothing);
+      expect(find.byKey(const ValueKey('context-details')), findsOneWidget);
+      expect(find.byKey(const ValueKey('context-sources')), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('context-details')));
-    await tester.pumpAndSettle();
-    expect(find.text('Ek bağlam.'), findsOneWidget);
-    expect(find.text('Bilinmiyor'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('context-details')));
+      await tester.pumpAndSettle();
+      expect(find.text('Ek bağlam.'), findsOneWidget);
+      expect(find.text('Bilinmiyor'), findsOneWidget);
 
-    expect(find.textContaining('result', findRichText: true), findsNothing);
-    expect(find.textContaining('community', findRichText: true), findsNothing);
-  });
+      expect(find.textContaining('result', findRichText: true), findsNothing);
+      expect(
+        find.textContaining('community', findRichText: true),
+        findsNothing,
+      );
+    },
+  );
 }

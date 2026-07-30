@@ -16,17 +16,21 @@ class CommunityReasonSection extends ConsumerStatefulWidget {
   final String caseVersionId;
 
   @override
-  ConsumerState<CommunityReasonSection> createState() => _CommunityReasonSectionState();
+  ConsumerState<CommunityReasonSection> createState() =>
+      _CommunityReasonSectionState();
 }
 
-class _CommunityReasonSectionState extends ConsumerState<CommunityReasonSection> {
+class _CommunityReasonSectionState
+    extends ConsumerState<CommunityReasonSection> {
   final _textController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     Future.microtask(
-      () => ref.read(communityReasonControllerProvider.notifier).load(widget.caseVersionId),
+      () => ref
+          .read(communityReasonControllerProvider.notifier)
+          .load(widget.caseVersionId),
     );
   }
 
@@ -65,8 +69,8 @@ class _CommunityReasonSectionState extends ConsumerState<CommunityReasonSection>
                   child: Text(
                     tr ? 'Topluluk gerekçeleri' : 'Community reasons',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ],
@@ -77,7 +81,8 @@ class _CommunityReasonSectionState extends ConsumerState<CommunityReasonSection>
                   ? 'Özel gerekçen burada otomatik yayınlanmaz. Topluluğa katkı ayrı bir eylemdir; metinli katkılar moderasyondan geçer.'
                   : 'Your private reason is never published here automatically. Community contribution is a separate action; text contributions are moderated.',
             ),
-            if (state.snapshot != null && state.snapshot!.tagPatternCounts.isNotEmpty) ...[
+            if (state.snapshot != null &&
+                state.snapshot!.tagPatternCounts.isNotEmpty) ...[
               const SizedBox(height: 14),
               Wrap(
                 spacing: 8,
@@ -95,7 +100,9 @@ class _CommunityReasonSectionState extends ConsumerState<CommunityReasonSection>
             ],
             const SizedBox(height: 14),
             Text(
-              tr ? 'Sen de ayrı bir gerekçe yayınla' : 'Publish a separate reason',
+              tr
+                  ? 'Sen de ayrı bir gerekçe yayınla'
+                  : 'Publish a separate reason',
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
@@ -108,7 +115,8 @@ class _CommunityReasonSectionState extends ConsumerState<CommunityReasonSection>
                     key: ValueKey('community-reason-tag-$tag'),
                     label: Text(strings.reasonTagLabel(tag)),
                     selected: state.selectedTags.contains(tag),
-                    onSelected: (_) => controller.toggleTag(tag, maxTags: maxTags),
+                    onSelected: (_) =>
+                        controller.toggleTag(tag, maxTags: maxTags),
                   ),
               ],
             ),
@@ -121,7 +129,9 @@ class _CommunityReasonSectionState extends ConsumerState<CommunityReasonSection>
               maxLines: 4,
               onChanged: controller.setText,
               decoration: InputDecoration(
-                labelText: tr ? 'İsteğe bağlı kısa metin' : 'Optional short text',
+                labelText: tr
+                    ? 'İsteğe bağlı kısa metin'
+                    : 'Optional short text',
                 helperText: tr
                     ? 'Metin varsa yayınlanmadan önce moderasyon bekler.'
                     : 'Text waits for moderation before public display.',
@@ -129,7 +139,8 @@ class _CommunityReasonSectionState extends ConsumerState<CommunityReasonSection>
             ),
             FilledButton(
               key: const ValueKey('community-reason-publish'),
-              onPressed: state.selectedTags.isEmpty ||
+              onPressed:
+                  state.selectedTags.isEmpty ||
                       state.uiState == CommunityReasonUiState.submitting
                   ? null
                   : () async {
@@ -153,11 +164,11 @@ class _CommunityReasonSectionState extends ConsumerState<CommunityReasonSection>
                 child: Text(
                   state.receipt!.moderationState == 'PENDING'
                       ? (tr
-                          ? 'Katkın alındı. Metin moderasyon sonrası görünür olabilir.'
-                          : 'Contribution received. Text may become visible after moderation.')
+                            ? 'Katkın alındı. Metin moderasyon sonrası görünür olabilir.'
+                            : 'Contribution received. Text may become visible after moderation.')
                       : (tr
-                          ? 'Katkın topluluk gerekçelerine eklendi.'
-                          : 'Your contribution was added to Community Reasons.'),
+                            ? 'Katkın topluluk gerekçelerine eklendi.'
+                            : 'Your contribution was added to Community Reasons.'),
                   key: const ValueKey('community-reason-receipt'),
                 ),
               ),
@@ -168,7 +179,9 @@ class _CommunityReasonSectionState extends ConsumerState<CommunityReasonSection>
             ],
             if (state.errorCode != null) ...[
               const SizedBox(height: 10),
-              Text('${tr ? 'Topluluk verisi kullanılamıyor' : 'Community data unavailable'} · ${state.errorCode}'),
+              Text(
+                '${tr ? 'Topluluk verisi kullanılamıyor' : 'Community data unavailable'} · ${state.errorCode}',
+              ),
             ],
             if (state.snapshot != null && state.snapshot!.items.isNotEmpty) ...[
               const SizedBox(height: 18),
@@ -181,7 +194,9 @@ class _CommunityReasonSectionState extends ConsumerState<CommunityReasonSection>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                    ),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Column(
@@ -190,7 +205,11 @@ class _CommunityReasonSectionState extends ConsumerState<CommunityReasonSection>
                       Wrap(
                         spacing: 6,
                         children: item.tags
-                            .map((tag) => Chip(label: Text(strings.reasonTagLabel(tag))))
+                            .map(
+                              (tag) => Chip(
+                                label: Text(strings.reasonTagLabel(tag)),
+                              ),
+                            )
                             .toList(growable: false),
                       ),
                       if (item.text != null) ...[
@@ -204,12 +223,14 @@ class _CommunityReasonSectionState extends ConsumerState<CommunityReasonSection>
                           _ReactionButton(
                             label: tr ? 'Bende yankılandı' : 'Resonates',
                             count: item.reactionCounts['RESONATES'] ?? 0,
-                            onPressed: () => controller.react(item.id, 'RESONATES'),
+                            onPressed: () =>
+                                controller.react(item.id, 'RESONATES'),
                           ),
                           _ReactionButton(
                             label: tr ? 'Faydalı' : 'Useful',
                             count: item.reactionCounts['USEFUL'] ?? 0,
-                            onPressed: () => controller.react(item.id, 'USEFUL'),
+                            onPressed: () =>
+                                controller.react(item.id, 'USEFUL'),
                           ),
                           IconButton(
                             tooltip: tr ? 'Raporla' : 'Report',
@@ -265,8 +286,8 @@ class _ReactionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TextButton.icon(
-        onPressed: onPressed,
-        icon: const Icon(Icons.add_reaction_outlined, size: 17),
-        label: Text('$label · $count'),
-      );
+    onPressed: onPressed,
+    icon: const Icon(Icons.add_reaction_outlined, size: 17),
+    label: Text('$label · $count'),
+  );
 }

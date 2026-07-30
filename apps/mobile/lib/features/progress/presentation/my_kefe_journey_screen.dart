@@ -14,14 +14,17 @@ class MyKefeJourneyScreen extends ConsumerStatefulWidget {
   final bool embedded;
 
   @override
-  ConsumerState<MyKefeJourneyScreen> createState() => _MyKefeJourneyScreenState();
+  ConsumerState<MyKefeJourneyScreen> createState() =>
+      _MyKefeJourneyScreenState();
 }
 
 class _MyKefeJourneyScreenState extends ConsumerState<MyKefeJourneyScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.read(progressControllerProvider.notifier).load());
+    Future.microtask(
+      () => ref.read(progressControllerProvider.notifier).load(),
+    );
   }
 
   @override
@@ -41,44 +44,47 @@ class _MyKefeJourneyScreenState extends ConsumerState<MyKefeJourneyScreen> {
             Text(
               strings.journeySubtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: KefeColorTokens.textMutedDark,
-                    height: 1.45,
-                  ),
+                color: KefeColorTokens.textMutedDark,
+                height: 1.45,
+              ),
             ),
             const SizedBox(height: 18),
             const SavedCasesSection(),
             const SizedBox(height: 18),
             ...switch (state.uiState) {
               ProgressUiState.idle || ProgressUiState.loading => [
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Text(strings.progressLoading),
-                    ),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(strings.progressLoading),
                   ),
-                ],
+                ),
+              ],
               ProgressUiState.errorRetryable => [
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(strings.progressUnavailable),
-                          const SizedBox(height: 12),
-                          OutlinedButton(
-                            onPressed: ref
-                                .read(progressControllerProvider.notifier)
-                                .load,
-                            child: Text(strings.progressRetry),
-                          ),
-                        ],
-                      ),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(strings.progressUnavailable),
+                        const SizedBox(height: 12),
+                        OutlinedButton(
+                          onPressed: ref
+                              .read(progressControllerProvider.notifier)
+                              .load,
+                          child: Text(strings.progressRetry),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ProgressUiState.ready =>
-                _ready(context, strings, state.envelope!),
+                ),
+              ],
+              ProgressUiState.ready => _ready(
+                context,
+                strings,
+                state.envelope!,
+              ),
             },
           ],
         ),
@@ -143,38 +149,38 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  strings.journeyEyebrow,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: KefeColorTokens.goldSoft,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.1,
-                      ),
-                ),
-                const SizedBox(height: 7),
-                Text(
-                  strings.journeyTitle,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        height: 1.08,
-                      ),
-                ),
-              ],
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              strings.journeyEyebrow,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: KefeColorTokens.goldSoft,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.1,
+              ),
             ),
-          ),
-          const CircleAvatar(
-            backgroundColor: Color(0x222CC9BC),
-            foregroundColor: KefeColorTokens.goldSoft,
-            child: Icon(Icons.timeline_rounded),
-          ),
-        ],
-      );
+            const SizedBox(height: 7),
+            Text(
+              strings.journeyTitle,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                height: 1.08,
+              ),
+            ),
+          ],
+        ),
+      ),
+      const CircleAvatar(
+        backgroundColor: Color(0x222CC9BC),
+        foregroundColor: KefeColorTokens.goldSoft,
+        child: Icon(Icons.timeline_rounded),
+      ),
+    ],
+  );
 }
 
 class _Overview extends StatelessWidget {
@@ -190,59 +196,57 @@ class _Overview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: KefeColorTokens.gold.withValues(alpha: 0.24),
-          ),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF122640), Color(0xFF111823), Color(0xFF281B24)],
-          ),
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(color: KefeColorTokens.gold.withValues(alpha: 0.24)),
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF122640), Color(0xFF111823), Color(0xFF281B24)],
+      ),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          strings.progressReadiness(progress.readiness),
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        const SizedBox(height: 15),
+        Row(
           children: [
-            Text(
-              strings.progressReadiness(progress.readiness),
-              style: Theme.of(context).textTheme.bodyMedium,
+            Expanded(
+              child: _Metric(
+                key: const ValueKey('my-kefe-weigh-count'),
+                value: progress.meaningfulWeighCount,
+                label: strings.progressWeighs,
+                icon: Icons.balance_rounded,
+              ),
             ),
-            const SizedBox(height: 15),
-            Row(
-              children: [
-                Expanded(
-                  child: _Metric(
-                    key: const ValueKey('my-kefe-weigh-count'),
-                    value: progress.meaningfulWeighCount,
-                    label: strings.progressWeighs,
-                    icon: Icons.balance_rounded,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _Metric(
-                    key: const ValueKey('my-kefe-update-count'),
-                    value: journey.decisionUpdateCount,
-                    label: strings.journeyRevisits,
-                    icon: Icons.change_circle_outlined,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _Metric(
-                    key: const ValueKey('my-kefe-reflection-count'),
-                    value: journey.reflectionCompletionCount,
-                    label: strings.journeyReflections,
-                    icon: Icons.auto_awesome_outlined,
-                  ),
-                ),
-              ],
+            const SizedBox(width: 8),
+            Expanded(
+              child: _Metric(
+                key: const ValueKey('my-kefe-update-count'),
+                value: journey.decisionUpdateCount,
+                label: strings.journeyRevisits,
+                icon: Icons.change_circle_outlined,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _Metric(
+                key: const ValueKey('my-kefe-reflection-count'),
+                value: journey.reflectionCompletionCount,
+                label: strings.journeyReflections,
+                icon: Icons.auto_awesome_outlined,
+              ),
             ),
           ],
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _Metric extends StatelessWidget {
@@ -259,36 +263,36 @@ class _Metric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        constraints: const BoxConstraints(minHeight: 105),
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: KefeColorTokens.surfaceDark.withValues(alpha: 0.78),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: KefeColorTokens.borderDark),
+    constraints: const BoxConstraints(minHeight: 105),
+    padding: const EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      color: KefeColorTokens.surfaceDark.withValues(alpha: 0.78),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: KefeColorTokens.borderDark),
+    ),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, size: 18, color: KefeColorTokens.goldSoft),
+        const SizedBox(height: 7),
+        Text(
+          '$value',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            color: KefeColorTokens.goldSoft,
+            fontWeight: FontWeight.w900,
+          ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 18, color: KefeColorTokens.goldSoft),
-            const SizedBox(height: 7),
-            Text(
-              '$value',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: KefeColorTokens.goldSoft,
-                    fontWeight: FontWeight.w900,
-                  ),
-            ),
-            Text(
-              label,
-              maxLines: 2,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: KefeColorTokens.textMutedDark,
-                  ),
-            ),
-          ],
+        Text(
+          label,
+          maxLines: 2,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: KefeColorTokens.textMutedDark,
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _Domains extends StatelessWidget {
@@ -312,9 +316,9 @@ class _Domains extends StatelessWidget {
           children: [
             Text(
               strings.journeyDomainActivity,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 14),
             for (var i = 0; i < items.length; i++) ...[
@@ -356,62 +360,59 @@ class _Journeys extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-        key: const ValueKey('my-kefe-recent-journeys'),
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                strings.journeyRecent,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-              ),
-              const SizedBox(height: 12),
-              for (var i = 0; i < items.length; i++) ...[
-                Text(
-                  _domainLabel(
-                    items[i].primaryDomain,
-                    strings.locale.languageCode,
-                  ),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: KefeColorTokens.goldSoft,
-                        fontWeight: FontWeight.w800,
-                      ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  items[i].title,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-                if (items[i].decisionUpdateCount > 0 ||
-                    items[i].reflectionCompleted) ...[
-                  const SizedBox(height: 7),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      if (items[i].decisionUpdateCount > 0)
-                        Chip(
-                          label: Text(
-                            strings.journeyUpdateCount(
-                              items[i].decisionUpdateCount,
-                            ),
-                          ),
-                        ),
-                      if (items[i].reflectionCompleted)
-                        Chip(label: Text(strings.journeyReflected)),
-                    ],
-                  ),
-                ],
-                if (i != items.length - 1) const Divider(height: 24),
-              ],
-            ],
+    key: const ValueKey('my-kefe-recent-journeys'),
+    child: Padding(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            strings.journeyRecent,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
-        ),
-      );
+          const SizedBox(height: 12),
+          for (var i = 0; i < items.length; i++) ...[
+            Text(
+              _domainLabel(items[i].primaryDomain, strings.locale.languageCode),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: KefeColorTokens.goldSoft,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              items[i].title,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            if (items[i].decisionUpdateCount > 0 ||
+                items[i].reflectionCompleted) ...[
+              const SizedBox(height: 7),
+              Wrap(
+                spacing: 8,
+                children: [
+                  if (items[i].decisionUpdateCount > 0)
+                    Chip(
+                      label: Text(
+                        strings.journeyUpdateCount(
+                          items[i].decisionUpdateCount,
+                        ),
+                      ),
+                    ),
+                  if (items[i].reflectionCompleted)
+                    Chip(label: Text(strings.journeyReflected)),
+                ],
+              ),
+            ],
+            if (i != items.length - 1) const Divider(height: 24),
+          ],
+        ],
+      ),
+    ),
+  );
 }
 
 class _LegacyRecent extends StatelessWidget {
@@ -422,27 +423,27 @@ class _LegacyRecent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                strings.progressRecent,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 10),
-              for (final item in progress.recentCases)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 7),
-                  child: Text(
-                    '• ${item.title} · ${_domainLabel(item.primaryDomain, strings.locale.languageCode)}',
-                  ),
-                ),
-            ],
+    child: Padding(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            strings.progressRecent,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
-        ),
-      );
+          const SizedBox(height: 10),
+          for (final item in progress.recentCases)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 7),
+              child: Text(
+                '• ${item.title} · ${_domainLabel(item.primaryDomain, strings.locale.languageCode)}',
+              ),
+            ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _Notice extends StatelessWidget {
@@ -452,21 +453,19 @@ class _Notice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: KefeColorTokens.rules.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: KefeColorTokens.rules.withValues(alpha: 0.22),
-          ),
-        ),
-        child: Text(
-          text,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: KefeColorTokens.textMutedDark,
-              ),
-        ),
-      );
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: KefeColorTokens.rules.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: KefeColorTokens.rules.withValues(alpha: 0.22)),
+    ),
+    child: Text(
+      text,
+      style: Theme.of(
+        context,
+      ).textTheme.bodySmall?.copyWith(color: KefeColorTokens.textMutedDark),
+    ),
+  );
 }
 
 class _Footnote extends StatelessWidget {
@@ -476,21 +475,21 @@ class _Footnote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        key: const ValueKey('my-kefe-no-inference-note'),
-        padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: KefeColorTokens.surfaceDark,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: KefeColorTokens.borderDark),
-        ),
-        child: Text(
-          strings.journeyNonInferenceNote,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: KefeColorTokens.textMutedDark,
-                height: 1.4,
-              ),
-        ),
-      );
+    key: const ValueKey('my-kefe-no-inference-note'),
+    padding: const EdgeInsets.all(15),
+    decoration: BoxDecoration(
+      color: KefeColorTokens.surfaceDark,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: KefeColorTokens.borderDark),
+    ),
+    child: Text(
+      strings.journeyNonInferenceNote,
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+        color: KefeColorTokens.textMutedDark,
+        height: 1.4,
+      ),
+    ),
+  );
 }
 
 String _domainLabel(String domain, String languageCode) {

@@ -23,20 +23,20 @@ abstract final class KefeColorTokens {
 
 abstract final class KefeTheme {
   static ThemeData light() => _build(
-        brightness: Brightness.light,
-        background: KefeColorTokens.backgroundLight,
-        surface: KefeColorTokens.surfaceLight,
-        foreground: KefeColorTokens.textDark,
-        outline: const Color(0xFFD8DEE8),
-      );
+    brightness: Brightness.light,
+    background: KefeColorTokens.backgroundLight,
+    surface: KefeColorTokens.surfaceLight,
+    foreground: KefeColorTokens.textDark,
+    outline: const Color(0xFFD8DEE8),
+  );
 
   static ThemeData dark() => _build(
-        brightness: Brightness.dark,
-        background: KefeColorTokens.backgroundDark,
-        surface: KefeColorTokens.surfaceDark,
-        foreground: KefeColorTokens.textLight,
-        outline: KefeColorTokens.borderDark,
-      );
+    brightness: Brightness.dark,
+    background: KefeColorTokens.backgroundDark,
+    surface: KefeColorTokens.surfaceDark,
+    foreground: KefeColorTokens.textLight,
+    outline: KefeColorTokens.borderDark,
+  );
 
   static ThemeData _build({
     required Brightness brightness,
@@ -45,19 +45,20 @@ abstract final class KefeTheme {
     required Color foreground,
     required Color outline,
   }) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: KefeColorTokens.gold,
-      brightness: brightness,
-      surface: surface,
-    ).copyWith(
-      primary: KefeColorTokens.gold,
-      secondary: KefeColorTokens.rules,
-      tertiary: KefeColorTokens.empathy,
-      error: const Color(0xFFFF6B6B),
-      onSurface: foreground,
-      outline: outline,
-      outlineVariant: outline.withValues(alpha: 0.7),
-    );
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: KefeColorTokens.gold,
+          brightness: brightness,
+          surface: surface,
+        ).copyWith(
+          primary: KefeColorTokens.gold,
+          secondary: KefeColorTokens.rules,
+          tertiary: KefeColorTokens.empathy,
+          error: const Color(0xFFFF6B6B),
+          onSurface: foreground,
+          outline: outline,
+          outlineVariant: outline.withValues(alpha: 0.7),
+        );
 
     final isDark = brightness == Brightness.dark;
 
@@ -81,7 +82,9 @@ abstract final class KefeTheme {
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: outline.withValues(alpha: isDark ? 0.72 : 0.5)),
+          side: BorderSide(
+            color: outline.withValues(alpha: isDark ? 0.72 : 0.5),
+          ),
         ),
       ),
       chipTheme: ChipThemeData(
@@ -103,14 +106,18 @@ abstract final class KefeTheme {
                 : FontWeight.w500,
             color: states.contains(WidgetState.selected)
                 ? KefeColorTokens.goldSoft
-                : (isDark ? KefeColorTokens.textMutedDark : foreground.withValues(alpha: 0.68)),
+                : (isDark
+                      ? KefeColorTokens.textMutedDark
+                      : foreground.withValues(alpha: 0.68)),
           ),
         ),
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(
             color: states.contains(WidgetState.selected)
                 ? KefeColorTokens.goldSoft
-                : (isDark ? KefeColorTokens.textMutedDark : foreground.withValues(alpha: 0.68)),
+                : (isDark
+                      ? KefeColorTokens.textMutedDark
+                      : foreground.withValues(alpha: 0.68)),
           ),
         ),
       ),
@@ -119,22 +126,28 @@ abstract final class KefeTheme {
           minimumSize: const Size.fromHeight(54),
           backgroundColor: KefeColorTokens.gold,
           foregroundColor: const Color(0xFF171106),
-          textStyle: const TextStyle(fontWeight: FontWeight.w800, letterSpacing: 0.2),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          textStyle: const TextStyle(
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.2,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           minimumSize: const Size.fromHeight(50),
           side: BorderSide(color: outline),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
       ),
       dividerTheme: DividerThemeData(color: outline.withValues(alpha: 0.7)),
-      textTheme: ThemeData(brightness: brightness).textTheme.apply(
-            bodyColor: foreground,
-            displayColor: foreground,
-          ),
+      textTheme: ThemeData(
+        brightness: brightness,
+      ).textTheme.apply(bodyColor: foreground, displayColor: foreground),
       visualDensity: VisualDensity.standard,
     );
   }

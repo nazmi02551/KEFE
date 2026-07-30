@@ -205,7 +205,10 @@ def _openapi_errors() -> list[str]:
         ("/v1/weigh-sessions/{session_id}/reason", "put"): ("200", "PrivateReasonResponse"),
         ("/v1/weigh-sessions/{session_id}/perspectives", "get"): ("200", "PerspectiveResponse"),
         ("/v1/weigh-sessions/{session_id}/flow", "get"): ("200", "FlowRuntimeResponse"),
-        ("/v1/weigh-sessions/{session_id}/consensus-cards", "get"): ("200", "ConsensusCardsResponse"),
+        ("/v1/weigh-sessions/{session_id}/consensus-cards", "get"): (
+            "200",
+            "ConsensusCardsResponse",
+        ),
         (
             "/v1/weigh-sessions/{session_id}/consensus-cards/{card_id}/participation",
             "post",
@@ -326,9 +329,7 @@ def _schema_errors() -> list[str]:
         if fragment not in schema
     ]
 
-    mvp_migration = (
-        REPO_ROOT / "services/api/migrations/versions/20260730_0017_mvp_completion.py"
-    )
+    mvp_migration = REPO_ROOT / "services/api/migrations/versions/20260730_0017_mvp_completion.py"
     if not mvp_migration.exists():
         errors.append("MVP completion persistence migration is missing")
         return errors

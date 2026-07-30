@@ -11,7 +11,7 @@ abstract interface class SavedCaseStore {
 
 class SharedPreferencesSavedCaseStore implements SavedCaseStore {
   SharedPreferencesSavedCaseStore({SharedPreferences? preferences})
-      : _preferences = preferences;
+    : _preferences = preferences;
 
   static const _key = 'kefe.saved_cases.v1';
 
@@ -51,17 +51,20 @@ class SharedPreferencesSavedCaseStore implements SavedCaseStore {
   @override
   Future<void> writeAll(List<SavedCase> items) async {
     final preferences = await _prefs();
-    final normalized = [...items]..sort((a, b) => b.savedAt.compareTo(a.savedAt));
+    final normalized = [...items]
+      ..sort((a, b) => b.savedAt.compareTo(a.savedAt));
     await preferences.setString(
       _key,
-      jsonEncode(normalized.map((item) => item.toJson()).toList(growable: false)),
+      jsonEncode(
+        normalized.map((item) => item.toJson()).toList(growable: false),
+      ),
     );
   }
 }
 
 class MemorySavedCaseStore implements SavedCaseStore {
   MemorySavedCaseStore([Iterable<SavedCase> initial = const []])
-      : items = List<SavedCase>.from(initial);
+    : items = List<SavedCase>.from(initial);
 
   List<SavedCase> items;
 

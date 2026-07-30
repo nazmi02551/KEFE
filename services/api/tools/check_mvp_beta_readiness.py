@@ -43,7 +43,9 @@ def main() -> None:
     for path in MOBILE_LIB.rglob("*.dart"):
         text = path.read_text(encoding="utf-8")
         if forbidden_class.search(text):
-            problems.append(f"Case-specific mobile runtime class detected: {path.relative_to(REPO_ROOT)}")
+            problems.append(
+                f"Case-specific mobile runtime class detected: {path.relative_to(REPO_ROOT)}"
+            )
 
     if problems:
         raise SystemExit("\n".join(problems))

@@ -37,16 +37,15 @@ class QuestionInputCard extends StatelessWidget {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: (isConfidence
-                            ? KefeColorTokens.gold
-                            : KefeColorTokens.rules)
-                        .withValues(alpha: 0.10),
+                    color:
+                        (isConfidence
+                                ? KefeColorTokens.gold
+                                : KefeColorTokens.rules)
+                            .withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(11),
                   ),
                   child: Icon(
-                    isConfidence
-                        ? Icons.speed_rounded
-                        : Icons.balance_outlined,
+                    isConfidence ? Icons.speed_rounded : Icons.balance_outlined,
                     color: isConfidence
                         ? KefeColorTokens.goldSoft
                         : KefeColorTokens.rules,
@@ -61,17 +60,18 @@ class QuestionInputCard extends StatelessWidget {
                       Text(
                         isConfidence ? 'EMİNLİK' : 'KARAR',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: isConfidence
-                                  ? KefeColorTokens.goldSoft
-                                  : KefeColorTokens.rules,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.8,
-                            ),
+                          color: isConfidence
+                              ? KefeColorTokens.goldSoft
+                              : KefeColorTokens.rules,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.8,
+                        ),
                       ),
                       const SizedBox(height: 5),
                       Text(
                         question.prompt,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
                               fontWeight: FontWeight.w800,
                               height: 1.25,
                             ),
@@ -81,12 +81,14 @@ class QuestionInputCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .outlineVariant
-                        .withValues(alpha: 0.24),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outlineVariant.withValues(alpha: 0.24),
                     borderRadius: BorderRadius.circular(99),
                   ),
                   child: Text(
@@ -94,8 +96,8 @@ class QuestionInputCard extends StatelessWidget {
                         ? strings.requiredQuestion
                         : strings.optionalQuestion,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: KefeColorTokens.textMutedDark,
-                        ),
+                      color: KefeColorTokens.textMutedDark,
+                    ),
                   ),
                 ),
               ],
@@ -141,17 +143,17 @@ class _QuestionInput extends StatelessWidget {
 
     return switch (question.responseType) {
       'SINGLE_CHOICE' => _SingleChoiceInput(
-          question: question,
-          value: value,
-          enabled: enabled,
-          onChanged: onChanged,
-        ),
+        question: question,
+        value: value,
+        enabled: enabled,
+        onChanged: onChanged,
+      ),
       'CONFIDENCE' => _ConfidenceInput(
-          question: question,
-          value: value,
-          enabled: enabled,
-          onChanged: onChanged,
-        ),
+        question: question,
+        value: value,
+        enabled: enabled,
+        onChanged: onChanged,
+      ),
       _ => _UnsupportedQuestion(responseType: question.responseType),
     };
   }
@@ -172,7 +174,9 @@ class _BalanceChoiceInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectedIndex = question.options.indexWhere((option) => option == value);
+    final selectedIndex = question.options.indexWhere(
+      (option) => option == value,
+    );
     final effectiveIndex = selectedIndex < 0 ? null : selectedIndex;
 
     return Column(
@@ -283,10 +287,10 @@ class _BalanceOptionTile extends StatelessWidget {
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: selected ? color : null,
-                      fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
-                      height: 1.22,
-                    ),
+                  color: selected ? color : null,
+                  fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
+                  height: 1.22,
+                ),
               ),
             ],
           ),
@@ -324,11 +328,16 @@ class _SingleChoiceInput extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 160),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   color: value == option
                       ? KefeColorTokens.gold.withValues(alpha: 0.10)
-                      : KefeColorTokens.surfaceElevatedDark.withValues(alpha: 0.48),
+                      : KefeColorTokens.surfaceElevatedDark.withValues(
+                          alpha: 0.48,
+                        ),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: value == option
@@ -367,10 +376,10 @@ class _SingleChoiceInput extends StatelessWidget {
                       child: Text(
                         option,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: value == option
-                                  ? FontWeight.w800
-                                  : FontWeight.w600,
-                            ),
+                          fontWeight: value == option
+                              ? FontWeight.w800
+                              : FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
@@ -409,24 +418,24 @@ class _ConfidenceInput extends StatelessWidget {
             Text(
               _label(question.minimum),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: KefeColorTokens.textMutedDark,
-                  ),
+                color: KefeColorTokens.textMutedDark,
+              ),
             ),
             const Spacer(),
             if (value != null)
               Text(
                 '${_label((value as num).toDouble())}/10',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: KefeColorTokens.goldSoft,
-                      fontWeight: FontWeight.w900,
-                    ),
+                  color: KefeColorTokens.goldSoft,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             const Spacer(),
             Text(
               _label(question.maximum),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: KefeColorTokens.textMutedDark,
-                  ),
+                color: KefeColorTokens.textMutedDark,
+              ),
             ),
           ],
         ),
@@ -441,12 +450,12 @@ class _ConfidenceInput extends StatelessWidget {
                 selected: _sameValue(value, item),
                 button: true,
                 child: ChoiceChip(
-                  key: ValueKey(
-                    'confidence-${question.id}-${_label(item)}',
-                  ),
+                  key: ValueKey('confidence-${question.id}-${_label(item)}'),
                   label: Text(_label(item)),
                   selected: _sameValue(value, item),
-                  onSelected: enabled ? (_) => onChanged(_normalized(item)) : null,
+                  onSelected: enabled
+                      ? (_) => onChanged(_normalized(item))
+                      : null,
                 ),
               ),
           ],
@@ -461,9 +470,11 @@ class _ConfidenceInput extends StatelessWidget {
   List<double> _values() {
     final values = <double>[];
     final step = question.step <= 0 ? 1 : question.step;
-    for (var current = question.minimum;
-        current <= question.maximum + 1e-9;
-        current += step) {
+    for (
+      var current = question.minimum;
+      current <= question.maximum + 1e-9;
+      current += step
+    ) {
       values.add(current);
       if (values.length >= 20) break;
     }

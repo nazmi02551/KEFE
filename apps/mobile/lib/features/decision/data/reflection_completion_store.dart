@@ -44,10 +44,7 @@ abstract interface class ReflectionCompletionStore {
 
   Future<void> write(PendingReflectionCompletion completion);
 
-  Future<void> clear({
-    required String sessionId,
-    required String stepCode,
-  });
+  Future<void> clear({required String sessionId, required String stepCode});
 }
 
 class SharedPreferencesReflectionCompletionStore
@@ -79,7 +76,8 @@ class SharedPreferencesReflectionCompletionStore
       final completion = PendingReflectionCompletion.fromJson(
         (jsonDecode(raw) as Map).cast<String, Object?>(),
       );
-      if (completion.sessionId != sessionId || completion.stepCode != stepCode) {
+      if (completion.sessionId != sessionId ||
+          completion.stepCode != stepCode) {
         await preferences.remove(key);
         return null;
       }

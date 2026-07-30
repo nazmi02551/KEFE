@@ -36,7 +36,10 @@ void main() {
           .toList(growable: false);
       expect(destinations.length, 4);
       expect(destinations.last.label, 'My KEFE');
-      expect(find.byKey(const ValueKey('preview-build-identity')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('preview-build-identity')),
+        findsNothing,
+      );
       expect(find.byKey(const ValueKey('open-preview-radar')), findsNothing);
       expect(find.byKey(const ValueKey('open-preview-atlas')), findsNothing);
 
@@ -45,14 +48,20 @@ void main() {
 
       expect(find.byKey(const ValueKey('my-kefe-journey')), findsOneWidget);
       expect(find.byKey(const ValueKey('saved-cases-section')), findsNothing);
-      expect(find.byKey(const ValueKey('preview-build-identity')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('preview-build-identity')),
+        findsNothing,
+      );
 
       await tester.tap(find.byIcon(Icons.history_outlined));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('activity-screen')), findsOneWidget);
       expect(find.byKey(const ValueKey('saved-cases-section')), findsOneWidget);
-      expect(find.byKey(const ValueKey('preview-build-identity')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('preview-build-identity')),
+        findsNothing,
+      );
     },
   );
 }

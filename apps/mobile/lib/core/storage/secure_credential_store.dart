@@ -17,8 +17,6 @@ class SecureCredentialStore implements CredentialStore {
   Future<String?> read() => _storage.read(key: _accessTokenKey);
 
   @override
-  Future<void> write(String token) => _storage.write(
-    key: _accessTokenKey,
-    value: token,
-  );
+  Future<void> write(String token) =>
+      _storage.write(key: _accessTokenKey, value: token);
 }

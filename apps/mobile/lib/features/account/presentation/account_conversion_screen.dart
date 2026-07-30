@@ -9,10 +9,12 @@ class AccountConversionScreen extends ConsumerStatefulWidget {
   const AccountConversionScreen({super.key});
 
   @override
-  ConsumerState<AccountConversionScreen> createState() => _AccountConversionScreenState();
+  ConsumerState<AccountConversionScreen> createState() =>
+      _AccountConversionScreenState();
 }
 
-class _AccountConversionScreenState extends ConsumerState<AccountConversionScreen> {
+class _AccountConversionScreenState
+    extends ConsumerState<AccountConversionScreen> {
   final _identifier = TextEditingController();
   final _code = TextEditingController();
 
@@ -40,7 +42,9 @@ class _AccountConversionScreenState extends ConsumerState<AccountConversionScree
             Semantics(
               header: true,
               child: Text(
-                tr ? 'Tartımların seninle gelsin.' : 'Keep your weighs with you.',
+                tr
+                    ? 'Tartımların seninle gelsin.'
+                    : 'Keep your weighs with you.',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
             ),
@@ -56,8 +60,14 @@ class _AccountConversionScreenState extends ConsumerState<AccountConversionScree
                 state.uiState == AccountUiState.error) ...[
               SegmentedButton<String>(
                 segments: [
-                  ButtonSegment(value: 'EMAIL', label: Text(tr ? 'E-posta' : 'Email')),
-                  ButtonSegment(value: 'SMS', label: Text(tr ? 'Telefon' : 'Phone')),
+                  ButtonSegment(
+                    value: 'EMAIL',
+                    label: Text(tr ? 'E-posta' : 'Email'),
+                  ),
+                  ButtonSegment(
+                    value: 'SMS',
+                    label: Text(tr ? 'Telefon' : 'Phone'),
+                  ),
                 ],
                 selected: {state.channel},
                 onSelectionChanged: state.uiState == AccountUiState.requesting
@@ -87,7 +97,9 @@ class _AccountConversionScreenState extends ConsumerState<AccountConversionScree
                 onPressed: state.uiState == AccountUiState.requesting
                     ? null
                     : controller.requestOtp,
-                child: Text(tr ? 'Doğrulama kodu gönder' : 'Send verification code'),
+                child: Text(
+                  tr ? 'Doğrulama kodu gönder' : 'Send verification code',
+                ),
               ),
             ],
             if (state.uiState == AccountUiState.enterCode ||
@@ -104,7 +116,9 @@ class _AccountConversionScreenState extends ConsumerState<AccountConversionScree
                 keyboardType: TextInputType.number,
                 maxLength: 6,
                 autofillHints: const [AutofillHints.oneTimeCode],
-                decoration: InputDecoration(labelText: tr ? 'Doğrulama kodu' : 'Verification code'),
+                decoration: InputDecoration(
+                  labelText: tr ? 'Doğrulama kodu' : 'Verification code',
+                ),
               ),
               FilledButton(
                 key: const ValueKey('account-verify-merge'),
@@ -119,8 +133,12 @@ class _AccountConversionScreenState extends ConsumerState<AccountConversionScree
               const SizedBox(height: 12),
               Text(
                 state.mergedExistingHistory
-                    ? (tr ? 'Hesabın doğrulandı ve iki geçmiş güvenli biçimde birleştirildi.' : 'Account verified and both histories were safely merged.')
-                    : (tr ? 'Hesabın doğrulandı. Mevcut tartım geçmişin korunuyor.' : 'Account verified. Your existing weigh history is preserved.'),
+                    ? (tr
+                          ? 'Hesabın doğrulandı ve iki geçmiş güvenli biçimde birleştirildi.'
+                          : 'Account verified and both histories were safely merged.')
+                    : (tr
+                          ? 'Hesabın doğrulandı. Mevcut tartım geçmişin korunuyor.'
+                          : 'Account verified. Your existing weigh history is preserved.'),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 16),

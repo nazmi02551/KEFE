@@ -79,9 +79,8 @@ class _KefeAppState extends State<KefeApp> {
       ),
       GoRoute(
         path: '/share/:token',
-        builder: (context, state) => PublicShareScreen(
-          token: state.pathParameters['token']!,
-        ),
+        builder: (context, state) =>
+            PublicShareScreen(token: state.pathParameters['token']!),
       ),
       GoRoute(
         path: '/case/:caseId',

@@ -1,0 +1,1185 @@
+{
+  "components": {
+    "schemas": {
+      "AccountCredentialResponse": {
+        "properties": {
+          "access_token": {
+            "title": "Access Token",
+            "type": "string"
+          },
+          "actor_id": {
+            "format": "uuid",
+            "title": "Actor Id",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "merged_from_actor_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Merged From Actor Id"
+          },
+          "token_type": {
+            "default": "Bearer",
+            "title": "Token Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "actor_id",
+          "access_token",
+          "expires_at"
+        ],
+        "title": "AccountCredentialResponse",
+        "type": "object"
+      },
+      "CommunityReasonItem": {
+        "properties": {
+          "reaction_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Reaction Counts",
+            "type": "object"
+          },
+          "reason_id": {
+            "format": "uuid",
+            "title": "Reason Id",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "required": [
+          "reason_id",
+          "tags",
+          "text",
+          "reaction_counts"
+        ],
+        "title": "CommunityReasonItem",
+        "type": "object"
+      },
+      "CommunityReasonModeration": {
+        "enum": [
+          "NOT_REQUIRED",
+          "PENDING",
+          "ALLOWED",
+          "BLOCKED"
+        ],
+        "title": "CommunityReasonModeration",
+        "type": "string"
+      },
+      "CommunityReasonReceipt": {
+        "properties": {
+          "moderation_state": {
+            "title": "Moderation State",
+            "type": "string"
+          },
+          "reason_id": {
+            "format": "uuid",
+            "title": "Reason Id",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "required": [
+          "reason_id",
+          "tags",
+          "text",
+          "moderation_state"
+        ],
+        "title": "CommunityReasonReceipt",
+        "type": "object"
+      },
+      "CommunityReasonSnapshotResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CommunityReasonItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "methodology_note": {
+            "default": "Descriptive post-Commit Community Reasons; reactions do not rank truth or Signal eligibility.",
+            "title": "Methodology Note",
+            "type": "string"
+          },
+          "sample_size": {
+            "title": "Sample Size",
+            "type": "integer"
+          },
+          "tag_pattern_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Tag Pattern Counts",
+            "type": "object"
+          }
+        },
+        "required": [
+          "items",
+          "tag_pattern_counts",
+          "sample_size"
+        ],
+        "title": "CommunityReasonSnapshotResponse",
+        "type": "object"
+      },
+      "CreateShareRequest": {
+        "properties": {
+          "include_decision": {
+            "default": false,
+            "title": "Include Decision",
+            "type": "boolean"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id"
+        ],
+        "title": "CreateShareRequest",
+        "type": "object"
+      },
+      "CreateShareResponse": {
+        "properties": {
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "include_decision": {
+            "title": "Include Decision",
+            "type": "boolean"
+          },
+          "share_id": {
+            "format": "uuid",
+            "title": "Share Id",
+            "type": "string"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "share_id",
+          "token",
+          "expires_at",
+          "include_decision"
+        ],
+        "title": "CreateShareResponse",
+        "type": "object"
+      },
+      "GuestMergeRequest": {
+        "properties": {
+          "verification_token": {
+            "maxLength": 256,
+            "minLength": 16,
+            "title": "Verification Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "verification_token"
+        ],
+        "title": "GuestMergeRequest",
+        "type": "object"
+      },
+      "ModerateCommunityReasonRequest": {
+        "properties": {
+          "state": {
+            "$ref": "#/components/schemas/CommunityReasonModeration"
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "title": "ModerateCommunityReasonRequest",
+        "type": "object"
+      },
+      "ModerateCommunityReasonResponse": {
+        "properties": {
+          "moderation_state": {
+            "title": "Moderation State",
+            "type": "string"
+          },
+          "reason_id": {
+            "format": "uuid",
+            "title": "Reason Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason_id",
+          "moderation_state"
+        ],
+        "title": "ModerateCommunityReasonResponse",
+        "type": "object"
+      },
+      "OtpChallengeResponse": {
+        "properties": {
+          "challenge_id": {
+            "format": "uuid",
+            "title": "Challenge Id",
+            "type": "string"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/OtpChannel"
+          },
+          "destination_hint": {
+            "title": "Destination Hint",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "challenge_id",
+          "channel",
+          "destination_hint",
+          "expires_at"
+        ],
+        "title": "OtpChallengeResponse",
+        "type": "object"
+      },
+      "OtpChannel": {
+        "enum": [
+          "EMAIL",
+          "SMS"
+        ],
+        "title": "OtpChannel",
+        "type": "string"
+      },
+      "OtpRequest": {
+        "properties": {
+          "channel": {
+            "$ref": "#/components/schemas/OtpChannel"
+          },
+          "identifier": {
+            "maxLength": 254,
+            "minLength": 3,
+            "title": "Identifier",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel",
+          "identifier"
+        ],
+        "title": "OtpRequest",
+        "type": "object"
+      },
+      "OtpVerificationResponse": {
+        "properties": {
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "verification_token": {
+            "title": "Verification Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "verification_token",
+          "expires_at"
+        ],
+        "title": "OtpVerificationResponse",
+        "type": "object"
+      },
+      "OtpVerifyRequest": {
+        "properties": {
+          "challenge_id": {
+            "format": "uuid",
+            "title": "Challenge Id",
+            "type": "string"
+          },
+          "code": {
+            "maxLength": 6,
+            "minLength": 6,
+            "title": "Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "challenge_id",
+          "code"
+        ],
+        "title": "OtpVerifyRequest",
+        "type": "object"
+      },
+      "PrivacyDeletionResponse": {
+        "properties": {
+          "aggregate_contributions_anonymized": {
+            "title": "Aggregate Contributions Anonymized",
+            "type": "boolean"
+          },
+          "deleted_at": {
+            "title": "Deleted At",
+            "type": "string"
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "string"
+          },
+          "private_data_deleted": {
+            "title": "Private Data Deleted",
+            "type": "boolean"
+          },
+          "receipt_id": {
+            "format": "uuid",
+            "title": "Receipt Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "receipt_id",
+          "deleted_at",
+          "policy_version",
+          "private_data_deleted",
+          "aggregate_contributions_anonymized"
+        ],
+        "title": "PrivacyDeletionResponse",
+        "type": "object"
+      },
+      "PrivacyExportResponse": {
+        "properties": {
+          "actor_id": {
+            "format": "uuid",
+            "title": "Actor Id",
+            "type": "string"
+          },
+          "actor_kind": {
+            "title": "Actor Kind",
+            "type": "string"
+          },
+          "generated_at": {
+            "title": "Generated At",
+            "type": "string"
+          },
+          "product_data": {
+            "additionalProperties": true,
+            "title": "Product Data",
+            "type": "object"
+          },
+          "retention": {
+            "additionalProperties": true,
+            "title": "Retention",
+            "type": "object"
+          }
+        },
+        "required": [
+          "actor_id",
+          "actor_kind",
+          "generated_at",
+          "retention",
+          "product_data"
+        ],
+        "title": "PrivacyExportResponse",
+        "type": "object"
+      },
+      "PublicShareResponse": {
+        "properties": {
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "case_version_id": {
+            "format": "uuid",
+            "title": "Case Version Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "primary_domain": {
+            "title": "Primary Domain",
+            "type": "string"
+          },
+          "share_id": {
+            "format": "uuid",
+            "title": "Share Id",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "share_id",
+          "case_id",
+          "case_version_id",
+          "title",
+          "summary",
+          "primary_domain",
+          "decision",
+          "created_at",
+          "expires_at"
+        ],
+        "title": "PublicShareResponse",
+        "type": "object"
+      },
+      "PublishCommunityReasonRequest": {
+        "properties": {
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Tags",
+            "type": "array"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "required": [
+          "tags"
+        ],
+        "title": "PublishCommunityReasonRequest",
+        "type": "object"
+      },
+      "ReactionRequest": {
+        "properties": {
+          "reaction": {
+            "$ref": "#/components/schemas/ReasonReaction"
+          }
+        },
+        "required": [
+          "reaction"
+        ],
+        "title": "ReactionRequest",
+        "type": "object"
+      },
+      "ReasonReaction": {
+        "enum": [
+          "RESONATES",
+          "USEFUL",
+          "CHALLENGES"
+        ],
+        "title": "ReasonReaction",
+        "type": "string"
+      },
+      "ReasonReportCode": {
+        "enum": [
+          "ABUSE",
+          "PERSONAL_DATA",
+          "MISLEADING",
+          "OTHER"
+        ],
+        "title": "ReasonReportCode",
+        "type": "string"
+      },
+      "ReportRequest": {
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/ReasonReportCode"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "ReportRequest",
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/internal/admin/v1/community-reasons/{reason_id}/moderation": {
+      "post": {
+        "operationId": "moderate_reason_internal_admin_v1_community_reasons__reason_id__moderation_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reason_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Reason Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-KEFE-CSRF",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Csrf"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModerateCommunityReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModerateCommunityReasonResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Moderate Reason",
+        "tags": [
+          "Internal Admin"
+        ]
+      }
+    },
+    "/v1/auth/guest-merge": {
+      "post": {
+        "operationId": "merge_guest_v1_auth_guest_merge_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuestMergeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountCredentialResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Merge Guest",
+        "tags": [
+          "Account Continuity"
+        ]
+      }
+    },
+    "/v1/auth/otp/request": {
+      "post": {
+        "operationId": "request_otp_v1_auth_otp_request_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtpRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtpChallengeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Request Otp",
+        "tags": [
+          "Account Continuity"
+        ]
+      }
+    },
+    "/v1/auth/otp/verify": {
+      "post": {
+        "operationId": "verify_otp_v1_auth_otp_verify_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtpVerifyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtpVerificationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Verify Otp",
+        "tags": [
+          "Account Continuity"
+        ]
+      }
+    },
+    "/v1/case-versions/{case_version_id}/community-reasons": {
+      "get": {
+        "operationId": "read_reasons_v1_case_versions__case_version_id__community_reasons_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunityReasonSnapshotResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Read Reasons",
+        "tags": [
+          "Community Reason"
+        ]
+      }
+    },
+    "/v1/community-reasons/{reason_id}/reaction": {
+      "put": {
+        "operationId": "react_v1_community_reasons__reason_id__reaction_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reason_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Reason Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReactionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "React",
+        "tags": [
+          "Community Reason"
+        ]
+      }
+    },
+    "/v1/community-reasons/{reason_id}/reports": {
+      "post": {
+        "operationId": "report_v1_community_reasons__reason_id__reports_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reason_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Reason Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Report",
+        "tags": [
+          "Community Reason"
+        ]
+      }
+    },
+    "/v1/me": {
+      "delete": {
+        "operationId": "delete_me_v1_me_delete",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-KEFE-Delete-Confirm",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Delete-Confirm"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyDeletionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Me",
+        "tags": [
+          "Privacy"
+        ]
+      }
+    },
+    "/v1/me/privacy-export": {
+      "get": {
+        "operationId": "export_privacy_v1_me_privacy_export_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyExportResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Export Privacy",
+        "tags": [
+          "Privacy"
+        ]
+      }
+    },
+    "/v1/shares": {
+      "post": {
+        "operationId": "create_share_v1_shares_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateShareRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateShareResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Share",
+        "tags": [
+          "Sharing"
+        ]
+      }
+    },
+    "/v1/shares/{share_id}": {
+      "delete": {
+        "operationId": "revoke_share_v1_shares__share_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "share_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Share Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Revoke Share",
+        "tags": [
+          "Sharing"
+        ]
+      }
+    },
+    "/v1/shares/{token}": {
+      "get": {
+        "operationId": "read_share_v1_shares__token__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicShareResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Read Share",
+        "tags": [
+          "Sharing"
+        ]
+      }
+    },
+    "/v1/weigh-sessions/{session_id}/community-reason": {
+      "post": {
+        "operationId": "publish_reason_v1_weigh_sessions__session_id__community_reason_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Session Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishCommunityReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunityReasonReceipt"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Publish Reason",
+        "tags": [
+          "Community Reason"
+        ]
+      }
+    }
+  },
+  "target_version": "0.19.0"
+}

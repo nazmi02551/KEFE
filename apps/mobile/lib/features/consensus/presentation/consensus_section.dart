@@ -66,7 +66,9 @@ class _ConsensusSectionState extends ConsumerState<ConsensusSection> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  tr ? 'Konsensüs kartı hazırlanıyor…' : 'Preparing consensus card…',
+                  tr
+                      ? 'Konsensüs kartı hazırlanıyor…'
+                      : 'Preparing consensus card…',
                 ),
               ),
             ],
@@ -97,7 +99,9 @@ class _ConsensusSectionState extends ConsumerState<ConsensusSection> {
       case ConsensusUiState.participated:
         if (state.cards.isEmpty) return const SizedBox.shrink();
         final active = state.activeCard;
-        final completed = state.cards.where((card) => card.participated).toList();
+        final completed = state.cards
+            .where((card) => card.participated)
+            .toList();
         return Column(
           key: const ValueKey('consensus-section'),
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -150,9 +154,9 @@ class _ConsensusParticipationCard extends ConsumerWidget {
             card.proposition,
             key: const ValueKey('consensus-proposition'),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  height: 1.22,
-                ),
+              fontWeight: FontWeight.w800,
+              height: 1.22,
+            ),
           ),
           const SizedBox(height: 9),
           Text(
@@ -160,9 +164,9 @@ class _ConsensusParticipationCard extends ConsumerWidget {
                 ? 'Bu ifadeye ne kadar katılıyorsun? Kartın dağılımı kendi yanıtından sonra açılır.'
                 : 'How much do you agree? This card’s distribution unlocks after your own response.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: KefeColorTokens.textMutedDark,
-                  height: 1.4,
-                ),
+              color: KefeColorTokens.textMutedDark,
+              height: 1.4,
+            ),
           ),
           const SizedBox(height: 18),
           Wrap(
@@ -174,7 +178,9 @@ class _ConsensusParticipationCard extends ConsumerWidget {
                   key: ValueKey('consensus-stance-$stance'),
                   label: Text(_stanceLabel(stance, tr)),
                   selected: state.selectedStance == stance,
-                  onSelected: submitting ? null : (_) => controller.selectStance(stance),
+                  onSelected: submitting
+                      ? null
+                      : (_) => controller.selectStance(stance),
                 ),
             ],
           ),
@@ -184,9 +190,9 @@ class _ConsensusParticipationCard extends ConsumerWidget {
               tr
                   ? 'Gerekçeni en fazla ${card.maxReasonTags} etiketle belirt'
                   : 'Choose up to ${card.maxReasonTags} reason tags',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 9),
             Wrap(
@@ -198,7 +204,9 @@ class _ConsensusParticipationCard extends ConsumerWidget {
                     key: ValueKey('consensus-reason-$tag'),
                     label: Text(_reasonLabel(tag, tr)),
                     selected: state.selectedReasonTags.contains(tag),
-                    onSelected: submitting ? null : (_) => controller.toggleReasonTag(tag),
+                    onSelected: submitting
+                        ? null
+                        : (_) => controller.toggleReasonTag(tag),
                   ),
               ],
             ),
@@ -206,7 +214,9 @@ class _ConsensusParticipationCard extends ConsumerWidget {
           const SizedBox(height: 20),
           FilledButton.icon(
             key: const ValueKey('consensus-submit'),
-            onPressed: state.canSubmit && !submitting ? controller.submit : null,
+            onPressed: state.canSubmit && !submitting
+                ? controller.submit
+                : null,
             icon: submitting
                 ? const SizedBox(
                     width: 18,
@@ -226,9 +236,9 @@ class _ConsensusParticipationCard extends ConsumerWidget {
                 ? 'Bu katılım, kararını verdikten sonra gerçekleştiği için EXPOSED olarak tutulur. Ana sonuç veya Signal değildir.'
                 : 'Because this happens after your decision, it is stored as EXPOSED. It is not the core result or a Signal.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: KefeColorTokens.textMutedDark,
-                  height: 1.35,
-                ),
+              color: KefeColorTokens.textMutedDark,
+              height: 1.35,
+            ),
           ),
         ],
       ),
@@ -254,27 +264,33 @@ class _ConsensusCardResult extends StatelessWidget {
           const SizedBox(height: 14),
           Row(
             children: [
-              _IntegrityBadge(text: '${aggregate.contributionClass} · n=${aggregate.sampleSize}'),
+              _IntegrityBadge(
+                text:
+                    '${aggregate.contributionClass} · n=${aggregate.sampleSize}',
+              ),
               const Spacer(),
-              const Icon(Icons.check_circle_rounded, color: KefeColorTokens.success),
+              const Icon(
+                Icons.check_circle_rounded,
+                color: KefeColorTokens.success,
+              ),
             ],
           ),
           const SizedBox(height: 15),
           Text(
             card.proposition,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  height: 1.25,
-                ),
+              fontWeight: FontWeight.w800,
+              height: 1.25,
+            ),
           ),
           const SizedBox(height: 18),
           Text(
             tr ? 'KONSENSÜS DAĞILIMI' : 'CONSENSUS DISTRIBUTION',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: KefeColorTokens.goldSoft,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.8,
-                ),
+              color: KefeColorTokens.goldSoft,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.8,
+            ),
           ),
           const SizedBox(height: 12),
           for (final stance in card.stanceCodes) ...[
@@ -290,10 +306,10 @@ class _ConsensusCardResult extends StatelessWidget {
             Text(
               tr ? 'GEREKÇE ÖRÜNTÜLERİ' : 'REASON PATTERNS',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: KefeColorTokens.textMutedDark,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.7,
-                  ),
+                color: KefeColorTokens.textMutedDark,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.7,
+              ),
             ),
             const SizedBox(height: 9),
             Wrap(
@@ -322,9 +338,9 @@ class _ConsensusCardResult extends StatelessWidget {
             child: Text(
               aggregate.provenanceNote,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: KefeColorTokens.textMutedDark,
-                    height: 1.4,
-                  ),
+                color: KefeColorTokens.textMutedDark,
+                height: 1.4,
+              ),
             ),
           ),
         ],
@@ -340,18 +356,16 @@ class _ConsensusFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-        key: key,
-        child: Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: KefeColorTokens.gold.withValues(alpha: 0.24),
-            ),
-          ),
-          child: child,
-        ),
-      );
+    key: key,
+    child: Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: KefeColorTokens.gold.withValues(alpha: 0.24)),
+      ),
+      child: child,
+    ),
+  );
 }
 
 class _ConsensusHeader extends StatelessWidget {
@@ -369,7 +383,10 @@ class _ConsensusHeader extends StatelessWidget {
             color: KefeColorTokens.gold.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(13),
           ),
-          child: const Icon(Icons.hub_outlined, color: KefeColorTokens.goldSoft),
+          child: const Icon(
+            Icons.hub_outlined,
+            color: KefeColorTokens.goldSoft,
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -379,17 +396,17 @@ class _ConsensusHeader extends StatelessWidget {
               Text(
                 tr ? 'WE · ORTAK ZEMİN' : 'WE · COMMON GROUND',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: KefeColorTokens.goldSoft,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.8,
-                    ),
+                  color: KefeColorTokens.goldSoft,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.8,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
                 tr ? 'Konsensüs Kartı' : 'Consensus Card',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
               ),
             ],
           ),
@@ -406,20 +423,20 @@ class _IntegrityBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: KefeColorTokens.rules.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: KefeColorTokens.rules.withValues(alpha: 0.24)),
-        ),
-        child: Text(
-          text,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: KefeColorTokens.goldSoft,
-                fontWeight: FontWeight.w800,
-              ),
-        ),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    decoration: BoxDecoration(
+      color: KefeColorTokens.rules.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(999),
+      border: Border.all(color: KefeColorTokens.rules.withValues(alpha: 0.24)),
+    ),
+    child: Text(
+      text,
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+        color: KefeColorTokens.goldSoft,
+        fontWeight: FontWeight.w800,
+      ),
+    ),
+  );
 }
 
 class _DistributionRow extends StatelessWidget {
@@ -435,25 +452,25 @@ class _DistributionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Row(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  label,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: selected ? FontWeight.w900 : FontWeight.w600,
-                      ),
-                ),
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: selected ? FontWeight.w900 : FontWeight.w600,
               ),
-              Text('%${(value * 100).round()}'),
-            ],
+            ),
           ),
-          const SizedBox(height: 6),
-          LinearProgressIndicator(value: value.clamp(0, 1)),
+          Text('%${(value * 100).round()}'),
         ],
-      );
+      ),
+      const SizedBox(height: 6),
+      LinearProgressIndicator(value: value.clamp(0, 1)),
+    ],
+  );
 }
 
 class _Notice extends StatelessWidget {
@@ -465,22 +482,22 @@ class _Notice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: KefeColorTokens.goldSoft),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 4),
-                Text(body),
-              ],
-            ),
-          ),
-        ],
-      );
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Icon(icon, color: KefeColorTokens.goldSoft),
+      const SizedBox(width: 12),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(body),
+          ],
+        ),
+      ),
+    ],
+  );
 }
 
 class _ErrorState extends StatelessWidget {
@@ -496,33 +513,33 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Consensus temporarily unavailable${errorCode == null ? '' : ' · $errorCode'}',
-          ),
-          const SizedBox(height: 10),
-          OutlinedButton.icon(
-            onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded),
-            label: Text(retryLabel),
-          ),
-        ],
-      );
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Text(
+        'Consensus temporarily unavailable${errorCode == null ? '' : ' · $errorCode'}',
+      ),
+      const SizedBox(height: 10),
+      OutlinedButton.icon(
+        onPressed: onRetry,
+        icon: const Icon(Icons.refresh_rounded),
+        label: Text(retryLabel),
+      ),
+    ],
+  );
 }
 
 String _stanceLabel(String code, bool tr) => switch (code) {
-      'AGREE' => tr ? 'Katılıyorum' : 'Agree',
-      'MIXED' => tr ? 'Kısmen' : 'Mixed',
-      'DISAGREE' => tr ? 'Katılmıyorum' : 'Disagree',
-      _ => code.replaceAll('_', ' '),
-    };
+  'AGREE' => tr ? 'Katılıyorum' : 'Agree',
+  'MIXED' => tr ? 'Kısmen' : 'Mixed',
+  'DISAGREE' => tr ? 'Katılmıyorum' : 'Disagree',
+  _ => code.replaceAll('_', ' '),
+};
 
 String _reasonLabel(String code, bool tr) => switch (code) {
-      'FAIRNESS' => tr ? 'Adalet' : 'Fairness',
-      'NEED' => tr ? 'İhtiyaç' : 'Need',
-      'RULES' => tr ? 'Kurallar' : 'Rules',
-      'PRACTICAL_IMPACT' => tr ? 'Pratik etki' : 'Practical impact',
-      'RESPONSIBILITY' => tr ? 'Sorumluluk' : 'Responsibility',
-      _ => code.replaceAll('_', ' '),
-    };
+  'FAIRNESS' => tr ? 'Adalet' : 'Fairness',
+  'NEED' => tr ? 'İhtiyaç' : 'Need',
+  'RULES' => tr ? 'Kurallar' : 'Rules',
+  'PRACTICAL_IMPACT' => tr ? 'Pratik etki' : 'Practical impact',
+  'RESPONSIBILITY' => tr ? 'Sorumluluk' : 'Responsibility',
+  _ => code.replaceAll('_', ' '),
+};

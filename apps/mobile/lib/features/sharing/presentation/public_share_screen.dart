@@ -67,7 +67,9 @@ class _PublicShareScreenState extends ConsumerState<PublicShareScreen> {
               const Center(child: CircularProgressIndicator())
             else if (_share == null) ...[
               Text(
-                tr ? 'Bu paylaşım artık kullanılamıyor.' : 'This share is no longer available.',
+                tr
+                    ? 'Bu paylaşım artık kullanılamıyor.'
+                    : 'This share is no longer available.',
                 key: const ValueKey('public-share-error'),
               ),
               if (_errorCode != null) Text(_errorCode!),
@@ -86,8 +88,8 @@ class _PublicShareScreenState extends ConsumerState<PublicShareScreen> {
                 _share!.title,
                 key: const ValueKey('public-share-title'),
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
+                  fontWeight: FontWeight.w900,
+                ),
               ),
               const SizedBox(height: 10),
               Text(_share!.summary),
