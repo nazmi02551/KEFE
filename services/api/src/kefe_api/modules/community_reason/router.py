@@ -37,7 +37,8 @@ class CommunityReasonSnapshotResponse(BaseModel):
     tag_pattern_counts: dict[str, int]
     sample_size: int
     methodology_note: str = (
-        "Descriptive post-Commit Community Reasons; reactions do not rank truth or Signal eligibility."
+        "Descriptive post-Commit Community Reasons; reactions do not rank truth or "
+        "Signal eligibility."
     )
 
 
