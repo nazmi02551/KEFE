@@ -37,6 +37,7 @@ from kefe_api.modules.decision.bootstrap import (
 
 DEMO_ISSUE_ID = UUID("44444444-4444-4444-8444-444444444444")
 DEMO_RESULT_ID = UUID("66666666-6666-4666-8666-666666666666")
+DEMO_CONSENSUS_CARD_ID = UUID("91000000-0000-4000-8000-000000000001")
 
 DEMO_PERSPECTIVES = (
     (
@@ -154,7 +155,7 @@ def _publish_demo_case() -> None:
     service.publish(version.id, actor_ref="seed:demo-publisher")
 
 
-def _seed_demo_result_and_perspectives() -> None:
+def _seed_demo_result_perspectives_and_consensus() -> None:
     settings = get_settings()
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required to seed PostgreSQL")
@@ -214,11 +215,61 @@ def _seed_demo_result_and_perspectives() -> None:
                     "published_at": generated_at,
                 },
             )
+        connection.execute(
+            text(
+                """
+                INSERT INTO collective.consensus_card_version (
+                    id,
+                    case_version_id,
+                    proposition,
+                    stance_codes,
+                    reason_tag_codes,
+                    max_reason_tags,
+                    methodology_version,
+                    status,
+                    published_at
+                )
+                VALUES (
+                    :id,
+                    :case_version_id,
+                    :proposition,
+                    CAST(:stance_codes AS jsonb),
+                    CAST(:reason_tag_codes AS jsonb),
+                    2,
+                    'CONSENSUS_WE_V1',
+                    'PUBLISHED',
+                    :published_at
+                )
+                ON CONFLICT (id) DO UPDATE SET
+                    proposition = EXCLUDED.proposition,
+                    stance_codes = EXCLUDED.stance_codes,
+                    reason_tag_codes = EXCLUDED.reason_tag_codes,
+                    max_reason_tags = EXCLUDED.max_reason_tags,
+                    methodology_version = EXCLUDED.methodology_version,
+                    status = EXCLUDED.status,
+                    published_at = EXCLUDED.published_at,
+                    updated_at = now()
+                """
+            ),
+            {
+                "id": DEMO_CONSENSUS_CARD_ID,
+                "case_version_id": DEMO_CASE_VERSION_ID,
+                "proposition": (
+                    "Sınırlı bir kaynak dağıtılırken açıkça daha acil ihtiyaç, "
+                    "salt sıra önceliğinden önce gelmelidir."
+                ),
+                "stance_codes": json.dumps(["AGREE", "MIXED", "DISAGREE"]),
+                "reason_tag_codes": json.dumps(
+                    ["NEED", "FAIRNESS", "RULES", "PRACTICAL_IMPACT"]
+                ),
+                "published_at": generated_at,
+            },
+        )
 
 
 def seed_demo() -> None:
     _publish_demo_case()
-    _seed_demo_result_and_perspectives()
+    _seed_demo_result_perspectives_and_consensus()
 
 
 if __name__ == "__main__":
