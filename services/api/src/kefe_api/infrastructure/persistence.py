@@ -3,6 +3,7 @@ from __future__ import annotations
 from kefe_api.core.settings import Settings
 from kefe_api.infrastructure.db import build_engine
 from kefe_api.infrastructure.postgres_admin_security import PostgresAdminSessionStore
+from kefe_api.infrastructure.postgres_consensus import PostgresConsensusRepository
 from kefe_api.infrastructure.postgres_content_configuration import (
     PostgresContentConfigurationRepository,
 )
@@ -18,6 +19,8 @@ from kefe_api.infrastructure.postgres_reflection_decision import (
 )
 from kefe_api.modules.admin_security.in_memory import InMemoryAdminSessionStore
 from kefe_api.modules.admin_security.ports import AdminSessionStore
+from kefe_api.modules.consensus.in_memory import build_demo_consensus_repository
+from kefe_api.modules.consensus.ports import ConsensusRepository
 from kefe_api.modules.content_authoring.in_memory import InMemoryContentAuthoringRepository
 from kefe_api.modules.content_authoring.ports import ContentAuthoringRepository
 from kefe_api.modules.content_configuration.bootstrap import build_default_content_configuration
@@ -46,6 +49,16 @@ def build_decision_repository(settings: Settings) -> DecisionRepository:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
 
     return PostgresReflectionDecisionRepository(build_engine(settings.database_url))
+
+
+def build_consensus_repository(settings: Settings) -> ConsensusRepository:
+    if settings.persistence_backend == "memory":
+        return build_demo_consensus_repository()
+
+    if not settings.database_url:
+        raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
+
+    return PostgresConsensusRepository(build_engine(settings.database_url))
 
 
 def build_context_repository(settings: Settings) -> ContextRepository:

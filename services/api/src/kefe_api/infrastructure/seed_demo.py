@@ -12,6 +12,10 @@ from kefe_api.infrastructure.persistence import (
     build_content_authoring_repository,
     build_content_configuration_repository,
 )
+from kefe_api.modules.consensus.in_memory import (
+    DEMO_CONSENSUS_CARD_ID,
+    DEMO_CONSENSUS_CARD_VERSION_ID,
+)
 from kefe_api.modules.content_authoring.models import (
     AuthoringCaseVersion,
     AuthoringIssue,
@@ -39,32 +43,10 @@ DEMO_ISSUE_ID = UUID("44444444-4444-4444-8444-444444444444")
 DEMO_RESULT_ID = UUID("66666666-6666-4666-8666-666666666666")
 
 DEMO_PERSPECTIVES = (
-    (
-        DEMO_NEAR_PERSPECTIVE_ID,
-        "NEAR",
-        "İhtiyacı daha acil görünen kişiye öncelik vermek zararı azaltabilir.",
-    ),
-    (
-        DEMO_OPPOSING_PERSPECTIVE_ID,
-        "OPPOSING",
-        "Sırayı korumak, kişisel değerlendirmeden doğacak keyfiliği sınırlayabilir.",
-    ),
-    (
-        DEMO_BRIDGE_PERSPECTIVE_ID,
-        "BRIDGE",
-        (
-            "Acil ihtiyacı gözetirken sırada bekleyenin hakkını açık bir ölçütle "
-            "korumak iki kaygıyı birlikte taşıyabilir."
-        ),
-    ),
-    (
-        DEMO_ALTERNATIVE_PERSPECTIVE_ID,
-        "ALTERNATIVE_CONTEXT",
-        (
-            "Koltuk tek kaynak değilse kısa süreli destek veya yer değişimi "
-            "ikilemi yumuşatabilir."
-        ),
-    ),
+    (DEMO_NEAR_PERSPECTIVE_ID, "NEAR", "İhtiyacı daha acil görünen kişiye öncelik vermek zararı azaltabilir."),
+    (DEMO_OPPOSING_PERSPECTIVE_ID, "OPPOSING", "Sırayı korumak, kişisel değerlendirmeden doğacak keyfiliği sınırlayabilir."),
+    (DEMO_BRIDGE_PERSPECTIVE_ID, "BRIDGE", "Acil ihtiyacı gözetirken sırada bekleyenin hakkını açık bir ölçütle korumak iki kaygıyı birlikte taşıyabilir."),
+    (DEMO_ALTERNATIVE_PERSPECTIVE_ID, "ALTERNATIVE_CONTEXT", "Koltuk tek kaynak değilse kısa süreli destek veya yer değişimi ikilemi yumuşatabilir."),
 )
 
 
@@ -93,12 +75,7 @@ def _demo_authoring_version() -> AuthoringCaseVersion:
                         response_schema={
                             "options": ["A", "B"],
                             "reason": {
-                                "tags": [
-                                    "FAIRNESS",
-                                    "NEED",
-                                    "RESPONSIBILITY",
-                                    "PRACTICAL_IMPACT",
-                                ],
+                                "tags": ["FAIRNESS", "NEED", "RESPONSIBILITY", "PRACTICAL_IMPACT"],
                                 "max_tags": 3,
                                 "text_enabled": True,
                                 "text_max_length": 500,
@@ -142,10 +119,7 @@ def _publish_demo_case() -> None:
 
     version = _demo_authoring_version()
     service.create_case(
-        identity=CaseIdentity(
-            id=DEMO_CASE_ID,
-            slug="son-koltuk-kime-verilmeli",
-        ),
+        identity=CaseIdentity(id=DEMO_CASE_ID, slug="son-koltuk-kime-verilmeli"),
         initial_version=version,
         actor_ref="seed:demo-editor",
     )
@@ -154,7 +128,7 @@ def _publish_demo_case() -> None:
     service.publish(version.id, actor_ref="seed:demo-publisher")
 
 
-def _seed_demo_result_and_perspectives() -> None:
+def _seed_demo_result_perspectives_and_consensus() -> None:
     settings = get_settings()
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required to seed PostgreSQL")
@@ -167,8 +141,7 @@ def _seed_demo_result_and_perspectives() -> None:
                 """
                 INSERT INTO analytics.result_snapshot (
                     id, case_version_id, layer, n, confidence_label, payload, generated_at
-                )
-                VALUES (
+                ) VALUES (
                     :id, :case_version_id, 'TRUSTED', 1284, 'HIGH',
                     CAST(:payload AS jsonb), :generated_at
                 )
@@ -193,8 +166,7 @@ def _seed_demo_result_and_perspectives() -> None:
                     INSERT INTO content.perspective_card (
                         id, case_version_id, slot, body, source_kind,
                         provenance_label, moderation_state, status, published_at
-                    )
-                    VALUES (
+                    ) VALUES (
                         :id, :case_version_id, :slot, :body, 'CURATED',
                         'KEFE editoryal', 'NOT_REQUIRED', 'PUBLISHED', :published_at
                     )
@@ -214,11 +186,46 @@ def _seed_demo_result_and_perspectives() -> None:
                     "published_at": generated_at,
                 },
             )
+        connection.execute(
+            text(
+                """
+                INSERT INTO collective.consensus_card_version (
+                    id, card_id, version_no, case_version_id, proposition,
+                    stance_codes, reason_tag_codes, max_reason_tags,
+                    methodology_version, status, published_at
+                ) VALUES (
+                    :id, :card_id, 1, :case_version_id, :proposition,
+                    CAST(:stance_codes AS jsonb), CAST(:reason_tag_codes AS jsonb), 2,
+                    'CONSENSUS_WE_V1', 'PUBLISHED', :published_at
+                )
+                ON CONFLICT (id) DO UPDATE SET
+                    card_id = EXCLUDED.card_id,
+                    version_no = EXCLUDED.version_no,
+                    proposition = EXCLUDED.proposition,
+                    stance_codes = EXCLUDED.stance_codes,
+                    reason_tag_codes = EXCLUDED.reason_tag_codes,
+                    max_reason_tags = EXCLUDED.max_reason_tags,
+                    methodology_version = EXCLUDED.methodology_version,
+                    status = EXCLUDED.status,
+                    published_at = EXCLUDED.published_at,
+                    updated_at = now()
+                """
+            ),
+            {
+                "id": DEMO_CONSENSUS_CARD_VERSION_ID,
+                "card_id": DEMO_CONSENSUS_CARD_ID,
+                "case_version_id": DEMO_CASE_VERSION_ID,
+                "proposition": "Sınırlı bir kaynak dağıtılırken açıkça daha acil ihtiyaç, salt sıra önceliğinden önce gelmelidir.",
+                "stance_codes": json.dumps(["AGREE", "MIXED", "DISAGREE"]),
+                "reason_tag_codes": json.dumps(["NEED", "FAIRNESS", "RULES", "PRACTICAL_IMPACT"]),
+                "published_at": generated_at,
+            },
+        )
 
 
 def seed_demo() -> None:
     _publish_demo_case()
-    _seed_demo_result_and_perspectives()
+    _seed_demo_result_perspectives_and_consensus()
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
-# OpenAPI 0.17.0 synchronized from the exact generated API contract.
-manifest_version: 1.35.0
-updated_at: '2026-07-29'
+# OpenAPI 0.18.0 is the exact composition of the stable base snapshot and the reviewed Consensus overlay.
+manifest_version: 1.37.0
+updated_at: '2026-07-30'
 policy:
   executable_schema_source: services/api/migrations
   product_authority: approved KEFE documentation ecosystem
@@ -17,7 +17,11 @@ contracts:
   - id: openapi
     path: docs/contracts/openapi.v1.json
     version: 0.17.0
-    role: http_api_contract
+    role: stable_http_api_base_contract
+  - id: openapi-consensus-overlay
+    path: docs/contracts/openapi-consensus.v0.18.overlay.json
+    version: 0.18.0
+    role: additive_consensus_http_api_overlay
   - id: event-envelope
     path: docs/contracts/event-envelope.v1.schema.json
     version: '1'
@@ -102,6 +106,10 @@ contracts:
     path: docs/contracts/signal-impact-model.v1.yaml
     version: 1.0.0
     role: methodology_qualified_signal_and_verified_impact_lifecycle_policy
+  - id: consensus-participation
+    path: docs/contracts/consensus-participation.v1.yaml
+    version: 1.0.0
+    role: post_commit_exposed_descriptive_we_participation_policy
   - id: admin-security-policy
     path: docs/contracts/admin-security-policy.v1.yaml
     version: 1.0.0
@@ -120,7 +128,7 @@ contracts:
     role: secured_composable_configuration_management_http_policy
   - id: error-registry
     path: docs/contracts/error-codes.v1.yaml
-    version: 1.13.0
+    version: 1.14.0
     role: stable_api_errors
   - id: postgresql-m0-schema
     path: docs/contracts/postgresql-m0-schema.v1.8.0.sql
@@ -137,6 +145,10 @@ contracts:
       - services/api/migrations/versions/20260728_0008_context_sources.py
       - services/api/migrations/versions/20260728_0009_content_authoring.py
       - services/api/migrations/versions/20260728_0010_admin_sessions.py
+  - id: consensus-postgres-migration
+    path: services/api/migrations/versions/20260730_0015_consensus_participation.py
+    version: '20260730_0015'
+    role: executable_consensus_card_and_participation_persistence
   - id: repository-structure
     path: docs/contracts/repository-structure.v1.txt
     version: '1'
@@ -170,3 +182,4 @@ architecture_decisions:
   - docs/adr/0026-generic-reflection-runtime.md
   - docs/adr/0027-first-class-claim-argument-normalized-ingestion.md
   - docs/adr/0028-provider-neutral-ingestion-orchestration-reviewed-proposals.md
+  - docs/adr/0035-post-commit-consensus-participation.md
