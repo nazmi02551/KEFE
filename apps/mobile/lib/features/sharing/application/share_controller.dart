@@ -22,27 +22,19 @@ final shareRepositoryProvider = Provider<ShareRepository>((ref) {
 enum ShareUiState { idle, creating, ready, error }
 
 class ShareState {
-  const ShareState({
-    this.uiState = ShareUiState.idle,
-    this.includeDecision = false,
-    this.created,
-    this.errorCode,
-  });
+  const ShareState({this.uiState = ShareUiState.idle, this.created, this.errorCode});
 
   final ShareUiState uiState;
-  final bool includeDecision;
   final CreatedShare? created;
   final String? errorCode;
 
   ShareState copyWith({
     ShareUiState? uiState,
-    bool? includeDecision,
     CreatedShare? created,
     String? errorCode,
     bool clearError = false,
   }) => ShareState(
     uiState: uiState ?? this.uiState,
-    includeDecision: includeDecision ?? this.includeDecision,
     created: created ?? this.created,
     errorCode: clearError ? null : errorCode ?? this.errorCode,
   );
@@ -58,18 +50,13 @@ class ShareController extends Notifier<ShareState> {
   @override
   ShareState build() => const ShareState();
 
-  void setIncludeDecision(bool value) {
-    if (state.uiState == ShareUiState.creating) return;
-    state = ShareState(includeDecision: value);
-  }
-
   Future<void> create(String sessionId) async {
     if (state.uiState == ShareUiState.creating) return;
     state = state.copyWith(uiState: ShareUiState.creating, clearError: true);
     try {
       final created = await _repository.create(
         sessionId: sessionId,
-        includeDecision: state.includeDecision,
+        includeDecision: false,
       );
       state = state.copyWith(
         uiState: ShareUiState.ready,
@@ -94,7 +81,7 @@ class ShareController extends Notifier<ShareState> {
     if (created == null) return;
     try {
       await _repository.revoke(created.id);
-      state = ShareState(includeDecision: state.includeDecision);
+      state = const ShareState();
     } on ApiFailure catch (error) {
       state = state.copyWith(
         uiState: ShareUiState.error,
