@@ -64,6 +64,9 @@ class ConsensusService:
                 ),
             },
         )
+        for view in views:
+            if view.aggregate is not None:
+                self._record_aggregate_viewed(session=session, view=view)
         return tuple(views)
 
     def participate(
@@ -157,25 +160,46 @@ class ConsensusService:
             contribution_class=stored.contribution_class,
             generated_at=datetime.now(UTC),
         )
-        self._decision.append_event(
-            "consensus.participated",
-            session.id,
-            {
-                "case_version_id": str(session.case_version_id),
-                "card_version_id": str(card.id),
-                "stance_code": stored.stance_code,
-                "reason_tag_codes": list(stored.reason_tag_codes),
-                "reason_tag_count": len(stored.reason_tag_codes),
-                "contribution_class": stored.contribution_class,
-                "idempotent_replay": (
-                    attempt.status is ConsensusParticipationStatus.IDEMPOTENT_REPLAY
-                ),
-            },
-        )
-        return ConsensusCardView(
+        view = ConsensusCardView(
             card=card,
             participation=stored,
             aggregate=aggregate,
+        )
+        if attempt.status is ConsensusParticipationStatus.CREATED:
+            self._decision.append_event(
+                "consensus.participated",
+                session.id,
+                {
+                    "case_version_id": str(session.case_version_id),
+                    "card_version_id": str(card.id),
+                    "stance_code": stored.stance_code,
+                    "reason_tag_codes": list(stored.reason_tag_codes),
+                    "reason_tag_count": len(stored.reason_tag_codes),
+                    "contribution_class": stored.contribution_class,
+                },
+            )
+        self._record_aggregate_viewed(session=session, view=view)
+        return view
+
+    def _record_aggregate_viewed(
+        self,
+        *,
+        session: WeighSession,
+        view: ConsensusCardView,
+    ) -> None:
+        aggregate = view.aggregate
+        if aggregate is None:
+            return
+        self._decision.append_event(
+            "consensus.aggregate_viewed",
+            session.id,
+            {
+                "case_version_id": str(session.case_version_id),
+                "card_version_id": str(view.card.id),
+                "sample_size": aggregate.sample_size,
+                "contribution_class": aggregate.contribution_class,
+                "methodology_version": aggregate.methodology_version,
+            },
         )
 
     def _committed_owned_session(
