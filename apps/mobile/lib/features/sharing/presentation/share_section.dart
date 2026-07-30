@@ -43,24 +43,10 @@ class ShareSection extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               tr
-                  ? 'Varsayılan paylaşım yalnız vakayı içerir. Kararın ancak sen açıkça seçersen eklenir; özel gerekçen hiçbir zaman paylaşılmaz.'
-                  : 'Sharing includes only the case by default. Your decision is included only if you explicitly choose it; your private reason is never shared.',
+                  ? 'MVP paylaşımı yalnız vakayı içerir. Kararın, güven puanın ve özel gerekçen bağlantıya eklenmez.'
+                  : 'MVP sharing is case-only. Your decision, confidence, and private reason are never included in the link.',
             ),
-            const SizedBox(height: 10),
-            SwitchListTile.adaptive(
-              key: const ValueKey('share-include-decision'),
-              contentPadding: EdgeInsets.zero,
-              value: state.includeDecision,
-              onChanged: state.uiState == ShareUiState.creating
-                  ? null
-                  : controller.setIncludeDecision,
-              title: Text(tr ? 'Kararımı da ekle' : 'Include my decision'),
-              subtitle: Text(
-                tr
-                    ? 'Yalnız ana karar seçimin eklenir; gerekçe ve güven puanın eklenmez.'
-                    : 'Only the main decision choice is included; reason and confidence are excluded.',
-              ),
-            ),
+            const SizedBox(height: 12),
             if (created == null) ...[
               FilledButton.icon(
                 key: const ValueKey('share-create'),
@@ -72,8 +58,8 @@ class ShareSection extends ConsumerWidget {
                   state.uiState == ShareUiState.creating
                       ? (tr ? 'Bağlantı hazırlanıyor…' : 'Preparing link…')
                       : (tr
-                            ? 'Paylaşım bağlantısı oluştur'
-                            : 'Create share link'),
+                            ? 'Vaka bağlantısı oluştur'
+                            : 'Create case link'),
                 ),
               ),
             ] else ...[
