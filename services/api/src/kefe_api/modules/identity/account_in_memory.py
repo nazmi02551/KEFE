@@ -3,7 +3,6 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from kefe_api.core.errors import DomainError
 from kefe_api.modules.identity.account_models import (
     AccountIdentity,
     OtpChallenge,
@@ -67,9 +66,18 @@ class InMemoryAccountContinuityRepository:
         self._verifications[verification.token_hash] = verification
         return True
 
-    def consume_verification(self, *, token_hash: str, now: datetime) -> OtpVerification | None:
+    def consume_verification(
+        self,
+        *,
+        token_hash: str,
+        now: datetime,
+    ) -> OtpVerification | None:
         verification = self._verifications.get(token_hash)
-        if verification is None or verification.consumed_at is not None or verification.expires_at <= now:
+        if (
+            verification is None
+            or verification.consumed_at is not None
+            or verification.expires_at <= now
+        ):
             return None
         consumed = OtpVerification(
             token_hash=verification.token_hash,
