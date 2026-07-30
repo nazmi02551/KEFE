@@ -1,0 +1,51 @@
+{
+  "contract": "saved-cases-localization-slice10.v1",
+  "tracks_issue": 116,
+  "extends_adr": "ADR-0048",
+  "stack_base_pr": 115,
+  "scope": {
+    "saved_cases_migrated": true,
+    "final_presentation_audit": true,
+    "preview_content_localizer_migrated": false,
+    "third_locale_enabled": false,
+    "copy_semantics_changed": false,
+    "visual_redesign": false
+  },
+  "localization": {
+    "shared_locale_resolver_required": true,
+    "feature_owned_catalog_preserved": true,
+    "english_fallback": true,
+    "tr_en_key_parity_required": true,
+    "direct_locale_copy_branching_forbidden": true,
+    "supported_locales_remain_tr_en": true
+  },
+  "audit": {
+    "allowed_direct_language_boundaries": [
+      "KefeLocaleCatalog",
+      "KefeStringsDelegate",
+      "PreviewContentLocalizer"
+    ],
+    "saved_cases_included": true,
+    "repo_wide_presentation_scan_required": true,
+    "mainline_completion_requires_stack_merge": true
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "signal_in_scope": false,
+    "impact_in_scope": false,
+    "personality_inference": false,
+    "ideology_inference": false
+  },
+  "acceptance": {
+    "catalog_parity_test": true,
+    "unknown_locale_fallback_test": true,
+    "behavior_preservation_test": true,
+    "repo_source_audit_test": true,
+    "existing_mobile_regressions": true,
+    "production_copy_boundary": true,
+    "phone_acceptance": true,
+    "same_sha_api_mobile_mvp_global_success": true
+  }
+}
