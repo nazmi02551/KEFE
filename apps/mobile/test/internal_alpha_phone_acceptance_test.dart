@@ -123,16 +123,10 @@ void main() {
       await tester.tap(find.text('Aktivite'));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('saved-cases-section')), findsOneWidget);
-      expect(
-        find.byKey(const ValueKey('open-saved-case-$caseId')),
-        findsOneWidget,
-      );
-
-      await tester.tap(find.text('Keşfet'));
-      await tester.pumpAndSettle();
-      final caseCard = find.byKey(const ValueKey('explore-case-$caseId'));
-      await tester.ensureVisible(caseCard);
-      await tester.tap(caseCard);
+      final savedCase = find.byKey(const ValueKey('open-saved-case-$caseId'));
+      expect(savedCase, findsOneWidget);
+      await tester.ensureVisible(savedCase);
+      await tester.tap(savedCase);
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
