@@ -15,15 +15,13 @@ class KefeStrings {
     return Localizations.of<KefeStrings>(context, KefeStrings)!;
   }
 
-  String _text(
-    String key, {
-    Map<String, Object?> placeholders = const {},
-  }) => KefeLocaleCatalog.resolve(
-    locale: locale,
-    resources: CoreStringCatalog.resources,
-    key: key,
-    placeholders: placeholders,
-  );
+  String _text(String key, {Map<String, Object?> placeholders = const {}}) =>
+      KefeLocaleCatalog.resolve(
+        locale: locale,
+        resources: CoreStringCatalog.resources,
+        key: key,
+        placeholders: placeholders,
+      );
 
   String get appName => 'KEFE';
   String get promise => _text('promise');
@@ -78,10 +76,8 @@ class KefeStrings {
       _text('decision.unsupported_question_type');
   String get reasonTitle => _text('reason.title');
   String get reasonHelper => _text('reason.helper');
-  String reasonSelectionLimit(int maxTags) => _text(
-    'reason.selection_limit',
-    placeholders: {'maxTags': maxTags},
-  );
+  String reasonSelectionLimit(int maxTags) =>
+      _text('reason.selection_limit', placeholders: {'maxTags': maxTags});
   String get reasonTextLabel => _text('reason.text_label');
   String get reasonTextHint => _text('reason.text_hint');
 
@@ -111,10 +107,8 @@ class KefeStrings {
       ? _text('reflection.decision_changed', placeholders: {'count': count})
       : _text('reflection.decision_unchanged');
 
-  String reflectionInterventionSummary(int count) => _text(
-    'reflection.intervention_summary',
-    placeholders: {'count': count},
-  );
+  String reflectionInterventionSummary(int count) =>
+      _text('reflection.intervention_summary', placeholders: {'count': count});
   String get reflectionNonCausalNote => _text('reflection.non_causal_note');
   String get reflectionComplete => _text('reflection.complete');
   String get reflectionCompleted => _text('reflection.completed');
@@ -124,10 +118,12 @@ class KefeStrings {
   String get flowCapabilityPendingTitle =>
       _text('flow.capability_pending.title');
   String flowCapabilityPendingBody(String? reasonCode) => switch (reasonCode) {
-    'FLOW_DECISION_REVISION_REQUIRED' =>
-      _text('flow.capability_pending.decision_revision'),
-    'FLOW_REFLECTION_RUNTIME_PENDING' =>
-      _text('flow.capability_pending.reflection_runtime'),
+    'FLOW_DECISION_REVISION_REQUIRED' => _text(
+      'flow.capability_pending.decision_revision',
+    ),
+    'FLOW_REFLECTION_RUNTIME_PENDING' => _text(
+      'flow.capability_pending.reflection_runtime',
+    ),
     _ => _text('flow.capability_pending.default'),
   };
 
@@ -150,8 +146,9 @@ class KefeStrings {
     PerspectiveSlot.near => _text('perspective.slot.near'),
     PerspectiveSlot.opposing => _text('perspective.slot.opposing'),
     PerspectiveSlot.bridge => _text('perspective.slot.bridge'),
-    PerspectiveSlot.alternativeContext =>
-      _text('perspective.slot.alternative_context'),
+    PerspectiveSlot.alternativeContext => _text(
+      'perspective.slot.alternative_context',
+    ),
   };
 
   String perspectiveSourceLabel(String sourceKind) => switch (sourceKind) {
