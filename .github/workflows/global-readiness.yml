@@ -44,7 +44,6 @@ jobs:
           path: /tmp/openapi-global.v0.20.overlay.json
           if-no-files-found: error
       - name: Exact 0.20 overlay gate
-        if: hashFiles('docs/contracts/openapi-global.v0.20.overlay.json') != ''
         run: python tools/export_global_openapi_overlay.py --output ../../docs/contracts/openapi-global.v0.20.overlay.json --check
 
   postgres-global:
@@ -107,8 +106,18 @@ jobs:
           cache: true
       - name: Resolve dependencies
         run: flutter pub get
-      - name: Format gate
-        run: dart format --output=none --set-exit-if-changed lib test
+      - name: Normalize Dart formatting
+        run: dart format lib test
+      - name: Upload normalized mobile source
+        uses: actions/upload-artifact@v4
+        with:
+          name: global-mobile-normalized-source
+          path: |
+            apps/mobile/lib
+            apps/mobile/test
+          if-no-files-found: error
+      - name: Format drift gate
+        run: git diff --exit-code -- lib test
       - name: Analyze
         run: flutter analyze
       - name: Test mobile regressions
