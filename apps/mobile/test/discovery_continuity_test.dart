@@ -17,7 +17,7 @@ const caseId = '11111111-1111-4111-8111-111111111111';
 
 void main() {
   testWidgets(
-    'searches, filters, saves and continues a Case from My KEFE',
+    'searches, filters, saves and continues a Case from Activity',
     (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -76,9 +76,10 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('clear-explore-filters')));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Profil'));
+      await tester.tap(find.text('Aktivite'));
       await tester.pumpAndSettle();
 
+      expect(find.byKey(const ValueKey('activity-screen')), findsOneWidget);
       expect(find.byKey(const ValueKey('saved-cases-section')), findsOneWidget);
       expect(find.text('Son koltuk kime verilmeli?'), findsWidgets);
       expect(find.byKey(const ValueKey('open-saved-case-$caseId')), findsOneWidget);
