@@ -58,7 +58,12 @@ void main() {
       final caseCard = find.byKey(
         const ValueKey('explore-case-11111111-1111-4111-8111-111111111111'),
       );
-      await tester.ensureVisible(caseCard);
+      await tester.scrollUntilVisible(
+        caseCard,
+        280,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(caseCard);
       await tester.pumpAndSettle();
 
