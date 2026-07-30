@@ -1,6 +1,6 @@
 {
   "contract": "premium-visual-localization-slice1.v1",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "accepted",
   "tracks_issue": 98,
   "stack_base": "3f989bc74d894ef128aa933e814bdf08415af5f2",
@@ -14,6 +14,7 @@
     "forbid_dark_only_surface_tokens_in_governed_light_capable_presentation": true,
     "governed_files": [
       "apps/mobile/lib/features/weigh/presentation/weigh_hub_screen.dart",
+      "apps/mobile/lib/features/decision/presentation/case_hero_header.dart",
       "apps/mobile/lib/features/decision/presentation/question_input.dart",
       "apps/mobile/lib/features/decision/presentation/kefe_balance_visual.dart",
       "apps/mobile/lib/features/decision/presentation/reason_input.dart",
@@ -30,8 +31,10 @@
     "future_locale_requires_no_decision_screen_logic_change": true,
     "product_preview_chrome_governed": true,
     "preview_fixture_content_must_remain_preview_only": true,
+    "content_display_must_not_mutate_raw_response_values": true,
     "first_slice_catalog_scope": [
       "weigh_hub",
+      "decision_case_hero",
       "decision_question_chrome",
       "balance_accessibility",
       "confidence_chrome",
