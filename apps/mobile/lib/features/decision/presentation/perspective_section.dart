@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design/kefe_theme.dart';
 import '../../../core/localization/kefe_strings.dart';
+import '../../consensus/presentation/consensus_section.dart';
 import '../../progress/presentation/progress_section.dart';
+import '../application/decision_controller.dart';
 import '../domain/decision_models.dart';
 
-class PerspectiveSection extends StatelessWidget {
+class PerspectiveSection extends ConsumerWidget {
   const PerspectiveSection({
     required this.state,
     required this.result,
@@ -20,9 +23,23 @@ class PerspectiveSection extends StatelessWidget {
   final VoidCallback onRetry;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final strings = KefeStrings.of(context);
-    if (state == PerspectiveUiState.idle) return const SizedBox.shrink();
+    final decision = ref.watch(decisionControllerProvider);
+    final sessionId = decision.sessionId;
+    final caseVersionId = decision.caseData?.versionId;
+    final consensus = decision.reveal != null &&
+            sessionId != null &&
+            caseVersionId != null
+        ? ConsensusSection(
+            sessionId: sessionId,
+            caseVersionId: caseVersionId,
+          )
+        : null;
+
+    if (state == PerspectiveUiState.idle) {
+      return consensus ?? const SizedBox.shrink();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -102,6 +119,10 @@ class PerspectiveSection extends StatelessWidget {
             ),
           ),
         ),
+        if (consensus != null) ...[
+          const SizedBox(height: 20),
+          consensus,
+        ],
         const SizedBox(height: 20),
         const ProgressSection(),
       ],
