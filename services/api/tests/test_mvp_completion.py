@@ -6,11 +6,7 @@ from fastapi.testclient import TestClient
 
 from kefe_api.main import create_app
 from kefe_api.modules.community_reason.models import CommunityReasonModeration
-from kefe_api.modules.decision.bootstrap import (
-    DEMO_CASE_ID,
-    DEMO_CASE_VERSION_ID,
-    DEMO_QUESTION_ID,
-)
+from kefe_api.modules.decision.bootstrap import DEMO_CASE_ID, DEMO_QUESTION_ID
 from kefe_api.modules.identity.account_models import OtpChannel
 
 
@@ -97,7 +93,7 @@ def test_account_offer_is_functional_and_guest_history_survives_conversion() -> 
     assert session_id
 
 
-def test_share_requires_commit_redacts_private_reason_and_can_be_revoked() -> None:
+def test_share_requires_commit_is_case_only_and_can_be_revoked() -> None:
     app = create_app()
     client = TestClient(app)
     headers = _guest(client)
@@ -119,21 +115,30 @@ def test_share_requires_commit_redacts_private_reason_and_can_be_revoked() -> No
     assert reason.status_code == 200
     _commit(client, headers, session_id)
 
-    created = client.post(
+    unsupported = client.post(
         "/v1/shares",
         headers=headers,
         json={"session_id": session_id, "include_decision": True},
     )
+    assert unsupported.status_code == 422
+    assert unsupported.json()["code"] == "SHARE_DECISION_EXPOSURE_NOT_SUPPORTED"
+
+    created = client.post(
+        "/v1/shares",
+        headers=headers,
+        json={"session_id": session_id, "include_decision": False},
+    )
     assert created.status_code == 201
+    assert created.json()["include_decision"] is False
     public = client.get(f"/v1/shares/{created.json()['token']}")
     assert public.status_code == 200
     public_body = public.json()
-    assert public_body["decision"] == {
-        "question_id": str(DEMO_QUESTION_ID),
-        "value": "A",
-    }
-    assert "private" not in str(public_body).lower()
     assert public_body["case_id"] == str(DEMO_CASE_ID)
+    serialized = str(public_body).lower()
+    assert "decision" not in serialized
+    assert "confidence" not in serialized
+    assert "private" not in serialized
+    assert "reason" not in serialized
 
     revoked = client.delete(
         f"/v1/shares/{created.json()['share_id']}",
@@ -144,11 +149,22 @@ def test_share_requires_commit_redacts_private_reason_and_can_be_revoked() -> No
     assert missing.status_code == 404
 
 
-def test_community_reason_is_explicit_moderated_and_pattern_only() -> None:
+def test_community_reason_is_explicit_moderated_and_commit_gated_for_read() -> None:
     app = create_app()
     client = TestClient(app)
     headers = _guest(client)
+    uncommitted_session_id = _start_and_answer(client, headers)
+
+    pre_commit = client.get(
+        f"/v1/weigh-sessions/{uncommitted_session_id}/community-reasons",
+        headers=headers,
+    )
+    assert pre_commit.status_code == 403
+    assert pre_commit.json()["code"] == "COMMUNITY_REASON_COMMIT_REQUIRED"
+
     session_id = _committed(client, headers)
+    unauthenticated = client.get(f"/v1/weigh-sessions/{session_id}/community-reasons")
+    assert unauthenticated.status_code == 401
 
     tags_only = client.post(
         f"/v1/weigh-sessions/{session_id}/community-reason",
@@ -159,7 +175,8 @@ def test_community_reason_is_explicit_moderated_and_pattern_only() -> None:
     assert tags_only.json()["moderation_state"] == "NOT_REQUIRED"
 
     snapshot = client.get(
-        f"/v1/case-versions/{DEMO_CASE_VERSION_ID}/community-reasons"
+        f"/v1/weigh-sessions/{session_id}/community-reasons",
+        headers=headers,
     )
     assert snapshot.status_code == 200
     assert snapshot.json()["sample_size"] == 1
@@ -168,12 +185,13 @@ def test_community_reason_is_explicit_moderated_and_pattern_only() -> None:
     pending = client.post(
         f"/v1/weigh-sessions/{session_id}/community-reason",
         headers=headers,
-        json={"tags": ["RULES"], "text": "This must wait for moderation"},
+        json={"tags": ["RESPONSIBILITY"], "text": "This must wait for moderation"},
     )
     assert pending.status_code == 200
     assert pending.json()["moderation_state"] == "PENDING"
     hidden = client.get(
-        f"/v1/case-versions/{DEMO_CASE_VERSION_ID}/community-reasons"
+        f"/v1/weigh-sessions/{session_id}/community-reasons",
+        headers=headers,
     )
     assert hidden.status_code == 200
     assert hidden.json()["sample_size"] == 0
@@ -185,8 +203,10 @@ def test_community_reason_is_explicit_moderated_and_pattern_only() -> None:
     )
     assert allowed.moderation_state.value == "ALLOWED"
     visible = client.get(
-        f"/v1/case-versions/{DEMO_CASE_VERSION_ID}/community-reasons"
+        f"/v1/weigh-sessions/{session_id}/community-reasons",
+        headers=headers,
     )
+    assert visible.status_code == 200
     assert visible.json()["sample_size"] == 1
     assert visible.json()["items"][0]["text"] == "This must wait for moderation"
 
