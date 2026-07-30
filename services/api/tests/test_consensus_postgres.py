@@ -8,7 +8,10 @@ from sqlalchemy import create_engine, text
 
 from kefe_api.core.settings import get_settings
 from kefe_api.main import create_app
-from kefe_api.modules.consensus.in_memory import DEMO_CONSENSUS_CARD_ID
+from kefe_api.modules.consensus.in_memory import (
+    DEMO_CONSENSUS_CARD_ID,
+    DEMO_CONSENSUS_CARD_VERSION_ID,
+)
 from kefe_api.modules.decision.bootstrap import DEMO_CASE_ID, DEMO_QUESTION_ID
 
 pytestmark = pytest.mark.skipif(
@@ -37,10 +40,7 @@ def test_postgres_consensus_is_commit_gated_exposed_and_idempotent(
     headers = _guest_headers(client)
 
     try:
-        start = client.post(
-            f"/v1/cases/{DEMO_CASE_ID}/weigh-sessions",
-            headers=headers,
-        )
+        start = client.post(f"/v1/cases/{DEMO_CASE_ID}/weigh-sessions", headers=headers)
         assert start.status_code == 201
         session_id = start.json()["session_id"]
 
@@ -70,6 +70,7 @@ def test_postgres_consensus_is_commit_gated_exposed_and_idempotent(
         assert cards.status_code == 200
         card = cards.json()["items"][0]
         assert card["card_id"] == str(DEMO_CONSENSUS_CARD_ID)
+        assert card["card_version_id"] == str(DEMO_CONSENSUS_CARD_VERSION_ID)
         assert card["participation_state"] == "ELIGIBLE"
         assert card["aggregate"] is None
 
@@ -97,30 +98,18 @@ def test_postgres_consensus_is_commit_gated_exposed_and_idempotent(
         assert replay_body["participation"] == accepted_body["participation"]
         assert replay_body["participation_state"] == "PARTICIPATED"
         assert replay_body["aggregate"]["sample_size"] == accepted_body["aggregate"]["sample_size"]
-        assert (
-            replay_body["aggregate"]["stance_distribution"]
-            == accepted_body["aggregate"]["stance_distribution"]
-        )
-        assert (
-            replay_body["aggregate"]["reason_pattern_distribution"]
-            == accepted_body["aggregate"]["reason_pattern_distribution"]
-        )
-        body = accepted_body
-        assert body["participation_state"] == "PARTICIPATED"
-        assert body["participation"]["contribution_class"] == "EXPOSED"
-        assert body["aggregate"]["contribution_class"] == "EXPOSED"
-        assert body["aggregate"]["sample_size"] >= 1
+        assert replay_body["aggregate"]["stance_distribution"] == accepted_body["aggregate"]["stance_distribution"]
+        assert replay_body["aggregate"]["reason_pattern_distribution"] == accepted_body["aggregate"]["reason_pattern_distribution"]
+        assert accepted_body["participation"]["contribution_class"] == "EXPOSED"
+        assert accepted_body["aggregate"]["contribution_class"] == "EXPOSED"
+        assert accepted_body["aggregate"]["sample_size"] >= 1
 
         engine = create_engine(database_url)
         with engine.connect() as connection:
             row = connection.execute(
                 text(
                     """
-                    SELECT
-                        stance_code,
-                        reason_tag_codes,
-                        contribution_class,
-                        idempotency_key
+                    SELECT stance_code, reason_tag_codes, contribution_class, idempotency_key
                     FROM collective.consensus_participation
                     WHERE session_id = :session_id
                       AND card_version_id = :card_version_id
@@ -128,7 +117,7 @@ def test_postgres_consensus_is_commit_gated_exposed_and_idempotent(
                 ),
                 {
                     "session_id": session_id,
-                    "card_version_id": DEMO_CONSENSUS_CARD_ID,
+                    "card_version_id": DEMO_CONSENSUS_CARD_VERSION_ID,
                 },
             ).mappings().one()
             participation_events = connection.execute(
@@ -149,6 +138,8 @@ def test_postgres_consensus_is_commit_gated_exposed_and_idempotent(
         assert row["idempotency_key"] == idempotency
         assert set(row["reason_tag_codes"]) == {"NEED", "RULES"}
         assert len(participation_events) == 1
+        assert participation_events[0]["card_id"] == str(DEMO_CONSENSUS_CARD_ID)
+        assert participation_events[0]["card_version_id"] == str(DEMO_CONSENSUS_CARD_VERSION_ID)
         assert participation_events[0]["contribution_class"] == "EXPOSED"
         assert "proposition" not in participation_events[0]
         assert "private_reason" not in participation_events[0]
