@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design/kefe_surface.dart';
 import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/internal_alpha_strings.dart';
+import '../../../core/localization/kefe_content_localizer.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../domain/decision_models.dart';
 import 'kefe_balance_visual.dart';
 
-class QuestionInputCard extends StatelessWidget {
+class QuestionInputCard extends ConsumerWidget {
   const QuestionInputCard({
     required this.question,
     required this.value,
@@ -22,11 +24,18 @@ class QuestionInputCard extends StatelessWidget {
   final ValueChanged<Object> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final strings = KefeStrings.of(context);
+    final content = ref.watch(kefeContentLocalizerProvider);
     final visual = context.kefeVisual;
     final isConfidence = question.responseType == 'CONFIDENCE';
     final accent = isConfidence ? visual.gold : visual.rules;
+    final prompt = content.text(
+      namespace: KefeContentNamespace.questionPrompt,
+      id: question.id,
+      locale: strings.locale,
+      fallback: question.prompt,
+    );
 
     return KefeSurface(
       key: ValueKey('question-${question.id}'),
@@ -66,7 +75,7 @@ class QuestionInputCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 7),
                     Text(
-                      question.prompt,
+                      prompt,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w900,
                         height: 1.20,
@@ -82,7 +91,9 @@ class QuestionInputCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: visual.surfaceSunken,
                   borderRadius: BorderRadius.circular(99),
-                  border: Border.all(color: visual.border.withValues(alpha: 0.78)),
+                  border: Border.all(
+                    color: visual.border.withValues(alpha: 0.78),
+                  ),
                 ),
                 child: Text(
                   question.required
@@ -101,6 +112,8 @@ class QuestionInputCard extends StatelessWidget {
             question: question,
             value: value,
             enabled: enabled,
+            content: content,
+            locale: strings.locale,
             onChanged: onChanged,
           ),
         ],
@@ -114,21 +127,28 @@ class _QuestionInput extends StatelessWidget {
     required this.question,
     required this.value,
     required this.enabled,
+    required this.content,
+    required this.locale,
     required this.onChanged,
   });
 
   final DecisionQuestion question;
   final Object? value;
   final bool enabled;
+  final KefeContentLocalizer content;
+  final Locale locale;
   final ValueChanged<Object> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    if (question.responseType == 'SINGLE_CHOICE' && question.options.length == 2) {
+    if (question.responseType == 'SINGLE_CHOICE' &&
+        question.options.length == 2) {
       return _BalanceChoiceInput(
         question: question,
         value: value,
         enabled: enabled,
+        content: content,
+        locale: locale,
         onChanged: onChanged,
       );
     }
@@ -138,6 +158,8 @@ class _QuestionInput extends StatelessWidget {
         question: question,
         value: value,
         enabled: enabled,
+        content: content,
+        locale: locale,
         onChanged: onChanged,
       ),
       'CONFIDENCE' => _ConfidenceInput(
@@ -156,26 +178,36 @@ class _BalanceChoiceInput extends StatelessWidget {
     required this.question,
     required this.value,
     required this.enabled,
+    required this.content,
+    required this.locale,
     required this.onChanged,
   });
 
   final DecisionQuestion question;
   final Object? value;
   final bool enabled;
+  final KefeContentLocalizer content;
+  final Locale locale;
   final ValueChanged<Object> onChanged;
 
   @override
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
-    final selectedIndex = question.options.indexWhere((option) => option == value);
+    final selectedIndex = question.options.indexWhere(
+      (option) => option == value,
+    );
     final effectiveIndex = selectedIndex < 0 ? null : selectedIndex;
+    final leftRaw = question.options[0];
+    final rightRaw = question.options[1];
+    final leftLabel = _localizedOption(content, locale, leftRaw);
+    final rightLabel = _localizedOption(content, locale, rightRaw);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         KefeBalanceVisual(
-          leftLabel: question.options[0],
-          rightLabel: question.options[1],
+          leftLabel: leftLabel,
+          rightLabel: rightLabel,
           selectedIndex: effectiveIndex,
         ),
         const SizedBox(height: 14),
@@ -184,21 +216,23 @@ class _BalanceChoiceInput extends StatelessWidget {
           children: [
             Expanded(
               child: _BalanceOptionTile(
-                option: question.options[0],
+                rawOption: leftRaw,
+                label: leftLabel,
                 color: visual.rules,
                 selected: effectiveIndex == 0,
                 enabled: enabled,
-                onTap: () => onChanged(question.options[0]),
+                onTap: () => onChanged(leftRaw),
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: _BalanceOptionTile(
-                option: question.options[1],
+                rawOption: rightRaw,
+                label: rightLabel,
                 color: visual.empathy,
                 selected: effectiveIndex == 1,
                 enabled: enabled,
-                onTap: () => onChanged(question.options[1]),
+                onTap: () => onChanged(rightRaw),
               ),
             ),
           ],
@@ -210,14 +244,16 @@ class _BalanceChoiceInput extends StatelessWidget {
 
 class _BalanceOptionTile extends StatelessWidget {
   const _BalanceOptionTile({
-    required this.option,
+    required this.rawOption,
+    required this.label,
     required this.color,
     required this.selected,
     required this.enabled,
     required this.onTap,
   });
 
-  final String option;
+  final String rawOption;
+  final String label;
   final Color color;
   final bool selected;
   final bool enabled;
@@ -226,13 +262,17 @@ class _BalanceOptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
-    final duration = KefeMotion.resolve(context, const Duration(milliseconds: 220));
+    final duration = KefeMotion.resolve(
+      context,
+      const Duration(milliseconds: 220),
+    );
     return Semantics(
       selected: selected,
       button: true,
       enabled: enabled,
+      label: label,
       child: InkWell(
-        key: ValueKey('option-$option'),
+        key: ValueKey('option-$rawOption'),
         onTap: enabled ? onTap : null,
         borderRadius: BorderRadius.circular(17),
         child: AnimatedContainer(
@@ -278,20 +318,24 @@ class _BalanceOptionTile extends StatelessWidget {
                     ? Icon(
                         Icons.check_rounded,
                         size: 18,
-                        color: visual.isDark ? const Color(0xFF07111F) : Colors.white,
+                        color: visual.isDark
+                            ? const Color(0xFF07111F)
+                            : Colors.white,
                       )
                     : null,
               ),
               const SizedBox(height: 10),
-              Text(
-                option,
-                textAlign: TextAlign.center,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: selected ? color : visual.foreground,
-                  fontWeight: selected ? FontWeight.w900 : FontWeight.w750,
-                  height: 1.22,
+              ExcludeSemantics(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: selected ? color : visual.foreground,
+                    fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
+                    height: 1.22,
+                  ),
                 ),
               ),
             ],
@@ -307,18 +351,25 @@ class _SingleChoiceInput extends StatelessWidget {
     required this.question,
     required this.value,
     required this.enabled,
+    required this.content,
+    required this.locale,
     required this.onChanged,
   });
 
   final DecisionQuestion question;
   final Object? value;
   final bool enabled;
+  final KefeContentLocalizer content;
+  final Locale locale;
   final ValueChanged<Object> onChanged;
 
   @override
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
-    final duration = KefeMotion.resolve(context, const Duration(milliseconds: 200));
+    final duration = KefeMotion.resolve(
+      context,
+      const Duration(milliseconds: 200),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -327,15 +378,21 @@ class _SingleChoiceInput extends StatelessWidget {
             selected: value == option,
             button: true,
             enabled: enabled,
+            label: _localizedOption(content, locale, option),
             child: InkWell(
               key: ValueKey('option-$option'),
               onTap: enabled ? () => onChanged(option) : null,
               borderRadius: BorderRadius.circular(15),
               child: AnimatedContainer(
                 duration: duration,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
-                  color: value == option ? visual.subtleGoldSurface : visual.surfaceSunken,
+                  color: value == option
+                      ? visual.subtleGoldSurface
+                      : visual.surfaceSunken,
                   borderRadius: BorderRadius.circular(15),
                   border: Border.all(
                     color: value == option
@@ -351,9 +408,13 @@ class _SingleChoiceInput extends StatelessWidget {
                       height: 23,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: value == option ? visual.gold : Colors.transparent,
+                        color: value == option
+                            ? visual.gold
+                            : Colors.transparent,
                         border: Border.all(
-                          color: value == option ? visual.gold : visual.mutedForeground,
+                          color: value == option
+                              ? visual.gold
+                              : visual.mutedForeground,
                           width: 1.6,
                         ),
                       ),
@@ -367,10 +428,15 @@ class _SingleChoiceInput extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        option,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: value == option ? FontWeight.w800 : FontWeight.w600,
+                      child: ExcludeSemantics(
+                        child: Text(
+                          _localizedOption(content, locale, option),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                fontWeight: value == option
+                                    ? FontWeight.w800
+                                    : FontWeight.w600,
+                              ),
                         ),
                       ),
                     ),
@@ -417,12 +483,18 @@ class _ConfidenceInput extends StatelessWidget {
             ),
             const Spacer(),
             AnimatedSwitcher(
-              duration: KefeMotion.resolve(context, const Duration(milliseconds: 180)),
+              duration: KefeMotion.resolve(
+                context,
+                const Duration(milliseconds: 180),
+              ),
               child: value == null
                   ? const SizedBox.shrink()
                   : Container(
                       key: ValueKey('confidence-current-$value'),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
                       decoration: BoxDecoration(
                         color: visual.subtleGoldSurface,
                         borderRadius: BorderRadius.circular(99),
@@ -458,10 +530,14 @@ class _ConfidenceInput extends StatelessWidget {
                 button: true,
                 enabled: enabled,
                 child: ChoiceChip(
-                  key: ValueKey('confidence-${question.id}-${_label(item)}'),
+                  key: ValueKey(
+                    'confidence-${question.id}-${_label(item)}',
+                  ),
                   label: Text(_label(item)),
                   selected: _sameValue(value, item),
-                  onSelected: enabled ? (_) => onChanged(_normalized(item)) : null,
+                  onSelected: enabled
+                      ? (_) => onChanged(_normalized(item))
+                      : null,
                 ),
               ),
           ],
@@ -507,4 +583,17 @@ class _UnsupportedQuestion extends StatelessWidget {
       child: Text('${strings.unsupportedQuestionType} ($responseType)'),
     );
   }
+}
+
+String _localizedOption(
+  KefeContentLocalizer content,
+  Locale locale,
+  String rawOption,
+) {
+  return content.text(
+    namespace: KefeContentNamespace.option,
+    id: rawOption,
+    locale: locale,
+    fallback: rawOption,
+  );
 }
