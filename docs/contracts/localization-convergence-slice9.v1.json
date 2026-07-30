@@ -1,0 +1,65 @@
+{
+  "contract": "localization-convergence-slice9.v1",
+  "tracks_issue": 114,
+  "extends_adr": "ADR-0047",
+  "stack_base_pr": 113,
+  "scope": {
+    "settings_migrated": true,
+    "explore_migrated": true,
+    "radar_shared_resolver_converged": true,
+    "atlas_shared_resolver_converged": true,
+    "preview_content_localizer_migrated": false,
+    "third_locale_enabled": false,
+    "copy_semantics_changed": false,
+    "visual_redesign": false
+  },
+  "localization": {
+    "shared_locale_resolver_required": true,
+    "feature_owned_catalogs_preserved": true,
+    "english_fallback": true,
+    "tr_en_key_parity_required": true,
+    "direct_locale_copy_branching_forbidden": true,
+    "supported_locales_remain_tr_en": true
+  },
+  "behavior": {
+    "settings_public_api_preserved": true,
+    "explore_public_api_preserved": true,
+    "explore_domain_aliases_preserved": true,
+    "radar_public_api_preserved": true,
+    "atlas_public_api_preserved": true,
+    "radar_truthfulness_preserved": true,
+    "atlas_truthfulness_preserved": true,
+    "locale_preference_behavior_preserved": true,
+    "theme_preference_behavior_preserved": true
+  },
+  "audit": {
+    "governed_files_use_shared_resolver": true,
+    "core_kefe_strings_included": true,
+    "internal_alpha_included": true,
+    "progress_included": true,
+    "settings_included": true,
+    "explore_included": true,
+    "radar_included": true,
+    "atlas_included": true,
+    "preview_content_localizer_excluded_as_content_seam": true
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "signal_in_scope": false,
+    "impact_in_scope": false,
+    "personality_inference": false,
+    "ideology_inference": false
+  },
+  "acceptance": {
+    "catalog_parity_test": true,
+    "unknown_locale_fallback_test": true,
+    "behavior_preservation_test": true,
+    "source_audit_test": true,
+    "existing_mobile_regressions": true,
+    "production_copy_boundary": true,
+    "phone_acceptance": true,
+    "same_sha_api_mobile_mvp_global_success": true
+  }
+}
