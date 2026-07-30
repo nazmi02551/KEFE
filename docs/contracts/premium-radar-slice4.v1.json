@@ -1,0 +1,85 @@
+{
+  "contract": "premium-radar-slice4.v1",
+  "version": "1.0.0",
+  "status": "accepted",
+  "tracks_issue": 104,
+  "stack_base": "3056514c4814567d9218b6cde0e1b7247939701f",
+  "inherited_verified_perspective_runtime": "199acad08de0ce1281566bcbc7c6893754db92ae",
+  "slice": "RADAR_PRODUCT_PREVIEW",
+  "governed_files": [
+    "apps/mobile/lib/app/product_preview/radar_preview_screen.dart",
+    "apps/mobile/lib/app/product_preview/radar_preview_fixture.dart",
+    "apps/mobile/lib/app/product_preview/radar_preview_strings.dart",
+    "apps/mobile/lib/app/product_preview/preview_components.dart"
+  ],
+  "truthfulness": {
+    "product_preview_only": true,
+    "representative_ranking_only": true,
+    "live_trend_claim": false,
+    "production_popularity_claim": false,
+    "personalization_claim": false,
+    "trend_velocity_metric": false,
+    "ranking_algorithm_added": false,
+    "for_you_label_allowed_without_personalization": false
+  },
+  "presentation": {
+    "theme_adaptive_semantic_surfaces_required": true,
+    "direct_dark_only_surface_tokens_forbidden": true,
+    "generic_unstyled_ranking_card_forbidden": true,
+    "static_view_chips_are_buttons": false,
+    "ranking_cards_are_navigation_actions": true,
+    "flutter_native_lightweight_rendering": true,
+    "atlas_product_semantics_change": false
+  },
+  "localization": {
+    "radar_chrome_resource_catalog_required": true,
+    "catalog_keyed_by_locale_and_string_id": true,
+    "case_titles_via_content_localizer": true,
+    "presentation_locale_branching_forbidden": true,
+    "presentation_user_copy_literals_forbidden": true,
+    "third_locale_requires_presentation_refactor": false,
+    "preview_catalog_is_production_fallback": false
+  },
+  "runtime": {
+    "canonical_case_route_preserved": true,
+    "stable_case_ids_preserved": true,
+    "case_specific_runtime_added": false,
+    "case_version_semantics_change": false,
+    "decision_semantics_change": false
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "case_agnostic_runtime": true,
+    "preview_production_isolation": true,
+    "signal_in_scope": false,
+    "impact_in_scope": false,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "bias_inference": false,
+    "causal_inference": false
+  },
+  "deferred": [
+    "LIVE_RADAR_INGESTION",
+    "RADAR_PERSONALIZATION",
+    "ATLAS_PREMIUM",
+    "REPO_WIDE_MULTI_LOCALE_RESOURCE_MIGRATION"
+  ],
+  "verification": {
+    "exact_head_required": true,
+    "production_copy_boundary": true,
+    "flutter_analyze": true,
+    "all_mobile_regressions": true,
+    "product_preview_navigation_regressions": true,
+    "radar_localization_contract": true,
+    "radar_truthfulness_contract": true,
+    "phone_acceptance": true,
+    "api_ci": true,
+    "mobile_ci": true,
+    "mvp_beta_gates": true,
+    "global_readiness": true,
+    "human_visual_review_is_ci_pass": false
+  }
+}
