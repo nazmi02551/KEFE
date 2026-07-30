@@ -8,11 +8,14 @@ import '../core/design/kefe_theme.dart';
 import '../core/localization/kefe_strings.dart';
 import '../core/localization/settings_strings.dart';
 import '../core/preferences/app_preferences.dart';
+import '../features/account/presentation/account_conversion_screen.dart';
 import '../features/activity/presentation/activity_screen.dart';
 import '../features/decision/presentation/decision_flow_screen.dart';
 import '../features/explore/presentation/discovery_explore_screen.dart';
+import '../features/privacy/presentation/privacy_screen.dart';
 import '../features/progress/presentation/my_kefe_journey_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
+import '../features/sharing/presentation/public_share_screen.dart';
 import '../features/weigh/presentation/weigh_hub_screen.dart';
 import 'primary_navigation_shell.dart';
 import 'product_preview/atlas_preview_screen.dart';
@@ -68,7 +71,20 @@ class _ProductPreviewAppState extends ConsumerState<ProductPreviewApp> {
       ),
       GoRoute(
         path: '/settings',
-        builder: (_, _) => const SettingsScreen(showPrivacyControls: false),
+        builder: (_, _) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/account',
+        builder: (_, _) => const AccountConversionScreen(),
+      ),
+      GoRoute(
+        path: '/privacy',
+        builder: (_, _) => const PrivacyScreen(),
+      ),
+      GoRoute(
+        path: '/share/:token',
+        builder: (_, state) =>
+            PublicShareScreen(token: state.pathParameters['token']!),
       ),
       GoRoute(
         path: '/radar',
