@@ -118,6 +118,15 @@ void main() {
       await tester.pumpAndSettle();
     }
 
+    Future<void> reveal(String text) async {
+      await tester.scrollUntilVisible(
+        find.text(text),
+        280,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pump();
+    }
+
     await pump(theme: KefeTheme.light(), locale: const Locale('en', 'US'));
     var context = tester.element(
       find.byKey(const ValueKey('atlas-preview-list')),
@@ -134,9 +143,12 @@ void main() {
       find.text("Should AI companies' personal data collection be limited?"),
       findsOneWidget,
     );
+
+    await reveal('Country averages');
     expect(find.text('Country averages'), findsOneWidget);
     expect(find.text('Germany'), findsOneWidget);
     expect(find.text('7.1'), findsOneWidget);
+    await reveal('7.3');
     expect(find.text('7.3'), findsOneWidget);
 
     await pump(theme: KefeTheme.dark(), locale: const Locale('tr', 'TR'));
@@ -155,6 +167,8 @@ void main() {
       ),
       findsOneWidget,
     );
+
+    await reveal('Ülkelere göre ortalamalar');
     expect(find.text('Ülkelere göre ortalamalar'), findsOneWidget);
     expect(find.text('Almanya'), findsOneWidget);
   });
