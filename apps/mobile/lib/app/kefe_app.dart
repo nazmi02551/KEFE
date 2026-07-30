@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/design/kefe_theme.dart';
 import '../core/localization/kefe_strings.dart';
+import '../features/account/presentation/account_conversion_screen.dart';
 import '../features/activity/presentation/activity_screen.dart';
 import '../features/decision/presentation/decision_flow_screen.dart';
 import '../features/explore/presentation/discovery_explore_screen.dart';
@@ -57,6 +58,10 @@ class _KefeAppState extends State<KefeApp> {
           selectedIndex: 3,
           child: MyKefeJourneyScreen(embedded: true),
         ),
+      ),
+      GoRoute(
+        path: '/account',
+        builder: (context, state) => const AccountConversionScreen(),
       ),
       GoRoute(
         path: '/case/:caseId',
