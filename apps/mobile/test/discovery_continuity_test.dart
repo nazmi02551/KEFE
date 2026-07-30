@@ -19,6 +19,9 @@ void main() {
   testWidgets('searches, filters, saves and continues a Case from Activity', (
     tester,
   ) async {
+    tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
+    addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
