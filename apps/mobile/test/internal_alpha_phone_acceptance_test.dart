@@ -58,6 +58,15 @@ Future<void> _openSettings(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+Future<void> _scrollTo(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(
+    finder,
+    300,
+    scrollable: find.byType(Scrollable).last,
+  );
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets(
     'locale and theme switch persist through the shared preference store',
@@ -133,12 +142,12 @@ void main() {
       final option = find.byKey(
         const ValueKey('option-Öncelikli ihtiyacı olana'),
       );
-      await tester.ensureVisible(option);
+      await _scrollTo(tester, option);
       await tester.tap(option);
       await tester.pumpAndSettle();
 
       final commit = find.byKey(const ValueKey('commit-button'));
-      await tester.ensureVisible(commit);
+      await _scrollTo(tester, commit);
       await tester.tap(commit);
       await tester.pumpAndSettle();
 
