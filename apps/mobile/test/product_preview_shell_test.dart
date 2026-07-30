@@ -15,6 +15,11 @@ import 'package:kefe_mobile/features/progress/data/preview_progress_repository.d
 import 'package:kefe_mobile/features/saved_cases/application/saved_cases_controller.dart';
 import 'package:kefe_mobile/features/saved_cases/data/saved_case_store.dart';
 
+void _useTurkishLocale(WidgetTester tester) {
+  tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
+  addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+}
+
 void main() {
   test('preview catalog contains multiple domains and cases', () async {
     final repository = PreviewDecisionRepository();
@@ -38,6 +43,8 @@ void main() {
   testWidgets(
     'Product Preview uses four canonical tabs and keeps Radar secondary',
     (tester) async {
+      _useTurkishLocale(tester);
+
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -90,6 +97,8 @@ void main() {
   testWidgets(
     'Product Preview media keeps the Case hero and Commit semantics intact',
     (tester) async {
+      _useTurkishLocale(tester);
+
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -182,6 +191,8 @@ void main() {
   testWidgets('Activity owns saved Cases and decision continuation', (
     tester,
   ) async {
+    _useTurkishLocale(tester);
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -213,6 +224,8 @@ void main() {
   testWidgets(
     'My KEFE remains repository-driven insights without saved Cases',
     (tester) async {
+      _useTurkishLocale(tester);
+
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
