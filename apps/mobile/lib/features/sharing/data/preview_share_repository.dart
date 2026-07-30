@@ -19,7 +19,8 @@ class PreviewShareRepository implements ShareRepository {
       caseId: '11111111-1111-4111-8111-111111111111',
       caseVersionId: '22222222-2222-4222-8222-222222222222',
       title: 'Product Preview Case',
-      summary: 'CASE-ONLY preview share; no sender decision or private reason is included.',
+      summary:
+          'CASE-ONLY preview share; no sender decision or private reason is included.',
       primaryDomain: 'DAILY_LIFE',
       createdAt: now,
       expiresAt: now.add(const Duration(days: 7)),
