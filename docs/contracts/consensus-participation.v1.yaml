@@ -1,4 +1,4 @@
-contract_version: 1.1.0
+contract_version: 1.2.0
 updated_at: '2026-07-30'
 authority:
   adr: docs/adr/0035-post-commit-consensus-participation.md
@@ -10,6 +10,12 @@ capability:
   statement_runtime_generation: forbidden
   zero_or_more_cards_per_case_version: true
   explicit_product_composition_required: true
+identity:
+  stable_card_id_required: true
+  immutable_card_version_id_required: true
+  positive_version_no_required: true
+  one_published_version_per_card: true
+  participation_pins_card_version: true
 eligibility:
   bearer_identity_required: true
   actor_must_own_session: true
@@ -73,6 +79,8 @@ http:
   participate:
     method: POST
     path: /v1/weigh-sessions/{session_id}/consensus-cards/{card_id}/participation
+    path_identity: stable_card_id
+    receipt_identity: immutable_card_version_id
     idempotency_header: Idempotency-Key
 events:
   card_viewed:
@@ -84,6 +92,7 @@ events:
     exactly_once_for_created_participation: true
     allowed_fields:
       - case_version_id
+      - card_id
       - card_version_id
       - stance_code
       - reason_tag_codes
@@ -95,6 +104,7 @@ events:
     name: consensus.aggregate_viewed
     allowed_fields:
       - case_version_id
+      - card_id
       - card_version_id
       - sample_size
       - contribution_class
