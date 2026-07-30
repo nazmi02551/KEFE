@@ -2,8 +2,11 @@ from __future__ import annotations
 
 from alembic import op
 
-revision = "20260730_0015"
-down_revision = "20260729_0014"
+# The filename is retained for PR history continuity; the Alembic revision id is
+# the authoritative sequence and follows the existing 20260729_0015 knowledge
+# migration so the repository has a single linear head.
+revision = "20260730_0016"
+down_revision = "20260729_0015"
 branch_labels = None
 depends_on = None
 
