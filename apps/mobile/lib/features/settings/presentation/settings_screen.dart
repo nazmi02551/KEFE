@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/kefe_strings.dart';
+import '../../../core/localization/settings_strings.dart';
 import '../../../core/preferences/app_preferences.dart';
 
 class SettingsScreen extends ConsumerWidget {
