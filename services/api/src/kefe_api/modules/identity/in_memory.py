@@ -66,6 +66,13 @@ class InMemoryIdentityRepository:
             else:
                 self._actor_kinds[guest_actor_id] = ActorKind.ACCOUNT
 
+    def delete_actor(self, actor_id: UUID, *, now: datetime) -> None:
+        with self._lock:
+            for session in self._sessions.values():
+                if session.actor_id == actor_id:
+                    session.revoked_at = session.revoked_at or now
+            self._actor_kinds.pop(actor_id, None)
+
     def resolve_token(self, *, token_hash: str, now: datetime) -> TokenResolution:
         with self._lock:
             session = self._sessions.get(token_hash)
