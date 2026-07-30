@@ -1,0 +1,38 @@
+name: Slice6 Format Fix
+
+on:
+  push:
+    branches: [feature/localization-foundation-slice6]
+    paths:
+      - '.github/workflows/slice6-format-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/localization-foundation-slice6
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Format Slice 6 Dart sources
+        working-directory: apps/mobile
+        run: dart format lib/core/localization/kefe_locale_catalog.dart lib/features/progress/localization/progress_string_catalog.dart lib/features/progress/presentation/progress_strings.dart test/localization_foundation_slice6_test.dart
+      - name: Commit source-only formatting
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/mobile/lib/core/localization/kefe_locale_catalog.dart apps/mobile/lib/features/progress/localization/progress_string_catalog.dart apps/mobile/lib/features/progress/presentation/progress_strings.dart apps/mobile/test/localization_foundation_slice6_test.dart
+          if git diff --cached --quiet; then
+            echo 'No formatting changes.'
+            exit 0
+          fi
+          git commit -m 'style: normalize localization foundation slice 6'
+          git push origin HEAD:feature/localization-foundation-slice6
