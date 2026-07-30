@@ -6,28 +6,37 @@ Legend:
 - `AUTO` repository/CI-owned proof.
 - `EXT` requires human, provider, store, editorial or deployed-environment evidence.
 
+Repository-owned evidence checkpoint: `docs/status/MVP_CODE_COMPLETE_2026-07-30.md`
+Verified code candidate: `9025f0e4d75816e46c304883c414856bff1bd7a4`
+
 ## MVP code completion
 
-- [ ] AUTO — Golden Path regression: Explore → Case → Weigh → Commit → Reveal → Perspective → My KEFE → Share.
-- [ ] AUTO — Guest-first onboarding remains non-blocking.
-- [ ] AUTO — OTP request/verify/explicit guest→account conversion and history merge.
-- [ ] AUTO — Share is Commit-gated, opaque, expiring/revocable; private reason excluded.
-- [ ] AUTO — Community Reason is explicit, bounded, moderated; private Reason never auto-published.
-- [ ] AUTO — Privacy export/delete/retention contract and persistence tests.
-- [ ] AUTO — Encrypted local uncommitted drafts expire after seven days.
-- [ ] AUTO — uncertain Commit keeps server-authoritative same-key recovery.
-- [ ] AUTO — >=20 L0 DILEMMA and >=4 L0 CALL engineering catalog readiness.
-- [ ] AUTO — no Case-format-specific runtime Screen/Controller/Service classes.
-- [ ] AUTO — API/OpenAPI/error/manifest contract gates.
-- [ ] AUTO — PostgreSQL migration/seed/integration/outbox gates.
-- [ ] AUTO — Flutter format/analyze/widget/accessibility/locale/theme gates.
-- [ ] AUTO — repeatable critical-path in-process performance budget harness.
-- [ ] AUTO — operations rollback/kill-switch runbook exists.
-- [ ] AUTO — exact candidate SHA and artifacts recorded in CURRENT/status checkpoint.
+- [x] AUTO — Golden Path regression: Explore → Case → Weigh → Commit → Reveal → Perspective → My KEFE → Share.
+- [x] AUTO — Guest-first onboarding remains non-blocking.
+- [x] AUTO — OTP request/verify/explicit guest→account conversion and history merge.
+- [x] AUTO — Share is Commit-gated, CASE-ONLY, opaque, expiring/revocable; sender decision/confidence/private reason excluded.
+- [x] AUTO — Community Reason is explicit, bounded, moderated and actor-owned-COMMITTED-session gated; private Reason never auto-published.
+- [x] AUTO — Privacy export/delete/retention contract and persistence tests.
+- [x] AUTO — Encrypted local uncommitted drafts expire after seven days.
+- [x] AUTO — uncertain Commit keeps server-authoritative same-key recovery.
+- [x] AUTO — >=20 L0 DILEMMA and >=4 L0 CALL engineering catalog readiness.
+- [x] AUTO — no Case-format-specific runtime Screen/Controller/Service classes.
+- [x] AUTO — API/OpenAPI/error/manifest contract gates.
+- [x] AUTO — PostgreSQL migration/seed/integration/outbox gates.
+- [x] AUTO — Flutter format/analyze/widget/accessibility/locale/theme gates.
+- [x] AUTO — repeatable critical-path in-process performance budget harness.
+- [x] AUTO — operations rollback/kill-switch runbook exists.
+- [x] AUTO — exact candidate SHA and artifacts recorded in CURRENT/status checkpoint.
 
-When every AUTO item is green on one head, repository status may become:
+All AUTO items are green on one exact code candidate. Repository status is therefore:
 
 `MVP_CODE_COMPLETE / BETA_GATE_PENDING`
+
+Evidence:
+- MVP Beta Gates run `30516434466` — SUCCESS
+- API CI run `30516434447` — SUCCESS
+- Mobile CI run `30516434450` — SUCCESS
+- exact code SHA `9025f0e4d75816e46c304883c414856bff1bd7a4`
 
 ## External beta gate
 
