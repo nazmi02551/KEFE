@@ -1,4 +1,4 @@
-contract_version: 1.1.0
+contract_version: 1.2.0
 updated_at: '2026-07-30'
 authority:
   documentation_package: KEFE_Documentation_Ecosystem_2026-07-28_v3.4_CURRENT
@@ -10,15 +10,31 @@ authority:
   issue: 89
 release:
   next_promoted_version: v9
-  ci_artifact_generation: continuous
-  numbered_apk_promotion: milestone_gated
-  promotion_requires:
-    - all_capabilities_complete
+  current_candidate: v9-rc1
+  android_candidate_version: 0.9.0-rc.1+9
+  ci_artifact_generation: continuous_internal
+  release_candidate_distribution: exact_green_head_only
+  numbered_apk_promotion: milestone_and_phone_test_gated
+  candidate_requires:
+    - all_capabilities_implemented
     - mobile_ci_pass
+    - api_ci_pass
     - production_preview_isolation_pass
     - drive_v3_4_alignment_checkpoint_recorded
-    - phone_test_checklist_recorded
-    - artifact_identity_and_sha256_recorded
+    - phone_test_checklist_available
+    - candidate_identity_and_hashes_recorded
+    - visible_prerelease_identity
+  promotion_requires:
+    - candidate_gate_pass
+    - applicable_phone_test_items_pass
+    - blocking_feedback_resolved
+    - final_merge_commit_recorded
+    - final_artifact_identity_and_sha256_recorded
+    - prerelease_suffix_removed
+  naming:
+    internal_ci_artifact_must_not_be_called_release: true
+    candidate_label_pattern: v9-rcN
+    promoted_label: v9
 navigation:
   primary_destinations:
     - EXPLORE
