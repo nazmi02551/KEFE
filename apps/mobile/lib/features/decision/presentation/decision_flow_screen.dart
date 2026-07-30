@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/design/product_preview_visual_mode.dart';
-import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../context/presentation/context_section.dart';
 import '../../onboarding/application/onboarding_controller.dart';

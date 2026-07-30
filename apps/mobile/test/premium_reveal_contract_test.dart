@@ -8,53 +8,56 @@ void main() {
     '../../docs/contracts/premium-reveal-slice2.v1.json',
   );
 
-  test('governed Reveal presentation avoids dark-only and locale branching', () {
-    expect(contractFile.existsSync(), isTrue);
-    final contract = jsonDecode(contractFile.readAsStringSync())
-        as Map<String, Object?>;
-    final governed = (contract['governed_files']! as List<Object?>)
-        .cast<String>();
-    const forbiddenTokens = <String>[
-      'KefeColorTokens.backgroundDark',
-      'KefeColorTokens.surfaceDark',
-      'KefeColorTokens.surfaceElevatedDark',
-      'KefeColorTokens.surfaceSoftDark',
-      'KefeColorTokens.borderDark',
-    ];
-    const localeBranching = <String>[
-      "locale.languageCode == 'tr'",
-      'locale.languageCode == "tr"',
-      "locale.languageCode == 'en'",
-      'locale.languageCode == "en"',
-    ];
+  test(
+    'governed Reveal presentation avoids dark-only and locale branching',
+    () {
+      expect(contractFile.existsSync(), isTrue);
+      final contract =
+          jsonDecode(contractFile.readAsStringSync()) as Map<String, Object?>;
+      final governed = (contract['governed_files']! as List<Object?>)
+          .cast<String>();
+      const forbiddenTokens = <String>[
+        'KefeColorTokens.backgroundDark',
+        'KefeColorTokens.surfaceDark',
+        'KefeColorTokens.surfaceElevatedDark',
+        'KefeColorTokens.surfaceSoftDark',
+        'KefeColorTokens.borderDark',
+      ];
+      const localeBranching = <String>[
+        "locale.languageCode == 'tr'",
+        'locale.languageCode == "tr"',
+        "locale.languageCode == 'en'",
+        'locale.languageCode == "en"',
+      ];
 
-    for (final repositoryPath in governed) {
-      const mobilePrefix = 'apps/mobile/';
-      expect(repositoryPath.startsWith(mobilePrefix), isTrue);
-      final file = File(repositoryPath.substring(mobilePrefix.length));
-      expect(file.existsSync(), isTrue, reason: repositoryPath);
-      final source = file.readAsStringSync();
+      for (final repositoryPath in governed) {
+        const mobilePrefix = 'apps/mobile/';
+        expect(repositoryPath.startsWith(mobilePrefix), isTrue);
+        final file = File(repositoryPath.substring(mobilePrefix.length));
+        expect(file.existsSync(), isTrue, reason: repositoryPath);
+        final source = file.readAsStringSync();
 
-      for (final token in forbiddenTokens) {
-        expect(
-          source.contains(token),
-          isFalse,
-          reason: '$repositoryPath still owns dark-only token $token',
-        );
+        for (final token in forbiddenTokens) {
+          expect(
+            source.contains(token),
+            isFalse,
+            reason: '$repositoryPath still owns dark-only token $token',
+          );
+        }
+        for (final branch in localeBranching) {
+          expect(
+            source.contains(branch),
+            isFalse,
+            reason: '$repositoryPath contains presentation locale branching',
+          );
+        }
       }
-      for (final branch in localeBranching) {
-        expect(
-          source.contains(branch),
-          isFalse,
-          reason: '$repositoryPath contains presentation locale branching',
-        );
-      }
-    }
-  });
+    },
+  );
 
   test('Reveal slice keeps inference and pre-Commit boundaries closed', () {
-    final contract = jsonDecode(contractFile.readAsStringSync())
-        as Map<String, Object?>;
+    final contract =
+        jsonDecode(contractFile.readAsStringSync()) as Map<String, Object?>;
     final invariants = contract['invariants']! as Map<String, Object?>;
     final localization = contract['localization']! as Map<String, Object?>;
 
