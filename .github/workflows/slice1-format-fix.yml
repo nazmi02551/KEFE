@@ -36,3 +36,5 @@ jobs:
           fi
           git commit -m 'style: normalize premium slice Dart formatting'
           git push origin HEAD:feature/premium-visual-localization-slice1
+
+# trigger after workflow exists on branch
