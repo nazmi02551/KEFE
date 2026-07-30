@@ -26,8 +26,12 @@ class InMemoryPrivacyRepository:
                 "case_version_id": str(session.case_version_id),
                 "state": session.state.value,
                 "started_at": session.started_at.isoformat(),
-                "committed_at": session.committed_at.isoformat() if session.committed_at else None,
-                "responses": {str(key): value for key, value in session.responses.items()},
+                "committed_at": (
+                    session.committed_at.isoformat() if session.committed_at else None
+                ),
+                "responses": {
+                    str(key): value for key, value in session.responses.items()
+                },
             }
             for session in self._decision._sessions.values()
             if session.actor_id == actor_id
@@ -56,7 +60,9 @@ class InMemoryPrivacyRepository:
         deleted_at: datetime,
     ) -> PrivacyDeletionReceipt:
         session_ids = {
-            session.id for session in self._decision._sessions.values() if session.actor_id == actor_id
+            session.id
+            for session in self._decision._sessions.values()
+            if session.actor_id == actor_id
         }
         for session_id in session_ids:
             self._decision._sessions.pop(session_id, None)
