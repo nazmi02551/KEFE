@@ -95,24 +95,11 @@ class _PublicShareScreenState extends ConsumerState<PublicShareScreen> {
               Text(_share!.summary),
               const SizedBox(height: 12),
               Chip(label: Text(_share!.primaryDomain)),
-              if (_share!.decision != null) ...[
-                const SizedBox(height: 14),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      tr
-                          ? 'Paylaşan kişi ana kararını da ekledi: ${_share!.decision!['value']}'
-                          : 'The sender also included their main decision: ${_share!.decision!['value']}',
-                    ),
-                  ),
-                ),
-              ],
               const SizedBox(height: 18),
               Text(
                 tr
-                    ? 'Önce başkasının sonucunu kopyalamak yerine aynı vakayı kendin tart. Topluluk sonucu ancak kendi kararını sabitledikten sonra açılır.'
-                    : 'Weigh the same case yourself instead of copying someone else’s result. Collective results unlock only after your own Commit.',
+                    ? 'Paylaşan kişinin kararı burada gösterilmez. Önce aynı vakayı kendin tart ve kararını sabitle; topluluk sonucu ancak kendi Commit’inden sonra açılır.'
+                    : 'The sender’s decision is never shown here. Weigh the same case and Commit first; collective results unlock only after your own Commit.',
               ),
               const SizedBox(height: 16),
               FilledButton.icon(
