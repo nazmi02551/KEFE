@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../decision/application/decision_controller.dart';
 import '../../decision/data/decision_repository.dart';
+import '../../decision/data/http_decision_repository.dart';
 import '../data/community_reason_repository.dart';
 import '../data/http_community_reason_repository.dart';
 
