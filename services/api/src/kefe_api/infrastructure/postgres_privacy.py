@@ -208,7 +208,7 @@ class PostgresPrivacyRepository:
                 stmt = text(
                     """
                     UPDATE analytics.outbox_event
-                    SET payload = (payload - 'actor_id') || '{"actor_deleted":true}'::jsonb
+                    SET payload = (payload - 'actor_id') || jsonb_build_object('actor_deleted', true)
                     WHERE aggregate_id IN :session_ids
                     """
                 ).bindparams(bindparam("session_ids", expanding=True))
