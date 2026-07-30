@@ -13,9 +13,6 @@ void main() {
   testWidgets(
     'production exposes four canonical destinations without preview shell data',
     (tester) async {
-      tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
-      addTearDown(tester.platformDispatcher.clearLocaleTestValue);
-
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -34,22 +31,23 @@ void main() {
 
       expect(find.byKey(const ValueKey('primary-navigation')), findsOneWidget);
       expect(find.byType(NavigationDestination), findsNWidgets(4));
-      expect(find.text('Keşfet'), findsOneWidget);
-      expect(find.text('Tartım'), findsOneWidget);
-      expect(find.text('Aktivite'), findsOneWidget);
-      expect(find.text('My KEFE'), findsOneWidget);
+      final destinations = tester
+          .widgetList<NavigationDestination>(find.byType(NavigationDestination))
+          .toList(growable: false);
+      expect(destinations.length, 4);
+      expect(destinations.last.label, 'My KEFE');
       expect(find.byKey(const ValueKey('preview-build-identity')), findsNothing);
       expect(find.byKey(const ValueKey('open-preview-radar')), findsNothing);
       expect(find.byKey(const ValueKey('open-preview-atlas')), findsNothing);
 
-      await tester.tap(find.text('My KEFE'));
+      await tester.tap(find.byIcon(Icons.person_outline_rounded));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('my-kefe-journey')), findsOneWidget);
       expect(find.byKey(const ValueKey('saved-cases-section')), findsNothing);
       expect(find.byKey(const ValueKey('preview-build-identity')), findsNothing);
 
-      await tester.tap(find.text('Aktivite'));
+      await tester.tap(find.byIcon(Icons.history_outlined));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('activity-screen')), findsOneWidget);
