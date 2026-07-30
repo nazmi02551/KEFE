@@ -1,6 +1,6 @@
 {
   "contract": "premium-visual-localization-slice1.v1",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "status": "accepted",
   "tracks_issue": 98,
   "stack_base": "3f989bc74d894ef128aa933e814bdf08415af5f2",
@@ -18,9 +18,9 @@
       "apps/mobile/lib/features/decision/presentation/question_input.dart",
       "apps/mobile/lib/features/decision/presentation/kefe_balance_visual.dart",
       "apps/mobile/lib/features/decision/presentation/reason_input.dart",
-      "apps/mobile/lib/features/context/presentation/context_section.dart",
-      "apps/mobile/lib/features/decision/presentation/decision_flow_screen.dart"
+      "apps/mobile/lib/features/context/presentation/context_section.dart"
     ],
+    "commit_cta_uses_shared_filled_button_theme": true,
     "reduce_motion_required": true,
     "screen_reader_semantics_required": true,
     "core_journey_must_not_depend_on_renderer_success": true
