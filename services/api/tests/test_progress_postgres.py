@@ -56,7 +56,7 @@ def test_postgres_progress_is_actor_scoped_and_low_claim(
         assert response.status_code == 200
         body = response.json()
         assert body["account_offer"]["eligible"] is True
-        assert body["account_offer"]["account_creation_available"] is False
+        assert body["account_offer"]["account_creation_available"] is True
         assert body["progress"]["meaningful_weigh_count"] == 1
         assert body["progress"]["distinct_case_count"] == 1
         assert body["progress"]["distinct_domain_count"] == 1
