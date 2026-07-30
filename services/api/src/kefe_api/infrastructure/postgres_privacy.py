@@ -41,7 +41,7 @@ class PostgresPrivacyRepository:
                 responses = connection.execute(stmt, {"session_ids": session_ids}).mappings().all()
                 stmt = text(
                     """
-                    SELECT session_id, tags, text, moderation_state, updated_at
+                    SELECT session_id, tags, text_body AS text, moderation_state, updated_at
                     FROM decision.private_reason
                     WHERE session_id IN :session_ids
                     ORDER BY session_id
@@ -125,6 +125,16 @@ class PostgresPrivacyRepository:
                     "private_reason": reason_map.get(row["id"]),
                 }
                 for row in sessions
+            ],
+            "private_reasons": [
+                {
+                    "session_id": str(row["session_id"]),
+                    "tags": list(row["tags"]),
+                    "text": row["text"],
+                    "moderation_state": row["moderation_state"],
+                    "updated_at": row["updated_at"].isoformat(),
+                }
+                for row in reasons
             ],
             "decision_revisions": [
                 {
