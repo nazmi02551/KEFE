@@ -47,11 +47,12 @@ class HttpCommunityReasonRepository implements CommunityReasonRepository {
   }
 
   @override
-  Future<CommunityReasonSnapshot> fetch(String caseVersionId) async {
+  Future<CommunityReasonSnapshot> fetch(String sessionId) async {
     final body = _decode(
       await _request(
-        () => _client.get(
-          _uri('/v1/case-versions/$caseVersionId/community-reasons'),
+        () async => _client.get(
+          _uri('/v1/weigh-sessions/$sessionId/community-reasons'),
+          headers: await _authorizedHeaders(),
         ),
       ),
     );
@@ -69,8 +70,9 @@ class HttpCommunityReasonRepository implements CommunityReasonRepository {
         .toList(growable: false);
     return CommunityReasonSnapshot(
       items: items,
-      tagPatternCounts: (body['tag_pattern_counts'] as Map<String, Object?>)
-          .map((key, value) => MapEntry(key, value as int)),
+      tagPatternCounts: (body['tag_pattern_counts'] as Map<String, Object?>).map(
+        (key, value) => MapEntry(key, value as int),
+      ),
       sampleSize: body['sample_size'] as int,
       methodologyNote: body['methodology_note'] as String,
     );
