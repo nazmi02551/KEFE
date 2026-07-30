@@ -44,13 +44,55 @@ jobs:
           name: mvp-openapi-generated
           path: services/api/openapi.mvp.generated.json
           if-no-files-found: error
+      - name: Export generated OpenAPI 0.19 additive overlay
+        working-directory: services/api
+        run: >-
+          python tools/export_mvp_openapi_overlay.py
+          --output openapi.mvp.overlay.generated.json
+      - name: Upload generated OpenAPI overlay
+        uses: actions/upload-artifact@v4
+        with:
+          name: mvp-openapi-overlay-generated
+          path: services/api/openapi.mvp.overlay.generated.json
+          if-no-files-found: error
+      - name: Normalize targeted Python formatting
+        working-directory: services/api
+        run: >-
+          ruff format
+          tests/test_consensus_postgres.py
+          tests/test_mvp_completion_postgres.py
+          tools/check_contract_sync.py
+          tools/check_mvp_beta_readiness.py
+      - name: Upload normalized API sources
+        uses: actions/upload-artifact@v4
+        with:
+          name: mvp-api-normalized-source
+          path: |
+            services/api/tests/test_consensus_postgres.py
+            services/api/tests/test_mvp_completion_postgres.py
+            services/api/tools/check_contract_sync.py
+            services/api/tools/check_mvp_beta_readiness.py
+          if-no-files-found: error
+      - name: Python format drift gate
+        working-directory: services/api
+        run: >-
+          git diff --exit-code --
+          tests/test_consensus_postgres.py
+          tests/test_mvp_completion_postgres.py
+          tools/check_contract_sync.py
+          tools/check_mvp_beta_readiness.py
       - name: Ruff
         working-directory: services/api
         run: ruff check .
       - name: Contract sync
         working-directory: services/api
         run: python tools/check_contract_sync.py
-      - name: Exact OpenAPI drift gate
+      - name: OpenAPI 0.19 additive overlay exact gate
+        working-directory: services/api
+        run: >-
+          python tools/export_mvp_openapi_overlay.py
+          --check ../../docs/contracts/openapi-mvp.v0.19.overlay.json
+      - name: Exact composed OpenAPI drift gate
         working-directory: services/api
         run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
       - name: MVP beta catalog and generic-runtime gate
@@ -145,9 +187,20 @@ jobs:
       - name: Resolve dependencies
         working-directory: apps/mobile
         run: flutter pub get
+      - name: Normalize Dart formatting for exact drift evidence
+        working-directory: apps/mobile
+        run: dart format lib test
+      - name: Upload normalized mobile source
+        uses: actions/upload-artifact@v4
+        with:
+          name: mvp-mobile-normalized-source
+          path: |
+            apps/mobile/lib
+            apps/mobile/test
+          if-no-files-found: error
       - name: Format gate
         working-directory: apps/mobile
-        run: dart format --output=none --set-exit-if-changed lib test
+        run: git diff --exit-code -- lib test
       - name: Analyze
         working-directory: apps/mobile
         run: flutter analyze
