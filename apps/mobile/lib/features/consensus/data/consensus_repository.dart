@@ -9,6 +9,7 @@ abstract interface class ConsensusRepository {
   Future<ConsensusCard> participate({
     required String sessionId,
     required String caseVersionId,
+    required String cardId,
     required String cardVersionId,
     required String stanceCode,
     required List<String> reasonTagCodes,
