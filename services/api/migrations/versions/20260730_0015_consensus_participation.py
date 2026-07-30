@@ -3,8 +3,7 @@ from __future__ import annotations
 from alembic import op
 
 # The filename is retained for PR history continuity; the Alembic revision id is
-# the authoritative sequence and follows the existing 20260729_0015 knowledge
-# migration so the repository has a single linear head.
+# authoritative and follows the existing 20260729_0015 knowledge migration.
 revision = "20260730_0016"
 down_revision = "20260729_0015"
 branch_labels = None
@@ -17,6 +16,8 @@ def upgrade() -> None:
         """
         CREATE TABLE collective.consensus_card_version (
             id uuid PRIMARY KEY,
+            card_id uuid NOT NULL,
+            version_no integer NOT NULL CHECK (version_no > 0),
             case_version_id uuid NOT NULL
                 REFERENCES content.case_version(id) ON DELETE RESTRICT,
             proposition text NOT NULL CHECK (length(btrim(proposition)) > 0),
@@ -31,8 +32,16 @@ def upgrade() -> None:
                 CHECK (status IN ('DRAFT','PUBLISHED','RETIRED')),
             published_at timestamptz NOT NULL,
             created_at timestamptz NOT NULL DEFAULT now(),
-            updated_at timestamptz NOT NULL DEFAULT now()
+            updated_at timestamptz NOT NULL DEFAULT now(),
+            UNIQUE(card_id, version_no)
         )
+        """
+    )
+    op.execute(
+        """
+        CREATE UNIQUE INDEX consensus_card_one_published_version_idx
+        ON collective.consensus_card_version(card_id)
+        WHERE status = 'PUBLISHED'
         """
     )
     op.execute(
@@ -90,5 +99,6 @@ def downgrade() -> None:
     op.execute("DROP INDEX IF EXISTS collective.consensus_participation_card_class_idx")
     op.execute("DROP TABLE IF EXISTS collective.consensus_participation")
     op.execute("DROP INDEX IF EXISTS collective.consensus_card_case_version_idx")
+    op.execute("DROP INDEX IF EXISTS collective.consensus_card_one_published_version_idx")
     op.execute("DROP TABLE IF EXISTS collective.consensus_card_version")
     op.execute("DROP SCHEMA IF EXISTS collective")
