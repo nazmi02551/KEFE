@@ -5,13 +5,15 @@ class PreviewCommunityReasonRepository implements CommunityReasonRepository {
     const CommunityReasonItem(
       id: 'preview-reason-1',
       tags: ['FAIRNESS'],
-      text: 'Farklı ihtiyaçları aynı kuralla değerlendirmek her zaman adil olmayabilir.',
+      text:
+          'Farklı ihtiyaçları aynı kuralla değerlendirmek her zaman adil olmayabilir.',
       reactionCounts: {'RESONATES': 12, 'USEFUL': 8},
     ),
     const CommunityReasonItem(
       id: 'preview-reason-2',
       tags: ['RULES'],
-      text: 'Öngörülebilir ortak kurallar herkese aynı başlangıç noktası sağlar.',
+      text:
+          'Öngörülebilir ortak kurallar herkese aynı başlangıç noktası sağlar.',
       reactionCounts: {'RESONATES': 9, 'USEFUL': 11},
     ),
   ];
@@ -28,7 +30,8 @@ class PreviewCommunityReasonRepository implements CommunityReasonRepository {
       items: List.unmodifiable(_items),
       tagPatternCounts: counts,
       sampleSize: _items.length,
-      methodologyNote: 'Product Preview sample. Descriptive only; not Signal or truth ranking.',
+      methodologyNote:
+          'Product Preview sample. Descriptive only; not Signal or truth ranking.',
     );
   }
 
@@ -54,7 +57,10 @@ class PreviewCommunityReasonRepository implements CommunityReasonRepository {
   }
 
   @override
-  Future<void> react({required String reasonId, required String reaction}) async {}
+  Future<void> react({
+    required String reasonId,
+    required String reaction,
+  }) async {}
 
   @override
   Future<void> report({required String reasonId, required String code}) async {}
