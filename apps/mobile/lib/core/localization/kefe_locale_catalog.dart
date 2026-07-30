@@ -11,7 +11,8 @@ abstract final class KefeLocaleCatalog {
     required String key,
     Map<String, Object?> placeholders = const {},
   }) {
-    final fallback = resources[fallbackLanguageCode] ?? const <String, String>{};
+    final fallback =
+        resources[fallbackLanguageCode] ?? const <String, String>{};
     final localized = resources[locale.languageCode] ?? fallback;
     final template = localized[key] ?? fallback[key] ?? key;
     return interpolate(template, placeholders);
@@ -29,7 +30,8 @@ abstract final class KefeLocaleCatalog {
   }
 
   static Set<String> canonicalKeys(KefeLocaleResources resources) =>
-      (resources[fallbackLanguageCode] ?? const <String, String>{}).keys.toSet();
+      (resources[fallbackLanguageCode] ?? const <String, String>{}).keys
+          .toSet();
 
   static Set<String> missingKeys(
     KefeLocaleResources resources,

@@ -9,73 +9,83 @@ import 'package:kefe_mobile/features/progress/localization/progress_string_catal
 import 'package:kefe_mobile/features/progress/presentation/progress_strings.dart';
 
 void main() {
-  test('Slice 6 contract keeps migration incremental and product boundaries closed', () {
-    final file = File(
-      '../../docs/contracts/localization-foundation-slice6.v1.json',
-    );
-    expect(file.existsSync(), isTrue);
+  test(
+    'Slice 6 contract keeps migration incremental and product boundaries closed',
+    () {
+      final file = File(
+        '../../docs/contracts/localization-foundation-slice6.v1.json',
+      );
+      expect(file.existsSync(), isTrue);
 
-    final contract = jsonDecode(file.readAsStringSync()) as Map<String, Object?>;
-    final migration = contract['migration']! as Map<String, Object?>;
-    final invariants = contract['invariants']! as Map<String, Object?>;
+      final contract =
+          jsonDecode(file.readAsStringSync()) as Map<String, Object?>;
+      final migration = contract['migration']! as Map<String, Object?>;
+      final invariants = contract['invariants']! as Map<String, Object?>;
 
-    expect(migration['progress_strings_migrated'], isTrue);
-    expect(migration['core_kefe_strings_migrated'], isFalse);
-    expect(migration['internal_alpha_strings_migrated'], isFalse);
-    expect(migration['repo_wide_localization_complete'], isFalse);
-    expect(migration['locale_preference_behavior_change'], isFalse);
-    expect(invariants['commit_first'], isTrue);
-    expect(invariants['blind_first'], isTrue);
-    expect(invariants['signal_in_scope'], isFalse);
-    expect(invariants['impact_in_scope'], isFalse);
-  });
+      expect(migration['progress_strings_migrated'], isTrue);
+      expect(migration['core_kefe_strings_migrated'], isFalse);
+      expect(migration['internal_alpha_strings_migrated'], isFalse);
+      expect(migration['repo_wide_localization_complete'], isFalse);
+      expect(migration['locale_preference_behavior_change'], isFalse);
+      expect(invariants['commit_first'], isTrue);
+      expect(invariants['blind_first'], isTrue);
+      expect(invariants['signal_in_scope'], isFalse);
+      expect(invariants['impact_in_scope'], isFalse);
+    },
+  );
 
-  test('Progress catalog has exact key parity for current supported languages', () {
-    expect(
-      KefeLocaleCatalog.missingKeys(ProgressStringCatalog.resources, 'tr'),
-      isEmpty,
-    );
-    expect(
-      KefeLocaleCatalog.extraKeys(ProgressStringCatalog.resources, 'tr'),
-      isEmpty,
-    );
-    expect(
-      KefeLocaleCatalog.missingKeys(ProgressStringCatalog.resources, 'en'),
-      isEmpty,
-    );
-    expect(
-      KefeLocaleCatalog.extraKeys(ProgressStringCatalog.resources, 'en'),
-      isEmpty,
-    );
-  });
+  test(
+    'Progress catalog has exact key parity for current supported languages',
+    () {
+      expect(
+        KefeLocaleCatalog.missingKeys(ProgressStringCatalog.resources, 'tr'),
+        isEmpty,
+      );
+      expect(
+        KefeLocaleCatalog.extraKeys(ProgressStringCatalog.resources, 'tr'),
+        isEmpty,
+      );
+      expect(
+        KefeLocaleCatalog.missingKeys(ProgressStringCatalog.resources, 'en'),
+        isEmpty,
+      );
+      expect(
+        KefeLocaleCatalog.extraKeys(ProgressStringCatalog.resources, 'en'),
+        isEmpty,
+      );
+    },
+  );
 
-  test('resolver falls back to English and interpolates placeholders safely', () {
-    expect(
-      KefeLocaleCatalog.resolve(
-        locale: const Locale('de', 'DE'),
-        resources: ProgressStringCatalog.resources,
-        key: 'progress.title',
-      ),
-      'My KEFE',
-    );
-    expect(
-      KefeLocaleCatalog.resolve(
-        locale: const Locale('de', 'DE'),
-        resources: ProgressStringCatalog.resources,
-        key: 'journey.update_count.many',
-        placeholders: const {'count': 3},
-      ),
-      '3 revisits',
-    );
-    expect(
-      KefeLocaleCatalog.resolve(
-        locale: const Locale('en', 'US'),
-        resources: ProgressStringCatalog.resources,
-        key: 'missing.stable.key',
-      ),
-      'missing.stable.key',
-    );
-  });
+  test(
+    'resolver falls back to English and interpolates placeholders safely',
+    () {
+      expect(
+        KefeLocaleCatalog.resolve(
+          locale: const Locale('de', 'DE'),
+          resources: ProgressStringCatalog.resources,
+          key: 'progress.title',
+        ),
+        'My KEFE',
+      );
+      expect(
+        KefeLocaleCatalog.resolve(
+          locale: const Locale('de', 'DE'),
+          resources: ProgressStringCatalog.resources,
+          key: 'journey.update_count.many',
+          placeholders: const {'count': 3},
+        ),
+        '3 revisits',
+      );
+      expect(
+        KefeLocaleCatalog.resolve(
+          locale: const Locale('en', 'US'),
+          resources: ProgressStringCatalog.resources,
+          key: 'missing.stable.key',
+        ),
+        'missing.stable.key',
+      );
+    },
+  );
 
   test('Progress public copy API preserves current TR and EN wording', () {
     const tr = KefeStrings(Locale('tr', 'TR'));

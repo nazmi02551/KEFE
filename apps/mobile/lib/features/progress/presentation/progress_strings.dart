@@ -23,12 +23,11 @@ extension ProgressStrings on KefeStrings {
   String get progressRecent => _progressText('progress.recent');
   String get progressMethodology => _progressText('progress.methodology');
 
-  String progressReadiness(String readiness) => _progressText(
-    switch (readiness) {
-      'FORMING' => 'progress.readiness.forming',
-      _ => 'progress.readiness.default',
-    },
-  );
+  String progressReadiness(String readiness) =>
+      _progressText(switch (readiness) {
+        'FORMING' => 'progress.readiness.forming',
+        _ => 'progress.readiness.default',
+      });
 
   String get journeyEyebrow => _progressText('journey.eyebrow');
   String get journeyTitle => _progressText('journey.title');
@@ -45,10 +44,8 @@ extension ProgressStrings on KefeStrings {
   String get journeyNonInferenceNote =>
       _progressText('journey.non_inference_note');
 
-  String journeyWeighCount(int count) => _progressText(
-    'journey.weigh_count',
-    placeholders: {'count': count},
-  );
+  String journeyWeighCount(int count) =>
+      _progressText('journey.weigh_count', placeholders: {'count': count});
 
   String journeyUpdateCount(int count) => _progressText(
     count == 1 ? 'journey.update_count.one' : 'journey.update_count.many',
