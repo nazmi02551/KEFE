@@ -52,8 +52,8 @@ def _openapi_errors() -> list[str]:
     contract = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
     errors: list[str] = []
 
-    if contract.get("info", {}).get("version") != "0.17.0":
-        errors.append("OpenAPI checked-in version must match API v0.17.0")
+    if contract.get("info", {}).get("version") != "0.18.0":
+        errors.append("OpenAPI checked-in version must match API v0.18.0")
 
     bearer = contract.get("components", {}).get("securitySchemes", {}).get("HTTPBearer")
     if bearer != {"scheme": "bearer", "type": "http"}:
@@ -81,6 +81,11 @@ def _openapi_errors() -> list[str]:
         "JourneyResponse",
         "FlowRuntimeStepResponse",
         "FlowRuntimeResponse",
+        "ConsensusParticipationRequest",
+        "ConsensusParticipationResponse",
+        "ConsensusAggregateResponse",
+        "ConsensusCardResponse",
+        "ConsensusCardsResponse",
         "AdminSessionResponse",
         "AuthoringVersionResponse",
         "AuditTrailResponse",
@@ -161,6 +166,37 @@ def _openapi_errors() -> list[str]:
             "state",
             "reason_code",
         },
+        "ConsensusParticipationRequest": {"stance_code", "reason_tag_codes"},
+        "ConsensusParticipationResponse": {
+            "stance_code",
+            "reason_tag_codes",
+            "contribution_class",
+            "participated_at",
+        },
+        "ConsensusAggregateResponse": {
+            "sample_size",
+            "stance_distribution",
+            "reason_pattern_distribution",
+            "contribution_class",
+            "methodology_version",
+            "generated_at",
+            "provenance_note",
+        },
+        "ConsensusCardResponse": {
+            "card_id",
+            "card_version_id",
+            "case_version_id",
+            "proposition",
+            "stance_codes",
+            "reason_tag_codes",
+            "max_reason_tags",
+            "methodology_version",
+            "participation_state",
+            "contribution_class",
+            "participation",
+            "aggregate",
+        },
+        "ConsensusCardsResponse": {"items"},
         "AdminSessionResponse": {
             "admin_subject_id",
             "session_id",
@@ -213,12 +249,35 @@ def _openapi_errors() -> list[str]:
     if leaked:
         errors.append("ProgressResponse leaks forbidden fields: " + ", ".join(leaked))
 
+    aggregate_properties = schemas.get("ConsensusAggregateResponse", {}).get("properties", {})
+    forbidden_consensus_fields = {
+        "actor_id",
+        "demographic_segment",
+        "private_reason_text",
+        "personality",
+        "ideology",
+        "psychometric_score",
+        "signal_score",
+        "persuasion_score",
+    }
+    consensus_leaks = sorted(forbidden_consensus_fields & aggregate_properties.keys())
+    if consensus_leaks:
+        errors.append(
+            "ConsensusAggregateResponse leaks forbidden fields: "
+            + ", ".join(consensus_leaks)
+        )
+
     paths = contract.get("paths", {})
     response_contracts = {
         ("/v1/cases/{case_id}", "get"): "CaseDetailResponse",
         ("/v1/weigh-sessions/{session_id}/reason", "put"): "PrivateReasonResponse",
         ("/v1/weigh-sessions/{session_id}/perspectives", "get"): "PerspectiveResponse",
         ("/v1/weigh-sessions/{session_id}/flow", "get"): "FlowRuntimeResponse",
+        ("/v1/weigh-sessions/{session_id}/consensus-cards", "get"): "ConsensusCardsResponse",
+        (
+            "/v1/weigh-sessions/{session_id}/consensus-cards/{card_id}/participation",
+            "post",
+        ): "ConsensusCardResponse",
         ("/v1/case-versions/{case_version_id}/context", "get"): "ContextSnapshotResponse",
         ("/v1/me/progress", "get"): "ProgressEnvelopeResponse",
         ("/internal/admin/v1/session", "get"): "AdminSessionResponse",
@@ -263,6 +322,11 @@ def _openapi_errors() -> list[str]:
         ("/v1/weigh-sessions/{session_id}/flow", "get"),
         ("/v1/weigh-sessions/{session_id}/reveal", "get"),
         ("/v1/weigh-sessions/{session_id}/perspectives", "get"),
+        ("/v1/weigh-sessions/{session_id}/consensus-cards", "get"),
+        (
+            "/v1/weigh-sessions/{session_id}/consensus-cards/{card_id}/participation",
+            "post",
+        ),
         ("/v1/me/progress", "get"),
         ("/v1/identity/session", "delete"),
     )
@@ -390,6 +454,36 @@ def _configuration_errors() -> list[str]:
     return errors
 
 
+def _consensus_contract_errors() -> list[str]:
+    policy = (CONTRACTS / "consensus-participation.v1.yaml").read_text(encoding="utf-8")
+    required = {
+        "code: CONSENSUS_PARTICIPATION",
+        "case_subtype: forbidden",
+        "session_state_required: COMMITTED",
+        "class_for_this_slice: EXPOSED",
+        "pool_into_core_pre_result: forbidden",
+        "aggregate_visible_before_participation: false",
+        "aggregate_visible_after_participation: true",
+        "free_text: forbidden",
+        "one_participation_per_actor_per_card_version: true",
+        "preview_fallback_in_production: forbidden",
+        "- SIGNAL_QUALIFICATION",
+    }
+    errors = [
+        f"Consensus contract missing: {fragment}"
+        for fragment in sorted(required)
+        if fragment not in policy
+    ]
+    if not _source_contains("class ConsensusService"):
+        errors.append("Consensus application service is missing")
+    if not _source_contains("class PostgresConsensusRepository"):
+        errors.append("PostgreSQL ConsensusRepository adapter is missing")
+    migration = REPO_ROOT / "services/api/migrations/versions/20260730_0015_consensus_participation.py"
+    if not migration.exists():
+        errors.append("Consensus persistence migration is missing")
+    return errors
+
+
 def main() -> None:
     registered = _registered_error_codes()
     used = _used_domain_error_codes()
@@ -409,6 +503,7 @@ def main() -> None:
     problems.extend(_schema_errors())
     problems.extend(_authoring_contract_errors())
     problems.extend(_configuration_errors())
+    problems.extend(_consensus_contract_errors())
     problems.extend(_openapi_errors())
 
     if problems:
@@ -418,8 +513,8 @@ def main() -> None:
         "Contract sync OK: "
         f"{len(used)} DomainError codes registered; consumer HTTP, Admin HTTP, "
         "typed questions, private reasons, Context, Perspective, Flow runtime, "
-        "My KEFE Progress, identity, editorial persistence, publication, Admin "
-        "sessions and outbox invariants verified."
+        "Consensus WE, My KEFE Progress, identity, editorial persistence, publication, "
+        "Admin sessions and outbox invariants verified."
     )
 
 
