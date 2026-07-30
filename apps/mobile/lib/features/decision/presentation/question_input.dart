@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/design/kefe_theme.dart';
+import '../../../core/design/kefe_surface.dart';
+import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../domain/decision_models.dart';
@@ -23,97 +24,86 @@ class QuestionInputCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
     final isConfidence = question.responseType == 'CONFIDENCE';
-    return Card(
+    final accent = isConfidence ? visual.gold : visual.rules;
+
+    return KefeSurface(
       key: ValueKey('question-${question.id}'),
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color:
-                        (isConfidence
-                                ? KefeColorTokens.gold
-                                : KefeColorTokens.rules)
-                            .withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(11),
-                  ),
-                  child: Icon(
-                    isConfidence ? Icons.speed_rounded : Icons.balance_outlined,
-                    color: isConfidence
-                        ? KefeColorTokens.goldSoft
-                        : KefeColorTokens.rules,
-                    size: 20,
-                  ),
+      tone: KefeSurfaceTone.raised,
+      padding: const EdgeInsets.all(19),
+      accent: accent,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: visual.isDark ? 0.14 : 0.09),
+                  borderRadius: BorderRadius.circular(13),
+                  border: Border.all(color: accent.withValues(alpha: 0.18)),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isConfidence
-                            ? strings.questionConfidence
-                            : strings.questionDecision,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: isConfidence
-                              ? KefeColorTokens.goldSoft
-                              : KefeColorTokens.rules,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        question.prompt,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              height: 1.25,
-                            ),
-                      ),
-                    ],
-                  ),
+                child: Icon(
+                  isConfidence ? Icons.speed_rounded : Icons.balance_outlined,
+                  color: accent,
+                  size: 21,
                 ),
-                const SizedBox(width: 10),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outlineVariant.withValues(alpha: 0.24),
-                    borderRadius: BorderRadius.circular(99),
-                  ),
-                  child: Text(
-                    question.required
-                        ? strings.requiredQuestion
-                        : strings.optionalQuestion,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: KefeColorTokens.textMutedDark,
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    KefeEyebrow(
+                      isConfidence
+                          ? strings.questionConfidence
+                          : strings.questionDecision,
+                      color: accent,
                     ),
+                    const SizedBox(height: 7),
+                    Text(
+                      question.prompt,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        height: 1.20,
+                        letterSpacing: -0.25,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                decoration: BoxDecoration(
+                  color: visual.surfaceSunken,
+                  borderRadius: BorderRadius.circular(99),
+                  border: Border.all(color: visual.border.withValues(alpha: 0.78)),
+                ),
+                child: Text(
+                  question.required
+                      ? strings.requiredQuestion
+                      : strings.optionalQuestion,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: visual.mutedForeground,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 18),
-            _QuestionInput(
-              question: question,
-              value: value,
-              enabled: enabled,
-              onChanged: onChanged,
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _QuestionInput(
+            question: question,
+            value: value,
+            enabled: enabled,
+            onChanged: onChanged,
+          ),
+        ],
       ),
     );
   }
@@ -134,8 +124,7 @@ class _QuestionInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (question.responseType == 'SINGLE_CHOICE' &&
-        question.options.length == 2) {
+    if (question.responseType == 'SINGLE_CHOICE' && question.options.length == 2) {
       return _BalanceChoiceInput(
         question: question,
         value: value,
@@ -177,9 +166,8 @@ class _BalanceChoiceInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectedIndex = question.options.indexWhere(
-      (option) => option == value,
-    );
+    final visual = context.kefeVisual;
+    final selectedIndex = question.options.indexWhere((option) => option == value);
     final effectiveIndex = selectedIndex < 0 ? null : selectedIndex;
 
     return Column(
@@ -197,7 +185,7 @@ class _BalanceChoiceInput extends StatelessWidget {
             Expanded(
               child: _BalanceOptionTile(
                 option: question.options[0],
-                color: KefeColorTokens.rules,
+                color: visual.rules,
                 selected: effectiveIndex == 0,
                 enabled: enabled,
                 onTap: () => onChanged(question.options[0]),
@@ -207,7 +195,7 @@ class _BalanceChoiceInput extends StatelessWidget {
             Expanded(
               child: _BalanceOptionTile(
                 option: question.options[1],
-                color: KefeColorTokens.empathy,
+                color: visual.empathy,
                 selected: effectiveIndex == 1,
                 enabled: enabled,
                 onTap: () => onChanged(question.options[1]),
@@ -237,61 +225,72 @@ class _BalanceOptionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    final duration = KefeMotion.resolve(context, const Duration(milliseconds: 220));
     return Semantics(
       selected: selected,
       button: true,
+      enabled: enabled,
       child: InkWell(
         key: ValueKey('option-$option'),
         onTap: enabled ? onTap : null,
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(17),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          constraints: const BoxConstraints(minHeight: 82),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+          duration: duration,
+          curve: Curves.easeOutCubic,
+          constraints: const BoxConstraints(minHeight: 90),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
           decoration: BoxDecoration(
             color: selected
-                ? color.withValues(alpha: 0.13)
-                : KefeColorTokens.surfaceElevatedDark.withValues(alpha: 0.46),
-            borderRadius: BorderRadius.circular(15),
+                ? color.withValues(alpha: visual.isDark ? 0.18 : 0.10)
+                : visual.surfaceSunken,
+            borderRadius: BorderRadius.circular(17),
             border: Border.all(
-              color: selected
-                  ? color.withValues(alpha: 0.72)
-                  : Theme.of(context).colorScheme.outlineVariant,
-              width: selected ? 1.6 : 1,
+              color: selected ? color.withValues(alpha: 0.82) : visual.border,
+              width: selected ? 1.7 : 1,
             ),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.11),
+                      blurRadius: 18,
+                      spreadRadius: 1,
+                    ),
+                  ]
+                : const [],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                width: 25,
-                height: 25,
+                duration: duration,
+                width: 27,
+                height: 27,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: selected ? color : Colors.transparent,
                   border: Border.all(
-                    color: selected ? color : KefeColorTokens.textMutedDark,
+                    color: selected ? color : visual.mutedForeground,
                     width: 1.5,
                   ),
                 ),
                 child: selected
-                    ? const Icon(
+                    ? Icon(
                         Icons.check_rounded,
-                        size: 17,
-                        color: Color(0xFF07111F),
+                        size: 18,
+                        color: visual.isDark ? const Color(0xFF07111F) : Colors.white,
                       )
                     : null,
               ),
-              const SizedBox(height: 9),
+              const SizedBox(height: 10),
               Text(
                 option,
                 textAlign: TextAlign.center,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: selected ? color : null,
-                  fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
+                  color: selected ? color : visual.foreground,
+                  fontWeight: selected ? FontWeight.w900 : FontWeight.w750,
                   height: 1.22,
                 ),
               ),
@@ -318,6 +317,8 @@ class _SingleChoiceInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    final duration = KefeMotion.resolve(context, const Duration(milliseconds: 200));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -325,51 +326,41 @@ class _SingleChoiceInput extends StatelessWidget {
           Semantics(
             selected: value == option,
             button: true,
+            enabled: enabled,
             child: InkWell(
               key: ValueKey('option-$option'),
               onTap: enabled ? () => onChanged(option) : null,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(15),
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 160),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 14,
-                ),
+                duration: duration,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                 decoration: BoxDecoration(
-                  color: value == option
-                      ? KefeColorTokens.gold.withValues(alpha: 0.10)
-                      : KefeColorTokens.surfaceElevatedDark.withValues(
-                          alpha: 0.48,
-                        ),
-                  borderRadius: BorderRadius.circular(14),
+                  color: value == option ? visual.subtleGoldSurface : visual.surfaceSunken,
+                  borderRadius: BorderRadius.circular(15),
                   border: Border.all(
                     color: value == option
-                        ? KefeColorTokens.gold.withValues(alpha: 0.58)
-                        : Theme.of(context).colorScheme.outlineVariant,
+                        ? visual.gold.withValues(alpha: 0.62)
+                        : visual.border,
                   ),
                 ),
                 child: Row(
                   children: [
                     AnimatedContainer(
-                      duration: const Duration(milliseconds: 160),
-                      width: 22,
-                      height: 22,
+                      duration: duration,
+                      width: 23,
+                      height: 23,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: value == option
-                            ? KefeColorTokens.gold
-                            : Colors.transparent,
+                        color: value == option ? visual.gold : Colors.transparent,
                         border: Border.all(
-                          color: value == option
-                              ? KefeColorTokens.gold
-                              : KefeColorTokens.textMutedDark,
+                          color: value == option ? visual.gold : visual.mutedForeground,
                           width: 1.6,
                         ),
                       ),
                       child: value == option
                           ? const Icon(
                               Icons.check_rounded,
-                              size: 15,
+                              size: 16,
                               color: Color(0xFF171106),
                             )
                           : null,
@@ -379,9 +370,7 @@ class _SingleChoiceInput extends StatelessWidget {
                       child: Text(
                         option,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: value == option
-                              ? FontWeight.w800
-                              : FontWeight.w600,
+                          fontWeight: value == option ? FontWeight.w800 : FontWeight.w600,
                         ),
                       ),
                     ),
@@ -412,6 +401,7 @@ class _ConfidenceInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
     final values = _values();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -421,44 +411,57 @@ class _ConfidenceInput extends StatelessWidget {
             Text(
               _label(question.minimum),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: KefeColorTokens.textMutedDark,
+                color: visual.mutedForeground,
+                fontWeight: FontWeight.w700,
               ),
             ),
             const Spacer(),
-            if (value != null)
-              Text(
-                '${_label((value as num).toDouble())}/10',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: KefeColorTokens.goldSoft,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
+            AnimatedSwitcher(
+              duration: KefeMotion.resolve(context, const Duration(milliseconds: 180)),
+              child: value == null
+                  ? const SizedBox.shrink()
+                  : Container(
+                      key: ValueKey('confidence-current-$value'),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: visual.subtleGoldSurface,
+                        borderRadius: BorderRadius.circular(99),
+                      ),
+                      child: Text(
+                        '${_label((value as num).toDouble())}/10',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: visual.goldSoft,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+            ),
             const Spacer(),
             Text(
               _label(question.maximum),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: KefeColorTokens.textMutedDark,
+                color: visual.mutedForeground,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 9),
+        const SizedBox(height: 12),
         Wrap(
-          spacing: 6,
-          runSpacing: 8,
+          spacing: 7,
+          runSpacing: 9,
           alignment: WrapAlignment.center,
           children: [
             for (final item in values)
               Semantics(
                 selected: _sameValue(value, item),
                 button: true,
+                enabled: enabled,
                 child: ChoiceChip(
                   key: ValueKey('confidence-${question.id}-${_label(item)}'),
                   label: Text(_label(item)),
                   selected: _sameValue(value, item),
-                  onSelected: enabled
-                      ? (_) => onChanged(_normalized(item))
-                      : null,
+                  onSelected: enabled ? (_) => onChanged(_normalized(item)) : null,
                 ),
               ),
           ],
