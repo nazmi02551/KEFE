@@ -4,6 +4,7 @@ from kefe_api.core.exception_handlers import install_exception_handlers
 from kefe_api.core.settings import get_settings
 from kefe_api.infrastructure.persistence import (
     build_admin_session_store,
+    build_consensus_repository,
     build_content_authoring_repository,
     build_content_configuration_repository,
     build_context_repository,
@@ -18,6 +19,8 @@ from kefe_api.modules.admin_security.content_configuration import (
 from kefe_api.modules.admin_security.policy import default_admin_security_policy
 from kefe_api.modules.admin_security.router import router as admin_router
 from kefe_api.modules.admin_security.service import AdminSecurityService
+from kefe_api.modules.consensus.router import router as consensus_router
+from kefe_api.modules.consensus.service import ConsensusService
 from kefe_api.modules.content_authoring.registry import default_authoring_registry
 from kefe_api.modules.content_authoring.service import ContentAuthoringService
 from kefe_api.modules.content_configuration.admin_router import (
@@ -56,6 +59,7 @@ def create_app() -> FastAPI:
 
     context_repository = build_context_repository(settings)
     decision_repository = build_decision_repository(settings)
+    consensus_repository = build_consensus_repository(settings)
     identity_repository = build_identity_repository(settings)
     progress_repository = build_progress_repository(settings, decision_repository)
     content_authoring_repository = build_content_authoring_repository(settings)
@@ -91,6 +95,11 @@ def create_app() -> FastAPI:
     app.state.context_service = ContextService(context_repository)
     app.state.decision_repository = decision_repository
     app.state.decision_service = LineageAwareDecisionService(decision_repository)
+    app.state.consensus_repository = consensus_repository
+    app.state.consensus_service = ConsensusService(
+        consensus_repository=consensus_repository,
+        decision_repository=decision_repository,
+    )
     app.state.flow_runtime_service = flow_runtime_service
     app.state.decision_lineage_service = DecisionLineageService(
         decision_repository,
@@ -129,6 +138,7 @@ def create_app() -> FastAPI:
     app.include_router(identity_router)
     app.include_router(context_router)
     app.include_router(decision_router)
+    app.include_router(consensus_router)
     app.include_router(decision_lineage_router)
     app.include_router(reflection_router)
     app.include_router(flow_runtime_router)
