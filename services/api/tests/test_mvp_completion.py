@@ -1,9 +1,16 @@
 from __future__ import annotations
 
+from uuid import UUID
+
 from fastapi.testclient import TestClient
 
 from kefe_api.main import create_app
-from kefe_api.modules.decision.bootstrap import DEMO_CASE_ID, DEMO_CASE_VERSION_ID, DEMO_QUESTION_ID
+from kefe_api.modules.community_reason.models import CommunityReasonModeration
+from kefe_api.modules.decision.bootstrap import (
+    DEMO_CASE_ID,
+    DEMO_CASE_VERSION_ID,
+    DEMO_QUESTION_ID,
+)
 from kefe_api.modules.identity.account_models import OtpChannel
 
 
@@ -13,7 +20,7 @@ def _guest(client: TestClient) -> dict[str, str]:
     return {"Authorization": f"Bearer {response.json()['access_token']}"}
 
 
-def _committed(client: TestClient, headers: dict[str, str]) -> str:
+def _start_and_answer(client: TestClient, headers: dict[str, str]) -> str:
     start = client.post(f"/v1/cases/{DEMO_CASE_ID}/weigh-sessions", headers=headers)
     assert start.status_code == 201
     session_id = start.json()["session_id"]
@@ -23,11 +30,20 @@ def _committed(client: TestClient, headers: dict[str, str]) -> str:
         json={"responses": [{"question_id": str(DEMO_QUESTION_ID), "value": "A"}]},
     )
     assert answer.status_code == 200
+    return session_id
+
+
+def _commit(client: TestClient, headers: dict[str, str], session_id: str) -> None:
     commit = client.post(
         f"/v1/weigh-sessions/{session_id}/commit",
         headers={**headers, "Idempotency-Key": f"mvp-completion-{session_id}"},
     )
     assert commit.status_code == 200
+
+
+def _committed(client: TestClient, headers: dict[str, str]) -> str:
+    session_id = _start_and_answer(client, headers)
+    _commit(client, headers, session_id)
     return session_id
 
 
@@ -49,7 +65,10 @@ def test_account_offer_is_functional_and_guest_history_survives_conversion() -> 
     assert challenge.status_code == 201
     body = challenge.json()
     assert body["destination_hint"] == "mv***@example.test"
-    code = app.state.otp_delivery.code_for(channel=OtpChannel.EMAIL, identifier=identifier)
+    code = app.state.otp_delivery.code_for(
+        channel=OtpChannel.EMAIL,
+        identifier=identifier,
+    )
     assert code is not None
 
     verified = client.post(
@@ -72,7 +91,6 @@ def test_account_offer_is_functional_and_guest_history_survives_conversion() -> 
     assert after.json()["account_offer"]["eligible"] is False
     assert after.json()["account_offer"]["account_creation_available"] is False
 
-    # Old guest credential now resolves to the promoted Account actor in-memory.
     old_token_progress = client.get("/v1/me/progress", headers=guest_headers)
     assert old_token_progress.status_code == 200
     assert old_token_progress.json()["progress"]["meaningful_weigh_count"] == 1
@@ -83,8 +101,7 @@ def test_share_requires_commit_redacts_private_reason_and_can_be_revoked() -> No
     app = create_app()
     client = TestClient(app)
     headers = _guest(client)
-    start = client.post(f"/v1/cases/{DEMO_CASE_ID}/weigh-sessions", headers=headers)
-    session_id = start.json()["session_id"]
+    session_id = _start_and_answer(client, headers)
 
     denied = client.post(
         "/v1/shares",
@@ -94,21 +111,13 @@ def test_share_requires_commit_redacts_private_reason_and_can_be_revoked() -> No
     assert denied.status_code == 403
     assert denied.json()["code"] == "SHARE_COMMIT_REQUIRED"
 
-    client.put(
-        f"/v1/weigh-sessions/{session_id}/responses",
-        headers=headers,
-        json={"responses": [{"question_id": str(DEMO_QUESTION_ID), "value": "A"}]},
-    )
     reason = client.put(
         f"/v1/weigh-sessions/{session_id}/reason",
         headers=headers,
         json={"tags": ["FAIRNESS"], "text": "private reason must never leak"},
     )
     assert reason.status_code == 200
-    client.post(
-        f"/v1/weigh-sessions/{session_id}/commit",
-        headers={**headers, "Idempotency-Key": "mvp-share-commit-0001"},
-    )
+    _commit(client, headers, session_id)
 
     created = client.post(
         "/v1/shares",
@@ -126,7 +135,10 @@ def test_share_requires_commit_redacts_private_reason_and_can_be_revoked() -> No
     assert "private" not in str(public_body).lower()
     assert public_body["case_id"] == str(DEMO_CASE_ID)
 
-    revoked = client.delete(f"/v1/shares/{created.json()['share_id']}", headers=headers)
+    revoked = client.delete(
+        f"/v1/shares/{created.json()['share_id']}",
+        headers=headers,
+    )
     assert revoked.status_code == 204
     missing = client.get(f"/v1/shares/{created.json()['token']}")
     assert missing.status_code == 404
@@ -146,7 +158,9 @@ def test_community_reason_is_explicit_moderated_and_pattern_only() -> None:
     assert tags_only.status_code == 200
     assert tags_only.json()["moderation_state"] == "NOT_REQUIRED"
 
-    snapshot = client.get(f"/v1/case-versions/{DEMO_CASE_VERSION_ID}/community-reasons")
+    snapshot = client.get(
+        f"/v1/case-versions/{DEMO_CASE_VERSION_ID}/community-reasons"
+    )
     assert snapshot.status_code == 200
     assert snapshot.json()["sample_size"] == 1
     assert snapshot.json()["tag_pattern_counts"] == {"FAIRNESS": 1, "NEED": 1}
@@ -158,20 +172,21 @@ def test_community_reason_is_explicit_moderated_and_pattern_only() -> None:
     )
     assert pending.status_code == 200
     assert pending.json()["moderation_state"] == "PENDING"
-    hidden = client.get(f"/v1/case-versions/{DEMO_CASE_VERSION_ID}/community-reasons")
+    hidden = client.get(
+        f"/v1/case-versions/{DEMO_CASE_VERSION_ID}/community-reasons"
+    )
     assert hidden.status_code == 200
     assert hidden.json()["sample_size"] == 0
 
     reason_id = pending.json()["reason_id"]
     allowed = app.state.community_reason_service.moderate(
-        reason_id=__import__("uuid").UUID(reason_id),
-        state=__import__(
-            "kefe_api.modules.community_reason.models",
-            fromlist=["CommunityReasonModeration"],
-        ).CommunityReasonModeration.ALLOWED,
+        reason_id=UUID(reason_id),
+        state=CommunityReasonModeration.ALLOWED,
     )
     assert allowed.moderation_state.value == "ALLOWED"
-    visible = client.get(f"/v1/case-versions/{DEMO_CASE_VERSION_ID}/community-reasons")
+    visible = client.get(
+        f"/v1/case-versions/{DEMO_CASE_VERSION_ID}/community-reasons"
+    )
     assert visible.json()["sample_size"] == 1
     assert visible.json()["items"][0]["text"] == "This must wait for moderation"
 
@@ -180,18 +195,22 @@ def test_privacy_export_excludes_credentials_then_delete_revokes_identity() -> N
     app = create_app()
     client = TestClient(app)
     headers = _guest(client)
-    session_id = _committed(client, headers)
-    client.put(
+    session_id = _start_and_answer(client, headers)
+    reason = client.put(
         f"/v1/weigh-sessions/{session_id}/reason",
         headers=headers,
         json={"tags": ["FAIRNESS"], "text": "owner-visible private reason"},
     )
+    assert reason.status_code == 200
+    _commit(client, headers, session_id)
 
     exported = client.get("/v1/me/privacy-export", headers=headers)
     assert exported.status_code == 200
     body = exported.json()
     assert body["product_data"]["weigh_sessions"][0]["session_id"] == session_id
-    assert body["product_data"]["private_reasons"][0]["text"] == "owner-visible private reason"
+    assert body["product_data"]["private_reasons"][0]["text"] == (
+        "owner-visible private reason"
+    )
     serialized = str(body).lower()
     assert "token_hash" not in serialized
     assert "access_token" not in serialized
