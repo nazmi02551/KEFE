@@ -115,11 +115,17 @@ class PreviewContentLocalizer implements KefeContentLocalizer {
       if (id.startsWith('preview-context-c-')) return 'Preview note';
     }
     if (namespace == KefeContentNamespace.contextBlockBody) {
+      if (id.startsWith('preview-context-a-')) {
+        final caseId = id.substring('preview-context-a-'.length);
+        return _en['${KefeContentNamespace.caseSummary}:$caseId'] ?? fallback;
+      }
       if (id.startsWith('preview-context-c-')) {
         return 'This is not live news. It is a representative scenario prepared to test KEFE’s product flow, source separation and pre-Commit decision experience.';
       }
       if (id.startsWith('preview-context-b-')) {
-        return _englishTensionForCaseId(id.substring('preview-context-b-'.length));
+        return _englishTensionForCaseId(
+          id.substring('preview-context-b-'.length),
+        );
       }
     }
 
