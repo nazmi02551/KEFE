@@ -74,7 +74,7 @@ class ConsensusService:
         *,
         actor_id: UUID,
         session_id: UUID,
-        card_version_id: UUID,
+        card_id: UUID,
         stance_code: str,
         reason_tag_codes: list[str],
         idempotency_key: str,
@@ -82,7 +82,7 @@ class ConsensusService:
         session = self._committed_owned_session(actor_id, session_id)
         card = self._consensus.get_card(
             case_version_id=session.case_version_id,
-            card_version_id=card_version_id,
+            card_id=card_id,
         )
         if card is None:
             raise DomainError(
@@ -171,6 +171,7 @@ class ConsensusService:
                 session.id,
                 {
                     "case_version_id": str(session.case_version_id),
+                    "card_id": str(card.card_id),
                     "card_version_id": str(card.id),
                     "stance_code": stored.stance_code,
                     "reason_tag_codes": list(stored.reason_tag_codes),
@@ -195,6 +196,7 @@ class ConsensusService:
             session.id,
             {
                 "case_version_id": str(session.case_version_id),
+                "card_id": str(view.card.card_id),
                 "card_version_id": str(view.card.id),
                 "sample_size": aggregate.sample_size,
                 "contribution_class": aggregate.contribution_class,
