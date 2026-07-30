@@ -91,7 +91,8 @@ jobs:
         working-directory: services/api
         run: >-
           python tools/export_mvp_openapi_overlay.py
-          --check ../../docs/contracts/openapi-mvp.v0.19.overlay.json
+          --output ../../docs/contracts/openapi-mvp.v0.19.overlay.json
+          --check
       - name: Exact composed OpenAPI drift gate
         working-directory: services/api
         run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
@@ -226,13 +227,15 @@ jobs:
                     <action android:name="android.intent.action.VIEW" />
                     <category android:name="android.intent.category.DEFAULT" />
                     <category android:name="android.intent.category.BROWSABLE" />
-                    <data android:scheme="kefe" android:host="share" />
+                    <data android:scheme="kefe" />
                 </intent-filter>
           '''
           if 'android:scheme="kefe"' not in source:
               source = source.replace(marker, intent + '\n            ' + marker, 1)
               path.write_text(source)
-          assert 'android:scheme="kefe"' in path.read_text()
+          manifest = path.read_text()
+          assert 'android:scheme="kefe"' in manifest
+          assert 'android:host="share"' not in manifest
           PY
       - name: Build production-entry MVP candidate APK
         working-directory: apps/mobile
