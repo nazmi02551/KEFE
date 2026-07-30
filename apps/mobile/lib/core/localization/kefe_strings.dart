@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import '../../features/decision/domain/decision_models.dart';
+import 'core_string_catalog.dart';
+import 'kefe_locale_catalog.dart';
 
 class KefeStrings {
   const KefeStrings(this.locale);
@@ -13,257 +15,166 @@ class KefeStrings {
     return Localizations.of<KefeStrings>(context, KefeStrings)!;
   }
 
-  bool get _tr => locale.languageCode == 'tr';
+  String _text(
+    String key, {
+    Map<String, Object?> placeholders = const {},
+  }) => KefeLocaleCatalog.resolve(
+    locale: locale,
+    resources: CoreStringCatalog.resources,
+    key: key,
+    placeholders: placeholders,
+  );
 
   String get appName => 'KEFE';
-  String get promise => _tr
-      ? 'Kararını tart. Farklı düşünmenin nedenlerini gör.'
-      : 'Weigh your decision. See why people differ.';
-  String get onboardingTitleOne =>
-      _tr ? 'Önce kendi kararını gör.' : 'See your own decision first.';
-  String get onboardingBodyOne => _tr
-      ? 'KEFE sana çoğunluğun ne dediğini göstermeden önce, aynı konuya kendi gözünden bakmanı ister.'
-      : 'Before showing what the crowd thinks, KEFE asks you to look at the same question through your own eyes.';
-  String get onboardingStepTwoEyebrow =>
-      _tr ? 'Farkı keşfet' : 'Discover the difference';
-  String get onboardingTitleTwo => _tr
-      ? 'Sonra neden ayrıştığını keşfet.'
-      : 'Then discover why views diverge.';
-  String get onboardingBodyTwo => _tr
-      ? 'Kararından sonra topluluk sonucunu, farklı perspektifleri ve zamanla fikrinin nasıl değiştiğini inceleyebilirsin.'
-      : 'After your decision, you can inspect community results, different perspectives and how your view changes over time.';
-  String get onboardingNext => _tr ? 'Devam et' : 'Continue';
-  String get onboardingTryCase =>
-      _tr ? 'İlk tartımı yap' : 'Make your first weigh';
-  String get continueAsGuest =>
-      _tr ? 'Misafir olarak devam et' : 'Continue as guest';
-  String get firstRevealHelper => _tr
-      ? 'İlk tartımın tamamlandı. KEFE’yi keşfetmeye misafir olarak devam edebilirsin.'
-      : 'Your first weigh is complete. You can continue exploring KEFE as a guest.';
-  String get exploreTitle => _tr ? 'Keşfet' : 'Explore';
-  String get exploreIntro => _tr
-      ? 'Önce sen karar ver. Sonra dünyayı gör.'
-      : 'Decide first. Then see the world.';
-  String get exploreEmpty => _tr
-      ? 'Şu anda tartılacak bir içerik yok.'
-      : 'There is nothing to weigh right now.';
-  String get openCase => _tr ? 'Tartmaya Başla' : 'Start Weighing';
+  String get promise => _text('promise');
+  String get onboardingTitleOne => _text('onboarding.title_one');
+  String get onboardingBodyOne => _text('onboarding.body_one');
+  String get onboardingStepTwoEyebrow => _text('onboarding.step_two_eyebrow');
+  String get onboardingTitleTwo => _text('onboarding.title_two');
+  String get onboardingBodyTwo => _text('onboarding.body_two');
+  String get onboardingNext => _text('onboarding.next');
+  String get onboardingTryCase => _text('onboarding.try_case');
+  String get continueAsGuest => _text('onboarding.continue_as_guest');
+  String get firstRevealHelper => _text('onboarding.first_reveal_helper');
+  String get exploreTitle => _text('explore.title');
+  String get exploreIntro => _text('explore.intro');
+  String get exploreEmpty => _text('explore.empty');
+  String get openCase => _text('explore.open_case');
 
-  String get contextTitle => _tr ? 'Bağlam' : 'Context';
-  String get contextHelper => _tr
-      ? 'Karar vermeden önce doğrulanmış bilgiler ile iddia ve belirsizlikleri ayrı ayrı incele.'
-      : 'Before deciding, review verified information separately from claims and uncertainty.';
-  String get contextDetails => _tr ? 'Ayrıntıları aç' : 'Show details';
-  String get contextSources => _tr ? 'Kaynakları gör' : 'View sources';
-  String get contextLoading =>
-      _tr ? 'Bağlam hazırlanıyor…' : 'Preparing context…';
-  String get contextUnavailable => _tr
-      ? 'Bağlam şu anda yüklenemedi. Sonuç veya topluluk bilgisi gösterilmedi.'
-      : 'Context could not load right now. No result or community information was shown.';
-  String get contextRetry => _tr ? 'Bağlamı tekrar yükle' : 'Retry context';
-  String contextClaimStatus(String status) {
-    return switch (status) {
-      'VERIFIED' => _tr ? 'Doğrulandı' : 'Verified',
-      'CLAIMED' => _tr ? 'İddia' : 'Claimed',
-      'DISPUTED' => _tr ? 'Çelişkili' : 'Disputed',
-      'UNKNOWN' => _tr ? 'Bilinmiyor' : 'Unknown',
-      _ => status,
-    };
-  }
+  String get contextTitle => _text('context.title');
+  String get contextHelper => _text('context.helper');
+  String get contextDetails => _text('context.details');
+  String get contextSources => _text('context.sources');
+  String get contextLoading => _text('context.loading');
+  String get contextUnavailable => _text('context.unavailable');
+  String get contextRetry => _text('context.retry');
 
-  String contextSourceKind(String sourceKind) {
-    return switch (sourceKind) {
-      'OFFICIAL' => _tr ? 'Resmî kaynak' : 'Official source',
-      'NEWS' => _tr ? 'Haber kaynağı' : 'News source',
-      'RESEARCH' => _tr ? 'Araştırma' : 'Research',
-      'EDITORIAL' => _tr ? 'Editoryal kaynak' : 'Editorial source',
-      _ => _tr ? 'Diğer kaynak' : 'Other source',
-    };
-  }
+  String contextClaimStatus(String status) => switch (status) {
+    'VERIFIED' => _text('context.claim.verified'),
+    'CLAIMED' => _text('context.claim.claimed'),
+    'DISPUTED' => _text('context.claim.disputed'),
+    'UNKNOWN' => _text('context.claim.unknown'),
+    _ => status,
+  };
 
-  String get loading => _tr ? 'Hazırlanıyor…' : 'Preparing…';
-  String get retry => _tr ? 'Tekrar dene' : 'Try again';
-  String get start => _tr ? 'Başla' : 'Start';
-  String get commit => _tr ? 'Kararımı Ver' : 'Commit My Decision';
-  String get retrySync => _tr ? 'Kararımı Senkronize Et' : 'Sync My Decision';
-  String get commitHelper => _tr
-      ? 'Kararını kilitle ve sonucu gör.'
-      : 'Lock your decision and reveal the result.';
-  String get completeRequired => _tr
-      ? 'Devam etmek için zorunlu soruları yanıtla.'
-      : 'Answer the required questions to continue.';
-  String get requiredQuestion => _tr ? 'Zorunlu' : 'Required';
-  String get optionalQuestion => _tr ? 'İsteğe bağlı' : 'Optional';
-  String get unsupportedQuestionType => _tr
-      ? 'Bu soru tipi bu sürümde desteklenmiyor.'
-      : 'This question type is not supported in this version.';
-  String get reasonTitle =>
-      _tr ? 'Neden böyle düşündün?' : 'Why did you think this?';
-  String get reasonHelper => _tr
-      ? 'İstersen kararında etkili olan gerekçeleri seç. Bu sürümde gerekçen diğer kullanıcılara gösterilmez; kısa metin güvenlik amacıyla incelenebilir.'
-      : 'Optionally choose what shaped your decision. In this version it is not shown to other users; short text may be reviewed for safety.';
-  String reasonSelectionLimit(int maxTags) => _tr
-      ? 'En fazla $maxTags gerekçe seçebilirsin.'
-      : 'You can choose up to $maxTags reasons.';
-  String get reasonTextLabel => _tr ? 'Kısa gerekçe' : 'Short reason';
-  String get reasonTextHint => _tr
-      ? 'İstersen kendi cümlelerinle ekle…'
-      : 'Optionally add it in your own words…';
-  String reasonTagLabel(String code) {
-    return switch (code) {
-      'FAIRNESS' => _tr ? 'Adalet' : 'Fairness',
-      'NEED' => _tr ? 'İhtiyaç' : 'Need',
-      'RESPONSIBILITY' => _tr ? 'Sorumluluk' : 'Responsibility',
-      'EMPATHY' => _tr ? 'Empati' : 'Empathy',
-      'RULES' => _tr ? 'Kural' : 'Rules',
-      'CONSEQUENCE' => _tr ? 'Sonuç' : 'Consequence',
-      'PROPORTIONALITY' => _tr ? 'Orantılılık' : 'Proportionality',
-      'PRACTICAL_IMPACT' => _tr ? 'Pratik etki' : 'Practical impact',
-      _ => code.replaceAll('_', ' '),
-    };
-  }
+  String contextSourceKind(String sourceKind) => switch (sourceKind) {
+    'OFFICIAL' => _text('context.source.official'),
+    'NEWS' => _text('context.source.news'),
+    'RESEARCH' => _text('context.source.research'),
+    'EDITORIAL' => _text('context.source.editorial'),
+    _ => _text('context.source.other'),
+  };
 
-  String get pendingHelper => _tr
-      ? 'Kararın cihazda güvende. Aynı karar anahtarıyla güvenli biçimde yeniden denenecek.'
-      : 'Your decision is safe on this device. It will retry with the same decision key.';
-  String get offlineDraft =>
-      _tr ? 'Çevrimdışı taslak geri yüklendi.' : 'Offline draft restored.';
-  String get decisionSyncPending => _tr
-      ? 'Yanıtların ve gerekçen cihazda güvende. Bağlantı geldiğinde Commit öncesi senkronizasyon yeniden denenecek.'
-      : 'Your answers and reason are safe on this device. Pre-commit sync will retry when connectivity returns.';
-  String get revealPending => _tr
-      ? 'Kararın kaydedildi. Sonuç bağlantı geldiğinde yeniden açılabilir.'
-      : 'Your decision is committed. The result can be reopened when connectivity returns.';
-  String get uncertainCommit => _tr
-      ? 'Bağlantı kesildi. Kararın gönderilmiş olabilir; aynı anahtarla güvenli biçimde kontrol edeceğiz.'
-      : 'Connection dropped. Your decision may already be committed; we will safely check with the same key.';
-  String get revealTitle =>
-      _tr ? 'Topluluk nasıl tarttı?' : 'How did the community weigh it?';
-  String get trustedSample => _tr ? 'Güvenilir örneklem' : 'Trusted sample';
-  String get selectAnswer => _tr ? 'Bir seçenek seç' : 'Choose an option';
+  String get loading => _text('common.loading');
+  String get retry => _text('common.retry');
+  String get start => _text('common.start');
+  String get commit => _text('decision.commit');
+  String get retrySync => _text('decision.retry_sync');
+  String get commitHelper => _text('decision.commit_helper');
+  String get completeRequired => _text('decision.complete_required');
+  String get requiredQuestion => _text('decision.required_question');
+  String get optionalQuestion => _text('decision.optional_question');
+  String get unsupportedQuestionType =>
+      _text('decision.unsupported_question_type');
+  String get reasonTitle => _text('reason.title');
+  String get reasonHelper => _text('reason.helper');
+  String reasonSelectionLimit(int maxTags) => _text(
+    'reason.selection_limit',
+    placeholders: {'maxTags': maxTags},
+  );
+  String get reasonTextLabel => _text('reason.text_label');
+  String get reasonTextHint => _text('reason.text_hint');
 
-  String get reflectionTitle =>
-      _tr ? 'Kararına bir daha bak' : 'Look at your decision again';
-  String reflectionDecisionSummary(bool changed, int count) {
-    if (changed) {
-      return _tr
-          ? 'İki kararın arasında $count yanıt değişti.'
-          : '$count response changed between your two decisions.';
-    }
-    return _tr
-        ? 'İki kararın arasında yanıt değişikliği görünmüyor.'
-        : 'No response change is visible between your two decisions.';
-  }
+  String reasonTagLabel(String code) => switch (code) {
+    'FAIRNESS' => _text('reason.tag.fairness'),
+    'NEED' => _text('reason.tag.need'),
+    'RESPONSIBILITY' => _text('reason.tag.responsibility'),
+    'EMPATHY' => _text('reason.tag.empathy'),
+    'RULES' => _text('reason.tag.rules'),
+    'CONSEQUENCE' => _text('reason.tag.consequence'),
+    'PROPORTIONALITY' => _text('reason.tag.proportionality'),
+    'PRACTICAL_IMPACT' => _text('reason.tag.practical_impact'),
+    _ => code.replaceAll('_', ' '),
+  };
 
-  String reflectionInterventionSummary(int count) => _tr
-      ? 'İki kararın arasında $count kayıtlı karşılaşma bulunuyor.'
-      : '$count recorded encounter sits between the two decisions.';
-  String get reflectionNonCausalNote => _tr
-      ? 'Bu görünüm değişimi ve aradaki karşılaşmaları birlikte gösterir; bir karşılaşmanın karar değişimine neden olduğunu söylemez.'
-      : 'This view shows the change and intervening encounters together; it does not claim that an encounter caused the change.';
-  String get reflectionComplete =>
-      _tr ? 'Yansımayı tamamla' : 'Complete reflection';
-  String get reflectionCompleted =>
-      _tr ? 'Yansıma tamamlandı' : 'Reflection completed';
-  String get reflectionLoading =>
-      _tr ? 'Yansıma hazırlanıyor…' : 'Preparing reflection…';
-  String get reflectionRetry =>
-      _tr ? 'Yansımayı tekrar yükle' : 'Retry reflection';
+  String get pendingHelper => _text('sync.pending_helper');
+  String get offlineDraft => _text('sync.offline_draft');
+  String get decisionSyncPending => _text('sync.decision_pending');
+  String get revealPending => _text('sync.reveal_pending');
+  String get uncertainCommit => _text('sync.uncertain_commit');
+  String get revealTitle => _text('reveal.title');
+  String get trustedSample => _text('reveal.trusted_sample');
+  String get selectAnswer => _text('reveal.select_answer');
 
-  String get flowCapabilityPendingTitle => _tr
-      ? 'Bu adım henüz kullanıma açılmadı'
-      : 'This step is not available yet';
-  String flowCapabilityPendingBody(String? reasonCode) {
-    return switch (reasonCode) {
-      'FLOW_DECISION_REVISION_REQUIRED' =>
-        _tr
-            ? 'Bu akışta yeniden tartım adımı var. Karar değişimi altyapısı tamamlandığında aynı akış içinde açılacak.'
-            : 'This flow includes a re-weigh step. It will unlock here when decision revision support is available.',
-      'FLOW_REFLECTION_RUNTIME_PENDING' =>
-        _tr
-            ? 'Bu akışın yansıtma adımı hazırlanıyor. Mevcut kararın değiştirilmedi.'
-            : 'This flow’s reflection step is being prepared. Your current decision has not been changed.',
-      _ =>
-        _tr
-            ? 'Akış bu adımı tanıyor ancak bu sürüm henüz çalıştırmıyor. Diğer desteklenen adımlar aynı akışta kullanılabilir.'
-            : 'The flow recognizes this step, but this version does not execute it yet. Other supported steps remain available.',
-    };
-  }
+  String get reflectionTitle => _text('reflection.title');
+  String reflectionDecisionSummary(bool changed, int count) => changed
+      ? _text('reflection.decision_changed', placeholders: {'count': count})
+      : _text('reflection.decision_unchanged');
 
-  String get flowOfflineUnavailable => _tr
-      ? 'Bu eski çevrimdışı taslakta doğrulanmış akış bilgisi yok. Bağlantı kurulunca akış sunucudan yeniden alınacak; uygulama varsayılan bir ekran dizisi uydurmayacak.'
-      : 'This older offline draft has no verified flow snapshot. The flow will be fetched from the server when connectivity returns; the app will not invent a default screen order.';
-  String get flowRuntimeUnavailable => _tr
-      ? 'Bu vaka için doğrulanmış karar akışı şu anda kullanılamıyor.'
-      : 'The verified decision flow is currently unavailable for this case.';
-  String get flowRuntimeMismatch => _tr
-      ? 'Karar akışı bu oturumun vaka sürümüyle eşleşmedi. Güvenli biçimde yeniden yükle.'
-      : 'The decision flow did not match this session’s case version. Reload safely.';
+  String reflectionInterventionSummary(int count) => _text(
+    'reflection.intervention_summary',
+    placeholders: {'count': count},
+  );
+  String get reflectionNonCausalNote => _text('reflection.non_causal_note');
+  String get reflectionComplete => _text('reflection.complete');
+  String get reflectionCompleted => _text('reflection.completed');
+  String get reflectionLoading => _text('reflection.loading');
+  String get reflectionRetry => _text('reflection.retry');
 
-  String get perspectiveTitle =>
-      _tr ? 'Başka açılardan bak' : 'See other perspectives';
-  String get perspectiveLoading =>
-      _tr ? 'Perspektifler hazırlanıyor…' : 'Preparing perspectives…';
-  String get perspectiveRetry =>
-      _tr ? 'Perspektifleri tekrar yükle' : 'Retry perspectives';
-  String get perspectiveUnavailable => _tr
-      ? 'Sonucun hazır. Perspektifler şu anda yüklenemedi; kararını yeniden göndermeden tekrar deneyebilirsin.'
-      : 'Your result is ready. Perspectives could not load right now; you can retry without resending your decision.';
-  String get perspectiveCuratedNote => _tr
-      ? 'Şimdilik doğrulanmış editoryal perspektifler gösteriliyor.'
-      : 'For now, verified curated perspectives are shown.';
-  String get perspectiveClusterPending => _tr
-      ? 'Mevcut perspektifleri görebilirsin; daha geniş perspektif işlemesi sürüyor.'
-      : 'You can view the available perspectives while broader processing continues.';
-  String get perspectiveEmpty => _tr
-      ? 'Bu vaka için şu anda uygun bir karşı perspektif yok.'
-      : 'There is no eligible counter-perspective for this case right now.';
-  String get reasonPendingModeration => _tr
-      ? 'Kendi kısa gerekçen güvenlik incelemesinde. Bu, aşağıdaki perspektiflerin kaynağı olduğu anlamına gelmez.'
-      : 'Your short reason is under safety review. This does not mean it is a source for the perspectives below.';
-  String get perspectiveMethodology =>
-      _tr ? 'Bu görünüm hakkında' : 'About this view';
-  String perspectiveSlotLabel(PerspectiveSlot slot) {
-    return switch (slot) {
-      PerspectiveSlot.near => _tr ? 'Yakın perspektif' : 'Nearby perspective',
-      PerspectiveSlot.opposing =>
-        _tr ? 'Karşı perspektif' : 'Opposing perspective',
-      PerspectiveSlot.bridge =>
-        _tr ? 'Köprü perspektifi' : 'Bridge perspective',
-      PerspectiveSlot.alternativeContext =>
-        _tr ? 'Alternatif bağlam' : 'Alternative context',
-    };
-  }
+  String get flowCapabilityPendingTitle =>
+      _text('flow.capability_pending.title');
+  String flowCapabilityPendingBody(String? reasonCode) => switch (reasonCode) {
+    'FLOW_DECISION_REVISION_REQUIRED' =>
+      _text('flow.capability_pending.decision_revision'),
+    'FLOW_REFLECTION_RUNTIME_PENDING' =>
+      _text('flow.capability_pending.reflection_runtime'),
+    _ => _text('flow.capability_pending.default'),
+  };
 
-  String perspectiveSourceLabel(String sourceKind) {
-    return switch (sourceKind) {
-      'CURATED' => _tr ? 'Editoryal olarak derlendi' : 'Editorially curated',
-      'HUMAN_REASON' => _tr ? 'İnsan gerekçesi' : 'Human reason',
-      _ => _tr ? 'Kaynak bilgisi' : 'Source information',
-    };
-  }
+  String get flowOfflineUnavailable => _text('flow.offline_unavailable');
+  String get flowRuntimeUnavailable => _text('flow.runtime_unavailable');
+  String get flowRuntimeMismatch => _text('flow.runtime_mismatch');
 
-  String get genericError => _tr
-      ? 'Bir sorun oluştu. Kararın kaybolmadı; tekrar deneyebilirsin.'
-      : 'Something went wrong. Your decision was not lost; you can retry.';
+  String get perspectiveTitle => _text('perspective.title');
+  String get perspectiveLoading => _text('perspective.loading');
+  String get perspectiveRetry => _text('perspective.retry');
+  String get perspectiveUnavailable => _text('perspective.unavailable');
+  String get perspectiveCuratedNote => _text('perspective.curated_note');
+  String get perspectiveClusterPending => _text('perspective.cluster_pending');
+  String get perspectiveEmpty => _text('perspective.empty');
+  String get reasonPendingModeration =>
+      _text('perspective.reason_pending_moderation');
+  String get perspectiveMethodology => _text('perspective.methodology');
 
-  String messageForCode(String? code) {
-    return switch (code) {
-      'OFFLINE_DRAFT_RESTORED' => offlineDraft,
-      'DECISION_SYNC_PENDING' => decisionSyncPending,
-      'WEIGH_COMMIT_UNCERTAIN' => uncertainCommit,
-      'RESULT_SYNC_PENDING' => revealPending,
-      'FLOW_RUNTIME_OFFLINE_UNAVAILABLE' => flowOfflineUnavailable,
-      'FLOW_RUNTIME_UNAVAILABLE' ||
-      'FLOW_RUNTIME_NOT_CONFIGURED' => flowRuntimeUnavailable,
-      'FLOW_RUNTIME_VERSION_MISMATCH' => flowRuntimeMismatch,
-      'NETWORK_UNAVAILABLE' || 'NETWORK_TIMEOUT' =>
-        _tr
-            ? 'Bağlantı kurulamadı. Cihazdaki karar korunuyor.'
-            : 'Could not connect. The decision on this device is preserved.',
-      _ => genericError,
-    };
-  }
+  String perspectiveSlotLabel(PerspectiveSlot slot) => switch (slot) {
+    PerspectiveSlot.near => _text('perspective.slot.near'),
+    PerspectiveSlot.opposing => _text('perspective.slot.opposing'),
+    PerspectiveSlot.bridge => _text('perspective.slot.bridge'),
+    PerspectiveSlot.alternativeContext =>
+      _text('perspective.slot.alternative_context'),
+  };
+
+  String perspectiveSourceLabel(String sourceKind) => switch (sourceKind) {
+    'CURATED' => _text('perspective.source.curated'),
+    'HUMAN_REASON' => _text('perspective.source.human_reason'),
+    _ => _text('perspective.source.default'),
+  };
+
+  String get genericError => _text('error.generic');
+
+  String messageForCode(String? code) => switch (code) {
+    'OFFLINE_DRAFT_RESTORED' => offlineDraft,
+    'DECISION_SYNC_PENDING' => decisionSyncPending,
+    'WEIGH_COMMIT_UNCERTAIN' => uncertainCommit,
+    'RESULT_SYNC_PENDING' => revealPending,
+    'FLOW_RUNTIME_OFFLINE_UNAVAILABLE' => flowOfflineUnavailable,
+    'FLOW_RUNTIME_UNAVAILABLE' ||
+    'FLOW_RUNTIME_NOT_CONFIGURED' => flowRuntimeUnavailable,
+    'FLOW_RUNTIME_VERSION_MISMATCH' => flowRuntimeMismatch,
+    'NETWORK_UNAVAILABLE' ||
+    'NETWORK_TIMEOUT' => _text('error.network_unavailable'),
+    _ => genericError,
+  };
 }
 
 class KefeStringsDelegate extends LocalizationsDelegate<KefeStrings> {
