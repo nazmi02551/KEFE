@@ -88,7 +88,7 @@ void main() {
     await tester.pumpWidget(
       revealHarness(
         theme: KefeTheme.dark(),
-        locale: const Locale('tr', 'TR'),
+        locale: const Locale('en', 'US'),
         disableAnimations: true,
       ),
     );
