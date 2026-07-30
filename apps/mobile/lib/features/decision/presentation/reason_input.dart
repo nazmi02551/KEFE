@@ -53,7 +53,11 @@ class ReasonInputCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(13),
                   border: Border.all(color: accent.withValues(alpha: 0.18)),
                 ),
-                child: Icon(Icons.format_quote_rounded, color: accent, size: 22),
+                child: Icon(
+                  Icons.format_quote_rounded,
+                  color: accent,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 13),
               Expanded(
@@ -114,9 +118,9 @@ class ReasonInputCard extends StatelessWidget {
             const SizedBox(height: 9),
             Text(
               strings.reasonSelectionLimit(policy.maxTags),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: visual.mutedForeground,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: visual.mutedForeground),
             ),
           ],
           if (policy.textEnabled) ...[

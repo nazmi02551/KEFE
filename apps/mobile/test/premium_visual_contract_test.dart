@@ -10,8 +10,8 @@ void main() {
     );
     expect(contractFile.existsSync(), isTrue);
 
-    final contract = jsonDecode(contractFile.readAsStringSync())
-        as Map<String, Object?>;
+    final contract =
+        jsonDecode(contractFile.readAsStringSync()) as Map<String, Object?>;
     final visual = contract['visual_system']! as Map<String, Object?>;
     final governed = (visual['governed_files']! as List<Object?>)
         .cast<String>();
@@ -54,12 +54,13 @@ void main() {
   });
 
   test('slice contract keeps product/runtime inference boundaries closed', () {
-    final contract = jsonDecode(
-          File(
-            '../../docs/contracts/premium-visual-localization-slice1.v1.json',
-          ).readAsStringSync(),
-        )
-        as Map<String, Object?>;
+    final contract =
+        jsonDecode(
+              File(
+                '../../docs/contracts/premium-visual-localization-slice1.v1.json',
+              ).readAsStringSync(),
+            )
+            as Map<String, Object?>;
     final invariants = contract['invariants']! as Map<String, Object?>;
 
     expect(invariants['commit_first'], isTrue);

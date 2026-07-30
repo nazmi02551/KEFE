@@ -269,7 +269,9 @@ class _WeighCaseTile extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: visual.subtleGoldSurface,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: visual.gold.withValues(alpha: 0.18)),
+                  border: Border.all(
+                    color: visual.gold.withValues(alpha: 0.18),
+                  ),
                 ),
                 child: Icon(Icons.balance_outlined, color: visual.goldSoft),
               ),

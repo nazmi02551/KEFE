@@ -24,15 +24,11 @@ abstract final class KefeColorTokens {
 }
 
 abstract final class KefeTheme {
-  static ThemeData light() => _build(
-    brightness: Brightness.light,
-    visual: KefeVisualTheme.light,
-  );
+  static ThemeData light() =>
+      _build(brightness: Brightness.light, visual: KefeVisualTheme.light);
 
-  static ThemeData dark() => _build(
-    brightness: Brightness.dark,
-    visual: KefeVisualTheme.dark,
-  );
+  static ThemeData dark() =>
+      _build(brightness: Brightness.dark, visual: KefeVisualTheme.dark);
 
   static ThemeData _build({
     required Brightness brightness,
@@ -80,15 +76,21 @@ abstract final class KefeTheme {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: visual.surfaceRaised,
-        selectedColor: visual.gold.withValues(alpha: visual.isDark ? 0.18 : 0.13),
+        selectedColor: visual.gold.withValues(
+          alpha: visual.isDark ? 0.18 : 0.13,
+        ),
         side: BorderSide(color: visual.border.withValues(alpha: 0.82)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
         labelStyle: TextStyle(color: visual.foreground),
       ),
       navigationBarTheme: NavigationBarThemeData(
         height: 72,
-        backgroundColor: visual.isDark ? const Color(0xFF081420) : visual.surface,
-        indicatorColor: visual.gold.withValues(alpha: visual.isDark ? 0.18 : 0.13),
+        backgroundColor: visual.isDark
+            ? const Color(0xFF081420)
+            : visual.surface,
+        indicatorColor: visual.gold.withValues(
+          alpha: visual.isDark ? 0.18 : 0.13,
+        ),
         elevation: 0,
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => TextStyle(
@@ -118,7 +120,9 @@ abstract final class KefeTheme {
             fontWeight: FontWeight.w800,
             letterSpacing: 0.2,
           ),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(17)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(17),
+          ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -126,13 +130,18 @@ abstract final class KefeTheme {
           minimumSize: const Size.fromHeight(50),
           foregroundColor: visual.foreground,
           side: BorderSide(color: visual.borderStrong),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
       ),
-      dividerTheme: DividerThemeData(color: visual.border.withValues(alpha: 0.72)),
-      textTheme: ThemeData(
-        brightness: brightness,
-      ).textTheme.apply(bodyColor: visual.foreground, displayColor: visual.foreground),
+      dividerTheme: DividerThemeData(
+        color: visual.border.withValues(alpha: 0.72),
+      ),
+      textTheme: ThemeData(brightness: brightness).textTheme.apply(
+        bodyColor: visual.foreground,
+        displayColor: visual.foreground,
+      ),
       visualDensity: VisualDensity.standard,
     );
   }

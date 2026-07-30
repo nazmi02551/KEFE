@@ -40,7 +40,9 @@ void main() {
     }
 
     await pump(theme: KefeTheme.light());
-    var context = tester.element(find.byKey(const ValueKey('kefe-balance-visual')));
+    var context = tester.element(
+      find.byKey(const ValueKey('kefe-balance-visual')),
+    );
     expect(context.kefeVisual.isDark, isFalse);
     expect(find.text('Rules / Rights'), findsOneWidget);
     expect(find.text('Empathy / Compassion'), findsOneWidget);
@@ -102,27 +104,30 @@ void main() {
     expect(captured, 'Doğru');
   });
 
-  test('preview content catalog falls back without mutating Turkish fixture data', () {
-    const localizer = PreviewContentLocalizer();
-    const caseId = '11111111-1111-4111-8111-111111111113';
+  test(
+    'preview content catalog falls back without mutating Turkish fixture data',
+    () {
+      const localizer = PreviewContentLocalizer();
+      const caseId = '11111111-1111-4111-8111-111111111113';
 
-    expect(
-      localizer.text(
-        namespace: KefeContentNamespace.caseTitle,
-        id: caseId,
-        locale: const Locale('en', 'US'),
-        fallback: 'Bu pozisyonda penaltı kararı doğru muydu?',
-      ),
-      'Was the penalty decision correct?',
-    );
-    expect(
-      localizer.text(
-        namespace: KefeContentNamespace.option,
-        id: 'Doğru',
-        locale: const Locale('tr', 'TR'),
-        fallback: 'Doğru',
-      ),
-      'Doğru',
-    );
-  });
+      expect(
+        localizer.text(
+          namespace: KefeContentNamespace.caseTitle,
+          id: caseId,
+          locale: const Locale('en', 'US'),
+          fallback: 'Bu pozisyonda penaltı kararı doğru muydu?',
+        ),
+        'Was the penalty decision correct?',
+      );
+      expect(
+        localizer.text(
+          namespace: KefeContentNamespace.option,
+          id: 'Doğru',
+          locale: const Locale('tr', 'TR'),
+          fallback: 'Doğru',
+        ),
+        'Doğru',
+      );
+    },
+  );
 }

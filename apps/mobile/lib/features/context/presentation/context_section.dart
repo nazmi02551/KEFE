@@ -35,7 +35,10 @@ class ContextSection extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(strings.contextUnavailable, key: const ValueKey('context-error')),
+            Text(
+              strings.contextUnavailable,
+              key: const ValueKey('context-error'),
+            ),
             const SizedBox(height: 12),
             OutlinedButton(
               onPressed: () =>
@@ -72,11 +75,7 @@ class _ContextContent extends ConsumerWidget {
     final content = ref.watch(kefeContentLocalizerProvider);
     final counts = <String, int>{};
     for (final block in snapshot.blocks) {
-      counts.update(
-        block.claimStatus,
-        (value) => value + 1,
-        ifAbsent: () => 1,
-      );
+      counts.update(block.claimStatus, (value) => value + 1, ifAbsent: () => 1);
     }
 
     return Column(
@@ -90,9 +89,7 @@ class _ContextContent extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: visual.subtleGoldSurface,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: visual.gold.withValues(alpha: 0.18),
-                ),
+                border: Border.all(color: visual.gold.withValues(alpha: 0.18)),
               ),
               child: Icon(Icons.article_outlined, color: visual.goldSoft),
             ),
@@ -119,9 +116,9 @@ class _ContextContent extends ConsumerWidget {
           const SizedBox(height: 20),
           Text(
             strings.contextInformationStatus,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w900,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 11),
           Wrap(
@@ -158,9 +155,9 @@ class _ContextContent extends ConsumerWidget {
               collapsedIconColor: visual.mutedForeground,
               title: Text(
                 strings.contextDetails,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
               ),
               children: [
                 for (final block in snapshot.detailBlocks) ...[
@@ -313,9 +310,7 @@ class _ContextBlockTile extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: visual.surfaceSunken,
-        border: Border.all(
-          color: visual.border.withValues(alpha: 0.86),
-        ),
+        border: Border.all(color: visual.border.withValues(alpha: 0.86)),
         borderRadius: BorderRadius.circular(17),
       ),
       child: Padding(
@@ -377,8 +372,7 @@ class _ContextBlockTile extends StatelessWidget {
                       linkedSources
                           .map(
                             (source) => content.text(
-                              namespace:
-                                  KefeContentNamespace.contextPublisher,
+                              namespace: KefeContentNamespace.contextPublisher,
                               id: source.publisher,
                               locale: locale,
                               fallback: source.publisher,

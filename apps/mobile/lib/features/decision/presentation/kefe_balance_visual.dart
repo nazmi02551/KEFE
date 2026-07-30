@@ -57,7 +57,9 @@ class KefeBalanceVisual extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: visual.shadow.withValues(alpha: visual.isDark ? 0.18 : 0.07),
+              color: visual.shadow.withValues(
+                alpha: visual.isDark ? 0.18 : 0.07,
+              ),
               blurRadius: compact ? 16 : 24,
               offset: const Offset(0, 10),
             ),
@@ -261,12 +263,13 @@ class _KefeBalancePainter extends CustomPainter {
       center,
       medallionRadius,
       Paint()
-        ..shader = RadialGradient(
-          colors: [visual.goldSoft, visual.gold, visual.surfaceStrong],
-          stops: const [0.0, 0.46, 1.0],
-        ).createShader(
-          Rect.fromCircle(center: center, radius: medallionRadius),
-        ),
+        ..shader =
+            RadialGradient(
+              colors: [visual.goldSoft, visual.gold, visual.surfaceStrong],
+              stops: const [0.0, 0.46, 1.0],
+            ).createShader(
+              Rect.fromCircle(center: center, radius: medallionRadius),
+            ),
     );
     canvas.drawCircle(
       center,

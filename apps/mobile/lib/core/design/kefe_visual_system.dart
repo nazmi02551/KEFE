@@ -106,7 +106,8 @@ class KefeVisualTheme extends ThemeExtension<KefeVisualTheme> {
 
   Color get subtleGoldSurface => gold.withValues(alpha: isDark ? 0.12 : 0.09);
   Color get subtleRulesSurface => rules.withValues(alpha: isDark ? 0.14 : 0.09);
-  Color get subtleEmpathySurface => empathy.withValues(alpha: isDark ? 0.14 : 0.09);
+  Color get subtleEmpathySurface =>
+      empathy.withValues(alpha: isDark ? 0.14 : 0.09);
 
   @override
   KefeVisualTheme copyWith({
@@ -191,7 +192,8 @@ extension KefeVisualThemeContext on BuildContext {
 abstract final class KefeMotion {
   static Duration resolve(BuildContext context, Duration preferred) {
     final media = MediaQuery.maybeOf(context);
-    if (media?.disableAnimations == true || media?.accessibleNavigation == true) {
+    if (media?.disableAnimations == true ||
+        media?.accessibleNavigation == true) {
       return Duration.zero;
     }
     return preferred;
