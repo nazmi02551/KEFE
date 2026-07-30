@@ -1,12 +1,29 @@
-# KEFE v9 Discovery, Activity and Continuity — Phone-Test Checklist
+# KEFE v9 Discovery, Activity and Continuity — RC Phone-Test Checklist
 
-This checklist is the human acceptance gate for promoting the v9 phone-test APK. Completing CI alone does not promote a numbered APK.
+This checklist is the human acceptance gate for promoting KEFE v9. The installable binary used here is a prerelease candidate labelled `v9-rcN`; it is not the promoted v9 release. Completing CI alone does not promote a numbered release.
+
+## Candidate provenance
+
+Record before installation:
+
+- Candidate label:
+- Candidate commit:
+- Mobile CI run:
+- API CI run:
+- Artifact ID:
+- Artifact ZIP SHA-256:
+- Extracted APK SHA-256:
+- Android package version:
+
+Reject the candidate if its visible label, commit or hash does not match the recorded values.
 
 ## Installation and identity
 
 - [ ] Install over the previous test build or perform a clean install when Android signing identity requires it.
 - [ ] Confirm the application opens without a crash.
-- [ ] Confirm the visible Product Preview identity is still the current non-promoted build identity until v9 is explicitly released.
+- [ ] Confirm Android identifies the package as a prerelease version such as `0.9.0-rc.1+9`.
+- [ ] Confirm the visible identity reads `Product Preview v9-rc1` with the expected short commit.
+- [ ] Confirm no screen presents the candidate as the promoted v9 release.
 
 ## Canonical primary navigation
 
@@ -59,18 +76,28 @@ This checklist is the human acceptance gate for promoting the v9 phone-test APK.
 - [ ] Confirm no analytics or debug output contains raw search text, Case title/summary or private rationale.
 - [ ] Confirm TalkBack/Android accessibility announces primary navigation, search, filters, save/remove controls and Activity Case actions.
 
-## Promotion record
+## Tester record
 
-Record before publishing v9:
-
-- Mobile CI run:
-- API CI run:
-- Artifact ID:
-- Artifact ZIP SHA-256:
-- Extracted APK SHA-256:
-- Merge commit:
 - Phone/device model:
 - Android version:
+- Installation method:
+- Passed items:
+- Failed items:
+- Blocking defects:
+- Non-blocking observations:
 - Tester notes:
 
-v9 is not promoted until all applicable items above are completed and the artifact identity is recorded in the durable checkpoint.
+## Promotion record
+
+Complete only after all applicable phone-test items pass and blocking defects are resolved:
+
+- Final merge commit:
+- Final Mobile CI run:
+- Final API CI run:
+- Promoted artifact ID:
+- Promoted artifact ZIP SHA-256:
+- Promoted APK SHA-256:
+- Promoted Android package version:
+- Visible release label:
+
+v9 is not promoted until the release-candidate gate passes, all applicable human checks pass, blocking feedback is resolved, and the final artifact record is complete.
