@@ -52,6 +52,7 @@ class HttpConsensusRepository implements ConsensusRepository {
   Future<ConsensusCard> participate({
     required String sessionId,
     required String caseVersionId,
+    required String cardId,
     required String cardVersionId,
     required String stanceCode,
     required List<String> reasonTagCodes,
@@ -63,7 +64,7 @@ class HttpConsensusRepository implements ConsensusRepository {
         () => _client.post(
           _uri(
             '/v1/weigh-sessions/$sessionId/consensus-cards/'
-            '$cardVersionId/participation',
+            '$cardId/participation',
           ),
           headers: {...headers, 'Idempotency-Key': idempotencyKey},
           body: jsonEncode({
@@ -74,7 +75,9 @@ class HttpConsensusRepository implements ConsensusRepository {
       ),
     );
     final card = _parseCard(body);
-    if (card.caseVersionId != caseVersionId || card.versionId != cardVersionId) {
+    if (card.caseVersionId != caseVersionId ||
+        card.id != cardId ||
+        card.versionId != cardVersionId) {
       throw const ClientTransportFailure(code: 'CONSENSUS_CONTRACT_INVALID');
     }
     return card;
@@ -149,9 +152,7 @@ class HttpConsensusRepository implements ConsensusRepository {
     };
   }
 
-  Future<http.Response> _request(
-    Future<http.Response> Function() action,
-  ) async {
+  Future<http.Response> _request(Future<http.Response> Function() action) async {
     try {
       return await action().timeout(_config.requestTimeout);
     } on TimeoutException {
