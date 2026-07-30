@@ -29,11 +29,15 @@ mvp_code_requirements:
     merge_idempotency: required
   sharing:
     commit_required: true
+    case_only: true
     opaque_token: true
     expiration: required
     revoke: required
-    decision_inclusion_default: false
-    private_reason: forbidden
+    include_decision_true_error: SHARE_DECISION_EXPOSURE_NOT_SUPPORTED
+    sender_decision_public_payload: forbidden
+    sender_confidence_public_payload: forbidden
+    sender_private_reason_public_payload: forbidden
+    mobile_deep_link: 'kefe:///share/{token}'
     pre_commit_result: forbidden
   community_reason:
     explicit_publication: true
@@ -42,6 +46,8 @@ mvp_code_requirements:
     optional_bounded_text: true
     moderation: required
     public_pending_or_blocked_text: forbidden
+    read_requires_actor_owned_committed_session: true
+    public_case_version_read_route: forbidden
     reactions_controlled: true
     report_route: required
     popularity_truth_inference: forbidden
