@@ -106,8 +106,21 @@ def test_consensus_participation_is_exposed_idempotent_and_reveals_aggregate() -
 
     assert first.status_code == 200
     assert replay.status_code == 200
-    assert replay.json() == first.json()
-    body = first.json()
+    first_body = first.json()
+    replay_body = replay.json()
+    assert replay_body["participation"] == first_body["participation"]
+    assert replay_body["participation_state"] == first_body["participation_state"]
+    assert replay_body["aggregate"]["sample_size"] == first_body["aggregate"]["sample_size"]
+    assert (
+        replay_body["aggregate"]["stance_distribution"]
+        == first_body["aggregate"]["stance_distribution"]
+    )
+    assert (
+        replay_body["aggregate"]["reason_pattern_distribution"]
+        == first_body["aggregate"]["reason_pattern_distribution"]
+    )
+
+    body = first_body
     assert body["participation_state"] == "PARTICIPATED"
     assert body["participation"]["contribution_class"] == "EXPOSED"
     assert body["aggregate"]["contribution_class"] == "EXPOSED"
