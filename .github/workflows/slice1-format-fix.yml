@@ -1,0 +1,38 @@
+name: Slice1 Format Fix
+
+on:
+  push:
+    branches: [feature/premium-visual-localization-slice1]
+    paths:
+      - '.github/workflows/slice1-format-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/premium-visual-localization-slice1
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Format mobile Dart sources
+        working-directory: apps/mobile
+        run: dart format lib test
+      - name: Commit source-only formatting
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/mobile/lib apps/mobile/test
+          if git diff --cached --quiet; then
+            echo 'No formatting changes.'
+            exit 0
+          fi
+          git commit -m 'style: normalize premium slice Dart formatting'
+          git push origin HEAD:feature/premium-visual-localization-slice1
