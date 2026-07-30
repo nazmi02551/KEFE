@@ -93,12 +93,7 @@ class KefeSurface extends StatelessWidget {
 }
 
 class KefeEyebrow extends StatelessWidget {
-  const KefeEyebrow(
-    this.text, {
-    this.color,
-    this.icon,
-    super.key,
-  });
+  const KefeEyebrow(this.text, {this.color, this.icon, super.key});
 
   final String text;
   final Color? color;
