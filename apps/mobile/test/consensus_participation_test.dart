@@ -16,8 +16,12 @@ import 'package:kefe_mobile/features/progress/application/progress_controller.da
 import 'package:kefe_mobile/features/progress/data/preview_progress_repository.dart';
 
 void main() {
-  test('production entrypoint never imports preview Consensus data', () {
+  test('production enables Consensus without importing preview Consensus data', () {
     final productionMain = File('lib/main.dart').readAsStringSync();
+    expect(
+      productionMain,
+      contains('consensusExperienceEnabledProvider.overrideWithValue(true)'),
+    );
     expect(productionMain, isNot(contains('preview_consensus_repository')));
     expect(productionMain, isNot(contains('PreviewConsensusRepository')));
   });
@@ -34,6 +38,7 @@ void main() {
             decisionDraftStoreProvider.overrideWithValue(
               MemoryDecisionDraftStore(),
             ),
+            consensusExperienceEnabledProvider.overrideWithValue(true),
             consensusRepositoryProvider.overrideWithValue(
               PreviewConsensusRepository(),
             ),
