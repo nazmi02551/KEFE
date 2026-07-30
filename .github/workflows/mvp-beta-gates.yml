@@ -1,0 +1,195 @@
+name: MVP Beta Gates
+
+on:
+  pull_request:
+    paths:
+      - 'services/api/**'
+      - 'apps/mobile/**'
+      - 'docs/contracts/**'
+      - 'docs/adr/0036-mvp-code-completion-and-beta-gate.md'
+      - 'docs/runbooks/MVP_BETA_OPERATIONS.md'
+      - '.github/workflows/mvp-beta-gates.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/api/**'
+      - 'apps/mobile/**'
+      - 'docs/contracts/**'
+      - '.github/workflows/mvp-beta-gates.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  api-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Export generated OpenAPI 0.19 candidate
+        working-directory: services/api
+        run: python tools/export_openapi.py --output openapi.mvp.generated.json
+      - name: Upload generated OpenAPI candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: mvp-openapi-generated
+          path: services/api/openapi.mvp.generated.json
+          if-no-files-found: error
+      - name: Ruff
+        working-directory: services/api
+        run: ruff check .
+      - name: Contract sync
+        working-directory: services/api
+        run: python tools/check_contract_sync.py
+      - name: Exact OpenAPI drift gate
+        working-directory: services/api
+        run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
+      - name: MVP beta catalog and generic-runtime gate
+        working-directory: services/api
+        run: python tools/check_mvp_beta_readiness.py
+      - name: API unit and behavior tests
+        working-directory: services/api
+        run: pytest --cov=kefe_api --cov-report=term-missing
+      - name: Critical-path in-process performance regression budget
+        working-directory: services/api
+        run: python tools/check_mvp_performance_budget.py
+
+  postgres:
+    needs: api-contract
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: kefe
+          POSTGRES_USER: kefe
+          POSTGRES_PASSWORD: kefe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kefe -d kefe"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Migrate PostgreSQL to one head
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: alembic upgrade head
+      - name: Seed canonical demo and beta catalog
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: |
+          python -m kefe_api.infrastructure.seed_demo
+          python -m kefe_api.infrastructure.seed_context_demo
+          python -m kefe_api.infrastructure.seed_beta_catalog
+      - name: Verify 20 DILEMMA plus 4 CALL are published L0
+        env:
+          PGPASSWORD: kefe
+        run: |
+          python - <<'PY'
+          import psycopg
+          with psycopg.connect('postgresql://kefe:kefe@localhost:5432/kefe') as conn:
+              rows = conn.execute(
+                  """
+                  SELECT base_format_code, count(*)
+                  FROM content.case_version
+                  WHERE status = 'PUBLISHED' AND content_risk = 'L0'
+                  GROUP BY base_format_code
+                  """
+              ).fetchall()
+          counts = dict(rows)
+          assert counts.get('DILEMMA', 0) >= 20, counts
+          assert counts.get('CALL', 0) >= 4, counts
+          print(counts)
+          PY
+      - name: PostgreSQL MVP continuity and privacy integration
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+          KEFE_RUN_POSTGRES_TESTS: '1'
+        run: pytest tests/test_mvp_completion_postgres.py tests/test_consensus_postgres.py
+
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve dependencies
+        working-directory: apps/mobile
+        run: flutter pub get
+      - name: Format gate
+        working-directory: apps/mobile
+        run: dart format --output=none --set-exit-if-changed lib test
+      - name: Analyze
+        working-directory: apps/mobile
+        run: flutter analyze
+      - name: Test accessibility locale theme and regressions
+        working-directory: apps/mobile
+        run: flutter test
+      - name: Generate transient Android host
+        working-directory: apps/mobile
+        run: |
+          if [ ! -d android ]; then
+            flutter create --platforms=android --project-name kefe_mobile .
+          fi
+      - name: Register KEFE Share deep link in candidate Android host
+        working-directory: apps/mobile
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('android/app/src/main/AndroidManifest.xml')
+          source = path.read_text()
+          marker = '</activity>'
+          intent = '''
+                <intent-filter>
+                    <action android:name="android.intent.action.VIEW" />
+                    <category android:name="android.intent.category.DEFAULT" />
+                    <category android:name="android.intent.category.BROWSABLE" />
+                    <data android:scheme="kefe" android:host="share" />
+                </intent-filter>
+          '''
+          if 'android:scheme="kefe"' not in source:
+              source = source.replace(marker, intent + '\n            ' + marker, 1)
+              path.write_text(source)
+          assert 'android:scheme="kefe"' in path.read_text()
+          PY
+      - name: Build production-entry MVP candidate APK
+        working-directory: apps/mobile
+        run: >-
+          flutter build apk --debug
+          -t lib/main.dart
+          --dart-define=KEFE_API_BASE_URL=https://beta-api.invalid/
+      - name: Upload internal MVP candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: kefe-mvp-beta-internal
+          path: apps/mobile/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
