@@ -402,7 +402,9 @@ class _SportsCallScenePainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.2
-        ..color = visual.goldSoft.withValues(alpha: visual.isDark ? 0.13 : 0.09),
+        ..color = visual.goldSoft.withValues(
+          alpha: visual.isDark ? 0.13 : 0.09,
+        ),
     );
   }
 
