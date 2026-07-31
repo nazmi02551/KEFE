@@ -156,15 +156,26 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.tap(
-        find.byKey(const ValueKey('community-reason-tag-FAIRNESS')),
+      final communityTag = find.byKey(
+        const ValueKey('community-reason-tag-FAIRNESS'),
       );
+      await tester.ensureVisible(communityTag);
+      await tester.pumpAndSettle();
+      await tester.tap(communityTag);
       await tester.pump();
-      await tester.enterText(
-        find.byKey(const ValueKey('community-reason-text')),
-        'A concise public reason',
+
+      final communityText = find.byKey(
+        const ValueKey('community-reason-text'),
       );
-      await tester.tap(find.byKey(const ValueKey('community-reason-publish')));
+      await tester.ensureVisible(communityText);
+      await tester.enterText(communityText, 'A concise public reason');
+
+      final communityPublish = find.byKey(
+        const ValueKey('community-reason-publish'),
+      );
+      await tester.ensureVisible(communityPublish);
+      await tester.pumpAndSettle();
+      await tester.tap(communityPublish);
       await tester.pumpAndSettle();
 
       expect(communityRepository.publishCalls, 1);
