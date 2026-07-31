@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kefe_mobile/app/product_preview/atlas_globe_visual.dart';
 import 'package:kefe_mobile/app/product_preview/atlas_preview_fixture.dart';
 import 'package:kefe_mobile/app/product_preview/atlas_preview_screen.dart';
 import 'package:kefe_mobile/app/product_preview_app.dart';
@@ -79,6 +80,18 @@ void main() {
     expect(
       find.byKey(const ValueKey('atlas-selected-case-title')),
       findsOneWidget,
+    );
+
+    final globe = tester.widget<AtlasGlobeVisual>(
+      find.byKey(const ValueKey('atlas-world-globe')),
+    );
+    expect(
+      globe.markers
+          .map((item) => '${item.countryCode}:${item.value.toStringAsFixed(1)}')
+          .toList(),
+      AtlasPreviewFixture.countries
+          .map((item) => '${item.countryCode}:${item.value.toStringAsFixed(1)}')
+          .toList(),
     );
 
     for (final item in AtlasPreviewFixture.countries) {
