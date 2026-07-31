@@ -5,6 +5,9 @@ import 'kefe_visual_composition_models.dart';
 
 enum KefeVisualPlaceholderKind { loading, unavailable }
 
+ValueKey<String> kefeVisualStateKey(String state, String slot, String id) =>
+    ValueKey<String>('case-media-$state-$slot-$id');
+
 extension KefeVisualCompositionFlutter on KefeVisualCompositionPolicy {
   BoxFit get boxFit => switch (fit) {
     KefeVisualFitPolicy.cover => BoxFit.cover,
