@@ -11,7 +11,9 @@ import '../../decision/application/decision_controller.dart';
 import '../application/onboarding_controller.dart';
 
 class OnboardingGateScreen extends ConsumerStatefulWidget {
-  const OnboardingGateScreen({super.key});
+  const OnboardingGateScreen({this.reviewMode = false, super.key});
+
+  final bool reviewMode;
 
   @override
   ConsumerState<OnboardingGateScreen> createState() =>
@@ -30,6 +32,12 @@ class _OnboardingGateScreenState extends ConsumerState<OnboardingGateScreen> {
   }
 
   Future<void> _resolveState() async {
+    if (widget.reviewMode) {
+      if (!mounted) return;
+      setState(() => _ready = true);
+      return;
+    }
+
     final completed = await ref
         .read(onboardingControllerProvider)
         .isCompleted();
