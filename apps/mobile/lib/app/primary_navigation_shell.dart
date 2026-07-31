@@ -40,7 +40,9 @@ class PrimaryNavigationShell extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: visual.shadow.withValues(alpha: visual.isDark ? 0.28 : 0.1),
+              color: visual.shadow.withValues(
+                alpha: visual.isDark ? 0.28 : 0.1,
+              ),
               blurRadius: 20,
               offset: const Offset(0, -6),
             ),
