@@ -78,37 +78,37 @@ void main() {
     expect(source, isNot(contains("'Saved Cases'")));
   });
 
-  test('repo presentation source has only intentional language-code boundaries', () {
-    final directLanguageFiles = <String>{};
-    final forbiddenHelperFiles = <String>{};
+  test(
+    'repo presentation source has only intentional language-code boundaries',
+    () {
+      final directLanguageFiles = <String>{};
+      final forbiddenHelperFiles = <String>{};
 
-    for (final entity in Directory('lib').listSync(recursive: true)) {
-      if (entity is! File || !entity.path.endsWith('.dart')) continue;
-      final source = entity.readAsStringSync();
+      for (final entity in Directory('lib').listSync(recursive: true)) {
+        if (entity is! File || !entity.path.endsWith('.dart')) continue;
+        final source = entity.readAsStringSync();
 
-      if (source.contains('locale.languageCode')) {
-        directLanguageFiles.add(entity.path);
+        if (source.contains('locale.languageCode')) {
+          directLanguageFiles.add(entity.path);
+        }
+        if (source.contains('_isTurkish') ||
+            source.contains('_iaTr') ||
+            source.contains('_savedCaseIsTurkish') ||
+            source.contains('bool get _tr')) {
+          forbiddenHelperFiles.add(entity.path);
+        }
       }
-      if (source.contains('_isTurkish') ||
-          source.contains('_iaTr') ||
-          source.contains('_savedCaseIsTurkish') ||
-          source.contains('bool get _tr')) {
-        forbiddenHelperFiles.add(entity.path);
-      }
-    }
 
-    expect(
-      directLanguageFiles,
-      {
+      expect(directLanguageFiles, {
         'lib/app/product_preview/preview_content_localizer.dart',
         'lib/core/localization/kefe_locale_catalog.dart',
         'lib/core/localization/kefe_strings.dart',
-      },
-    );
-    expect(forbiddenHelperFiles, isEmpty);
-    expect(
-      KefeStrings.supportedLocales,
-      const [Locale('tr', 'TR'), Locale('en', 'US')],
-    );
-  });
+      });
+      expect(forbiddenHelperFiles, isEmpty);
+      expect(KefeStrings.supportedLocales, const [
+        Locale('tr', 'TR'),
+        Locale('en', 'US'),
+      ]);
+    },
+  );
 }
