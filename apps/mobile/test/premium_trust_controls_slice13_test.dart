@@ -99,8 +99,14 @@ void main() {
             find.byKey(const ValueKey('settings-privacy-entry')),
             findsOneWidget,
           );
-          expect(find.byType(RadioListTile<AppLocalePreference>), findsNWidgets(3));
-          expect(find.byType(RadioListTile<AppThemePreference>), findsNWidgets(3));
+          expect(
+            find.byType(RadioListTile<AppLocalePreference>),
+            findsNWidgets(3),
+          );
+          expect(
+            find.byType(RadioListTile<AppThemePreference>),
+            findsNWidgets(3),
+          );
 
           final appBar = tester.widget<AppBar>(find.byType(AppBar));
           expect(appBar.backgroundColor, expectedVisual.surfaceRaised);
@@ -111,67 +117,69 @@ void main() {
     }
   }
 
-  testWidgets('settings keeps preference controller and privacy route semantics', (
-    tester,
-  ) async {
-    final container = ProviderContainer(
-      overrides: [
-        appPreferencesStoreProvider.overrideWithValue(
-          MemoryAppPreferencesStore(),
+  testWidgets(
+    'settings keeps preference controller and privacy route semantics',
+    (tester) async {
+      final container = ProviderContainer(
+        overrides: [
+          appPreferencesStoreProvider.overrideWithValue(
+            MemoryAppPreferencesStore(),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final router = GoRouter(
+        initialLocation: '/settings',
+        routes: [
+          GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
+          GoRoute(
+            path: '/privacy',
+            builder: (_, _) =>
+                const Scaffold(body: Text('privacy-route-sentinel')),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(
+            locale: const Locale('en', 'US'),
+            supportedLocales: KefeStrings.supportedLocales,
+            localizationsDelegates: const [
+              KefeStringsDelegate(),
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            theme: KefeTheme.light(),
+            routerConfig: router,
+          ),
         ),
-      ],
-    );
-    addTearDown(container.dispose);
+      );
+      await tester.pumpAndSettle();
 
-    final router = GoRouter(
-      initialLocation: '/settings',
-      routes: [
-        GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
-        GoRoute(
-          path: '/privacy',
-          builder: (_, _) => const Scaffold(body: Text('privacy-route-sentinel')),
-        ),
-      ],
-    );
-    addTearDown(router.dispose);
+      await tester.tap(find.text('Dark'));
+      await tester.pump();
+      expect(
+        container.read(appPreferencesControllerProvider).theme,
+        AppThemePreference.dark,
+      );
 
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp.router(
-          locale: const Locale('en', 'US'),
-          supportedLocales: KefeStrings.supportedLocales,
-          localizationsDelegates: const [
-            KefeStringsDelegate(),
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          theme: KefeTheme.light(),
-          routerConfig: router,
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('English'));
+      await tester.pump();
+      expect(
+        container.read(appPreferencesControllerProvider).locale,
+        AppLocalePreference.en,
+      );
 
-    await tester.tap(find.text('Dark'));
-    await tester.pump();
-    expect(
-      container.read(appPreferencesControllerProvider).theme,
-      AppThemePreference.dark,
-    );
-
-    await tester.tap(find.text('English'));
-    await tester.pump();
-    expect(
-      container.read(appPreferencesControllerProvider).locale,
-      AppLocalePreference.en,
-    );
-
-    await tester.tap(find.byKey(const ValueKey('settings-privacy-entry')));
-    await tester.pumpAndSettle();
-    expect(find.text('privacy-route-sentinel'), findsOneWidget);
-  });
+      await tester.tap(find.byKey(const ValueKey('settings-privacy-entry')));
+      await tester.pumpAndSettle();
+      expect(find.text('privacy-route-sentinel'), findsOneWidget);
+    },
+  );
 
   testWidgets('privacy gate stays hidden unless explicitly enabled', (
     tester,
@@ -188,7 +196,7 @@ void main() {
       tester,
       locale: const Locale('en', 'US'),
       dark: true,
-      overrides: [privacyExperienceEnabledProvider.overrideWithValue(true)],
+      privacyEnabled: true,
       child: const PrivacyControlsSection(),
     );
     expect(find.byKey(const ValueKey('privacy-controls')), findsOneWidget);
@@ -227,8 +235,14 @@ void main() {
             find.byKey(const ValueKey('account-identifier-surface')),
             findsOneWidget,
           );
-          expect(find.byKey(const ValueKey('account-identifier')), findsOneWidget);
-          expect(find.byKey(const ValueKey('account-request-otp')), findsOneWidget);
+          expect(
+            find.byKey(const ValueKey('account-identifier')),
+            findsOneWidget,
+          );
+          expect(
+            find.byKey(const ValueKey('account-request-otp')),
+            findsOneWidget,
+          );
           expect(
             find.byKey(const ValueKey('account-continue-guest')),
             findsOneWidget,
@@ -288,14 +302,16 @@ Future<void> _pumpLocalized(
   required Locale locale,
   required bool dark,
   required Widget child,
-  List<Override> overrides = const [],
+  bool privacyEnabled = false,
 }) async {
   tester.platformDispatcher.localeTestValue = locale;
   addTearDown(tester.platformDispatcher.clearLocaleTestValue);
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: overrides,
+      overrides: privacyEnabled
+          ? [privacyExperienceEnabledProvider.overrideWithValue(true)]
+          : const [],
       child: MaterialApp(
         locale: locale,
         supportedLocales: KefeStrings.supportedLocales,
