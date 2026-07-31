@@ -1,0 +1,152 @@
+{
+  "contract": "perspective-landscape-slice20",
+  "version": "1.0.0",
+  "date": "2026-07-31",
+  "source_adr": "docs/adr/0058-perspective-landscape-convergence.md",
+  "tracker_issue": 142,
+  "parent_foundation": "docs/adr/0055-high-fidelity-visual-composition-foundation.md",
+  "status": "architecture_locked_runtime_pending",
+  "scope": {
+    "perspective_visual_convergence": true,
+    "perspective_domain_change": false,
+    "perspective_repository_change": false,
+    "api_change": false,
+    "schema_change": false,
+    "route_change": false,
+    "primary_navigation_change": false,
+    "signal_impact_change": false
+  },
+  "placement": {
+    "surface": "existing PerspectiveSection",
+    "post_commit_only": true,
+    "after_successful_reveal": true,
+    "standalone_route_forbidden": true,
+    "pre_commit_render_forbidden": true,
+    "loaded_states": [
+      "READY",
+      "CLUSTER_PENDING",
+      "DEGRADED_CURATED"
+    ],
+    "minimum_recognized_cards": 1
+  },
+  "source_truth": {
+    "allowed_inputs": [
+      "PerspectiveResult.cards[].slot"
+    ],
+    "recognized_slots": [
+      "NEAR",
+      "OPPOSING",
+      "BRIDGE",
+      "ALTERNATIVE_CONTEXT"
+    ],
+    "preserve_api_card_order": true,
+    "local_reranking_forbidden": true,
+    "slot_presence_only_for_landscape_geometry": true,
+    "case_id_branch_forbidden": true,
+    "case_title_branch_forbidden": true,
+    "domain_branch_forbidden": true
+  },
+  "quantitative_truthfulness": {
+    "current_payload_has_user_coordinate": false,
+    "current_payload_has_population_density_coordinate": false,
+    "current_payload_has_user_percentage": false,
+    "current_payload_has_population_percentage": false,
+    "current_payload_has_ideology_score": false,
+    "current_payload_has_psychometric_score": false,
+    "current_payload_has_measured_distance": false,
+    "invented_user_marker_forbidden": true,
+    "invented_user_percentage_forbidden": true,
+    "invented_population_percentage_forbidden": true,
+    "invented_density_forbidden": true,
+    "invented_distance_forbidden": true,
+    "invented_correctness_forbidden": true,
+    "geometry_as_popularity_or_density_forbidden": true,
+    "future_quantitative_landscape_requires_new_methodology_contract": true
+  },
+  "presentation": {
+    "renderer_family": "FLUTTER_PERSPECTIVE_LANDSCAPE_V1",
+    "qualitative_terrain": true,
+    "deterministic_geometry": true,
+    "fixed_slot_anchor_grammar": true,
+    "theme_adaptive": true,
+    "light_theme_required": true,
+    "dark_theme_required": true,
+    "compact_layout_required": true,
+    "enlarged_text_safe": true,
+    "text_inside_custom_painter_forbidden": true,
+    "existing_cards_remain_complete_text_representation": true,
+    "existing_methodology_remains_visible": true,
+    "degraded_and_pending_notes_remain_visible": true,
+    "continuous_animation_forbidden": true,
+    "webview_required": false,
+    "threejs_required": false,
+    "live_3d_required": false
+  },
+  "accessibility": {
+    "terrain_geometry_decorative": true,
+    "terrain_geometry_excluded_from_semantics": true,
+    "cards_preserve_semantic_labels": true,
+    "color_only_information_forbidden": true,
+    "landscape_must_not_block_card_reachability": true
+  },
+  "runtime": {
+    "perspective_fetch_timing_unchanged": true,
+    "retry_perspective_only": true,
+    "answer_replay_on_retry": false,
+    "private_reason_replay_on_retry": false,
+    "commit_replay_on_retry": false,
+    "reveal_replay_on_retry": false,
+    "adjacent_consensus_community_progress_share_semantics_change": false
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "case_agnostic_runtime": true,
+    "preview_production_isolation": true,
+    "preview_fixture_is_production_fallback": false,
+    "my_kefe_observed_descriptive_only": true,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "bias_inference": false,
+    "causal_inference": false,
+    "signal_in_scope": false,
+    "impact_in_scope": false
+  },
+  "tests": {
+    "contract_guard": true,
+    "post_commit_reachability": true,
+    "pre_commit_absence": true,
+    "slot_presence_mapping": true,
+    "api_card_order_preserved": true,
+    "no_case_specific_branch": true,
+    "no_numeric_user_or_population_position": true,
+    "light_dark": true,
+    "compact_layout": true,
+    "enlarged_text": true,
+    "perspective_consumption_regressions": true,
+    "production_copy_boundary": true,
+    "phone_acceptance": true
+  },
+  "required_exact_head_workflows": [
+    "API CI",
+    "Mobile CI",
+    "MVP Beta Gates",
+    "Global Readiness"
+  ],
+  "non_claims": [
+    "USER_PERCENTILE",
+    "POPULATION_PERCENTILE",
+    "MEASURED_IDEOLOGICAL_POSITION",
+    "MEASURED_VALUE_POSITION",
+    "PSYCHOMETRIC_POSITION",
+    "MEASURED_USER_COMMUNITY_DISTANCE",
+    "POPULATION_DENSITY",
+    "OBJECTIVE_CORRECTNESS",
+    "SIGNAL_AUTHORITY",
+    "IMPACT_READINESS",
+    "HUMAN_VISUAL_APPROVAL",
+    "HUMAN_USABILITY_PASS"
+  ]
+}
