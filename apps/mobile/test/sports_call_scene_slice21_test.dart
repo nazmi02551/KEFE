@@ -234,14 +234,18 @@ void main() {
       final sportsTitle = find.text(
         'Bu pozisyonda penaltı kararı doğru muydu?',
       );
+      final sportsCard = find.byKey(
+        const ValueKey('explore-case-$_sportsCaseId'),
+      );
       await tester.scrollUntilVisible(
-        sportsTitle,
+        sportsCard,
         280,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pump();
+      expect(sportsCard, findsOneWidget);
       expect(sportsTitle, findsOneWidget);
-      await tester.tap(sportsTitle);
+      await tester.tap(sportsCard);
       await _pumpUntilFound(tester, find.byType(SportsCallSceneVisual));
 
       expect(find.byType(SportsCallSceneVisual), findsOneWidget);
