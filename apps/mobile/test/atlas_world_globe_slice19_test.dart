@@ -54,6 +54,7 @@ void main() {
     );
     expect(contract['presentation']['continuous_animation_forbidden'], isTrue);
     expect(contract['presentation']['live_3d_required'], isFalse);
+    expect(contract['presentation']['text_scale_safe'], isTrue);
     expect(contract['tests']['globe_marker_fixture_value_parity'], isTrue);
   });
 
@@ -146,6 +147,23 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Atlas remains usable with enlarged text', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await _pumpAtlas(tester, ThemeMode.dark, textScale: 1.6);
+
+    expect(find.byKey(const ValueKey('atlas-preview-notice')), findsOneWidget);
+    expect(find.byKey(const ValueKey('atlas-world-globe')), findsOneWidget);
+    for (final item in AtlasPreviewFixture.countries) {
+      expect(
+        find.byKey(ValueKey('atlas-country-card-${item.countryCode}')),
+        findsOneWidget,
+      );
+    }
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Product Preview secondary action reaches the Atlas truth surface', (
     tester,
   ) async {
@@ -164,7 +182,11 @@ void main() {
   });
 }
 
-Future<void> _pumpAtlas(WidgetTester tester, ThemeMode themeMode) async {
+Future<void> _pumpAtlas(
+  WidgetTester tester,
+  ThemeMode themeMode, {
+  double textScale = 1.0,
+}) async {
   await tester.pumpWidget(
     ProviderScope(
       child: MaterialApp(
@@ -172,6 +194,12 @@ Future<void> _pumpAtlas(WidgetTester tester, ThemeMode themeMode) async {
         theme: KefeTheme.light(),
         darkTheme: KefeTheme.dark(),
         themeMode: themeMode,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
         home: const Scaffold(body: AtlasPreviewScreen()),
       ),
     ),
