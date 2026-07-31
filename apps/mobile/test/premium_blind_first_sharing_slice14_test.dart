@@ -120,7 +120,9 @@ void main() {
           );
           expect(
             tester
-                .widget<KefeSurface>(find.byKey(const ValueKey('share-section')))
+                .widget<KefeSurface>(
+                  find.byKey(const ValueKey('share-section')),
+                )
                 .tone,
             KefeSurfaceTone.raised,
           );
@@ -223,10 +225,7 @@ void main() {
 
     expect(controllerSource, contains('includeDecision: false'));
     expect(previewSource, contains('if (includeDecision)'));
-    expect(
-      previewSource,
-      contains('SHARE_DECISION_EXPOSURE_NOT_SUPPORTED'),
-    );
+    expect(previewSource, contains('SHARE_DECISION_EXPOSURE_NOT_SUPPORTED'));
 
     final publicShareSource = repositorySource.split('class PublicShare').last;
     for (final forbidden in const [
@@ -308,15 +307,13 @@ Future<void> _pumpShareRouter(
     routes: [
       GoRoute(
         path: '/share/:token',
-        builder: (_, state) => PublicShareScreen(
-          token: state.pathParameters['token']!,
-        ),
+        builder: (_, state) =>
+            PublicShareScreen(token: state.pathParameters['token']!),
       ),
       GoRoute(
         path: '/case/:caseId',
-        builder: (_, _) => const Scaffold(
-          body: Center(child: Text('receiver-case-sentinel')),
-        ),
+        builder: (_, _) =>
+            const Scaffold(body: Center(child: Text('receiver-case-sentinel'))),
       ),
     ],
   );
