@@ -1,0 +1,72 @@
+{
+  "contract": "premium-shell-slice12",
+  "version": "1.0.0",
+  "date": "2026-07-31",
+  "issue": 119,
+  "stack_base": "63b2838b6695f5939639167d3b11d0dba2bbf1a0",
+  "scope": {
+    "primary_navigation_visual_convergence": true,
+    "settings_access_visual_convergence": true,
+    "preview_build_identity_visual_convergence": true,
+    "preview_secondary_chrome_visual_convergence": true,
+    "route_architecture_change": false,
+    "new_primary_tab": false,
+    "backend_model_change": false,
+    "new_product_mode": false
+  },
+  "navigation": {
+    "canonical_paths": [
+      "/explore",
+      "/weigh",
+      "/activity",
+      "/my-kefe"
+    ],
+    "canonical_destination_count": 4,
+    "selected_index_semantics_preserved": true,
+    "primary_navigation_key_preserved": true,
+    "production_settings_key_preserved": true,
+    "preview_settings_key_preserved": true,
+    "radar_atlas_secondary_only": true,
+    "back_navigation_semantics_preserved": true
+  },
+  "presentation": {
+    "semantic_kefe_roles_required": true,
+    "light_dark_parity_required": true,
+    "tr_en_rendering_required": true,
+    "direct_dark_only_tokens_forbidden": true,
+    "preview_identity_truthfulness_preserved": true,
+    "screen_reader_semantics_required": true,
+    "text_scaling_required": true,
+    "continuous_animation_added": false,
+    "new_user_facing_copy": false
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "generic_runtime": true,
+    "preview_production_isolation": true,
+    "my_kefe_observed_descriptive_only": true,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "bias_inference": false,
+    "causal_inference": false,
+    "signal_in_scope": false,
+    "impact_in_scope": false
+  },
+  "verification": {
+    "exact_head_required": true,
+    "format_required": true,
+    "analyzer_required": true,
+    "all_flutter_tests_required": true,
+    "shell_tr_en_light_dark_required": true,
+    "navigation_continuity_required": true,
+    "production_copy_boundary_required": true,
+    "phone_acceptance_required": true,
+    "api_ci_required": true,
+    "mobile_ci_required": true,
+    "mvp_beta_gates_required": true,
+    "global_readiness_required": true
+  }
+}

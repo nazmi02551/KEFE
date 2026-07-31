@@ -62,11 +62,11 @@ class _KefeAppState extends ConsumerState<KefeApp> {
         path: '/my-kefe',
         builder: (context, state) => PrimaryNavigationShell(
           selectedIndex: 3,
-          floatingActionButton: FloatingActionButton.small(
-            key: const ValueKey('open-settings'),
-            onPressed: () => context.push('/settings'),
+          floatingActionButton: KefeShellAction(
+            actionKey: const ValueKey('open-settings'),
+            icon: Icons.settings_outlined,
             tooltip: KefeStrings.of(context).settingsTitle,
-            child: const Icon(Icons.settings_outlined),
+            onPressed: () => context.push('/settings'),
           ),
           child: const MyKefeJourneyScreen(embedded: true),
         ),
