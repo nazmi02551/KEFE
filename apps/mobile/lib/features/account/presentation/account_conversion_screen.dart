@@ -77,19 +77,18 @@ class _AccountConversionScreenState
                           header: true,
                           child: Text(
                             strings.accountHeading,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
+                            style: Theme.of(context).textTheme.headlineSmall
                                 ?.copyWith(fontWeight: FontWeight.w900),
                           ),
                         ),
                         const SizedBox(height: 7),
                         Text(
                           strings.accountBody,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: visual.mutedForeground,
-                            height: 1.45,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: visual.mutedForeground,
+                                height: 1.45,
+                              ),
                         ),
                       ],
                     ),
@@ -182,10 +181,11 @@ class _AccountConversionScreenState
                             strings.accountCodeInstruction(
                               state.challenge?.destinationHint ?? '',
                             ),
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              height: 1.4,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(
+                                  height: 1.4,
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                         ),
                       ],
