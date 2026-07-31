@@ -100,10 +100,17 @@ void main() {
           );
           expect(find.byType(KefeSurface), findsWidgets);
 
+          final footnote = find.byKey(
+            const ValueKey('my-kefe-no-inference-note'),
+          );
+          final journeyScroll = find.descendant(
+            of: find.byKey(const ValueKey('my-kefe-journey')),
+            matching: find.byType(Scrollable),
+          );
           await tester.scrollUntilVisible(
-            find.byKey(const ValueKey('my-kefe-no-inference-note')),
+            footnote,
             300,
-            scrollable: find.byKey(const ValueKey('my-kefe-journey')),
+            scrollable: journeyScroll,
           );
           expect(
             find.byKey(const ValueKey('my-kefe-no-inference-note')),

@@ -54,7 +54,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                       children: [
                         const SizedBox.square(
                           dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: Icon(Icons.hourglass_top_rounded, size: 18),
                         ),
                         const SizedBox(width: 12),
                         Expanded(child: Text(strings.activityLoading)),
