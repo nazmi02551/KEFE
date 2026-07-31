@@ -2,13 +2,17 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kefe_mobile/app/product_preview/atlas_globe_visual.dart';
 import 'package:kefe_mobile/app/product_preview/atlas_preview_fixture.dart';
 import 'package:kefe_mobile/app/product_preview/atlas_preview_screen.dart';
+import 'package:kefe_mobile/app/product_preview/atlas_preview_strings.dart';
+import 'package:kefe_mobile/app/product_preview/preview_components.dart';
 import 'package:kefe_mobile/app/product_preview_app.dart';
 import 'package:kefe_mobile/core/design/kefe_theme.dart';
+import 'package:kefe_mobile/core/localization/kefe_strings.dart';
 
 void main() {
   test('Slice 19 contract preserves representative Preview truthfulness', () {
@@ -83,13 +87,11 @@ void main() {
     (tester) async {
       await _pumpAtlas(tester, ThemeMode.dark);
 
+      final noticeFinder = find.byKey(const ValueKey('atlas-preview-notice'));
+      expect(noticeFinder, findsOneWidget);
       expect(
-        find.byKey(const ValueKey('atlas-preview-notice')),
-        findsOneWidget,
-      );
-      expect(
-        find.textContaining('gerçek ülke sonucu değildir'),
-        findsOneWidget,
+        tester.widget<PreviewNotice>(noticeFinder).text,
+        AtlasPreviewStrings.resources['tr']!['notice'],
       );
       expect(find.byKey(const ValueKey('atlas-world-globe')), findsOneWidget);
       expect(
@@ -113,6 +115,7 @@ void main() {
             .toList(),
       );
 
+      await _revealCountryCards(tester);
       for (final item in AtlasPreviewFixture.countries) {
         expect(
           find.byKey(ValueKey('atlas-country-marker-${item.countryCode}')),
@@ -154,8 +157,12 @@ void main() {
       tester.getSize(find.byKey(const ValueKey('atlas-world-globe'))).height,
       218,
     );
-    expect(find.byKey(const ValueKey('atlas-preview-notice')), findsOneWidget);
-    expect(find.textContaining('temsili Product Preview'), findsOneWidget);
+    final noticeFinder = find.byKey(const ValueKey('atlas-preview-notice'));
+    expect(noticeFinder, findsOneWidget);
+    expect(
+      tester.widget<PreviewNotice>(noticeFinder).text,
+      AtlasPreviewStrings.resources['tr']!['notice'],
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -167,6 +174,7 @@ void main() {
 
     expect(find.byKey(const ValueKey('atlas-preview-notice')), findsOneWidget);
     expect(find.byKey(const ValueKey('atlas-world-globe')), findsOneWidget);
+    await _revealCountryCards(tester);
     for (final item in AtlasPreviewFixture.countries) {
       expect(
         find.byKey(ValueKey('atlas-country-card-${item.countryCode}')),
@@ -188,17 +196,27 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('atlas-preview-list')), findsOneWidget);
+      final noticeFinder = find.byKey(const ValueKey('atlas-preview-notice'));
+      expect(noticeFinder, findsOneWidget);
       expect(
-        find.byKey(const ValueKey('atlas-preview-notice')),
-        findsOneWidget,
+        AtlasPreviewStrings.resources.values
+            .map((catalog) => catalog['notice'])
+            .whereType<String>(),
+        contains(tester.widget<PreviewNotice>(noticeFinder).text),
       );
       expect(find.byKey(const ValueKey('atlas-world-globe')), findsOneWidget);
-      expect(
-        find.textContaining('gerçek ülke sonucu değildir'),
-        findsOneWidget,
-      );
     },
   );
+}
+
+Future<void> _revealCountryCards(WidgetTester tester) async {
+  final lastCard = find.byKey(const ValueKey('atlas-country-card-ID'));
+  await tester.scrollUntilVisible(
+    lastCard,
+    320,
+    scrollable: find.byType(Scrollable).first,
+  );
+  await tester.pump();
 }
 
 Future<void> _pumpAtlas(
@@ -210,6 +228,13 @@ Future<void> _pumpAtlas(
     ProviderScope(
       child: MaterialApp(
         locale: const Locale('tr'),
+        supportedLocales: KefeStrings.supportedLocales,
+        localizationsDelegates: const [
+          KefeStringsDelegate(),
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         theme: KefeTheme.light(),
         darkTheme: KefeTheme.dark(),
         themeMode: themeMode,
