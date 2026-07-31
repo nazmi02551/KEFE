@@ -1,0 +1,160 @@
+{
+  "contract": "sports-call-scene-slice21",
+  "version": "1.0.0",
+  "date": "2026-07-31",
+  "source_adr": "docs/adr/0059-sports-call-scene-convergence.md",
+  "tracker_issue": 144,
+  "parent_foundation": "docs/adr/0055-high-fidelity-visual-composition-foundation.md",
+  "status": "architecture_locked_runtime_pending",
+  "scope": {
+    "sports_call_visual_convergence": true,
+    "decision_domain_change": false,
+    "case_version_schema_change": false,
+    "backend_change": false,
+    "api_change": false,
+    "route_change": false,
+    "signal_impact_change": false
+  },
+  "renderer": {
+    "code": "KEFE_SPORTS_SCENE_V1",
+    "selection_source": "CaseMediaRendition.rendererCode",
+    "case_id_branch_forbidden": true,
+    "case_title_branch_forbidden": true,
+    "case_format_branch_forbidden": true,
+    "domain_branch_forbidden": true,
+    "flutter_native": true,
+    "deterministic_geometry": true,
+    "idle_continuous_animation_forbidden": true,
+    "webview_required": false,
+    "threejs_required": false,
+    "live_3d_required": false
+  },
+  "preview_adoption": {
+    "semantic_locator": "SPORTS_DECISION",
+    "existing_media_exposure": "PRE_COMMIT_SAFE",
+    "existing_alt_text_preserved": true,
+    "existing_attribution_preserved": true,
+    "other_preview_assets_keep_existing_renderer": true,
+    "preview_fixture_is_production_fallback": false
+  },
+  "illustration_truth": {
+    "presentation_only": true,
+    "claim_evidence": false,
+    "spatial_evidence": false,
+    "geometry_encodes_real_event_coordinates": false,
+    "allowed_decorative_elements": [
+      "PITCH",
+      "FIELD_MARKINGS",
+      "GOAL",
+      "ABSTRACT_PLAYERS",
+      "BALL",
+      "AMBIENT_STADIUM_DEPTH",
+      "NON_SEMANTIC_DECISION_GLOW"
+    ],
+    "fake_camera_views_forbidden": true,
+    "fake_var_frame_forbidden": true,
+    "fake_referee_position_forbidden": true,
+    "fake_player_coordinates_forbidden": true,
+    "fake_ball_coordinates_forbidden": true,
+    "fake_offside_line_forbidden": true,
+    "fake_contact_line_forbidden": true,
+    "fake_goal_line_adjudication_forbidden": true,
+    "fake_correctness_indicator_forbidden": true,
+    "evidence_view_tabs_forbidden": true,
+    "replay_controls_forbidden": true
+  },
+  "decision_truth": {
+    "representative_case_title": "Bu pozisyonda penaltı kararı doğru muydu?",
+    "representative_question": "Hakemin penaltı kararını nasıl değerlendiriyorsun?",
+    "canonical_options": [
+      "Doğru",
+      "Yanlış"
+    ],
+    "confidence_semantics_unchanged": true,
+    "private_reason_semantics_unchanged": true,
+    "commit_semantics_unchanged": true,
+    "reveal_semantics_unchanged": true,
+    "scene_changes_answer_values": false,
+    "scene_exposes_result_before_commit": false,
+    "scene_implies_kefe_adjudication": false
+  },
+  "media_boundary": {
+    "case_version_pinned": true,
+    "existing_exposure_phase_authoritative": true,
+    "presentation_media_is_evidence": false,
+    "alt_text_is_semantic_image_label": true,
+    "attribution_policy_preserved": true,
+    "unsupported_renderer_uses_existing_fallback": true,
+    "renderer_failure_blocks_decision_core": false
+  },
+  "presentation": {
+    "theme_adaptive": true,
+    "dark_theme_required": true,
+    "light_theme_required": true,
+    "compact_phone_required": true,
+    "enlarged_text_surrounding_layout_safe": true,
+    "reduce_motion_compatible": true,
+    "repaint_boundary_required": true,
+    "text_inside_scene_painter_forbidden": true
+  },
+  "future_spatial_evidence": {
+    "in_scope": false,
+    "requires_new_contract": true,
+    "required_future_topics": [
+      "IMMUTABLE_VIEW_IDENTITY",
+      "REFERENCE_FRAME_AND_COORDINATE_SEMANTICS",
+      "CAMERA_VIEW_PROVENANCE",
+      "ANNOTATION_MEANING_AND_PROVENANCE",
+      "EXPOSURE_PHASE",
+      "EVIDENCE_VS_DECORATION",
+      "ACCESSIBILITY_REPRESENTATION",
+      "EDITORIAL_VALIDATION_AND_RIGHTS",
+      "ABSENCE_FALLBACK"
+    ]
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "case_agnostic_runtime": true,
+    "preview_production_isolation": true,
+    "my_kefe_observed_descriptive_only": true,
+    "inference_added": false,
+    "signal_in_scope": false,
+    "impact_in_scope": false
+  },
+  "tests": {
+    "contract_guard": true,
+    "renderer_code_selection": true,
+    "sports_preview_renderer_adoption": true,
+    "other_preview_renderer_continuity": true,
+    "sports_case_copy_and_options_unchanged": true,
+    "pre_commit_scene_reachability": true,
+    "pre_commit_reveal_absence": true,
+    "no_fake_spatial_evidence_ui": true,
+    "dark_light": true,
+    "compact_phone": true,
+    "enlarged_text": true,
+    "media_fallback_non_blocking": true,
+    "existing_mobile_regressions": true,
+    "production_copy_boundary": true,
+    "phone_acceptance": true
+  },
+  "required_exact_head_workflows": [
+    "API CI",
+    "Mobile CI",
+    "MVP Beta Gates",
+    "Global Readiness"
+  ],
+  "non_claims": [
+    "SPATIAL_EVENT_RECONSTRUCTION",
+    "VAR_EVIDENCE",
+    "CAMERA_VIEW_EVIDENCE",
+    "OFFSIDE_OR_CONTACT_GEOMETRY",
+    "REFEREE_POSITION",
+    "ADJUDICATION_TRUTH",
+    "HUMAN_VISUAL_APPROVAL",
+    "HUMAN_USABILITY_PASS",
+    "PRODUCTION_MEDIA_PROVIDER_READINESS"
+  ]
+}
