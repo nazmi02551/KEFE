@@ -11,10 +11,8 @@ extension KefeVisualCompositionFlutter on KefeVisualCompositionPolicy {
     KefeVisualFitPolicy.contain => BoxFit.contain,
   };
 
-  Alignment get focalAlignment => Alignment(
-    (focalPoint.x * 2) - 1,
-    (focalPoint.y * 2) - 1,
-  );
+  Alignment get focalAlignment =>
+      Alignment((focalPoint.x * 2) - 1, (focalPoint.y * 2) - 1);
 
   bool supportsBrightness(Brightness brightness) => switch (themeSuitability) {
     KefeVisualThemeSuitability.adaptive => true,
@@ -51,7 +49,8 @@ class KefeVisualCompositionPlaceholder extends StatelessWidget {
     final visual = context.kefeVisual;
     final icon = switch (kind) {
       KefeVisualPlaceholderKind.loading => Icons.hourglass_top_rounded,
-      KefeVisualPlaceholderKind.unavailable => Icons.image_not_supported_outlined,
+      KefeVisualPlaceholderKind.unavailable =>
+        Icons.image_not_supported_outlined,
     };
     final body = AspectRatio(
       aspectRatio: aspectRatio,
