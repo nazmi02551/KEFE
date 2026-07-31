@@ -164,9 +164,7 @@ void main() {
       await tester.tap(communityTag);
       await tester.pump();
 
-      final communityText = find.byKey(
-        const ValueKey('community-reason-text'),
-      );
+      final communityText = find.byKey(const ValueKey('community-reason-text'));
       await tester.ensureVisible(communityText);
       await tester.enterText(communityText, 'A concise public reason');
 
