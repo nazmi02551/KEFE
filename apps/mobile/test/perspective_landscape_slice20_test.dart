@@ -22,7 +22,10 @@ void main() {
     expect(contract['contract'], 'perspective-landscape-slice20');
     expect(contract['placement']['post_commit_only'], isTrue);
     expect(contract['placement']['pre_commit_render_forbidden'], isTrue);
-    expect(contract['source_truth']['slot_presence_only_for_landscape_geometry'], isTrue);
+    expect(
+      contract['source_truth']['slot_presence_only_for_landscape_geometry'],
+      isTrue,
+    );
     expect(contract['source_truth']['local_reranking_forbidden'], isTrue);
     expect(contract['source_truth']['case_id_branch_forbidden'], isTrue);
     expect(
