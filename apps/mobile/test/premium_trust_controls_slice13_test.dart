@@ -181,17 +181,23 @@ void main() {
     },
   );
 
-  testWidgets('privacy gate stays hidden unless explicitly enabled', (
-    tester,
-  ) async {
+  testWidgets('privacy gate stays hidden by default', (tester) async {
     await _pumpLocalized(
       tester,
       locale: const Locale('en', 'US'),
       dark: false,
       child: const PrivacyControlsSection(),
     );
-    expect(find.byKey(const ValueKey('privacy-controls')), findsNothing);
 
+    expect(find.byKey(const ValueKey('privacy-controls')), findsNothing);
+    expect(find.byKey(const ValueKey('privacy-export')), findsNothing);
+    expect(find.byKey(const ValueKey('privacy-delete')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('privacy controls render when gate is explicitly enabled', (
+    tester,
+  ) async {
     await _pumpLocalized(
       tester,
       locale: const Locale('en', 'US'),
@@ -199,6 +205,7 @@ void main() {
       privacyEnabled: true,
       child: const PrivacyControlsSection(),
     );
+
     expect(find.byKey(const ValueKey('privacy-controls')), findsOneWidget);
     expect(find.byKey(const ValueKey('privacy-export')), findsOneWidget);
     expect(find.byKey(const ValueKey('privacy-delete')), findsOneWidget);
