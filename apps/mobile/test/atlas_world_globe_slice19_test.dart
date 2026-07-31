@@ -33,6 +33,14 @@ void main() {
       isFalse,
     );
     expect(
+      contract['data_truthfulness']['globe_marker_values_source'],
+      'AtlasPreviewFixture.countries',
+    );
+    expect(
+      contract['data_truthfulness']['duplicate_globe_value_constants_forbidden'],
+      isTrue,
+    );
+    expect(
       contract['data_truthfulness']['invented_country_percentages_forbidden'],
       isTrue,
     );
@@ -46,6 +54,7 @@ void main() {
     );
     expect(contract['presentation']['continuous_animation_forbidden'], isTrue);
     expect(contract['presentation']['live_3d_required'], isFalse);
+    expect(contract['tests']['globe_marker_fixture_value_parity'], isTrue);
   });
 
   test('existing Atlas fixture values remain unchanged', () {
