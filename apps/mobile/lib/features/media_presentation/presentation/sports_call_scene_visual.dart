@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../core/design/kefe_visual_system.dart';
+import '../../../core/visual_composition/kefe_visual_composition_flutter.dart';
 import '../../../core/visual_composition/kefe_visual_composition_models.dart';
 
 class SportsCallSceneVisual extends StatelessWidget {
