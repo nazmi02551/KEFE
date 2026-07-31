@@ -216,6 +216,7 @@ void main() {
 
     expect(repository.perspectiveCalls, 0);
     expect(find.byKey(const ValueKey('perspective-section')), findsNothing);
+    expect(find.byKey(const ValueKey('perspective-landscape')), findsNothing);
   });
 
   testWidgets(
@@ -236,6 +237,27 @@ void main() {
       expect(section, findsOneWidget);
       expect(
         find.byKey(const ValueKey('perspective-curated-note')),
+        findsOneWidget,
+      );
+      final landscape = find.byKey(const ValueKey('perspective-landscape'));
+      await makeVisible(tester, landscape);
+      expect(landscape, findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('perspective-landscape-slot-near')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('perspective-landscape-slot-opposing')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('perspective-landscape-slot-bridge')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(
+          const ValueKey('perspective-landscape-slot-alternativeContext'),
+        ),
         findsOneWidget,
       );
       expect(
@@ -310,6 +332,10 @@ void main() {
       expect(repository.commitCalls, 1);
       expect(repository.revealCalls, 1);
       expect(repository.perspectiveCalls, 2);
+      expect(
+        find.byKey(const ValueKey('perspective-landscape')),
+        findsOneWidget,
+      );
       expect(
         find.byKey(const ValueKey('perspective-card-opposing')),
         findsOneWidget,
