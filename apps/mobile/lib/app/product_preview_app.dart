@@ -164,7 +164,7 @@ class _ExploreSecondaryActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
-    return Column(
+    return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         KefeShellAction(
@@ -174,7 +174,7 @@ class _ExploreSecondaryActions extends StatelessWidget {
           icon: Icons.auto_awesome_rounded,
           onPressed: () => context.push('/welcome?review=1'),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(width: 10),
         KefeShellAction(
           actionKey: const ValueKey('open-preview-radar'),
           heroTag: 'preview-radar',
@@ -182,7 +182,7 @@ class _ExploreSecondaryActions extends StatelessWidget {
           icon: Icons.radar_rounded,
           onPressed: () => context.push('/radar'),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(width: 10),
         KefeShellAction(
           actionKey: const ValueKey('open-preview-atlas'),
           heroTag: 'preview-atlas',
