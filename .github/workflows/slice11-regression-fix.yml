@@ -27,8 +27,8 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
 
-          spinner_old = """const SizedBox.square(\n                          dimension: 18,\n                          child: CircularProgressIndicator(strokeWidth: 2),\n                        ),"""
-          spinner_new = """Icon(\n                          Icons.hourglass_top_rounded,\n                          size: 18,\n                          color: context.kefeVisual.gold,\n                        ),"""
+          spinner_old = "child: CircularProgressIndicator(strokeWidth: 2),"
+          spinner_new = "child: Icon(Icons.hourglass_top_rounded, size: 18),"
           spinner_paths = [
               Path('apps/mobile/lib/features/activity/presentation/activity_screen.dart'),
               Path('apps/mobile/lib/features/progress/presentation/my_kefe_journey_screen.dart'),
@@ -37,7 +37,7 @@ jobs:
           for path in spinner_paths:
               text = path.read_text()
               if spinner_old not in text:
-                  raise SystemExit(f'loading spinner block not found in {path}')
+                  raise SystemExit(f'loading spinner child not found in {path}')
               path.write_text(text.replace(spinner_old, spinner_new, 1))
 
           test_path = Path('apps/mobile/test/premium_history_slice11_test.dart')
@@ -59,4 +59,4 @@ jobs:
           git commit -m 'fix: stabilize premium history loading and test harness'
           git push origin HEAD:feature/premium-history-slice11
 
-# trigger
+# trigger-2
