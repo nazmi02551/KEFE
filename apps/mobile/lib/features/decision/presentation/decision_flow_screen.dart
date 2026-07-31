@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/design/kefe_surface.dart';
+import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/design/product_preview_visual_mode.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../context/presentation/context_section.dart';
@@ -409,22 +411,58 @@ class _FirstUseCompletionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
-    return Card(
+    final visual = context.kefeVisual;
+    return KefeSurface(
       key: const ValueKey('first-use-completion'),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(strings.firstRevealHelper),
-            const SizedBox(height: 16),
-            FilledButton(
-              key: const ValueKey('continue-as-guest'),
-              onPressed: onContinue,
-              child: Text(strings.continueAsGuest),
-            ),
-          ],
-        ),
+      tone: KefeSurfaceTone.premium,
+      accent: visual.success,
+      padding: const EdgeInsets.all(20),
+      borderRadius: 24,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: visual.success.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: visual.success.withValues(alpha: 0.34),
+                  ),
+                ),
+                child: ExcludeSemantics(
+                  child: Icon(
+                    Icons.check_rounded,
+                    color: visual.success,
+                    size: 26,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Text(
+                  strings.firstRevealHelper,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: visual.onSurfaceStrong,
+                    fontWeight: FontWeight.w800,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          FilledButton.icon(
+            key: const ValueKey('continue-as-guest'),
+            onPressed: onContinue,
+            icon: const Icon(Icons.arrow_forward_rounded),
+            label: Text(strings.continueAsGuest),
+          ),
+        ],
       ),
     );
   }
