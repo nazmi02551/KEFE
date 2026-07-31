@@ -88,6 +88,7 @@ class PrimaryNavigationShell extends StatelessWidget {
 
 class KefeShellAction extends StatelessWidget {
   const KefeShellAction({
+    required this.actionKey,
     required this.icon,
     required this.tooltip,
     required this.onPressed,
@@ -95,6 +96,7 @@ class KefeShellAction extends StatelessWidget {
     super.key,
   });
 
+  final Key actionKey;
   final IconData icon;
   final String tooltip;
   final VoidCallback onPressed;
@@ -107,6 +109,7 @@ class KefeShellAction extends StatelessWidget {
     return SizedBox.square(
       dimension: 48,
       child: FloatingActionButton.small(
+        key: actionKey,
         heroTag: heroTag,
         tooltip: tooltip,
         elevation: 0,
