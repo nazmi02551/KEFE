@@ -58,13 +58,12 @@ void main() {
       testWidgets(
         'onboarding is premium in ${locale.languageCode} ${dark ? 'dark' : 'light'}',
         (tester) async {
-          await _pumpOnboarding(
-            tester,
-            locale: locale,
-            dark: dark,
-          );
+          await _pumpOnboarding(tester, locale: locale, dark: dark);
 
-          expect(find.byKey(const ValueKey('onboarding-pages')), findsOneWidget);
+          expect(
+            find.byKey(const ValueKey('onboarding-pages')),
+            findsOneWidget,
+          );
           expect(
             find.byKey(const ValueKey('onboarding-promise-1')),
             findsOneWidget,
@@ -106,9 +105,9 @@ void main() {
     final decisionSource = File(
       'lib/features/decision/presentation/decision_flow_screen.dart',
     ).readAsStringSync();
-    final completionSource = decisionSource.split(
-      'class _FirstUseCompletionCard',
-    )[1].split('class _ErrorState')[0];
+    final completionSource = decisionSource
+        .split('class _FirstUseCompletionCard')[1]
+        .split('class _ErrorState')[0];
 
     expect(onboardingSource, contains('KefeSurface('));
     expect(onboardingSource, contains('KefeSurfaceTone.premium'));
@@ -117,10 +116,7 @@ void main() {
     expect(onboardingSource, contains("ValueKey('onboarding-pages')"));
     expect(onboardingSource, contains("ValueKey('onboarding-promise-1')"));
     expect(onboardingSource, contains("ValueKey('onboarding-promise-2')"));
-    expect(
-      onboardingSource,
-      contains("ValueKey('onboarding-primary-button')"),
-    );
+    expect(onboardingSource, contains("ValueKey('onboarding-primary-button')"));
 
     expect(completionSource, contains('KefeSurface('));
     expect(completionSource, contains('KefeSurfaceTone.premium'));
