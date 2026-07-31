@@ -1,6 +1,6 @@
 {
   "contract": "atlas-world-globe-slice19",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "date": "2026-07-31",
   "source_adr": "docs/adr/0057-atlas-world-globe-convergence.md",
   "parent_foundation": "docs/adr/0055-high-fidelity-visual-composition-foundation.md",
@@ -28,6 +28,8 @@
     "existing_scale_min": 0,
     "existing_scale_max": 10,
     "existing_country_values_unchanged": true,
+    "globe_marker_values_source": "AtlasPreviewFixture.countries",
+    "duplicate_globe_value_constants_forbidden": true,
     "representative_notice_required": true,
     "invented_country_percentages_forbidden": true,
     "invented_sample_size_forbidden": true,
@@ -62,7 +64,8 @@
     "live_3d_required": false
   },
   "marker_semantics": {
-    "source": "PRESENTATION_ONLY_COUNTRY_CODE_MAP",
+    "position_source": "AtlasPreviewFixture.presentation_marker_coordinates",
+    "value_source": "AtlasPreviewFixture.countries.value",
     "analytical_geography_claim": false,
     "sample_geography_claim": false,
     "jurisdiction_methodology_claim": false,
@@ -101,6 +104,7 @@
   "tests": {
     "contract_guard": true,
     "fixture_value_continuity": true,
+    "globe_marker_fixture_value_parity": true,
     "truth_notice": true,
     "no_fabricated_metadata": true,
     "light_dark": true,
