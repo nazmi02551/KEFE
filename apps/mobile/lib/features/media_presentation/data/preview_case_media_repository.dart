@@ -1,3 +1,4 @@
+import '../../../core/visual_composition/kefe_visual_composition_models.dart';
 import '../domain/case_media_models.dart';
 import 'case_media_repository.dart';
 
@@ -66,6 +67,7 @@ class PreviewCaseMediaRepository implements CaseMediaRepository {
       return const [];
     }
 
+    final isHero = slot == CaseMediaSlot.caseHero;
     return [
       CaseMediaPresentation(
         id: 'preview-media-$caseVersionId-${slot.code}',
@@ -79,7 +81,16 @@ class PreviewCaseMediaRepository implements CaseMediaRepository {
         rendition: CaseMediaRendition(
           rendererCode: 'KEFE_ABSTRACT_V1',
           locator: spec.key,
-          aspectRatio: slot == CaseMediaSlot.caseHero ? 1.85 : 1.55,
+          aspectRatio: isHero ? 1.85 : 1.55,
+          composition: isHero
+              ? const KefeVisualCompositionPolicy(
+                  focalPoint: KefeVisualFocalPoint(x: 0.5, y: 0.46),
+                  safeArea: KefeVisualSafeArea.hero,
+                  fallback: KefeVisualFallbackPolicy.semanticPlaceholder,
+                  motion: KefeVisualMotionPolicy.reducedMotionAware,
+                  performance: KefeVisualPerformanceBudget.hero,
+                )
+              : KefeVisualCompositionPolicy.card,
         ),
         attribution: 'KEFE Product Preview · temsili illüstrasyon',
       ),
