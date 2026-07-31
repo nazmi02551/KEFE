@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import '../../../core/design/kefe_visual_system.dart';
@@ -17,7 +15,9 @@ class KefeBalanceVisual extends StatelessWidget {
     this.selectedIndex,
     this.compact = false,
     super.key,
-  }) : assert(selectedIndex == null || selectedIndex == 0 || selectedIndex == 1);
+  }) : assert(
+         selectedIndex == null || selectedIndex == 0 || selectedIndex == 1,
+       );
 
   final String leftLabel;
   final String rightLabel;
@@ -269,14 +269,15 @@ class _BalanceBackdropPainter extends CustomPainter {
       center,
       size.shortestSide * 0.42,
       Paint()
-        ..shader = RadialGradient(
-          colors: [
-            active.withValues(alpha: visual.isDark ? 0.13 : 0.08),
-            Colors.transparent,
-          ],
-        ).createShader(
-          Rect.fromCircle(center: center, radius: size.shortestSide * 0.42),
-        ),
+        ..shader =
+            RadialGradient(
+              colors: [
+                active.withValues(alpha: visual.isDark ? 0.13 : 0.08),
+                Colors.transparent,
+              ],
+            ).createShader(
+              Rect.fromCircle(center: center, radius: size.shortestSide * 0.42),
+            ),
     );
 
     final horizonY = size.height * 0.76;
@@ -441,11 +442,12 @@ class _SignatureBalancePainter extends CustomPainter {
     );
 
     final baseY = size.height * 0.86;
-    for (final layer in <({double width, double height, double dy, double alpha})>[
-      (width: 0.26, height: 0.055, dy: 0.000, alpha: 1.0),
-      (width: 0.22, height: 0.040, dy: -0.026, alpha: 0.90),
-      (width: 0.15, height: 0.030, dy: -0.048, alpha: 0.82),
-    ]) {
+    for (final layer
+        in <({double width, double height, double dy, double alpha})>[
+          (width: 0.26, height: 0.055, dy: 0.000, alpha: 1.0),
+          (width: 0.22, height: 0.040, dy: -0.026, alpha: 0.90),
+          (width: 0.15, height: 0.030, dy: -0.048, alpha: 0.82),
+        ]) {
       final rect = Rect.fromCenter(
         center: Offset(center.dx, baseY + size.height * layer.dy),
         width: size.width * layer.width,
@@ -481,12 +483,7 @@ class _SignatureBalancePainter extends CustomPainter {
     );
   }
 
-  void _drawPivot(
-    Canvas canvas,
-    Size size,
-    Offset center,
-    Color activeColor,
-  ) {
+  void _drawPivot(Canvas canvas, Size size, Offset center, Color activeColor) {
     final radius = size.height * 0.078;
     canvas.drawCircle(
       center,
@@ -500,11 +497,7 @@ class _SignatureBalancePainter extends CustomPainter {
       radius,
       Paint()
         ..shader = RadialGradient(
-          colors: [
-            visual.goldSoft,
-            visual.gold,
-            _bronzeDark,
-          ],
+          colors: [visual.goldSoft, visual.gold, _bronzeDark],
           stops: const [0.0, 0.50, 1.0],
         ).createShader(Rect.fromCircle(center: center, radius: radius)),
     );
@@ -622,11 +615,12 @@ class _SignatureBalancePainter extends CustomPainter {
         anchor,
         size.height * 0.024,
         Paint()
-          ..shader = RadialGradient(
-            colors: [visual.goldSoft, visual.gold, _bronzeDark],
-          ).createShader(
-            Rect.fromCircle(center: anchor, radius: size.height * 0.024),
-          ),
+          ..shader =
+              RadialGradient(
+                colors: [visual.goldSoft, visual.gold, _bronzeDark],
+              ).createShader(
+                Rect.fromCircle(center: anchor, radius: size.height * 0.024),
+              ),
       );
     }
   }
@@ -650,16 +644,8 @@ class _SignatureBalancePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    canvas.drawLine(
-      anchor,
-      Offset(anchor.dx - chainSpread, panY),
-      chainPaint,
-    );
-    canvas.drawLine(
-      anchor,
-      Offset(anchor.dx + chainSpread, panY),
-      chainPaint,
-    );
+    canvas.drawLine(anchor, Offset(anchor.dx - chainSpread, panY), chainPaint);
+    canvas.drawLine(anchor, Offset(anchor.dx + chainSpread, panY), chainPaint);
 
     if (selected) {
       canvas.drawCircle(
