@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/design/kefe_theme.dart';
+import '../../../core/design/kefe_surface.dart';
+import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../progress/application/progress_controller.dart';
@@ -39,24 +40,26 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
           key: const ValueKey('activity-screen'),
           padding: const EdgeInsets.fromLTRB(18, 14, 18, 30),
           children: [
-            _ActivityHeader(strings: strings),
-            const SizedBox(height: 10),
-            Text(
-              strings.activitySubtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: KefeColorTokens.textMutedDark,
-                height: 1.45,
-              ),
-            ),
+            _ActivityHero(strings: strings),
             const SizedBox(height: 18),
             const SavedCasesSection(visible: true),
             const SizedBox(height: 18),
             ...switch (state.uiState) {
               ProgressUiState.idle || ProgressUiState.loading => [
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Text(strings.activityLoading),
+                KefeSurface(
+                  child: Semantics(
+                    liveRegion: true,
+                    label: strings.activityLoading,
+                    child: Row(
+                      children: [
+                        const SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(child: Text(strings.activityLoading)),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -95,89 +98,103 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
       return [
         if (preview) _PreviewNotice(text: strings.activityPreviewNotice),
         if (preview) const SizedBox(height: 14),
-        Card(
+        KefeSurface(
           key: const ValueKey('activity-empty'),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Text(strings.activityEmpty),
-          ),
+          tone: KefeSurfaceTone.raised,
+          child: Text(strings.activityEmpty),
         ),
       ];
     }
 
     return [
       if (preview) _PreviewNotice(text: strings.activityPreviewNotice),
-      if (preview) const SizedBox(height: 14),
-      Text(
+      if (preview) const SizedBox(height: 16),
+      KefeEyebrow(
         strings.activityHistoryTitle,
-        style: Theme.of(
-          context,
-        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+        icon: Icons.history_toggle_off_rounded,
       ),
-      const SizedBox(height: 12),
-      Card(
+      const SizedBox(height: 10),
+      KefeSurface(
         key: const ValueKey('activity-history'),
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            children: [
-              if (journeys.isNotEmpty)
-                for (var index = 0; index < journeys.length; index++) ...[
-                  _JourneyTile(item: journeys[index], strings: strings),
-                  if (index != journeys.length - 1) const Divider(height: 24),
-                ]
-              else
-                for (var index = 0; index < legacy.length; index++) ...[
-                  _LegacyJourneyTile(item: legacy[index], strings: strings),
-                  if (index != legacy.length - 1) const Divider(height: 24),
-                ],
-            ],
-          ),
+        tone: KefeSurfaceTone.raised,
+        child: Column(
+          children: [
+            if (journeys.isNotEmpty)
+              for (var index = 0; index < journeys.length; index++) ...[
+                _JourneyTile(item: journeys[index], strings: strings),
+                if (index != journeys.length - 1) const SizedBox(height: 10),
+              ]
+            else
+              for (var index = 0; index < legacy.length; index++) ...[
+                _LegacyJourneyTile(item: legacy[index], strings: strings),
+                if (index != legacy.length - 1) const SizedBox(height: 10),
+              ],
+          ],
         ),
       ),
     ];
   }
 }
 
-class _ActivityHeader extends StatelessWidget {
-  const _ActivityHeader({required this.strings});
+class _ActivityHero extends StatelessWidget {
+  const _ActivityHero({required this.strings});
 
   final KefeStrings strings;
 
   @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              strings.activityEyebrow,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: KefeColorTokens.goldSoft,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.1,
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return KefeSurface(
+      tone: KefeSurfaceTone.premium,
+      accent: visual.gold,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                KefeEyebrow(
+                  strings.activityEyebrow,
+                  icon: Icons.history_rounded,
+                ),
+                const SizedBox(height: 9),
+                Text(
+                  strings.activityTitle,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: visual.onSurfaceStrong,
+                    fontWeight: FontWeight.w900,
+                    height: 1.08,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  strings.activitySubtitle,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: visual.onSurfaceStrong.withValues(alpha: 0.76),
+                    height: 1.45,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 14),
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: visual.gold.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: visual.goldSoft.withValues(alpha: 0.34),
               ),
             ),
-            const SizedBox(height: 7),
-            Text(
-              strings.activityTitle,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w900,
-                height: 1.08,
-              ),
-            ),
-          ],
-        ),
+            child: Icon(Icons.history_rounded, color: visual.goldSoft),
+          ),
+        ],
       ),
-      const CircleAvatar(
-        backgroundColor: Color(0x222CC9BC),
-        foregroundColor: KefeColorTokens.goldSoft,
-        child: Icon(Icons.history_rounded),
-      ),
-    ],
-  );
+    );
+  }
 }
 
 class _JourneyTile extends StatelessWidget {
@@ -187,63 +204,76 @@ class _JourneyTile extends StatelessWidget {
   final KefeStrings strings;
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    button: true,
-    label: item.title,
-    child: InkWell(
-      key: ValueKey('activity-case-${item.caseId}'),
-      borderRadius: BorderRadius.circular(14),
-      onTap: () => context.push('/case/${item.caseId}'),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const CircleAvatar(
-              backgroundColor: Color(0x1FD9B66F),
-              foregroundColor: KefeColorTokens.goldSoft,
-              child: Icon(Icons.balance_outlined),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.title,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 7),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return Semantics(
+      button: true,
+      label: item.title,
+      child: Material(
+        color: visual.surfaceSunken,
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          key: ValueKey('activity-case-${item.caseId}'),
+          borderRadius: BorderRadius.circular(18),
+          onTap: () => context.push('/case/${item.caseId}'),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _HistoryIcon(icon: Icons.balance_outlined, color: visual.gold),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (item.decisionUpdateCount > 0)
-                        Chip(
-                          label: Text(
-                            strings.activityUpdateCount(
-                              item.decisionUpdateCount,
-                            ),
-                          ),
+                      Text(
+                        item.title,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
                         ),
-                      if (item.reflectionCompleted)
-                        Chip(label: Text(strings.activityReflected)),
-                      if (item.decisionUpdateCount == 0 &&
-                          !item.reflectionCompleted)
-                        Chip(label: Text(strings.activityCommitted)),
+                      ),
+                      const SizedBox(height: 9),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          if (item.decisionUpdateCount > 0)
+                            _HistoryPill(
+                              label: strings.activityUpdateCount(
+                                item.decisionUpdateCount,
+                              ),
+                              color: visual.rules,
+                            ),
+                          if (item.reflectionCompleted)
+                            _HistoryPill(
+                              label: strings.activityReflected,
+                              color: visual.gold,
+                            ),
+                          if (item.decisionUpdateCount == 0 &&
+                              !item.reflectionCompleted)
+                            _HistoryPill(
+                              label: strings.activityCommitted,
+                              color: visual.success,
+                            ),
+                        ],
+                      ),
                     ],
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 20,
+                  color: visual.mutedForeground,
+                ),
+              ],
             ),
-            const Icon(Icons.arrow_forward_rounded),
-          ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _LegacyJourneyTile extends StatelessWidget {
@@ -253,21 +283,91 @@ class _LegacyJourneyTile extends StatelessWidget {
   final KefeStrings strings;
 
   @override
-  Widget build(BuildContext context) => ListTile(
-    key: ValueKey('activity-case-${item.caseId}'),
-    contentPadding: EdgeInsets.zero,
-    leading: const CircleAvatar(
-      backgroundColor: Color(0x1FD9B66F),
-      foregroundColor: KefeColorTokens.goldSoft,
-      child: Icon(Icons.balance_outlined),
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return Material(
+      color: visual.surfaceSunken,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        key: ValueKey('activity-case-${item.caseId}'),
+        borderRadius: BorderRadius.circular(18),
+        onTap: () => context.push('/case/${item.caseId}'),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              _HistoryIcon(icon: Icons.balance_outlined, color: visual.gold),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 7),
+                    _HistoryPill(
+                      label: strings.activityCommitted,
+                      color: visual.success,
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_rounded,
+                size: 20,
+                color: visual.mutedForeground,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HistoryIcon extends StatelessWidget {
+  const _HistoryIcon({required this.icon, required this.color});
+
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 40,
+    height: 40,
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(14),
     ),
-    title: Text(
-      item.title,
-      style: const TextStyle(fontWeight: FontWeight.w800),
+    child: Icon(icon, size: 20, color: color),
+  );
+}
+
+class _HistoryPill extends StatelessWidget {
+  const _HistoryPill({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.10),
+      borderRadius: BorderRadius.circular(999),
+      border: Border.all(color: color.withValues(alpha: 0.20)),
     ),
-    subtitle: Text(strings.activityCommitted),
-    trailing: const Icon(Icons.arrow_forward_rounded),
-    onTap: () => context.push('/case/${item.caseId}'),
+    child: Text(
+      label,
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+        color: color,
+        fontWeight: FontWeight.w800,
+      ),
+    ),
   );
 }
 
@@ -283,17 +383,16 @@ class _ActivityError extends StatelessWidget {
   final VoidCallback onRetry;
 
   @override
-  Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(message),
-          const SizedBox(height: 12),
-          OutlinedButton(onPressed: onRetry, child: Text(retryLabel)),
-        ],
-      ),
+  Widget build(BuildContext context) => KefeSurface(
+    tone: KefeSurfaceTone.raised,
+    accent: context.kefeVisual.attention,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(message),
+        const SizedBox(height: 12),
+        OutlinedButton(onPressed: onRetry, child: Text(retryLabel)),
+      ],
     ),
   );
 }
@@ -304,19 +403,30 @@ class _PreviewNotice extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => KefeSurface(
     key: const ValueKey('activity-preview-notice'),
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      color: KefeColorTokens.rules.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: KefeColorTokens.rules.withValues(alpha: 0.22)),
-    ),
-    child: Text(
-      text,
-      style: Theme.of(
-        context,
-      ).textTheme.bodySmall?.copyWith(color: KefeColorTokens.textMutedDark),
+    tone: KefeSurfaceTone.sunken,
+    padding: const EdgeInsets.all(13),
+    accent: context.kefeVisual.rules,
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          Icons.science_outlined,
+          size: 18,
+          color: context.kefeVisual.rules,
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: context.kefeVisual.mutedForeground,
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
     ),
   );
 }
