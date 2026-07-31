@@ -1,8 +1,8 @@
 # KEFE Product Completion + Visual Roadmap — 2026-07-31
 
 Status: WORKING / stacked planning record
-Top verified runtime before Slice 17 runtime work: `68b390584901dc706059485afb6f29d7f073defc` (Slice 16 corrected)
-Top planning branch: `feature/high-fidelity-visual-foundation-slice17`
+Top verified runtime: `ce9630ba4f013ac9611ac10b397bff356d797bad` (Slice 17 verified foundation)
+Top working branch: `feature/high-fidelity-visual-foundation-slice17`
 Canonical visual-foundation tracker: #129
 
 This record summarizes what is already repo-verified on the active stacked line and what remains before a four-dörtlük consumer product can be claimed. It does not promote the stack to main and does not supersede Drive CURRENT v3.4.
@@ -29,7 +29,7 @@ Important scope distinction: finishing the current premium visual program does *
 - Accessibility/Reduce Motion foundations, production copy boundary and phone-acceptance automation.
 - Exact-head CI discipline across API CI, Mobile CI, MVP Beta Gates and Global Readiness.
 
-### Premium convergence through Slice 16
+### Premium convergence through Slice 17
 1. Decision Journey foundation.
 2. Reveal + KEFE Gap.
 3. Perspective/counter-view.
@@ -42,6 +42,7 @@ Important scope distinction: finishing the current premium visual program does *
 14. Blind First sharing.
 15. Consensus + Community Reasons.
 16. First-use/onboarding + first-Reveal completion, including corrected phone-preview reachability.
+17. Reusable high-fidelity visual composition foundation + executable phone surface parity guard.
 
 ## 2. What the concept references mean
 
@@ -53,29 +54,37 @@ The premium concept screenshots supplied during product development are target a
 
 They are not pixel-exact specifications, current runtime evidence, new methodology or permission to introduce screen-specific runtime branches.
 
-The current app is intentionally an intermediate premium foundation, not yet that final art-direction fidelity.
+The current app now has the reusable visual-composition infrastructure needed to pursue that target safely, but the concept-level hero scenes themselves have not yet been implemented.
 
-## 3. Foundation-first visual sequence
+## 3. Verified visual foundation and next sequence
 
-### Slice 17 — High-Fidelity Visual Composition Foundation
-Before building screen-specific photorealistic/rich scenes, establish shared infrastructure for:
-- semantic visual/scene slots;
-- provider-neutral asset/rendition descriptors;
-- asset identity/hash and provenance;
-- aspect/focal crop/safe-area/theme suitability;
-- PRE_COMMIT_SAFE / POST_COMMIT_ONLY exposure;
-- deterministic loading/empty/error/fallback;
-- decorative vs semantic accessibility;
-- optimized static/pre-rendered assets + lightweight Flutter overlays;
-- low-end Android decode/cache/memory/performance budgets;
-- Reduce Motion;
-- theme/locale/text-scale/golden visual regression.
+### Slice 17 — High-Fidelity Visual Composition Foundation — VERIFIED
+Exact runtime:
+`ce9630ba4f013ac9611ac10b397bff356d797bad`
 
-No WebView/Three.js or mandatory live 3D engine is planned for this foundation.
+Exact-head workflows:
+- API CI #842 / `30656878396` — SUCCESS
+- Mobile CI #641 / `30656878583` — SUCCESS
+- MVP Beta Gates #346 / `30656878438` — SUCCESS
+- Global Readiness #253 / `30656878637` — SUCCESS
 
-### After foundation verification
-Initial high-fidelity adoption order:
-1. Weigh / signature Balance hero.
+Foundation now includes:
+- reusable provider-neutral composition policy on the existing Case media seam;
+- normalized focal-point and safe-area rules;
+- adaptive/light-only/dark-only suitability;
+- text-hierarchy and semantic-placeholder fallback classes;
+- PRE_COMMIT_SAFE / POST_COMMIT_ONLY enforcement preserved;
+- deterministic loading/empty/error/exposure/fallback states;
+- explicit decorative/semantic accessibility behavior;
+- bounded compact/hero decode and decoded-memory budgets;
+- Reduce-Motion-aware motion policy through shared `KefeMotion`;
+- theme-adaptive representative media rendering;
+- executable production/Product Preview route/surface parity guard.
+
+No WebView/Three.js or mandatory live 3D engine was introduced.
+
+### Next high-fidelity adoption order
+1. **Weigh / Signature Balance Hero** — next engineering slice.
 2. Atlas world/globe hero.
 3. Perspective Landscape.
 4. Spatial CALL scene.
@@ -88,7 +97,7 @@ Each remains a separate contract-first vertical slice. The order can change only
 ### 4.1 Architecture locked, implementation still pending or incomplete
 The repository already contains contracts whose semantics are accepted but whose full runtime is not yet implemented. These are not visual polish:
 
-- **Provider-neutral ingestion orchestration**: durable ingestion runs/stages, proposal/review/materialization, bounded retry and provider-neutral processors are architecture-locked; the contract still marks the first implementation slice pending. External source/AI provider calls, Admin queue UI and Candidate Case → authoring-draft projection remain separately deferred.
+- **Provider-neutral ingestion orchestration**: durable ingestion runs/stages, proposal/review/materialization, bounded retry and provider-neutral processors are architecture-locked; the contract still marks the first implementation slice pending. External source/AI provider calls, Admin queue UI and Candidate Case → authoring-draft projection remain separately deferred. PR #68 remains excluded from the active delivery line and cannot be counted as delivered here.
 - **Editorial projection**: accepted Candidate Cases / Decision Problems / Question Drafts still require an explicit projection contract into the existing Content Authoring lifecycle; automatic publication remains forbidden.
 - **WE → SIGNAL → IMPACT**: the methodology-qualified Signal and verified Impact lifecycle is architecture-locked, but its contract is explicitly implementation-pending. Collective Result/Consensus must not be treated as Signal by shortcut.
 - **Operational/Admin maturity**: secured Admin foundations exist, but future editorial/review queue and full operational studio capabilities must be implemented only through explicit contracts.
@@ -132,23 +141,23 @@ For every future phone candidate, record and test:
 6. any behavior intentionally impossible to prove in preview (real OTP/provider delivery, production network/SLO, store behavior, etc.);
 7. no already-implemented intended review surface may silently disappear from the candidate artifact.
 
-The Product Preview may add safe review access (for example first-use replay, Radar/Atlas previews) but may not replace production semantics or use preview fixtures as production fallback.
+Slice 17 made the route/shared-surface portion of this rule executable in `phone_surface_parity_test.dart`. Future slices must continue adding nested/conditional reachability tests where their review surface requires them.
 
-A candidate must not be described as “the current app on the phone” without passing this reachability/parity inventory against its exact runtime SHA.
+The Product Preview may add safe review access but may not replace production semantics or use preview fixtures as production fallback.
 
 ## 6. What still blocks a final/public product claim
 
 ### Repo/product work still remaining
-- Implement and repo-verify Slice 17 visual composition foundation and selected high-fidelity screen slices.
+- Execute the selected high-fidelity screen slices beginning with Signature Balance Hero.
 - Execute the architecture-pending non-visual slices that are accepted as required for the target release.
-- Complete APK/Product Preview reachability/parity inventory for meaningful phone checkpoints.
+- Continue APK/Product Preview reachability/parity coverage for meaningful phone checkpoints.
 - Continue fresh audits for remaining component/state/typography/spacing/accessibility/performance debt.
 - Promote the draft stack to main in dependency order and verify the resulting mainline state.
 - Select accepted-later Product Bible/Roadmap Capability Register items only through explicit product decisions/contracts; do not assume every deferred capability is launch-blocking.
 
 ### External/human evidence still pending
 - Human phone usability/visual review on accepted exact candidate builds.
-- Real production OTP/provider configuration and deliverability.
+- Real production OTP provider configuration and deliverability.
 - Editorial CQB acceptance of launch content.
 - Current Apple/Google store compliance/signing/review evidence.
 - Deployed production SLO/load/observability evidence.
@@ -162,11 +171,11 @@ Do not create a new permanent official logical document for this visual strategy
 
 Working decisions live in Git ADR/contract/status plus the Drive WORKING checkpoint. At the next declared documentation publication milestone, synchronize accepted changes into:
 - Design System: scene/hero taxonomy, visual asset/rendition/state/accessibility/performance/golden rules;
-- Engineering Blueprint: asset resolution/adapters/cache/performance/test architecture and phone-candidate parity gate if accepted;
+- Engineering Blueprint: asset resolution/adapters/cache/performance/test architecture and phone-candidate parity gate;
 - Product Bible: target art-direction adoption pattern and screen sequence; retain the existing capability register as the long-term product horizon;
 - MVP Delivery Plan: target-release capability subset and gates when materially changed.
 
-Master Product Document changes only if product semantics/constitutional principles change. The current visual foundation and parity-governance clarifications do not require that.
+Master Product Document changes only if product semantics/constitutional principles change. Slice 17 does not require that.
 
 ## 8. Continuation rule
 
@@ -182,4 +191,4 @@ A future ChatGPT/Codex session must not depend on chat history. The phrase **“
 9. Never merge out of stack order or treat preview as production fallback.
 10. Never claim PASS without the required evidence.
 
-This rule should be reflected in the canonical `docs/status/CURRENT.md` handoff on main and kept current after meaningful milestones.
+Current next unresolved visual slice after the verified Slice 17 foundation is **Weigh / Signature Balance Hero Convergence**.
