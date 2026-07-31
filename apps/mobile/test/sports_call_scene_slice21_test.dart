@@ -49,12 +49,24 @@ void main() {
       contract['illustration_truth']['geometry_encodes_real_event_coordinates'],
       isFalse,
     );
-    expect(contract['illustration_truth']['fake_camera_views_forbidden'], isTrue);
+    expect(
+      contract['illustration_truth']['fake_camera_views_forbidden'],
+      isTrue,
+    );
     expect(contract['illustration_truth']['fake_var_frame_forbidden'], isTrue);
-    expect(contract['illustration_truth']['fake_offside_line_forbidden'], isTrue);
-    expect(contract['illustration_truth']['evidence_view_tabs_forbidden'], isTrue);
+    expect(
+      contract['illustration_truth']['fake_offside_line_forbidden'],
+      isTrue,
+    );
+    expect(
+      contract['illustration_truth']['evidence_view_tabs_forbidden'],
+      isTrue,
+    );
     expect(contract['future_spatial_evidence']['in_scope'], isFalse);
-    expect(contract['future_spatial_evidence']['requires_new_contract'], isTrue);
+    expect(
+      contract['future_spatial_evidence']['requires_new_contract'],
+      isTrue,
+    );
     expect(contract['invariants']['commit_first'], isTrue);
     expect(contract['invariants']['blind_first'], isTrue);
     expect(contract['invariants']['signal_in_scope'], isFalse);
@@ -152,57 +164,48 @@ void main() {
   testWidgets('Sports renderer is theme-adaptive and text-scale safe', (
     tester,
   ) async {
-    await _pumpMediaSurface(
-      tester,
-      themeMode: ThemeMode.dark,
-      textScale: 1.0,
-    );
+    await _pumpMediaSurface(tester, themeMode: ThemeMode.dark, textScale: 1.0);
 
     expect(find.byType(SportsCallSceneVisual), findsOneWidget);
     expect(
-      find.byKey(
-        const ValueKey('case-media-CASE_HERO-$_sportsCaseVersionId'),
-      ),
+      find.byKey(const ValueKey('case-media-CASE_HERO-$_sportsCaseVersionId')),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
 
-    await _pumpMediaSurface(
-      tester,
-      themeMode: ThemeMode.light,
-      textScale: 1.6,
-    );
+    await _pumpMediaSurface(tester, themeMode: ThemeMode.light, textScale: 1.6);
     expect(find.byType(SportsCallSceneVisual), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('unsupported renderer falls back without blocking media surface', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          caseMediaRepositoryProvider.overrideWithValue(
-            const _UnsupportedRendererRepository(),
-          ),
-        ],
-        child: MaterialApp(
-          theme: KefeTheme.light(),
-          home: const Scaffold(
-            body: CaseMediaSurface(
-              caseVersionId: 'fallback-case-version',
-              slot: CaseMediaSlot.caseHero,
+  testWidgets(
+    'unsupported renderer falls back without blocking media surface',
+    (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            caseMediaRepositoryProvider.overrideWithValue(
+              const _UnsupportedRendererRepository(),
+            ),
+          ],
+          child: MaterialApp(
+            theme: KefeTheme.light(),
+            home: const Scaffold(
+              body: CaseMediaSurface(
+                caseVersionId: 'fallback-case-version',
+                slot: CaseMediaSlot.caseHero,
+              ),
             ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.byType(KefeVisualCompositionPlaceholder), findsOneWidget);
-    expect(find.byType(SportsCallSceneVisual), findsNothing);
-    expect(tester.takeException(), isNull);
-  });
+      expect(find.byType(KefeVisualCompositionPlaceholder), findsOneWidget);
+      expect(find.byType(SportsCallSceneVisual), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'Product Preview reaches Sports scene before Commit without Reveal',
@@ -228,7 +231,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final sportsTitle = find.text('Bu pozisyonda penaltı kararı doğru muydu?');
+      final sportsTitle = find.text(
+        'Bu pozisyonda penaltı kararı doğru muydu?',
+      );
       await tester.scrollUntilVisible(
         sportsTitle,
         280,
