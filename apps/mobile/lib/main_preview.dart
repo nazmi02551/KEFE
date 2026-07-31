@@ -15,6 +15,8 @@ import 'features/decision/application/decision_controller.dart';
 import 'features/decision/data/preview_journey_decision_repository.dart';
 import 'features/media_presentation/application/case_media_provider.dart';
 import 'features/media_presentation/data/preview_case_media_repository.dart';
+import 'features/onboarding/application/onboarding_controller.dart';
+import 'features/onboarding/data/onboarding_store.dart';
 import 'features/privacy/application/privacy_controller.dart';
 import 'features/privacy/data/preview_privacy_repository.dart';
 import 'features/progress/application/progress_controller.dart';
@@ -52,6 +54,7 @@ void main() {
         progressRepositoryProvider.overrideWithValue(
           PreviewProgressRepository(),
         ),
+        onboardingStoreProvider.overrideWithValue(MemoryOnboardingStore()),
         productPreviewVisualModeProvider.overrideWithValue(true),
       ],
       child: const ProductPreviewApp(),

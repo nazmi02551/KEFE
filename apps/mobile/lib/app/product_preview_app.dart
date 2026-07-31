@@ -13,6 +13,7 @@ import '../features/account/presentation/account_conversion_screen.dart';
 import '../features/activity/presentation/activity_screen.dart';
 import '../features/decision/presentation/decision_flow_screen.dart';
 import '../features/explore/presentation/discovery_explore_screen.dart';
+import '../features/onboarding/presentation/onboarding_gate_screen.dart';
 import '../features/privacy/presentation/privacy_screen.dart';
 import '../features/progress/presentation/my_kefe_journey_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
@@ -34,6 +35,12 @@ class _ProductPreviewAppState extends ConsumerState<ProductPreviewApp> {
     initialLocation: '/explore',
     routes: [
       GoRoute(path: '/', redirect: (_, _) => '/explore'),
+      GoRoute(
+        path: '/welcome',
+        builder: (_, state) => OnboardingGateScreen(
+          reviewMode: state.uri.queryParameters['review'] == '1',
+        ),
+      ),
       GoRoute(
         path: '/explore',
         builder: (_, _) => PrimaryNavigationShell(
@@ -99,8 +106,10 @@ class _ProductPreviewAppState extends ConsumerState<ProductPreviewApp> {
       ),
       GoRoute(
         path: '/case/:caseId',
-        builder: (_, state) =>
-            DecisionFlowScreen(caseId: state.pathParameters['caseId']!),
+        builder: (_, state) => DecisionFlowScreen(
+          caseId: state.pathParameters['caseId']!,
+          firstUse: state.uri.queryParameters['firstUse'] == '1',
+        ),
       ),
     ],
   );
@@ -154,9 +163,18 @@ class _ExploreSecondaryActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final strings = KefeStrings.of(context);
+    return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        KefeShellAction(
+          actionKey: const ValueKey('open-preview-first-use'),
+          heroTag: 'preview-first-use',
+          tooltip: strings.onboardingTryCase,
+          icon: Icons.auto_awesome_rounded,
+          onPressed: () => context.push('/welcome?review=1'),
+        ),
+        const SizedBox(width: 10),
         KefeShellAction(
           actionKey: const ValueKey('open-preview-radar'),
           heroTag: 'preview-radar',
@@ -164,7 +182,7 @@ class _ExploreSecondaryActions extends StatelessWidget {
           icon: Icons.radar_rounded,
           onPressed: () => context.push('/radar'),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(width: 10),
         KefeShellAction(
           actionKey: const ValueKey('open-preview-atlas'),
           heroTag: 'preview-atlas',
