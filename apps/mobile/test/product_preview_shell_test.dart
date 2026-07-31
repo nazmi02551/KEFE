@@ -85,18 +85,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('onboarding-pages')), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey('onboarding-promise-1')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const ValueKey('onboarding-promise-1')), findsOneWidget);
     expect(onboardingStore.completed, isTrue);
 
     await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
     await tester.pumpAndSettle();
-    expect(
-      find.byKey(const ValueKey('onboarding-promise-2')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const ValueKey('onboarding-promise-2')), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
     await tester.pumpAndSettle();
