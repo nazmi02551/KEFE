@@ -87,6 +87,16 @@ Do not generate/distribute a new APK for every small change. Produce a phone art
 
 When reviewing visual work, verify that the governed screen is actually reachable from the distributed preview artifact. Source-level existence alone is not sufficient review evidence.
 
+A phone candidate may be described as the current implemented phone experience only for its exact verified runtime SHA. Before presenting it that way, audit production versus Product Preview surface reachability at that SHA:
+- inventory the production routes/user-facing surfaces;
+- inventory the Product Preview routes/user-facing surfaces;
+- classify every implemented consumer surface as production+preview reachable, production-only with reason, preview-only with reason, or conditional/feature-gated with an explicit review path/exclusion;
+- record Product Preview provider/fixture substitutions separately from production providers;
+- ensure no intended review surface is silently omitted from the artifact;
+- mark behaviors that preview cannot prove, including real provider delivery, production networking/SLO, store behavior and other external evidence.
+
+Product Preview may expose safe review-only navigation, but it must not change production semantics and its fixtures/adapters must never become production fallback.
+
 ## 8. Visual-system direction
 
 - dark-first premium KEFE identity with valid light theme;
