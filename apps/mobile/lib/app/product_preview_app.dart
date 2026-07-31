@@ -61,7 +61,7 @@ class _ProductPreviewAppState extends ConsumerState<ProductPreviewApp> {
         builder: (context, _) => PrimaryNavigationShell(
           selectedIndex: 3,
           floatingActionButton: KefeShellAction(
-            key: const ValueKey('open-preview-settings'),
+            actionKey: const ValueKey('open-preview-settings'),
             icon: Icons.settings_outlined,
             tooltip: KefeStrings.of(context).settingsTitle,
             onPressed: () => context.push('/settings'),
@@ -158,7 +158,7 @@ class _ExploreSecondaryActions extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         KefeShellAction(
-          key: const ValueKey('open-preview-radar'),
+          actionKey: const ValueKey('open-preview-radar'),
           heroTag: 'preview-radar',
           tooltip: 'Radar',
           icon: Icons.radar_rounded,
@@ -166,7 +166,7 @@ class _ExploreSecondaryActions extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         KefeShellAction(
-          key: const ValueKey('open-preview-atlas'),
+          actionKey: const ValueKey('open-preview-atlas'),
           heroTag: 'preview-atlas',
           tooltip: 'Atlas',
           icon: Icons.public_rounded,
