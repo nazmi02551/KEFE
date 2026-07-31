@@ -77,6 +77,7 @@ class _AtlasHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
     return KefeSurface(
       key: const ValueKey('atlas-hero'),
       tone: KefeSurfaceTone.premium,
@@ -90,45 +91,56 @@ class _AtlasHero extends StatelessWidget {
             strings: strings,
           ),
           SizedBox(height: compact ? 13 : 17),
-          Row(
-            children: [
-              Expanded(
-                child: Divider(
-                  color: visual.gold.withValues(alpha: 0.25),
-                  height: 1,
+          if (textScale > 1.28)
+            Text(
+              strings.worldView,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: visual.goldSoft,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.45,
+              ),
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: Divider(
+                    color: visual.gold.withValues(alpha: 0.25),
+                    height: 1,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 9),
-              Icon(
-                Icons.diamond_outlined,
-                size: 12,
-                color: visual.goldSoft.withValues(alpha: 0.82),
-              ),
-              const SizedBox(width: 9),
-              Text(
-                strings.worldView,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: visual.goldSoft,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.45,
+                const SizedBox(width: 9),
+                Icon(
+                  Icons.diamond_outlined,
+                  size: 12,
+                  color: visual.goldSoft.withValues(alpha: 0.82),
                 ),
-              ),
-              const SizedBox(width: 9),
-              Icon(
-                Icons.diamond_outlined,
-                size: 12,
-                color: visual.goldSoft.withValues(alpha: 0.82),
-              ),
-              const SizedBox(width: 9),
-              Expanded(
-                child: Divider(
-                  color: visual.gold.withValues(alpha: 0.25),
-                  height: 1,
+                const SizedBox(width: 9),
+                Text(
+                  strings.worldView,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: visual.goldSoft,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.45,
+                  ),
                 ),
-              ),
-            ],
-          ),
+                const SizedBox(width: 9),
+                Icon(
+                  Icons.diamond_outlined,
+                  size: 12,
+                  color: visual.goldSoft.withValues(alpha: 0.82),
+                ),
+                const SizedBox(width: 9),
+                Expanded(
+                  child: Divider(
+                    color: visual.gold.withValues(alpha: 0.25),
+                    height: 1,
+                  ),
+                ),
+              ],
+            ),
           SizedBox(height: compact ? 4 : 8),
           AtlasGlobeVisual(markers: _atlasMarkers, compact: compact),
           SizedBox(height: compact ? 4 : 9),
@@ -218,6 +230,7 @@ class _CountryGrid extends StatelessWidget {
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: oneColumn ? 1 : 2,
             childAspectRatio: oneColumn ? 2.55 : 1.18,
+            mainAxisExtent: textScale > 1.28 ? 168 : null,
             crossAxisSpacing: 11,
             mainAxisSpacing: 11,
           ),
