@@ -10,6 +10,8 @@ import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/preview_decision_repository.dart';
 import 'package:kefe_mobile/features/media_presentation/application/case_media_provider.dart';
 import 'package:kefe_mobile/features/media_presentation/data/preview_case_media_repository.dart';
+import 'package:kefe_mobile/features/onboarding/application/onboarding_controller.dart';
+import 'package:kefe_mobile/features/onboarding/data/onboarding_store.dart';
 import 'package:kefe_mobile/features/progress/application/progress_controller.dart';
 import 'package:kefe_mobile/features/progress/data/preview_progress_repository.dart';
 import 'package:kefe_mobile/features/saved_cases/application/saved_cases_controller.dart';
@@ -43,6 +45,63 @@ void main() {
     expect(productionMain, isNot(contains('PreviewCaseMediaRepository')));
     expect(productionMain, isNot(contains('preview_progress_repository')));
     expect(productionMain, isNot(contains('PreviewProgressRepository')));
+    expect(productionMain, isNot(contains('MemoryOnboardingStore')));
+  });
+
+  testWidgets('Product Preview can replay the governed first-use journey', (
+    tester,
+  ) async {
+    _useTurkishLocale(tester);
+    final onboardingStore = MemoryOnboardingStore()..completed = true;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          decisionRepositoryProvider.overrideWithValue(
+            PreviewDecisionRepository(),
+          ),
+          decisionDraftStoreProvider.overrideWithValue(
+            MemoryDecisionDraftStore(),
+          ),
+          caseMediaRepositoryProvider.overrideWithValue(
+            const PreviewCaseMediaRepository(),
+          ),
+          savedCaseStoreProvider.overrideWithValue(MemorySavedCaseStore()),
+          onboardingStoreProvider.overrideWithValue(onboardingStore),
+          productPreviewVisualModeProvider.overrideWithValue(true),
+        ],
+        child: const ProductPreviewApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('explore-list')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('open-preview-first-use')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('open-preview-first-use')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('onboarding-pages')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('onboarding-promise-1')),
+      findsOneWidget,
+    );
+    expect(onboardingStore.completed, isTrue);
+
+    await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('onboarding-promise-2')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
+    expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
   });
 
   testWidgets(
@@ -79,6 +138,10 @@ void main() {
       expect(find.text('Tartım'), findsOneWidget);
       expect(find.text('Aktivite'), findsOneWidget);
       expect(find.text('My KEFE'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('open-preview-first-use')),
+        findsOneWidget,
+      );
       expect(find.byKey(const ValueKey('open-preview-radar')), findsOneWidget);
       expect(find.byKey(const ValueKey('open-preview-atlas')), findsOneWidget);
       expect(
