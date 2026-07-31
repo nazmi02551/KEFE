@@ -301,47 +301,83 @@ class _AbstractMediaPainter extends CustomPainter {
     'RESOURCE_PRIORITY' => (
       icon: Icons.airline_seat_recline_normal_rounded,
       accent: visual.empathy,
-      colors: [blend(visual.rules, 0.32), visual.surfaceStrong, blend(visual.empathy, 0.30)],
+      colors: [
+        blend(visual.rules, 0.32),
+        visual.surfaceStrong,
+        blend(visual.empathy, 0.30),
+      ],
     ),
     'DATA_NETWORK' => (
       icon: Icons.hub_rounded,
       accent: visual.rules,
-      colors: [blend(visual.rules, 0.38), visual.surfaceStrong, blend(visual.burgundy, 0.24)],
+      colors: [
+        blend(visual.rules, 0.38),
+        visual.surfaceStrong,
+        blend(visual.burgundy, 0.24),
+      ],
     ),
     'SPORTS_DECISION' => (
       icon: Icons.sports_soccer_rounded,
       accent: visual.success,
-      colors: [blend(visual.success, 0.30), visual.surfaceStrong, blend(visual.burgundy, 0.18)],
+      colors: [
+        blend(visual.success, 0.30),
+        visual.surfaceStrong,
+        blend(visual.burgundy, 0.18),
+      ],
     ),
     'CIVIC_TRANSPARENCY' => (
       icon: Icons.account_balance_outlined,
       accent: visual.gold,
-      colors: [blend(visual.gold, 0.24), visual.surfaceStrong, blend(visual.rules, 0.22)],
+      colors: [
+        blend(visual.gold, 0.24),
+        visual.surfaceStrong,
+        blend(visual.rules, 0.22),
+      ],
     ),
     'REMOTE_WORK' => (
       icon: Icons.laptop_mac_rounded,
       accent: visual.rules,
-      colors: [blend(visual.rules, 0.30), visual.surfaceStrong, blend(visual.burgundy, 0.24)],
+      colors: [
+        blend(visual.rules, 0.30),
+        visual.surfaceStrong,
+        blend(visual.burgundy, 0.24),
+      ],
     ),
     'AIR_TRAVEL' => (
       icon: Icons.airplanemode_active_rounded,
       accent: visual.gold,
-      colors: [blend(visual.rules, 0.31), visual.surfaceStrong, blend(visual.empathy, 0.22)],
+      colors: [
+        blend(visual.rules, 0.31),
+        visual.surfaceStrong,
+        blend(visual.empathy, 0.22),
+      ],
     ),
     'WORK_TRANSITION' => (
       icon: Icons.model_training_rounded,
       accent: visual.attention,
-      colors: [blend(visual.attention, 0.25), visual.surfaceStrong, blend(visual.rules, 0.21)],
+      colors: [
+        blend(visual.attention, 0.25),
+        visual.surfaceStrong,
+        blend(visual.rules, 0.21),
+      ],
     ),
     'EDUCATION_AI' => (
       icon: Icons.school_rounded,
       accent: visual.empathy,
-      colors: [blend(visual.burgundy, 0.25), visual.surfaceStrong, blend(visual.rules, 0.24)],
+      colors: [
+        blend(visual.burgundy, 0.25),
+        visual.surfaceStrong,
+        blend(visual.rules, 0.24),
+      ],
     ),
     _ => (
       icon: Icons.image_outlined,
       accent: visual.gold,
-      colors: [blend(visual.rules, 0.25), visual.surfaceStrong, blend(visual.burgundy, 0.20)],
+      colors: [
+        blend(visual.rules, 0.25),
+        visual.surfaceStrong,
+        blend(visual.burgundy, 0.20),
+      ],
     ),
   };
 }
