@@ -20,6 +20,15 @@ extension KefeVisualCompositionFlutter on KefeVisualCompositionPolicy {
     KefeVisualThemeSuitability.darkOnly => brightness == Brightness.dark,
   };
 
+  Duration resolveMotionDuration(
+    BuildContext context,
+    Duration preferred,
+  ) => switch (motion) {
+    KefeVisualMotionPolicy.staticOnly => Duration.zero,
+    KefeVisualMotionPolicy.reducedMotionAware =>
+      KefeMotion.resolve(context, preferred),
+  };
+
   EdgeInsets safePaddingFor(Size size) => EdgeInsets.fromLTRB(
     size.width * safeArea.left,
     size.height * safeArea.top,
