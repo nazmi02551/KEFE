@@ -1,0 +1,103 @@
+{
+  "contract": "premium-blind-first-sharing-slice14",
+  "version": "1.0.0",
+  "date": "2026-07-31",
+  "issue": 123,
+  "stack_base": "aeae083a640c3c658d1a0536e3f17d853540d982",
+  "scope": {
+    "outbound_share_visual_convergence": true,
+    "inbound_public_share_visual_convergence": true,
+    "community_product_expansion": false,
+    "share_backend_change": false,
+    "share_schema_change": false,
+    "route_architecture_change": false,
+    "new_product_mode": false
+  },
+  "blind_first": {
+    "share_feature_gate_preserved": true,
+    "outbound_include_decision": false,
+    "preview_rejects_decision_exposure": true,
+    "receiver_enters_case_before_reveal": true,
+    "pre_commit_reveal_forbidden": true,
+    "sender_decision_forbidden": true,
+    "sender_confidence_forbidden": true,
+    "sender_reason_forbidden": true,
+    "community_result_forbidden": true,
+    "expert_result_forbidden": true,
+    "sender_history_forbidden": true
+  },
+  "outbound": {
+    "deep_link_prefix": "kefe:///share/",
+    "create_controller_semantics_preserved": true,
+    "clipboard_copy_preserved": true,
+    "revoke_semantics_preserved": true,
+    "keys_preserved": [
+      "share-section",
+      "share-create",
+      "share-deep-link",
+      "share-copy",
+      "share-revoke",
+      "share-error"
+    ]
+  },
+  "inbound": {
+    "token_repository_read_preserved": true,
+    "weigh_route_pattern": "/case/:caseId",
+    "keys_preserved": [
+      "public-share-error",
+      "public-share-title",
+      "public-share-weigh"
+    ],
+    "public_share_fields": [
+      "id",
+      "caseId",
+      "caseVersionId",
+      "title",
+      "summary",
+      "primaryDomain",
+      "createdAt",
+      "expiresAt"
+    ]
+  },
+  "presentation": {
+    "semantic_kefe_surfaces_required": true,
+    "light_dark_parity_required": true,
+    "tr_en_rendering_required": true,
+    "direct_dark_only_tokens_forbidden": true,
+    "screen_reader_semantics_required": true,
+    "text_scaling_required": true,
+    "continuous_decorative_animation_added": false,
+    "new_product_semantics": false
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "generic_runtime": true,
+    "preview_production_isolation": true,
+    "my_kefe_observed_descriptive_only": true,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "bias_inference": false,
+    "causal_inference": false,
+    "signal_in_scope": false,
+    "impact_in_scope": false
+  },
+  "verification": {
+    "exact_head_required": true,
+    "format_required": true,
+    "analyzer_required": true,
+    "all_flutter_tests_required": true,
+    "share_tr_en_light_dark_required": true,
+    "feature_gate_tests_required": true,
+    "blind_first_deep_link_required": true,
+    "schema_boundary_test_required": true,
+    "production_copy_boundary_required": true,
+    "phone_acceptance_required": true,
+    "api_ci_required": true,
+    "mobile_ci_required": true,
+    "mvp_beta_gates_required": true,
+    "global_readiness_required": true
+  }
+}
