@@ -33,7 +33,7 @@ class SettingsScreen extends ConsumerWidget {
       body: SafeArea(
         child: ListView(
           key: const ValueKey('settings-screen'),
-          padding: const EdgeInsets.fromLTRB(18, 18, 18, 32),
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 20),
           children: [
             _SettingsChoiceGroup<AppLocalePreference>(
               key: const ValueKey('settings-language-group'),
@@ -56,7 +56,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             _SettingsChoiceGroup<AppThemePreference>(
               key: const ValueKey('settings-appearance-group'),
               icon: Icons.contrast_rounded,
@@ -79,46 +79,54 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
             if (showPrivacyControls) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
               KefeSurface(
                 key: const ValueKey('settings-privacy-entry'),
                 tone: KefeSurfaceTone.raised,
                 padding: EdgeInsets.zero,
+                borderRadius: 18,
                 child: Semantics(
                   button: true,
                   child: InkWell(
                     onTap: () => context.push('/privacy'),
                     child: Padding(
-                      padding: const EdgeInsets.all(18),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           _SettingsIcon(
                             icon: Icons.privacy_tip_outlined,
                             color: visual.goldSoft,
+                            compact: true,
                           ),
-                          const SizedBox(width: 14),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   strings.privacyAndData,
-                                  style: Theme.of(context).textTheme.titleMedium
+                                  style: Theme.of(context).textTheme.titleSmall
                                       ?.copyWith(fontWeight: FontWeight.w800),
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 2),
                                 Text(
                                   strings.privacyAndDataHelper,
-                                  style: Theme.of(context).textTheme.bodyMedium
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(color: visual.mutedForeground),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 8),
                           Icon(
                             Icons.chevron_right_rounded,
+                            size: 20,
                             color: visual.mutedForeground,
                           ),
                         ],
@@ -164,19 +172,25 @@ class _SettingsChoiceGroup<T> extends StatelessWidget {
 
     return KefeSurface(
       tone: KefeSurfaceTone.raised,
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+      borderRadius: 18,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              _SettingsIcon(icon: icon, color: visual.goldSoft),
-              const SizedBox(width: 12),
+              _SettingsIcon(
+                icon: icon,
+                color: visual.goldSoft,
+                compact: true,
+              ),
+              const SizedBox(width: 10),
               Expanded(
                 child: Semantics(
                   header: true,
                   child: Text(
                     title,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -184,7 +198,7 @@ class _SettingsChoiceGroup<T> extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 4),
           RadioGroup<T>(
             groupValue: groupValue,
             onChanged: (value) {
@@ -226,15 +240,16 @@ class _ChoiceTile<T> extends StatelessWidget {
     final visual = context.kefeVisual;
 
     return RadioListTile<T>(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+      contentPadding: EdgeInsets.zero,
+      visualDensity: const VisualDensity(horizontal: -1, vertical: -2),
       value: value,
       selected: selected,
       activeColor: visual.gold,
       selectedTileColor: visual.gold.withValues(alpha: 0.08),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       title: Text(
         title,
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
           fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
         ),
       ),
@@ -243,23 +258,29 @@ class _ChoiceTile<T> extends StatelessWidget {
 }
 
 class _SettingsIcon extends StatelessWidget {
-  const _SettingsIcon({required this.icon, required this.color});
+  const _SettingsIcon({
+    required this.icon,
+    required this.color,
+    this.compact = false,
+  });
 
   final IconData icon;
   final Color color;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
+    final dimension = compact ? 32.0 : 38.0;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(compact ? 10 : 12),
         border: Border.all(color: visual.border),
       ),
       child: SizedBox.square(
-        dimension: 38,
-        child: Icon(icon, size: 20, color: color),
+        dimension: dimension,
+        child: Icon(icon, size: compact ? 18 : 20, color: color),
       ),
     );
   }
