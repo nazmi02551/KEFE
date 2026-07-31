@@ -44,23 +44,26 @@ void main() {
       }
     });
 
-    test('Preview-only surfaces stay explicit and out of production routing', () {
-      const previewOnlyRoutes = <String>['/radar', '/atlas'];
+    test(
+      'Preview-only surfaces stay explicit and out of production routing',
+      () {
+        const previewOnlyRoutes = <String>['/radar', '/atlas'];
 
-      for (final route in previewOnlyRoutes) {
-        expect(previewApp, contains("path: '$route'"));
-        expect(
-          productionApp,
-          isNot(contains("path: '$route'")),
-          reason: '$route is a secondary Product Preview surface',
-        );
-      }
+        for (final route in previewOnlyRoutes) {
+          expect(previewApp, contains("path: '$route'"));
+          expect(
+            productionApp,
+            isNot(contains("path: '$route'")),
+            reason: '$route is a secondary Product Preview surface',
+          );
+        }
 
-      expect(previewApp, contains("initialLocation: '/explore'"));
-      expect(productionApp, contains("initialLocation = '/welcome'"));
-      expect(previewApp, contains("'/welcome?review=1'"));
-      expect(previewApp, contains("ValueKey('open-preview-first-use')"));
-    });
+        expect(previewApp, contains("initialLocation: '/explore'"));
+        expect(productionApp, contains("initialLocation = '/welcome'"));
+        expect(previewApp, contains("'/welcome?review=1'"));
+        expect(previewApp, contains("ValueKey('open-preview-first-use')"));
+      },
+    );
 
     test('Shared routes render the same production presentation surfaces', () {
       const sharedScreens = <String>[
@@ -117,18 +120,21 @@ void main() {
       }
     });
 
-    test('Governed conditional experiences are enabled in both compositions', () {
-      const governedFlags = <String>[
-        'consensusExperienceEnabledProvider.overrideWithValue(true)',
-        'communityReasonExperienceEnabledProvider.overrideWithValue(true)',
-        'shareExperienceEnabledProvider.overrideWithValue(true)',
-        'privacyExperienceEnabledProvider.overrideWithValue(true)',
-      ];
+    test(
+      'Governed conditional experiences are enabled in both compositions',
+      () {
+        const governedFlags = <String>[
+          'consensusExperienceEnabledProvider.overrideWithValue(true)',
+          'communityReasonExperienceEnabledProvider.overrideWithValue(true)',
+          'shareExperienceEnabledProvider.overrideWithValue(true)',
+          'privacyExperienceEnabledProvider.overrideWithValue(true)',
+        ];
 
-      for (final flag in governedFlags) {
-        expect(productionMain, contains(flag));
-        expect(previewMain, contains(flag));
-      }
-    });
+        for (final flag in governedFlags) {
+          expect(productionMain, contains(flag));
+          expect(previewMain, contains(flag));
+        }
+      },
+    );
   });
 }
