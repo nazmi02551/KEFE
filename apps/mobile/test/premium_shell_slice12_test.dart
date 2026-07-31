@@ -29,10 +29,12 @@ void main() {
     expect(scope['new_primary_tab'], isFalse);
     expect(scope['backend_model_change'], isFalse);
     expect(navigation['canonical_destination_count'], 4);
-    expect(
-      navigation['canonical_paths'],
-      ['/explore', '/weigh', '/activity', '/my-kefe'],
-    );
+    expect(navigation['canonical_paths'], [
+      '/explore',
+      '/weigh',
+      '/activity',
+      '/my-kefe',
+    ]);
     expect(navigation['selected_index_semantics_preserved'], isTrue);
     expect(navigation['radar_atlas_secondary_only'], isTrue);
     expect(presentation['semantic_kefe_roles_required'], isTrue);
@@ -50,10 +52,14 @@ void main() {
     expect(invariants['impact_in_scope'], isFalse);
   });
 
-  expect(
-    PrimaryNavigationShell.paths,
-    ['/explore', '/weigh', '/activity', '/my-kefe'],
-  );
+  test('primary navigation paths remain canonical', () {
+    expect(PrimaryNavigationShell.paths, [
+      '/explore',
+      '/weigh',
+      '/activity',
+      '/my-kefe',
+    ]);
+  });
 
   for (final locale in const [Locale('tr', 'TR'), Locale('en', 'US')]) {
     for (final dark in const [false, true]) {
@@ -101,9 +107,7 @@ void main() {
           expect(action.backgroundColor, expectedVisual.surfaceStrong);
           expect(action.foregroundColor, expectedVisual.goldSoft);
           expect(
-            tester.getSize(
-              find.byKey(const ValueKey('slice12-shell-action')),
-            ),
+            tester.getSize(find.byKey(const ValueKey('slice12-shell-action'))),
             const Size(48, 48),
           );
           expect(tester.takeException(), isNull);
@@ -112,63 +116,72 @@ void main() {
     }
   }
 
-  testWidgets('canonical tab selection keeps route and selectedIndex semantics', (
-    tester,
-  ) async {
-    final router = GoRouter(
-      initialLocation: '/explore',
-      routes: [
-        for (var index = 0; index < PrimaryNavigationShell.paths.length; index++)
-          GoRoute(
-            path: PrimaryNavigationShell.paths[index],
-            builder: (_, _) => PrimaryNavigationShell(
-              selectedIndex: index,
-              child: Center(child: Text('screen-$index')),
+  testWidgets(
+    'canonical tab selection keeps route and selectedIndex semantics',
+    (tester) async {
+      final router = GoRouter(
+        initialLocation: '/explore',
+        routes: [
+          for (
+            var index = 0;
+            index < PrimaryNavigationShell.paths.length;
+            index++
+          )
+            GoRoute(
+              path: PrimaryNavigationShell.paths[index],
+              builder: (_, _) => PrimaryNavigationShell(
+                selectedIndex: index,
+                child: Center(child: Text('screen-$index')),
+              ),
             ),
-          ),
-      ],
-    );
-    addTearDown(router.dispose);
-
-    await tester.pumpWidget(
-      MaterialApp.router(
-        locale: const Locale('en', 'US'),
-        supportedLocales: KefeStrings.supportedLocales,
-        localizationsDelegates: const [
-          KefeStringsDelegate(),
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
         ],
-        theme: KefeTheme.light(),
-        routerConfig: router,
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    final labels = ['Explore', 'Weigh', 'Activity', 'My KEFE'];
-    for (var index = 1; index < labels.length; index++) {
-      await tester.tap(find.text(labels[index]));
-      await tester.pumpAndSettle();
-      expect(find.text('screen-$index'), findsOneWidget);
-      expect(
-        tester.widget<NavigationBar>(
-          find.byKey(const ValueKey('primary-navigation')),
-        ).selectedIndex,
-        index,
       );
-    }
+      addTearDown(router.dispose);
 
-    await tester.tap(find.text(labels.first));
-    await tester.pumpAndSettle();
-    expect(find.text('screen-0'), findsOneWidget);
-    expect(
-      tester.widget<NavigationBar>(
-        find.byKey(const ValueKey('primary-navigation')),
-      ).selectedIndex,
-      0,
-    );
-  });
+      await tester.pumpWidget(
+        MaterialApp.router(
+          locale: const Locale('en', 'US'),
+          supportedLocales: KefeStrings.supportedLocales,
+          localizationsDelegates: const [
+            KefeStringsDelegate(),
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          theme: KefeTheme.light(),
+          routerConfig: router,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final labels = ['Explore', 'Weigh', 'Activity', 'My KEFE'];
+      for (var index = 1; index < labels.length; index++) {
+        await tester.tap(find.text(labels[index]));
+        await tester.pumpAndSettle();
+        expect(find.text('screen-$index'), findsOneWidget);
+        expect(
+          tester
+              .widget<NavigationBar>(
+                find.byKey(const ValueKey('primary-navigation')),
+              )
+              .selectedIndex,
+          index,
+        );
+      }
+
+      await tester.tap(find.text(labels.first));
+      await tester.pumpAndSettle();
+      expect(find.text('screen-0'), findsOneWidget);
+      expect(
+        tester
+            .widget<NavigationBar>(
+              find.byKey(const ValueKey('primary-navigation')),
+            )
+            .selectedIndex,
+        0,
+      );
+    },
+  );
 
   test('governed shell chrome rejects direct dark-only token dependencies', () {
     final paths = [
