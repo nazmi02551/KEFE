@@ -17,7 +17,11 @@ class AtlasGlobeMarker {
 }
 
 class AtlasGlobeVisual extends StatelessWidget {
-  const AtlasGlobeVisual({required this.markers, this.compact = false, super.key});
+  const AtlasGlobeVisual({
+    required this.markers,
+    this.compact = false,
+    super.key,
+  });
 
   final List<AtlasGlobeMarker> markers;
   final bool compact;
