@@ -361,7 +361,6 @@ class _ContextNote extends StatelessWidget {
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
     return KefeSurface(
-      key: key,
       tone: KefeSurfaceTone.sunken,
       accent: accent,
       padding: const EdgeInsets.all(12),
