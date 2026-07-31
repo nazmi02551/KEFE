@@ -111,9 +111,8 @@ class _CommunityReasonSectionState
                   key: ValueKey('community-reason-tag-$tag'),
                   label: Text(strings.reasonTagLabel(tag)),
                   selected: state.selectedTags.contains(tag),
-                  onSelected: state.uiState == CommunityReasonUiState.submitting
-                      ? null
-                      : (_) => controller.toggleTag(tag, maxTags: maxTags),
+                  onSelected: (_) =>
+                      controller.toggleTag(tag, maxTags: maxTags),
                 ),
             ],
           ),
@@ -124,7 +123,6 @@ class _CommunityReasonSectionState
             maxLength: 300,
             minLines: 2,
             maxLines: 4,
-            enabled: state.uiState != CommunityReasonUiState.submitting,
             onChanged: controller.setText,
             decoration: InputDecoration(
               labelText: strings.communityOptionalText,
