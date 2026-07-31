@@ -69,58 +69,70 @@ void main() {
 
   test('production router still does not expose Atlas', () {
     final productionApp = File('lib/app/kefe_app.dart').readAsStringSync();
-    final previewApp = File('lib/app/product_preview_app.dart').readAsStringSync();
+    final previewApp = File(
+      'lib/app/product_preview_app.dart',
+    ).readAsStringSync();
 
     expect(productionApp, isNot(contains("path: '/atlas'")));
     expect(previewApp, contains("path: '/atlas'"));
     expect(previewApp, contains("ValueKey('open-preview-atlas')"));
   });
 
-  testWidgets('Atlas renders notice, globe, markers and complete country cards', (
-    tester,
-  ) async {
-    await _pumpAtlas(tester, ThemeMode.dark);
+  testWidgets(
+    'Atlas renders notice, globe, markers and complete country cards',
+    (tester) async {
+      await _pumpAtlas(tester, ThemeMode.dark);
 
-    expect(find.byKey(const ValueKey('atlas-preview-notice')), findsOneWidget);
-    expect(
-      find.textContaining('gerçek ülke sonucu değildir'),
-      findsOneWidget,
-    );
-    expect(find.byKey(const ValueKey('atlas-world-globe')), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey('atlas-selected-case-title')),
-      findsOneWidget,
-    );
-
-    final globe = tester.widget<AtlasGlobeVisual>(find.byType(AtlasGlobeVisual));
-    expect(
-      globe.markers
-          .map((item) => '${item.countryCode}:${item.value.toStringAsFixed(1)}')
-          .toList(),
-      AtlasPreviewFixture.countries
-          .map((item) => '${item.countryCode}:${item.value.toStringAsFixed(1)}')
-          .toList(),
-    );
-
-    for (final item in AtlasPreviewFixture.countries) {
       expect(
-        find.byKey(ValueKey('atlas-country-marker-${item.countryCode}')),
+        find.byKey(const ValueKey('atlas-preview-notice')),
         findsOneWidget,
       );
       expect(
-        find.byKey(ValueKey('atlas-country-card-${item.countryCode}')),
+        find.textContaining('gerçek ülke sonucu değildir'),
         findsOneWidget,
       );
-    }
+      expect(find.byKey(const ValueKey('atlas-world-globe')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('atlas-selected-case-title')),
+        findsOneWidget,
+      );
 
-    expect(find.text('7.1'), findsOneWidget);
-    expect(find.text('5.4'), findsOneWidget);
-    expect(find.text('6.2'), findsOneWidget);
-    expect(find.text('4.8'), findsOneWidget);
-    expect(find.text('6.7'), findsOneWidget);
-    expect(find.text('7.3'), findsOneWidget);
-    expect(find.textContaining('%'), findsNothing);
-  });
+      final globe = tester.widget<AtlasGlobeVisual>(
+        find.byType(AtlasGlobeVisual),
+      );
+      expect(
+        globe.markers
+            .map(
+              (item) => '${item.countryCode}:${item.value.toStringAsFixed(1)}',
+            )
+            .toList(),
+        AtlasPreviewFixture.countries
+            .map(
+              (item) => '${item.countryCode}:${item.value.toStringAsFixed(1)}',
+            )
+            .toList(),
+      );
+
+      for (final item in AtlasPreviewFixture.countries) {
+        expect(
+          find.byKey(ValueKey('atlas-country-marker-${item.countryCode}')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(ValueKey('atlas-country-card-${item.countryCode}')),
+          findsOneWidget,
+        );
+      }
+
+      expect(find.text('7.1'), findsOneWidget);
+      expect(find.text('5.4'), findsOneWidget);
+      expect(find.text('6.2'), findsOneWidget);
+      expect(find.text('4.8'), findsOneWidget);
+      expect(find.text('6.7'), findsOneWidget);
+      expect(find.text('7.3'), findsOneWidget);
+      expect(find.textContaining('%'), findsNothing);
+    },
+  );
 
   testWidgets('Atlas remains valid in light theme', (tester) async {
     await _pumpAtlas(tester, ThemeMode.light);
@@ -164,22 +176,29 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Product Preview secondary action reaches the Atlas truth surface', (
-    tester,
-  ) async {
-    await tester.pumpWidget(const ProviderScope(child: ProductPreviewApp()));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'Product Preview secondary action reaches the Atlas truth surface',
+    (tester) async {
+      await tester.pumpWidget(const ProviderScope(child: ProductPreviewApp()));
+      await tester.pumpAndSettle();
 
-    final atlasAction = find.byKey(const ValueKey('open-preview-atlas'));
-    expect(atlasAction, findsOneWidget);
-    await tester.tap(atlasAction);
-    await tester.pumpAndSettle();
+      final atlasAction = find.byKey(const ValueKey('open-preview-atlas'));
+      expect(atlasAction, findsOneWidget);
+      await tester.tap(atlasAction);
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('atlas-preview-list')), findsOneWidget);
-    expect(find.byKey(const ValueKey('atlas-preview-notice')), findsOneWidget);
-    expect(find.byKey(const ValueKey('atlas-world-globe')), findsOneWidget);
-    expect(find.textContaining('gerçek ülke sonucu değildir'), findsOneWidget);
-  });
+      expect(find.byKey(const ValueKey('atlas-preview-list')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('atlas-preview-notice')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('atlas-world-globe')), findsOneWidget);
+      expect(
+        find.textContaining('gerçek ülke sonucu değildir'),
+        findsOneWidget,
+      );
+    },
+  );
 }
 
 Future<void> _pumpAtlas(
