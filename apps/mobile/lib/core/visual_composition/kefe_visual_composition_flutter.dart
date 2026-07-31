@@ -8,6 +8,9 @@ enum KefeVisualPlaceholderKind { loading, unavailable }
 ValueKey<String> kefeVisualStateKey(String state, String slot, String id) =>
     ValueKey<String>('case-media-$state-$slot-$id');
 
+ValueKey<String> kefeCaseMediaKey(String slot, String id) =>
+    ValueKey<String>('case-media-$slot-$id');
+
 extension KefeVisualCompositionFlutter on KefeVisualCompositionPolicy {
   BoxFit get boxFit => switch (fit) {
     KefeVisualFitPolicy.cover => BoxFit.cover,
