@@ -1,0 +1,38 @@
+name: Slice11 Format Fix
+
+on:
+  push:
+    branches: [feature/premium-history-slice11]
+    paths:
+      - '.github/workflows/slice11-format-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/premium-history-slice11
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Format Slice 11 Dart sources
+        working-directory: apps/mobile
+        run: dart format lib/features/activity/presentation/activity_screen.dart lib/features/progress/presentation/my_kefe_journey_screen.dart lib/features/progress/presentation/progress_section.dart lib/features/saved_cases/presentation/saved_cases_section.dart test/premium_history_slice11_test.dart
+      - name: Commit source-only formatting
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/mobile/lib/features/activity/presentation/activity_screen.dart apps/mobile/lib/features/progress/presentation/my_kefe_journey_screen.dart apps/mobile/lib/features/progress/presentation/progress_section.dart apps/mobile/lib/features/saved_cases/presentation/saved_cases_section.dart apps/mobile/test/premium_history_slice11_test.dart
+          if git diff --cached --quiet; then
+            echo 'No formatting changes.'
+            exit 0
+          fi
+          git commit -m 'style: normalize premium history slice 11'
+          git push origin HEAD:feature/premium-history-slice11
