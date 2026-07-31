@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../core/design/kefe_theme.dart';
+import '../core/design/kefe_visual_system.dart';
 import '../core/localization/internal_alpha_strings.dart';
 import '../core/localization/kefe_strings.dart';
 
@@ -24,12 +24,27 @@ class PrimaryNavigationShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
+
     return Scaffold(
       body: child,
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: DecoratedBox(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: KefeColorTokens.borderDark)),
+        key: const ValueKey('primary-navigation-surface'),
+        decoration: BoxDecoration(
+          color: visual.surfaceRaised,
+          border: Border(
+            top: BorderSide(
+              color: visual.border.withValues(alpha: visual.isDark ? 0.92 : 1),
+            ),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: visual.shadow.withValues(alpha: visual.isDark ? 0.28 : 0.1),
+              blurRadius: 20,
+              offset: const Offset(0, -6),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -37,6 +52,8 @@ class PrimaryNavigationShell extends StatelessWidget {
             ?footer,
             NavigationBar(
               key: const ValueKey('primary-navigation'),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
               selectedIndex: selectedIndex,
               onDestinationSelected: (index) => context.go(paths[index]),
               destinations: [
@@ -64,6 +81,44 @@ class PrimaryNavigationShell extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class KefeShellAction extends StatelessWidget {
+  const KefeShellAction({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+    this.heroTag,
+    super.key,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+  final Object? heroTag;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+
+    return SizedBox.square(
+      dimension: 48,
+      child: FloatingActionButton.small(
+        heroTag: heroTag,
+        tooltip: tooltip,
+        elevation: 0,
+        highlightElevation: 2,
+        backgroundColor: visual.surfaceStrong,
+        foregroundColor: visual.goldSoft,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: visual.gold.withValues(alpha: 0.38)),
+        ),
+        onPressed: onPressed,
+        child: Icon(icon),
       ),
     );
   }
