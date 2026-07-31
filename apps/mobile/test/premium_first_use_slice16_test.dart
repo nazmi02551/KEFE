@@ -141,10 +141,7 @@ void main() {
     expect(store.readCount, 0);
     expect(store.markCount, 0);
     expect(find.byKey(const ValueKey('onboarding-pages')), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey('onboarding-promise-1')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const ValueKey('onboarding-promise-1')), findsOneWidget);
   });
 
   test('governed first-use presentation uses semantic KEFE primitives', () {
@@ -158,7 +155,9 @@ void main() {
       'lib/app/product_preview_app.dart',
     ).readAsStringSync();
     final previewMainSource = File('lib/main_preview.dart').readAsStringSync();
-    final productionAppSource = File('lib/app/kefe_app.dart').readAsStringSync();
+    final productionAppSource = File(
+      'lib/app/kefe_app.dart',
+    ).readAsStringSync();
     final productionMainSource = File('lib/main.dart').readAsStringSync();
     final completionSource = decisionSource
         .split('class _FirstUseCompletionCard')[1]
