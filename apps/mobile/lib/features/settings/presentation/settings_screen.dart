@@ -104,17 +104,13 @@ class SettingsScreen extends ConsumerWidget {
                               children: [
                                 Text(
                                   strings.privacyAndData,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
+                                  style: Theme.of(context).textTheme.titleMedium
                                       ?.copyWith(fontWeight: FontWeight.w800),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   strings.privacyAndDataHelper,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
+                                  style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(color: visual.mutedForeground),
                                 ),
                               ],
