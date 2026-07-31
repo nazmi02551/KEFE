@@ -9,9 +9,7 @@ class AtlasGlobeMarker {
     required this.countryCode,
     required this.value,
     required this.normalizedPosition,
-  }) : assert(value >= 0 && value <= 10),
-       assert(normalizedPosition.dx >= 0 && normalizedPosition.dx <= 1),
-       assert(normalizedPosition.dy >= 0 && normalizedPosition.dy <= 1);
+  }) : assert(value >= 0 && value <= 10);
 
   final String countryCode;
   final double value;
