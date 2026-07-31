@@ -61,80 +61,97 @@ void main() {
     expect(contract['invariants']['impact_in_scope'], isFalse);
   });
 
-  test('representative Sports CALL copy and answer values remain unchanged', () async {
-    final repository = PreviewDecisionRepository();
-    final item = await repository.fetchCase(_sportsCaseId);
+  test(
+    'representative Sports CALL copy and answer values remain unchanged',
+    () async {
+      final repository = PreviewDecisionRepository();
+      final item = await repository.fetchCase(_sportsCaseId);
 
-    expect(item.versionId, _sportsCaseVersionId);
-    expect(item.format, 'SPORTS_CALL');
-    expect(item.domain, 'SPORTS');
-    expect(item.title, 'Bu pozisyonda penaltı kararı doğru muydu?');
-    expect(
-      item.summary,
-      'Temas, avantaj ve VAR müdahalesi üzerinden bir Sports CALL yap.',
-    );
-    expect(item.questions.first.prompt, 'Hakemin penaltı kararını nasıl değerlendiriyorsun?');
-    expect(item.questions.first.responseType, 'SINGLE_CHOICE');
-    expect(item.questions.first.options, const ['Doğru', 'Yanlış']);
-    expect(item.questions[1].responseType, 'CONFIDENCE');
-  });
+      expect(item.versionId, _sportsCaseVersionId);
+      expect(item.format, 'SPORTS_CALL');
+      expect(item.domain, 'SPORTS');
+      expect(item.title, 'Bu pozisyonda penaltı kararı doğru muydu?');
+      expect(
+        item.summary,
+        'Temas, avantaj ve VAR müdahalesi üzerinden bir Sports CALL yap.',
+      );
+      expect(
+        item.questions.first.prompt,
+        'Hakemin penaltı kararını nasıl değerlendiriyorsun?',
+      );
+      expect(item.questions.first.responseType, 'SINGLE_CHOICE');
+      expect(item.questions.first.options, const ['Doğru', 'Yanlış']);
+      expect(item.questions[1].responseType, 'CONFIDENCE');
+    },
+  );
 
-  test('Preview media selects Sports renderer without changing other assets', () async {
-    const repository = PreviewCaseMediaRepository();
+  test(
+    'Preview media selects Sports renderer without changing other assets',
+    () async {
+      const repository = PreviewCaseMediaRepository();
 
-    final sports = await repository.fetchForCaseVersion(
-      _sportsCaseVersionId,
-      slot: CaseMediaSlot.caseHero,
-      postCommitAvailable: false,
-    );
-    final data = await repository.fetchForCaseVersion(
-      _dataCaseVersionId,
-      slot: CaseMediaSlot.caseHero,
-      postCommitAvailable: false,
-    );
+      final sports = await repository.fetchForCaseVersion(
+        _sportsCaseVersionId,
+        slot: CaseMediaSlot.caseHero,
+        postCommitAvailable: false,
+      );
+      final data = await repository.fetchForCaseVersion(
+        _dataCaseVersionId,
+        slot: CaseMediaSlot.caseHero,
+        postCommitAvailable: false,
+      );
 
-    expect(sports, hasLength(1));
-    expect(sports.single.rendition.rendererCode, 'KEFE_SPORTS_SCENE_V1');
-    expect(sports.single.rendition.locator, 'SPORTS_DECISION');
-    expect(sports.single.exposurePhase, MediaExposurePhase.preCommitSafe);
-    expect(
-      sports.single.altText,
-      'Futbol sahası, top ve karar anını temsil eden soyut KEFE illüstrasyonu.',
-    );
-    expect(
-      sports.single.attribution,
-      'KEFE Product Preview · temsili illüstrasyon',
-    );
+      expect(sports, hasLength(1));
+      expect(sports.single.rendition.rendererCode, 'KEFE_SPORTS_SCENE_V1');
+      expect(sports.single.rendition.locator, 'SPORTS_DECISION');
+      expect(sports.single.exposurePhase, MediaExposurePhase.preCommitSafe);
+      expect(
+        sports.single.altText,
+        'Futbol sahası, top ve karar anını temsil eden soyut KEFE illüstrasyonu.',
+      );
+      expect(
+        sports.single.attribution,
+        'KEFE Product Preview · temsili illüstrasyon',
+      );
 
-    expect(data, hasLength(1));
-    expect(data.single.rendition.rendererCode, 'KEFE_ABSTRACT_V1');
-    expect(data.single.rendition.locator, 'DATA_NETWORK');
-  });
+      expect(data, hasLength(1));
+      expect(data.single.rendition.rendererCode, 'KEFE_ABSTRACT_V1');
+      expect(data.single.rendition.locator, 'DATA_NETWORK');
+    },
+  );
 
-  test('scene renderer source contains no fake evidence controls or Case branching', () {
-    final source = File(
-      'lib/features/media_presentation/presentation/sports_call_scene_visual.dart',
-    ).readAsStringSync();
-    final surfaceSource = File(
-      'lib/features/media_presentation/presentation/case_media_surface.dart',
-    ).readAsStringSync();
+  test(
+    'scene renderer source contains no fake evidence controls or Case branching',
+    () {
+      final source = File(
+        'lib/features/media_presentation/presentation/sports_call_scene_visual.dart',
+      ).readAsStringSync();
+      final surfaceSource = File(
+        'lib/features/media_presentation/presentation/case_media_surface.dart',
+      ).readAsStringSync();
 
-    expect(source, isNot(contains('caseId')));
-    expect(source, isNot(contains('caseTitle')));
-    expect(source, isNot(contains('SPORTS_CALL')));
-    expect(source, isNot(contains('VAR')));
-    expect(source, isNot(contains('Üstten')));
-    expect(source, isNot(contains('Hakem')));
-    expect(source, isNot(contains('offside')));
-    expect(source, isNot(contains('TabBar')));
-    expect(source, isNot(contains('IconButton')));
-    expect(source, isNot(contains('GestureDetector')));
-    expect(source, isNot(contains('InkWell')));
-    expect(surfaceSource, contains("'KEFE_SPORTS_SCENE_V1'"));
-    expect(surfaceSource, isNot(contains("item.caseVersionId == '$_sportsCaseVersionId'")));
-  });
+      expect(source, isNot(contains('caseId')));
+      expect(source, isNot(contains('caseTitle')));
+      expect(source, isNot(contains('SPORTS_CALL')));
+      expect(source, isNot(contains('VAR')));
+      expect(source, isNot(contains('Üstten')));
+      expect(source, isNot(contains('Hakem')));
+      expect(source, isNot(contains('offside')));
+      expect(source, isNot(contains('TabBar')));
+      expect(source, isNot(contains('IconButton')));
+      expect(source, isNot(contains('GestureDetector')));
+      expect(source, isNot(contains('InkWell')));
+      expect(surfaceSource, contains("'KEFE_SPORTS_SCENE_V1'"));
+      expect(
+        surfaceSource,
+        isNot(contains("item.caseVersionId == '$_sportsCaseVersionId'")),
+      );
+    },
+  );
 
-  testWidgets('Sports renderer is theme-adaptive and text-scale safe', (tester) async {
+  testWidgets('Sports renderer is theme-adaptive and text-scale safe', (
+    tester,
+  ) async {
     await _pumpMediaSurface(
       tester,
       themeMode: ThemeMode.dark,
@@ -143,7 +160,9 @@ void main() {
 
     expect(find.byType(SportsCallSceneVisual), findsOneWidget);
     expect(
-      find.byKey(const ValueKey('case-media-CASE_HERO-$_sportsCaseVersionId')),
+      find.byKey(
+        const ValueKey('case-media-CASE_HERO-$_sportsCaseVersionId'),
+      ),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
@@ -185,51 +204,64 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Product Preview reaches Sports scene before Commit without Reveal', (
-    tester,
-  ) async {
-    tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
-    addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+  testWidgets(
+    'Product Preview reaches Sports scene before Commit without Reveal',
+    (tester) async {
+      tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
+      addTearDown(tester.platformDispatcher.clearLocaleTestValue);
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          decisionRepositoryProvider.overrideWithValue(
-            PreviewJourneyDecisionRepository(),
-          ),
-          kefeContentLocalizerProvider.overrideWithValue(
-            const PreviewContentLocalizer(),
-          ),
-          caseMediaRepositoryProvider.overrideWithValue(
-            const PreviewCaseMediaRepository(),
-          ),
-        ],
-        child: const ProductPreviewApp(),
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            decisionRepositoryProvider.overrideWithValue(
+              PreviewJourneyDecisionRepository(),
+            ),
+            kefeContentLocalizerProvider.overrideWithValue(
+              const PreviewContentLocalizer(),
+            ),
+            caseMediaRepositoryProvider.overrideWithValue(
+              const PreviewCaseMediaRepository(),
+            ),
+          ],
+          child: const ProductPreviewApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    final sportsTitle = find.text('Bu pozisyonda penaltı kararı doğru muydu?');
-    await tester.scrollUntilVisible(
-      sportsTitle,
-      280,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pump();
-    expect(sportsTitle, findsOneWidget);
-    await tester.tap(sportsTitle);
-    await tester.pumpAndSettle();
+      final sportsTitle = find.text('Bu pozisyonda penaltı kararı doğru muydu?');
+      await tester.scrollUntilVisible(
+        sportsTitle,
+        280,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pump();
+      expect(sportsTitle, findsOneWidget);
+      await tester.tap(sportsTitle);
+      await _pumpUntilFound(tester, find.byType(SportsCallSceneVisual));
 
-    expect(find.byType(SportsCallSceneVisual), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey('case-media-CASE_HERO-$_sportsCaseVersionId')),
-      findsOneWidget,
-    );
-    expect(find.text('Hakemin penaltı kararını nasıl değerlendiriyorsun?'), findsOneWidget);
-    expect(find.byKey(const ValueKey('option-Doğru')), findsOneWidget);
-    expect(find.byKey(const ValueKey('option-Yanlış')), findsOneWidget);
-    expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
-  });
+      expect(find.byType(SportsCallSceneVisual), findsOneWidget);
+      expect(
+        find.byKey(
+          const ValueKey('case-media-CASE_HERO-$_sportsCaseVersionId'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Hakemin penaltı kararını nasıl değerlendiriyorsun?'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('option-Doğru')), findsOneWidget);
+      expect(find.byKey(const ValueKey('option-Yanlış')), findsOneWidget);
+      expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
+    },
+  );
+}
+
+Future<void> _pumpUntilFound(WidgetTester tester, Finder finder) async {
+  for (var attempt = 0; attempt < 20; attempt++) {
+    await tester.pump(const Duration(milliseconds: 100));
+    if (finder.evaluate().isNotEmpty) return;
+  }
 }
 
 Future<void> _pumpMediaSurface(
