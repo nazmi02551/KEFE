@@ -74,7 +74,10 @@ void main() {
       );
       await scrollTo(tester, signatureBalance);
       expect(signatureBalance, findsOneWidget);
-      expect(find.byKey(const ValueKey('balance-state-neutral')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('balance-state-neutral')),
+        findsOneWidget,
+      );
       expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
 
       final firstYes = find.byKey(const ValueKey('option-Evet'));
