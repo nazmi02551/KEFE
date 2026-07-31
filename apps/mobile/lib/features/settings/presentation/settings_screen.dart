@@ -179,11 +179,7 @@ class _SettingsChoiceGroup<T> extends StatelessWidget {
         children: [
           Row(
             children: [
-              _SettingsIcon(
-                icon: icon,
-                color: visual.goldSoft,
-                compact: true,
-              ),
+              _SettingsIcon(icon: icon, color: visual.goldSoft, compact: true),
               const SizedBox(width: 10),
               Expanded(
                 child: Semantics(
