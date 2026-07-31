@@ -65,8 +65,10 @@ class _CaseMediaSurfaceState extends ConsumerState<CaseMediaSurface> {
         if (snapshot.connectionState == ConnectionState.waiting &&
             !snapshot.hasData) {
           return KefeVisualCompositionPlaceholder(
-            placeholderKey: ValueKey(
-              'case-media-loading-${widget.slot.code}-${widget.caseVersionId}',
+            placeholderKey: kefeVisualStateKey(
+              'loading',
+              widget.slot.code,
+              widget.caseVersionId,
             ),
             aspectRatio: _defaultAspectRatio,
             borderRadius: widget.borderRadius,
@@ -76,8 +78,10 @@ class _CaseMediaSurfaceState extends ConsumerState<CaseMediaSurface> {
 
         if (snapshot.hasError) {
           return SizedBox.shrink(
-            key: ValueKey(
-              'case-media-error-${widget.slot.code}-${widget.caseVersionId}',
+            key: kefeVisualStateKey(
+              'error',
+              widget.slot.code,
+              widget.caseVersionId,
             ),
           );
         }
@@ -85,8 +89,10 @@ class _CaseMediaSurfaceState extends ConsumerState<CaseMediaSurface> {
         final items = snapshot.data;
         if (items == null || items.isEmpty) {
           return SizedBox.shrink(
-            key: ValueKey(
-              'case-media-empty-${widget.slot.code}-${widget.caseVersionId}',
+            key: kefeVisualStateKey(
+              'empty',
+              widget.slot.code,
+              widget.caseVersionId,
             ),
           );
         }
@@ -100,8 +106,10 @@ class _CaseMediaSurfaceState extends ConsumerState<CaseMediaSurface> {
         if (item.exposurePhase == MediaExposurePhase.postCommitOnly &&
             !widget.postCommitAvailable) {
           return SizedBox.shrink(
-            key: ValueKey(
-              'case-media-exposure-blocked-${item.slot.code}-${item.caseVersionId}',
+            key: kefeVisualStateKey(
+              'exposure-blocked',
+              item.slot.code,
+              item.caseVersionId,
             ),
           );
         }
@@ -230,14 +238,18 @@ class _MediaRenderer extends StatelessWidget {
   ) {
     if (policy.fallback == KefeVisualFallbackPolicy.textHierarchyOnly) {
       return SizedBox.shrink(
-        key: ValueKey(
-          'case-media-fallback-$reason-${item.slot.code}-${item.caseVersionId}',
+        key: kefeVisualStateKey(
+          'fallback-$reason',
+          item.slot.code,
+          item.caseVersionId,
         ),
       );
     }
     return KefeVisualCompositionPlaceholder(
-      placeholderKey: ValueKey(
-        'case-media-fallback-$reason-${item.slot.code}-${item.caseVersionId}',
+      placeholderKey: kefeVisualStateKey(
+        'fallback-$reason',
+        item.slot.code,
+        item.caseVersionId,
       ),
       aspectRatio: item.rendition.aspectRatio,
       borderRadius: borderRadius,
