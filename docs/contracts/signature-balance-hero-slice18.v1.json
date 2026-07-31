@@ -1,0 +1,116 @@
+{
+  "contract": "signature-balance-hero-slice18",
+  "version": "1.0.0",
+  "date": "2026-07-31",
+  "source_adr": "docs/adr/0056-signature-balance-hero-convergence.md",
+  "parent_foundation": "docs/adr/0055-high-fidelity-visual-composition-foundation.md",
+  "tracker_issue": 137,
+  "status": "architecture_locked_runtime_pending",
+  "scope": {
+    "two_option_single_choice_visual_convergence": true,
+    "weigh_hub_redesign": false,
+    "question_response_semantics_change": false,
+    "controller_change": false,
+    "api_change": false,
+    "schema_change": false,
+    "route_change": false,
+    "case_specific_branching": false,
+    "collective_result_change": false,
+    "signal_impact_change": false,
+    "profile_inference_change": false
+  },
+  "eligibility": {
+    "response_type": "SINGLE_CHOICE",
+    "required_option_count": 2,
+    "case_id_allowlist_forbidden": true,
+    "case_title_matching_forbidden": true,
+    "domain_name_branching_forbidden": true
+  },
+  "truthfulness": {
+    "canonical_option_values_unchanged": true,
+    "states": [
+      "NEUTRAL",
+      "LEFT_SELECTED",
+      "RIGHT_SELECTED"
+    ],
+    "invented_percentage_for_binary_forbidden": true,
+    "invented_collective_distribution_forbidden": true,
+    "pre_commit_collective_exposure_forbidden": true,
+    "pre_commit_signal_impact_exposure_forbidden": true
+  },
+  "presentation": {
+    "renderer_family": "FLUTTER_SIGNATURE_BALANCE_V1",
+    "lightweight_flutter_native": true,
+    "theme_adaptive": true,
+    "light_theme_required": true,
+    "dark_theme_required": true,
+    "rules_left_emphasis": true,
+    "empathy_right_emphasis": true,
+    "metallic_gold_signature_material": true,
+    "explicit_option_controls_retained": true,
+    "hero_semantic_feedback_only": true,
+    "labels_must_remain_text": true,
+    "compact_layout_required": true,
+    "text_scale_safe": true,
+    "continuous_animation_forbidden": true,
+    "webview_required": false,
+    "threejs_required": false,
+    "live_3d_required": false
+  },
+  "foundation_reuse": {
+    "slice17_visual_roles": true,
+    "slice17_reduce_motion": true,
+    "slice17_fallback_policy": true,
+    "slice17_phone_parity_rule": true,
+    "same_widget_in_production_and_preview": true
+  },
+  "interaction": {
+    "selection_source": "EXPLICIT_OPTION_CONTROL",
+    "hero_may_reflect_selection": true,
+    "hero_is_sole_input_control": false,
+    "screen_reader_option_controls_required": true,
+    "canonical_raw_option_emission_required": true
+  },
+  "performance": {
+    "low_end_android_first_class": true,
+    "idle_per_frame_repaint_forbidden": true,
+    "selection_transition_max_ms": 420,
+    "reduce_motion_zero_duration_required": true,
+    "continuous_particles_forbidden": true,
+    "continuous_shader_animation_forbidden": true
+  },
+  "phone_review": {
+    "preview_reachability_required": true,
+    "pre_commit_hero_reachable": true,
+    "production_widget_reuse_required": true,
+    "preview_only_balance_implementation_forbidden": true
+  },
+  "tests": {
+    "contract_guard": true,
+    "generic_eligibility": true,
+    "neutral_left_right_states": true,
+    "raw_option_value_continuity": true,
+    "no_precommit_collective_leakage": true,
+    "reduce_motion": true,
+    "light_dark": true,
+    "compact_layout": true,
+    "semantics": true,
+    "preview_reachability": true,
+    "existing_decision_regressions": true
+  },
+  "required_exact_head_workflows": [
+    "API CI",
+    "Mobile CI",
+    "MVP Beta Gates",
+    "Global Readiness"
+  ],
+  "non_claims": [
+    "PIXEL_EXACT_CONCEPT_MATCH",
+    "HUMAN_VISUAL_APPROVAL",
+    "HUMAN_USABILITY_PASS",
+    "PHOTOREALISTIC_3D_ENGINE",
+    "NEW_DECISION_METHODOLOGY",
+    "SIGNAL_IMPACT_READINESS",
+    "PRODUCTION_STORE_READINESS"
+  ]
+}
