@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/design/kefe_theme.dart';
+import '../../../core/design/kefe_surface.dart';
+import '../../../core/design/kefe_visual_system.dart';
+import '../../../core/localization/kefe_content_localizer.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../application/saved_cases_controller.dart';
 import '../domain/saved_case.dart';
@@ -44,69 +46,97 @@ class _SavedCasesSectionState extends ConsumerState<SavedCasesSection> {
 
     final strings = KefeStrings.of(context);
     final state = ref.watch(savedCasesControllerProvider);
+    final visual = context.kefeVisual;
 
-    return Card(
+    return KefeSurface(
       key: const ValueKey('saved-cases-section'),
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                const Icon(
+      tone: KefeSurfaceTone.raised,
+      accent: visual.gold,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: visual.subtleGoldSurface,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(
                   Icons.bookmark_added_outlined,
-                  color: KefeColorTokens.goldSoft,
+                  color: visual.gold,
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        strings.savedCasesTitle,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(width: 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      strings.savedCasesTitle,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
                       ),
-                      const SizedBox(height: 3),
-                      Text(
-                        strings.savedCasesSubtitle,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: KefeColorTokens.textMutedDark,
-                        ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      strings.savedCasesSubtitle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: visual.mutedForeground,
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+              ),
+              if (state.items.isNotEmpty)
+                Container(
+                  constraints: const BoxConstraints(minWidth: 34),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 6,
                   ),
-                ),
-                if (state.items.isNotEmpty)
-                  Text(
+                  decoration: BoxDecoration(
+                    color: visual.subtleGoldSurface,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
                     '${state.items.length}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: KefeColorTokens.goldSoft,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: visual.gold,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            if (state.uiState == SavedCasesUiState.loading &&
-                state.items.isEmpty)
-              const LinearProgressIndicator()
-            else if (state.items.isEmpty)
-              Text(
-                strings.savedCasesEmpty,
-                key: const ValueKey('saved-cases-empty'),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: KefeColorTokens.textMutedDark,
                 ),
-              )
-            else
-              for (var index = 0; index < state.items.length; index++) ...[
-                _SavedCaseTile(item: state.items[index]),
-                if (index != state.items.length - 1) const Divider(height: 22),
-              ],
-          ],
-        ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (state.uiState == SavedCasesUiState.loading && state.items.isEmpty)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                minHeight: 5,
+                color: visual.gold,
+                backgroundColor: visual.surfaceSunken,
+              ),
+            )
+          else if (state.items.isEmpty)
+            Text(
+              strings.savedCasesEmpty,
+              key: const ValueKey('saved-cases-empty'),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: visual.mutedForeground,
+              ),
+            )
+          else
+            for (var index = 0; index < state.items.length; index++) ...[
+              _SavedCaseTile(item: state.items[index]),
+              if (index != state.items.length - 1)
+                const SizedBox(height: 10),
+            ],
+        ],
       ),
     );
   }
@@ -120,49 +150,73 @@ class _SavedCaseTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
+    final locale = Localizations.localeOf(context);
+    final localizer = ref.watch(kefeContentLocalizerProvider);
+    final title = localizer.text(
+      namespace: KefeContentNamespace.caseTitle,
+      id: item.caseId,
+      locale: locale,
+      fallback: item.title,
+    );
+    final summary = localizer.text(
+      namespace: KefeContentNamespace.caseSummary,
+      id: item.caseId,
+      locale: locale,
+      fallback: item.summary,
+    );
+
     return Semantics(
       container: true,
-      label: item.title,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            item.title,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            item.summary,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: KefeColorTokens.textMutedDark,
+      label: title,
+      child: Container(
+        padding: const EdgeInsets.all(13),
+        decoration: BoxDecoration(
+          color: visual.surfaceSunken,
+          borderRadius: BorderRadius.circular(17),
+          border: Border.all(color: visual.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              FilledButton.tonalIcon(
-                key: ValueKey('open-saved-case-${item.caseId}'),
-                onPressed: () => context.push('/case/${item.caseId}'),
-                icon: const Icon(Icons.arrow_forward_rounded, size: 17),
-                label: Text(strings.savedCasesOpen),
+            const SizedBox(height: 5),
+            Text(
+              summary,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: visual.mutedForeground,
               ),
-              TextButton.icon(
-                key: ValueKey('remove-saved-case-${item.caseId}'),
-                onPressed: () => ref
-                    .read(savedCasesControllerProvider.notifier)
-                    .remove(item.caseId),
-                icon: const Icon(Icons.bookmark_remove_outlined, size: 17),
-                label: Text(strings.savedCasesRemove),
-              ),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                FilledButton.tonalIcon(
+                  key: ValueKey('open-saved-case-${item.caseId}'),
+                  onPressed: () => context.push('/case/${item.caseId}'),
+                  icon: const Icon(Icons.arrow_forward_rounded, size: 17),
+                  label: Text(strings.savedCasesOpen),
+                ),
+                TextButton.icon(
+                  key: ValueKey('remove-saved-case-${item.caseId}'),
+                  onPressed: () => ref
+                      .read(savedCasesControllerProvider.notifier)
+                      .remove(item.caseId),
+                  icon: const Icon(Icons.bookmark_remove_outlined, size: 17),
+                  label: Text(strings.savedCasesRemove),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
