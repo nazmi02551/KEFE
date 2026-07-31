@@ -1,0 +1,68 @@
+{
+  "contract": "premium-first-use-slice16",
+  "version": 1,
+  "issue": 127,
+  "adr": "ADR-0054",
+  "scope": {
+    "onboarding_visual_convergence": true,
+    "first_reveal_completion_visual_convergence": true,
+    "new_onboarding_step": false,
+    "copy_change": false,
+    "case_selection_change": false,
+    "backend_change": false,
+    "api_change": false,
+    "schema_change": false,
+    "route_change": false
+  },
+  "onboarding": {
+    "promise_count": 2,
+    "first_case_fetch_before_promises": false,
+    "page_one_advances_to_page_two": true,
+    "page_two_uses_existing_demo_case": true,
+    "first_use_query_preserved": true,
+    "completion_persisted_after_first_reveal": true
+  },
+  "continuation": {
+    "continue_as_guest_preserved": true,
+    "continue_destination": "/explore",
+    "account_required": false
+  },
+  "presentation": {
+    "semantic_kefe_surfaces_required": true,
+    "theme_adaptive_required": true,
+    "tr_en_required": true,
+    "light_dark_required": true,
+    "reduce_motion_aware": true,
+    "continuous_loading_animation_added": false
+  },
+  "stable_keys": [
+    "onboarding-pages",
+    "onboarding-promise-1",
+    "onboarding-promise-2",
+    "onboarding-primary-button",
+    "first-use-completion",
+    "continue-as-guest"
+  ],
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "generic_runtime": true,
+    "preview_production_isolation": true,
+    "signal_in_scope": false,
+    "impact_in_scope": false,
+    "personality_inference": false,
+    "causal_inference": false
+  },
+  "evidence": {
+    "exact_head_ci_required": true,
+    "required_workflows": [
+      "API CI",
+      "Mobile CI",
+      "MVP Beta Gates",
+      "Global Readiness"
+    ],
+    "apk_only_after_verified_checkpoint": true,
+    "human_usability_not_inferred_from_ci": true
+  }
+}
