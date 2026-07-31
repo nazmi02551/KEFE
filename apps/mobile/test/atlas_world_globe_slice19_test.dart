@@ -114,13 +114,15 @@ void main() {
             )
             .toList(),
       );
-
-      await _revealCountryCards(tester);
       for (final item in AtlasPreviewFixture.countries) {
         expect(
           find.byKey(ValueKey('atlas-country-marker-${item.countryCode}')),
           findsOneWidget,
         );
+      }
+
+      await _revealCountryCards(tester);
+      for (final item in AtlasPreviewFixture.countries) {
         expect(
           find.byKey(ValueKey('atlas-country-card-${item.countryCode}')),
           findsOneWidget,
