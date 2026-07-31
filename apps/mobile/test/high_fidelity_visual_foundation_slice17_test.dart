@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kefe_mobile/core/design/kefe_theme.dart';
+import 'package:kefe_mobile/core/visual_composition/kefe_visual_composition_flutter.dart';
 import 'package:kefe_mobile/core/visual_composition/kefe_visual_composition_models.dart';
 import 'package:kefe_mobile/features/media_presentation/application/case_media_provider.dart';
 import 'package:kefe_mobile/features/media_presentation/data/case_media_repository.dart';
@@ -96,6 +97,31 @@ void main() {
         );
       },
     );
+
+    testWidgets('Reduce Motion resolves governed composition motion to zero', (
+      tester,
+    ) async {
+      Duration? resolved;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(accessibleNavigation: true),
+            child: Builder(
+              builder: (context) {
+                resolved = KefeVisualCompositionPolicy.hero
+                    .resolveMotionDuration(
+                      context,
+                      const Duration(milliseconds: 320),
+                    );
+                return const SizedBox();
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(resolved, Duration.zero);
+    });
   });
 
   group('Slice 17 deterministic visual states', () {
