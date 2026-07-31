@@ -23,6 +23,7 @@ class PreviewCaseMediaRepository implements CaseMediaRepository {
       hash: 'f33ef847f50971e031e7a92b63eae0d9dc0be5226faa8169dfeede094c09f6c1',
       alt:
           'Futbol sahası, top ve karar anını temsil eden soyut KEFE illüstrasyonu.',
+      rendererCode: 'KEFE_SPORTS_SCENE_V1',
     ),
     '22222222-2222-4222-8222-222222222225': _PreviewMediaSpec(
       key: 'CIVIC_TRANSPARENCY',
@@ -79,7 +80,7 @@ class PreviewCaseMediaRepository implements CaseMediaRepository {
         altText: spec.alt,
         exposurePhase: MediaExposurePhase.preCommitSafe,
         rendition: CaseMediaRendition(
-          rendererCode: 'KEFE_ABSTRACT_V1',
+          rendererCode: spec.rendererCode,
           locator: spec.key,
           aspectRatio: isHero ? 1.85 : 1.55,
           composition: isHero
@@ -103,9 +104,11 @@ class _PreviewMediaSpec {
     required this.key,
     required this.hash,
     required this.alt,
+    this.rendererCode = 'KEFE_ABSTRACT_V1',
   });
 
   final String key;
   final String hash;
   final String alt;
+  final String rendererCode;
 }
