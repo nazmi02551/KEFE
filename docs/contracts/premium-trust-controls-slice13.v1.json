@@ -1,0 +1,101 @@
+{
+  "contract": "premium-trust-controls-slice13",
+  "version": "1.0.0",
+  "date": "2026-07-31",
+  "issue": 121,
+  "stack_base": "86c88ddfbe3fe60ced5a17655d1ce0a8bc2c3761",
+  "scope": {
+    "settings_visual_convergence": true,
+    "privacy_visual_convergence": true,
+    "account_visual_convergence": true,
+    "public_share_visual_convergence": false,
+    "preference_model_change": false,
+    "authentication_backend_change": false,
+    "otp_provider_change": false,
+    "route_architecture_change": false,
+    "new_product_mode": false
+  },
+  "settings": {
+    "locale_values": ["SYSTEM", "TR", "EN"],
+    "theme_values": ["SYSTEM", "LIGHT", "DARK"],
+    "preference_persistence_preserved": true,
+    "privacy_route_preserved": true,
+    "new_locale_enabled": false
+  },
+  "privacy": {
+    "feature_gate_preserved": true,
+    "disabled_state_not_activated": true,
+    "export_json_clipboard_preserved": true,
+    "delete_confirmation_token": "DELETE",
+    "delete_confirmation_semantics_preserved": true,
+    "successful_delete_route": "/welcome",
+    "keys_preserved": [
+      "privacy-controls",
+      "privacy-export",
+      "privacy-delete",
+      "privacy-delete-confirmation"
+    ]
+  },
+  "account": {
+    "optional": true,
+    "channels": ["EMAIL", "SMS"],
+    "ui_states_preserved": [
+      "enterIdentifier",
+      "requesting",
+      "enterCode",
+      "verifying",
+      "complete",
+      "error"
+    ],
+    "controller_semantics_preserved": true,
+    "guest_escape_preserved": true,
+    "production_otp_claim": false,
+    "keys_preserved": [
+      "account-identifier",
+      "account-request-otp",
+      "account-otp-code",
+      "account-verify-merge",
+      "account-error",
+      "account-continue-guest"
+    ]
+  },
+  "presentation": {
+    "semantic_kefe_surfaces_required": true,
+    "light_dark_parity_required": true,
+    "tr_en_rendering_required": true,
+    "direct_dark_only_tokens_forbidden": true,
+    "screen_reader_semantics_required": true,
+    "text_scaling_required": true,
+    "continuous_decorative_animation_added": false,
+    "new_product_semantics": false
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "generic_runtime": true,
+    "preview_production_isolation": true,
+    "my_kefe_observed_descriptive_only": true,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "bias_inference": false,
+    "causal_inference": false,
+    "signal_in_scope": false,
+    "impact_in_scope": false
+  },
+  "verification": {
+    "exact_head_required": true,
+    "format_required": true,
+    "analyzer_required": true,
+    "all_flutter_tests_required": true,
+    "trust_controls_tr_en_light_dark_required": true,
+    "state_boundary_tests_required": true,
+    "production_copy_boundary_required": true,
+    "phone_acceptance_required": true,
+    "api_ci_required": true,
+    "mobile_ci_required": true,
+    "mvp_beta_gates_required": true,
+    "global_readiness_required": true
+  }
+}
