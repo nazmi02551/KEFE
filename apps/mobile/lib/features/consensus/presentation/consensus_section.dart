@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/design/kefe_theme.dart';
+import '../../../core/design/kefe_surface.dart';
+import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../application/consensus_controller.dart';
@@ -49,6 +50,7 @@ class _ConsensusSectionState extends ConsumerState<ConsensusSection> {
   Widget build(BuildContext context) {
     final state = ref.watch(consensusControllerProvider);
     final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
 
     if (state.sessionId != null && state.sessionId != widget.sessionId) {
       return const SizedBox.shrink();
@@ -57,16 +59,14 @@ class _ConsensusSectionState extends ConsumerState<ConsensusSection> {
       case ConsensusUiState.idle:
       case ConsensusUiState.loading:
         return _ConsensusFrame(
-          child: Row(
-            children: [
-              const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(strokeWidth: 2.5),
-              ),
-              const SizedBox(width: 12),
-              Expanded(child: Text(strings.consensusLoading)),
-            ],
+          child: Semantics(
+            liveRegion: true,
+            label: strings.consensusLoading,
+            child: _StatusNotice(
+              icon: Icons.hourglass_empty_rounded,
+              title: strings.consensusLoading,
+              accent: visual.rules,
+            ),
           ),
         );
       case ConsensusUiState.empty:
@@ -130,6 +130,7 @@ class _ConsensusParticipationCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = KefeStrings.of(context);
     final controller = ref.read(consensusControllerProvider.notifier);
+    final visual = context.kefeVisual;
     return _ConsensusFrame(
       key: ValueKey('consensus-card-${card.versionId}'),
       child: Column(
@@ -143,7 +144,7 @@ class _ConsensusParticipationCard extends ConsumerWidget {
             card.proposition,
             key: const ValueKey('consensus-proposition'),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w900,
               height: 1.22,
             ),
           ),
@@ -151,7 +152,7 @@ class _ConsensusParticipationCard extends ConsumerWidget {
           Text(
             strings.consensusPrompt,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: KefeColorTokens.textMutedDark,
+              color: visual.mutedForeground,
               height: 1.4,
             ),
           ),
@@ -202,25 +203,17 @@ class _ConsensusParticipationCard extends ConsumerWidget {
             onPressed: state.canSubmit && !submitting
                 ? controller.submit
                 : null,
-            icon: submitting
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.how_to_vote_outlined),
+            icon: Icon(
+              submitting
+                  ? Icons.hourglass_top_rounded
+                  : Icons.how_to_vote_outlined,
+            ),
             label: Text(
               submitting ? strings.consensusSubmitting : strings.consensusJoin,
             ),
           ),
-          const SizedBox(height: 10),
-          Text(
-            strings.consensusExposedMethodology,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: KefeColorTokens.textMutedDark,
-              height: 1.35,
-            ),
-          ),
+          const SizedBox(height: 12),
+          _MethodNote(text: strings.consensusExposedMethodology),
         ],
       ),
     );
@@ -235,6 +228,7 @@ class _ConsensusCardResult extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
     final aggregate = card.aggregate!;
     return _ConsensusFrame(
       key: ValueKey('consensus-result-${card.versionId}'),
@@ -243,16 +237,19 @@ class _ConsensusCardResult extends StatelessWidget {
         children: [
           const _ConsensusHeader(),
           const SizedBox(height: 14),
-          Row(
+          Wrap(
+            spacing: 10,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               _IntegrityBadge(
                 text:
                     '${aggregate.contributionClass} · n=${aggregate.sampleSize}',
               ),
-              const Spacer(),
-              const Icon(
+              Icon(
                 Icons.check_circle_rounded,
-                color: KefeColorTokens.success,
+                color: visual.success,
+                semanticLabel: strings.consensusDistribution,
               ),
             ],
           ),
@@ -260,19 +257,12 @@ class _ConsensusCardResult extends StatelessWidget {
           Text(
             card.proposition,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w900,
               height: 1.25,
             ),
           ),
           const SizedBox(height: 18),
-          Text(
-            strings.consensusDistribution,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: KefeColorTokens.goldSoft,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.8,
-            ),
-          ),
+          KefeEyebrow(strings.consensusDistribution, color: visual.goldSoft),
           const SizedBox(height: 12),
           for (final stance in card.stanceCodes) ...[
             _DistributionRow(
@@ -287,7 +277,7 @@ class _ConsensusCardResult extends StatelessWidget {
             Text(
               strings.consensusReasonPatterns,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: KefeColorTokens.textMutedDark,
+                color: visual.mutedForeground,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 0.7,
               ),
@@ -298,31 +288,18 @@ class _ConsensusCardResult extends StatelessWidget {
               runSpacing: 8,
               children: aggregate.reasonPatternDistribution.entries
                   .map(
-                    (entry) => Chip(
-                      label: Text(
-                        '${strings.consensusReasonLabel(entry.key)} · %${(entry.value * 100).round()}',
-                      ),
+                    (entry) => _ResultChip(
+                      label:
+                          '${strings.consensusReasonLabel(entry.key)} · %${(entry.value * 100).round()}',
                     ),
                   )
                   .toList(growable: false),
             ),
           ],
           const SizedBox(height: 15),
-          Container(
+          _MethodNote(
             key: const ValueKey('consensus-methodology-note'),
-            padding: const EdgeInsets.all(13),
-            decoration: BoxDecoration(
-              color: KefeColorTokens.surfaceElevatedDark.withValues(alpha: 0.7),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: KefeColorTokens.borderDark),
-            ),
-            child: Text(
-              aggregate.provenanceNote,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: KefeColorTokens.textMutedDark,
-                height: 1.4,
-              ),
-            ),
+            text: aggregate.provenanceNote,
           ),
         ],
       ),
@@ -336,17 +313,16 @@ class _ConsensusFrame extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => Card(
-    key: key,
-    child: Container(
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return KefeSurface(
+      key: key,
+      tone: KefeSurfaceTone.raised,
+      accent: visual.gold,
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: KefeColorTokens.gold.withValues(alpha: 0.24)),
-      ),
       child: child,
-    ),
-  );
+    );
+  }
 }
 
 class _ConsensusHeader extends StatelessWidget {
@@ -355,39 +331,33 @@ class _ConsensusHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 42,
-          height: 42,
+          width: 44,
+          height: 44,
           decoration: BoxDecoration(
-            color: KefeColorTokens.gold.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(13),
+            color: visual.subtleGoldSurface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: visual.gold.withValues(alpha: 0.24)),
           ),
-          child: const Icon(
-            Icons.hub_outlined,
-            color: KefeColorTokens.goldSoft,
-          ),
+          child: Icon(Icons.hub_outlined, color: visual.goldSoft),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 13),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                strings.consensusEyebrow,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: KefeColorTokens.goldSoft,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.8,
-                ),
-              ),
-              const SizedBox(height: 2),
+              KefeEyebrow(strings.consensusEyebrow, color: visual.goldSoft),
+              const SizedBox(height: 3),
               Text(
                 strings.consensusCardTitle,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  height: 1.15,
+                ),
               ),
             ],
           ),
@@ -403,21 +373,24 @@ class _IntegrityBadge extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-    decoration: BoxDecoration(
-      color: KefeColorTokens.rules.withValues(alpha: 0.1),
-      borderRadius: BorderRadius.circular(999),
-      border: Border.all(color: KefeColorTokens.rules.withValues(alpha: 0.24)),
-    ),
-    child: Text(
-      text,
-      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-        color: KefeColorTokens.goldSoft,
-        fontWeight: FontWeight.w800,
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: visual.subtleRulesSurface,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: visual.rules.withValues(alpha: 0.24)),
       ),
-    ),
-  );
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: visual.rules,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
 }
 
 class _DistributionRow extends StatelessWidget {
@@ -432,26 +405,143 @@ class _DistributionRow extends StatelessWidget {
   final bool selected;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      Row(
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    final normalized = value.clamp(0, 1).toDouble();
+    final accent = selected ? visual.gold : visual.rules;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: selected ? FontWeight.w900 : FontWeight.w600,
+                ),
+              ),
+            ),
+            Text(
+              '%${(normalized * 100).round()}',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: selected ? visual.goldSoft : visual.mutedForeground,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 7),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: LinearProgressIndicator(
+            value: normalized,
+            minHeight: 8,
+            backgroundColor: visual.surfaceSunken,
+            color: accent,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ResultChip extends StatelessWidget {
+  const _ResultChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: visual.surfaceSunken,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: visual.border),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: visual.mutedForeground,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+class _MethodNote extends StatelessWidget {
+  const _MethodNote({required this.text, super.key});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return KefeSurface(
+      key: key,
+      tone: KefeSurfaceTone.sunken,
+      accent: visual.rules,
+      padding: const EdgeInsets.all(13),
+      borderRadius: 16,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Icon(Icons.science_outlined, size: 19, color: visual.rules),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: selected ? FontWeight.w900 : FontWeight.w600,
+              text,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: visual.mutedForeground,
+                height: 1.4,
               ),
             ),
           ),
-          Text('%${(value * 100).round()}'),
         ],
       ),
-      const SizedBox(height: 6),
-      LinearProgressIndicator(value: value.clamp(0, 1)),
-    ],
-  );
+    );
+  }
+}
+
+class _StatusNotice extends StatelessWidget {
+  const _StatusNotice({
+    required this.icon,
+    required this.title,
+    required this.accent,
+  });
+
+  final IconData icon;
+  final String title;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return KefeSurface(
+      tone: KefeSurfaceTone.sunken,
+      accent: accent,
+      padding: const EdgeInsets.all(13),
+      borderRadius: 16,
+      child: Row(
+        children: [
+          Icon(icon, color: accent),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: visual.mutedForeground,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _Notice extends StatelessWidget {
@@ -462,23 +552,43 @@ class _Notice extends StatelessWidget {
   final String body;
 
   @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Icon(icon, color: KefeColorTokens.goldSoft),
-      const SizedBox(width: 12),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 4),
-            Text(body),
-          ],
-        ),
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return KefeSurface(
+      tone: KefeSurfaceTone.sunken,
+      accent: visual.attention,
+      padding: const EdgeInsets.all(13),
+      borderRadius: 16,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: visual.attention),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  body,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: visual.mutedForeground,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-    ],
-  );
+    );
+  }
 }
 
 class _ErrorState extends StatelessWidget {
@@ -493,16 +603,40 @@ class _ErrorState extends StatelessWidget {
   final Future<void> Function() onRetry;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      Text(message),
-      const SizedBox(height: 10),
-      OutlinedButton.icon(
-        onPressed: onRetry,
-        icon: const Icon(Icons.refresh_rounded),
-        label: Text(retryLabel),
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return KefeSurface(
+      tone: KefeSurfaceTone.sunken,
+      accent: visual.attention,
+      padding: const EdgeInsets.all(13),
+      borderRadius: 16,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.info_outline_rounded, color: visual.attention),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  message,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: visual.mutedForeground,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh_rounded),
+            label: Text(retryLabel),
+          ),
+        ],
       ),
-    ],
-  );
+    );
+  }
 }
