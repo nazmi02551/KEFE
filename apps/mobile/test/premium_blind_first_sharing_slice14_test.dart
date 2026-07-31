@@ -89,18 +89,13 @@ void main() {
         'outbound case-only share renders create and ready states in ${locale.languageCode} ${dark ? 'dark' : 'light'}',
         (tester) async {
           final repository = PreviewShareRepository();
-          final expectedVisual = dark
-              ? KefeVisualTheme.dark
-              : KefeVisualTheme.light;
 
           await _pumpLocalized(
             tester,
             locale: locale,
             dark: dark,
-            overrides: [
-              shareExperienceEnabledProvider.overrideWithValue(true),
-              shareRepositoryProvider.overrideWithValue(repository),
-            ],
+            sharingEnabled: true,
+            repository: repository,
             child: const Scaffold(body: ShareSection(sessionId: 'session-1')),
           );
 
@@ -129,18 +124,20 @@ void main() {
                 .tone,
             KefeSurfaceTone.raised,
           );
-
-          final ready = tester.widget<KefeSurface>(
-            find.byKey(const ValueKey('share-ready-surface')),
+          expect(
+            tester
+                .widget<KefeSurface>(
+                  find.byKey(const ValueKey('share-ready-surface')),
+                )
+                .tone,
+            KefeSurfaceTone.sunken,
           );
-          expect(ready.tone, KefeSurfaceTone.sunken);
           expect(
             Theme.of(
               tester.element(find.byKey(const ValueKey('share-section'))),
             ).brightness,
             dark ? Brightness.dark : Brightness.light,
           );
-          expect(expectedVisual.surfaceRaised, isNotNull);
           expect(tester.takeException(), isNull);
         },
       );
@@ -264,14 +261,20 @@ Future<void> _pumpLocalized(
   required Locale locale,
   required bool dark,
   required Widget child,
-  List<Override> overrides = const [],
+  bool sharingEnabled = false,
+  ShareRepository? repository,
 }) async {
   tester.platformDispatcher.localeTestValue = locale;
   addTearDown(tester.platformDispatcher.clearLocaleTestValue);
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: overrides,
+      overrides: [
+        if (sharingEnabled)
+          shareExperienceEnabledProvider.overrideWithValue(true),
+        if (repository != null)
+          shareRepositoryProvider.overrideWithValue(repository),
+      ],
       child: MaterialApp(
         locale: locale,
         supportedLocales: KefeStrings.supportedLocales,
