@@ -69,10 +69,26 @@ void main() {
       expect(find.text('KARAR YOLCULUĞU'), findsOneWidget);
       expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
 
+      final signatureBalance = find.byKey(
+        const ValueKey('signature-balance-hero'),
+      );
+      await scrollTo(tester, signatureBalance);
+      expect(signatureBalance, findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('balance-state-neutral')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
+
       final firstYes = find.byKey(const ValueKey('option-Evet'));
       await scrollTo(tester, firstYes);
       await tester.tap(firstYes);
       await tester.pump();
+      expect(
+        find.byKey(const ValueKey('balance-state-leftSelected')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
 
       final firstCommit = find.byKey(const ValueKey('commit-button'));
       await scrollTo(tester, firstCommit);

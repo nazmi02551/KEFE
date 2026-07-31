@@ -209,6 +209,7 @@ class _BalanceChoiceInput extends StatelessWidget {
           leftLabel: leftLabel,
           rightLabel: rightLabel,
           selectedIndex: effectiveIndex,
+          compact: MediaQuery.sizeOf(context).height < 700,
         ),
         const SizedBox(height: 14),
         Row(
