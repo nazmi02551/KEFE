@@ -16,22 +16,36 @@ import 'package:kefe_mobile/features/media_presentation/presentation/case_media_
 void main() {
   group('Slice 17 contract and policy', () {
     test('executable contract keeps visual work inside the locked boundary', () {
-      final contract = jsonDecode(
-        File(
-          '../../docs/contracts/high-fidelity-visual-foundation-slice17.v1.json',
-        ).readAsStringSync(),
-      ) as Map<String, dynamic>;
+      final contract =
+          jsonDecode(
+                File(
+                  '../../docs/contracts/high-fidelity-visual-foundation-slice17.v1.json',
+                ).readAsStringSync(),
+              )
+              as Map<String, dynamic>;
 
       expect(contract['contract'], 'high-fidelity-visual-foundation-slice17');
       expect(contract['scope']['visual_composition_foundation'], isTrue);
-      expect(contract['scope']['screen_specific_high_fidelity_convergence'], isFalse);
+      expect(
+        contract['scope']['screen_specific_high_fidelity_convergence'],
+        isFalse,
+      );
       expect(contract['scope']['product_semantics_change'], isFalse);
       expect(contract['architecture']['case_agnostic_composition'], isTrue);
       expect(contract['architecture']['webview_required'], isFalse);
       expect(contract['architecture']['threejs_required'], isFalse);
-      expect(contract['presentation_contract']['focal_crop_policy_required'], isTrue);
-      expect(contract['presentation_contract']['safe_area_policy_required'], isTrue);
-      expect(contract['presentation_contract']['fallback_policy_required'], isTrue);
+      expect(
+        contract['presentation_contract']['focal_crop_policy_required'],
+        isTrue,
+      );
+      expect(
+        contract['presentation_contract']['safe_area_policy_required'],
+        isTrue,
+      );
+      expect(
+        contract['presentation_contract']['fallback_policy_required'],
+        isTrue,
+      );
       expect(contract['performance']['low_end_android_first_class'], isTrue);
     });
 
@@ -45,7 +59,10 @@ void main() {
       expect(hero.performance.cacheClass, KefeVisualCacheClass.hero);
       expect(hero.performance.maxDecodeWidthPx, lessThanOrEqualTo(1600));
       expect(hero.performance.maxDecodeHeightPx, lessThanOrEqualTo(1200));
-      expect(hero.performance.maxDecodedBytes, lessThanOrEqualTo(8 * 1024 * 1024));
+      expect(
+        hero.performance.maxDecodedBytes,
+        lessThanOrEqualTo(8 * 1024 * 1024),
+      );
 
       expect(card.fallback, KefeVisualFallbackPolicy.textHierarchyOnly);
       expect(card.performance.cacheClass, KefeVisualCacheClass.compact);
@@ -53,26 +70,32 @@ void main() {
       expect(card.safeArea.right, greaterThan(0));
     });
 
-    test('preview renditions pin identity, hash, focal policy and budget', () async {
-      const repository = PreviewCaseMediaRepository();
-      final items = await repository.fetchForCaseVersion(
-        '22222222-2222-4222-8222-222222222222',
-        slot: CaseMediaSlot.caseHero,
-        postCommitAvailable: false,
-      );
+    test(
+      'preview renditions pin identity, hash, focal policy and budget',
+      () async {
+        const repository = PreviewCaseMediaRepository();
+        final items = await repository.fetchForCaseVersion(
+          '22222222-2222-4222-8222-222222222222',
+          slot: CaseMediaSlot.caseHero,
+          postCommitAvailable: false,
+        );
 
-      expect(items, hasLength(1));
-      final item = items.single;
-      final policy = item.rendition.composition;
-      expect(item.assetIdentity, startsWith('preview-abstract:'));
-      expect(item.assetContentHash, matches(RegExp(r'^[a-f0-9]{64}$')));
-      expect(item.exposurePhase, MediaExposurePhase.preCommitSafe);
-      expect(policy.focalPoint.x, inInclusiveRange(0, 1));
-      expect(policy.focalPoint.y, inInclusiveRange(0, 1));
-      expect(policy.safeArea.left, greaterThan(0));
-      expect(policy.themeSuitability, KefeVisualThemeSuitability.adaptive);
-      expect(policy.performance.maxDecodedBytes, lessThanOrEqualTo(8 * 1024 * 1024));
-    });
+        expect(items, hasLength(1));
+        final item = items.single;
+        final policy = item.rendition.composition;
+        expect(item.assetIdentity, startsWith('preview-abstract:'));
+        expect(item.assetContentHash, matches(RegExp(r'^[a-f0-9]{64}$')));
+        expect(item.exposurePhase, MediaExposurePhase.preCommitSafe);
+        expect(policy.focalPoint.x, inInclusiveRange(0, 1));
+        expect(policy.focalPoint.y, inInclusiveRange(0, 1));
+        expect(policy.safeArea.left, greaterThan(0));
+        expect(policy.themeSuitability, KefeVisualThemeSuitability.adaptive);
+        expect(
+          policy.performance.maxDecodedBytes,
+          lessThanOrEqualTo(8 * 1024 * 1024),
+        );
+      },
+    );
   });
 
   group('Slice 17 deterministic visual states', () {
@@ -96,9 +119,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         find.byKey(
-          const ValueKey(
-            'case-media-empty-CASE_HERO-case-version-under-test',
-          ),
+          const ValueKey('case-media-empty-CASE_HERO-case-version-under-test'),
         ),
         findsOneWidget,
       );
