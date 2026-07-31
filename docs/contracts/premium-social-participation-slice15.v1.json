@@ -1,0 +1,119 @@
+{
+  "contract": "premium-social-participation-slice15",
+  "version": "1.0.0",
+  "date": "2026-07-31",
+  "issue": 125,
+  "stack_base": "e1391a0271b75f43dd6aa91fa0fa2eac033e4e91",
+  "scope": {
+    "consensus_visual_convergence": true,
+    "community_reason_visual_convergence": true,
+    "new_consensus_methodology": false,
+    "new_community_distribution": false,
+    "backend_change": false,
+    "schema_change": false,
+    "route_architecture_change": false,
+    "new_product_mode": false
+  },
+  "post_commit_boundary": {
+    "committed_session_required": true,
+    "case_version_binding_preserved": true,
+    "pre_commit_exposure_added": false,
+    "blind_first_changed": false
+  },
+  "consensus": {
+    "states_preserved": [
+      "idle",
+      "loading",
+      "empty",
+      "blocked",
+      "errorRetryable",
+      "eligible",
+      "submitting",
+      "participated"
+    ],
+    "submit_semantics_preserved": true,
+    "retry_semantics_preserved": true,
+    "existing_aggregate_display_only": true,
+    "new_metric_forbidden": true,
+    "ranking_forbidden": true,
+    "recommendation_forbidden": true,
+    "inference_forbidden": true,
+    "keys_preserved": [
+      "consensus-section",
+      "consensus-proposition",
+      "consensus-submit",
+      "consensus-methodology-note"
+    ],
+    "key_patterns_preserved": [
+      "consensus-card-<versionId>",
+      "consensus-stance-<code>",
+      "consensus-reason-<code>",
+      "consensus-result-<versionId>"
+    ]
+  },
+  "community_reason": {
+    "feature_gate_preserved": true,
+    "load_semantics_preserved": true,
+    "publish_semantics_preserved": true,
+    "react_semantics_preserved": true,
+    "report_semantics_preserved": true,
+    "reason_policy_from_case_version_preserved": true,
+    "optional_text_max_length": 300,
+    "moderation_receipt_semantics_preserved": true,
+    "author_identity_added": false,
+    "social_graph_added": false,
+    "ranking_added": false,
+    "recommendation_added": false,
+    "inferred_stance_added": false,
+    "keys_preserved": [
+      "community-reason-section",
+      "community-reason-text",
+      "community-reason-publish",
+      "community-reason-receipt"
+    ],
+    "key_patterns_preserved": [
+      "community-reason-tag-<tag>"
+    ]
+  },
+  "presentation": {
+    "semantic_kefe_surfaces_required": true,
+    "light_dark_parity_required": true,
+    "tr_en_rendering_required": true,
+    "direct_dark_only_tokens_forbidden": true,
+    "screen_reader_semantics_required": true,
+    "text_scaling_required": true,
+    "continuous_loading_animation_added": false,
+    "new_product_semantics": false
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "generic_runtime": true,
+    "preview_production_isolation": true,
+    "my_kefe_observed_descriptive_only": true,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "bias_inference": false,
+    "causal_inference": false,
+    "signal_in_scope": false,
+    "impact_in_scope": false
+  },
+  "verification": {
+    "exact_head_required": true,
+    "format_required": true,
+    "analyzer_required": true,
+    "all_flutter_tests_required": true,
+    "social_participation_tr_en_light_dark_required": true,
+    "feature_gate_tests_required": true,
+    "post_commit_boundary_required": true,
+    "source_boundary_test_required": true,
+    "production_copy_boundary_required": true,
+    "phone_acceptance_required": true,
+    "api_ci_required": true,
+    "mobile_ci_required": true,
+    "mvp_beta_gates_required": true,
+    "global_readiness_required": true
+  }
+}
