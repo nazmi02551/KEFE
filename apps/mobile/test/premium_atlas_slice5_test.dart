@@ -73,14 +73,21 @@ void main() {
     final source = File(
       'lib/app/product_preview/atlas_preview_screen.dart',
     ).readAsStringSync();
+    final globeSource = File(
+      'lib/app/product_preview/atlas_globe_visual.dart',
+    ).readAsStringSync();
 
     expect(source, contains('AtlasPreviewStrings.of(context)'));
     expect(source, contains('kefeContentLocalizerProvider'));
     expect(source, contains('KefeContentNamespace.caseTitle'));
     expect(source, contains('KefeSurface('));
-    expect(source, contains('CustomPaint('));
+    expect(source, contains("import 'atlas_globe_visual.dart';"));
+    expect(source, contains('AtlasGlobeVisual('));
+    expect(globeSource, contains('CustomPaint('));
+    expect(globeSource, contains('ExcludeSemantics('));
     expect(source, contains('ExcludeSemantics('));
     expect(source, isNot(contains('KefeColorTokens.')));
+    expect(globeSource, isNot(contains('KefeColorTokens.')));
     expect(source, isNot(contains('locale.languageCode')));
     expect(source, isNot(contains('Ülkelere göre ortalamalar')));
     expect(source, isNot(contains('gerçek ülke sonucu değildir')));
