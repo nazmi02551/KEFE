@@ -134,9 +134,7 @@ class _MediaRenderer extends StatelessWidget {
       return _fallback(context, policy, 'theme');
     }
 
-    final mediaKey = ValueKey(
-      'case-media-${item.slot.code}-${item.caseVersionId}',
-    );
+    final mediaKey = kefeCaseMediaKey(item.slot.code, item.caseVersionId);
     final media = switch (item.rendition.rendererCode) {
       'KEFE_ABSTRACT_V1' => _abstractMedia(context, policy, mediaKey),
       'KEFE_SPORTS_SCENE_V1' => SportsCallSceneVisual(
