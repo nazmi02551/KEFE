@@ -108,11 +108,12 @@ class ShareSection extends ConsumerWidget {
                         child: SelectableText(
                           created.deepLink,
                           key: const ValueKey('share-deep-link'),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: visual.foreground,
-                            fontWeight: FontWeight.w700,
-                            height: 1.35,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: visual.foreground,
+                                fontWeight: FontWeight.w700,
+                                height: 1.35,
+                              ),
                         ),
                       ),
                     ],
