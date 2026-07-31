@@ -3,24 +3,22 @@
 **Updated:** 2026-07-31  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Main latest observed checkpoint:** `53018c9cc57b890f0af17171e004d10b6dbd7770`  
 **Active stacked line top:** PR #132 `feature/high-fidelity-visual-foundation-slice17`  
-**Latest repo-verified active-stack runtime:** `68b390584901dc706059485afb6f29d7f073defc`  
-**Latest active-stack runtime owner:** PR #128 / corrected Slice 16  
+**Latest repo-verified active-stack runtime:** `ce9630ba4f013ac9611ac10b397bff356d797bad`  
+**Latest runtime owner:** PR #132 / Slice 17 High-Fidelity Visual Composition Foundation  
+**PR #132 current head:** later documentation-only head; resolve live before acting  
 
-This file is the **canonical durable engineering handoff** for continuation. Chat history is not a source of truth.
+This file is the **canonical durable engineering handoff** for continuation. Chat history is supplementary context, not engineering source of truth.
 
-A new ChatGPT/Codex session receiving only **“KEFE’yi geliştirmeye devam et”** must use the continuation protocol in this file, recover the live repo/CI/Drive state and continue the next unresolved work without asking the user to reconstruct prior conversations.
+A new ChatGPT/Codex session receiving only **“KEFE’yi geliştirmeye devam et”** must read root `AGENTS.md`, this file, live GitHub state/CI and relevant Drive CURRENT/WORKING state, then resume the next unresolved work without asking the user to reconstruct prior conversations.
 
-Historical detail remains preserved in Git status records, ADRs, contracts, PRs and commits; this file intentionally summarizes the current working truth rather than duplicating every historical checkpoint.
-
-## 1. Authority and documentation baseline
+## 1. Documentation authority
 
 ### Published CURRENT
 
-**KEFE Documentation Ecosystem v3.4 — CURRENT / validation PASS**
+**KEFE Documentation Ecosystem v3.4 — CURRENT / validation PASS** remains the published authority until an explicit documentation promotion milestone completes.
 
-Principal published versions:
+Principal published versions include:
 - Master Product Document v1.3.0 — Approved Canonical
 - Documentation Governance v1.5.0 — Approved
 - Product Bible v1.5.0 — Working Baseline
@@ -33,168 +31,187 @@ Principal published versions:
 Published artifact: `KEFE_Documentation_Ecosystem_2026-07-28_v3.4_CURRENT.zip`  
 Drive CURRENT file ID: `1MXvCTNPfv-pWYIHCo5KqpmTOf-3RyFhZ`
 
-CURRENT v3.4 remains authoritative until an explicit documentation promotion milestone completes. Draft/stacked work must not silently overwrite it.
-
 ### WORKING
 
-Drive WORKING contains:
-- `KEFE_Documentation_Ecosystem_2026-07-30_v3.5_WORKING_CHECKPOINT.zip`
-- native living checkpoint `KEFE Internal Alpha Checkpoint v1.1.0 WORKING`, ID `1pOVkA12khFJTdfw-wCcuzRYcFNPnB2Cq1Ylo6_h5A3o`
+Drive WORKING includes the living checkpoint:
+`KEFE Internal Alpha Checkpoint v1.1.0 WORKING`  
+ID: `1pOVkA12khFJTdfw-wCcuzRYcFNPnB2Cq1Ylo6_h5A3o`
 
-WORKING may pin verified runtime SHAs and accepted working deltas. It does not supersede CURRENT until formal promotion.
+It now pins verified Slice 17 runtime `ce9630ba...` and records the non-visual architecture horizon plus APK/Product Preview fidelity rule. WORKING does not supersede CURRENT.
 
-Documentation rule: update existing normative source documents at publication milestones rather than creating parallel manifestos. Git ADR/contract/status records are the engineering working layer between publication milestones.
+At the next declared documentation publication milestone, accepted Slice 17+ changes belong in the existing Design System, Engineering Blueprint and Product Bible; do not create a parallel official manifesto.
 
 ## 2. Binding invariants
 
-These remain binding unless an explicit accepted product/architecture decision changes them:
+Preserve unless an explicit accepted decision changes them:
 
-- KEFE is a case-agnostic modular public-reasoning/decision engine.
-- Composition over Case Types; no named-Case runtime feature families.
-- Published `CaseVersion` is immutable and pins effective runtime/configuration provenance.
-- Commit First remains global.
-- Blind First/pre-result isolation remains binding where applicable.
-- Context, private draft/reason, Commit, Reveal, Perspective and later participation retain their exposure boundaries.
-- Preview fixtures/adapters are never production fallback.
-- Raw backend/CaseVersion values are not mutated by display localization.
-- My KEFE is observed/descriptive history only; no personality, ideology, psychometric, bias or causal inference.
-- Collective Result/Consensus is not automatically Signal, truth or formal authority.
-- Signal and Impact may not silently broaden into unrelated slices.
-- AI/provider output is never autonomous truth/editorial acceptance/publication.
-- Accessibility, Reduce Motion, localization and low-end Android are first-class constraints.
+- case-agnostic modular runtime; composition over named Case types;
+- immutable published `CaseVersion` with pinned runtime/configuration provenance;
+- Commit First;
+- Blind First / pre-result isolation where applicable;
+- no pre-Commit collective/result/Perspective leakage;
+- preview fixtures/adapters are never production fallback;
+- raw backend/CaseVersion values are not changed by display localization;
+- My KEFE is observed/descriptive only; no personality, ideology, psychometric, bias or causal inference;
+- Collective Result/Consensus is not automatically Signal, truth or formal authority;
+- Signal/Impact may not silently broaden;
+- AI/provider output is not autonomous truth, editorial acceptance or publication authority;
+- accessibility, Reduce Motion, localization and low-end Android are first-class constraints;
 - CI does not prove human usability, editorial CQB, production OTP/provider delivery, store compliance, deployed SLO or operator rollback.
 
-## 3. Main versus active working stack
+## 3. Active stack
 
-`main` is not currently the top implementation line. The active work is a long draft stack and must be promoted only in dependency order.
+`main` is not the current top implementation line. The active work remains a draft stacked chain and must be promoted only in dependency order.
 
-Observed active stack:
+Observed dependency line:
 
 `main → #90 → #92 → #94 → #95 → #97 → #99 → #101 → #103 → #105 → #107 → #109 → #111 → #113 → #115 → #117 → #118 → #120 → #122 → #124 → #126 → #128 → #132`
 
-PR #68 is unrelated to this MVP/premium stack and remains excluded from continuation unless explicitly reviewed separately.
+PR #68 is excluded from this active MVP/premium stack. It contains isolated ingestion-orchestration work and must not be counted as delivered or merged/rebased silently. Adoption requires a fresh compatibility review.
 
-Never merge a child ahead of its parent. Before any merge, re-read the full live stack and mergeability/CI state; do not rely on this static list if GitHub has moved.
+Before any merge, re-read the live stack, current bases/heads, mergeability, reviews and exact CI. Never merge a child before its parent.
 
-## 4. Latest verified active-stack checkpoint
+## 4. Latest verified runtime — Slice 17
 
-### Corrected Slice 16 — Premium First-Use Journey
+### High-Fidelity Visual Composition Foundation
 
 Verified runtime SHA:
-`68b390584901dc706059485afb6f29d7f073defc`
+`ce9630ba4f013ac9611ac10b397bff356d797bad`
 
-Exact-head workflows:
-- API CI #821 / `30642405804` — SUCCESS
-- Mobile CI #623 / `30642406123` — SUCCESS
-- MVP Beta Gates #325 / `30642405824` — SUCCESS
-- Global Readiness #235 / `30642405813` — SUCCESS
+Exact-head workflows — all SUCCESS on the same SHA:
+- API CI #842 / `30656878396`
+- Mobile CI #641 / `30656878583`
+- MVP Beta Gates #346 / `30656878438`
+- Global Readiness #253 / `30656878637`
 
-Phone artifact:
+Global phone artifact:
 - `kefe-internal-alpha-phone-preview`
-- artifact ID `8798145837`
-- archive digest `sha256:da667b71de223b23a9faf16b2cca66317613455636629ba72d65f2c9f9b3c4b9`
-- APK SHA-256 `3b056e860e92bb871c405f0729b14c6914a330db89933f3b1e8085a8d1cada77`
-- `beta-api.invalid` absent in raw/unpacked scan.
+- artifact ID `8803708655`
+- archive digest `sha256:65f79409a95b9434009762ce4ff1554d806cddae583bdd87db83b930ef7e8fd0`
+- payload `app-debug.apk`
+- APK SHA-256 `aaebe3b9a75f0c7a4380db5236c5f0944a0d97bec62281fc80732eeeede13c82`
+- `beta-api.invalid` absent in raw and unpacked scans.
 
-PR #128 may have later documentation-only commits. Do not redefine the verified runtime SHA from a docs-only head.
+This is an internal Product Preview artifact, not a production/public-beta/store release.
 
-Slice 16 also corrected Product Preview reachability: preview can replay the first-use journey without mutating production onboarding persistence.
+Later documentation-only commits on PR #132 do **not** redefine this verified runtime SHA.
 
-## 5. What is already built on the active stack
+Durable records:
+- Issue #129
+- ADR-0055 `docs/adr/0055-high-fidelity-visual-composition-foundation.md`
+- contract `docs/contracts/high-fidelity-visual-foundation-slice17.v1.json`
+- audit `docs/status/CAPABILITY_RELEASE_AUDIT_2026-07-31.md`
+- verification `docs/status/HIGH_FIDELITY_VISUAL_FOUNDATION_SLICE17_2026-07-31.md`
+- roadmap `docs/status/PRODUCT_COMPLETION_AND_VISUAL_ROADMAP_2026-07-31.md`
 
-### Consumer/product foundation
-- Explore and canonical four-tab shell: Explore / Weigh / Activity / My KEFE.
-- Case → Context → typed Weigh → private Reason → Commit → Reveal → Perspective.
-- Activity/Saved Cases continuity and descriptive My KEFE history.
-- Case-only Blind First sharing.
-- Post-Commit Consensus and Community Reasons inside existing bounded contracts.
-- Settings, privacy presentation and optional account-conversion UI.
-- First-use onboarding and first-Reveal completion.
+## 5. What Slice 17 closed
 
-### Architecture/readiness foundation
-- FastAPI modular backend + PostgreSQL, migrations, contracts and CI gates.
-- Generic composable Flow/CaseVersion execution and historical reproducibility.
-- DecisionRevision / Exposure / Intervention / DecisionDelta / Reflection foundations.
-- First-class Claim/Argument knowledge foundations and reviewed orchestration lineage already developed earlier in the repository history.
-- Product Preview/production isolation.
-- TR/EN localization resource architecture with deterministic English fallback for unsupported resource lookup; no third-locale support claim.
-- System/Light/Dark preferences and shared semantic KEFE visual system.
-- Accessibility/Reduce Motion foundations, production-copy boundary and automated phone acceptance.
+The existing Case media seam now carries reusable provider-neutral composition policy for:
+- fit;
+- normalized focal point;
+- normalized safe area;
+- theme suitability;
+- fallback class;
+- Reduce-Motion-aware motion;
+- bounded compact/hero decode and decoded-memory budgets;
+- cache class.
 
-### Premium convergence through Slice 16
-1. Decision Journey foundation.
-2. Reveal + KEFE Gap.
-3. Perspective/counter-view.
-4. Radar preview.
-5. Atlas preview.
-6–10. Localization foundation/convergence.
-11. Activity + My KEFE.
-12. Shared navigation shell.
-13. Settings + Privacy + Account.
-14. Blind First sharing.
-15. Consensus + Community Reasons.
-16. First-use/onboarding + completion and preview-reachability correction.
+Case media preserves asset identity/hash, aspect ratio, renderer/locator and PRE_COMMIT_SAFE / POST_COMMIT_ONLY exposure.
 
-These slices establish a premium reusable foundation. They do **not** mean the current phone UI has reached the high-fidelity concept-art direction.
+`CaseMediaSurface` now has deterministic non-continuous loading plus explicit empty/error/exposure/fallback behavior. Unsupported renderers or incompatible theme renditions degrade without blocking the decision task. Semantic fallback can preserve alt text; decorative media remains excluded from semantics.
 
-## 6. Current visual target and next architecture slice
+Representative media rendering uses shared theme-adaptive KEFE visual roles. No named-Case renderer branch, mandatory live 3D, WebView or Three.js was introduced.
 
-Premium concept references showing a signature physical-looking KEFE balance, Atlas world/globe scene, Perspective landscape and Spatial CALL field/camera view are **target art direction**.
+Phone parity is now executable at route/shared-surface level: Product Preview must expose production consumer route families while Preview-only Radar/Atlas and first-use review access remain explicit; Preview repository substitutions remain isolated from production.
 
-They are not:
-- current runtime evidence;
-- pixel-exact specifications;
-- permission to add Case-specific runtime branches;
-- new methodology/data semantics;
-- proof of human usability.
+No human visual/usability PASS is inferred.
 
-### Slice 17 — High-Fidelity Visual Composition Foundation
+## 6. Consumer/product state
 
-Canonical tracker: Issue #129  
-Draft PR: #132  
-ADR: `docs/adr/0055-high-fidelity-visual-composition-foundation.md`  
-Contract: `docs/contracts/high-fidelity-visual-foundation-slice17.v1.json`  
-Roadmap: `docs/status/PRODUCT_COMPLETION_AND_VISUAL_ROADMAP_2026-07-31.md`
+The active stack already contains the main consumer loop:
 
-PR #132 currently contains planning/contract files only. **No Slice 17 runtime PASS or APK exists yet.** Parent verified runtime remains Slice 16 SHA `68b39058...` until a new exact-head runtime passes all required gates.
+`Explore → Case/Context → typed Weigh/private Reason → Commit → Reveal → Perspective`
 
-Decision: finish reusable visual-composition infrastructure before implementing rich screen-specific scenes.
+plus:
+- Activity / Saved Cases continuity;
+- descriptive My KEFE history;
+- Blind First case-only sharing;
+- bounded post-Commit Consensus and Community Reasons;
+- Settings, locale/theme and Privacy presentation;
+- optional account-conversion UI;
+- first-use onboarding and first-Reveal completion;
+- generic Flow/CaseVersion runtime;
+- Product Preview/production isolation;
+- TR/EN localization architecture and valid light/dark themes.
 
-Foundation target includes:
-- provider-neutral semantic scene/media slots;
-- asset identity/content hash and provenance;
-- aspect ratio, focal crop, safe-area and theme suitability rules;
-- PRE_COMMIT_SAFE / POST_COMMIT_ONLY exposure guarding;
-- deterministic loading/empty/error/fallback states;
-- decorative/semantic accessibility and text-first fallback;
-- optimized static/pre-rendered visual assets plus lightweight Flutter interactive/data overlays;
-- low-end Android decode/cache/memory/performance budgets;
-- Reduce Motion and theme/locale/text-scale/golden visual regressions.
+Premium convergence through verified Slice 17:
+1. Decision Journey
+2. Reveal + KEFE Gap
+3. Perspective
+4. Radar Preview
+5. Atlas Preview
+6–10. Localization foundation/convergence
+11. Activity + My KEFE
+12. Shared shell
+13. Settings + Privacy + Account
+14. Blind First Sharing
+15. Consensus + Community Reasons
+16. First-use journey + corrected Preview reachability
+17. High-fidelity visual composition foundation + phone parity guard
 
-No mandatory WebView, Three.js or continuously rendered 3D engine is planned.
+The concept-level physical Balance, Atlas globe, Perspective terrain and Spatial CALL scenes are **not** yet implemented; they remain target art direction.
 
-### Planned high-fidelity adoption after foundation verification
+## 7. Non-visual work still exists
 
-Initial order, subject only to a fresh evidence-based audit or accepted decision:
-1. Weigh / signature Balance hero.
-2. Atlas world/globe hero.
-3. Perspective Landscape.
-4. Spatial CALL scene.
-5. Remaining primary-screen loading/empty/error/skeleton, typography and spacing convergence.
+Visual completion is not total KEFE completion.
 
-Before this decision, the likely next slice was general premium loading/empty/error/skeleton convergence across high-visibility screens. That work is not discarded; it is now folded into the visual-foundation/state system and post-foundation cleanup sequence so we do not polish the same surfaces twice.
+Architecture-locked or incomplete areas include:
+- provider-neutral ingestion orchestration on the active delivery line;
+- Candidate Case / Decision Problem / Question Draft projection into Content Authoring;
+- methodology-qualified `WE → SIGNAL → IMPACT` runtime;
+- full Admin/editorial/review operational UI and tooling;
+- real production auth/OTP/provider delivery and other environment/provider maturity.
 
-## 7. Remaining path to a four-dörtlük product
+The canonical Product Bible also preserves accepted-later families such as Today, Evidence Builder, fuller Atlas/Context Lens/Chronicle/Temporal Retest, Circle/Rooms/UGC, Live, DECIDE/RETRO, Education/AI reasoning tools, Observe/Wrapped, Research/Insights/Pulse/Aggregate API and long-horizon validated Values/global indices/governance.
 
-### Repository/product work
-- Implement and repo-verify Slice 17 visual composition foundation.
-- Execute the high-fidelity screen convergence slices above.
-- Continue fresh audits for remaining component/state/typography/spacing/accessibility/performance debt.
-- Promote the draft stack to main in dependency order and verify the resulting mainline state.
-- Select any remaining deferred Product Bible/Roadmap Capability Register items through explicit contracts; do not assume every deferred capability is launch-blocking.
+These are preserved directions, not automatic first-release blockers. Select delivery slices explicitly; do not speculative-build the whole horizon.
 
-### External/human gates
-Still pending and not replaceable by CI:
+## 8. Phone candidate fidelity rule
+
+A phone APK represents only its **exact verified runtime SHA**.
+
+Before describing a future APK as the current implemented phone experience:
+1. record exact runtime SHA, four-workflow evidence, artifact ID/digest and APK hash;
+2. inventory production routes/user-facing surfaces;
+3. inventory Product Preview routes/user-facing surfaces;
+4. classify implemented surfaces as production+preview, production-only with reason, preview-only with reason, or conditional/feature-gated with explicit review path/exclusion;
+5. record Preview repository/provider/fixture substitutions;
+6. mark external behaviors Preview cannot prove;
+7. ensure no intended review surface silently exists in source but is unreachable in the candidate.
+
+Route parity alone is not proof of every nested conditional surface. Add reachability tests when a slice adds or changes a review-critical nested state.
+
+## 9. Next unresolved engineering work
+
+The reusable visual foundation is verified. The next high-visibility vertical slice is:
+
+**Weigh / Signature Balance Hero Convergence**
+
+It must be contract-first and reuse Slice 17 composition/fallback/accessibility/performance rules. Preserve controller/read-model/decision semantics and avoid named-Case branches.
+
+Initial visual sequence after Balance:
+1. Atlas World/Globe
+2. Perspective Landscape
+3. Spatial CALL
+4. residual primary-screen state/typography/spacing/accessibility/performance convergence
+
+Do not interpret this visual sequence as replacing the separately governed non-visual architecture/release backlog.
+
+At the later target-release planning boundary, explicitly decide—rather than guess—how much public Web/deep-link landing and Admin Studio UI the first public beta requires.
+
+## 10. External/human gates still pending
+
+Not replaceable by CI:
 - human phone visual/usability review;
 - real production OTP/provider configuration and deliverability;
 - editorial CQB acceptance of launch content;
@@ -202,65 +219,39 @@ Still pending and not replaceable by CI:
 - deployed production SLO/load/observability;
 - operator-validated production feature-switch/rollback controls.
 
-## 8. Documentation propagation plan
+## 11. Standard development protocol
 
-Do not create a new permanent official logical document for high-fidelity visuals.
+For each meaningful vertical slice:
+1. read `AGENTS.md`, this file, live stack and CI;
+2. distinguish verified runtime SHA from later docs-only head;
+3. audit current implementation before selecting scope;
+4. ADR + executable contract first for material boundary changes;
+5. keep one coherent branch/PR per slice and respect stack order;
+6. implement generic/case-agnostic behavior with preview/production isolation;
+7. add tests/contracts with implementation;
+8. enforce canonical format/analyzer/full regressions and required API/Mobile/MVP/Global gates;
+9. never call PASS without exact evidence;
+10. create/distribute APK only for meaningful verified checkpoints;
+11. record status evidence and update Drive WORKING;
+12. promote published CURRENT documentation only at a declared documentation milestone with its own QA/readback checks.
 
-At the next declared documentation publication milestone, synchronize accepted Slice 17+ findings into existing documents:
-- **Design System** — scene/hero taxonomy, asset/rendition/fallback/accessibility/performance/golden rules;
-- **Engineering Blueprint** — provider-neutral asset resolution, caching/performance/test architecture;
-- **Product Bible** — target art-direction adoption pattern and screen sequence;
-- **MVP Delivery Plan** only if schedule/gates materially change;
-- **Master Product Document** only if product semantics/constitutional principles change.
+## 12. New-chat continuation protocol
 
-Until promotion, Drive CURRENT v3.4 stays untouched and the native Drive WORKING checkpoint carries verified working deltas.
+When the user says **“KEFE’yi geliştirmeye devam et”**:
 
-## 9. Standard development protocol
+1. read root `AGENTS.md` and `docs/status/CURRENT.md` from `main`;
+2. inspect live repo metadata, open PR stack/top head, recent merges and CI;
+3. resolve latest verified runtime separately from docs-only heads;
+4. read the relevant ADR/contract/status files;
+5. consult Drive CURRENT/WORKING when normative/publication detail is needed;
+6. determine whether next unresolved work is visual, non-visual runtime, release evidence or selected future capability;
+7. continue in dependency order without restarting product analysis;
+8. ask the user only if a genuinely material unresolved product/architecture decision is reached.
 
-For every meaningful vertical slice:
-1. Read live repo status and this handoff.
-2. Inspect active parent/top PRs and exact CI; distinguish runtime SHA from docs-only head.
-3. Audit the current implementation before choosing scope.
-4. If product/architecture boundary changes, ADR + executable contract first.
-5. One coherent branch/PR per slice; preserve stack order.
-6. Implement generic, case-agnostic behavior; no preview fallback.
-7. Ship tests/contracts with implementation.
-8. Use canonical format/analyzer/full regressions and required API/Mobile/MVP/Global gates.
-9. Do not call PASS/completed without exact evidence.
-10. Produce a new APK only for a meaningful exact-head verified checkpoint.
-11. Record durable status evidence and update Drive WORKING where appropriate.
-12. Promote CURRENT DOCX/PDF ecosystem only at declared milestones after render/QA/manifest/checksum/upload/readback verification.
-
-Ask the user when a genuinely material product/architecture decision is unresolved. Do not ask for already-known project history, repo names, prior decisions or routine implementation choices that can be recovered from durable sources.
-
-## 10. New-chat continuation protocol
-
-When the user says **“KEFE’yi geliştirmeye devam et”**, treat it as an instruction to resume, not as a request for a recap.
-
-1. Read `docs/status/CURRENT.md` from `main`.
-2. Read GitHub live repository metadata, open PR stack, top PR, recent merges and CI.
-3. If an active stacked line is ahead of main, resolve its top accepted planning head and latest exact verified runtime separately.
-4. Read the relevant top ADR/contract/status files.
-5. Read Drive CURRENT and WORKING only as needed for normative/publication detail; never promote WORKING implicitly.
-6. Continue the next unresolved item in dependency order.
-7. Do not reopen settled product decisions without new contradictory evidence.
-8. If a major new decision is truly required, present the conflict/options to the user before locking it.
-
-Minimal recovery prompt is therefore simply:
+Minimal recovery prompt:
 
 > KEFE’yi geliştirmeye devam et.
 
-No longer require the user to paste historical SHAs or long instructions; those belong in this durable handoff and live repository state.
+## 13. Repository metadata caution
 
-## 11. Repository metadata caution
-
-GitHub repository metadata observed on 2026-07-31 reports repository visibility as **public**. Older project context described the repository as private. Do not change repository visibility automatically. Treat this as an owner/security verification item and require explicit owner intent before any visibility mutation.
-
-## 12. Evidence discipline
-
-- Repo-verified ≠ human-usability approved.
-- Internal phone candidate ≠ production/store release.
-- Preview data ≠ production evidence.
-- Green tests on one SHA do not transfer to a later runtime SHA.
-- Documentation-only commits after a verified runtime must be identified as such.
-- External/provider/store/SLO claims require their own real evidence.
+GitHub metadata observed on 2026-07-31 reports repository visibility as **public**, while older project context described it as private. Do not change visibility automatically. Require explicit owner intent before any visibility mutation.
