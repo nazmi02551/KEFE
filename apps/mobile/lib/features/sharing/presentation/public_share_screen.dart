@@ -86,10 +86,7 @@ class _PublicShareScreenState extends ConsumerState<PublicShareScreen> {
                   label: strings.loading,
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.hourglass_top_rounded,
-                        color: visual.goldSoft,
-                      ),
+                      Icon(Icons.hourglass_top_rounded, color: visual.goldSoft),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
