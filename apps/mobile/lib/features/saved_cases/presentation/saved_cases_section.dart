@@ -64,10 +64,7 @@ class _SavedCasesSectionState extends ConsumerState<SavedCasesSection> {
                   color: visual.subtleGoldSurface,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(
-                  Icons.bookmark_added_outlined,
-                  color: visual.gold,
-                ),
+                child: Icon(Icons.bookmark_added_outlined, color: visual.gold),
               ),
               const SizedBox(width: 11),
               Expanded(
@@ -126,15 +123,14 @@ class _SavedCasesSectionState extends ConsumerState<SavedCasesSection> {
             Text(
               strings.savedCasesEmpty,
               key: const ValueKey('saved-cases-empty'),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: visual.mutedForeground,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: visual.mutedForeground),
             )
           else
             for (var index = 0; index < state.items.length; index++) ...[
               _SavedCaseTile(item: state.items[index]),
-              if (index != state.items.length - 1)
-                const SizedBox(height: 10),
+              if (index != state.items.length - 1) const SizedBox(height: 10),
             ],
         ],
       ),
@@ -181,18 +177,18 @@ class _SavedCaseTile extends ConsumerWidget {
           children: [
             Text(
               title,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 5),
             Text(
               summary,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: visual.mutedForeground,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: visual.mutedForeground),
             ),
             const SizedBox(height: 10),
             Wrap(

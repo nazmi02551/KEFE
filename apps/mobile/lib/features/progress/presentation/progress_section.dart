@@ -95,10 +95,7 @@ class _ProgressReady extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              KefeEyebrow(
-                strings.progressTitle,
-                icon: Icons.insights_rounded,
-              ),
+              KefeEyebrow(strings.progressTitle, icon: Icons.insights_rounded),
               const SizedBox(height: 9),
               Text(
                 strings.progressReadiness(progress.readiness),

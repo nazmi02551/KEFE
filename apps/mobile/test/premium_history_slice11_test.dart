@@ -70,7 +70,10 @@ void main() {
             find.byKey(const ValueKey('activity-preview-notice')),
             findsOneWidget,
           );
-          expect(find.byKey(const ValueKey('saved-cases-section')), findsOneWidget);
+          expect(
+            find.byKey(const ValueKey('saved-cases-section')),
+            findsOneWidget,
+          );
           expect(find.byType(KefeSurface), findsWidgets);
           expect(tester.takeException(), isNull);
         },
@@ -91,7 +94,10 @@ void main() {
             find.byKey(const ValueKey('my-kefe-preview-notice')),
             findsOneWidget,
           );
-          expect(find.byKey(const ValueKey('saved-cases-section')), findsNothing);
+          expect(
+            find.byKey(const ValueKey('saved-cases-section')),
+            findsNothing,
+          );
           expect(find.byType(KefeSurface), findsWidgets);
 
           await tester.scrollUntilVisible(
@@ -157,7 +163,9 @@ Future<void> _pumpHistorySurface(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        progressRepositoryProvider.overrideWithValue(PreviewProgressRepository()),
+        progressRepositoryProvider.overrideWithValue(
+          PreviewProgressRepository(),
+        ),
         savedCaseStoreProvider.overrideWithValue(MemorySavedCaseStore()),
         kefeContentLocalizerProvider.overrideWithValue(
           const PreviewContentLocalizer(),

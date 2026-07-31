@@ -411,11 +411,7 @@ class _PreviewNotice extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          Icons.science_outlined,
-          size: 18,
-          color: context.kefeVisual.rules,
-        ),
+        Icon(Icons.science_outlined, size: 18, color: context.kefeVisual.rules),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
