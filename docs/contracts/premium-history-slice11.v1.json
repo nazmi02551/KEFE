@@ -1,0 +1,58 @@
+{
+  "contract": "premium-history-slice11",
+  "version": "1.0.0",
+  "date": "2026-07-31",
+  "scope": {
+    "activity_visual_convergence": true,
+    "my_kefe_visual_convergence": true,
+    "progress_visual_convergence": true,
+    "backend_model_change": false,
+    "new_history_metric": false,
+    "new_product_mode": false
+  },
+  "presentation": {
+    "semantic_kefe_surfaces_required": true,
+    "light_dark_parity_required": true,
+    "tr_en_rendering_required": true,
+    "direct_dark_only_tokens_forbidden": true,
+    "preview_truthfulness_notice_preserved": true,
+    "non_inference_note_preserved": true,
+    "reduce_motion_required_if_motion_added": true,
+    "screen_reader_semantics_required": true
+  },
+  "behavior": {
+    "existing_navigation_preserved": true,
+    "existing_widget_keys_preserved": true,
+    "progress_controller_semantics_preserved": true,
+    "loading_retry_semantics_preserved": true,
+    "read_model_values_preserved": true,
+    "preview_fixture_as_production_fallback": false
+  },
+  "my_kefe": {
+    "observed_descriptive_only": true,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "bias_inference": false,
+    "causal_inference": false,
+    "normative_scoring": false
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "generic_runtime": true,
+    "preview_production_isolation": true,
+    "signal_in_scope": false,
+    "impact_in_scope": false
+  },
+  "verification": {
+    "exact_head_required": true,
+    "api_ci_required": true,
+    "mobile_ci_required": true,
+    "mvp_beta_gates_required": true,
+    "global_readiness_required": true,
+    "phone_acceptance_required": true,
+    "production_copy_boundary_required": true
+  }
+}
