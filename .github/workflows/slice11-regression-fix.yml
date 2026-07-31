@@ -1,0 +1,60 @@
+name: Slice11 Regression Fix
+
+on:
+  push:
+    branches: [feature/premium-history-slice11]
+    paths:
+      - '.github/workflows/slice11-regression-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/premium-history-slice11
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Apply deterministic regression fix
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          spinner_old = """const SizedBox.square(\n                          dimension: 18,\n                          child: CircularProgressIndicator(strokeWidth: 2),\n                        ),"""
+          spinner_new = """Icon(\n                          Icons.hourglass_top_rounded,\n                          size: 18,\n                          color: context.kefeVisual.gold,\n                        ),"""
+          spinner_paths = [
+              Path('apps/mobile/lib/features/activity/presentation/activity_screen.dart'),
+              Path('apps/mobile/lib/features/progress/presentation/my_kefe_journey_screen.dart'),
+              Path('apps/mobile/lib/features/progress/presentation/progress_section.dart'),
+          ]
+          for path in spinner_paths:
+              text = path.read_text()
+              if spinner_old not in text:
+                  raise SystemExit(f'loading spinner block not found in {path}')
+              path.write_text(text.replace(spinner_old, spinner_new, 1))
+
+          test_path = Path('apps/mobile/test/premium_history_slice11_test.dart')
+          test_text = test_path.read_text()
+          scroll_old = """await tester.scrollUntilVisible(\n            find.byKey(const ValueKey('my-kefe-no-inference-note')),\n            300,\n            scrollable: find.byKey(const ValueKey('my-kefe-journey')),\n          );"""
+          scroll_new = """final footnote = find.byKey(\n            const ValueKey('my-kefe-no-inference-note'),\n          );\n          final journeyScroll = find.descendant(\n            of: find.byKey(const ValueKey('my-kefe-journey')),\n            matching: find.byType(Scrollable),\n          );\n          await tester.scrollUntilVisible(\n            footnote,\n            300,\n            scrollable: journeyScroll,\n          );"""
+          if scroll_old not in test_text:
+              raise SystemExit('Slice 11 scroll harness block not found')
+          test_path.write_text(test_text.replace(scroll_old, scroll_new, 1))
+          PY
+      - name: Canonical format
+        working-directory: apps/mobile
+        run: dart format lib/features/activity/presentation/activity_screen.dart lib/features/progress/presentation/my_kefe_journey_screen.dart lib/features/progress/presentation/progress_section.dart test/premium_history_slice11_test.dart
+      - name: Commit source-only fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/mobile/lib/features/activity/presentation/activity_screen.dart apps/mobile/lib/features/progress/presentation/my_kefe_journey_screen.dart apps/mobile/lib/features/progress/presentation/progress_section.dart apps/mobile/test/premium_history_slice11_test.dart
+          git commit -m 'fix: stabilize premium history loading and test harness'
+          git push origin HEAD:feature/premium-history-slice11
