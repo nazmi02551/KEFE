@@ -12,6 +12,7 @@ import '../../progress/presentation/progress_section.dart';
 import '../../sharing/presentation/share_section.dart';
 import '../application/decision_controller.dart';
 import '../domain/decision_models.dart';
+import 'perspective_landscape_visual.dart';
 
 class PerspectiveSection extends ConsumerWidget {
   const PerspectiveSection({
@@ -280,6 +281,12 @@ class _LoadedState extends ConsumerWidget {
             accent: visual.attention,
           ),
           const SizedBox(height: 12),
+        ],
+        if (snapshot.cards.isNotEmpty) ...[
+          PerspectiveLandscapeVisual(
+            slots: [for (final card in snapshot.cards) card.slot],
+          ),
+          const SizedBox(height: 14),
         ],
         if (snapshot.cards.isEmpty)
           KefeSurface(
