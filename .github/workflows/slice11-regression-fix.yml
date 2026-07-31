@@ -58,3 +58,5 @@ jobs:
           git add apps/mobile/lib/features/activity/presentation/activity_screen.dart apps/mobile/lib/features/progress/presentation/my_kefe_journey_screen.dart apps/mobile/lib/features/progress/presentation/progress_section.dart apps/mobile/test/premium_history_slice11_test.dart
           git commit -m 'fix: stabilize premium history loading and test harness'
           git push origin HEAD:feature/premium-history-slice11
+
+# trigger
