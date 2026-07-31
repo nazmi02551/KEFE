@@ -1,0 +1,105 @@
+{
+  "contract": "high-fidelity-visual-foundation-slice17",
+  "version": 1,
+  "issue": 129,
+  "adr": "ADR-0055",
+  "goal": "Reusable provider-neutral visual composition infrastructure before high-fidelity screen convergence.",
+  "scope": {
+    "visual_composition_foundation": true,
+    "screen_specific_high_fidelity_convergence": false,
+    "product_semantics_change": false,
+    "backend_methodology_change": false,
+    "case_type_added": false,
+    "signal_change": false,
+    "impact_change": false
+  },
+  "architecture": {
+    "provider_neutral_descriptors": true,
+    "case_agnostic_composition": true,
+    "asset_identity_pinned": true,
+    "asset_content_hash_pinned": true,
+    "preview_production_isolation": true,
+    "preview_as_production_fallback": false,
+    "heavy_live_3d_required": false,
+    "webview_required": false,
+    "threejs_required": false,
+    "flutter_native_overlay_supported": true,
+    "pre_rendered_asset_supported": true
+  },
+  "presentation_contract": {
+    "semantic_slots_required": true,
+    "aspect_ratio_required": true,
+    "focal_crop_policy_required": true,
+    "safe_area_policy_required": true,
+    "theme_suitability_policy_required": true,
+    "fallback_policy_required": true,
+    "loading_state_required": true,
+    "empty_state_required": true,
+    "error_unavailable_state_required": true,
+    "core_task_survives_asset_failure": true
+  },
+  "exposure": {
+    "pre_commit_safe_explicit": true,
+    "post_commit_only_explicit": true,
+    "pre_commit_collective_result_exposure": false,
+    "pre_commit_perspective_exposure": false
+  },
+  "accessibility": {
+    "decorative_or_semantic_explicit": true,
+    "semantic_alt_or_text_equivalent_required": true,
+    "decorative_media_only_meaning_carrier": false,
+    "reduce_motion_required": true,
+    "text_scaling_regression_required": true
+  },
+  "performance": {
+    "low_end_android_first_class": true,
+    "bounded_decode_behavior_required": true,
+    "bounded_cache_memory_policy_required": true,
+    "continuous_decorative_animation_required": false,
+    "visual_fidelity_may_block_core_decision_path": false
+  },
+  "future_vertical_order": [
+    "WEIGH_SIGNATURE_BALANCE_HERO",
+    "ATLAS_WORLD_HERO",
+    "PERSPECTIVE_LANDSCAPE",
+    "SPATIAL_CALL_SCENE",
+    "PRIMARY_SCREEN_STATE_TYPOGRAPHY_SPACING_CONVERGENCE"
+  ],
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "generic_runtime": true,
+    "raw_backend_values_unchanged_by_display": true,
+    "my_kefe_descriptive_only": true,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "bias_inference": false,
+    "causal_inference": false
+  },
+  "evidence": {
+    "concept_references_are_runtime_evidence": false,
+    "human_usability_inferred_from_ci": false,
+    "exact_head_ci_required": true,
+    "required_workflows": [
+      "API CI",
+      "Mobile CI",
+      "MVP Beta Gates",
+      "Global Readiness"
+    ],
+    "visual_contract_tests_required": true,
+    "theme_locale_visual_regression_required": true,
+    "performance_regression_required": true,
+    "apk_only_after_meaningful_verified_checkpoint": true
+  },
+  "documentation": {
+    "current_v34_superseded": false,
+    "new_official_logical_document_required": false,
+    "next_publication_targets": [
+      "Design System",
+      "Engineering Blueprint",
+      "Product Bible"
+    ]
+  }
+}

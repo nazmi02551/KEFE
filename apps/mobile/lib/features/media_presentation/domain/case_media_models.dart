@@ -1,3 +1,5 @@
+import '../../../core/visual_composition/kefe_visual_composition_models.dart';
+
 enum CaseMediaSlot {
   exploreCard('EXPLORE_CARD'),
   caseHero('CASE_HERO'),
@@ -59,11 +61,16 @@ class CaseMediaRendition {
     required this.rendererCode,
     required this.locator,
     required this.aspectRatio,
-  });
+    this.composition = const KefeVisualCompositionPolicy(),
+  }) : assert(aspectRatio > 0);
 
-  /// Provider-neutral renderer family. The first preview slice only supports
-  /// KEFE_ABSTRACT_V1. Remote image/CDN renderers are deliberately deferred.
+  /// Provider-neutral renderer family. A renderer code selects presentation
+  /// capability, not a Case type or provider SDK.
   final String rendererCode;
   final String locator;
   final double aspectRatio;
+
+  /// Shared visual-composition policy used by Case media now and reusable by
+  /// later high-fidelity scene families without named-Case branches.
+  final KefeVisualCompositionPolicy composition;
 }
