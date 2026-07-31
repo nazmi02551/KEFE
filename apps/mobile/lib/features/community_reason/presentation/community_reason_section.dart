@@ -97,9 +97,9 @@ class _CommunityReasonSectionState
           const SizedBox(height: 18),
           Text(
             strings.communityPublishHeading,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 10),
           Wrap(
@@ -218,9 +218,9 @@ class _CommunityReasonSectionState
             const SizedBox(height: 20),
             Text(
               strings.communityPublished,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 10),
             for (final item in state.snapshot!.items) ...[
@@ -326,9 +326,7 @@ class _CommunityHeader extends StatelessWidget {
           decoration: BoxDecoration(
             color: visual.subtleEmpathySurface,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: visual.empathy.withValues(alpha: 0.22),
-            ),
+            border: Border.all(color: visual.empathy.withValues(alpha: 0.22)),
           ),
           child: Icon(Icons.people_alt_outlined, color: visual.empathy),
         ),
