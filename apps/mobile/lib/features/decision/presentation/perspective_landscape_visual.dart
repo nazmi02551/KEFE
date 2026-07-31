@@ -93,9 +93,10 @@ class _SlotLegend extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(999),
-              color: _slotColor(visual, slot).withValues(
-                alpha: visual.isDark ? 0.11 : 0.07,
-              ),
+              color: _slotColor(
+                visual,
+                slot,
+              ).withValues(alpha: visual.isDark ? 0.11 : 0.07),
               border: Border.all(
                 color: _slotColor(visual, slot).withValues(alpha: 0.30),
               ),
@@ -185,7 +186,8 @@ class _PerspectiveLandscapePainter extends CustomPainter {
         baseline: yBase,
         amplitudeScale: 1 - normalizedLayer * 0.065,
       );
-      final alpha = (visual.isDark ? 0.24 : 0.18) * (1 - normalizedLayer * 0.55);
+      final alpha =
+          (visual.isDark ? 0.24 : 0.18) * (1 - normalizedLayer * 0.55);
       final lineColor = Color.lerp(
         visual.rules,
         visual.goldSoft,
@@ -229,17 +231,18 @@ class _PerspectiveLandscapePainter extends CustomPainter {
       Offset(size.width * 0.5, size.height * 0.50),
       size.shortestSide * 0.40,
       Paint()
-        ..shader = RadialGradient(
-          colors: [
-            visual.gold.withValues(alpha: visual.isDark ? 0.045 : 0.025),
-            Colors.transparent,
-          ],
-        ).createShader(
-          Rect.fromCircle(
-            center: Offset(size.width * 0.5, size.height * 0.50),
-            radius: size.shortestSide * 0.40,
-          ),
-        ),
+        ..shader =
+            RadialGradient(
+              colors: [
+                visual.gold.withValues(alpha: visual.isDark ? 0.045 : 0.025),
+                Colors.transparent,
+              ],
+            ).createShader(
+              Rect.fromCircle(
+                center: Offset(size.width * 0.5, size.height * 0.50),
+                radius: size.shortestSide * 0.40,
+              ),
+            ),
     );
   }
 
@@ -271,7 +274,10 @@ class _PerspectiveLandscapePainter extends CustomPainter {
             amplitudeScale;
       }
       final ripple =
-          math.sin(xNorm * math.pi * 6.0) * size.height * 0.008 * amplitudeScale;
+          math.sin(xNorm * math.pi * 6.0) *
+          size.height *
+          0.008 *
+          amplitudeScale;
       final y = baseline - elevation - ripple;
       if (i == 0) {
         path.moveTo(x, y);
@@ -360,18 +366,22 @@ class _PerspectiveLandscapePainter extends CustomPainter {
 
 List<PerspectiveSlot> _uniqueSlots(List<PerspectiveSlot> slots) {
   final seen = <PerspectiveSlot>{};
-  return [for (final slot in slots) if (seen.add(slot)) slot];
+  return [
+    for (final slot in slots)
+      if (seen.add(slot)) slot,
+  ];
 }
 
 bool _setEquals(Set<PerspectiveSlot> a, Set<PerspectiveSlot> b) =>
     a.length == b.length && a.containsAll(b);
 
-Color _slotColor(KefeVisualTheme visual, PerspectiveSlot slot) => switch (slot) {
-  PerspectiveSlot.near => visual.success,
-  PerspectiveSlot.opposing => visual.empathy,
-  PerspectiveSlot.bridge => visual.gold,
-  PerspectiveSlot.alternativeContext => visual.rules,
-};
+Color _slotColor(KefeVisualTheme visual, PerspectiveSlot slot) =>
+    switch (slot) {
+      PerspectiveSlot.near => visual.success,
+      PerspectiveSlot.opposing => visual.empathy,
+      PerspectiveSlot.bridge => visual.gold,
+      PerspectiveSlot.alternativeContext => visual.rules,
+    };
 
 IconData _slotIcon(PerspectiveSlot slot) => switch (slot) {
   PerspectiveSlot.near => Icons.near_me_outlined,
