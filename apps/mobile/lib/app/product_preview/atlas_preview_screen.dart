@@ -160,9 +160,7 @@ class _SelectedCaseHeader extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: visual.gold.withValues(alpha: 0.12),
-            border: Border.all(
-              color: visual.goldSoft.withValues(alpha: 0.30),
-            ),
+            border: Border.all(color: visual.goldSoft.withValues(alpha: 0.30)),
             boxShadow: [
               BoxShadow(
                 color: visual.gold.withValues(alpha: 0.08),
