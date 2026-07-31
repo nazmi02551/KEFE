@@ -130,10 +130,7 @@ class _AtlasHero extends StatelessWidget {
             ],
           ),
           SizedBox(height: compact ? 4 : 8),
-          AtlasGlobeVisual(
-            markers: _atlasMarkers,
-            compact: compact,
-          ),
+          AtlasGlobeVisual(markers: _atlasMarkers, compact: compact),
           SizedBox(height: compact ? 4 : 9),
           _AtlasContinuum(strings: strings),
         ],
@@ -348,7 +345,9 @@ class _CountryAverageCard extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: accent.withValues(alpha: visual.isDark ? 0.13 : 0.08),
+                    color: accent.withValues(
+                      alpha: visual.isDark ? 0.13 : 0.08,
+                    ),
                     border: Border.all(color: accent.withValues(alpha: 0.52)),
                   ),
                   child: ExcludeSemantics(
@@ -416,7 +415,7 @@ class _ScaleTrack extends StatelessWidget {
     return ExcludeSemantics(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final markerSize = 11.0;
+          const markerSize = 11.0;
           final normalized = ((value ?? 0) / 10).clamp(0.0, 1.0);
           return SizedBox(
             height: value == null ? 8 : 13,
@@ -467,37 +466,13 @@ class _ScaleTrack extends StatelessWidget {
   }
 }
 
-const _atlasMarkers = <AtlasGlobeMarker>[
-  AtlasGlobeMarker(
-    countryCode: 'US',
-    value: 6.2,
-    normalizedPosition: Offset(0.22, 0.36),
-  ),
-  AtlasGlobeMarker(
-    countryCode: 'BR',
-    value: 6.7,
-    normalizedPosition: Offset(0.34, 0.67),
-  ),
-  AtlasGlobeMarker(
-    countryCode: 'DE',
-    value: 5.4,
-    normalizedPosition: Offset(0.48, 0.30),
-  ),
-  AtlasGlobeMarker(
-    countryCode: 'TR',
-    value: 7.1,
-    normalizedPosition: Offset(0.58, 0.38),
-  ),
-  AtlasGlobeMarker(
-    countryCode: 'JP',
-    value: 4.8,
-    normalizedPosition: Offset(0.79, 0.39),
-  ),
-  AtlasGlobeMarker(
-    countryCode: 'ID',
-    value: 7.3,
-    normalizedPosition: Offset(0.70, 0.68),
-  ),
+final _atlasMarkers = <AtlasGlobeMarker>[
+  for (final item in AtlasPreviewFixture.countries)
+    AtlasGlobeMarker(
+      countryCode: item.countryCode,
+      value: item.value,
+      normalizedPosition: Offset(item.markerX, item.markerY),
+    ),
 ];
 
 Color _countryValueColor(KefeVisualTheme visual, double value) {
