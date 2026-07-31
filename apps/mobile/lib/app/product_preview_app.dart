@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/build/preview_build_info.dart';
 import '../core/design/kefe_theme.dart';
+import '../core/design/kefe_visual_system.dart';
 import '../core/localization/kefe_strings.dart';
 import '../core/localization/settings_strings.dart';
 import '../core/preferences/app_preferences.dart';
@@ -59,11 +60,11 @@ class _ProductPreviewAppState extends ConsumerState<ProductPreviewApp> {
         path: '/my-kefe',
         builder: (context, _) => PrimaryNavigationShell(
           selectedIndex: 3,
-          floatingActionButton: FloatingActionButton.small(
+          floatingActionButton: KefeShellAction(
             key: const ValueKey('open-preview-settings'),
-            onPressed: () => context.push('/settings'),
+            icon: Icons.settings_outlined,
             tooltip: KefeStrings.of(context).settingsTitle,
-            child: const Icon(Icons.settings_outlined),
+            onPressed: () => context.push('/settings'),
           ),
           footer: const _PreviewBuildIdentity(),
           child: const MyKefeJourneyScreen(embedded: true),
@@ -156,20 +157,20 @@ class _ExploreSecondaryActions extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        FloatingActionButton.small(
+        KefeShellAction(
           key: const ValueKey('open-preview-radar'),
           heroTag: 'preview-radar',
           tooltip: 'Radar',
+          icon: Icons.radar_rounded,
           onPressed: () => context.push('/radar'),
-          child: const Icon(Icons.radar_rounded),
         ),
         const SizedBox(height: 10),
-        FloatingActionButton.small(
+        KefeShellAction(
           key: const ValueKey('open-preview-atlas'),
           heroTag: 'preview-atlas',
           tooltip: 'Atlas',
+          icon: Icons.public_rounded,
           onPressed: () => context.push('/atlas'),
-          child: const Icon(Icons.public_rounded),
         ),
       ],
     );
@@ -189,10 +190,23 @@ class _SecondaryPreviewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: visual.surfaceRaised,
+        foregroundColor: visual.foreground,
         leading: BackButton(onPressed: onBack),
-        title: Text(title),
+        title: Text(
+          title,
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(height: 1, thickness: 1, color: visual.border),
+        ),
       ),
       body: child,
     );
@@ -204,21 +218,22 @@ class _PreviewBuildIdentity extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+
     return Semantics(
       label: PreviewBuildInfo.label,
       child: Container(
         key: const ValueKey('preview-build-identity'),
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-        color: KefeColorTokens.surfaceDark,
+        decoration: BoxDecoration(
+          color: visual.surfaceSunken,
+          border: Border(bottom: BorderSide(color: visual.border)),
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.verified_outlined,
-              size: 14,
-              color: KefeColorTokens.goldSoft,
-            ),
+            Icon(Icons.verified_outlined, size: 14, color: visual.gold),
             const SizedBox(width: 6),
             Flexible(
               child: Text(
@@ -226,7 +241,7 @@ class _PreviewBuildIdentity extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: KefeColorTokens.textMutedDark,
+                  color: visual.mutedForeground,
                   fontWeight: FontWeight.w700,
                 ),
               ),
