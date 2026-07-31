@@ -316,7 +316,6 @@ class _ConsensusFrame extends StatelessWidget {
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
     return KefeSurface(
-      key: key,
       tone: KefeSurfaceTone.raised,
       accent: visual.gold,
       padding: const EdgeInsets.all(18),
@@ -481,7 +480,6 @@ class _MethodNote extends StatelessWidget {
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
     return KefeSurface(
-      key: key,
       tone: KefeSurfaceTone.sunken,
       accent: visual.rules,
       padding: const EdgeInsets.all(13),
