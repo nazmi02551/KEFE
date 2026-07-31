@@ -91,9 +91,7 @@ void main() {
       findsOneWidget,
     );
 
-    final globe = tester.widget<AtlasGlobeVisual>(
-      find.byKey(const ValueKey('atlas-world-globe')),
-    );
+    final globe = tester.widget<AtlasGlobeVisual>(find.byType(AtlasGlobeVisual));
     expect(
       globe.markers
           .map((item) => '${item.countryCode}:${item.value.toStringAsFixed(1)}')
