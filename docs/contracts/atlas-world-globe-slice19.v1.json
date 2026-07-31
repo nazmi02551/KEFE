@@ -1,0 +1,129 @@
+{
+  "contract": "atlas-world-globe-slice19",
+  "version": "1.0.0",
+  "date": "2026-07-31",
+  "source_adr": "docs/adr/0057-atlas-world-globe-convergence.md",
+  "parent_foundation": "docs/adr/0055-high-fidelity-visual-composition-foundation.md",
+  "tracker_issue": 140,
+  "status": "architecture_locked_runtime_pending",
+  "scope": {
+    "preview_atlas_visual_convergence": true,
+    "production_atlas_promotion": false,
+    "primary_navigation_change": false,
+    "backend_change": false,
+    "api_change": false,
+    "schema_change": false,
+    "aggregation_methodology_change": false,
+    "signal_impact_change": false
+  },
+  "route": {
+    "preview_path": "/atlas",
+    "preview_only": true,
+    "production_route_forbidden": true,
+    "secondary_preview_action_preserved": true
+  },
+  "data_truthfulness": {
+    "fixture_values_are_representative_preview_only": true,
+    "fixture_values_are_real_country_results": false,
+    "existing_scale_min": 0,
+    "existing_scale_max": 10,
+    "existing_country_values_unchanged": true,
+    "representative_notice_required": true,
+    "invented_country_percentages_forbidden": true,
+    "invented_sample_size_forbidden": true,
+    "invented_date_range_forbidden": true,
+    "invented_confidence_forbidden": true,
+    "invented_weighting_methodology_forbidden": true,
+    "invented_live_update_timestamp_forbidden": true,
+    "causal_country_explanation_forbidden": true,
+    "signal_or_authority_claim_forbidden": true
+  },
+  "presentation": {
+    "renderer_family": "FLUTTER_ATLAS_GLOBE_V1",
+    "lightweight_flutter_native": true,
+    "dimensional_globe": true,
+    "atmosphere_depth": true,
+    "graticule": true,
+    "abstract_landmasses": true,
+    "deterministic_orbit_arcs": true,
+    "deterministic_country_markers": true,
+    "country_cards_retained": true,
+    "selected_case_retained": true,
+    "continuum_retained": true,
+    "truth_notice_must_not_be_hidden": true,
+    "theme_adaptive": true,
+    "light_theme_required": true,
+    "dark_theme_required": true,
+    "compact_layout_required": true,
+    "text_scale_safe": true,
+    "continuous_animation_forbidden": true,
+    "webview_required": false,
+    "threejs_required": false,
+    "live_3d_required": false
+  },
+  "marker_semantics": {
+    "source": "PRESENTATION_ONLY_COUNTRY_CODE_MAP",
+    "analytical_geography_claim": false,
+    "sample_geography_claim": false,
+    "jurisdiction_methodology_claim": false,
+    "existing_scalar_is_only_value_encoding": true,
+    "derive_two_percentages_from_scalar_forbidden": true
+  },
+  "accessibility": {
+    "country_cards_complete_text_representation": true,
+    "color_only_information_forbidden": true,
+    "position_only_information_forbidden": true,
+    "decorative_globe_geometry_excluded_from_semantics": true,
+    "notice_clipping_forbidden": true
+  },
+  "foundation_reuse": {
+    "slice17_theme_roles": true,
+    "slice17_reduce_motion": true,
+    "slice17_performance_policy": true,
+    "slice17_phone_parity_rule": true
+  },
+  "performance": {
+    "low_end_android_first_class": true,
+    "idle_per_frame_repaint_forbidden": true,
+    "continuous_particles_forbidden": true,
+    "continuous_shader_animation_forbidden": true,
+    "remote_asset_dependency_required": false
+  },
+  "phone_review": {
+    "preview_action_reachability_required": true,
+    "atlas_route_reachable": true,
+    "representative_notice_reachable": true,
+    "globe_hero_reachable": true,
+    "selected_case_reachable": true,
+    "country_cards_reachable": true,
+    "production_route_isolation_required": true
+  },
+  "tests": {
+    "contract_guard": true,
+    "fixture_value_continuity": true,
+    "truth_notice": true,
+    "no_fabricated_metadata": true,
+    "light_dark": true,
+    "compact_layout": true,
+    "country_card_semantics": true,
+    "preview_reachability": true,
+    "production_route_isolation": true,
+    "existing_mobile_regressions": true
+  },
+  "required_exact_head_workflows": [
+    "API CI",
+    "Mobile CI",
+    "MVP Beta Gates",
+    "Global Readiness"
+  ],
+  "non_claims": [
+    "REAL_COUNTRY_RESULTS",
+    "LIVE_ATLAS",
+    "NATIONAL_REPRESENTATIVENESS",
+    "VALIDATED_CROSS_COUNTRY_METHODOLOGY",
+    "SIGNAL_AUTHORITY",
+    "PRODUCTION_ATLAS_READINESS",
+    "HUMAN_VISUAL_APPROVAL",
+    "HUMAN_USABILITY_PASS"
+  ]
+}
