@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/design/kefe_theme.dart';
+import '../../../core/design/kefe_surface.dart';
+import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../application/decision_controller.dart';
 import '../application/reflection_completion_provider.dart';
@@ -258,77 +259,78 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
     final model = _model;
     final completed =
         model?.completed == true ||
         widget.step.state == FlowStepRuntimeState.completed;
+    final statusColor = model?.decisionChanged == true
+        ? visual.attention
+        : visual.success;
 
-    return Card(
+    return KefeSurface(
       key: ValueKey('reflection-step-${widget.step.code}'),
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
+      tone: KefeSurfaceTone.raised,
+      accent: visual.gold,
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ExcludeSemantics(
+                child: Container(
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: KefeColorTokens.gold.withValues(alpha: 0.12),
+                    color: visual.subtleGoldSurface,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: KefeColorTokens.gold.withValues(alpha: 0.24),
+                      color: visual.gold.withValues(alpha: 0.24),
                     ),
                   ),
-                  child: const Icon(
-                    Icons.route_rounded,
-                    color: KefeColorTokens.goldSoft,
-                  ),
+                  child: Icon(Icons.route_rounded, color: visual.goldSoft),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      strings.reflectionTitle,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: visual.foreground,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    if (model != null) ...[
+                      const SizedBox(height: 4),
                       Text(
-                        strings.reflectionTitle,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
+                        strings.reflectionDecisionSummary(
+                          model.decisionChanged,
+                          model.changedQuestionCount,
+                        ),
+                        key: const ValueKey('reflection-summary'),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: visual.mutedForeground,
+                          height: 1.35,
                         ),
                       ),
-                      if (model != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          strings.reflectionDecisionSummary(
-                            model.decisionChanged,
-                            model.changedQuestionCount,
-                          ),
-                          key: const ValueKey('reflection-summary'),
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: KefeColorTokens.textMutedDark,
-                                height: 1.35,
-                              ),
-                        ),
-                      ],
                     ],
-                  ),
+                  ],
                 ),
-                if (model != null)
-                  Container(
+              ),
+              if (model != null)
+                ExcludeSemantics(
+                  child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 9,
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color:
-                          (model.decisionChanged
-                                  ? KefeColorTokens.attention
-                                  : KefeColorTokens.success)
-                              .withValues(alpha: 0.10),
+                      color: statusColor.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(99),
                     ),
                     child: Icon(
@@ -336,143 +338,288 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
                           ? Icons.compare_arrows_rounded
                           : Icons.check_rounded,
                       size: 17,
-                      color: model.decisionChanged
-                          ? KefeColorTokens.attention
-                          : KefeColorTokens.success,
+                      color: statusColor,
                     ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (_loading && model == null)
-              Text(strings.reflectionLoading)
-            else if (_errorCode != null && model == null) ...[
-              Text(strings.messageForCode(_errorCode)),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                key: const ValueKey('reflection-retry'),
-                onPressed: _load,
-                child: Text(strings.reflectionRetry),
-              ),
-            ] else if (model != null) ...[
-              _DecisionJourneyGraphic(model: model),
-              if (model.interventionCount > 0) ...[
-                const SizedBox(height: 14),
-                Container(
-                  key: const ValueKey('reflection-intervention-summary'),
-                  padding: const EdgeInsets.all(13),
-                  decoration: BoxDecoration(
-                    color: KefeColorTokens.rules.withValues(alpha: 0.07),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: KefeColorTokens.rules.withValues(alpha: 0.18),
-                    ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.visibility_outlined,
-                        color: KefeColorTokens.rules,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          strings.reflectionInterventionSummary(
-                            model.interventionCount,
-                          ),
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.copyWith(height: 1.4),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
-              ],
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (_loading && model == null)
+            _ReflectionLoadingState(label: strings.reflectionLoading)
+          else if (_errorCode != null && model == null)
+            _ReflectionErrorState(
+              message: strings.messageForCode(_errorCode),
+              retryLabel: strings.reflectionRetry,
+              onRetry: _load,
+            )
+          else if (model != null) ...[
+            _DecisionJourneyGraphic(model: model),
+            if (model.interventionCount > 0) ...[
               const SizedBox(height: 14),
-              Container(
+              KefeSurface(
+                key: const ValueKey('reflection-intervention-summary'),
+                tone: KefeSurfaceTone.sunken,
+                accent: visual.rules,
                 padding: const EdgeInsets.all(13),
-                decoration: BoxDecoration(
-                  color: KefeColorTokens.surfaceElevatedDark.withValues(
-                    alpha: 0.72,
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outlineVariant,
-                  ),
-                ),
+                borderRadius: 14,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(
-                      Icons.info_outline_rounded,
-                      color: KefeColorTokens.goldSoft,
-                      size: 20,
+                    ExcludeSemantics(
+                      child: Icon(
+                        Icons.visibility_outlined,
+                        color: visual.rules,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        strings.reflectionNonCausalNote,
-                        key: const ValueKey('reflection-non-causal-note'),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: KefeColorTokens.textMutedDark,
-                          height: 1.45,
+                        strings.reflectionInterventionSummary(
+                          model.interventionCount,
+                        ),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: visual.foreground,
+                          height: 1.4,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              if (_errorCode != null) ...[
-                const SizedBox(height: 10),
-                Text(
-                  strings.messageForCode(_errorCode),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-              const SizedBox(height: 16),
-              if (completed)
-                Container(
-                  key: const ValueKey('reflection-completed'),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: KefeColorTokens.success.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(13),
+            ],
+            const SizedBox(height: 14),
+            KefeSurface(
+              tone: KefeSurfaceTone.sunken,
+              accent: visual.gold,
+              padding: const EdgeInsets.all(13),
+              borderRadius: 14,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ExcludeSemantics(
+                    child: Icon(
+                      Icons.info_outline_rounded,
+                      color: visual.goldSoft,
+                      size: 20,
+                    ),
                   ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      strings.reflectionNonCausalNote,
+                      key: const ValueKey('reflection-non-causal-note'),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: visual.mutedForeground,
+                        height: 1.45,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (_errorCode != null) ...[
+              const SizedBox(height: 10),
+              _ReflectionInlineStatus(
+                message: strings.messageForCode(_errorCode),
+              ),
+            ],
+            const SizedBox(height: 16),
+            if (completed)
+              Semantics(
+                liveRegion: true,
+                child: KefeSurface(
+                  key: const ValueKey('reflection-completed'),
+                  tone: KefeSurfaceTone.sunken,
+                  accent: visual.success,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  borderRadius: 13,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.check_circle_rounded,
-                        color: KefeColorTokens.success,
-                        size: 19,
+                      ExcludeSemantics(
+                        child: Icon(
+                          Icons.check_circle_rounded,
+                          color: visual.success,
+                          size: 19,
+                        ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
-                        strings.reflectionCompleted,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: KefeColorTokens.success,
-                          fontWeight: FontWeight.w800,
+                      Flexible(
+                        child: Text(
+                          strings.reflectionCompleted,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                color: visual.success,
+                                fontWeight: FontWeight.w800,
+                              ),
                         ),
                       ),
                     ],
                   ),
-                )
-              else
-                FilledButton.icon(
+                ),
+              )
+            else
+              Semantics(
+                liveRegion: _completing,
+                child: FilledButton.icon(
                   key: const ValueKey('reflection-complete-button'),
                   onPressed: _completing ? null : _complete,
-                  icon: _completing
-                      ? const SizedBox.square(
-                          dimension: 19,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.check_rounded),
-                  label: Text(strings.reflectionComplete),
+                  icon: Icon(
+                    _completing
+                        ? Icons.hourglass_top_rounded
+                        : Icons.check_rounded,
+                  ),
+                  label: Text(
+                    _completing ? strings.loading : strings.reflectionComplete,
+                  ),
                 ),
-            ],
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ReflectionLoadingState extends StatelessWidget {
+  const _ReflectionLoadingState({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return Semantics(
+      liveRegion: true,
+      label: label,
+      child: KefeSurface(
+        key: const ValueKey('reflection-loading'),
+        tone: KefeSurfaceTone.sunken,
+        accent: visual.gold,
+        padding: const EdgeInsets.all(14),
+        borderRadius: 14,
+        child: Row(
+          children: [
+            ExcludeSemantics(
+              child: Icon(Icons.hourglass_top_rounded, color: visual.goldSoft),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: visual.foreground,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReflectionErrorState extends StatelessWidget {
+  const _ReflectionErrorState({
+    required this.message,
+    required this.retryLabel,
+    required this.onRetry,
+  });
+
+  final String message;
+  final String retryLabel;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return Semantics(
+      liveRegion: true,
+      child: KefeSurface(
+        key: const ValueKey('reflection-error'),
+        tone: KefeSurfaceTone.sunken,
+        accent: visual.empathy,
+        padding: const EdgeInsets.all(15),
+        borderRadius: 14,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ExcludeSemantics(
+                  child: Icon(
+                    Icons.error_outline_rounded,
+                    color: visual.empathy,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    message,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: visual.foreground,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              key: const ValueKey('reflection-retry'),
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: Text(retryLabel),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReflectionInlineStatus extends StatelessWidget {
+  const _ReflectionInlineStatus({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return Semantics(
+      liveRegion: true,
+      child: KefeSurface(
+        key: const ValueKey('reflection-inline-status'),
+        tone: KefeSurfaceTone.sunken,
+        accent: visual.empathy,
+        padding: const EdgeInsets.all(12),
+        borderRadius: 13,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ExcludeSemantics(
+              child: Icon(
+                Icons.error_outline_rounded,
+                color: visual.empathy,
+                size: 19,
+              ),
+            ),
+            const SizedBox(width: 9),
+            Expanded(
+              child: Text(
+                message,
+                textAlign: TextAlign.start,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: visual.foreground,
+                  height: 1.4,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -487,91 +634,86 @@ class _DecisionJourneyGraphic extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
     final changedColor = model.decisionChanged
-        ? KefeColorTokens.attention
-        : KefeColorTokens.success;
+        ? visual.attention
+        : visual.success;
 
-    return Container(
-      key: const ValueKey('reflection-journey-graphic'),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            KefeColorTokens.rules.withValues(alpha: 0.08),
-            KefeColorTokens.surfaceElevatedDark.withValues(alpha: 0.72),
-            changedColor.withValues(alpha: 0.08),
+    return ExcludeSemantics(
+      child: KefeSurface(
+        key: const ValueKey('reflection-journey-graphic'),
+        tone: KefeSurfaceTone.sunken,
+        accent: changedColor,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+        borderRadius: 18,
+        semanticContainer: false,
+        child: Row(
+          children: [
+            _RevisionNode(
+              label: '1',
+              color: visual.rules,
+              icon: Icons.balance_outlined,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Divider(
+                          color: visual.gold.withValues(alpha: 0.32),
+                        ),
+                      ),
+                      const SizedBox(width: 7),
+                      Icon(
+                        model.decisionChanged
+                            ? Icons.swap_horiz_rounded
+                            : Icons.arrow_forward_rounded,
+                        color: changedColor,
+                        size: 23,
+                      ),
+                      const SizedBox(width: 7),
+                      Expanded(
+                        child: Divider(
+                          color: visual.gold.withValues(alpha: 0.32),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 7),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.visibility_outlined,
+                        size: 14,
+                        color: visual.mutedForeground,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        '${model.interventionCount}',
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: visual.mutedForeground,
+                              fontWeight: FontWeight.w800,
+                            ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            _RevisionNode(
+              label: '${model.revisionCount}',
+              color: changedColor,
+              icon: model.decisionChanged
+                  ? Icons.change_circle_outlined
+                  : Icons.check_circle_outline_rounded,
+            ),
           ],
         ),
-        border: Border.all(color: KefeColorTokens.gold.withValues(alpha: 0.18)),
-      ),
-      child: Row(
-        children: [
-          _RevisionNode(
-            label: '1',
-            color: KefeColorTokens.rules,
-            icon: Icons.balance_outlined,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Divider(
-                        color: KefeColorTokens.gold.withValues(alpha: 0.32),
-                      ),
-                    ),
-                    const SizedBox(width: 7),
-                    Icon(
-                      model.decisionChanged
-                          ? Icons.swap_horiz_rounded
-                          : Icons.arrow_forward_rounded,
-                      color: changedColor,
-                      size: 23,
-                    ),
-                    const SizedBox(width: 7),
-                    Expanded(
-                      child: Divider(
-                        color: KefeColorTokens.gold.withValues(alpha: 0.32),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 7),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.visibility_outlined,
-                      size: 14,
-                      color: KefeColorTokens.textMutedDark,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      '${model.interventionCount}',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: KefeColorTokens.textMutedDark,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
-          _RevisionNode(
-            label: '${model.revisionCount}',
-            color: changedColor,
-            icon: model.decisionChanged
-                ? Icons.change_circle_outlined
-                : Icons.check_circle_outline_rounded,
-          ),
-        ],
       ),
     );
   }
