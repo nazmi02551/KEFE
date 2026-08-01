@@ -4,6 +4,11 @@ abstract final class SettingsStringCatalog {
   static const KefeLocaleResources resources = {
     'en': {
       'settings.title': 'Settings',
+      'settings.loading': 'Loading your saved settings…',
+      'settings.saving': 'Saving your setting…',
+      'settings.unavailable':
+          'Saved settings are unavailable. Your last confirmed choices are shown when possible.',
+      'settings.retry': 'Retry',
       'language.title': 'Language',
       'language.system': 'Use device language',
       'language.turkish': 'Türkçe',
@@ -18,6 +23,11 @@ abstract final class SettingsStringCatalog {
     },
     'tr': {
       'settings.title': 'Ayarlar',
+      'settings.loading': 'Kayıtlı ayarların yükleniyor…',
+      'settings.saving': 'Ayarın kaydediliyor…',
+      'settings.unavailable':
+          'Kayıtlı ayarlara ulaşılamıyor. Mümkün olduğunda son doğrulanan seçimlerin gösterilir.',
+      'settings.retry': 'Yeniden dene',
       'language.title': 'Dil',
       'language.system': 'Cihaz dilini kullan',
       'language.turkish': 'Türkçe',

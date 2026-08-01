@@ -6,16 +6,35 @@ enum AppLocalePreference { system, tr, en }
 
 enum AppThemePreference { system, light, dark }
 
+enum AppPreferencesStatus { idle, loading, ready, saving, error }
+
+enum AppPreferencesFailure { read, write }
+
 class AppPreferencesState {
   const AppPreferencesState({
     this.locale = AppLocalePreference.system,
     this.theme = AppThemePreference.system,
-    this.loaded = false,
-  });
+    bool loaded = false,
+    AppPreferencesStatus? status,
+    this.failure,
+  }) : status =
+           status ??
+           (loaded ? AppPreferencesStatus.ready : AppPreferencesStatus.idle);
 
   final AppLocalePreference locale;
   final AppThemePreference theme;
-  final bool loaded;
+  final AppPreferencesStatus status;
+  final AppPreferencesFailure? failure;
+
+  bool get loaded =>
+      status == AppPreferencesStatus.ready ||
+      status == AppPreferencesStatus.saving ||
+      (status == AppPreferencesStatus.error &&
+          failure == AppPreferencesFailure.write);
+
+  bool get loading => status == AppPreferencesStatus.loading;
+  bool get saving => status == AppPreferencesStatus.saving;
+  bool get hasError => status == AppPreferencesStatus.error;
 
   Locale? get resolvedLocale => switch (locale) {
     AppLocalePreference.system => null,
@@ -33,11 +52,22 @@ class AppPreferencesState {
     AppLocalePreference? locale,
     AppThemePreference? theme,
     bool? loaded,
+    AppPreferencesStatus? status,
+    AppPreferencesFailure? failure,
+    bool clearFailure = false,
   }) {
+    final resolvedStatus =
+        status ??
+        (loaded == null
+            ? this.status
+            : loaded
+            ? AppPreferencesStatus.ready
+            : AppPreferencesStatus.idle);
     return AppPreferencesState(
       locale: locale ?? this.locale,
       theme: theme ?? this.theme,
-      loaded: loaded ?? this.loaded,
+      status: resolvedStatus,
+      failure: clearFailure ? null : failure ?? this.failure,
     );
   }
 }
@@ -100,12 +130,12 @@ class MemoryAppPreferencesStore implements AppPreferencesStore {
 
   @override
   Future<void> writeLocale(AppLocalePreference locale) async {
-    value = value.copyWith(locale: locale, loaded: true);
+    value = value.copyWith(locale: locale, loaded: true, clearFailure: true);
   }
 
   @override
   Future<void> writeTheme(AppThemePreference theme) async {
-    value = value.copyWith(theme: theme, loaded: true);
+    value = value.copyWith(theme: theme, loaded: true, clearFailure: true);
   }
 }
 
@@ -119,23 +149,87 @@ final appPreferencesControllerProvider =
     );
 
 class AppPreferencesController extends Notifier<AppPreferencesState> {
+  bool _loadInFlight = false;
+  bool _writeInFlight = false;
+
   AppPreferencesStore get _store => ref.read(appPreferencesStoreProvider);
 
   @override
   AppPreferencesState build() => const AppPreferencesState();
 
-  Future<void> load() async {
-    if (state.loaded) return;
-    state = await _store.read();
+  Future<void> load({bool force = false}) async {
+    if (_loadInFlight || _writeInFlight) return;
+    if (state.loaded && !force) return;
+
+    _loadInFlight = true;
+    state = state.copyWith(
+      status: AppPreferencesStatus.loading,
+      clearFailure: true,
+    );
+    try {
+      final persisted = await _store.read();
+      state = persisted.copyWith(
+        status: AppPreferencesStatus.ready,
+        clearFailure: true,
+      );
+    } on Object {
+      state = state.copyWith(
+        status: AppPreferencesStatus.error,
+        failure: AppPreferencesFailure.read,
+      );
+    } finally {
+      _loadInFlight = false;
+    }
   }
 
+  Future<void> retry() => load(force: true);
+
   Future<void> setLocale(AppLocalePreference locale) async {
-    state = state.copyWith(locale: locale, loaded: true);
-    await _store.writeLocale(locale);
+    final next = state.copyWith(
+      locale: locale,
+      status: AppPreferencesStatus.ready,
+      clearFailure: true,
+    );
+    await _persist(next: next, write: () => _store.writeLocale(locale));
   }
 
   Future<void> setTheme(AppThemePreference theme) async {
-    state = state.copyWith(theme: theme, loaded: true);
-    await _store.writeTheme(theme);
+    final next = state.copyWith(
+      theme: theme,
+      status: AppPreferencesStatus.ready,
+      clearFailure: true,
+    );
+    await _persist(next: next, write: () => _store.writeTheme(theme));
+  }
+
+  Future<void> _persist({
+    required AppPreferencesState next,
+    required Future<void> Function() write,
+  }) async {
+    if (_loadInFlight || _writeInFlight || !state.loaded) return;
+
+    final persisted = state.copyWith(
+      status: AppPreferencesStatus.ready,
+      clearFailure: true,
+    );
+    _writeInFlight = true;
+    state = next.copyWith(
+      status: AppPreferencesStatus.saving,
+      clearFailure: true,
+    );
+    try {
+      await write();
+      state = state.copyWith(
+        status: AppPreferencesStatus.ready,
+        clearFailure: true,
+      );
+    } on Object {
+      state = persisted.copyWith(
+        status: AppPreferencesStatus.error,
+        failure: AppPreferencesFailure.write,
+      );
+    } finally {
+      _writeInFlight = false;
+    }
   }
 }

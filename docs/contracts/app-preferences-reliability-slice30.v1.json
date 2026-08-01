@@ -1,0 +1,47 @@
+{
+  "contract": "app-preferences-reliability-slice30",
+  "version": 1,
+  "issue": 172,
+  "parent_pr": 170,
+  "scope": {
+    "store_interface_change": false,
+    "persistence_key_change": false,
+    "serialization_change": false,
+    "preference_meaning_change": false,
+    "route_change": false,
+    "api_change": false,
+    "schema_change": false,
+    "preview_provider_change": false
+  },
+  "states": {
+    "idle": {"trusted_persisted_values": false},
+    "loading": {"key": "settings-loading", "blocking_settings_choices": true},
+    "ready": {"trusted_persisted_values": true},
+    "saving": {"key": "settings-saving", "optimistic": true},
+    "error": {"key": "settings-error", "retry_key": "settings-retry"}
+  },
+  "resolution": {
+    "launch_uses_system_defaults_while_unresolved": true,
+    "read_failure_caught": true,
+    "read_retry_calls_only_existing_read_path": true,
+    "duplicate_load_guard": true,
+    "duplicate_write_guard": true,
+    "write_failure_rolls_back_last_persisted_state": true
+  },
+  "presentation": {
+    "live_region": true,
+    "decorative_icons_excluded": true,
+    "indeterminate_progress": false,
+    "artificial_completion": false,
+    "compact_width": 360,
+    "text_scale": 1.6,
+    "themes": ["light", "dark"],
+    "locales": ["tr", "en"]
+  },
+  "required_workflows": [
+    "API CI",
+    "Mobile CI",
+    "MVP Beta Gates",
+    "Global Readiness"
+  ]
+}
