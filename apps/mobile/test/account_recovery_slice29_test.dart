@@ -35,7 +35,10 @@ void main() {
       contract['operations']['merge_guest']['retry_action'],
       'mergeGuestWithPrivatePendingVerification',
     );
-    expect(contract['security']['verification_token_in_account_state'], isFalse);
+    expect(
+      contract['security']['verification_token_in_account_state'],
+      isFalse,
+    );
     expect(contract['security']['verification_token_persisted'], isFalse);
     expect(contract['security']['verification_token_logged'], isFalse);
     expect(contract['guards']['duplicate_request_ignored'], isTrue);
@@ -60,100 +63,116 @@ void main() {
     expect(stateSource, isNot(contains('OtpVerification')));
     expect(stateSource, isNot(contains('verificationToken')));
     expect(screenSource, isNot(contains('verificationToken')));
+    expect(screenSource, contains("ValueKey('account-error')"));
     expect(controllerSource, contains('OtpVerification? _pendingVerification'));
     expect(controllerSource, isNot(contains('print(')));
     expect(controllerSource, isNot(contains('log(')));
   });
 
-  test('request failure retry preserves identifier and repeats request', () async {
-    final repository = _ControllableAccountRepository()..requestFailures = 1;
-    final container = _container(repository);
-    addTearDown(container.dispose);
-    final controller = container.read(accountControllerProvider.notifier);
+  test(
+    'request failure retry preserves identifier and repeats request',
+    () async {
+      final repository = _ControllableAccountRepository()..requestFailures = 1;
+      final container = _container(repository);
+      addTearDown(container.dispose);
+      final controller = container.read(accountControllerProvider.notifier);
 
-    controller.setIdentifier('person@example.com');
-    await controller.requestOtp();
+      controller.setIdentifier('person@example.com');
+      await controller.requestOtp();
 
-    expect(repository.requestCalls, 1);
-    expect(container.read(accountControllerProvider).uiState, AccountUiState.error);
-    expect(
-      container.read(accountControllerProvider).failurePhase,
-      AccountFailurePhase.requestOtp,
-    );
-    expect(
-      container.read(accountControllerProvider).identifier,
-      'person@example.com',
-    );
+      expect(repository.requestCalls, 1);
+      expect(
+        container.read(accountControllerProvider).uiState,
+        AccountUiState.error,
+      );
+      expect(
+        container.read(accountControllerProvider).failurePhase,
+        AccountFailurePhase.requestOtp,
+      );
+      expect(
+        container.read(accountControllerProvider).identifier,
+        'person@example.com',
+      );
 
-    await controller.retry();
+      await controller.retry();
 
-    final state = container.read(accountControllerProvider);
-    expect(repository.requestCalls, 2);
-    expect(state.uiState, AccountUiState.enterCode);
-    expect(state.identifier, 'person@example.com');
-    expect(state.challenge?.id, 'challenge-1');
-  });
+      final state = container.read(accountControllerProvider);
+      expect(repository.requestCalls, 2);
+      expect(state.uiState, AccountUiState.enterCode);
+      expect(state.identifier, 'person@example.com');
+      expect(state.challenge?.id, 'challenge-1');
+    },
+  );
 
-  test('verification failure keeps challenge and retry resumes code entry', () async {
-    final repository = _ControllableAccountRepository()..verifyFailures = 1;
-    final container = _container(repository);
-    addTearDown(container.dispose);
-    final controller = container.read(accountControllerProvider.notifier);
+  test(
+    'verification failure keeps challenge and retry resumes code entry',
+    () async {
+      final repository = _ControllableAccountRepository()..verifyFailures = 1;
+      final container = _container(repository);
+      addTearDown(container.dispose);
+      final controller = container.read(accountControllerProvider.notifier);
 
-    controller.setIdentifier('person@example.com');
-    await controller.requestOtp();
-    final challenge = container.read(accountControllerProvider).challenge;
-    await controller.verifyAndMerge('123456');
+      controller.setIdentifier('person@example.com');
+      await controller.requestOtp();
+      final challenge = container.read(accountControllerProvider).challenge;
+      await controller.verifyAndMerge('123456');
 
-    expect(repository.requestCalls, 1);
-    expect(repository.verifyCalls, 1);
-    expect(repository.mergeCalls, 0);
-    expect(
-      container.read(accountControllerProvider).failurePhase,
-      AccountFailurePhase.verifyOtp,
-    );
-    expect(container.read(accountControllerProvider).challenge, same(challenge));
+      expect(repository.requestCalls, 1);
+      expect(repository.verifyCalls, 1);
+      expect(repository.mergeCalls, 0);
+      expect(
+        container.read(accountControllerProvider).failurePhase,
+        AccountFailurePhase.verifyOtp,
+      );
+      expect(
+        container.read(accountControllerProvider).challenge,
+        same(challenge),
+      );
 
-    await controller.retry();
+      await controller.retry();
 
-    final state = container.read(accountControllerProvider);
-    expect(state.uiState, AccountUiState.enterCode);
-    expect(state.challenge, same(challenge));
-    expect(repository.requestCalls, 1);
-    expect(repository.verifyCalls, 1);
-    expect(repository.mergeCalls, 0);
-  });
+      final state = container.read(accountControllerProvider);
+      expect(state.uiState, AccountUiState.enterCode);
+      expect(state.challenge, same(challenge));
+      expect(repository.requestCalls, 1);
+      expect(repository.verifyCalls, 1);
+      expect(repository.mergeCalls, 0);
+    },
+  );
 
-  test('merge failure retry repeats only merge with verified context', () async {
-    final repository = _ControllableAccountRepository()..mergeFailures = 1;
-    final container = _container(repository);
-    addTearDown(container.dispose);
-    final controller = container.read(accountControllerProvider.notifier);
+  test(
+    'merge failure retry repeats only merge with verified context',
+    () async {
+      final repository = _ControllableAccountRepository()..mergeFailures = 1;
+      final container = _container(repository);
+      addTearDown(container.dispose);
+      final controller = container.read(accountControllerProvider.notifier);
 
-    controller.setIdentifier('person@example.com');
-    await controller.requestOtp();
-    await controller.verifyAndMerge('123456');
+      controller.setIdentifier('person@example.com');
+      await controller.requestOtp();
+      await controller.verifyAndMerge('123456');
 
-    expect(repository.requestCalls, 1);
-    expect(repository.verifyCalls, 1);
-    expect(repository.mergeCalls, 1);
-    expect(repository.mergeTokens, ['verified-token']);
-    expect(
-      container.read(accountControllerProvider).failurePhase,
-      AccountFailurePhase.mergeGuest,
-    );
+      expect(repository.requestCalls, 1);
+      expect(repository.verifyCalls, 1);
+      expect(repository.mergeCalls, 1);
+      expect(repository.mergeTokens, ['verified-token']);
+      expect(
+        container.read(accountControllerProvider).failurePhase,
+        AccountFailurePhase.mergeGuest,
+      );
 
-    await controller.retry();
+      await controller.retry();
 
-    final state = container.read(accountControllerProvider);
-    expect(repository.requestCalls, 1);
-    expect(repository.verifyCalls, 1);
-    expect(repository.mergeCalls, 2);
-    expect(repository.mergeTokens, ['verified-token', 'verified-token']);
-    expect(state.uiState, AccountUiState.complete);
-    expect(state.actorId, 'actor-1');
-    expect(state.mergedExistingHistory, isTrue);
-  });
+      final state = container.read(accountControllerProvider);
+      expect(repository.requestCalls, 1);
+      expect(repository.verifyCalls, 1);
+      expect(repository.mergeCalls, 2);
+      expect(repository.mergeTokens, ['verified-token', 'verified-token']);
+      expect(state.uiState, AccountUiState.complete);
+      expect(state.actorId, 'actor-1');
+      expect(state.mergedExistingHistory, isTrue);
+    },
+  );
 
   test('duplicate request verify and merge actions are guarded', () async {
     final repository = _ControllableAccountRepository();
@@ -185,7 +204,10 @@ void main() {
     repository.mergeGate!.complete(repository.conversion);
     await verify;
 
-    expect(container.read(accountControllerProvider).uiState, AccountUiState.complete);
+    expect(
+      container.read(accountControllerProvider).uiState,
+      AccountUiState.complete,
+    );
   });
 
   testWidgets('request error keeps identifier phase and localized retry', (
@@ -205,9 +227,13 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('account-request-otp')));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('account-identifier-surface')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('account-identifier-surface')),
+      findsOneWidget,
+    );
     expect(find.byKey(const ValueKey('account-code-surface')), findsNothing);
     expect(find.byKey(const ValueKey('account-error-surface')), findsOneWidget);
+    expect(find.byKey(const ValueKey('account-error')), findsOneWidget);
     expect(find.byKey(const ValueKey('account-error-retry')), findsOneWidget);
     expect(find.text('Kodu yeniden gönder'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -230,7 +256,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('account-code-surface')), findsOneWidget);
-    expect(find.byKey(const ValueKey('account-identifier-surface')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('account-identifier-surface')),
+      findsNothing,
+    );
     expect(find.byKey(const ValueKey('account-error-surface')), findsOneWidget);
     expect(find.text('Edit code'), findsOneWidget);
     expect(repository.requestCalls, 1);
@@ -267,41 +296,48 @@ void main() {
     expect(repository.requestCalls, 1);
     expect(repository.verifyCalls, 1);
     expect(repository.mergeCalls, 2);
-    expect(find.byKey(const ValueKey('account-complete-surface')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('account-complete-surface')),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 
   for (final themeMode in [ThemeMode.light, ThemeMode.dark]) {
-    testWidgets(
-      'account recovery is compact-safe in ${themeMode.name} theme',
-      (tester) async {
-        tester.view.physicalSize = const Size(360, 800);
-        tester.view.devicePixelRatio = 1;
-        addTearDown(tester.view.resetPhysicalSize);
-        addTearDown(tester.view.resetDevicePixelRatio);
+    testWidgets('account recovery is compact-safe in ${themeMode.name} theme', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
 
-        final repository = _ControllableAccountRepository()
-          ..requestFailures = 1;
-        await _pumpScreen(
-          tester,
-          repository: repository,
-          locale: const Locale('tr', 'TR'),
-          themeMode: themeMode,
-          textScale: 1.6,
-        );
-        await tester.enterText(
-          find.byKey(const ValueKey('account-identifier')),
-          'person@example.com',
-        );
-        await tester.tap(find.byKey(const ValueKey('account-request-otp')));
-        await tester.pumpAndSettle();
+      final repository = _ControllableAccountRepository()..requestFailures = 1;
+      await _pumpScreen(
+        tester,
+        repository: repository,
+        locale: const Locale('tr', 'TR'),
+        themeMode: themeMode,
+        textScale: 1.6,
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('account-identifier')),
+        'person@example.com',
+      );
+      await tester.tap(find.byKey(const ValueKey('account-request-otp')));
+      await tester.pumpAndSettle();
 
-        expect(find.byKey(const ValueKey('account-error-surface')), findsOneWidget);
-        expect(find.byKey(const ValueKey('account-error-retry')), findsOneWidget);
-        expect(find.byKey(const ValueKey('account-continue-guest')), findsOneWidget);
-        expect(tester.takeException(), isNull);
-      },
-    );
+      expect(
+        find.byKey(const ValueKey('account-error-surface')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('account-error-retry')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('account-continue-guest')),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    });
   }
 }
 
