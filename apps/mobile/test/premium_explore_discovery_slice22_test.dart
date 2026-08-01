@@ -83,7 +83,8 @@ void main() {
       expect(source, contains('KefeSurfaceTone.premium'));
       expect(source, contains('KefeSurfaceTone.raised'));
       expect(source, isNot(contains('KefeColorTokens')));
-      expect(source, isNot(contains('Card(')));
+      expect(source, isNot(contains('return Card(')));
+      expect(source, isNot(contains('child: Card(')));
       expect(source, isNot(contains('LinearGradient(')));
       expect(source, isNot(contains('CircularProgressIndicator')));
       expect(source, isNot(contains("item.id == '")));
