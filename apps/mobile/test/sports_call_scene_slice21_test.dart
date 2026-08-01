@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kefe_mobile/app/product_preview/preview_content_localizer.dart';
 import 'package:kefe_mobile/app/product_preview_app.dart';
 import 'package:kefe_mobile/core/design/kefe_theme.dart';
+import 'package:kefe_mobile/core/design/product_preview_visual_mode.dart';
 import 'package:kefe_mobile/core/localization/kefe_content_localizer.dart';
 import 'package:kefe_mobile/core/visual_composition/kefe_visual_composition_flutter.dart';
 import 'package:kefe_mobile/core/visual_composition/kefe_visual_composition_models.dart';
@@ -208,7 +209,7 @@ void main() {
   );
 
   testWidgets(
-    'Product Preview reaches Sports scene before Commit without Reveal',
+    'distributed Product Preview reaches Sports scene before Commit without Reveal',
     (tester) async {
       tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
       addTearDown(tester.platformDispatcher.clearLocaleTestValue);
@@ -225,6 +226,7 @@ void main() {
             caseMediaRepositoryProvider.overrideWithValue(
               const PreviewCaseMediaRepository(),
             ),
+            productPreviewVisualModeProvider.overrideWithValue(true),
           ],
           child: const ProductPreviewApp(),
         ),
