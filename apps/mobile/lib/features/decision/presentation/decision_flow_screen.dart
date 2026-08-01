@@ -599,9 +599,9 @@ class _ErrorState extends StatelessWidget {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  height: 1.45,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(height: 1.45),
               ),
               const SizedBox(height: 16),
               FilledButton.icon(

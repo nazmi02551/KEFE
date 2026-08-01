@@ -58,39 +58,45 @@ void main() {
     expect(contract['invariants']['impact_in_scope'], isFalse);
   });
 
-  test('governed Decision Flow source uses deterministic KEFE state surfaces', () {
-    final source = File(
-      'lib/features/decision/presentation/decision_flow_screen.dart',
-    ).readAsStringSync();
+  test(
+    'governed Decision Flow source uses deterministic KEFE state surfaces',
+    () {
+      final source = File(
+        'lib/features/decision/presentation/decision_flow_screen.dart',
+      ).readAsStringSync();
 
-    expect(source, contains('KefeMotion.resolve('));
-    expect(source, contains("const ValueKey('decision-loading-surface')"));
-    expect(source, contains("const ValueKey('decision-error-surface')"));
-    expect(source, contains("const ValueKey('decision-status-surface')"));
-    expect(source, contains("const ValueKey('decision-status-message')"));
-    expect(source, contains("const ValueKey('commit-button')"));
-    expect(source, contains("ValueKey('capability-pending-\${step.code}')"));
+      expect(source, contains('KefeMotion.resolve('));
+      expect(source, contains("const ValueKey('decision-loading-surface')"));
+      expect(source, contains("const ValueKey('decision-error-surface')"));
+      expect(source, contains("const ValueKey('decision-status-surface')"));
+      expect(source, contains("const ValueKey('decision-status-message')"));
+      expect(source, contains("const ValueKey('commit-button')"));
+      expect(source, contains("ValueKey('capability-pending-\${step.code}')"));
 
-    expect(source, isNot(contains('CircularProgressIndicator')));
-    expect(source, isNot(contains('return Card(')));
-    expect(source, isNot(contains('duration: const Duration(milliseconds: 220)')));
-    expect(source, isNot(contains('item.id ==')));
-    expect(source, isNot(contains('caseData.title ==')));
-  });
+      expect(source, isNot(contains('CircularProgressIndicator')));
+      expect(source, isNot(contains('return Card(')));
+      expect(
+        source,
+        isNot(contains('duration: const Duration(milliseconds: 220)')),
+      );
+      expect(source, isNot(contains('item.id ==')));
+      expect(source, isNot(contains('caseData.title ==')));
+    },
+  );
 
   test('Commit enablement and recovery dispatch remain source-locked', () {
     final source = File(
       'lib/features/decision/presentation/decision_flow_screen.dart',
     ).readAsStringSync();
 
-    expect(
-      source,
-      contains('!state.hasRequiredResponses || state.submitting'),
-    );
+    expect(source, contains('!state.hasRequiredResponses || state.submitting'));
     expect(source, contains('state.recoveryPending'));
     expect(source, contains('controller.retryPending'));
     expect(source, contains('controller.commit'));
-    expect(source, contains("'COLLECTIVE_RESULT' => _resultStep(context, ref)"));
+    expect(
+      source,
+      contains("'COLLECTIVE_RESULT' => _resultStep(context, ref)"),
+    );
     expect(source, contains('state.reveal == null'));
   });
 }
