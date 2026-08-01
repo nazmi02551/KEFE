@@ -6,6 +6,7 @@ import '../../../core/visual_composition/kefe_visual_composition_flutter.dart';
 import '../../../core/visual_composition/kefe_visual_composition_models.dart';
 import '../application/case_media_provider.dart';
 import '../domain/case_media_models.dart';
+import 'sports_call_scene_visual.dart';
 
 class CaseMediaSurface extends ConsumerStatefulWidget {
   const CaseMediaSurface({
@@ -132,17 +133,41 @@ class _MediaRenderer extends StatelessWidget {
     if (!policy.supportsBrightness(Theme.of(context).brightness)) {
       return _fallback(context, policy, 'theme');
     }
-    if (item.rendition.rendererCode != 'KEFE_ABSTRACT_V1') {
+
+    final mediaKey = kefeCaseMediaKey(item.slot.code, item.caseVersionId);
+    final media = switch (item.rendition.rendererCode) {
+      'KEFE_ABSTRACT_V1' => _abstractMedia(context, policy, mediaKey),
+      'KEFE_SPORTS_SCENE_V1' => SportsCallSceneVisual(
+        mediaKey: mediaKey,
+        aspectRatio: item.rendition.aspectRatio,
+        borderRadius: borderRadius,
+        composition: policy,
+        attribution: item.attribution,
+      ),
+      _ => null,
+    };
+
+    if (media == null) {
       return _fallback(context, policy, 'renderer');
     }
+    if (item.decorative) {
+      return ExcludeSemantics(child: media);
+    }
+    return Semantics(image: true, label: item.altText, child: media);
+  }
 
+  Widget _abstractMedia(
+    BuildContext context,
+    KefeVisualCompositionPolicy policy,
+    Key mediaKey,
+  ) {
     final visual = _visualFor(context, item.rendition.locator);
-    final media = AspectRatio(
+    return AspectRatio(
       aspectRatio: item.rendition.aspectRatio,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
         child: DecoratedBox(
-          key: ValueKey('case-media-${item.slot.code}-${item.caseVersionId}'),
+          key: mediaKey,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
@@ -224,11 +249,6 @@ class _MediaRenderer extends StatelessWidget {
         ),
       ),
     );
-
-    if (item.decorative) {
-      return ExcludeSemantics(child: media);
-    }
-    return Semantics(image: true, label: item.altText, child: media);
   }
 
   Widget _fallback(
