@@ -9,13 +9,26 @@ import '../../../core/localization/settings_strings.dart';
 import '../../../core/preferences/app_preferences.dart';
 import 'settings_persistence_state_surface.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({this.showPrivacyControls = true, super.key});
 
   final bool showPrivacyControls;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future<void>.microtask(
+      () => ref.read(appPreferencesControllerProvider.notifier).load(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
     final preferences = ref.watch(appPreferencesControllerProvider);
     final controller = ref.read(appPreferencesControllerProvider.notifier);
@@ -113,7 +126,7 @@ class SettingsScreen extends ConsumerWidget {
                 ],
               ),
             ],
-            if (showPrivacyControls) ...[
+            if (widget.showPrivacyControls) ...[
               const SizedBox(height: 10),
               KefeSurface(
                 key: const ValueKey('settings-privacy-entry'),
