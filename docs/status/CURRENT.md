@@ -3,10 +3,10 @@
 **Updated:** 2026-08-01  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Active stacked line top:** PR #154 `feature/reflection-state-convergence-slice24`  
-**Latest repo-verified active-stack runtime:** `d24826235ae81638b475cacde150754d75f9c72a`  
-**Latest runtime owner:** PR #154 / Slice 24 Reflection State and Semantic-Surface Convergence  
-**PR #154 current head:** `9731ac833aebb7f8b5d3b457bbde63c504be3b47` (documentation-only commit after the verified runtime)
+**Active stacked line top:** PR #157 `feature/decision-information-state-slice25`  
+**Latest repo-verified active-stack runtime:** `1578b27d931e1856655c0734f8d8991817c9c00c`  
+**Latest runtime owner:** PR #157 / Slice 25 Decision Journey Information-State Convergence  
+**PR #157 current head:** `5977c015713f8f977333396a115395ba597687b9` (documentation-only commit after the verified runtime)
 
 This file is the canonical durable engineering handoff. Chat history is supplementary context only.
 
@@ -36,7 +36,7 @@ Drive CURRENT file ID: `1MXvCTNPfv-pWYIHCo5KqpmTOf-3RyFhZ`
 
 The existing Drive WORKING checkpoint was last known to pin Slice 18 and therefore must not be treated as newer than the live GitHub stack recorded here. It remains WORKING, not published CURRENT.
 
-At the next declared documentation milestone, accepted Slice 19–24 changes belong in the existing Product Bible, Design System and Engineering Blueprint. Do not create a parallel official manifesto or silently promote WORKING material to CURRENT.
+At the next declared documentation milestone, accepted Slice 19–25 changes belong in the existing Product Bible, Design System and Engineering Blueprint. Do not create a parallel official manifesto or silently promote WORKING material to CURRENT.
 
 ## 2. Binding invariants
 
@@ -62,7 +62,7 @@ Preserve unless an explicit accepted decision changes them:
 
 Observed dependency line:
 
-`main → #90 → #92 → #94 → #95 → #97 → #99 → #101 → #103 → #105 → #107 → #109 → #111 → #113 → #115 → #117 → #118 → #120 → #122 → #124 → #126 → #128 → #132 → #138 → #141 → #143 → #145 → #147 → #149 → #154`
+`main → #90 → #92 → #94 → #95 → #97 → #99 → #101 → #103 → #105 → #107 → #109 → #111 → #113 → #115 → #117 → #118 → #120 → #122 → #124 → #126 → #128 → #132 → #138 → #141 → #143 → #145 → #147 → #149 → #154 → #157`
 
 Before any merge, re-read live bases/heads, mergeability, reviews and exact CI. Never merge a child before its parent.
 
@@ -71,67 +71,71 @@ Before any merge, re-read live bases/heads, mergeability, reviews and exact CI. 
 - PR #68 remains outside the active MVP/premium stack. Its ingestion-orchestration work requires a fresh compatibility review before adoption.
 - PR #151 and Issue #150 are closed as a superseded duplicate of canonical Slice 23 PR #149 / Issue #148. PR #151 independently reached a green runtime (`1c272a642aed3127aa4f162067d50e80a0adb73c`), but it started from the same PR #147 parent and created conflicting ADR-0061/contract ownership. Its evidence is historical only and does not define a second active Slice 23.
 
-## 4. Latest verified runtime — Slice 24
+## 4. Latest verified runtime — Slice 25
 
-### Reflection State and Semantic-Surface Convergence
+### Decision Journey Information-State Convergence
 
 Verified runtime SHA:
 
-`d24826235ae81638b475cacde150754d75f9c72a`
+`1578b27d931e1856655c0734f8d8991817c9c00c`
 
 All required repository-owned workflows passed on that exact SHA:
 
-- API CI #936 / run `30693395002` — SUCCESS
-- Mobile CI #727 / run `30693395016` — SUCCESS
-- MVP Beta Gates #440 / run `30693395007` — SUCCESS
-- Global Readiness #339 / run `30693395027` — SUCCESS
+- API CI #945 / run `30695358124` — SUCCESS
+- Mobile CI #735 / run `30695358118` — SUCCESS
+- MVP Beta Gates #449 / run `30695358112` — SUCCESS
+- Global Readiness #347 / run `30695358132` — SUCCESS
 
 Contract-first records:
 
-- Issue #153
-- PR #154
-- ADR-0062 `docs/adr/0062-reflection-state-semantic-surface-convergence.md`
-- contract `docs/contracts/reflection-state-convergence-slice24.v1.json`
-- verification `docs/status/REFLECTION_STATE_CONVERGENCE_SLICE24_2026-08-01.md`
+- Issue #156
+- PR #157
+- ADR-0063 `docs/adr/0063-decision-journey-information-state-convergence.md`
+- contract `docs/contracts/decision-information-state-slice25.v1.json`
+- verification `docs/status/DECISION_INFORMATION_STATE_SLICE25_2026-08-01.md`
 
-### What Slice 24 closed
+### What Slice 25 closed
 
-The reusable Flow-driven `ReflectionStepCard` now uses shared KEFE semantic surfaces and theme-adaptive visual roles for:
+The final two indeterminate async information states in the primary Decision Journey now use deterministic, theme-adaptive KEFE semantic surfaces.
 
-- initial loading;
-- load error and retry;
-- inline completion error;
-- completion working state;
-- completed state;
-- intervention-count disclosure;
-- non-causal methodology disclosure;
-- revision/intervention journey presentation.
+#### Context
 
-The governed Reflection source no longer contains:
+`ContextSection` now provides:
 
-- a generic Material `Card` root;
-- `CircularProgressIndicator`;
-- direct dark-only `KefeColorTokens` presentation usage;
-- `surfaceElevatedDark` / `textMutedDark` usage;
-- a screen-local fixed `LinearGradient`;
-- Case/domain/format-specific Reflection branching.
+- deterministic `context-loading` state;
+- semantic `context-error` state;
+- stable `context-retry` action;
+- live-region status treatment;
+- no indeterminate spinner or artificial progress.
 
-The journey graphic is excluded from independent semantics. The existing textual summary and `reflection-non-causal-note` remain authoritative.
+Context remains pre-Commit safe, optional and CaseVersion-pinned. Retry still invalidates only `contextSnapshotProvider(caseVersionId)`. Empty Context remains omitted; no placeholder context, evidence or source is fabricated. Existing block/source order, disclosure levels, claim-status values, raw content and source relationships are unchanged.
 
-ADR-0026 and `reflection-runtime.v1.yaml` remain unchanged. Reflection is still actor-private, server-derived, descriptive and non-causal. Completion remains immutable, idempotent and lineage-cursor aware. It creates no DecisionRevision and contributes to no Collective Result, Signal, Impact, advocacy or My KEFE inference input.
+#### Perspective
 
-Executable coverage includes contract/source guards, deterministic loading/error/completing/completed states, pending idempotency-key reuse, single completion dispatch, pending-store cleanup, generic Flow journey continuity, dark/light, 360×800, 1.6× text, production-copy and phone acceptance regressions.
+`PerspectiveSection` now provides:
+
+- deterministic `perspective-loading` state;
+- semantic `perspective-error` and stable `perspective-retry` action;
+- defensive `perspective-unavailable` state when a loaded state unexpectedly has no result;
+- live-region status treatment;
+- no indeterminate spinner or artificial progress.
+
+Perspective remains absent before Commit/Reveal. Retry invokes only the existing Perspective retry path and never replays answer, private reason, Commit or Reveal. Perspective cards, slots, source/provenance values, methodology, curated fallback, cluster-pending disclosure and downstream Consensus/Community Reasons/Progress/Share composition remain unchanged.
+
+Executable coverage includes contract/source guards, deterministic Context/Perspective states, Context provider invalidation, empty omission, defensive null handling, existing pre/post-Commit boundaries, dark/light, 360×800, 1.6× text, production-copy and phone acceptance regressions.
+
+The Context error regression disables Riverpod automatic retry only inside its test `ProviderScope`; production provider behavior is unchanged.
 
 ### Latest phone artifact
 
-Global Readiness #339 produced:
+Global Readiness #347 produced:
 
 - artifact: `kefe-internal-alpha-phone-preview`
-- artifact ID: `8816502335`
-- archive digest: `sha256:73129828dcb7210ef0ec0e33b6d58919122a05b1e72dc1c6e211de6541e19038`
+- artifact ID: `8817119041`
+- archive digest: `sha256:f9e296b3a8a27c9f9eaba9f0d2c3b6115890b23d8bf1a6744b3c672f92c1a11c`
 - payload: `app-debug.apk`
-- payload size: `160577074` bytes
-- APK SHA-256: `d3962c0a0cc29c4de82208ed50ff26f3e62c7b64122842e5740dac88bbe72df9`
+- payload size: `160577802` bytes
+- APK SHA-256: `19f555f1976619d4e611c5c591fdf193c4e2fd7613d3761d84c9eaa98a02dc99`
 - `beta-api.invalid`: absent in raw and unpacked scans.
 
 This is an internal Product Preview artifact for the exact verified runtime. It is not production/public-beta/store, production-provider, editorial-acceptance or human-usability evidence.
@@ -182,8 +186,15 @@ This is an internal Product Preview artifact for the exact verified runtime. It 
 
 - PR #154
 - verified runtime `d24826235ae81638b475cacde150754d75f9c72a`
-- generic Reflection presentation/state convergence completed as described above;
+- generic Reflection presentation/state convergence completed;
 - non-causal, actor-private and lineage-cursor completion semantics remain intact.
+
+### Slice 25 — Decision Journey Information States
+
+- PR #157
+- verified runtime `1578b27d931e1856655c0734f8d8991817c9c00c`
+- residual Context and Perspective async information states converged as described above;
+- pre-Commit Context, post-Commit Perspective and retry-isolation semantics remain intact.
 
 ## 6. Current consumer/product state
 
@@ -204,9 +215,9 @@ plus:
 - Product Preview/production isolation;
 - Turkish/English localization architecture and valid light/dark themes;
 - high-fidelity Signature Balance, representative Atlas globe, qualitative Perspective landscape and representative Sports CALL scene;
-- premium Explore, Decision Flow shell/state and Reflection state convergence.
+- premium Explore, Decision Flow shell/state, Reflection and information-state convergence.
 
-Visual convergence is not total product completion.
+Visual/state convergence is not total product completion.
 
 ## 7. Non-visual work still exists
 
@@ -242,11 +253,11 @@ Route parity alone is not proof of every nested conditional surface. Add reachab
 
 Do not start another slice from chat memory alone.
 
-The next step is a fresh audit on the canonical top branch (`feature/reflection-state-convergence-slice24`) covering:
+The next step is a fresh audit on the canonical top branch (`feature/decision-information-state-slice25`) covering:
 
 - remaining primary-screen/component generic Material surfaces or direct screen-local styling;
 - typography and spacing taxonomy consistency;
-- deterministic empty/loading/error/skeleton treatment;
+- deterministic empty/loading/error/skeleton treatment outside the now-converged primary Decision Journey;
 - dark/light parity;
 - 360×800 and enlarged-text reachability;
 - Reduce Motion and semantics;
@@ -254,7 +265,7 @@ The next step is a fresh audit on the canonical top branch (`feature/reflection-
 - production/Product Preview surface reachability;
 - overlap with separately governed non-visual architecture priorities.
 
-After the audit, choose one meaningful vertical Slice 25. A material boundary change requires ADR + executable contract before runtime. Ordinary internal refactoring must not manufacture an unnecessary product ADR.
+After the audit, choose one meaningful vertical Slice 26. A material boundary change requires ADR + executable contract before runtime. Ordinary internal refactoring must not manufacture an unnecessary product ADR.
 
 Do not reopen Spatial CALL as factual/interactive evidence until a separate typed spatial-evidence/provenance contract exists. The current Sports scene is representative presentation only.
 
