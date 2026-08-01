@@ -71,27 +71,11 @@ class EditorialProjectionService:
             command.idempotency_key,
         )
         if replay is not None:
-            if replay.input_hash != input_hash:
-                raise DomainError(
-                    "EDITORIAL_PROJECTION_IDEMPOTENCY_CONFLICT",
-                    "Idempotency key was already used with different projection input",
-                    409,
-                )
-            return EditorialProjectionResult(record=replay, replayed=True)
+            return self._validated_replay(replay, input_hash)
 
         previous = self._repository.get_by_candidate(command.candidate_proposal_id)
         if previous is not None:
-            raise DomainError(
-                "EDITORIAL_PROJECTION_CANDIDATE_ALREADY_PROJECTED",
-                "Candidate Case was already projected",
-                409,
-                meta={
-                    "authoring_case_id": str(previous.authoring_case_id),
-                    "authoring_case_version_id": str(
-                        previous.authoring_case_version_id
-                    ),
-                },
-            )
+            raise self._candidate_already_projected(previous)
 
         identity, draft = self._map_draft(bundle.candidate, profile, command)
         created_at = datetime.now(UTC)
@@ -128,13 +112,66 @@ class EditorialProjectionService:
                 record=record,
             )
         except ValueError as exc:
-            raise DomainError(
-                "EDITORIAL_PROJECTION_PERSISTENCE_CONFLICT",
-                "Editorial projection conflicted with existing state",
-                409,
-                detail=str(exc),
-            ) from exc
+            return self._recover_after_persistence_conflict(
+                command=command,
+                input_hash=input_hash,
+                exc=exc,
+            )
         return EditorialProjectionResult(record=record, replayed=False)
+
+    def _recover_after_persistence_conflict(
+        self,
+        *,
+        command: EditorialProjectionCommand,
+        input_hash: str,
+        exc: ValueError,
+    ) -> EditorialProjectionResult:
+        concurrent_replay = self._repository.get_by_idempotency(
+            command.candidate_proposal_id,
+            command.idempotency_key,
+        )
+        if concurrent_replay is not None:
+            return self._validated_replay(concurrent_replay, input_hash)
+
+        concurrent_projection = self._repository.get_by_candidate(
+            command.candidate_proposal_id
+        )
+        if concurrent_projection is not None:
+            raise self._candidate_already_projected(concurrent_projection) from exc
+
+        raise DomainError(
+            "EDITORIAL_PROJECTION_PERSISTENCE_CONFLICT",
+            "Editorial projection conflicted with existing state",
+            409,
+            detail=str(exc),
+        ) from exc
+
+    @staticmethod
+    def _validated_replay(
+        record: EditorialProjectionRecord,
+        input_hash: str,
+    ) -> EditorialProjectionResult:
+        if record.input_hash != input_hash:
+            raise DomainError(
+                "EDITORIAL_PROJECTION_IDEMPOTENCY_CONFLICT",
+                "Idempotency key was already used with different projection input",
+                409,
+            )
+        return EditorialProjectionResult(record=record, replayed=True)
+
+    @staticmethod
+    def _candidate_already_projected(
+        record: EditorialProjectionRecord,
+    ) -> DomainError:
+        return DomainError(
+            "EDITORIAL_PROJECTION_CANDIDATE_ALREADY_PROJECTED",
+            "Candidate Case was already projected",
+            409,
+            meta={
+                "authoring_case_id": str(record.authoring_case_id),
+                "authoring_case_version_id": str(record.authoring_case_version_id),
+            },
+        )
 
     @staticmethod
     def _validate_bundle(
