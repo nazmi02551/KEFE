@@ -5,6 +5,10 @@ abstract final class SavedCaseStringCatalog {
     'en': {
       'saved.title': 'Saved Cases',
       'saved.subtitle': 'Cases you kept for a later weigh.',
+      'saved.loading': 'Loading your saved Cases…',
+      'saved.unavailable':
+          'Saved Cases could not be refreshed. Your last available list remains visible.',
+      'saved.retry': 'Try again',
       'saved.empty': 'You have not saved a Case yet.',
       'saved.open': 'Open Case',
       'saved.remove': 'Remove from saved',
@@ -19,6 +23,10 @@ abstract final class SavedCaseStringCatalog {
     'tr': {
       'saved.title': 'Kaydettiklerin',
       'saved.subtitle': 'Daha sonra tartmak için ayırdığın vakalar.',
+      'saved.loading': 'Kaydettiğin vakalar yükleniyor…',
+      'saved.unavailable':
+          'Kaydedilen vakalar yenilenemedi. Son erişilebilen listen görünmeye devam ediyor.',
+      'saved.retry': 'Yeniden dene',
       'saved.empty': 'Henüz kaydettiğin bir vaka yok.',
       'saved.open': 'Vakayı aç',
       'saved.remove': 'Kayıttan çıkar',
