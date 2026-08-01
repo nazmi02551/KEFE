@@ -18,7 +18,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-def test_postgres_analytics_store_is_idempotent_and_preserves_governed_payload() -> None:
+def test_postgres_analytics_store_is_idempotent() -> None:
     engine = create_engine(os.environ["KEFE_DATABASE_URL"], future=True)
     source_event_id = uuid4()
     actor_id = uuid4()
