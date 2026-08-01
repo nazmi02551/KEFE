@@ -17,8 +17,9 @@ class AppPreferencesState {
     bool loaded = false,
     AppPreferencesStatus? status,
     this.failure,
-  }) : status = status ??
-            (loaded ? AppPreferencesStatus.ready : AppPreferencesStatus.idle);
+  }) : status =
+           status ??
+           (loaded ? AppPreferencesStatus.ready : AppPreferencesStatus.idle);
 
   final AppLocalePreference locale;
   final AppThemePreference theme;
@@ -55,7 +56,8 @@ class AppPreferencesState {
     AppPreferencesFailure? failure,
     bool clearFailure = false,
   }) {
-    final resolvedStatus = status ??
+    final resolvedStatus =
+        status ??
         (loaded == null
             ? this.status
             : loaded
@@ -188,10 +190,7 @@ class AppPreferencesController extends Notifier<AppPreferencesState> {
       status: AppPreferencesStatus.ready,
       clearFailure: true,
     );
-    await _persist(
-      next: next,
-      write: () => _store.writeLocale(locale),
-    );
+    await _persist(next: next, write: () => _store.writeLocale(locale));
   }
 
   Future<void> setTheme(AppThemePreference theme) async {
@@ -200,10 +199,7 @@ class AppPreferencesController extends Notifier<AppPreferencesState> {
       status: AppPreferencesStatus.ready,
       clearFailure: true,
     );
-    await _persist(
-      next: next,
-      write: () => _store.writeTheme(theme),
-    );
+    await _persist(next: next, write: () => _store.writeTheme(theme));
   }
 
   Future<void> _persist({
