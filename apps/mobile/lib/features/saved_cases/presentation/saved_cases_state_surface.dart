@@ -9,12 +9,14 @@ class SavedCasesStateSurface extends StatelessWidget {
     this.compact = false,
     super.key,
   }) : retryLabel = null,
+       retryButtonKey = null,
        onRetry = null,
        isError = false;
 
   const SavedCasesStateSurface.error({
     required this.message,
     required this.retryLabel,
+    required this.retryButtonKey,
     required this.onRetry,
     this.compact = false,
     super.key,
@@ -22,6 +24,7 @@ class SavedCasesStateSurface extends StatelessWidget {
 
   final String message;
   final String? retryLabel;
+  final Key? retryButtonKey;
   final VoidCallback? onRetry;
   final bool isError;
   final bool compact;
@@ -66,6 +69,7 @@ class SavedCasesStateSurface extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   OutlinedButton(
+                    key: retryButtonKey,
                     onPressed: onRetry,
                     child: Text(retryLabel!),
                   ),
