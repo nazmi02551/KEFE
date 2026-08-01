@@ -133,9 +133,12 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
   await tester.scrollUntilVisible(
     finder,
     300,
-    scrollable: find.byType(Scrollable).first,
+    scrollable: find.byType(Scrollable).last,
   );
-  await tester.pump();
+  await tester.pumpAndSettle();
+  expect(finder, findsOneWidget);
+  await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
   await tester.tap(finder);
   await tester.pumpAndSettle();
 }
