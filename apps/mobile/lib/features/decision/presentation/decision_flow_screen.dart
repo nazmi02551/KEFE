@@ -109,6 +109,7 @@ class _DecisionContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final strings = KefeStrings.of(context);
     final caseData = state.caseData!;
     final flowRuntime = state.flowRuntime!;
     final productPreviewVisual = ref.watch(productPreviewVisualModeProvider);
@@ -194,7 +195,6 @@ class _FlowStepSection extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    final strings = KefeStrings.of(context);
     final caseData = state.caseData!;
     final reasonPolicy = caseData.reasonPolicy;
     final controller = ref.read(decisionControllerProvider.notifier);
