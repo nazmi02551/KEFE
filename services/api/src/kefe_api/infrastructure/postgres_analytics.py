@@ -54,30 +54,48 @@ class PostgresAnalyticsEventStore:
                     "contribution_class": event.contribution_class,
                     "privacy_class": event.privacy_class.value,
                     "retention_class": event.retention_class.value,
-                    "metric_families": json.dumps(list(event.metric_families), separators=(",", ":")),
-                    "payload": json.dumps(event.payload, separators=(",", ":"), sort_keys=True),
+                    "metric_families": json.dumps(
+                        list(event.metric_families),
+                        separators=(",", ":"),
+                    ),
+                    "payload": json.dumps(
+                        event.payload,
+                        separators=(",", ":"),
+                        sort_keys=True,
+                    ),
                 },
             ).scalar_one_or_none()
         return inserted is not None
 
     def get(self, event_id: UUID) -> AnalyticsEvent | None:
         with self._engine.connect() as connection:
-            row = connection.execute(
-                text(self._select() + " WHERE id = :event_id"),
-                {"event_id": event_id},
-            ).mappings().one_or_none()
+            row = (
+                connection.execute(
+                    text(self._select() + " WHERE id = :event_id"),
+                    {"event_id": event_id},
+                )
+                .mappings()
+                .one_or_none()
+            )
         return None if row is None else self._event(row)
 
-    def list_by_source_event(self, source_event_id: UUID) -> tuple[AnalyticsEvent, ...]:
+    def list_by_source_event(
+        self,
+        source_event_id: UUID,
+    ) -> tuple[AnalyticsEvent, ...]:
         with self._engine.connect() as connection:
-            rows = connection.execute(
-                text(
-                    self._select()
-                    + " WHERE source_event_id = :source_event_id "
-                    + "ORDER BY analytics_name, analytics_version"
-                ),
-                {"source_event_id": source_event_id},
-            ).mappings().all()
+            rows = (
+                connection.execute(
+                    text(
+                        self._select()
+                        + " WHERE source_event_id = :source_event_id "
+                        + "ORDER BY analytics_name, analytics_version"
+                    ),
+                    {"source_event_id": source_event_id},
+                )
+                .mappings()
+                .all()
+            )
         return tuple(self._event(row) for row in rows)
 
     @staticmethod
