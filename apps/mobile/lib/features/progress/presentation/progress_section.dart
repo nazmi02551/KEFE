@@ -33,11 +33,11 @@ class _ProgressSectionState extends ConsumerState<ProgressSection> {
     final state = ref.watch(progressControllerProvider);
 
     return switch (state.uiState) {
-      ProgressUiState.idle || ProgressUiState.loading =>
-        ProgressAsyncStateSurface.loading(
-          surfaceKey: 'progress-loading',
-          message: strings.progressLoading,
-        ),
+      ProgressUiState.idle ||
+      ProgressUiState.loading => ProgressAsyncStateSurface.loading(
+        surfaceKey: 'progress-loading',
+        message: strings.progressLoading,
+      ),
       ProgressUiState.errorRetryable => ProgressAsyncStateSurface.error(
         surfaceKey: 'progress-error',
         retryKey: 'progress-retry',
