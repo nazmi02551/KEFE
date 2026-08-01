@@ -70,14 +70,14 @@ class _DecisionFlowScreenState extends ConsumerState<DecisionFlowScreen> {
       appBar: AppBar(title: Text(strings.appName)),
       body: SafeArea(
         child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 220),
+          duration: KefeMotion.resolve(
+            context,
+            const Duration(milliseconds: 220),
+          ),
           child: state.loading
-              ? Center(
+              ? _DecisionLoading(
                   key: const ValueKey('loading'),
-                  child: Semantics(
-                    label: strings.loading,
-                    child: const CircularProgressIndicator(),
-                  ),
+                  label: strings.loading,
                 )
               : state.caseData == null || state.flowRuntime == null
               ? _ErrorState(
@@ -113,6 +113,7 @@ class _DecisionContent extends ConsumerWidget {
     final caseData = state.caseData!;
     final flowRuntime = state.flowRuntime!;
     final productPreviewVisual = ref.watch(productPreviewVisualModeProvider);
+    final visual = context.kefeVisual;
 
     return ListView(
       padding: const EdgeInsets.all(20),
@@ -140,15 +141,37 @@ class _DecisionContent extends ConsumerWidget {
           const SizedBox(height: 16),
           Semantics(
             liveRegion: true,
-            child: Text(
-              strings.messageForCode(state.errorCode),
-              key: const ValueKey('decision-status-message'),
-              style: TextStyle(
-                color: state.offlineDraft
-                    ? Theme.of(context).colorScheme.secondary
-                    : Theme.of(context).colorScheme.error,
+            child: KefeSurface(
+              key: const ValueKey('decision-status-surface'),
+              tone: KefeSurfaceTone.raised,
+              accent: state.offlineDraft ? visual.attention : visual.empathy,
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ExcludeSemantics(
+                    child: Icon(
+                      state.offlineDraft
+                          ? Icons.cloud_off_rounded
+                          : Icons.error_outline_rounded,
+                      color: state.offlineDraft
+                          ? visual.attention
+                          : visual.empathy,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      strings.messageForCode(state.errorCode),
+                      key: const ValueKey('decision-status-message'),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: visual.foreground,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
             ),
           ),
         ],
@@ -241,21 +264,27 @@ class _FlowStepSection extends ConsumerWidget {
           const SizedBox(height: 12),
         ],
         const SizedBox(height: 8),
-        FilledButton(
+        FilledButton.icon(
           key: const ValueKey('commit-button'),
           onPressed: !state.hasRequiredResponses || state.submitting
               ? null
               : state.recoveryPending
               ? controller.retryPending
               : controller.commit,
-          child: state.submitting
-              ? const SizedBox.square(
-                  dimension: 22,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(
-                  state.recoveryPending ? strings.retrySync : strings.commit,
-                ),
+          icon: Icon(
+            state.submitting
+                ? Icons.hourglass_top_rounded
+                : state.recoveryPending
+                ? Icons.sync_problem_rounded
+                : Icons.lock_rounded,
+          ),
+          label: Text(
+            state.submitting
+                ? strings.loading
+                : state.recoveryPending
+                ? strings.retrySync
+                : strings.commit,
+          ),
         ),
         const SizedBox(height: 8),
         Text(
@@ -375,6 +404,48 @@ class _ExposureAwareContextStepState extends State<_ExposureAwareContextStep> {
   }
 }
 
+class _DecisionLoading extends StatelessWidget {
+  const _DecisionLoading({required this.label, super.key});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Semantics(
+          liveRegion: true,
+          label: label,
+          child: KefeSurface(
+            key: const ValueKey('decision-loading-surface'),
+            tone: KefeSurfaceTone.raised,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ExcludeSemantics(
+                  child: Icon(Icons.balance_rounded, color: visual.goldSoft),
+                ),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _CapabilityPendingCard extends StatelessWidget {
   const _CapabilityPendingCard({required this.step});
 
@@ -383,21 +454,44 @@ class _CapabilityPendingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
-    return Card(
+    final visual = context.kefeVisual;
+    return KefeSurface(
       key: ValueKey('capability-pending-${step.code}'),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              strings.flowCapabilityPendingTitle,
-              style: Theme.of(context).textTheme.titleMedium,
+      tone: KefeSurfaceTone.raised,
+      accent: visual.attention,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ExcludeSemantics(
+                child: Icon(
+                  Icons.extension_off_rounded,
+                  color: visual.attention,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  strings.flowCapabilityPendingTitle,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            strings.flowCapabilityPendingBody(step.reasonCode),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: visual.mutedForeground,
+              height: 1.45,
             ),
-            const SizedBox(height: 8),
-            Text(strings.flowCapabilityPendingBody(step.reasonCode)),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -482,16 +576,41 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            FilledButton(onPressed: onRetry, child: Text(retryLabel)),
-          ],
+        child: KefeSurface(
+          key: const ValueKey('decision-error-surface'),
+          tone: KefeSurfaceTone.raised,
+          accent: visual.empathy,
+          padding: const EdgeInsets.all(22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ExcludeSemantics(
+                child: Icon(
+                  Icons.error_outline_rounded,
+                  color: visual.empathy,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh_rounded),
+                label: Text(retryLabel),
+              ),
+            ],
+          ),
         ),
       ),
     );
