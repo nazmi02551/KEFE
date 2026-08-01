@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kefe_mobile/core/design/kefe_surface.dart';
 import 'package:kefe_mobile/core/design/kefe_theme.dart';
 import 'package:kefe_mobile/core/localization/kefe_strings.dart';
+import 'package:kefe_mobile/features/context/application/context_controller.dart';
 import 'package:kefe_mobile/features/context/data/context_repository.dart';
 import 'package:kefe_mobile/features/context/domain/context_models.dart';
 import 'package:kefe_mobile/features/context/presentation/context_section.dart';
@@ -75,9 +76,7 @@ void main() {
     expect(contextSource, isNot(contains('LinearProgressIndicator')));
   });
 
-  testWidgets('Context loading, error and retry are deterministic', (
-    tester,
-  ) async {
+  testWidgets('Context loading resolves deterministically', (tester) async {
     final repository = _InformationStateRepository();
     final gate = Completer<CaseContextSnapshot>();
     repository.contextGate = gate;
@@ -97,20 +96,43 @@ void main() {
 
     expect(find.text('Temel bağlam'), findsOneWidget);
     expect(find.byKey(const ValueKey('context-loading')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 
-    final errorRepository = _InformationStateRepository()..failContext = true;
-    await _pumpContext(tester, repository: errorRepository);
+  testWidgets('Context error retry invalidates only its provider', (
+    tester,
+  ) async {
+    var attempts = 0;
+    final snapshot = _InformationStateRepository().contextSnapshot();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          contextSnapshotProvider(_caseVersionId).overrideWith((ref) async {
+            attempts += 1;
+            if (attempts == 1) {
+              throw const ClientTransportFailure(code: 'NETWORK_UNAVAILABLE');
+            }
+            return snapshot;
+          }),
+        ],
+        child: const _TestApp(
+          themeMode: ThemeMode.dark,
+          textScale: 1,
+          child: ContextSection(caseVersionId: _caseVersionId),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('context-error')), findsOneWidget);
     expect(find.byKey(const ValueKey('context-retry')), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
 
-    errorRepository.failContext = false;
     await tester.tap(find.byKey(const ValueKey('context-retry')));
     await tester.pumpAndSettle();
 
-    expect(errorRepository.contextCalls, 2);
+    expect(attempts, 2);
     expect(find.text('Temel bağlam'), findsOneWidget);
     expect(find.byKey(const ValueKey('context-error')), findsNothing);
     expect(tester.takeException(), isNull);
