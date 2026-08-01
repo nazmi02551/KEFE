@@ -59,9 +59,7 @@ class AccountState {
     actorId: actorId ?? this.actorId,
     mergedExistingHistory: mergedExistingHistory ?? this.mergedExistingHistory,
     errorCode: clearError ? null : errorCode ?? this.errorCode,
-    failurePhase: clearFailure
-        ? null
-        : failurePhase ?? this.failurePhase,
+    failurePhase: clearFailure ? null : failurePhase ?? this.failurePhase,
   );
 }
 
