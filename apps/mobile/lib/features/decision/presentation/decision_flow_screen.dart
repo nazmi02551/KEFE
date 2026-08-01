@@ -70,14 +70,14 @@ class _DecisionFlowScreenState extends ConsumerState<DecisionFlowScreen> {
       appBar: AppBar(title: Text(strings.appName)),
       body: SafeArea(
         child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 220),
+          duration: KefeMotion.resolve(
+            context,
+            const Duration(milliseconds: 220),
+          ),
           child: state.loading
-              ? Center(
+              ? _DecisionLoadingState(
                   key: const ValueKey('loading'),
-                  child: Semantics(
-                    label: strings.loading,
-                    child: const CircularProgressIndicator(),
-                  ),
+                  label: strings.loading,
                 )
               : state.caseData == null || state.flowRuntime == null
               ? _ErrorState(
@@ -119,15 +119,8 @@ class _DecisionContent extends ConsumerWidget {
       children: [
         if (productPreviewVisual)
           CaseHeroHeader(caseData: caseData, flowRuntime: flowRuntime)
-        else ...[
-          Text(
-            caseData.title,
-            key: const ValueKey('case-title'),
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 12),
-          Text(caseData.summary, style: Theme.of(context).textTheme.bodyLarge),
-        ],
+        else
+          _ProductionCaseSummaryHeader(caseData: caseData),
         const SizedBox(height: 20),
         for (final step in flowRuntime.steps)
           _FlowStepSection(
@@ -138,18 +131,9 @@ class _DecisionContent extends ConsumerWidget {
           ),
         if (state.errorCode != null) ...[
           const SizedBox(height: 16),
-          Semantics(
-            liveRegion: true,
-            child: Text(
-              strings.messageForCode(state.errorCode),
-              key: const ValueKey('decision-status-message'),
-              style: TextStyle(
-                color: state.offlineDraft
-                    ? Theme.of(context).colorScheme.secondary
-                    : Theme.of(context).colorScheme.error,
-              ),
-              textAlign: TextAlign.center,
-            ),
+          _DecisionStatusSurface(
+            message: strings.messageForCode(state.errorCode),
+            offlineDraft: state.offlineDraft,
           ),
         ],
       ],
@@ -182,7 +166,7 @@ class _FlowStepSection extends ConsumerWidget {
       'REFLECTION' => _reflectionStep(),
       _ =>
         step.state == FlowStepRuntimeState.unsupported
-            ? _CapabilityPendingCard(step: step)
+            ? _CapabilityPendingSurface(step: step)
             : const SizedBox.shrink(),
     };
   }
@@ -205,7 +189,7 @@ class _FlowStepSection extends ConsumerWidget {
 
   Widget _decisionStep(BuildContext context, WidgetRef ref) {
     if (step.state == FlowStepRuntimeState.unsupported) {
-      return _CapabilityPendingCard(step: step);
+      return _CapabilityPendingSurface(step: step);
     }
     if (step.state != FlowStepRuntimeState.ready) {
       return const SizedBox.shrink();
@@ -216,6 +200,11 @@ class _FlowStepSection extends ConsumerWidget {
     final reasonPolicy = caseData.reasonPolicy;
     final controller = ref.read(decisionControllerProvider.notifier);
     final inputsEnabled = !state.recoveryPending && !state.submitting;
+    final action = !state.hasRequiredResponses || state.submitting
+        ? null
+        : state.recoveryPending
+        ? controller.retryPending
+        : controller.commit;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -241,30 +230,11 @@ class _FlowStepSection extends ConsumerWidget {
           const SizedBox(height: 12),
         ],
         const SizedBox(height: 8),
-        FilledButton(
-          key: const ValueKey('commit-button'),
-          onPressed: !state.hasRequiredResponses || state.submitting
-              ? null
-              : state.recoveryPending
-              ? controller.retryPending
-              : controller.commit,
-          child: state.submitting
-              ? const SizedBox.square(
-                  dimension: 22,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(
-                  state.recoveryPending ? strings.retrySync : strings.commit,
-                ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          !state.hasRequiredResponses
-              ? strings.completeRequired
-              : state.recoveryPending
-              ? strings.pendingHelper
-              : strings.commitHelper,
-          textAlign: TextAlign.center,
+        _CommitActionPanel(
+          onPressed: action,
+          submitting: state.submitting,
+          recoveryPending: state.recoveryPending,
+          hasRequiredResponses: state.hasRequiredResponses,
         ),
         const SizedBox(height: 20),
       ],
@@ -273,7 +243,7 @@ class _FlowStepSection extends ConsumerWidget {
 
   Widget _reflectionStep() {
     if (step.state == FlowStepRuntimeState.unsupported) {
-      return _CapabilityPendingCard(step: step);
+      return _CapabilityPendingSurface(step: step);
     }
     if (step.state != FlowStepRuntimeState.ready &&
         step.state != FlowStepRuntimeState.completed) {
@@ -288,7 +258,7 @@ class _FlowStepSection extends ConsumerWidget {
 
   Widget _resultStep(BuildContext context, WidgetRef ref) {
     if (step.state == FlowStepRuntimeState.unsupported) {
-      return _CapabilityPendingCard(step: step);
+      return _CapabilityPendingSurface(step: step);
     }
     if (step.state != FlowStepRuntimeState.ready || state.reveal == null) {
       return const SizedBox.shrink();
@@ -375,29 +345,293 @@ class _ExposureAwareContextStepState extends State<_ExposureAwareContextStep> {
   }
 }
 
-class _CapabilityPendingCard extends StatelessWidget {
-  const _CapabilityPendingCard({required this.step});
+class _ProductionCaseSummaryHeader extends StatelessWidget {
+  const _ProductionCaseSummaryHeader({required this.caseData});
+
+  final DecisionCase caseData;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return KefeSurface(
+      key: const ValueKey('production-case-summary-header'),
+      tone: KefeSurfaceTone.premium,
+      padding: const EdgeInsets.all(20),
+      borderRadius: 26,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ExcludeSemantics(
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: visual.subtleGoldSurface,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: visual.gold.withValues(alpha: 0.28),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.balance_rounded,
+                    color: visual.goldSoft,
+                    size: 24,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Text(
+                  caseData.title,
+                  key: const ValueKey('case-title'),
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: visual.onSurfaceStrong,
+                    fontWeight: FontWeight.w900,
+                    height: 1.14,
+                    letterSpacing: -0.35,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            caseData.summary,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: visual.onSurfaceStrong.withValues(alpha: 0.74),
+              height: 1.46,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DecisionLoadingState extends StatelessWidget {
+  const _DecisionLoadingState({required this.label, super.key});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Semantics(
+          liveRegion: true,
+          label: label,
+          child: KefeSurface(
+            tone: KefeSurfaceTone.raised,
+            accent: visual.gold,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ExcludeSemantics(
+                  child: Icon(
+                    Icons.hourglass_top_rounded,
+                    color: visual.goldSoft,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CommitActionPanel extends StatelessWidget {
+  const _CommitActionPanel({
+    required this.onPressed,
+    required this.submitting,
+    required this.recoveryPending,
+    required this.hasRequiredResponses,
+  });
+
+  final VoidCallback? onPressed;
+  final bool submitting;
+  final bool recoveryPending;
+  final bool hasRequiredResponses;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
+    final helper = !hasRequiredResponses
+        ? strings.completeRequired
+        : recoveryPending
+        ? strings.pendingHelper
+        : strings.commitHelper;
+    final buttonLabel = submitting
+        ? strings.loading
+        : recoveryPending
+        ? strings.retrySync
+        : strings.commit;
+
+    return KefeSurface(
+      key: const ValueKey('commit-action-panel'),
+      tone: KefeSurfaceTone.raised,
+      accent: recoveryPending ? visual.attention : visual.gold,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            liveRegion: submitting,
+            child: FilledButton.icon(
+              key: const ValueKey('commit-button'),
+              onPressed: onPressed,
+              icon: Icon(
+                submitting
+                    ? Icons.hourglass_top_rounded
+                    : recoveryPending
+                    ? Icons.sync_rounded
+                    : Icons.lock_rounded,
+              ),
+              label: Text(buttonLabel),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            helper,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: visual.mutedForeground,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DecisionStatusSurface extends StatelessWidget {
+  const _DecisionStatusSurface({
+    required this.message,
+    required this.offlineDraft,
+  });
+
+  final String message;
+  final bool offlineDraft;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    final accent = offlineDraft
+        ? visual.attention
+        : Theme.of(context).colorScheme.error;
+    return Semantics(
+      liveRegion: true,
+      child: KefeSurface(
+        tone: KefeSurfaceTone.sunken,
+        accent: accent,
+        padding: const EdgeInsets.all(15),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ExcludeSemantics(
+              child: Icon(
+                offlineDraft
+                    ? Icons.cloud_off_rounded
+                    : Icons.error_outline_rounded,
+                color: accent,
+                size: 21,
+              ),
+            ),
+            const SizedBox(width: 11),
+            Expanded(
+              child: Text(
+                message,
+                key: const ValueKey('decision-status-message'),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: visual.foreground,
+                  height: 1.42,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CapabilityPendingSurface extends StatelessWidget {
+  const _CapabilityPendingSurface({required this.step});
 
   final FlowRuntimeStep step;
 
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
-    return Card(
+    final visual = context.kefeVisual;
+    return KefeSurface(
       key: ValueKey('capability-pending-${step.code}'),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              strings.flowCapabilityPendingTitle,
-              style: Theme.of(context).textTheme.titleMedium,
+      tone: KefeSurfaceTone.raised,
+      accent: visual.attention,
+      padding: const EdgeInsets.all(18),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ExcludeSemantics(
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: visual.attention.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(13),
+                border: Border.all(
+                  color: visual.attention.withValues(alpha: 0.26),
+                ),
+              ),
+              child: Icon(
+                Icons.info_outline_rounded,
+                color: visual.attention,
+                size: 21,
+              ),
             ),
-            const SizedBox(height: 8),
-            Text(strings.flowCapabilityPendingBody(step.reasonCode)),
-          ],
-        ),
+          ),
+          const SizedBox(width: 13),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  strings.flowCapabilityPendingTitle,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  strings.flowCapabilityPendingBody(step.reasonCode),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: visual.mutedForeground,
+                    height: 1.42,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -482,16 +716,45 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            FilledButton(onPressed: onRetry, child: Text(retryLabel)),
-          ],
+        child: Semantics(
+          liveRegion: true,
+          child: KefeSurface(
+            tone: KefeSurfaceTone.raised,
+            accent: Theme.of(context).colorScheme.error,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ExcludeSemantics(
+                  child: Icon(
+                    Icons.error_outline_rounded,
+                    color: Theme.of(context).colorScheme.error,
+                    size: 30,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: visual.foreground,
+                    height: 1.42,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: onRetry,
+                  child: Text(retryLabel),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
