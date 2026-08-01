@@ -61,7 +61,10 @@ void main() {
     expect(contract['completion']['pending_key_reuse_preserved'], isTrue);
     expect(contract['completion']['creates_decision_revision'], isFalse);
     expect(contract['methodology']['descriptive_non_causal'], isTrue);
-    expect(contract['methodology']['intervention_caused_change_claim'], isFalse);
+    expect(
+      contract['methodology']['intervention_caused_change_claim'],
+      isFalse,
+    );
     expect(contract['methodology']['raw_response_values_exposed'], isFalse);
     expect(contract['methodology']['private_reason_text_exposed'], isFalse);
     expect(contract['methodology']['signal_input'], isFalse);
@@ -85,10 +88,7 @@ void main() {
     expect(source, contains('context.kefeVisual'));
     expect(source, contains("key: const ValueKey('reflection-loading')"));
     expect(source, contains("key: const ValueKey('reflection-error')"));
-    expect(
-      source,
-      contains("key: const ValueKey('reflection-inline-status')"),
-    );
+    expect(source, contains("key: const ValueKey('reflection-inline-status')"));
     expect(
       source,
       contains("key: const ValueKey('reflection-complete-button')"),
@@ -113,6 +113,7 @@ void main() {
     repository.loadGate = loadGate;
 
     await _pumpReflection(tester, repository: repository);
+    await tester.pump();
     await tester.pump();
 
     expect(find.byKey(const ValueKey('reflection-loading')), findsOneWidget);
@@ -199,7 +200,10 @@ void main() {
       completionGate.complete();
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('reflection-completed')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('reflection-completed')),
+        findsOneWidget,
+      );
       expect(completionStore.completions, isEmpty);
       expect(repository.completeCalls, 1);
       expect(tester.takeException(), isNull);
@@ -259,7 +263,9 @@ Future<void> _pumpReflection(
       key: UniqueKey(),
       overrides: [
         decisionRepositoryProvider.overrideWithValue(repository),
-        decisionDraftStoreProvider.overrideWithValue(MemoryDecisionDraftStore()),
+        decisionDraftStoreProvider.overrideWithValue(
+          MemoryDecisionDraftStore(),
+        ),
         reflectionCompletionStoreProvider.overrideWithValue(
           completionStore ?? MemoryReflectionCompletionStore(),
         ),
