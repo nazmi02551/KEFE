@@ -114,7 +114,6 @@ void main() {
     expect(find.byKey(const ValueKey('progress-retry')), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('progress-retry')));
-    await tester.tap(find.byKey(const ValueKey('progress-retry')));
     await tester.pumpAndSettle();
 
     expect(repository.calls, 2);
