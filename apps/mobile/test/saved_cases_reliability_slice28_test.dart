@@ -30,10 +30,7 @@ void main() {
     expect(contract['scope']['store_change'], isFalse);
     expect(contract['scope']['persistence_format_change'], isFalse);
     expect(contract['states']['loading_empty']['key'], 'saved-cases-loading');
-    expect(
-      contract['states']['error_empty']['empty_claim_visible'],
-      isFalse,
-    );
+    expect(contract['states']['error_empty']['empty_claim_visible'], isFalse);
     expect(
       contract['states']['error_with_items']['items_remain_visible'],
       isTrue,
@@ -116,7 +113,10 @@ void main() {
 
     await _pump(tester, store: store, locale: const Locale('tr', 'TR'));
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('open-saved-case-case-1')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('open-saved-case-case-1')),
+      findsOneWidget,
+    );
 
     store.gate = Completer<List<SavedCase>>();
     final container = ProviderScope.containerOf(
@@ -126,7 +126,10 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(const ValueKey('saved-cases-loading')), findsOneWidget);
-    expect(find.byKey(const ValueKey('open-saved-case-case-1')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('open-saved-case-case-1')),
+      findsOneWidget,
+    );
     expect(find.byKey(const ValueKey('saved-cases-empty')), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -147,7 +150,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('saved-cases-error')), findsOneWidget);
-    expect(find.byKey(const ValueKey('open-saved-case-case-1')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('open-saved-case-case-1')),
+      findsOneWidget,
+    );
     expect(find.byKey(const ValueKey('saved-cases-empty')), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -160,9 +166,7 @@ void main() {
     await _pump(tester, store: store, locale: const Locale('tr', 'TR'));
     await tester.pumpAndSettle();
 
-    await tester.tap(
-      find.byKey(const ValueKey('remove-saved-case-case-1')),
-    );
+    await tester.tap(find.byKey(const ValueKey('remove-saved-case-case-1')));
     await tester.pumpAndSettle();
 
     expect(store.writes, 1);
