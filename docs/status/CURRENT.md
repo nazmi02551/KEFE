@@ -1,22 +1,23 @@
 # KEFE Current Project Checkpoint
 
-**Updated:** 2026-07-31  
+**Updated:** 2026-08-01  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Active stacked line top:** PR #138 `feature/signature-balance-hero-slice18`  
-**Latest repo-verified active-stack runtime:** `1035b769bcbd7059cc84a9680ef62f0113cc32e3`  
-**Latest runtime owner:** PR #138 / Slice 18 Signature Balance Hero  
-**PR #138 current head:** may contain later documentation-only commits; resolve live before acting  
+**Main documentation checkpoint:** `7ac18ea24940614e3d240660eb5048aa851414a6`  
+**Active stacked line top:** PR #149 `feature/decision-flow-shell-state-slice23`  
+**Latest repo-verified active-stack runtime:** `d28ae2d8f3ac831cd73badeb6d4ac90d9404a9b2`  
+**Latest runtime owner:** PR #149 / Slice 23 Decision Flow Shell and State  
+**PR #149 current head:** `77209eb8847a651ab8bb619f18ec4539c469cb77` (later documentation-only commits do not redefine the runtime)
 
-This file is the **canonical durable engineering handoff** for continuation. Chat history is supplementary context, not engineering source of truth.
+This file is the canonical durable engineering handoff. Chat history is supplementary context only.
 
-A new ChatGPT/Codex session receiving only **“KEFE’yi geliştirmeye devam et”** must read root `AGENTS.md`, this file, live GitHub state/CI and relevant Drive CURRENT/WORKING state, then resume the next unresolved work without asking the user to reconstruct prior conversations.
+A new ChatGPT/Codex session receiving only **“KEFE’yi geliştirmeye devam et”** must read root `AGENTS.md`, this file, live GitHub state/CI and relevant Drive CURRENT/WORKING state, then continue in dependency order without asking the user to reconstruct prior conversations.
 
 ## 1. Documentation authority
 
 ### Published CURRENT
 
-**KEFE Documentation Ecosystem v3.4 — CURRENT / validation PASS** remains the published authority until an explicit documentation promotion milestone completes.
+**KEFE Documentation Ecosystem v3.4 — CURRENT / validation PASS** remains the published authority until an explicit documentation-promotion milestone completes.
 
 Principal published versions include:
 - Master Product Document v1.3.0 — Approved Canonical
@@ -31,15 +32,9 @@ Principal published versions include:
 Published artifact: `KEFE_Documentation_Ecosystem_2026-07-28_v3.4_CURRENT.zip`  
 Drive CURRENT file ID: `1MXvCTNPfv-pWYIHCo5KqpmTOf-3RyFhZ`
 
-### WORKING
+### Drive WORKING
 
-Drive WORKING includes the living checkpoint:
-`KEFE Internal Alpha Checkpoint v1.1.0 WORKING`  
-ID: `1pOVkA12khFJTdfw-wCcuzRYcFNPnB2Cq1Ylo6_h5A3o`
-
-It pins verified Slice 18 runtime `1035b769...`, preserves Slice 17 runtime `ce9630ba...` in its own historical section, records the non-visual architecture horizon and carries the APK/Product Preview fidelity rule. WORKING does not supersede CURRENT.
-
-At the next declared documentation publication milestone, accepted Slice 17/18+ changes belong in the existing Design System, Engineering Blueprint and Product Bible; do not create a parallel official manifesto.
+The existing Drive WORKING checkpoint was last known to pin Slice 18 and therefore must not be treated as newer than the live GitHub stack recorded here. It remains WORKING, not published CURRENT. At the next documentation milestone, accepted Slice 19–23 changes belong in the existing Product Bible, Design System and Engineering Blueprint; do not create a parallel official manifesto.
 
 ## 2. Binding invariants
 
@@ -57,114 +52,131 @@ Preserve unless an explicit accepted decision changes them:
 - Signal/Impact may not silently broaden;
 - AI/provider output is not autonomous truth, editorial acceptance or publication authority;
 - accessibility, Reduce Motion, localization and low-end Android are first-class constraints;
-- CI does not prove human usability, editorial CQB, production OTP/provider delivery, store compliance, deployed SLO or operator rollback.
+- CI does not prove human usability, editorial CQB, production provider delivery, store compliance, deployed SLO or operator rollback.
 
-## 3. Active stack
+## 3. Active stacked line
 
 `main` is not the current top implementation line. The active work remains a draft stacked chain and must be promoted only in dependency order.
 
 Observed dependency line:
 
-`main → #90 → #92 → #94 → #95 → #97 → #99 → #101 → #103 → #105 → #107 → #109 → #111 → #113 → #115 → #117 → #118 → #120 → #122 → #124 → #126 → #128 → #132 → #138`
+`main → #90 → #92 → #94 → #95 → #97 → #99 → #101 → #103 → #105 → #107 → #109 → #111 → #113 → #115 → #117 → #118 → #120 → #122 → #124 → #126 → #128 → #132 → #138 → #141 → #143 → #145 → #147 → #149`
 
-PR #68 is excluded from this active MVP/premium stack. It contains isolated ingestion-orchestration work and must not be counted as delivered or merged/rebased silently. Adoption requires a fresh compatibility review.
+Before any merge, re-read live bases/heads, mergeability, reviews and exact CI. Never merge a child before its parent.
 
-Before any merge, re-read the live stack, current bases/heads, mergeability, reviews and exact CI. Never merge a child before its parent.
+### Explicit exclusions
 
-## 4. Latest verified runtime — Slice 18
+- PR #68 remains outside the active MVP/premium stack. Its ingestion-orchestration work requires a fresh compatibility review before adoption.
+- PR #151 and Issue #150 are closed as a superseded duplicate of canonical Slice 23 PR #149 / Issue #148. PR #151 independently reached a green runtime (`1c272a642aed3127aa4f162067d50e80a0adb73c`), but it started from the same PR #147 parent and created conflicting ADR-0061/contract ownership. Its evidence is historical only and does not define a second active Slice 23.
 
-### Signature Balance Hero Convergence
+## 4. Latest verified runtime — Slice 23
+
+### Decision Flow Shell and State Convergence
 
 Verified runtime SHA:
-`1035b769bcbd7059cc84a9680ef62f0113cc32e3`
 
-Exact-head workflows — all SUCCESS on the same SHA:
-- API CI #852 / `30659612084`
-- Mobile CI #650 / `30659612079`
-- MVP Beta Gates #356 / `30659612086`
-- Global Readiness #262 / `30659612104`
+`d28ae2d8f3ac831cd73badeb6d4ac90d9404a9b2`
 
-Global phone artifact:
-- `kefe-internal-alpha-phone-preview`
-- artifact ID `8804739690`
-- archive digest `sha256:1d698475dea6ba262ca54c1ae0bafb2c605e8e4566ad185df73d62bf7601f239`
-- payload `app-debug.apk`
-- APK size `160529090` bytes
-- APK SHA-256 `93ce2c5ffb9e07f787749e10218284b75283cf891e8a0fbaf37a9d66d7cb406f`
-- `beta-api.invalid` absent in raw and unpacked scans.
+All required repository-owned workflows passed on that exact SHA:
 
-This is an internal Product Preview artifact, not a production/public-beta/store release.
+- API CI #923 / run `30689857505` — SUCCESS
+- Mobile CI #716 / run `30689857464` — SUCCESS
+- MVP Beta Gates #427 / run `30689857461` — SUCCESS
+- Global Readiness #328 / run `30689857463` — SUCCESS
 
-Later documentation-only commits on PR #138 do **not** redefine this verified runtime SHA.
+Contract-first records:
 
-Durable Slice 18 records:
-- Issue #137
-- ADR-0056 `docs/adr/0056-signature-balance-hero-convergence.md`
-- contract `docs/contracts/signature-balance-hero-slice18.v1.json`
-- verification `docs/status/SIGNATURE_BALANCE_HERO_SLICE18_2026-07-31.md`
+- Issue #148
+- PR #149
+- ADR-0061 `docs/adr/0061-decision-flow-shell-state-convergence.md`
+- contract `docs/contracts/decision-flow-shell-state-slice23.v1.json`
+- verification `docs/status/DECISION_FLOW_SHELL_STATE_SLICE23_2026-08-01.md`
 
-## 5. What Slice 18 closed
+### What Slice 23 closed
 
-The shared production `KefeBalanceVisual` now provides a richer dimensional Signature Balance for the existing generic exactly-two-option `SINGLE_CHOICE` capability.
+The shared `DecisionFlowScreen` now uses deterministic, theme-adaptive KEFE semantic surfaces for:
 
-Eligibility remains capability-driven. No Case ID, Case title or domain-specific branch was introduced.
+- initial loading;
+- load error and retry;
+- unsupported capability disclosure;
+- Commit working/recovery presentation;
+- inline offline/error status.
 
-Truthfulness remains intact:
-- visual states are neutral / left-selected / right-selected only;
-- tilt/highlight reflects only the current user's own binary choice;
-- canonical raw option values remain unchanged;
-- no percentage, continuous coordinate, community distribution, Consensus, Perspective, Signal or Impact is invented before Commit.
+The governed screen no longer contains indeterminate `CircularProgressIndicator` use or a generic Material `Card` for capability-pending presentation. Root loading/error/content transition resolves through `KefeMotion.resolve` and collapses under Reduce Motion.
 
-The Flutter-native renderer adds metallic/gold pedestal/base/pivot/beam/chains/pans, Rules cyan left treatment, Empathy warm right treatment and deterministic depth/glow. No mandatory live 3D, WebView, Three.js or continuous particle/shader animation was added.
+Production displays the raw Case title and summary in a premium text-only KEFE surface while Product Preview keeps the explicit `CaseHeroHeader` and Preview media repository wiring. No Preview fixture/media fallback was introduced into production.
 
-Explicit option tiles remain the actual accessible controls. Reduce Motion collapses selection transition to zero. Short decision viewports use compact presentation so option controls remain reachable; normal modern phones retain the larger hero.
+The stable `commit-button`, required-response gate, normal `commit`, uncertain-Commit `retryPending`, helper mapping, Context exposure, FlowRuntime order/mapping, Reflection, first-Reveal onboarding completion and pre-Commit Reveal/Perspective absence remain unchanged.
 
-Product Preview regression proves the production Signature Balance widget is reachable before Commit on the airline Case path and that Reveal remains absent pre-Commit.
+Executable coverage includes dark/light, 360×800, 1.6× text, loading/error/unsupported/submitting/offline states, production/Preview isolation, full regressions, production-copy checks and phone acceptance. The onboarding journey test was hardened so option, Commit and continuation actions are actually reachable in the Decision ListView.
 
-Rejected candidates were not promoted:
-- `9e1e7ba098055f2530bde99b524bdfc32a4f0205` — analyzer/format failure;
-- `08c173310b5ee1192eb3f9dff36066eba1d7dc91` — full regressions exposed a real short-viewport option-reachability regression.
+### Latest phone artifact
 
-The final solution fixed the product layout rather than weakening tests.
+Global Readiness #328 produced:
 
-No pixel-exact concept reproduction or human visual/usability PASS is claimed.
+- artifact: `kefe-internal-alpha-phone-preview`
+- artifact ID: `8815333223`
+- archive digest: `sha256:b4c897eaec5f22cb08adc7e39c1a57a417eb22af182fd4809e84869558da7c9c`
+- payload: `app-debug.apk`
+- payload size: `160577634` bytes
+- APK SHA-256: `3375af0f152417c3ff0fbc0f4c6c0f5fafe7bd0ae168df4368783c42808ad76b`
+- `beta-api.invalid`: absent in raw and unpacked scans.
 
-## 6. Previous verified visual foundation — Slice 17
+This is an internal Product Preview artifact, not production/public-beta/store or human-usability evidence.
 
-Slice 17 remains the verified reusable foundation checkpoint at:
-`ce9630ba4f013ac9611ac10b397bff356d797bad`
+## 5. Verified high-fidelity progression after Slice 18
 
-Exact-head Slice 17 workflows:
-- API CI #842 / `30656878396`
-- Mobile CI #641 / `30656878583`
-- MVP Beta Gates #346 / `30656878438`
-- Global Readiness #253 / `30656878637`
+### Slice 19 — Atlas World / Globe
 
-It established:
-- provider-neutral visual composition policy;
-- normalized focal/safe-area rules;
-- theme suitability/fallback classes;
-- Reduce-Motion-aware motion;
-- bounded compact/hero performance budgets;
-- deterministic media loading/empty/error/exposure/fallback;
-- PRE_COMMIT_SAFE / POST_COMMIT_ONLY preservation;
-- production/Product Preview route/shared-surface parity guard.
+- PR #141
+- verified runtime `db514fe61768f0a3cf7b0c4fe1ac4fa525be9edc`
+- materially richer Flutter-native Atlas globe;
+- representative Preview data remains explicitly non-live and non-nationally representative;
+- Atlas remains secondary Product Preview-only;
+- marker values/positions are derived from one fixture source;
+- dark/light, compact phone and enlarged-text regressions pass.
 
-Records:
-- Issue #129
-- ADR-0055
-- `docs/contracts/high-fidelity-visual-foundation-slice17.v1.json`
-- `docs/status/CAPABILITY_RELEASE_AUDIT_2026-07-31.md`
-- `docs/status/HIGH_FIDELITY_VISUAL_FOUNDATION_SLICE17_2026-07-31.md`
-- `docs/status/PRODUCT_COMPLETION_AND_VISUAL_ROADMAP_2026-07-31.md`
+### Slice 20 — Perspective Landscape
 
-## 7. Consumer/product state
+- PR #143
+- verified runtime `d33596da0c7fb6d8a6a43b620ce11c5bf38c850f`
+- qualitative topographic post-Commit Perspective landscape;
+- geometry is driven only by recognized Perspective slots;
+- cards remain the complete semantic truth in API order;
+- no measured user coordinate, ideology/value position, population density or inferred distance is claimed.
 
-The active stack already contains the main consumer loop:
+### Slice 21 — Sports CALL Scene
+
+- PR #145
+- verified runtime `eb7dbb2f85f5fa955040c5da60c6ab4c928e7da8`
+- provider-neutral `KEFE_SPORTS_SCENE_V1` renderer selected only through `CaseMediaRendition.rendererCode`;
+- representative football scene, not adjudication evidence;
+- no fake VAR/replay/offside/contact/goal-line controls or factual geometry;
+- current Sports question/answers/Commit/Reveal/Perspective semantics remain unchanged.
+
+### Slice 22 — Premium Explore Discovery
+
+- PR #147
+- verified runtime `0891ed8a96e2f0c5bc2666e07f9f7e549e5af067`
+- primary Explore discovery moved to shared semantic KEFE surfaces;
+- search/filter/saved behavior, repository order and canonical Case navigation remain unchanged;
+- no ranking, recommendation, popularity, personalization or editorial-priority semantics were introduced;
+- deterministic loading/empty/no-result/error states and phone/text-scale coverage pass.
+
+### Slice 23 — Decision Flow Shell and State
+
+- PR #149
+- verified runtime `d28ae2d8f3ac831cd73badeb6d4ac90d9404a9b2`
+- primary Case/Decision state and Commit presentation convergence completed as described above.
+
+## 6. Current consumer/product state
+
+The active stack contains the principal consumer loop:
 
 `Explore → Case/Context → typed Weigh/private Reason → Commit → Reveal → Perspective`
 
 plus:
+
 - Activity / Saved Cases continuity;
 - descriptive My KEFE history;
 - Blind First case-only sharing;
@@ -174,83 +186,66 @@ plus:
 - first-use onboarding and first-Reveal completion;
 - generic Flow/CaseVersion runtime;
 - Product Preview/production isolation;
-- TR/EN localization architecture and valid light/dark themes.
+- Turkish/English localization architecture and valid light/dark themes;
+- high-fidelity Signature Balance, representative Atlas globe, qualitative Perspective landscape and representative Sports CALL scene;
+- premium Explore and Decision Flow shell/state convergence.
 
-Premium convergence through verified Slice 18:
-1. Decision Journey
-2. Reveal + KEFE Gap
-3. Perspective
-4. Radar Preview
-5. Atlas Preview
-6–10. Localization foundation/convergence
-11. Activity + My KEFE
-12. Shared shell
-13. Settings + Privacy + Account
-14. Blind First Sharing
-15. Consensus + Community Reasons
-16. First-use journey + corrected Preview reachability
-17. High-fidelity visual composition foundation + phone parity guard
-18. Signature Balance Hero convergence
+Visual convergence is not total product completion.
 
-The concept-level Atlas globe, Perspective terrain and Spatial CALL scenes are **not** yet implemented; they remain target art direction.
-
-## 8. Non-visual work still exists
-
-Visual completion is not total KEFE completion.
+## 7. Non-visual work still exists
 
 Architecture-locked or incomplete areas include:
+
 - provider-neutral ingestion orchestration on the active delivery line;
 - Candidate Case / Decision Problem / Question Draft projection into Content Authoring;
 - methodology-qualified `WE → SIGNAL → IMPACT` runtime;
 - full Admin/editorial/review operational UI and tooling;
-- real production auth/OTP/provider delivery and other environment/provider maturity.
+- real production auth/OTP/provider delivery and environment maturity;
+- production observability/SLO/load/rollback evidence;
+- target-release decisions for public Web/deep-link landing and Admin Studio scope.
 
-The canonical Product Bible also preserves accepted-later families such as Today, Evidence Builder, fuller Atlas/Context Lens/Chronicle/Temporal Retest, Circle/Rooms/UGC, Live, DECIDE/RETRO, Education/AI reasoning tools, Observe/Wrapped, Research/Insights/Pulse/Aggregate API and long-horizon validated Values/global indices/governance.
+The canonical Product Bible also preserves accepted-later families such as Today, Evidence Builder, fuller Atlas/Context Lens/Chronicle/Temporal Retest, Circle/Rooms/UGC, Live, DECIDE/RETRO, Education/AI reasoning tools, Observe/Wrapped, Research/Insights/Pulse/Aggregate API and long-horizon validated Values/global indices/governance. These are directions, not automatic first-release blockers.
 
-These are preserved directions, not automatic first-release blockers. Select delivery slices explicitly; do not speculative-build the whole horizon.
+## 8. Phone candidate fidelity rule
 
-## 9. Phone candidate fidelity rule
-
-A phone APK represents only its **exact verified runtime SHA**.
+A phone APK represents only its exact verified runtime SHA.
 
 Before describing a future APK as the current implemented phone experience:
+
 1. record exact runtime SHA, four-workflow evidence, artifact ID/digest and APK hash;
-2. inventory production routes/user-facing surfaces;
-3. inventory Product Preview routes/user-facing surfaces;
-4. classify implemented surfaces as production+preview, production-only with reason, preview-only with reason, or conditional/feature-gated with explicit review path/exclusion;
+2. inventory production routes and user-facing surfaces;
+3. inventory Product Preview routes and user-facing surfaces;
+4. classify every implemented consumer surface as production+preview, production-only with reason, preview-only with reason, or conditional/feature-gated with explicit review path/exclusion;
 5. record Preview repository/provider/fixture substitutions;
 6. mark external behaviors Preview cannot prove;
 7. ensure no intended review surface silently exists in source but is unreachable in the candidate.
 
-Route parity alone is not proof of every nested conditional surface. Add reachability tests when a slice adds or changes a review-critical nested state.
+Route parity alone is not proof of every nested conditional surface. Add reachability tests when a slice changes a review-critical nested state.
 
-## 10. Next unresolved engineering work
+## 9. Next unresolved engineering work
 
-The next planned high-visibility visual vertical slice is:
+Do not start another visual slice from chat memory alone.
 
-**Atlas World / Globe Convergence**
+The next step is a fresh audit on the canonical top branch (`feature/decision-flow-shell-state-slice23`) covering:
 
-Before implementation:
-- audit the current Preview Atlas implementation and data/methodology labels;
-- create a fresh ADR + executable contract;
-- reuse Slice 17 composition/fallback/accessibility/performance rules;
-- preserve representative/sample-data truthfulness;
-- do not make Preview/example country values appear live, production or methodology-validated;
-- keep Atlas secondary until an accepted product decision changes navigation;
-- no mandatory heavy live 3D.
+- remaining primary-screen/component generic Material surfaces or direct screen-local styling;
+- typography and spacing taxonomy consistency;
+- deterministic empty/loading/error/skeleton treatment;
+- dark/light parity;
+- 360×800 and enlarged-text reachability;
+- Reduce Motion and semantics;
+- low-end Android performance;
+- production/Product Preview surface reachability;
+- overlap with separately governed non-visual architecture priorities.
 
-Initial sequence after Atlas:
-1. Perspective Landscape
-2. Spatial CALL
-3. residual primary-screen state/typography/spacing/accessibility/performance convergence
+After the audit, choose one meaningful vertical Slice 24. A material boundary change requires ADR + executable contract before runtime. Ordinary internal refactoring must not manufacture an unnecessary product ADR.
 
-Do not interpret this visual sequence as replacing the separately governed non-visual architecture/release backlog.
+Do not reopen Spatial CALL as factual/interactive evidence until a separate typed spatial-evidence/provenance contract exists. The current Sports scene is representative presentation only.
 
-At the later target-release planning boundary, explicitly decide—rather than guess—how much public Web/deep-link landing and Admin Studio UI the first public beta requires.
-
-## 11. External/human gates still pending
+## 10. External/human gates still pending
 
 Not replaceable by CI:
+
 - human phone visual/usability review;
 - real production OTP/provider configuration and deliverability;
 - editorial CQB acceptance of launch content;
@@ -258,39 +253,23 @@ Not replaceable by CI:
 - deployed production SLO/load/observability;
 - operator-validated production feature-switch/rollback controls.
 
-## 12. Standard development protocol
+## 11. Standard development protocol
 
 For each meaningful vertical slice:
+
 1. read `AGENTS.md`, this file, live stack and CI;
 2. distinguish verified runtime SHA from later docs-only head;
 3. audit current implementation before selecting scope;
 4. ADR + executable contract first for material boundary changes;
 5. keep one coherent branch/PR per slice and respect stack order;
-6. implement generic/case-agnostic behavior with preview/production isolation;
+6. implement generic/case-agnostic behavior with Preview/production isolation;
 7. add tests/contracts with implementation;
 8. enforce canonical format/analyzer/full regressions and required API/Mobile/MVP/Global gates;
 9. never call PASS without exact evidence;
 10. create/distribute APK only for meaningful verified checkpoints;
-11. record status evidence and update Drive WORKING;
-12. promote published CURRENT documentation only at a declared documentation milestone with its own QA/readback checks.
+11. record durable status evidence and update Drive WORKING when appropriate;
+12. promote published CURRENT documentation only at a declared documentation milestone with QA/readback checks.
 
-## 13. New-chat continuation protocol
+## 12. Repository metadata caution
 
-When the user says **“KEFE’yi geliştirmeye devam et”**:
-
-1. read root `AGENTS.md` and `docs/status/CURRENT.md` from `main`;
-2. inspect live repo metadata, open PR stack/top head, recent merges and CI;
-3. resolve latest verified runtime separately from docs-only heads;
-4. read the relevant ADR/contract/status files;
-5. consult Drive CURRENT/WORKING when normative/publication detail is needed;
-6. determine whether next unresolved work is visual, non-visual runtime, release evidence or selected future capability;
-7. continue in dependency order without restarting product analysis;
-8. ask the user only if a genuinely material unresolved product/architecture decision is reached.
-
-Minimal recovery prompt:
-
-> KEFE’yi geliştirmeye devam et.
-
-## 14. Repository metadata caution
-
-GitHub metadata observed on 2026-07-31 reports repository visibility as **public**, while older project context described it as private. Do not change visibility automatically. Require explicit owner intent before any visibility mutation.
+GitHub currently reports repository visibility as **public**, while older project context described it as private. Do not change visibility automatically. Require explicit owner intent before any visibility mutation.
