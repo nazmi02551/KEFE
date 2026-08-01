@@ -133,9 +133,12 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
   await tester.scrollUntilVisible(
     finder,
     300,
-    scrollable: find.byType(Scrollable).first,
+    scrollable: find.byType(Scrollable).last,
   );
-  await tester.pump();
+  await tester.pumpAndSettle();
+  expect(finder, findsOneWidget);
+  await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
   await tester.tap(finder);
   await tester.pumpAndSettle();
 }
@@ -188,8 +191,7 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const ValueKey('option-A')));
-      await tester.pump();
+      await tapVisible(tester, find.byKey(const ValueKey('option-A')));
       await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
 
       expect(repository.commitCalls, 1);
@@ -200,7 +202,7 @@ void main() {
       await tester.scrollUntilVisible(
         continueButton,
         300,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: find.byType(Scrollable).last,
       );
       await tester.pumpAndSettle();
       expect(
