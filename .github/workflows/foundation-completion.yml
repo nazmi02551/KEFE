@@ -1,0 +1,35 @@
+name: Foundation Completion
+
+on:
+  pull_request:
+    paths:
+      - docs/contracts/foundation-completion-program.v1.json
+      - docs/status/FOUNDATION_COMPLETION_PROGRAM_2026-08-02.md
+      - docs/roadmap/capability-portfolio.v1.tsv
+      - scripts/validate_foundation_completion.py
+      - .github/workflows/foundation-completion.yml
+  push:
+    branches: [main]
+    paths:
+      - docs/contracts/foundation-completion-program.v1.json
+      - docs/status/FOUNDATION_COMPLETION_PROGRAM_2026-08-02.md
+      - docs/roadmap/capability-portfolio.v1.tsv
+      - scripts/validate_foundation_completion.py
+      - .github/workflows/foundation-completion.yml
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate capability portfolio
+        run: python scripts/validate_capability_portfolio.py
+      - name: Validate foundation completion program
+        run: python scripts/validate_foundation_completion.py
