@@ -154,8 +154,8 @@ contracts:
     version: '20260730_0016'
     role: executable_consensus_card_and_participation_persistence
   - id: analytics-event-spine-migration
-    path: services/api/migrations/versions/20260801_0018_analytics_event_spine.py
-    version: '20260801_0018'
+    path: services/api/migrations/versions/20260801_0019_analytics_event_spine.py
+    version: '20260801_0019'
     role: durable_idempotent_analytics_event_projection_store
   - id: repository-structure
     path: docs/contracts/repository-structure.v1.txt
