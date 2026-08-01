@@ -38,7 +38,9 @@ def default_analytics_registry() -> AnalyticsRegistry:
             retention_class=retention,
             metric_families=("ACTIVATION",),
             allowed_payload_fields=frozenset(),
-            required_provenance=frozenset({"actor_id", "session_id", "case_version_id"}),
+            required_provenance=frozenset(
+                {"actor_id", "session_id", "case_version_id"}
+            ),
         ),
         AnalyticsEventDefinition(
             source_event_name="weigh.committed",
@@ -50,7 +52,12 @@ def default_analytics_registry() -> AnalyticsRegistry:
             metric_families=("ACTIVATION", "QUALITY"),
             allowed_payload_fields=frozenset({"committed_at", "has_reason"}),
             required_provenance=frozenset(
-                {"actor_id", "session_id", "case_version_id", "contribution_class"}
+                {
+                    "actor_id",
+                    "session_id",
+                    "case_version_id",
+                    "contribution_class",
+                }
             ),
             fixed_contribution_class="CORE_PRE_RESULT",
         ),
@@ -85,7 +92,12 @@ def default_analytics_registry() -> AnalyticsRegistry:
             retention_class=retention,
             metric_families=("QUALITY",),
             allowed_payload_fields=frozenset(
-                {"flow_step_code", "resource_category", "exposure_id", "intervention_id"}
+                {
+                    "flow_step_code",
+                    "resource_category",
+                    "exposure_id",
+                    "intervention_id",
+                }
             ),
             required_provenance=frozenset({"session_id"}),
         ),
@@ -98,7 +110,12 @@ def default_analytics_registry() -> AnalyticsRegistry:
             retention_class=retention,
             metric_families=("QUALITY",),
             allowed_payload_fields=frozenset(
-                {"flow_step_code", "resource_category", "exposure_id", "intervention_id"}
+                {
+                    "flow_step_code",
+                    "resource_category",
+                    "exposure_id",
+                    "intervention_id",
+                }
             ),
             required_provenance=frozenset({"session_id"}),
         ),
@@ -116,4 +133,7 @@ def default_analytics_registry() -> AnalyticsRegistry:
             required_provenance=frozenset({"session_id"}),
         ),
     )
-    return {(item.source_event_name, item.source_event_version): item for item in definitions}
+    return {
+        (item.source_event_name, item.source_event_version): item
+        for item in definitions
+    }
