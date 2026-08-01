@@ -1,0 +1,59 @@
+{
+  "contract": "onboarding-gate-reliability-slice29",
+  "version": 1,
+  "issue": 169,
+  "scope": {
+    "presentation_local_state": true,
+    "controller_change": false,
+    "store_change": false,
+    "persistence_format_change": false,
+    "completion_semantics_change": false,
+    "route_change": false,
+    "api_change": false,
+    "schema_change": false,
+    "preview_provider_change": false
+  },
+  "states": {
+    "resolving": {
+      "key": "onboarding-loading",
+      "indeterminate_progress": false,
+      "artificial_completion": false
+    },
+    "ready": {
+      "existing_pages_preserved": true
+    },
+    "error_retryable": {
+      "key": "onboarding-error",
+      "retry_key": "onboarding-retry",
+      "silent_completion": false,
+      "silent_bypass": false
+    }
+  },
+  "resolution": {
+    "duplicate_guard": true,
+    "retry_path": "OnboardingController.isCompleted",
+    "completed_route": "/explore",
+    "incomplete_result": "existing_onboarding_pages",
+    "review_mode_reads_persistence": false
+  },
+  "preserved": {
+    "onboarding_content": true,
+    "completion_write_path": true,
+    "product_preview_isolation": true,
+    "signal_in_scope": false,
+    "impact_in_scope": false
+  },
+  "evidence": {
+    "required_exact_sha_workflows": [
+      "API CI",
+      "Mobile CI",
+      "MVP Beta Gates",
+      "Global Readiness"
+    ],
+    "compact_viewport": "360x800",
+    "text_scale": 1.6,
+    "themes": ["light", "dark"],
+    "reduce_motion": true,
+    "semantics": true
+  }
+}
