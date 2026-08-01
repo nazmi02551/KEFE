@@ -77,7 +77,9 @@ void main() {
     );
     addTearDown(container.dispose);
 
-    final controller = container.read(appPreferencesControllerProvider.notifier);
+    final controller = container.read(
+      appPreferencesControllerProvider.notifier,
+    );
     await controller.load();
 
     var state = container.read(appPreferencesControllerProvider);
@@ -105,7 +107,9 @@ void main() {
       overrides: [appPreferencesStoreProvider.overrideWithValue(store)],
     );
     addTearDown(container.dispose);
-    final controller = container.read(appPreferencesControllerProvider.notifier);
+    final controller = container.read(
+      appPreferencesControllerProvider.notifier,
+    );
 
     await controller.load();
     store.localeWriteFailuresRemaining = 1;
@@ -135,7 +139,9 @@ void main() {
       overrides: [appPreferencesStoreProvider.overrideWithValue(store)],
     );
     addTearDown(container.dispose);
-    final controller = container.read(appPreferencesControllerProvider.notifier);
+    final controller = container.read(
+      appPreferencesControllerProvider.notifier,
+    );
 
     final firstLoad = controller.load();
     await controller.load();
