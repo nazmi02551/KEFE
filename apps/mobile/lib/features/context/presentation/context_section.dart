@@ -17,35 +17,83 @@ class ContextSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
     final contextValue = ref.watch(contextSnapshotProvider(caseVersionId));
 
     return contextValue.when(
       loading: () => KefeSurface(
         key: const ValueKey('context-section'),
         tone: KefeSurfaceTone.raised,
-        padding: const EdgeInsets.all(24),
+        accent: visual.rules,
+        padding: const EdgeInsets.all(18),
         child: Semantics(
+          key: const ValueKey('context-loading'),
+          liveRegion: true,
           label: strings.contextLoading,
-          child: const Center(child: CircularProgressIndicator()),
+          child: Row(
+            children: [
+              ExcludeSemantics(
+                child: Icon(
+                  Icons.hourglass_top_rounded,
+                  color: visual.rules,
+                  size: 21,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  strings.contextLoading,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: visual.foreground,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       error: (_, _) => KefeSurface(
         key: const ValueKey('context-section'),
         tone: KefeSurfaceTone.raised,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              strings.contextUnavailable,
-              key: const ValueKey('context-error'),
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: () =>
-                  ref.invalidate(contextSnapshotProvider(caseVersionId)),
-              child: Text(strings.contextRetry),
-            ),
-          ],
+        accent: visual.empathy,
+        child: Semantics(
+          liveRegion: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ExcludeSemantics(
+                    child: Icon(
+                      Icons.error_outline_rounded,
+                      color: visual.empathy,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      strings.contextUnavailable,
+                      key: const ValueKey('context-error'),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: visual.foreground,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                key: const ValueKey('context-retry'),
+                onPressed: () =>
+                    ref.invalidate(contextSnapshotProvider(caseVersionId)),
+                icon: const Icon(Icons.refresh_rounded),
+                label: Text(strings.contextRetry),
+              ),
+            ],
+          ),
         ),
       ),
       data: (snapshot) {
