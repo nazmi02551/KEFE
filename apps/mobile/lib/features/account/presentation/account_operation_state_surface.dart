@@ -4,16 +4,16 @@ import '../../../core/design/kefe_surface.dart';
 import '../../../core/design/kefe_visual_system.dart';
 
 class AccountOperationStateSurface extends StatelessWidget {
-  const AccountOperationStateSurface.status({
-    required this.message,
-    super.key,
-  }) : retryLabel = null,
-       retryButtonKey = null,
-       onRetry = null,
-       isError = false;
+  const AccountOperationStateSurface.status({required this.message, super.key})
+    : messageKey = null,
+      retryLabel = null,
+      retryButtonKey = null,
+      onRetry = null,
+      isError = false;
 
   const AccountOperationStateSurface.error({
     required this.message,
+    required this.messageKey,
     required this.retryLabel,
     required this.retryButtonKey,
     required this.onRetry,
@@ -21,6 +21,7 @@ class AccountOperationStateSurface extends StatelessWidget {
   }) : isError = true;
 
   final String message;
+  final Key? messageKey;
   final String? retryLabel;
   final Key? retryButtonKey;
   final VoidCallback? onRetry;
@@ -47,13 +48,12 @@ class AccountOperationStateSurface extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ExcludeSemantics(
-                  child: Icon(icon, size: 19, color: accent),
-                ),
+                ExcludeSemantics(child: Icon(icon, size: 19, color: accent)),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     message,
+                    key: messageKey,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: isError ? accent : visual.mutedForeground,
                       fontWeight: isError ? FontWeight.w700 : FontWeight.w600,
