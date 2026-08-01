@@ -24,18 +24,47 @@ jobs:
         with:
           flutter-version: 3.44.4
           channel: stable
-      - name: Remove stale local and apply canonical formatting
+      - name: Correct locals and apply canonical formatting
         run: |
           python - <<'PY'
           from pathlib import Path
 
           path = Path('apps/mobile/lib/features/decision/presentation/decision_flow_screen.dart')
           source = path.read_text()
-          stale = "    final strings = KefeStrings.of(context);\n    final caseData = state.caseData!;"
-          replacement = "    final caseData = state.caseData!;"
-          if stale not in source:
-              raise SystemExit('Expected stale local pattern was not found')
-          path.write_text(source.replace(stale, replacement, 1))
+
+          content_marker = 'class _DecisionContent extends ConsumerWidget {'
+          content_start = source.index(content_marker)
+          content_end = source.index('class _FlowStepSection extends ConsumerWidget {', content_start)
+          content = source[content_start:content_end]
+          missing_strings = (
+              '  Widget build(BuildContext context, WidgetRef ref) {\n'
+              '    final caseData = state.caseData!;'
+          )
+          restored_strings = (
+              '  Widget build(BuildContext context, WidgetRef ref) {\n'
+              '    final strings = KefeStrings.of(context);\n'
+              '    final caseData = state.caseData!;'
+          )
+          if content.count(missing_strings) != 1:
+              raise SystemExit('DecisionContent target was not unique')
+          content = content.replace(missing_strings, restored_strings, 1)
+          source = source[:content_start] + content + source[content_end:]
+
+          step_marker = '  Widget _decisionStep(BuildContext context, WidgetRef ref) {'
+          step_start = source.index(step_marker)
+          step_end = source.index('  Widget _reflectionStep()', step_start)
+          step = source[step_start:step_end]
+          stale_strings = (
+              '    final strings = KefeStrings.of(context);\n'
+              '    final caseData = state.caseData!;'
+          )
+          replacement = '    final caseData = state.caseData!;'
+          if step.count(stale_strings) != 1:
+              raise SystemExit('Decision step target was not unique')
+          step = step.replace(stale_strings, replacement, 1)
+          source = source[:step_start] + step + source[step_end:]
+
+          path.write_text(source)
           PY
           dart format \
             apps/mobile/lib/features/decision/presentation/decision_flow_screen.dart \
@@ -51,5 +80,5 @@ jobs:
           git add \
             apps/mobile/lib/features/decision/presentation/decision_flow_screen.dart \
             apps/mobile/test/decision_flow_shell_state_slice23_test.dart
-          git commit -m "fix: normalize Slice 23 Decision Flow sources"
+          git commit -m "fix: correct and normalize Slice 23 Decision Flow sources"
           git push origin HEAD:feature/decision-flow-shell-state-slice23
