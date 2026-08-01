@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../../core/design/kefe_surface.dart';
 import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/internal_alpha_strings.dart';
+import '../../../core/localization/kefe_content_localizer.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../progress/application/progress_controller.dart';
 import '../../progress/domain/progress_models.dart';
+import '../../progress/presentation/progress_async_state_surface.dart';
 import '../../saved_cases/presentation/saved_cases_section.dart';
 
 class ActivityScreen extends ConsumerStatefulWidget {
@@ -46,25 +48,15 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
             const SizedBox(height: 18),
             ...switch (state.uiState) {
               ProgressUiState.idle || ProgressUiState.loading => [
-                KefeSurface(
-                  child: Semantics(
-                    liveRegion: true,
-                    label: strings.activityLoading,
-                    child: Row(
-                      children: [
-                        const SizedBox.square(
-                          dimension: 18,
-                          child: Icon(Icons.hourglass_top_rounded, size: 18),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(child: Text(strings.activityLoading)),
-                      ],
-                    ),
-                  ),
+                ProgressAsyncStateSurface.loading(
+                  surfaceKey: 'activity-loading',
+                  message: strings.activityLoading,
                 ),
               ],
               ProgressUiState.errorRetryable => [
-                _ActivityError(
+                ProgressAsyncStateSurface.error(
+                  surfaceKey: 'activity-error',
+                  retryKey: 'activity-retry',
                   message: strings.activityUnavailable,
                   retryLabel: strings.activityRetry,
                   onRetry: ref.read(progressControllerProvider.notifier).load,
@@ -189,7 +181,9 @@ class _ActivityHero extends StatelessWidget {
                 color: visual.goldSoft.withValues(alpha: 0.34),
               ),
             ),
-            child: Icon(Icons.history_rounded, color: visual.goldSoft),
+            child: ExcludeSemantics(
+              child: Icon(Icons.history_rounded, color: visual.goldSoft),
+            ),
           ),
         ],
       ),
@@ -197,18 +191,27 @@ class _ActivityHero extends StatelessWidget {
   }
 }
 
-class _JourneyTile extends StatelessWidget {
+class _JourneyTile extends ConsumerWidget {
   const _JourneyTile({required this.item, required this.strings});
 
   final MyKefeRecentJourney item;
   final KefeStrings strings;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final visual = context.kefeVisual;
+    final locale = Localizations.localeOf(context);
+    final localizer = ref.watch(kefeContentLocalizerProvider);
+    final displayTitle = localizer.text(
+      namespace: KefeContentNamespace.caseTitle,
+      id: item.caseId,
+      locale: locale,
+      fallback: item.title,
+    );
+
     return Semantics(
       button: true,
-      label: item.title,
+      label: displayTitle,
       child: Material(
         color: visual.surfaceSunken,
         borderRadius: BorderRadius.circular(18),
@@ -228,7 +231,7 @@ class _JourneyTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        item.title,
+                        displayTitle,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w800,
                         ),
@@ -262,10 +265,12 @@ class _JourneyTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 20,
-                  color: visual.mutedForeground,
+                ExcludeSemantics(
+                  child: Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 20,
+                    color: visual.mutedForeground,
+                  ),
                 ),
               ],
             ),
@@ -276,52 +281,67 @@ class _JourneyTile extends StatelessWidget {
   }
 }
 
-class _LegacyJourneyTile extends StatelessWidget {
+class _LegacyJourneyTile extends ConsumerWidget {
   const _LegacyJourneyTile({required this.item, required this.strings});
 
   final RecentProgressCase item;
   final KefeStrings strings;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final visual = context.kefeVisual;
-    return Material(
-      color: visual.surfaceSunken,
-      borderRadius: BorderRadius.circular(18),
-      child: InkWell(
-        key: ValueKey('activity-case-${item.caseId}'),
+    final locale = Localizations.localeOf(context);
+    final localizer = ref.watch(kefeContentLocalizerProvider);
+    final displayTitle = localizer.text(
+      namespace: KefeContentNamespace.caseTitle,
+      id: item.caseId,
+      locale: locale,
+      fallback: item.title,
+    );
+
+    return Semantics(
+      button: true,
+      label: displayTitle,
+      child: Material(
+        color: visual.surfaceSunken,
         borderRadius: BorderRadius.circular(18),
-        onTap: () => context.push('/case/${item.caseId}'),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              _HistoryIcon(icon: Icons.balance_outlined, color: visual.gold),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.title,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
+        child: InkWell(
+          key: ValueKey('activity-case-${item.caseId}'),
+          borderRadius: BorderRadius.circular(18),
+          onTap: () => context.push('/case/${item.caseId}'),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                _HistoryIcon(icon: Icons.balance_outlined, color: visual.gold),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        displayTitle,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 7),
-                    _HistoryPill(
-                      label: strings.activityCommitted,
-                      color: visual.success,
-                    ),
-                  ],
+                      const SizedBox(height: 7),
+                      _HistoryPill(
+                        label: strings.activityCommitted,
+                        color: visual.success,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Icon(
-                Icons.arrow_forward_rounded,
-                size: 20,
-                color: visual.mutedForeground,
-              ),
-            ],
+                ExcludeSemantics(
+                  child: Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 20,
+                    color: visual.mutedForeground,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -336,14 +356,16 @@ class _HistoryIcon extends StatelessWidget {
   final Color color;
 
   @override
-  Widget build(BuildContext context) => Container(
-    width: 40,
-    height: 40,
-    decoration: BoxDecoration(
-      color: color.withValues(alpha: 0.12),
-      borderRadius: BorderRadius.circular(14),
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Icon(icon, size: 20, color: color),
     ),
-    child: Icon(icon, size: 20, color: color),
   );
 }
 
@@ -371,32 +393,6 @@ class _HistoryPill extends StatelessWidget {
   );
 }
 
-class _ActivityError extends StatelessWidget {
-  const _ActivityError({
-    required this.message,
-    required this.retryLabel,
-    required this.onRetry,
-  });
-
-  final String message;
-  final String retryLabel;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) => KefeSurface(
-    tone: KefeSurfaceTone.raised,
-    accent: context.kefeVisual.attention,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(message),
-        const SizedBox(height: 12),
-        OutlinedButton(onPressed: onRetry, child: Text(retryLabel)),
-      ],
-    ),
-  );
-}
-
 class _PreviewNotice extends StatelessWidget {
   const _PreviewNotice({required this.text});
 
@@ -411,7 +407,13 @@ class _PreviewNotice extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(Icons.science_outlined, size: 18, color: context.kefeVisual.rules),
+        ExcludeSemantics(
+          child: Icon(
+            Icons.science_outlined,
+            size: 18,
+            color: context.kefeVisual.rules,
+          ),
+        ),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
