@@ -25,6 +25,7 @@ import 'package:kefe_mobile/features/media_presentation/presentation/sports_call
 const _sportsCaseId = '11111111-1111-4111-8111-111111111113';
 const _sportsCaseVersionId = '22222222-2222-4222-8222-222222222224';
 const _dataCaseVersionId = '22222222-2222-4222-8222-222222222223';
+const _sportsQuestionId = '33333333-3333-4333-8333-333333333335';
 
 void main() {
   test('Slice 21 contract locks illustrative non-evidence boundary', () {
@@ -245,6 +246,19 @@ void main() {
         findsOneWidget,
       );
       expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
+      expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
+
+      final question = find.byKey(
+        const ValueKey('question-$_sportsQuestionId'),
+      );
+      await tester.scrollUntilVisible(
+        question,
+        260,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pump();
+
+      expect(question, findsOneWidget);
       expect(find.byKey(const ValueKey('option-Doğru')), findsOneWidget);
       expect(find.byKey(const ValueKey('option-Yanlış')), findsOneWidget);
       expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
