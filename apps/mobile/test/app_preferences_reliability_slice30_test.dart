@@ -57,6 +57,8 @@ void main() {
       "ValueKey('settings-error')",
       "ValueKey('settings-retry')",
       "ValueKey('settings-saving')",
+      'Future<void>.microtask',
+      'IgnorePointer',
     ]) {
       expect(settingsSource, contains(token));
     }
@@ -158,7 +160,7 @@ void main() {
     await firstWrite;
   });
 
-  testWidgets('read failure shows retry and recovers settings groups', (
+  testWidgets('read failure keeps fallback groups disabled until retry', (
     tester,
   ) async {
     final store = _ControllablePreferencesStore(
@@ -174,13 +176,6 @@ void main() {
 
     expect(find.byKey(const ValueKey('settings-error')), findsOneWidget);
     expect(find.byKey(const ValueKey('settings-retry')), findsOneWidget);
-    expect(find.byKey(const ValueKey('settings-language-group')), findsNothing);
-
-    await tester.tap(find.byKey(const ValueKey('settings-retry')));
-    await tester.pumpAndSettle();
-
-    expect(store.reads, 2);
-    expect(find.byKey(const ValueKey('settings-error')), findsNothing);
     expect(
       find.byKey(const ValueKey('settings-language-group')),
       findsOneWidget,
@@ -189,6 +184,19 @@ void main() {
       find.byKey(const ValueKey('settings-appearance-group')),
       findsOneWidget,
     );
+
+    await tester.tap(find.text('Dark'));
+    await tester.pump();
+    expect(store.themeWrites, 0);
+
+    await tester.tap(find.byKey(const ValueKey('settings-retry')));
+    await tester.pumpAndSettle();
+
+    expect(store.reads, 2);
+    expect(find.byKey(const ValueKey('settings-error')), findsNothing);
+    await tester.tap(find.text('Dark'));
+    await tester.pumpAndSettle();
+    expect(store.themeWrites, 1);
     expect(tester.takeException(), isNull);
   });
 
@@ -244,6 +252,10 @@ void main() {
 
           expect(find.byKey(const ValueKey('settings-error')), findsOneWidget);
           expect(find.byKey(const ValueKey('settings-retry')), findsOneWidget);
+          expect(
+            find.byKey(const ValueKey('settings-language-group')),
+            findsOneWidget,
+          );
           expect(tester.takeException(), isNull);
         },
       );
@@ -284,32 +296,10 @@ Future<void> _pump(
           ).copyWith(textScaler: TextScaler.linear(textScale)),
           child: child!,
         ),
-        home: const _SettingsHarness(),
+        home: const SettingsScreen(showPrivacyControls: false),
       ),
     ),
   );
-}
-
-class _SettingsHarness extends ConsumerStatefulWidget {
-  const _SettingsHarness();
-
-  @override
-  ConsumerState<_SettingsHarness> createState() => _SettingsHarnessState();
-}
-
-class _SettingsHarnessState extends ConsumerState<_SettingsHarness> {
-  @override
-  void initState() {
-    super.initState();
-    Future<void>.microtask(
-      () => ref.read(appPreferencesControllerProvider.notifier).load(),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return const SettingsScreen(showPrivacyControls: false);
-  }
 }
 
 class _ControllablePreferencesStore implements AppPreferencesStore {
