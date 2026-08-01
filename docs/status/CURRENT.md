@@ -3,25 +3,22 @@
 **Updated:** 2026-08-01  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Active stacked line top:** PR #170 `feature/onboarding-gate-reliability-slice29`  
-**Latest repo-verified active-stack runtime:** `fd6dbf83a4b1ce41f0cd2aab0ffed60bd3309770`  
-**Latest runtime owner:** PR #170 / Slice 29 Onboarding Gate Resolution Reliability  
-**PR #170 current head:** `b3c93a668bc84afc36e8146ec203bc31f347d6fc` (documentation-only commit after the verified runtime)
+**Active stacked line top:** PR #173 `feature/app-preferences-reliability-slice30`  
+**Latest repo-verified active-stack runtime:** `e41cea5fc7bccb4bbe085b48cd15ea5a2fead082`  
+**Latest runtime owner:** PR #173 / Slice 30 App Preferences Persistence Reliability  
+**PR #173 current head:** `e5212e91c443a3c4f091374b786a8e987c9fe2c5` (documentation-only commit after the verified runtime)
 
-This file is the canonical durable engineering handoff. Chat history is supplementary context only.
-
-A new ChatGPT/Codex session receiving only **“KEFE’yi geliştirmeye devam et”** must read root `AGENTS.md`, this file, live GitHub state/CI and relevant Drive CURRENT/WORKING state, then continue in dependency order without asking the user to reconstruct prior conversations.
+This file is the canonical durable engineering handoff. Chat history is supplementary only. A continuation session must read root `AGENTS.md`, this file, live GitHub state/CI and relevant Drive CURRENT/WORKING authority before acting.
 
 ## 1. Documentation authority
 
 **KEFE Documentation Ecosystem v3.4 — CURRENT / validation PASS** remains the published documentation authority until an explicit promotion milestone completes.
 
-Published artifact: `KEFE_Documentation_Ecosystem_2026-07-28_v3.4_CURRENT.zip`  
-Drive CURRENT file ID: `1MXvCTNPfv-pWYIHCo5KqpmTOf-3RyFhZ`
+- Published artifact: `KEFE_Documentation_Ecosystem_2026-07-28_v3.4_CURRENT.zip`
+- Drive CURRENT file ID: `1MXvCTNPfv-pWYIHCo5KqpmTOf-3RyFhZ`
+- Drive WORKING was last known to pin Slice 18. It is stale relative to the repository and remains WORKING, not published CURRENT.
 
-The existing Drive WORKING checkpoint was last known to pin Slice 18. It is older than the live repository stack and remains WORKING, not published CURRENT.
-
-At the next declared documentation milestone, accepted Slice 19–29 changes belong in the existing Product Bible, Design System and Engineering Blueprint. Do not create a parallel official manifesto or silently promote WORKING material.
+At the next declared documentation milestone, accepted Slice 19–30 deltas belong in the existing Product Bible, Design System and Engineering Blueprint. Do not create a parallel official manifesto or silently promote WORKING material.
 
 ## 2. Binding invariants
 
@@ -36,10 +33,10 @@ Preserve unless an explicit accepted decision changes them:
 - raw backend/CaseVersion/history values are not mutated by display localization;
 - My KEFE and Activity are observed/descriptive history only;
 - no personality, ideology, psychometric, bias, causal or normative inference;
-- Collective Result/Consensus is not automatically Signal, truth or formal authority;
+- Collective Result/Consensus is not automatically Signal, truth or authority;
 - Signal/Impact may not silently broaden;
 - AI/provider output is not autonomous truth, editorial acceptance or publication authority;
-- accessibility, Reduce Motion, localization and low-end Android are first-class constraints;
+- accessibility, Reduce Motion, localization and low-end Android are first-class;
 - CI does not prove human usability, editorial CQB, production provider delivery, store compliance, deployed SLO or operator rollback.
 
 ## 3. Active stacked line
@@ -48,91 +45,101 @@ Preserve unless an explicit accepted decision changes them:
 
 Observed dependency line:
 
-`main → #90 → #92 → #94 → #95 → #97 → #99 → #101 → #103 → #105 → #107 → #109 → #111 → #113 → #115 → #117 → #118 → #120 → #122 → #124 → #126 → #128 → #132 → #138 → #141 → #143 → #145 → #147 → #149 → #154 → #157 → #160 → #163 → #165 → #170`
+`main → #90 → #92 → #94 → #95 → #97 → #99 → #101 → #103 → #105 → #107 → #109 → #111 → #113 → #115 → #117 → #118 → #120 → #122 → #124 → #126 → #128 → #132 → #138 → #141 → #143 → #145 → #147 → #149 → #154 → #157 → #160 → #163 → #165 → #170 → #173`
 
-Before any merge, re-read live bases/heads, mergeability, reviews and exact CI. Never merge a child before its parent.
+Never merge a child before its parent. Before any merge, re-read live bases/heads, mergeability, reviews and exact CI.
 
-### Current stacked PRs
+Current top stack:
 
-- PR #160 / Slice 26 remains open, review-ready and mergeable. Verified runtime `b78d71a26823f757cf1a42fed564c93ef9915bb6`.
-- PR #163 / Slice 27 remains open, review-ready and mergeable. Verified runtime `b8df16e0a4dc74750044a3cc7cd56aa7170157db`.
-- PR #165 / Slice 28 remains open, review-ready and mergeable. Verified runtime `eb1d5dbea2218f3e8730909b47af64459c6b0b45`.
-- PR #170 / Slice 29 remains open, review-ready and mergeable. Verified runtime `fd6dbf83a4b1ce41f0cd2aab0ffed60bd3309770`; docs-only head `b3c93a668bc84afc36e8146ec203bc31f347d6fc`.
+- PR #160 / Slice 26 — open, review-ready; verified runtime `b78d71a26823f757cf1a42fed564c93ef9915bb6`.
+- PR #163 / Slice 27 — open, review-ready; verified runtime `b8df16e0a4dc74750044a3cc7cd56aa7170157db`.
+- PR #165 / Slice 28 — open, review-ready; verified runtime `eb1d5dbea2218f3e8730909b47af64459c6b0b45`.
+- PR #170 / Slice 29 — open, review-ready; verified runtime `fd6dbf83a4b1ce41f0cd2aab0ffed60bd3309770`; docs-only head `b3c93a668bc84afc36e8146ec203bc31f347d6fc`.
+- PR #173 / Slice 30 — open, review-ready and mergeable; verified runtime `e41cea5fc7bccb4bbe085b48cd15ea5a2fead082`; docs-only head `e5212e91c443a3c4f091374b786a8e987c9fe2c5`.
 
-### Explicit exclusions
+Explicit exclusions:
 
-- PR #68 remains outside the active MVP/premium stack. Its ingestion-orchestration work requires a fresh compatibility review before adoption.
-- PR #151 and Issue #150 remain closed as a superseded duplicate of canonical Slice 23 PR #149 / Issue #148. Its evidence is historical only.
+- PR #68 remains outside the active MVP/premium stack pending fresh compatibility review.
+- PR #151 / Issue #150 remain superseded historical duplicates of canonical Slice 23 PR #149 / Issue #148.
 
-## 4. Latest verified runtime — Slice 29
+## 4. Latest verified runtime — Slice 30
 
-### Onboarding Gate Resolution Reliability
+### App Preferences Persistence Reliability
 
-Verified runtime SHA:
+Verified runtime:
 
-`fd6dbf83a4b1ce41f0cd2aab0ffed60bd3309770`
+`e41cea5fc7bccb4bbe085b48cd15ea5a2fead082`
 
-All required repository-owned workflows passed on that exact SHA:
+Exact-SHA workflows:
 
-- API CI #993 / run `30706624421` — SUCCESS
-- Mobile CI #779 / run `30706624398` — SUCCESS
-- MVP Beta Gates #497 / run `30706624387` — SUCCESS
-- Global Readiness #391 / run `30706624392` — SUCCESS
+- API CI #1002 / run `30708122770` — SUCCESS
+- Mobile CI #788 / run `30708122780` — SUCCESS
+- MVP Beta Gates #506 / run `30708122782` — SUCCESS
+- Global Readiness #400 / run `30708122781` — SUCCESS
 
 Contract-first records:
 
-- Issue #169
-- PR #170
-- ADR-0067 `docs/adr/0067-onboarding-gate-resolution-reliability.md`
-- contract `docs/contracts/onboarding-gate-reliability-slice29.v1.json`
-- verification `docs/status/ONBOARDING_GATE_RELIABILITY_SLICE29_2026-08-01.md`
+- Issue #172
+- PR #173
+- ADR-0068 `docs/adr/0068-app-preferences-persistence-reliability.md`
+- contract `docs/contracts/app-preferences-reliability-slice30.v1.json`
+- verification `docs/status/APP_PREFERENCES_RELIABILITY_SLICE30_2026-08-01.md`
 
-### What Slice 29 closed
+### What Slice 30 closed
 
-The launch onboarding gate previously had no failure state around the persisted completion lookup. A persistence exception could leave the user indefinitely on the loading screen.
+Locale/theme preferences previously had no truthful persistence lifecycle. Startup read exceptions could escape the fire-and-forget load; Settings rendered system defaults before a successful read; write failures could leave an unsaved optimistic selection visible as though durable.
 
-Slice 29 adds a presentation-local guarded state machine:
+Slice 30 adds controller-owned idle, loading, ready, saving and error state:
 
-- resolving → deterministic `onboarding-loading`;
-- persistence failure → retryable `onboarding-error` and `onboarding-retry`;
-- incomplete lookup → existing onboarding pages;
-- completed lookup → existing `/explore` route;
-- `reviewMode` → existing onboarding pages with zero persistence reads;
-- concurrent lookup attempts → rejected by a single-flight guard.
+- read exceptions are caught and represented;
+- launch remains non-blocking and uses deterministic system defaults while unresolved;
+- Settings independently starts the same guarded read path;
+- root and Settings loads remain single-flight;
+- unresolved/read-error fallback choices remain structurally visible but disabled and accompanied by loading/error disclosure;
+- retry invokes only the existing read path;
+- locale/theme writes are single-flight;
+- saving is explicitly disclosed;
+- write failure restores the last known persisted locale/theme snapshot;
+- stable keys: `settings-loading`, `settings-error`, `settings-retry`, `settings-saving`;
+- state surfaces use live-region semantics and decorative-icon exclusion without indeterminate progress;
+- compact retry layout is valid at 360×800 and 1.6× text;
+- EN/TR, light/dark and prior Settings semantic regressions are covered.
 
-Failure does not mark onboarding complete, write persistence or silently bypass onboarding. Retry invokes only the existing `OnboardingController.isCompleted()` path.
+Preserved boundaries:
 
-The following remain unchanged:
-
-- `OnboardingController` and `OnboardingStore` interfaces;
-- persistence key/format and completion meaning;
-- onboarding pages, copy, primary action and Case route;
-- existing Reduce Motion-aware page transition;
+- `AppPreferencesStore` interface;
+- SharedPreferences keys;
+- enum-name serialization;
+- locale/theme values and meanings;
+- routes, onboarding and Privacy semantics;
 - API, schema, migrations and auth;
 - production/Product Preview provider isolation.
 
-The loading/error presentation uses KEFE semantic surfaces, live-region announcements, decorative-icon semantic exclusion and governed common localized copy. It contains no indeterminate spinner, artificial percentage or continuous animation.
+### Rejected candidates
 
-### Rejected candidate
+Not PASS:
 
-`95f79fe89b007eeff3b9b711c63b9ba0ace4f480` is not PASS. API and PostgreSQL checks passed, but MVP Beta Gates stopped at canonical Dart format drift before its mobile test/build stages. Formatter-only output was applied to produce the verified runtime.
+- `a68b1caaf5feb67642df276a8d04bd04353d742f` — MVP format drift; Mobile exposed behavioral regressions.
+- `87492618d7bc8370029a3970f0ab6898dc8a3cff` — format/analyzer clean, behavioral regressions remained.
+- `32c901f94925ae660ebe36e90548f1d2e22a1611` — compact coverage passed and failures fell from ten to four, but unresolved Settings structure was still hidden from prior semantic contracts.
+
+Only `e41cea5fc7bccb4bbe085b48cd15ea5a2fead082` is the verified Slice 30 runtime.
 
 ### Latest phone artifact
 
-Global Readiness #391 produced:
+Global Readiness #400 produced:
 
 - artifact: `kefe-internal-alpha-phone-preview`
-- artifact ID: `8820584551`
-- archive size: `82164611` bytes
-- archive digest: `sha256:99e95bf7ba1f4f343bbf5bfc71e2ef0498bef18ccad6f5361f3a9aa02fa43b4b`
+- artifact ID: `8821041756`
+- archive digest: `sha256:bdfd0dc95833082edd5525eda134287fa4105b04ec5d904458a423bd7cd03923`
 - payload: `app-debug.apk`
-- payload size: `160581202` bytes
-- APK SHA-256: `0bfddf87b288ae1a84ade4483000d0b189819b2bf17ff575572ff2990f9ac6fd`
+- payload size: `160585878` bytes
+- APK SHA-256: `c8ba5f717e86543d1ffc0fbfe3c6f87dc7c01469f87d45d30591569351404389`
 - `beta-api.invalid`: absent in raw and unpacked scans.
 
-This is an internal Product Preview artifact for the exact verified runtime. It is not production/public-beta/store, production-provider, human-usability, editorial-acceptance or deployed-SLO evidence.
+This is an internal Product Preview artifact for the exact runtime. It is not production/public-beta/store, target-device persistence, human-usability, editorial-acceptance or deployed-SLO evidence.
 
-## 5. Recent verified progression
+## 5. Verified progression after Slice 18
 
 - Slice 19 / PR #141 — Atlas World / Globe — `db514fe61768f0a3cf7b0c4fe1ac4fa525be9edc`
 - Slice 20 / PR #143 — Perspective Landscape — `d33596da0c7fb6d8a6a43b620ce11c5bf38c850f`
@@ -145,27 +152,15 @@ This is an internal Product Preview artifact for the exact verified runtime. It 
 - Slice 27 / PR #163 — Activity State/Localization — `b8df16e0a4dc74750044a3cc7cd56aa7170157db`
 - Slice 28 / PR #165 — Saved Cases Reliability — `eb1d5dbea2218f3e8730909b47af64459c6b0b45`
 - Slice 29 / PR #170 — Onboarding Gate Reliability — `fd6dbf83a4b1ce41f0cd2aab0ffed60bd3309770`
+- Slice 30 / PR #173 — App Preferences Reliability — `e41cea5fc7bccb4bbe085b48cd15ea5a2fead082`
 
 ## 6. Current consumer/product state
 
-The active stack contains the principal consumer loop:
+The active stack contains:
 
-`Onboarding → Explore → Case/Context → typed Weigh/private Reason → Commit → Reveal → Perspective → Reflection where the pinned Flow requires it`
+`Onboarding → Explore → Case/Context → typed Weigh/private Reason → Commit → Reveal → Perspective → Reflection where required`
 
-plus:
-
-- reliable onboarding completion resolution and retry;
-- truthful Activity and Saved Cases continuity;
-- descriptive My KEFE history;
-- bounded Progress and optional account-conversion UI;
-- Blind First case-only sharing;
-- bounded post-Commit Consensus and Community Reasons;
-- Settings, locale/theme and Privacy presentation;
-- first-Reveal completion;
-- generic Flow/CaseVersion runtime;
-- Product Preview/production isolation;
-- Turkish/English localization and valid light/dark themes;
-- high-fidelity Signature Balance, representative Atlas globe, qualitative Perspective landscape and representative Sports CALL scene.
+plus reliable onboarding resolution; recoverable locale/theme persistence; truthful Activity and Saved Cases continuity; descriptive My KEFE; bounded Progress/account conversion; Blind First case sharing; bounded post-Commit Consensus/Community Reasons; Settings/Privacy; generic Flow/CaseVersion runtime; Preview/production isolation; EN/TR; valid light/dark themes; and representative premium visual compositions.
 
 Visual/state convergence is not total product completion.
 
@@ -179,44 +174,40 @@ Architecture-locked or incomplete areas include:
 - full Admin/editorial/review operational UI and tooling;
 - real production auth/OTP/provider delivery and environment maturity;
 - production observability/SLO/load/rollback evidence;
-- target-release decisions for public Web/deep-link landing and Admin Studio scope.
+- target-release decisions for public Web/deep-link landing and Admin Studio.
 
-Accepted-later Product Bible families remain directions, not automatic first-release blockers.
+Accepted-later Product Bible families are directions, not automatic first-release blockers.
 
 ## 8. Phone candidate fidelity rule
 
-A phone APK represents only its exact verified runtime SHA.
+An APK represents only its exact verified runtime SHA. Before presenting a future APK as the current implemented phone experience:
 
-Before describing a future APK as the current implemented phone experience:
-
-1. record exact runtime SHA, four-workflow evidence, artifact ID/digest and APK hash;
+1. record exact runtime, four-workflow evidence, artifact ID/digest and APK hash;
 2. inventory production and Product Preview routes/surfaces;
 3. classify review-critical surfaces as production+preview, production-only, preview-only or conditional;
-4. record Preview repository/provider/fixture substitutions;
-5. mark external behaviors Preview cannot prove;
+4. record Preview provider/fixture substitutions;
+5. mark external behavior Preview cannot prove;
 6. add reachability tests for changed nested states.
 
 Route parity alone does not prove every nested conditional surface.
 
 ## 9. Next unresolved engineering work
 
-Do not start another slice from chat memory alone.
+Do not select Slice 31 from chat memory alone.
 
-The next step is a fresh audit on canonical top branch `feature/onboarding-gate-reliability-slice29` covering:
+Fresh-audit canonical top branch `feature/app-preferences-reliability-slice30` for:
 
-- remaining launch/root-shell reliability gaps;
+- remaining root-shell and persistence reliability gaps;
 - residual generic Material/direct styling outside converged consumer surfaces;
-- remaining deterministic loading/error/empty gaps;
+- deterministic loading/error/empty gaps;
 - typography and spacing taxonomy;
 - Reduce Motion and semantics;
 - compact/enlarged-text reachability;
 - low-end Android performance;
 - production/Product Preview surface reachability;
-- overlap with separately governed non-visual architecture priorities.
+- overlap with higher-value non-visual architecture priorities.
 
-After the audit, select one meaningful Slice 30. A material boundary change requires issue + ADR + executable contract before runtime. Ordinary refactoring must not manufacture unnecessary product decisions.
-
-Do not reopen Spatial CALL as factual/interactive evidence until a separate typed spatial-evidence/provenance contract exists.
+Select one meaningful Slice 31 from evidence. A material boundary change requires issue + ADR + executable contract before runtime. Do not reopen Spatial CALL as factual/interactive evidence without a typed spatial-evidence/provenance contract.
 
 ## 10. External/human gates still pending
 
@@ -224,28 +215,26 @@ Not replaceable by CI:
 
 - human phone visual/usability review;
 - target-device persistence failure behavior;
-- real production OTP/provider configuration and deliverability;
-- editorial CQB acceptance of launch content;
+- production OTP/provider configuration and deliverability;
+- editorial CQB acceptance;
 - current Apple/Google store compliance/signing/review;
 - deployed production SLO/load/observability;
-- operator-validated production feature-switch/rollback controls.
+- operator-validated feature-switch/rollback controls.
 
-## 11. Standard development protocol
+## 11. Standard continuation protocol
 
-For each meaningful vertical slice:
-
-1. read `AGENTS.md`, this file, live stack and CI;
-2. distinguish verified runtime SHA from later docs-only head;
-3. audit current implementation before selecting scope;
-4. use issue + ADR + executable contract first for material boundary changes;
-5. keep one coherent branch/PR per slice and respect stack order;
-6. preserve generic runtime and Preview/production isolation;
-7. add executable tests/contracts with implementation;
-8. enforce canonical format, analyzer, full regressions and API/Mobile/MVP/Global gates;
-9. never call PASS without exact evidence;
-10. record durable status evidence and update Drive WORKING only at an appropriate milestone;
-11. promote published CURRENT documentation only through an explicit QA/readback milestone.
+1. Read `AGENTS.md`, this file, live stack and CI.
+2. Distinguish verified runtime SHA from later docs-only head.
+3. Audit before selecting scope.
+4. Use issue + ADR + executable contract first for material boundaries.
+5. Respect stacked dependency order.
+6. Preserve generic runtime and Preview/production isolation.
+7. Add executable tests/contracts.
+8. Enforce format, analyzer, regressions and four exact-SHA workflows.
+9. Never call PASS without exact evidence.
+10. Update durable status and Drive WORKING only at an appropriate milestone.
+11. Promote published CURRENT documentation only through explicit QA/readback.
 
 ## 12. Repository metadata caution
 
-GitHub currently reports repository visibility as **public**, while older project context described it as private. Do not change visibility automatically. Require explicit owner intent before any visibility mutation.
+GitHub currently reports repository visibility as **public**, while older project context described it as private. Do not change visibility automatically; require explicit owner intent.
