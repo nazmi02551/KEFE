@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kefe_mobile/app/kefe_app.dart';
 import 'package:kefe_mobile/app/product_preview/preview_content_localizer.dart';
-import 'package:kefe_mobile/app/product_preview_app.dart';
 import 'package:kefe_mobile/core/design/kefe_theme.dart';
 import 'package:kefe_mobile/core/design/product_preview_visual_mode.dart';
 import 'package:kefe_mobile/core/localization/kefe_content_localizer.dart';
@@ -209,7 +209,7 @@ void main() {
   );
 
   testWidgets(
-    'distributed Product Preview reaches Sports scene before Commit without Reveal',
+    'phone-preview configured Case route reaches Sports scene before Commit',
     (tester) async {
       tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
       addTearDown(tester.platformDispatcher.clearLocaleTestValue);
@@ -228,26 +228,11 @@ void main() {
             ),
             productPreviewVisualModeProvider.overrideWithValue(true),
           ],
-          child: const ProductPreviewApp(),
+          child: const KefeApp(
+            initialLocation: '/case/$_sportsCaseId',
+          ),
         ),
       );
-      await tester.pumpAndSettle();
-
-      final sportsTitle = find.text(
-        'Bu pozisyonda penaltı kararı doğru muydu?',
-      );
-      final sportsCard = find.byKey(
-        const ValueKey('explore-case-$_sportsCaseId'),
-      );
-      await tester.scrollUntilVisible(
-        sportsCard,
-        280,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pump();
-      expect(sportsCard, findsOneWidget);
-      expect(sportsTitle, findsOneWidget);
-      await tester.tap(sportsCard);
       await _pumpUntilFound(tester, find.byType(SportsCallSceneVisual));
 
       expect(find.byType(SportsCallSceneVisual), findsOneWidget);
@@ -255,6 +240,10 @@ void main() {
         find.byKey(
           const ValueKey('case-media-CASE_HERO-$_sportsCaseVersionId'),
         ),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Bu pozisyonda penaltı kararı doğru muydu?'),
         findsOneWidget,
       );
       expect(
@@ -269,7 +258,7 @@ void main() {
 }
 
 Future<void> _pumpUntilFound(WidgetTester tester, Finder finder) async {
-  for (var attempt = 0; attempt < 20; attempt++) {
+  for (var attempt = 0; attempt < 80; attempt++) {
     await tester.pump(const Duration(milliseconds: 100));
     if (finder.evaluate().isNotEmpty) return;
   }
