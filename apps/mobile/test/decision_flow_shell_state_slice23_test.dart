@@ -38,7 +38,14 @@ const _sampleCase = DecisionCase(
   ],
 );
 
-enum _DecisionFixture { loading, error, ready, submitting, offline, unsupported }
+enum _DecisionFixture {
+  loading,
+  error,
+  ready,
+  submitting,
+  offline,
+  unsupported,
+}
 
 void main() {
   test('Slice 23 contract locks presentation-only shell convergence', () {
@@ -55,7 +62,10 @@ void main() {
     expect(contract['scope']['decision_controller_change'], isFalse);
     expect(contract['scope']['flow_runtime_change'], isFalse);
     expect(contract['scope']['route_change'], isFalse);
-    expect(contract['root_state_transition']['uses_kefe_motion_resolve'], isTrue);
+    expect(
+      contract['root_state_transition']['uses_kefe_motion_resolve'],
+      isTrue,
+    );
     expect(
       contract['states']['indeterminate_spinner_in_governed_source_forbidden'],
       isTrue,
@@ -106,69 +116,72 @@ void main() {
     expect(source, contains('controller.commit'));
   });
 
-  testWidgets('loading, error and unsupported states are deterministic surfaces', (
-    tester,
-  ) async {
-    await _pumpDecision(tester, fixture: _DecisionFixture.loading);
-    expect(find.byKey(const ValueKey('loading')), findsOneWidget);
-    expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(find.byType(KefeSurface), findsWidgets);
-    expect(tester.takeException(), isNull);
+  testWidgets(
+    'loading, error and unsupported states are deterministic surfaces',
+    (tester) async {
+      await _pumpDecision(tester, fixture: _DecisionFixture.loading);
+      expect(find.byKey(const ValueKey('loading')), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byType(KefeSurface), findsWidgets);
+      expect(tester.takeException(), isNull);
 
-    await _pumpDecision(tester, fixture: _DecisionFixture.error);
-    expect(find.byKey(const ValueKey('error')), findsOneWidget);
-    expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(tester.takeException(), isNull);
+      await _pumpDecision(tester, fixture: _DecisionFixture.error);
+      expect(find.byKey(const ValueKey('error')), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(tester.takeException(), isNull);
 
-    await _pumpDecision(tester, fixture: _DecisionFixture.unsupported);
-    expect(
-      find.byKey(const ValueKey('capability-pending-DECISION')),
-      findsOneWidget,
-    );
-    expect(find.byKey(const ValueKey('commit-button')), findsNothing);
-    expect(tester.takeException(), isNull);
-  });
+      await _pumpDecision(tester, fixture: _DecisionFixture.unsupported);
+      expect(
+        find.byKey(const ValueKey('capability-pending-DECISION')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('commit-button')), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
-  testWidgets('production header stays text-only and Commit First remains intact', (
-    tester,
-  ) async {
-    await _pumpDecision(tester, fixture: _DecisionFixture.ready);
+  testWidgets(
+    'production header stays text-only and Commit First remains intact',
+    (tester) async {
+      await _pumpDecision(tester, fixture: _DecisionFixture.ready);
 
-    expect(
-      find.byKey(const ValueKey('production-case-summary-header')),
-      findsOneWidget,
-    );
-    expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
-    expect(find.text(_sampleCase.title), findsOneWidget);
-    expect(find.text(_sampleCase.summary), findsOneWidget);
-    expect(find.byType(CaseHeroHeader), findsNothing);
-    expect(find.byType(CaseMediaSurface), findsNothing);
-    expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('production-case-summary-header')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
+      expect(find.text(_sampleCase.title), findsOneWidget);
+      expect(find.text(_sampleCase.summary), findsOneWidget);
+      expect(find.byType(CaseHeroHeader), findsNothing);
+      expect(find.byType(CaseMediaSurface), findsNothing);
+      expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
 
-    await _scrollTo(tester, find.byKey(const ValueKey('commit-button')));
-    expect(find.byKey(const ValueKey('commit-button')), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+      await _scrollTo(tester, find.byKey(const ValueKey('commit-button')));
+      expect(find.byKey(const ValueKey('commit-button')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
-  testWidgets('Product Preview keeps the existing Case hero without pre-Commit result', (
-    tester,
-  ) async {
-    await _pumpDecision(
-      tester,
-      fixture: _DecisionFixture.ready,
-      productPreviewVisual: true,
-    );
+  testWidgets(
+    'Product Preview keeps the existing Case hero without pre-Commit result',
+    (tester) async {
+      await _pumpDecision(
+        tester,
+        fixture: _DecisionFixture.ready,
+        productPreviewVisual: true,
+      );
 
-    expect(find.byType(CaseHeroHeader), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey('production-case-summary-header')),
-      findsNothing,
-    );
-    expect(find.byType(CaseMediaSurface), findsOneWidget);
-    expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
-    expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
-    expect(tester.takeException(), isNull);
-  });
+      expect(find.byType(CaseHeroHeader), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('production-case-summary-header')),
+        findsNothing,
+      );
+      expect(find.byType(CaseMediaSurface), findsOneWidget);
+      expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
+      expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('Commit-working and offline status preserve stable keys', (
     tester,
@@ -196,35 +209,36 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Decision shell is overflow-free in dark/light and enlarged text', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(360, 800);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
+  testWidgets(
+    'Decision shell is overflow-free in dark/light and enlarged text',
+    (tester) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
 
-    await _pumpDecision(
-      tester,
-      fixture: _DecisionFixture.ready,
-      themeMode: ThemeMode.dark,
-    );
-    expect(
-      find.byKey(const ValueKey('production-case-summary-header')),
-      findsOneWidget,
-    );
-    expect(tester.takeException(), isNull);
+      await _pumpDecision(
+        tester,
+        fixture: _DecisionFixture.ready,
+        themeMode: ThemeMode.dark,
+      );
+      expect(
+        find.byKey(const ValueKey('production-case-summary-header')),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
 
-    await _pumpDecision(
-      tester,
-      fixture: _DecisionFixture.ready,
-      themeMode: ThemeMode.light,
-      textScale: 1.6,
-    );
-    await _scrollTo(tester, find.byKey(const ValueKey('commit-button')));
-    expect(find.byKey(const ValueKey('commit-action-panel')), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+      await _pumpDecision(
+        tester,
+        fixture: _DecisionFixture.ready,
+        themeMode: ThemeMode.light,
+        textScale: 1.6,
+      );
+      await _scrollTo(tester, find.byKey(const ValueKey('commit-button')));
+      expect(find.byKey(const ValueKey('commit-action-panel')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
 
 Future<void> _pumpDecision(

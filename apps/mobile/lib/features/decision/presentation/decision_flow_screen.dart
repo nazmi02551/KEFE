@@ -109,7 +109,6 @@ class _DecisionContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final strings = KefeStrings.of(context);
     final caseData = state.caseData!;
     final flowRuntime = state.flowRuntime!;
     final productPreviewVisual = ref.watch(productPreviewVisualModeProvider);
@@ -748,10 +747,7 @@ class _ErrorState extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: onRetry,
-                  child: Text(retryLabel),
-                ),
+                FilledButton(onPressed: onRetry, child: Text(retryLabel)),
               ],
             ),
           ),
