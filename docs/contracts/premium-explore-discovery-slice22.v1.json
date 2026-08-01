@@ -1,0 +1,159 @@
+{
+  "contract": "premium-explore-discovery-slice22",
+  "version": "1.0.0",
+  "date": "2026-08-01",
+  "source_adr": "docs/adr/0060-premium-explore-discovery-convergence.md",
+  "tracker_issue": 146,
+  "parent_runtime": "eb7dbb2f85f5fa955040c5da60c6ab4c928e7da8",
+  "status": "architecture_locked_runtime_pending",
+  "scope": {
+    "explore_presentation_convergence": true,
+    "repository_change": false,
+    "controller_change": false,
+    "filter_algorithm_change": false,
+    "item_order_change": false,
+    "saved_case_model_change": false,
+    "route_change": false,
+    "backend_change": false,
+    "api_change": false,
+    "schema_change": false,
+    "signal_impact_change": false
+  },
+  "discovery_truth": {
+    "repository_order_authoritative": true,
+    "first_item_featured": true,
+    "first_item_featured_implies_recommendation": false,
+    "ranking_score_added": false,
+    "popularity_added": false,
+    "personalization_added": false,
+    "editorial_priority_added": false,
+    "named_case_branch_forbidden": true,
+    "case_title_branch_forbidden": true,
+    "case_format_branch_forbidden": true,
+    "domain_specific_composition_branch_forbidden": true
+  },
+  "search_filters": {
+    "title_summary_substring_search_preserved": true,
+    "domain_exact_filter_preserved": true,
+    "saved_only_filter_preserved": true,
+    "filters_compose": true,
+    "clear_resets_query_domain_saved_only": true,
+    "no_result_distinct_from_repository_empty": true,
+    "query_analytics_added": false,
+    "targeting_added": false,
+    "new_filter_persistence_added": false
+  },
+  "saved_navigation": {
+    "saved_cases_controller_authoritative": true,
+    "device_local_saved_semantics_unchanged": true,
+    "activity_continuity_preserved": true,
+    "canonical_case_route": "/case/:caseId",
+    "save_action_must_not_trigger_case_navigation": true,
+    "stable_keys": [
+      "explore-list",
+      "explore-search-field",
+      "domain-filter-all",
+      "domain-filter-<DOMAIN>",
+      "saved-only-filter",
+      "clear-explore-filters",
+      "explore-case-<CASE_ID>",
+      "save-case-<CASE_ID>",
+      "explore-no-results"
+    ]
+  },
+  "presentation": {
+    "shared_kefe_surface_required": true,
+    "theme_adaptive": true,
+    "dark_theme_required": true,
+    "light_theme_required": true,
+    "direct_dark_only_tokens_forbidden": true,
+    "screen_local_fixed_rgb_gradient_forbidden": true,
+    "generic_material_card_in_governed_explore_forbidden": true,
+    "semantic_featured_surface": true,
+    "semantic_regular_case_surface": true,
+    "semantic_state_surfaces": true,
+    "narrow_phone_safe": true,
+    "enlarged_text_safe": true,
+    "refresh_indicator_behavior_unchanged": true,
+    "idle_continuous_animation_forbidden": true,
+    "webview_required": false,
+    "threejs_required": false,
+    "live_3d_required": false
+  },
+  "states": {
+    "loading_deterministic": true,
+    "error_retry_preserved": true,
+    "repository_empty_preserved": true,
+    "no_result_preserved": true,
+    "more_coming_preserved": true,
+    "indeterminate_loading_spinner_in_governed_surface_forbidden": true
+  },
+  "accessibility": {
+    "search_semantics_preserved": true,
+    "filter_semantics_preserved": true,
+    "save_semantics_preserved": true,
+    "case_navigation_semantics_preserved": true,
+    "media_alt_and_attribution_preserved": true,
+    "decorative_icons_do_not_duplicate_facts": true,
+    "touch_targets_preserved": true,
+    "scroll_reachability_required": true
+  },
+  "localization": {
+    "existing_catalogs_preserved": true,
+    "raw_case_values_unchanged": true,
+    "display_localization_boundary_preserved": true,
+    "presentation_language_branching_added": false,
+    "enabled_locales_unchanged": [
+      "tr",
+      "en"
+    ]
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "case_agnostic_runtime": true,
+    "preview_production_isolation": true,
+    "preview_fixture_is_production_fallback": false,
+    "my_kefe_observed_descriptive_only": true,
+    "inference_added": false,
+    "signal_in_scope": false,
+    "impact_in_scope": false
+  },
+  "tests": {
+    "contract_guard": true,
+    "search_domain_saved_clear_continuity": true,
+    "activity_saved_case_continuity": true,
+    "canonical_case_navigation": true,
+    "save_does_not_navigate": true,
+    "stable_keys": true,
+    "repository_order_and_featured_role": true,
+    "no_recommendation_or_ranking_semantics": true,
+    "deterministic_states": true,
+    "no_direct_dark_tokens_or_fixed_gradient": true,
+    "no_generic_card_in_governed_explore": true,
+    "dark_light": true,
+    "narrow_phone": true,
+    "enlarged_text": true,
+    "production_preview_reachability": true,
+    "existing_mobile_regressions": true,
+    "production_copy_boundary": true,
+    "phone_acceptance": true
+  },
+  "required_exact_head_workflows": [
+    "API CI",
+    "Mobile CI",
+    "MVP Beta Gates",
+    "Global Readiness"
+  ],
+  "non_claims": [
+    "RECOMMENDATION_ENGINE",
+    "PERSONALIZED_DISCOVERY",
+    "POPULARITY_RANKING",
+    "EDITORIAL_PRIORITY_MODEL",
+    "QUERY_ANALYTICS",
+    "HUMAN_VISUAL_APPROVAL",
+    "HUMAN_USABILITY_PASS",
+    "PRODUCTION_OR_STORE_READINESS"
+  ]
+}
