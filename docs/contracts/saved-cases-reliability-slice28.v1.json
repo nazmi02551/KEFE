@@ -1,0 +1,74 @@
+{
+  "contract": "saved-cases-reliability-slice28",
+  "version": 1,
+  "tracker": 164,
+  "scope": {
+    "presentation_state_convergence": true,
+    "localized_state_copy": true,
+    "controller_change": false,
+    "store_change": false,
+    "persistence_format_change": false,
+    "api_change": false,
+    "schema_change": false,
+    "route_change": false
+  },
+  "states": {
+    "loading_empty": {
+      "key": "saved-cases-loading",
+      "deterministic": true,
+      "indeterminate_spinner": false,
+      "artificial_progress": false
+    },
+    "loading_with_items": {
+      "key": "saved-cases-loading",
+      "items_remain_visible": true,
+      "blocking": false
+    },
+    "error_empty": {
+      "key": "saved-cases-error",
+      "retry_key": "saved-cases-retry",
+      "empty_claim_visible": false
+    },
+    "error_with_items": {
+      "key": "saved-cases-error",
+      "retry_key": "saved-cases-retry",
+      "items_remain_visible": true
+    },
+    "ready_empty": {
+      "key": "saved-cases-empty",
+      "only_successful_zero_items_state": true
+    }
+  },
+  "retry": {
+    "path": "SavedCasesController.load",
+    "replays_toggle": false,
+    "replays_remove": false,
+    "changes_navigation": false
+  },
+  "preserved": {
+    "controller_duplicate_load_guard": true,
+    "optimistic_toggle": true,
+    "optimistic_remove": true,
+    "write_failure_reload": true,
+    "saved_order": true,
+    "deduplication": true,
+    "visibility_triggered_load": true,
+    "display_time_localization": true,
+    "preview_production_isolation": true,
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "signal_in_scope": false,
+    "impact_in_scope": false
+  },
+  "verification": {
+    "exact_sha_required": true,
+    "api_ci": true,
+    "mobile_ci": true,
+    "mvp_beta_gates": true,
+    "global_readiness": true,
+    "compact_viewport": "360x800",
+    "text_scale": 1.6,
+    "light_dark": true
+  }
+}

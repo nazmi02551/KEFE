@@ -9,6 +9,7 @@ import '../../../core/localization/kefe_strings.dart';
 import '../application/saved_cases_controller.dart';
 import '../domain/saved_case.dart';
 import 'saved_case_strings.dart';
+import 'saved_cases_state_surface.dart';
 
 class SavedCasesSection extends ConsumerStatefulWidget {
   const SavedCasesSection({this.visible = false, super.key});
@@ -47,6 +48,10 @@ class _SavedCasesSectionState extends ConsumerState<SavedCasesSection> {
     final strings = KefeStrings.of(context);
     final state = ref.watch(savedCasesControllerProvider);
     final visual = context.kefeVisual;
+    final isLoading =
+        state.uiState == SavedCasesUiState.idle ||
+        state.uiState == SavedCasesUiState.loading;
+    final isError = state.uiState == SavedCasesUiState.error;
 
     return KefeSurface(
       key: const ValueKey('saved-cases-section'),
@@ -64,7 +69,12 @@ class _SavedCasesSectionState extends ConsumerState<SavedCasesSection> {
                   color: visual.subtleGoldSurface,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(Icons.bookmark_added_outlined, color: visual.gold),
+                child: ExcludeSemantics(
+                  child: Icon(
+                    Icons.bookmark_added_outlined,
+                    color: visual.gold,
+                  ),
+                ),
               ),
               const SizedBox(width: 11),
               Expanded(
@@ -110,16 +120,26 @@ class _SavedCasesSectionState extends ConsumerState<SavedCasesSection> {
             ],
           ),
           const SizedBox(height: 14),
-          if (state.uiState == SavedCasesUiState.loading && state.items.isEmpty)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: LinearProgressIndicator(
-                minHeight: 5,
-                color: visual.gold,
-                backgroundColor: visual.surfaceSunken,
-              ),
-            )
-          else if (state.items.isEmpty)
+          if (isLoading) ...[
+            SavedCasesStateSurface.loading(
+              key: const ValueKey('saved-cases-loading'),
+              message: strings.savedCasesLoading,
+              compact: state.items.isNotEmpty,
+            ),
+            if (state.items.isNotEmpty) const SizedBox(height: 10),
+          ],
+          if (isError) ...[
+            SavedCasesStateSurface.error(
+              key: const ValueKey('saved-cases-error'),
+              retryButtonKey: const ValueKey('saved-cases-retry'),
+              message: strings.savedCasesUnavailable,
+              retryLabel: strings.savedCasesRetry,
+              compact: state.items.isNotEmpty,
+              onRetry: ref.read(savedCasesControllerProvider.notifier).load,
+            ),
+            if (state.items.isNotEmpty) const SizedBox(height: 10),
+          ],
+          if (state.uiState == SavedCasesUiState.ready && state.items.isEmpty)
             Text(
               strings.savedCasesEmpty,
               key: const ValueKey('saved-cases-empty'),
@@ -127,7 +147,7 @@ class _SavedCasesSectionState extends ConsumerState<SavedCasesSection> {
                 context,
               ).textTheme.bodyMedium?.copyWith(color: visual.mutedForeground),
             )
-          else
+          else if (state.items.isNotEmpty)
             for (var index = 0; index < state.items.length; index++) ...[
               _SavedCaseTile(item: state.items[index]),
               if (index != state.items.length - 1) const SizedBox(height: 10),
