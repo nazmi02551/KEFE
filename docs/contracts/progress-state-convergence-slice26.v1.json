@@ -1,0 +1,91 @@
+{
+  "contract": "progress-state-convergence-slice26",
+  "version": 1,
+  "tracker": 159,
+  "stack_parent": "feature/decision-information-state-slice25",
+  "scope": {
+    "presentation_only": true,
+    "shared_async_state_primitive": true,
+    "progress_section_consumer": true,
+    "my_kefe_journey_consumer": true,
+    "controller_change": false,
+    "repository_change": false,
+    "api_or_schema_change": false,
+    "route_change": false
+  },
+  "states": {
+    "loading": {
+      "deterministic": true,
+      "live_region": true,
+      "indeterminate_spinner": false,
+      "artificial_progress": false
+    },
+    "error_retryable": {
+      "deterministic": true,
+      "live_region": true,
+      "retry_path": "ProgressController.load",
+      "replays_answer": false,
+      "replays_private_reason": false,
+      "replays_commit": false,
+      "replays_reveal": false,
+      "replays_perspective": false,
+      "replays_reflection": false
+    }
+  },
+  "stable_keys": {
+    "progress_section": [
+      "progress-loading",
+      "progress-error",
+      "progress-retry"
+    ],
+    "my_kefe_journey": [
+      "my-kefe-loading",
+      "my-kefe-error",
+      "my-kefe-retry",
+      "my-kefe-empty"
+    ]
+  },
+  "preserved": {
+    "progress_controller_state_machine": true,
+    "duplicate_load_guard": true,
+    "ready_values": true,
+    "account_offer_behavior": true,
+    "continue_as_guest_behavior": true,
+    "saved_cases_composition": true,
+    "refresh_behavior": true,
+    "preview_production_isolation": true,
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "my_kefe_descriptive_only": true,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "bias_inference": false,
+    "causal_inference": false,
+    "signal_in_scope": false,
+    "impact_in_scope": false
+  },
+  "accessibility": {
+    "dark_theme": true,
+    "light_theme": true,
+    "viewport": "360x800",
+    "text_scale": 1.6,
+    "decorative_icons_excluded": true,
+    "continuous_decorative_animation": false
+  },
+  "required_workflows": [
+    "API CI",
+    "Mobile CI",
+    "MVP Beta Gates",
+    "Global Readiness"
+  ],
+  "external_evidence_not_claimed": [
+    "human_visual_usability",
+    "editorial_cqb",
+    "production_provider_delivery",
+    "production_slo",
+    "store_compliance",
+    "operator_rollback"
+  ]
+}
