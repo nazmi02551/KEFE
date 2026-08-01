@@ -10,6 +10,10 @@ extension KefeSettingsStrings on KefeStrings {
   );
 
   String get settingsTitle => _settingsText('settings.title');
+  String get settingsLoading => _settingsText('settings.loading');
+  String get settingsSaving => _settingsText('settings.saving');
+  String get settingsUnavailable => _settingsText('settings.unavailable');
+  String get settingsRetry => _settingsText('settings.retry');
   String get languageTitle => _settingsText('language.title');
   String get languageSystem => _settingsText('language.system');
   String get languageTurkish => _settingsText('language.turkish');
