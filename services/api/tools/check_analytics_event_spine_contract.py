@@ -34,7 +34,7 @@ MIGRATION = (
     / "api"
     / "migrations"
     / "versions"
-    / "20260801_0018_analytics_event_spine.py"
+    / "20260801_0019_analytics_event_spine.py"
 )
 WORKER = (
     REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "workers" / "outbox.py"
@@ -121,8 +121,8 @@ def main() -> int:
         _require(
             MIGRATION.read_text(encoding="utf-8"),
             (
-                'revision = "20260801_0018"',
-                'down_revision = "20260730_0017"',
+                'revision = "20260801_0019"',
+                'down_revision = "20260730_0018"',
                 "CREATE SCHEMA IF NOT EXISTS analytics",
                 "CREATE TABLE analytics.analytics_event",
                 "UNIQUE(source_event_id, analytics_name, analytics_version)",
