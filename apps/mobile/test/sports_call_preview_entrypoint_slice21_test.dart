@@ -10,10 +10,7 @@ void main() {
       source,
       contains('productPreviewVisualModeProvider.overrideWithValue(true)'),
     );
-    expect(
-      source,
-      contains('caseMediaRepositoryProvider.overrideWithValue('),
-    );
+    expect(source, contains('caseMediaRepositoryProvider.overrideWithValue('));
     expect(source, contains('const PreviewCaseMediaRepository()'));
     expect(source, contains('runApp('));
     expect(source, contains('const ProductPreviewApp()'));
@@ -25,6 +22,9 @@ void main() {
     expect(source, contains("path: '/case/:caseId'"));
     expect(source, contains('DecisionFlowScreen('));
     expect(source, contains("state.pathParameters['caseId']!"));
-    expect(source, isNot(contains("caseId == '11111111-1111-4111-8111-111111111113'")));
+    expect(
+      source,
+      isNot(contains("caseId == '11111111-1111-4111-8111-111111111113'")),
+    );
   });
 }
