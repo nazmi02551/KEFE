@@ -57,8 +57,7 @@ void main() {
   });
 
   testWidgets('first lookup renders deterministic loading', (tester) async {
-    final store = _ControllableOnboardingStore()
-      ..gate = Completer<bool>();
+    final store = _ControllableOnboardingStore()..gate = Completer<bool>();
 
     await _pump(tester, store: store);
     await tester.pump();
@@ -94,8 +93,7 @@ void main() {
   testWidgets('duplicate resolution attempts are ignored while in flight', (
     tester,
   ) async {
-    final store = _ControllableOnboardingStore()
-      ..gate = Completer<bool>();
+    final store = _ControllableOnboardingStore()..gate = Completer<bool>();
 
     await _pump(tester, store: store);
     await tester.pump();
@@ -121,28 +119,22 @@ void main() {
   });
 
   for (final themeMode in [ThemeMode.light, ThemeMode.dark]) {
-    testWidgets(
-      'error surface is compact-safe in ${themeMode.name} theme',
-      (tester) async {
-        tester.view.physicalSize = const Size(360, 800);
-        tester.view.devicePixelRatio = 1;
-        addTearDown(tester.view.resetPhysicalSize);
-        addTearDown(tester.view.resetDevicePixelRatio);
+    testWidgets('error surface is compact-safe in ${themeMode.name} theme', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
 
-        final store = _ControllableOnboardingStore()..failuresRemaining = 1;
-        await _pump(
-          tester,
-          store: store,
-          themeMode: themeMode,
-          textScale: 1.6,
-        );
-        await tester.pumpAndSettle();
+      final store = _ControllableOnboardingStore()..failuresRemaining = 1;
+      await _pump(tester, store: store, themeMode: themeMode, textScale: 1.6);
+      await tester.pumpAndSettle();
 
-        expect(find.byKey(const ValueKey('onboarding-error')), findsOneWidget);
-        expect(find.byKey(const ValueKey('onboarding-retry')), findsOneWidget);
-        expect(tester.takeException(), isNull);
-      },
-    );
+      expect(find.byKey(const ValueKey('onboarding-error')), findsOneWidget);
+      expect(find.byKey(const ValueKey('onboarding-retry')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
   }
 }
 
