@@ -37,6 +37,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         preferences.loading || (!preferences.loaded && !preferences.hasError);
     final choicesEnabled =
         preferences.loaded && !preferences.loading && !preferences.saving;
+    final showPersistenceState =
+        showLoading || preferences.hasError || preferences.saving;
 
     return Scaffold(
       appBar: AppBar(
@@ -77,55 +79,52 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 icon: Icons.save_outlined,
                 isError: false,
               ),
-            if (preferences.loaded) ...[
-              if (preferences.hasError || preferences.saving)
-                const SizedBox(height: 10),
-              _SettingsChoiceGroup<AppLocalePreference>(
-                key: const ValueKey('settings-language-group'),
-                icon: Icons.language_rounded,
-                title: strings.languageTitle,
-                groupValue: preferences.locale,
-                enabled: choicesEnabled,
-                onChanged: controller.setLocale,
-                choices: [
-                  _SettingsChoice(
-                    value: AppLocalePreference.system,
-                    title: strings.languageSystem,
-                  ),
-                  _SettingsChoice(
-                    value: AppLocalePreference.tr,
-                    title: strings.languageTurkish,
-                  ),
-                  _SettingsChoice(
-                    value: AppLocalePreference.en,
-                    title: strings.languageEnglish,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              _SettingsChoiceGroup<AppThemePreference>(
-                key: const ValueKey('settings-appearance-group'),
-                icon: Icons.contrast_rounded,
-                title: strings.appearanceTitle,
-                groupValue: preferences.theme,
-                enabled: choicesEnabled,
-                onChanged: controller.setTheme,
-                choices: [
-                  _SettingsChoice(
-                    value: AppThemePreference.system,
-                    title: strings.themeSystem,
-                  ),
-                  _SettingsChoice(
-                    value: AppThemePreference.light,
-                    title: strings.themeLight,
-                  ),
-                  _SettingsChoice(
-                    value: AppThemePreference.dark,
-                    title: strings.themeDark,
-                  ),
-                ],
-              ),
-            ],
+            if (showPersistenceState) const SizedBox(height: 10),
+            _SettingsChoiceGroup<AppLocalePreference>(
+              key: const ValueKey('settings-language-group'),
+              icon: Icons.language_rounded,
+              title: strings.languageTitle,
+              groupValue: preferences.locale,
+              enabled: choicesEnabled,
+              onChanged: controller.setLocale,
+              choices: [
+                _SettingsChoice(
+                  value: AppLocalePreference.system,
+                  title: strings.languageSystem,
+                ),
+                _SettingsChoice(
+                  value: AppLocalePreference.tr,
+                  title: strings.languageTurkish,
+                ),
+                _SettingsChoice(
+                  value: AppLocalePreference.en,
+                  title: strings.languageEnglish,
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            _SettingsChoiceGroup<AppThemePreference>(
+              key: const ValueKey('settings-appearance-group'),
+              icon: Icons.contrast_rounded,
+              title: strings.appearanceTitle,
+              groupValue: preferences.theme,
+              enabled: choicesEnabled,
+              onChanged: controller.setTheme,
+              choices: [
+                _SettingsChoice(
+                  value: AppThemePreference.system,
+                  title: strings.themeSystem,
+                ),
+                _SettingsChoice(
+                  value: AppThemePreference.light,
+                  title: strings.themeLight,
+                ),
+                _SettingsChoice(
+                  value: AppThemePreference.dark,
+                  title: strings.themeDark,
+                ),
+              ],
+            ),
             if (widget.showPrivacyControls) ...[
               const SizedBox(height: 10),
               KefeSurface(
