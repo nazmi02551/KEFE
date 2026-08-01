@@ -11,6 +11,9 @@ extension SavedCaseStrings on KefeStrings {
 
   String get savedCasesTitle => _savedCaseText('saved.title');
   String get savedCasesSubtitle => _savedCaseText('saved.subtitle');
+  String get savedCasesLoading => _savedCaseText('saved.loading');
+  String get savedCasesUnavailable => _savedCaseText('saved.unavailable');
+  String get savedCasesRetry => _savedCaseText('saved.retry');
   String get savedCasesEmpty => _savedCaseText('saved.empty');
   String get savedCasesOpen => _savedCaseText('saved.open');
   String get savedCasesRemove => _savedCaseText('saved.remove');
