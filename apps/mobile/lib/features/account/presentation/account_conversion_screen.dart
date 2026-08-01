@@ -7,6 +7,8 @@ import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../application/account_controller.dart';
+import 'account_operation_state_surface.dart';
+import 'account_recovery_strings.dart';
 
 class AccountConversionScreen extends ConsumerStatefulWidget {
   const AccountConversionScreen({super.key});
@@ -38,10 +40,13 @@ class _AccountConversionScreenState
     final showIdentifier =
         state.uiState == AccountUiState.enterIdentifier ||
         state.uiState == AccountUiState.requesting ||
-        state.uiState == AccountUiState.error;
+        (state.uiState == AccountUiState.error &&
+            state.failurePhase == AccountFailurePhase.requestOtp);
     final showCode =
         state.uiState == AccountUiState.enterCode ||
-        state.uiState == AccountUiState.verifying;
+        state.uiState == AccountUiState.verifying ||
+        (state.uiState == AccountUiState.error &&
+            state.failurePhase == AccountFailurePhase.verifyOtp);
 
     return Scaffold(
       appBar: AppBar(
@@ -127,6 +132,7 @@ class _AccountConversionScreenState
                     TextField(
                       key: const ValueKey('account-identifier'),
                       controller: _identifier,
+                      enabled: state.uiState != AccountUiState.requesting,
                       keyboardType: state.channel == 'EMAIL'
                           ? TextInputType.emailAddress
                           : TextInputType.phone,
@@ -151,11 +157,16 @@ class _AccountConversionScreenState
                       onPressed: state.uiState == AccountUiState.requesting
                           ? null
                           : controller.requestOtp,
-                      icon: state.uiState == AccountUiState.requesting
-                          ? const Icon(Icons.hourglass_top_rounded)
-                          : const Icon(Icons.arrow_forward_rounded),
+                      icon: const Icon(Icons.arrow_forward_rounded),
                       label: Text(strings.accountSendCode),
                     ),
+                    if (state.uiState == AccountUiState.requesting) ...[
+                      const SizedBox(height: 12),
+                      AccountOperationStateSurface.status(
+                        key: const ValueKey('account-requesting'),
+                        message: strings.accountRequesting,
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -194,6 +205,7 @@ class _AccountConversionScreenState
                     TextField(
                       key: const ValueKey('account-otp-code'),
                       controller: _code,
+                      enabled: state.uiState != AccountUiState.verifying,
                       keyboardType: TextInputType.number,
                       maxLength: 6,
                       autofillHints: const [AutofillHints.oneTimeCode],
@@ -207,13 +219,25 @@ class _AccountConversionScreenState
                       onPressed: state.uiState == AccountUiState.verifying
                           ? null
                           : () => controller.verifyAndMerge(_code.text),
-                      icon: state.uiState == AccountUiState.verifying
-                          ? const Icon(Icons.hourglass_top_rounded)
-                          : const Icon(Icons.verified_user_outlined),
+                      icon: const Icon(Icons.verified_user_outlined),
                       label: Text(strings.accountConvert),
                     ),
+                    if (state.uiState == AccountUiState.verifying) ...[
+                      const SizedBox(height: 12),
+                      AccountOperationStateSurface.status(
+                        key: const ValueKey('account-verifying'),
+                        message: strings.accountVerifying,
+                      ),
+                    ],
                   ],
                 ),
+              ),
+            ],
+            if (state.uiState == AccountUiState.merging) ...[
+              const SizedBox(height: 16),
+              AccountOperationStateSurface.status(
+                key: const ValueKey('account-merging'),
+                message: strings.accountMerging,
               ),
             ],
             if (state.uiState == AccountUiState.complete) ...[
@@ -224,7 +248,9 @@ class _AccountConversionScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Icon(Icons.verified_outlined, size: 46),
+                    const ExcludeSemantics(
+                      child: Icon(Icons.verified_outlined, size: 46),
+                    ),
                     const SizedBox(height: 14),
                     Text(
                       state.mergedExistingHistory
@@ -245,41 +271,14 @@ class _AccountConversionScreenState
                 ),
               ),
             ],
-            if (state.errorCode != null) ...[
+            if (state.errorCode != null && state.failurePhase != null) ...[
               const SizedBox(height: 16),
-              KefeSurface(
+              AccountOperationStateSurface.error(
                 key: const ValueKey('account-error-surface'),
-                tone: KefeSurfaceTone.sunken,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.error_outline_rounded,
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            strings.accountFailure(state.errorCode!),
-                            key: const ValueKey('account-error'),
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.error,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    OutlinedButton(
-                      onPressed: controller.retry,
-                      child: Text(strings.retry),
-                    ),
-                  ],
-                ),
+                message: _failureMessage(strings, state),
+                retryLabel: _retryLabel(strings, state.failurePhase!),
+                retryButtonKey: const ValueKey('account-error-retry'),
+                onRetry: controller.retry,
               ),
             ],
             const SizedBox(height: 14),
@@ -294,6 +293,22 @@ class _AccountConversionScreenState
       ),
     );
   }
+
+  String _failureMessage(KefeStrings strings, AccountState state) {
+    final code = state.errorCode!;
+    return switch (state.failurePhase!) {
+      AccountFailurePhase.requestOtp => strings.accountRequestFailure(code),
+      AccountFailurePhase.verifyOtp => strings.accountVerifyFailure(code),
+      AccountFailurePhase.mergeGuest => strings.accountMergeFailure(code),
+    };
+  }
+
+  String _retryLabel(KefeStrings strings, AccountFailurePhase phase) =>
+      switch (phase) {
+        AccountFailurePhase.requestOtp => strings.accountRetryRequest,
+        AccountFailurePhase.verifyOtp => strings.accountRetryCode,
+        AccountFailurePhase.mergeGuest => strings.accountRetryMerge,
+      };
 }
 
 class _AccountIcon extends StatelessWidget {
@@ -313,7 +328,9 @@ class _AccountIcon extends StatelessWidget {
       ),
       child: SizedBox.square(
         dimension: 42,
-        child: Icon(icon, size: 21, color: color),
+        child: ExcludeSemantics(
+          child: Icon(icon, size: 21, color: color),
+        ),
       ),
     );
   }
