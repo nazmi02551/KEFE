@@ -12,6 +12,7 @@ import 'package:kefe_mobile/core/localization/kefe_content_localizer.dart';
 import 'package:kefe_mobile/core/visual_composition/kefe_visual_composition_flutter.dart';
 import 'package:kefe_mobile/core/visual_composition/kefe_visual_composition_models.dart';
 import 'package:kefe_mobile/features/decision/application/decision_controller.dart';
+import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/preview_decision_repository.dart';
 import 'package:kefe_mobile/features/decision/data/preview_journey_decision_repository.dart';
 import 'package:kefe_mobile/features/media_presentation/application/case_media_provider.dart';
@@ -219,6 +220,9 @@ void main() {
           overrides: [
             decisionRepositoryProvider.overrideWithValue(
               PreviewJourneyDecisionRepository(),
+            ),
+            decisionDraftStoreProvider.overrideWithValue(
+              MemoryDecisionDraftStore(),
             ),
             kefeContentLocalizerProvider.overrideWithValue(
               const PreviewContentLocalizer(),
