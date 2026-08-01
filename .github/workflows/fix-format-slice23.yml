@@ -1,0 +1,55 @@
+name: Fix and format Slice 23
+
+on:
+  push:
+    branches:
+      - feature/decision-flow-shell-state-slice23
+    paths:
+      - .github/workflows/fix-format-slice23.yml
+      - apps/mobile/lib/features/decision/presentation/decision_flow_screen.dart
+      - apps/mobile/test/decision_flow_shell_state_slice23_test.dart
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.4
+          channel: stable
+      - name: Remove stale local and apply canonical formatting
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('apps/mobile/lib/features/decision/presentation/decision_flow_screen.dart')
+          source = path.read_text()
+          stale = "    final strings = KefeStrings.of(context);\n    final caseData = state.caseData!;"
+          replacement = "    final caseData = state.caseData!;"
+          if stale not in source:
+              raise SystemExit('Expected stale local pattern was not found')
+          path.write_text(source.replace(stale, replacement, 1))
+          PY
+          dart format \
+            apps/mobile/lib/features/decision/presentation/decision_flow_screen.dart \
+            apps/mobile/test/decision_flow_shell_state_slice23_test.dart
+      - name: Commit normalized sources
+        run: |
+          if git diff --quiet; then
+            echo "No source change remains."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            apps/mobile/lib/features/decision/presentation/decision_flow_screen.dart \
+            apps/mobile/test/decision_flow_shell_state_slice23_test.dart
+          git commit -m "fix: normalize Slice 23 Decision Flow sources"
+          git push origin HEAD:feature/decision-flow-shell-state-slice23
