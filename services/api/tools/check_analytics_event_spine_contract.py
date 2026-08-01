@@ -4,8 +4,18 @@ import json
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-CONTRACT = REPO_ROOT / "docs" / "contracts" / "analytics-event-spine-slice31.v1.json"
-ADR = REPO_ROOT / "docs" / "adr" / "0069-server-authoritative-analytics-event-spine.md"
+CONTRACT = (
+    REPO_ROOT
+    / "docs"
+    / "contracts"
+    / "analytics-event-spine-slice31.v1.json"
+)
+ADR = (
+    REPO_ROOT
+    / "docs"
+    / "adr"
+    / "0069-server-authoritative-analytics-event-spine.md"
+)
 ANALYTICS = (
     REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "analytics"
 )
@@ -24,13 +34,19 @@ MIGRATION = (
     / "api"
     / "migrations"
     / "versions"
-    / "20260801_0017_analytics_event_spine.py"
+    / "20260801_0018_analytics_event_spine.py"
 )
-WORKER = REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "workers" / "outbox.py"
+WORKER = (
+    REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "workers" / "outbox.py"
+)
 
 
 def _require(content: str, fragments: tuple[str, ...], *, label: str) -> list[str]:
-    return [f"{label} missing: {fragment}" for fragment in fragments if fragment not in content]
+    return [
+        f"{label} missing: {fragment}"
+        for fragment in fragments
+        if fragment not in content
+    ]
 
 
 def main() -> int:
@@ -105,8 +121,8 @@ def main() -> int:
         _require(
             MIGRATION.read_text(encoding="utf-8"),
             (
-                'revision = "20260801_0017"',
-                'down_revision = "20260730_0016"',
+                'revision = "20260801_0018"',
+                'down_revision = "20260730_0017"',
                 "CREATE SCHEMA IF NOT EXISTS analytics",
                 "CREATE TABLE analytics.analytics_event",
                 "UNIQUE(source_event_id, analytics_name, analytics_version)",
@@ -138,7 +154,8 @@ def main() -> int:
     )
     leaked = [fragment for fragment in forbidden_provider_fragments if fragment in source]
     if leaked:
-        errors.append("analytics domain contains provider SDK dependency: " + ", ".join(leaked))
+        message = "analytics domain contains provider SDK dependency: "
+        errors.append(message + ", ".join(leaked))
     if "from fastapi" in source:
         errors.append("HTTP framework leaked into analytics domain")
 
