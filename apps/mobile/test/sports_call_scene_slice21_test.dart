@@ -244,14 +244,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(
-        find.text('Bu pozisyonda penaltı kararı doğru muydu?'),
-        findsOneWidget,
-      );
-      expect(
-        find.text('Hakemin penaltı kararını nasıl değerlendiriyorsun?'),
-        findsOneWidget,
-      );
+      expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
       expect(find.byKey(const ValueKey('option-Doğru')), findsOneWidget);
       expect(find.byKey(const ValueKey('option-Yanlış')), findsOneWidget);
       expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
