@@ -37,7 +37,10 @@ void main() {
     expect(contract['scope']['filter_algorithm_change'], isFalse);
     expect(contract['scope']['item_order_change'], isFalse);
     expect(contract['scope']['route_change'], isFalse);
-    expect(contract['discovery_truth']['repository_order_authoritative'], isTrue);
+    expect(
+      contract['discovery_truth']['repository_order_authoritative'],
+      isTrue,
+    );
     expect(
       contract['discovery_truth']['first_item_featured_implies_recommendation'],
       isFalse,
@@ -66,23 +69,29 @@ void main() {
     expect(contract['invariants']['impact_in_scope'], isFalse);
   });
 
-  test('governed Explore source uses semantic surfaces without legacy chrome', () {
-    final source = File(
-      'lib/features/explore/presentation/discovery_explore_screen.dart',
-    ).readAsStringSync();
+  test(
+    'governed Explore source uses semantic surfaces without legacy chrome',
+    () {
+      final source = File(
+        'lib/features/explore/presentation/discovery_explore_screen.dart',
+      ).readAsStringSync();
 
-    expect(source, contains("import '../../../core/design/kefe_surface.dart';"));
-    expect(source, contains('KefeSurfaceTone.premium'));
-    expect(source, contains('KefeSurfaceTone.raised'));
-    expect(source, isNot(contains('KefeColorTokens')));
-    expect(source, isNot(contains('Card(')));
-    expect(source, isNot(contains('LinearGradient(')));
-    expect(source, isNot(contains('CircularProgressIndicator')));
-    expect(source, isNot(contains("item.id == '")));
-    expect(source, isNot(contains('caseData.title ==')));
-    expect(source, isNot(contains('recommendationScore')));
-    expect(source, isNot(contains('popularity')));
-  });
+      expect(
+        source,
+        contains("import '../../../core/design/kefe_surface.dart';"),
+      );
+      expect(source, contains('KefeSurfaceTone.premium'));
+      expect(source, contains('KefeSurfaceTone.raised'));
+      expect(source, isNot(contains('KefeColorTokens')));
+      expect(source, isNot(contains('Card(')));
+      expect(source, isNot(contains('LinearGradient(')));
+      expect(source, isNot(contains('CircularProgressIndicator')));
+      expect(source, isNot(contains("item.id == '")));
+      expect(source, isNot(contains('caseData.title ==')));
+      expect(source, isNot(contains('recommendationScore')));
+      expect(source, isNot(contains('popularity')));
+    },
+  );
 
   testWidgets('first repository item remains featured without new ranking UI', (
     tester,
@@ -94,43 +103,37 @@ void main() {
     await _pumpExplore(tester);
 
     final featured = find.byKey(const ValueKey('explore-featured-surface'));
-    final firstCase = find.byKey(
-      const ValueKey('explore-case-$_firstCaseId'),
-    );
+    final firstCase = find.byKey(const ValueKey('explore-case-$_firstCaseId'));
     expect(featured, findsOneWidget);
     expect(firstCase, findsOneWidget);
-    expect(
-      find.descendant(of: featured, matching: firstCase),
-      findsOneWidget,
-    );
+    expect(find.descendant(of: featured, matching: firstCase), findsOneWidget);
     expect(find.textContaining('%'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('save control remains local and does not trigger Case navigation', (
-    tester,
-  ) async {
-    final container = await _pumpExplore(tester);
+  testWidgets(
+    'save control remains local and does not trigger Case navigation',
+    (tester) async {
+      final container = await _pumpExplore(tester);
 
-    expect(
-      container.read(savedCasesControllerProvider).contains(_firstCaseId),
-      isFalse,
-    );
-    await tester.tap(
-      find.byKey(const ValueKey('save-case-$_firstCaseId')),
-    );
-    await tester.pumpAndSettle();
+      expect(
+        container.read(savedCasesControllerProvider).contains(_firstCaseId),
+        isFalse,
+      );
+      await tester.tap(find.byKey(const ValueKey('save-case-$_firstCaseId')));
+      await tester.pumpAndSettle();
 
-    expect(
-      container.read(savedCasesControllerProvider).contains(_firstCaseId),
-      isTrue,
-    );
-    expect(
-      find.byKey(const ValueKey('explore-case-$_firstCaseId')),
-      findsOneWidget,
-    );
-    expect(tester.takeException(), isNull);
-  });
+      expect(
+        container.read(savedCasesControllerProvider).contains(_firstCaseId),
+        isTrue,
+      );
+      expect(
+        find.byKey(const ValueKey('explore-case-$_firstCaseId')),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('loading, empty and error states are deterministic surfaces', (
     tester,
@@ -165,13 +168,15 @@ void main() {
     expect(find.byKey(const ValueKey('saved-only-filter')), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    await _pumpExplore(
-      tester,
-      themeMode: ThemeMode.light,
-      textScale: 1.6,
+    await _pumpExplore(tester, themeMode: ThemeMode.light, textScale: 1.6);
+    expect(
+      find.byKey(const ValueKey('explore-discovery-controls')),
+      findsOneWidget,
     );
-    expect(find.byKey(const ValueKey('explore-discovery-controls')), findsOneWidget);
-    expect(find.byKey(const ValueKey('explore-featured-surface')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('explore-featured-surface')),
+      findsOneWidget,
+    );
     await tester.drag(
       find.byKey(const ValueKey('explore-list')),
       const Offset(0, -620),

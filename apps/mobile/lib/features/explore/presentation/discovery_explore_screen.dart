@@ -420,17 +420,15 @@ class _FeaturedCaseCard extends StatelessWidget {
                     Flexible(
                       child: Text(
                         strings.domainLabel(item.domain),
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: visual.goldSoft,
-                          fontWeight: FontWeight.w900,
-                        ),
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: visual.goldSoft,
+                              fontWeight: FontWeight.w900,
+                            ),
                       ),
                     ),
                     const Spacer(),
-                    Icon(
-                      Icons.arrow_forward_rounded,
-                      color: visual.goldSoft,
-                    ),
+                    Icon(Icons.arrow_forward_rounded, color: visual.goldSoft),
                   ],
                 ),
               ],
@@ -480,10 +478,7 @@ class _CaseCard extends StatelessWidget {
                         color: visual.rules.withValues(alpha: 0.20),
                       ),
                     ),
-                    child: Icon(
-                      _domainIcon(item.domain),
-                      color: visual.rules,
-                    ),
+                    child: Icon(_domainIcon(item.domain), color: visual.rules),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -501,10 +496,11 @@ class _CaseCard extends StatelessWidget {
                       const SizedBox(height: 7),
                       Text(
                         item.title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          height: 1.22,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              height: 1.22,
+                            ),
                       ),
                       const SizedBox(height: 6),
                       Text(
@@ -673,9 +669,9 @@ class _MoreComing extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: visual.mutedForeground,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: visual.mutedForeground),
             ),
           ),
         ],
@@ -700,9 +696,9 @@ class _SectionTitle extends StatelessWidget {
             MediaQuery.textScalerOf(context).scale(1) > 1.35;
         final titleWidget = Text(
           title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w900,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
         );
         final trailingWidget = Text(
           trailing,
@@ -715,11 +711,7 @@ class _SectionTitle extends StatelessWidget {
         if (stacked) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              titleWidget,
-              const SizedBox(height: 4),
-              trailingWidget,
-            ],
+            children: [titleWidget, const SizedBox(height: 4), trailingWidget],
           );
         }
         return Row(
@@ -758,11 +750,7 @@ class _ExploreError extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.cloud_off_outlined,
-                size: 34,
-                color: visual.attention,
-              ),
+              Icon(Icons.cloud_off_outlined, size: 34, color: visual.attention),
               const SizedBox(height: 12),
               Text(message, textAlign: TextAlign.center),
               const SizedBox(height: 14),
