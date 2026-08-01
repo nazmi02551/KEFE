@@ -1,0 +1,129 @@
+{
+  "contract": "decision-flow-state-commit-slice23",
+  "version": "1.0.0",
+  "date": "2026-08-01",
+  "source_adr": "docs/adr/0061-decision-flow-state-commit-convergence.md",
+  "tracker_issue": 150,
+  "status": "architecture_locked_runtime_pending",
+  "scope": {
+    "decision_flow_presentation_convergence": true,
+    "decision_controller_change": false,
+    "repository_change": false,
+    "backend_change": false,
+    "api_change": false,
+    "schema_change": false,
+    "route_change": false,
+    "flow_order_change": false,
+    "signal_impact_change": false
+  },
+  "root_states": {
+    "loading_deterministic": true,
+    "loading_indeterminate_spinner_forbidden": true,
+    "error_uses_kefe_surface": true,
+    "retry_uses_existing_load_path": true,
+    "transition_uses_kefe_motion_resolve": true,
+    "reduce_motion_collapses_transition": true,
+    "technical_error_code_user_visible": false
+  },
+  "commit_action": {
+    "stable_key": "commit-button",
+    "single_commit_action": true,
+    "required_response_gate_unchanged": true,
+    "disabled_while_submitting": true,
+    "recovery_pending_uses_existing_retry_pending": true,
+    "normal_state_uses_existing_commit": true,
+    "request_payload_change": false,
+    "idempotency_change": false,
+    "uncertain_commit_recovery_change": false,
+    "submitting_deterministic": true,
+    "submitting_indeterminate_spinner_forbidden": true,
+    "optimistic_success_forbidden": true,
+    "duplicate_commit_prevented": true
+  },
+  "inline_status": {
+    "stable_key": "decision-status-message",
+    "live_region_preserved": true,
+    "uses_kefe_surface": true,
+    "offline_draft_distinction_preserved": true,
+    "localized_message_boundary_preserved": true,
+    "raw_transport_details_forbidden": true
+  },
+  "unsupported_capability": {
+    "stable_key_prefix": "capability-pending-",
+    "uses_kefe_surface": true,
+    "localized_title_body_preserved": true,
+    "unsupported_step_hidden": false,
+    "flow_order_changed": false
+  },
+  "flow_truth": {
+    "question_definitions_unchanged": true,
+    "raw_answer_values_unchanged": true,
+    "response_persistence_unchanged": true,
+    "reason_tags_unchanged": true,
+    "private_reason_semantics_unchanged": true,
+    "context_exposure_unchanged": true,
+    "pre_commit_reveal_absent": true,
+    "reveal_semantics_unchanged": true,
+    "perspective_semantics_unchanged": true,
+    "reflection_semantics_unchanged": true,
+    "first_use_completion_unchanged": true,
+    "generic_primitive_dispatch_preserved": true
+  },
+  "presentation": {
+    "theme_adaptive": true,
+    "dark_theme_required": true,
+    "light_theme_required": true,
+    "compact_phone_required": true,
+    "enlarged_text_required": true,
+    "continuous_idle_animation_forbidden": true,
+    "decorative_icons_excluded_from_semantics": true,
+    "custom_painter_text_forbidden": true,
+    "webview_required": false,
+    "threejs_required": false,
+    "live_3d_required": false
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "case_agnostic_runtime": true,
+    "preview_production_isolation": true,
+    "my_kefe_observed_descriptive_only": true,
+    "inference_added": false,
+    "signal_in_scope": false,
+    "impact_in_scope": false
+  },
+  "tests": {
+    "contract_guard": true,
+    "source_guard_no_spinner": true,
+    "source_guard_kefe_motion": true,
+    "loading_state": true,
+    "error_retry_state": true,
+    "capability_pending_state": true,
+    "commit_enablement": true,
+    "submitting_duplicate_prevention": true,
+    "recovery_pending": true,
+    "pre_commit_reveal_absence": true,
+    "dark_light": true,
+    "compact_phone": true,
+    "enlarged_text": true,
+    "existing_mobile_regressions": true,
+    "production_copy_boundary": true,
+    "phone_acceptance": true
+  },
+  "required_exact_head_workflows": [
+    "API CI",
+    "Mobile CI",
+    "MVP Beta Gates",
+    "Global Readiness"
+  ],
+  "non_claims": [
+    "DECISION_METHOD_CHANGE",
+    "NEW_COMMIT_SEMANTICS",
+    "NEW_RECOVERY_SEMANTICS",
+    "NEW_CASE_TYPE",
+    "HUMAN_VISUAL_APPROVAL",
+    "HUMAN_USABILITY_PASS",
+    "PRODUCTION_OR_STORE_READINESS"
+  ]
+}
