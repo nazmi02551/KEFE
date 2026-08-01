@@ -7,6 +7,7 @@ import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../../core/localization/settings_strings.dart';
 import '../../../core/preferences/app_preferences.dart';
+import 'settings_persistence_state_surface.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({this.showPrivacyControls = true, super.key});
@@ -19,6 +20,10 @@ class SettingsScreen extends ConsumerWidget {
     final preferences = ref.watch(appPreferencesControllerProvider);
     final controller = ref.read(appPreferencesControllerProvider.notifier);
     final visual = context.kefeVisual;
+    final showLoading =
+        preferences.loading || (!preferences.loaded && !preferences.hasError);
+    final choicesEnabled =
+        preferences.loaded && !preferences.loading && !preferences.saving;
 
     return Scaffold(
       appBar: AppBar(
@@ -35,49 +40,79 @@ class SettingsScreen extends ConsumerWidget {
           key: const ValueKey('settings-screen'),
           padding: const EdgeInsets.fromLTRB(14, 12, 14, 20),
           children: [
-            _SettingsChoiceGroup<AppLocalePreference>(
-              key: const ValueKey('settings-language-group'),
-              icon: Icons.language_rounded,
-              title: strings.languageTitle,
-              groupValue: preferences.locale,
-              onChanged: controller.setLocale,
-              choices: [
-                _SettingsChoice(
-                  value: AppLocalePreference.system,
-                  title: strings.languageSystem,
-                ),
-                _SettingsChoice(
-                  value: AppLocalePreference.tr,
-                  title: strings.languageTurkish,
-                ),
-                _SettingsChoice(
-                  value: AppLocalePreference.en,
-                  title: strings.languageEnglish,
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            _SettingsChoiceGroup<AppThemePreference>(
-              key: const ValueKey('settings-appearance-group'),
-              icon: Icons.contrast_rounded,
-              title: strings.appearanceTitle,
-              groupValue: preferences.theme,
-              onChanged: controller.setTheme,
-              choices: [
-                _SettingsChoice(
-                  value: AppThemePreference.system,
-                  title: strings.themeSystem,
-                ),
-                _SettingsChoice(
-                  value: AppThemePreference.light,
-                  title: strings.themeLight,
-                ),
-                _SettingsChoice(
-                  value: AppThemePreference.dark,
-                  title: strings.themeDark,
-                ),
-              ],
-            ),
+            if (showLoading)
+              SettingsPersistenceStateSurface(
+                key: const ValueKey('settings-loading'),
+                message: strings.settingsLoading,
+                icon: Icons.hourglass_empty_rounded,
+                isError: false,
+              ),
+            if (preferences.hasError)
+              SettingsPersistenceStateSurface(
+                key: const ValueKey('settings-error'),
+                message: strings.settingsUnavailable,
+                icon: Icons.cloud_off_outlined,
+                isError: true,
+                retryLabel: strings.settingsRetry,
+                retryKey: const ValueKey('settings-retry'),
+                onRetry: controller.retry,
+              ),
+            if (preferences.saving)
+              SettingsPersistenceStateSurface(
+                key: const ValueKey('settings-saving'),
+                message: strings.settingsSaving,
+                icon: Icons.save_outlined,
+                isError: false,
+              ),
+            if (preferences.loaded) ...[
+              if (preferences.hasError || preferences.saving)
+                const SizedBox(height: 10),
+              _SettingsChoiceGroup<AppLocalePreference>(
+                key: const ValueKey('settings-language-group'),
+                icon: Icons.language_rounded,
+                title: strings.languageTitle,
+                groupValue: preferences.locale,
+                enabled: choicesEnabled,
+                onChanged: controller.setLocale,
+                choices: [
+                  _SettingsChoice(
+                    value: AppLocalePreference.system,
+                    title: strings.languageSystem,
+                  ),
+                  _SettingsChoice(
+                    value: AppLocalePreference.tr,
+                    title: strings.languageTurkish,
+                  ),
+                  _SettingsChoice(
+                    value: AppLocalePreference.en,
+                    title: strings.languageEnglish,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              _SettingsChoiceGroup<AppThemePreference>(
+                key: const ValueKey('settings-appearance-group'),
+                icon: Icons.contrast_rounded,
+                title: strings.appearanceTitle,
+                groupValue: preferences.theme,
+                enabled: choicesEnabled,
+                onChanged: controller.setTheme,
+                choices: [
+                  _SettingsChoice(
+                    value: AppThemePreference.system,
+                    title: strings.themeSystem,
+                  ),
+                  _SettingsChoice(
+                    value: AppThemePreference.light,
+                    title: strings.themeLight,
+                  ),
+                  _SettingsChoice(
+                    value: AppThemePreference.dark,
+                    title: strings.themeDark,
+                  ),
+                ],
+              ),
+            ],
             if (showPrivacyControls) ...[
               const SizedBox(height: 10),
               KefeSurface(
@@ -124,10 +159,12 @@ class SettingsScreen extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Icon(
-                            Icons.chevron_right_rounded,
-                            size: 20,
-                            color: visual.mutedForeground,
+                          ExcludeSemantics(
+                            child: Icon(
+                              Icons.chevron_right_rounded,
+                              size: 20,
+                              color: visual.mutedForeground,
+                            ),
                           ),
                         ],
                       ),
@@ -155,6 +192,7 @@ class _SettingsChoiceGroup<T> extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.groupValue,
+    required this.enabled,
     required this.onChanged,
     required this.choices,
     super.key,
@@ -163,6 +201,7 @@ class _SettingsChoiceGroup<T> extends StatelessWidget {
   final IconData icon;
   final String title;
   final T groupValue;
+  final bool enabled;
   final ValueChanged<T> onChanged;
   final List<_SettingsChoice<T>> choices;
 
@@ -195,23 +234,32 @@ class _SettingsChoiceGroup<T> extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
-          RadioGroup<T>(
-            groupValue: groupValue,
-            onChanged: (value) {
-              if (value != null) onChanged(value);
-            },
-            child: Column(
-              children: [
-                for (var index = 0; index < choices.length; index++) ...[
-                  _ChoiceTile<T>(
-                    value: choices[index].value,
-                    title: choices[index].title,
-                    selected: choices[index].value == groupValue,
+          Semantics(
+            enabled: enabled,
+            child: IgnorePointer(
+              ignoring: !enabled,
+              child: Opacity(
+                opacity: enabled ? 1 : 0.58,
+                child: RadioGroup<T>(
+                  groupValue: groupValue,
+                  onChanged: (value) {
+                    if (value != null) onChanged(value);
+                  },
+                  child: Column(
+                    children: [
+                      for (var index = 0; index < choices.length; index++) ...[
+                        _ChoiceTile<T>(
+                          value: choices[index].value,
+                          title: choices[index].title,
+                          selected: choices[index].value == groupValue,
+                        ),
+                        if (index != choices.length - 1)
+                          Divider(height: 1, color: visual.border),
+                      ],
+                    ],
                   ),
-                  if (index != choices.length - 1)
-                    Divider(height: 1, color: visual.border),
-                ],
-              ],
+                ),
+              ),
             ),
           ),
         ],
@@ -268,15 +316,17 @@ class _SettingsIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
     final dimension = compact ? 32.0 : 38.0;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(compact ? 10 : 12),
-        border: Border.all(color: visual.border),
-      ),
-      child: SizedBox.square(
-        dimension: dimension,
-        child: Icon(icon, size: compact ? 18 : 20, color: color),
+    return ExcludeSemantics(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(compact ? 10 : 12),
+          border: Border.all(color: visual.border),
+        ),
+        child: SizedBox.square(
+          dimension: dimension,
+          child: Icon(icon, size: compact ? 18 : 20, color: color),
+        ),
       ),
     );
   }
