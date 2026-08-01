@@ -169,25 +169,28 @@ class _LoadingState extends StatelessWidget {
       label: strings.perspectiveLoading,
       liveRegion: true,
       child: KefeSurface(
+        key: const ValueKey('perspective-loading'),
         tone: KefeSurfaceTone.sunken,
+        accent: visual.rules,
         padding: const EdgeInsets.all(14),
         borderRadius: 17,
         child: Row(
           children: [
-            SizedBox.square(
-              dimension: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
+            ExcludeSemantics(
+              child: Icon(
+                Icons.hourglass_top_rounded,
                 color: visual.rules,
+                size: 21,
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 strings.perspectiveLoading,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: visual.mutedForeground),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: visual.foreground,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],
@@ -206,28 +209,86 @@ class _RetryState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
-    return KefeSurface(
-      tone: KefeSurfaceTone.sunken,
-      padding: const EdgeInsets.all(14),
-      borderRadius: 17,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            strings.perspectiveUnavailable,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: visual.mutedForeground,
-              height: 1.4,
+    return Semantics(
+      liveRegion: true,
+      child: KefeSurface(
+        key: const ValueKey('perspective-error'),
+        tone: KefeSurfaceTone.sunken,
+        accent: visual.empathy,
+        padding: const EdgeInsets.all(14),
+        borderRadius: 17,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ExcludeSemantics(
+                  child: Icon(
+                    Icons.error_outline_rounded,
+                    color: visual.empathy,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    strings.perspectiveUnavailable,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: visual.foreground,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            key: const ValueKey('perspective-retry'),
-            onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded),
-            label: Text(strings.perspectiveRetry),
-          ),
-        ],
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              key: const ValueKey('perspective-retry'),
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: Text(strings.perspectiveRetry),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _UnavailableState extends StatelessWidget {
+  const _UnavailableState({required this.strings});
+
+  final KefeStrings strings;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return Semantics(
+      liveRegion: true,
+      child: KefeSurface(
+        key: const ValueKey('perspective-unavailable'),
+        tone: KefeSurfaceTone.sunken,
+        accent: visual.empathy,
+        padding: const EdgeInsets.all(14),
+        borderRadius: 17,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ExcludeSemantics(
+              child: Icon(Icons.info_outline_rounded, color: visual.empathy),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                strings.perspectiveUnavailable,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: visual.foreground,
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -244,7 +305,7 @@ class _LoadedState extends ConsumerWidget {
     final strings = KefeStrings.of(context);
     final visual = context.kefeVisual;
     final snapshot = result;
-    if (snapshot == null) return Text(strings.perspectiveUnavailable);
+    if (snapshot == null) return _UnavailableState(strings: strings);
 
     final content = ref.watch(kefeContentLocalizerProvider);
     final locale = Localizations.localeOf(context);
