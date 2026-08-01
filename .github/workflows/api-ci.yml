@@ -87,6 +87,9 @@ jobs:
       - name: Claim Argument ingestion contract
         working-directory: services/api
         run: python tools/check_claim_argument_ingestion_contract.py
+      - name: Editorial Projection contract
+        working-directory: services/api
+        run: python tools/check_editorial_projection_contract.py
       - name: Admin HTTP contract
         id: admin-http-contract
         continue-on-error: true
@@ -178,6 +181,7 @@ jobs:
           tests/test_context_postgres.py
           tests/test_progress_postgres.py
           tests/test_content_authoring_postgres.py
+          tests/test_editorial_projection_postgres.py
           tests/test_admin_sessions_postgres.py
           tests/test_admin_http_postgres.py
           tests/test_content_configuration_postgres.py
