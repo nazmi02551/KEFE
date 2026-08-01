@@ -29,7 +29,7 @@ MIGRATION = (
     / "api"
     / "migrations"
     / "versions"
-    / "20260802_0018_editorial_projection.py"
+    / "20260802_0019_editorial_projection.py"
 )
 
 
@@ -114,8 +114,8 @@ def main() -> int:
         _require(
             migration,
             (
-                'revision = "20260802_0018"',
-                'down_revision = "20260730_0017"',
+                'revision = "20260802_0019"',
+                'down_revision = "20260730_0018"',
                 "CREATE TABLE editorial.projection_record",
                 "candidate_proposal_id uuid NOT NULL UNIQUE",
                 "authoring_case_id uuid NOT NULL UNIQUE",
