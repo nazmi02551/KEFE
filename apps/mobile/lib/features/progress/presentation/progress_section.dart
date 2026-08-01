@@ -8,6 +8,7 @@ import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_content_localizer.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../application/progress_controller.dart';
+import 'progress_async_state_surface.dart';
 import 'progress_strings.dart';
 
 class ProgressSection extends ConsumerStatefulWidget {
@@ -32,38 +33,17 @@ class _ProgressSectionState extends ConsumerState<ProgressSection> {
     final state = ref.watch(progressControllerProvider);
 
     return switch (state.uiState) {
-      ProgressUiState.idle || ProgressUiState.loading => KefeSurface(
-        key: const ValueKey('progress-loading'),
-        child: Semantics(
-          liveRegion: true,
-          label: strings.progressLoading,
-          child: Row(
-            children: [
-              const SizedBox.square(
-                dimension: 18,
-                child: Icon(Icons.hourglass_top_rounded, size: 18),
-              ),
-              const SizedBox(width: 12),
-              Expanded(child: Text(strings.progressLoading)),
-            ],
-          ),
+      ProgressUiState.idle || ProgressUiState.loading =>
+        ProgressAsyncStateSurface.loading(
+          surfaceKey: 'progress-loading',
+          message: strings.progressLoading,
         ),
-      ),
-      ProgressUiState.errorRetryable => KefeSurface(
-        key: const ValueKey('progress-error'),
-        tone: KefeSurfaceTone.raised,
-        accent: context.kefeVisual.attention,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(strings.progressUnavailable),
-            const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: ref.read(progressControllerProvider.notifier).load,
-              child: Text(strings.progressRetry),
-            ),
-          ],
-        ),
+      ProgressUiState.errorRetryable => ProgressAsyncStateSurface.error(
+        surfaceKey: 'progress-error',
+        retryKey: 'progress-retry',
+        message: strings.progressUnavailable,
+        retryLabel: strings.progressRetry,
+        onRetry: ref.read(progressControllerProvider.notifier).load,
       ),
       ProgressUiState.ready => _ProgressReady(state: state),
     };
