@@ -1,0 +1,73 @@
+{
+  "contract": "activity-history-convergence-slice27",
+  "version": 1,
+  "tracker": 162,
+  "scope": {
+    "presentation_only": true,
+    "activity_async_state_convergence": true,
+    "display_time_title_localization": true,
+    "controller_change": false,
+    "repository_change": false,
+    "api_change": false,
+    "schema_change": false,
+    "route_change": false,
+    "saved_cases_change": false
+  },
+  "states": {
+    "loading": {
+      "shared_primitive": "ProgressAsyncStateSurface.loading",
+      "key": "activity-loading",
+      "live_region": true,
+      "indeterminate_spinner": false,
+      "artificial_progress": false
+    },
+    "error_retryable": {
+      "shared_primitive": "ProgressAsyncStateSurface.error",
+      "key": "activity-error",
+      "retry_key": "activity-retry",
+      "retry_path": "ProgressController.load"
+    },
+    "empty": {
+      "key": "activity-empty",
+      "preserved": true
+    }
+  },
+  "localization": {
+    "provider": "kefeContentLocalizerProvider",
+    "namespace": "KefeContentNamespace.caseTitle",
+    "enriched_rows": true,
+    "legacy_rows": true,
+    "semantic_label_uses_display_title": true,
+    "raw_value_mutation": false
+  },
+  "preserved": {
+    "activity_descriptive_only": true,
+    "history_order": true,
+    "pull_to_refresh": true,
+    "saved_cases_composition": true,
+    "preview_notice": true,
+    "row_navigation": true,
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "preview_production_isolation": true,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "bias_inference": false,
+    "causal_inference": false,
+    "normative_inference": false,
+    "signal_in_scope": false,
+    "impact_in_scope": false
+  },
+  "verification": {
+    "exact_sha_required": true,
+    "api_ci": true,
+    "mobile_ci": true,
+    "mvp_beta_gates": true,
+    "global_readiness": true,
+    "compact_viewport": "360x800",
+    "text_scale": 1.6,
+    "light_dark": true
+  }
+}
