@@ -195,6 +195,7 @@ Future<ProviderContainer> _pumpExplore(
 }) async {
   await tester.pumpWidget(
     ProviderScope(
+      key: UniqueKey(),
       overrides: [
         decisionRepositoryProvider.overrideWithValue(
           PreviewDecisionRepository(),
