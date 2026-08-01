@@ -3,10 +3,10 @@
 **Updated:** 2026-08-01  
 **Repository:** `nazmi02551/KEFE`  
 **Default branch:** `main`  
-**Active stacked line top:** PR #157 `feature/decision-information-state-slice25`  
-**Latest repo-verified active-stack runtime:** `1578b27d931e1856655c0734f8d8991817c9c00c`  
-**Latest runtime owner:** PR #157 / Slice 25 Decision Journey Information-State Convergence  
-**PR #157 current head:** `5977c015713f8f977333396a115395ba597687b9` (documentation-only commit after the verified runtime)
+**Active stacked line top:** PR #160 `feature/progress-state-convergence-slice26`  
+**Latest repo-verified active-stack runtime:** `b78d71a26823f757cf1a42fed564c93ef9915bb6`  
+**Latest runtime owner:** PR #160 / Slice 26 Progress and My KEFE Async-State Convergence  
+**PR #160 current head:** `06944e1f6d7ffd2b60d86ad61d8202ea30e41a8a` (documentation-only commit after the verified runtime)
 
 This file is the canonical durable engineering handoff. Chat history is supplementary context only.
 
@@ -34,9 +34,9 @@ Drive CURRENT file ID: `1MXvCTNPfv-pWYIHCo5KqpmTOf-3RyFhZ`
 
 ### Drive WORKING
 
-The existing Drive WORKING checkpoint was last known to pin Slice 18 and therefore must not be treated as newer than the live GitHub stack recorded here. It remains WORKING, not published CURRENT.
+The existing Drive WORKING checkpoint was last known to pin Slice 18 and must not be treated as newer than the live GitHub stack recorded here. It remains WORKING, not published CURRENT.
 
-At the next declared documentation milestone, accepted Slice 19–25 changes belong in the existing Product Bible, Design System and Engineering Blueprint. Do not create a parallel official manifesto or silently promote WORKING material to CURRENT.
+At the next declared documentation milestone, accepted Slice 19–26 changes belong in the existing Product Bible, Design System and Engineering Blueprint. Do not create a parallel official manifesto or silently promote WORKING material to CURRENT.
 
 ## 2. Binding invariants
 
@@ -49,7 +49,7 @@ Preserve unless an explicit accepted decision changes them:
 - no pre-Commit collective/result/Perspective leakage;
 - Preview fixtures/adapters are never production fallback;
 - raw backend/CaseVersion values are not changed by display localization;
-- My KEFE is observed/descriptive only; no personality, ideology, psychometric, bias or causal inference;
+- My KEFE is observed/descriptive only; no personality, ideology, psychometric, bias, causal or normative inference;
 - Collective Result/Consensus is not automatically Signal, truth or formal authority;
 - Signal/Impact may not silently broaden;
 - AI/provider output is not autonomous truth, editorial acceptance or publication authority;
@@ -62,80 +62,99 @@ Preserve unless an explicit accepted decision changes them:
 
 Observed dependency line:
 
-`main → #90 → #92 → #94 → #95 → #97 → #99 → #101 → #103 → #105 → #107 → #109 → #111 → #113 → #115 → #117 → #118 → #120 → #122 → #124 → #126 → #128 → #132 → #138 → #141 → #143 → #145 → #147 → #149 → #154 → #157`
+`main → #90 → #92 → #94 → #95 → #97 → #99 → #101 → #103 → #105 → #107 → #109 → #111 → #113 → #115 → #117 → #118 → #120 → #122 → #124 → #126 → #128 → #132 → #138 → #141 → #143 → #145 → #147 → #149 → #154 → #157 → #160`
 
 Before any merge, re-read live bases/heads, mergeability, reviews and exact CI. Never merge a child before its parent.
 
 ### Explicit exclusions
 
 - PR #68 remains outside the active MVP/premium stack. Its ingestion-orchestration work requires a fresh compatibility review before adoption.
-- PR #151 and Issue #150 are closed as a superseded duplicate of canonical Slice 23 PR #149 / Issue #148. PR #151 independently reached a green runtime (`1c272a642aed3127aa4f162067d50e80a0adb73c`), but it started from the same PR #147 parent and created conflicting ADR-0061/contract ownership. Its evidence is historical only and does not define a second active Slice 23.
+- PR #151 and Issue #150 remain closed as a superseded duplicate of canonical Slice 23 PR #149 / Issue #148. Its independent green evidence is historical only and does not define a second active Slice 23.
 
-## 4. Latest verified runtime — Slice 25
+## 4. Latest verified runtime — Slice 26
 
-### Decision Journey Information-State Convergence
+### Progress and My KEFE Async-State Convergence
 
 Verified runtime SHA:
 
-`1578b27d931e1856655c0734f8d8991817c9c00c`
+`b78d71a26823f757cf1a42fed564c93ef9915bb6`
 
 All required repository-owned workflows passed on that exact SHA:
 
-- API CI #945 / run `30695358124` — SUCCESS
-- Mobile CI #735 / run `30695358118` — SUCCESS
-- MVP Beta Gates #449 / run `30695358112` — SUCCESS
-- Global Readiness #347 / run `30695358132` — SUCCESS
+- API CI #953 / run `30696294314` — SUCCESS
+- Mobile CI #742 / run `30696294319` — SUCCESS
+- MVP Beta Gates #457 / run `30696294318` — SUCCESS
+- Global Readiness #354 / run `30696294313` — SUCCESS
 
 Contract-first records:
 
-- Issue #156
-- PR #157
-- ADR-0063 `docs/adr/0063-decision-journey-information-state-convergence.md`
-- contract `docs/contracts/decision-information-state-slice25.v1.json`
-- verification `docs/status/DECISION_INFORMATION_STATE_SLICE25_2026-08-01.md`
+- Issue #159
+- PR #160
+- ADR-0064 `docs/adr/0064-progress-my-kefe-async-state-convergence.md`
+- contract `docs/contracts/progress-state-convergence-slice26.v1.json`
+- verification `docs/status/PROGRESS_STATE_CONVERGENCE_SLICE26_2026-08-01.md`
 
-### What Slice 25 closed
+### What Slice 26 closed
 
-The final two indeterminate async information states in the primary Decision Journey now use deterministic, theme-adaptive KEFE semantic surfaces.
+`ProgressSection` and `MyKefeJourneyScreen` previously implemented duplicate loading/error/retry presentation over the same `progressControllerProvider`. Slice 26 introduced one reusable `ProgressAsyncStateSurface` for both consumers.
 
-#### Context
+The shared primitive provides:
 
-`ContextSection` now provides:
+- deterministic loading presentation;
+- deterministic retryable-error presentation;
+- localized retry action;
+- theme-adaptive `KefeSurface` / `KefeVisualTheme` roles;
+- live-region status announcements;
+- decorative-icon semantic exclusion;
+- no indeterminate spinner;
+- no artificial completion measure;
+- no continuous decorative animation;
+- no generic Material `Card`.
 
-- deterministic `context-loading` state;
-- semantic `context-error` state;
-- stable `context-retry` action;
-- live-region status treatment;
-- no indeterminate spinner or artificial progress.
+Stable state keys:
 
-Context remains pre-Commit safe, optional and CaseVersion-pinned. Retry still invalidates only `contextSnapshotProvider(caseVersionId)`. Empty Context remains omitted; no placeholder context, evidence or source is fabricated. Existing block/source order, disclosure levels, claim-status values, raw content and source relationships are unchanged.
+- `progress-loading`
+- `progress-error`
+- `progress-retry`
+- `my-kefe-loading`
+- `my-kefe-error`
+- `my-kefe-retry`
+- `my-kefe-empty`
 
-#### Perspective
+The following remain unchanged:
 
-`PerspectiveSection` now provides:
+- `ProgressController` state machine and duplicate-load guard;
+- progress repository/provider selection;
+- readiness, count, recent-case, domain-activity, journey and methodology values;
+- account-offer eligibility, placement, creation availability and guest dismissal;
+- Saved Cases and pull-to-refresh composition;
+- production/Product Preview provider isolation;
+- routes, API, schema and migrations;
+- Decision journey dispatch behavior.
 
-- deterministic `perspective-loading` state;
-- semantic `perspective-error` and stable `perspective-retry` action;
-- defensive `perspective-unavailable` state when a loaded state unexpectedly has no result;
-- live-region status treatment;
-- no indeterminate spinner or artificial progress.
+Retry invokes only the existing `ProgressController.load()` path. It does not replay answer, private reason, Commit, Reveal, Perspective or Reflection.
 
-Perspective remains absent before Commit/Reveal. Retry invokes only the existing Perspective retry path and never replays answer, private reason, Commit or Reveal. Perspective cards, slots, source/provenance values, methodology, curated fallback, cluster-pending disclosure and downstream Consensus/Community Reasons/Progress/Share composition remain unchanged.
+My KEFE remains actor-history-derived and descriptive only. No personality, ideology, psychometric, bias, causal or normative inference was added.
 
-Executable coverage includes contract/source guards, deterministic Context/Perspective states, Context provider invalidation, empty omission, defensive null handling, existing pre/post-Commit boundaries, dark/light, 360×800, 1.6× text, production-copy and phone acceptance regressions.
+Executable coverage includes contract/source guards, shared-primitive consumption, deterministic loading/error/retry, one retry action producing one additional repository load, ready/account-offer continuity, My KEFE descriptive ready state, zero-history empty state, non-inference disclosure, dark/light, 360×800, 1.6× text, production-copy and phone-acceptance regressions.
 
-The Context error regression disables Riverpod automatic retry only inside its test `ProviderScope`; production provider behavior is unchanged.
+### Failed candidates retained as evidence
+
+- `fc8c4203c3804880fb68239fd8d39132918ce34e` was rejected because the canonical Dart format gate detected drift in `progress_section.dart`.
+- `54549144879824b4947d634eaf9da80a4571222d` was rejected because its test incorrectly treated two sequential `tester.tap` calls as simultaneous duplicate input. Flutter completed the first fast retry before the second tap, correctly producing another load. The production controller was not changed; the test was corrected to assert the intended UI contract.
+
+Neither failed candidate is PASS.
 
 ### Latest phone artifact
 
-Global Readiness #347 produced:
+Global Readiness #354 produced:
 
 - artifact: `kefe-internal-alpha-phone-preview`
-- artifact ID: `8817119041`
-- archive digest: `sha256:f9e296b3a8a27c9f9eaba9f0d2c3b6115890b23d8bf1a6744b3c672f92c1a11c`
+- artifact ID: `8817421376`
+- archive digest: `sha256:6b3852e94ff829782987fd2ed41428b75a87de7397c70382f2664e418f8d5624`
 - payload: `app-debug.apk`
-- payload size: `160577802` bytes
-- APK SHA-256: `19f555f1976619d4e611c5c591fdf193c4e2fd7613d3761d84c9eaa98a02dc99`
+- payload size: `160576474` bytes
+- APK SHA-256: `1a06d39bd7decb5a0060f545c053bd54c8c6335b095159f11bef57b864d645de`
 - `beta-api.invalid`: absent in raw and unpacked scans.
 
 This is an internal Product Preview artifact for the exact verified runtime. It is not production/public-beta/store, production-provider, editorial-acceptance or human-usability evidence.
@@ -146,55 +165,58 @@ This is an internal Product Preview artifact for the exact verified runtime. It 
 
 - PR #141
 - verified runtime `db514fe61768f0a3cf7b0c4fe1ac4fa525be9edc`
-- materially richer Flutter-native Atlas globe;
+- richer Flutter-native Atlas globe;
 - representative Preview data remains explicitly non-live and non-nationally representative;
-- Atlas remains secondary Product Preview-only;
-- dark/light, compact-phone and enlarged-text regressions pass.
+- Atlas remains secondary Product Preview-only.
 
 ### Slice 20 — Perspective Landscape
 
 - PR #143
 - verified runtime `d33596da0c7fb6d8a6a43b620ce11c5bf38c850f`
-- qualitative topographic post-Commit Perspective landscape;
-- cards remain the complete semantic truth in API order;
-- no measured user coordinate, ideology/value position, population density or inferred distance is claimed.
+- qualitative post-Commit Perspective landscape;
+- no measured user coordinate, ideology/value position, density or inferred distance claim.
 
 ### Slice 21 — Sports CALL Scene
 
 - PR #145
 - verified runtime `eb7dbb2f85f5fa955040c5da60c6ab4c928e7da8`
-- provider-neutral `KEFE_SPORTS_SCENE_V1` renderer selected only through `CaseMediaRendition.rendererCode`;
-- representative football scene, not adjudication evidence;
-- no fake VAR/replay/offside/contact/goal-line controls or factual geometry.
+- provider-neutral `KEFE_SPORTS_SCENE_V1` renderer;
+- representative football scene, not adjudication evidence.
 
 ### Slice 22 — Premium Explore Discovery
 
 - PR #147
 - verified runtime `0891ed8a96e2f0c5bc2666e07f9f7e549e5af067`
-- primary Explore discovery moved to shared semantic KEFE surfaces;
-- search/filter/saved behavior, repository order and canonical Case navigation remain unchanged;
-- no ranking, recommendation, popularity, personalization or editorial-priority semantics were introduced.
+- Explore moved to shared semantic KEFE surfaces;
+- no ranking, recommendation, popularity, personalization or editorial-priority semantics.
 
 ### Slice 23 — Decision Flow Shell and State
 
 - PR #149
 - verified runtime `d28ae2d8f3ac831cd73badeb6d4ac90d9404a9b2`
-- primary Case/Decision shell, runtime states, production Case summary and Commit presentation converged onto shared semantic surfaces;
-- production/Preview isolation and Commit First / Blind First behavior remain intact.
+- primary Case/Decision shell and runtime states converged;
+- production/Preview isolation and Commit First / Blind First remain intact.
 
 ### Slice 24 — Reflection State and Semantic Surfaces
 
 - PR #154
 - verified runtime `d24826235ae81638b475cacde150754d75f9c72a`
-- generic Reflection presentation/state convergence completed;
-- non-causal, actor-private and lineage-cursor completion semantics remain intact.
+- generic Reflection state convergence;
+- actor-private, non-causal and lineage-cursor completion semantics remain intact.
 
 ### Slice 25 — Decision Journey Information States
 
 - PR #157
 - verified runtime `1578b27d931e1856655c0734f8d8991817c9c00c`
-- residual Context and Perspective async information states converged as described above;
-- pre-Commit Context, post-Commit Perspective and retry-isolation semantics remain intact.
+- Context and Perspective async information states converged;
+- pre-Commit Context, post-Commit Perspective and retry isolation remain intact.
+
+### Slice 26 — Progress and My KEFE Async States
+
+- PR #160
+- verified runtime `b78d71a26823f757cf1a42fed564c93ef9915bb6`
+- duplicated progress loading/error/retry presentation converged through one shared semantic primitive;
+- My KEFE descriptive/non-inference and account-offer behavior remain intact.
 
 ## 6. Current consumer/product state
 
@@ -206,16 +228,16 @@ plus:
 
 - Activity / Saved Cases continuity;
 - descriptive My KEFE history;
+- bounded progress and optional account-conversion UI;
 - Blind First case-only sharing;
 - bounded post-Commit Consensus and Community Reasons;
 - Settings, locale/theme and Privacy presentation;
-- optional account-conversion UI;
 - first-use onboarding and first-Reveal completion;
 - generic Flow/CaseVersion runtime;
 - Product Preview/production isolation;
 - Turkish/English localization architecture and valid light/dark themes;
 - high-fidelity Signature Balance, representative Atlas globe, qualitative Perspective landscape and representative Sports CALL scene;
-- premium Explore, Decision Flow shell/state, Reflection and information-state convergence.
+- premium Explore, Decision shell/state, Reflection, Context/Perspective and Progress/My KEFE async-state convergence.
 
 Visual/state convergence is not total product completion.
 
@@ -242,7 +264,7 @@ Before describing a future APK as the current implemented phone experience:
 1. record exact runtime SHA, four-workflow evidence, artifact ID/digest and APK hash;
 2. inventory production routes and user-facing surfaces;
 3. inventory Product Preview routes and user-facing surfaces;
-4. classify every implemented consumer surface as production+preview, production-only with reason, preview-only with reason, or conditional/feature-gated with explicit review path/exclusion;
+4. classify every implemented consumer surface as production+preview, production-only, preview-only, or conditional/feature-gated with explicit reason;
 5. record Preview repository/provider/fixture substitutions;
 6. mark external behaviors Preview cannot prove;
 7. ensure no intended review surface silently exists in source but is unreachable in the candidate.
@@ -253,11 +275,11 @@ Route parity alone is not proof of every nested conditional surface. Add reachab
 
 Do not start another slice from chat memory alone.
 
-The next step is a fresh audit on the canonical top branch (`feature/decision-information-state-slice25`) covering:
+The next step is a fresh audit on the canonical top branch (`feature/progress-state-convergence-slice26`) covering:
 
 - remaining primary-screen/component generic Material surfaces or direct screen-local styling;
 - typography and spacing taxonomy consistency;
-- deterministic empty/loading/error/skeleton treatment outside the now-converged primary Decision Journey;
+- deterministic empty/loading/error treatment outside already-converged consumer surfaces;
 - dark/light parity;
 - 360×800 and enlarged-text reachability;
 - Reduce Motion and semantics;
@@ -265,7 +287,7 @@ The next step is a fresh audit on the canonical top branch (`feature/decision-in
 - production/Product Preview surface reachability;
 - overlap with separately governed non-visual architecture priorities.
 
-After the audit, choose one meaningful vertical Slice 26. A material boundary change requires ADR + executable contract before runtime. Ordinary internal refactoring must not manufacture an unnecessary product ADR.
+After the audit, choose one meaningful vertical Slice 27. A material boundary change requires ADR + executable contract before runtime. Ordinary internal refactoring must not manufacture an unnecessary product ADR.
 
 Do not reopen Spatial CALL as factual/interactive evidence until a separate typed spatial-evidence/provenance contract exists. The current Sports scene is representative presentation only.
 
