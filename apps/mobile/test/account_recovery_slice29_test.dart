@@ -320,10 +320,12 @@ void main() {
         themeMode: themeMode,
         textScale: 1.6,
       );
-      final screenScroll = find.descendant(
-        of: find.byKey(const ValueKey('account-conversion-screen')),
-        matching: find.byType(Scrollable),
-      );
+      final screenScroll = find
+          .descendant(
+            of: find.byKey(const ValueKey('account-conversion-screen')),
+            matching: find.byType(Scrollable),
+          )
+          .first;
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('account-identifier')),
         220,
