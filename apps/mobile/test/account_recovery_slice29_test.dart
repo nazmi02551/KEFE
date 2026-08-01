@@ -320,6 +320,15 @@ void main() {
         themeMode: themeMode,
         textScale: 1.6,
       );
+      final screenScroll = find.descendant(
+        of: find.byKey(const ValueKey('account-conversion-screen')),
+        matching: find.byType(Scrollable),
+      );
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('account-identifier')),
+        220,
+        scrollable: screenScroll,
+      );
       await tester.enterText(
         find.byKey(const ValueKey('account-identifier')),
         'person@example.com',
@@ -332,6 +341,11 @@ void main() {
         findsOneWidget,
       );
       expect(find.byKey(const ValueKey('account-error-retry')), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('account-continue-guest')),
+        220,
+        scrollable: screenScroll,
+      );
       expect(
         find.byKey(const ValueKey('account-continue-guest')),
         findsOneWidget,
