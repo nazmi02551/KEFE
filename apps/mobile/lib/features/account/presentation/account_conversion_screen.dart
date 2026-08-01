@@ -276,6 +276,7 @@ class _AccountConversionScreenState
               AccountOperationStateSurface.error(
                 key: const ValueKey('account-error-surface'),
                 message: _failureMessage(strings, state),
+                messageKey: const ValueKey('account-error'),
                 retryLabel: _retryLabel(strings, state.failurePhase!),
                 retryButtonKey: const ValueKey('account-error-retry'),
                 onRetry: controller.retry,
@@ -328,9 +329,7 @@ class _AccountIcon extends StatelessWidget {
       ),
       child: SizedBox.square(
         dimension: 42,
-        child: ExcludeSemantics(
-          child: Icon(icon, size: 21, color: color),
-        ),
+        child: ExcludeSemantics(child: Icon(icon, size: 21, color: color)),
       ),
     );
   }
