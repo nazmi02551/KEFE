@@ -24,8 +24,7 @@ class OnboardingGateScreen extends ConsumerStatefulWidget {
 
 class _OnboardingGateScreenState extends ConsumerState<OnboardingGateScreen> {
   final _pageController = PageController();
-  _OnboardingResolutionState _resolution =
-      _OnboardingResolutionState.resolving;
+  _OnboardingResolutionState _resolution = _OnboardingResolutionState.resolving;
   bool _resolutionInFlight = false;
   int _page = 0;
 
@@ -111,9 +110,7 @@ class _OnboardingGateScreenState extends ConsumerState<OnboardingGateScreen> {
                               isError
                                   ? Icons.cloud_off_outlined
                                   : Icons.hourglass_empty_rounded,
-                              color: isError
-                                  ? visual.attention
-                                  : visual.rules,
+                              color: isError ? visual.attention : visual.rules,
                             ),
                           ),
                           const SizedBox(width: 12),
