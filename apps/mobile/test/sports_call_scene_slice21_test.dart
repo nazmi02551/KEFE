@@ -228,9 +228,7 @@ void main() {
             ),
             productPreviewVisualModeProvider.overrideWithValue(true),
           ],
-          child: const KefeApp(
-            initialLocation: '/case/$_sportsCaseId',
-          ),
+          child: const KefeApp(initialLocation: '/case/$_sportsCaseId'),
         ),
       );
       await _pumpUntilFound(tester, find.byType(SportsCallSceneVisual));
