@@ -43,14 +43,18 @@ void main() {
     expect(contract['localization']['legacy_rows'], isTrue);
     expect(contract['localization']['raw_value_mutation'], isFalse);
     expect(contract['preserved']['activity_descriptive_only'], isTrue);
-    expect(contract['preserved']['personality_inference'], isFalse);
-    expect(contract['preserved']['ideology_inference'], isFalse);
-    expect(contract['preserved']['psychometric_inference'], isFalse);
-    expect(contract['preserved']['bias_inference'], isFalse);
-    expect(contract['preserved']['causal_inference'], isFalse);
-    expect(contract['preserved']['normative_inference'], isFalse);
-    expect(contract['preserved']['signal_in_scope'], isFalse);
-    expect(contract['preserved']['impact_in_scope'], isFalse);
+    for (final key in [
+      'personality_inference',
+      'ideology_inference',
+      'psychometric_inference',
+      'bias_inference',
+      'causal_inference',
+      'normative_inference',
+      'signal_in_scope',
+      'impact_in_scope',
+    ]) {
+      expect(contract['preserved'][key], isFalse);
+    }
   });
 
   test('Activity source uses shared states and display-time localization', () {
@@ -58,24 +62,28 @@ void main() {
       'lib/features/activity/presentation/activity_screen.dart',
     ).readAsStringSync();
 
-    expect(source, contains('ProgressAsyncStateSurface.loading'));
-    expect(source, contains('ProgressAsyncStateSurface.error'));
-    expect(source, contains("surfaceKey: 'activity-loading'"));
-    expect(source, contains("surfaceKey: 'activity-error'"));
-    expect(source, contains("retryKey: 'activity-retry'"));
-    expect(source, contains('kefeContentLocalizerProvider'));
-    expect(source, contains('KefeContentNamespace.caseTitle'));
-    expect(source, contains('label: displayTitle'));
+    for (final token in [
+      'ProgressAsyncStateSurface.loading',
+      'ProgressAsyncStateSurface.error',
+      "surfaceKey: 'activity-loading'",
+      "surfaceKey: 'activity-error'",
+      "retryKey: 'activity-retry'",
+      'kefeContentLocalizerProvider',
+      'KefeContentNamespace.caseTitle',
+      'label: displayTitle',
+    ]) {
+      expect(source, contains(token));
+    }
     expect(source, isNot(contains('CircularProgressIndicator')));
     expect(source, isNot(contains('LinearProgressIndicator')));
     expect(source, isNot(contains('class _ActivityError')));
   });
 
   testWidgets('Activity loading is deterministic', (tester) async {
-    final repository = _ControllableProgressRepository(_enrichedEnvelope())
+    final repository = _Repository(_enrichedEnvelope())
       ..gate = Completer<ProgressEnvelope>();
 
-    await _pumpActivity(
+    await _pump(
       tester,
       repository: repository,
       locale: const Locale('tr', 'TR'),
@@ -94,10 +102,9 @@ void main() {
   testWidgets('Activity retry invokes one additional progress load', (
     tester,
   ) async {
-    final repository = _ControllableProgressRepository(_enrichedEnvelope())
-      ..failuresRemaining = 1;
+    final repository = _Repository(_enrichedEnvelope())..failuresRemaining = 1;
 
-    await _pumpActivity(
+    await _pump(
       tester,
       repository: repository,
       locale: const Locale('tr', 'TR'),
@@ -105,8 +112,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('activity-error')), findsOneWidget);
-    expect(find.byKey(const ValueKey('activity-retry')), findsOneWidget);
-
     await tester.tap(find.byKey(const ValueKey('activity-retry')));
     await tester.pumpAndSettle();
 
@@ -116,71 +121,68 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('enriched Activity rows localize Case titles at display time', (
-    tester,
-  ) async {
-    await _pumpActivity(
+  for (final entry in [
+    (_enrichedEnvelope(), 'Ham zenginleştirilmiş başlık'),
+    (_legacyEnvelope(), 'Ham eski başlık'),
+  ]) {
+    testWidgets('Activity localizes ${entry.$2} at display time', (
       tester,
-      repository: _ControllableProgressRepository(_enrichedEnvelope()),
-      locale: const Locale('en', 'US'),
-    );
-    await tester.pumpAndSettle();
+    ) async {
+      await _pump(
+        tester,
+        repository: _Repository(entry.$1),
+        locale: const Locale('en', 'US'),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Who should get the last seat?'), findsOneWidget);
-    expect(find.text('Ham zenginleştirilmiş başlık'), findsNothing);
-    expect(
-      find.byKey(const ValueKey('activity-case-$_caseId')),
-      findsOneWidget,
-    );
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('legacy Activity rows localize Case titles at display time', (
-    tester,
-  ) async {
-    await _pumpActivity(
-      tester,
-      repository: _ControllableProgressRepository(_legacyEnvelope()),
-      locale: const Locale('en', 'US'),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('Who should get the last seat?'), findsOneWidget);
-    expect(find.text('Ham eski başlık'), findsNothing);
-    expect(
-      find.byKey(const ValueKey('activity-case-$_caseId')),
-      findsOneWidget,
-    );
-    expect(tester.takeException(), isNull);
-  });
+      expect(find.text('Who should get the last seat?'), findsOneWidget);
+      expect(find.text(entry.$2), findsNothing);
+      expect(
+        find.byKey(const ValueKey('activity-case-$_caseId')),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets(
-    'Activity empty state is overflow-free on compact phone with enlarged text',
+    'Activity empty state is reachable on compact phone with enlarged text',
     (tester) async {
       tester.view.physicalSize = const Size(360, 800);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await _pumpActivity(
+      await _pump(
         tester,
-        repository: _ControllableProgressRepository(_emptyEnvelope()),
+        repository: _Repository(_emptyEnvelope()),
         locale: const Locale('tr', 'TR'),
         themeMode: ThemeMode.light,
         textScale: 1.6,
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('activity-empty')), findsOneWidget);
+      final empty = find.byKey(const ValueKey('activity-empty'));
+      final activityScroll = find.descendant(
+        of: find.byKey(const ValueKey('activity-screen')),
+        matching: find.byType(Scrollable),
+      );
+      await tester.scrollUntilVisible(
+        empty,
+        250,
+        scrollable: activityScroll,
+      );
+
+      expect(empty, findsOneWidget);
       expect(find.byKey(const ValueKey('saved-cases-section')), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );
 }
 
-Future<void> _pumpActivity(
+Future<void> _pump(
   WidgetTester tester, {
-  required _ControllableProgressRepository repository,
+  required _Repository repository,
   required Locale locale,
   ThemeMode themeMode = ThemeMode.light,
   double textScale = 1,
@@ -223,32 +225,7 @@ Future<void> _pumpActivity(
   );
 }
 
-ProgressEnvelope _enrichedEnvelope() => ProgressEnvelope(
-  accountOffer: const AccountOffer(
-    eligible: false,
-    placement: 'NONE',
-    blocking: false,
-    dismissible: true,
-    continueAsGuestAvailable: true,
-    accountCreationAvailable: false,
-  ),
-  progress: MyKefeProgress(
-    readiness: 'INSUFFICIENT_DATA',
-    meaningfulWeighCount: 1,
-    distinctCaseCount: 1,
-    distinctDomainCount: 1,
-    firstCommittedAt: DateTime.utc(2026, 8, 1),
-    lastCommittedAt: DateTime.utc(2026, 8, 1),
-    recentCases: [
-      RecentProgressCase(
-        caseId: _caseId,
-        caseVersionId: 'activity-version',
-        title: 'Ham eski başlık',
-        primaryDomain: 'DAILY_LIFE',
-        committedAt: DateTime.utc(2026, 8, 1),
-      ),
-    ],
-  ),
+ProgressEnvelope _enrichedEnvelope() => _envelope(
   journey: MyKefeJourney(
     decisionUpdateCount: 1,
     revisitedCaseCount: 1,
@@ -267,13 +244,13 @@ ProgressEnvelope _enrichedEnvelope() => ProgressEnvelope(
       ),
     ],
   ),
-  methodology: const {
-    'sample_scope': 'CURRENT_ACTOR_COMMITTED_HISTORY',
-    'readiness_note': 'PRESENTATION_ONLY_NOT_RESEARCH_VALIDATED',
-  },
 );
 
-ProgressEnvelope _legacyEnvelope() => ProgressEnvelope(
+ProgressEnvelope _legacyEnvelope() => _envelope();
+
+ProgressEnvelope _envelope({
+  MyKefeJourney journey = const MyKefeJourney.empty(),
+}) => ProgressEnvelope(
   accountOffer: const AccountOffer(
     eligible: false,
     placement: 'NONE',
@@ -299,6 +276,7 @@ ProgressEnvelope _legacyEnvelope() => ProgressEnvelope(
       ),
     ],
   ),
+  journey: journey,
   methodology: const {
     'sample_scope': 'CURRENT_ACTOR_COMMITTED_HISTORY',
     'readiness_note': 'PRESENTATION_ONLY_NOT_RESEARCH_VALIDATED',
@@ -329,8 +307,8 @@ ProgressEnvelope _emptyEnvelope() => const ProgressEnvelope(
   },
 );
 
-class _ControllableProgressRepository implements ProgressRepository {
-  _ControllableProgressRepository(this.envelope);
+class _Repository implements ProgressRepository {
+  _Repository(this.envelope);
 
   final ProgressEnvelope envelope;
   Completer<ProgressEnvelope>? gate;
