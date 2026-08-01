@@ -10,6 +10,8 @@ import '../../../core/localization/kefe_strings.dart';
 import '../../decision/application/decision_controller.dart';
 import '../application/onboarding_controller.dart';
 
+enum _OnboardingResolutionState { resolving, ready, error }
+
 class OnboardingGateScreen extends ConsumerStatefulWidget {
   const OnboardingGateScreen({this.reviewMode = false, super.key});
 
@@ -22,7 +24,9 @@ class OnboardingGateScreen extends ConsumerStatefulWidget {
 
 class _OnboardingGateScreenState extends ConsumerState<OnboardingGateScreen> {
   final _pageController = PageController();
-  bool _ready = false;
+  _OnboardingResolutionState _resolution =
+      _OnboardingResolutionState.resolving;
+  bool _resolutionInFlight = false;
   int _page = 0;
 
   @override
@@ -32,21 +36,34 @@ class _OnboardingGateScreenState extends ConsumerState<OnboardingGateScreen> {
   }
 
   Future<void> _resolveState() async {
+    if (_resolutionInFlight) return;
     if (widget.reviewMode) {
       if (!mounted) return;
-      setState(() => _ready = true);
+      setState(() => _resolution = _OnboardingResolutionState.ready);
       return;
     }
 
-    final completed = await ref
-        .read(onboardingControllerProvider)
-        .isCompleted();
-    if (!mounted) return;
-    if (completed) {
-      context.go('/explore');
-      return;
+    _resolutionInFlight = true;
+    if (mounted && _resolution != _OnboardingResolutionState.resolving) {
+      setState(() => _resolution = _OnboardingResolutionState.resolving);
     }
-    setState(() => _ready = true);
+
+    try {
+      final completed = await ref
+          .read(onboardingControllerProvider)
+          .isCompleted();
+      if (!mounted) return;
+      if (completed) {
+        context.go('/explore');
+        return;
+      }
+      setState(() => _resolution = _OnboardingResolutionState.ready);
+    } on Object {
+      if (!mounted) return;
+      setState(() => _resolution = _OnboardingResolutionState.error);
+    } finally {
+      _resolutionInFlight = false;
+    }
   }
 
   @override
@@ -60,34 +77,69 @@ class _OnboardingGateScreenState extends ConsumerState<OnboardingGateScreen> {
     final strings = KefeStrings.of(context);
     final visual = context.kefeVisual;
 
-    if (!_ready) {
+    if (_resolution != _OnboardingResolutionState.ready) {
+      final isError = _resolution == _OnboardingResolutionState.error;
       return Scaffold(
         backgroundColor: visual.canvas,
         body: SafeArea(
           child: Center(
-            child: Semantics(
-              liveRegion: true,
-              label: strings.loading,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
               child: KefeSurface(
+                key: ValueKey(
+                  isError ? 'onboarding-error' : 'onboarding-loading',
+                ),
                 tone: KefeSurfaceTone.raised,
-                accent: visual.rules,
+                accent: isError ? visual.attention : visual.rules,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 16,
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.hourglass_empty_rounded, color: visual.rules),
-                    const SizedBox(width: 12),
-                    Text(
-                      strings.loading,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: visual.mutedForeground,
-                        fontWeight: FontWeight.w700,
+                child: Semantics(
+                  liveRegion: true,
+                  label: isError ? strings.genericError : strings.loading,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ExcludeSemantics(
+                            child: Icon(
+                              isError
+                                  ? Icons.cloud_off_outlined
+                                  : Icons.hourglass_empty_rounded,
+                              color: isError
+                                  ? visual.attention
+                                  : visual.rules,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Flexible(
+                            child: Text(
+                              isError ? strings.genericError : strings.loading,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: visual.mutedForeground,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.4,
+                                  ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                      if (isError) ...[
+                        const SizedBox(height: 14),
+                        OutlinedButton(
+                          key: const ValueKey('onboarding-retry'),
+                          onPressed: _resolveState,
+                          child: Text(strings.retry),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ),
             ),
