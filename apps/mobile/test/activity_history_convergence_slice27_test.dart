@@ -128,7 +128,10 @@ void main() {
 
     expect(find.text('Who should get the last seat?'), findsOneWidget);
     expect(find.text('Ham zenginleştirilmiş başlık'), findsNothing);
-    expect(find.byKey(const ValueKey('activity-case-$_caseId')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('activity-case-$_caseId')),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -144,7 +147,10 @@ void main() {
 
     expect(find.text('Who should get the last seat?'), findsOneWidget);
     expect(find.text('Ham eski başlık'), findsNothing);
-    expect(find.byKey(const ValueKey('activity-case-$_caseId')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('activity-case-$_caseId')),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 
