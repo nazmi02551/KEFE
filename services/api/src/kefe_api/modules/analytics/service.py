@@ -106,7 +106,10 @@ class AnalyticsEventProjector:
                     )
                 cls._reject_forbidden(child)
             return
-        if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        if isinstance(value, Sequence) and not isinstance(
+            value,
+            (str, bytes, bytearray),
+        ):
             for child in value:
                 cls._reject_forbidden(child)
 
