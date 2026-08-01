@@ -78,9 +78,7 @@ class SavedCasesStateSurface extends StatelessWidget {
             : Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ExcludeSemantics(
-                    child: Icon(icon, size: 18, color: accent),
-                  ),
+                  ExcludeSemantics(child: Icon(icon, size: 18, color: accent)),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
