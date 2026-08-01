@@ -1,0 +1,102 @@
+{
+  "contract": "account-recovery-slice29",
+  "version": 1,
+  "issue": 167,
+  "parent_pr": 165,
+  "scope": {
+    "mobile_controller_change": true,
+    "mobile_presentation_change": true,
+    "localization_change": true,
+    "repository_interface_change": false,
+    "http_endpoint_change": false,
+    "api_change": false,
+    "schema_change": false,
+    "migration_change": false,
+    "route_change": false,
+    "account_offer_change": false,
+    "otp_policy_change": false,
+    "credential_store_change": false,
+    "production_preview_isolation_change": false
+  },
+  "operations": {
+    "request_otp": {
+      "active_ui_state": "requesting",
+      "status_key": "account-requesting",
+      "failure_phase": "requestOtp",
+      "retry_action": "requestOtp",
+      "preserve": ["channel", "identifier"]
+    },
+    "verify_otp": {
+      "active_ui_state": "verifying",
+      "status_key": "account-verifying",
+      "failure_phase": "verifyOtp",
+      "retry_action": "resumeCodeEntry",
+      "preserve": ["channel", "identifier", "challenge"]
+    },
+    "merge_guest": {
+      "active_ui_state": "merging",
+      "status_key": "account-merging",
+      "failure_phase": "mergeGuest",
+      "retry_action": "mergeGuestWithPrivatePendingVerification",
+      "preserve": ["channel", "identifier", "challenge", "privatePendingVerification"]
+    }
+  },
+  "error_surface": {
+    "surface_key": "account-error-surface",
+    "message_key": "account-error",
+    "retry_key": "account-error-retry",
+    "semantic_live_region": true,
+    "decorative_icons_excluded": true
+  },
+  "security": {
+    "verification_token_in_account_state": false,
+    "verification_token_in_widget_tree": false,
+    "verification_token_persisted": false,
+    "verification_token_serialized": false,
+    "verification_token_logged": false,
+    "verification_token_clipboard": false,
+    "controller_private_memory_only": true,
+    "clear_on_success": true,
+    "clear_on_new_request": true,
+    "clear_on_full_fallback": true
+  },
+  "guards": {
+    "duplicate_request_ignored": true,
+    "duplicate_verify_ignored": true,
+    "duplicate_merge_ignored": true
+  },
+  "preserved": {
+    "guest_continuation": true,
+    "completed_conversion_semantics": true,
+    "merged_existing_history_semantics": true,
+    "repository_method_signatures": true,
+    "preview_fixture_not_production_fallback": true,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "bias_inference": false,
+    "causal_inference": false,
+    "normative_inference": false,
+    "signal_in_scope": false,
+    "impact_in_scope": false
+  },
+  "required_tests": [
+    "contract_guard",
+    "request_failure_retry_preserves_identifier",
+    "verification_failure_returns_to_code_entry_without_new_request",
+    "merge_failure_retries_merge_without_new_request_or_verification",
+    "duplicate_action_guards",
+    "verification_token_not_in_state_or_presentation",
+    "complete_flow_continuity",
+    "compact_360x800",
+    "text_scale_1_6",
+    "light_theme",
+    "dark_theme"
+  ],
+  "required_workflows": [
+    "API CI",
+    "Mobile CI",
+    "MVP Beta Gates",
+    "Global Readiness"
+  ]
+}
