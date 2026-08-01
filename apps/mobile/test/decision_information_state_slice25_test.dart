@@ -71,10 +71,7 @@ void main() {
     expect(perspectiveSource, contains("ValueKey('perspective-loading')"));
     expect(perspectiveSource, contains("ValueKey('perspective-error')"));
     expect(perspectiveSource, contains("ValueKey('perspective-retry')"));
-    expect(
-      perspectiveSource,
-      contains("ValueKey('perspective-unavailable')"),
-    );
+    expect(perspectiveSource, contains("ValueKey('perspective-unavailable')"));
     expect(contextSource, isNot(contains('LinearProgressIndicator')));
   });
 
@@ -101,19 +98,19 @@ void main() {
     expect(find.text('Temel bağlam'), findsOneWidget);
     expect(find.byKey(const ValueKey('context-loading')), findsNothing);
 
-    repository.failContext = true;
-    await _pumpContext(tester, repository: repository);
+    final errorRepository = _InformationStateRepository()..failContext = true;
+    await _pumpContext(tester, repository: errorRepository);
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('context-error')), findsOneWidget);
     expect(find.byKey(const ValueKey('context-retry')), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
 
-    repository.failContext = false;
+    errorRepository.failContext = false;
     await tester.tap(find.byKey(const ValueKey('context-retry')));
     await tester.pumpAndSettle();
 
-    expect(repository.contextCalls, greaterThanOrEqualTo(3));
+    expect(errorRepository.contextCalls, 2);
     expect(find.text('Temel bağlam'), findsOneWidget);
     expect(find.byKey(const ValueKey('context-error')), findsNothing);
     expect(tester.takeException(), isNull);
