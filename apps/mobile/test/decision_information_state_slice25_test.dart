@@ -107,6 +107,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
+        retry: (_, _) => null,
         overrides: [
           contextSnapshotProvider(_caseVersionId).overrideWith((ref) async {
             attempts += 1;
