@@ -9,6 +9,7 @@ import '../../../core/localization/kefe_strings.dart';
 import '../../saved_cases/presentation/saved_cases_section.dart';
 import '../application/progress_controller.dart';
 import '../domain/progress_models.dart';
+import 'progress_async_state_surface.dart';
 import 'progress_strings.dart';
 
 class MyKefeJourneyScreen extends ConsumerStatefulWidget {
@@ -47,40 +48,18 @@ class _MyKefeJourneyScreenState extends ConsumerState<MyKefeJourneyScreen> {
             const SavedCasesSection(),
             ...switch (state.uiState) {
               ProgressUiState.idle || ProgressUiState.loading => [
-                KefeSurface(
-                  child: Semantics(
-                    liveRegion: true,
-                    label: strings.progressLoading,
-                    child: Row(
-                      children: [
-                        const SizedBox.square(
-                          dimension: 18,
-                          child: Icon(Icons.hourglass_top_rounded, size: 18),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(child: Text(strings.progressLoading)),
-                      ],
-                    ),
-                  ),
+                ProgressAsyncStateSurface.loading(
+                  surfaceKey: 'my-kefe-loading',
+                  message: strings.progressLoading,
                 ),
               ],
               ProgressUiState.errorRetryable => [
-                KefeSurface(
-                  tone: KefeSurfaceTone.raised,
-                  accent: context.kefeVisual.attention,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(strings.progressUnavailable),
-                      const SizedBox(height: 12),
-                      OutlinedButton(
-                        onPressed: ref
-                            .read(progressControllerProvider.notifier)
-                            .load,
-                        child: Text(strings.progressRetry),
-                      ),
-                    ],
-                  ),
+                ProgressAsyncStateSurface.error(
+                  surfaceKey: 'my-kefe-error',
+                  retryKey: 'my-kefe-retry',
+                  message: strings.progressUnavailable,
+                  retryLabel: strings.progressRetry,
+                  onRetry: ref.read(progressControllerProvider.notifier).load,
                 ),
               ],
               ProgressUiState.ready => _ready(
@@ -110,6 +89,7 @@ class _MyKefeJourneyScreenState extends ConsumerState<MyKefeJourneyScreen> {
         if (preview) _Notice(text: strings.journeyPreviewNotice),
         if (preview) const SizedBox(height: 14),
         KefeSurface(
+          key: const ValueKey('my-kefe-empty'),
           tone: KefeSurfaceTone.raised,
           child: Text(strings.journeyEmpty),
         ),
