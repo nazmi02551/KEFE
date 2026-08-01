@@ -290,10 +290,7 @@ class _ReflectionStepCardState extends ConsumerState<ReflectionStepCard> {
                       color: visual.gold.withValues(alpha: 0.24),
                     ),
                   ),
-                  child: Icon(
-                    Icons.route_rounded,
-                    color: visual.goldSoft,
-                  ),
+                  child: Icon(Icons.route_rounded, color: visual.goldSoft),
                 ),
               ),
               const SizedBox(width: 12),
@@ -507,10 +504,7 @@ class _ReflectionLoadingState extends StatelessWidget {
         child: Row(
           children: [
             ExcludeSemantics(
-              child: Icon(
-                Icons.hourglass_top_rounded,
-                color: visual.goldSoft,
-              ),
+              child: Icon(Icons.hourglass_top_rounded, color: visual.goldSoft),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -699,10 +693,11 @@ class _DecisionJourneyGraphic extends StatelessWidget {
                       const SizedBox(width: 5),
                       Text(
                         '${model.interventionCount}',
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: visual.mutedForeground,
-                          fontWeight: FontWeight.w800,
-                        ),
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: visual.mutedForeground,
+                              fontWeight: FontWeight.w800,
+                            ),
                       ),
                     ],
                   ),
