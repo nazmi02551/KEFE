@@ -13,10 +13,8 @@ extension AccountRecoveryStrings on KefeStrings {
     placeholders: placeholders,
   );
 
-  String get accountRequesting =>
-      _accountRecoveryText('account.requesting');
-  String get accountVerifying =>
-      _accountRecoveryText('account.verifying');
+  String get accountRequesting => _accountRecoveryText('account.requesting');
+  String get accountVerifying => _accountRecoveryText('account.verifying');
   String get accountMerging => _accountRecoveryText('account.merging');
 
   String accountRequestFailure(String code) => _accountRecoveryText(
@@ -36,8 +34,6 @@ extension AccountRecoveryStrings on KefeStrings {
 
   String get accountRetryRequest =>
       _accountRecoveryText('account.retry_request');
-  String get accountRetryCode =>
-      _accountRecoveryText('account.retry_code');
-  String get accountRetryMerge =>
-      _accountRecoveryText('account.retry_merge');
+  String get accountRetryCode => _accountRecoveryText('account.retry_code');
+  String get accountRetryMerge => _accountRecoveryText('account.retry_merge');
 }
