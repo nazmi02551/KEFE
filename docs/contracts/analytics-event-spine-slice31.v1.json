@@ -140,12 +140,7 @@
       "privacy_class": "PRODUCT_ANALYTICS",
       "retention_class": "STANDARD_13_MONTHS",
       "metric_families": ["QUALITY"],
-      "required_provenance": [
-        "actor_id",
-        "session_id",
-        "case_version_id",
-        "contribution_class"
-      ],
+      "required_provenance": ["session_id"],
       "allowed_payload_fields": [
         "revision_id",
         "revision_no",
