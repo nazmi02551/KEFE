@@ -83,7 +83,9 @@ jobs:
       - name: Install API
         run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
       - name: Migrate PostgreSQL to global head
-        run: alembic upgrade head
+        run: |
+          alembic heads --verbose
+          alembic upgrade head
       - name: Seed canonical demo and beta catalog
         run: |
           python -m kefe_api.infrastructure.seed_demo

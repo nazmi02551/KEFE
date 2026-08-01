@@ -6,8 +6,15 @@ import time
 
 from kefe_api.core.settings import get_settings
 from kefe_api.infrastructure.db import build_engine
-from kefe_api.infrastructure.event_transports import LoggingEventTransport
+from kefe_api.infrastructure.event_transports import (
+    CompositeEventTransport,
+    LoggingEventTransport,
+)
+from kefe_api.infrastructure.postgres_analytics import PostgresAnalyticsEventStore
 from kefe_api.infrastructure.postgres_outbox import PostgresOutboxStore
+from kefe_api.modules.analytics.registry import default_analytics_registry
+from kefe_api.modules.analytics.service import AnalyticsEventProjector
+from kefe_api.modules.analytics.transport import AnalyticsProjectionTransport
 from kefe_api.modules.events.service import OutboxPublisher, RetryPolicy
 
 logger = logging.getLogger("kefe.outbox")
@@ -30,9 +37,18 @@ def build_publisher() -> OutboxPublisher:
         raise RuntimeError(f"Unsupported event transport: {settings.event_transport}")
 
     engine = build_engine(settings.database_url)
+    analytics_transport = AnalyticsProjectionTransport(
+        projector=AnalyticsEventProjector(
+            registry=default_analytics_registry(),
+            producer_version=settings.api_version,
+        ),
+        store=PostgresAnalyticsEventStore(engine),
+    )
     return OutboxPublisher(
         store=PostgresOutboxStore(engine),
-        transport=LoggingEventTransport(),
+        transport=CompositeEventTransport(
+            (analytics_transport, LoggingEventTransport())
+        ),
         retry_policy=RetryPolicy(
             base_seconds=settings.outbox_retry_base_seconds,
             max_seconds=settings.outbox_retry_max_seconds,
