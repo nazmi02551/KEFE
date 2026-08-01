@@ -46,7 +46,7 @@ def test_unknown_source_event_is_ignored() -> None:
     assert _projector().project(_source("unknown.event", {})) is None
 
 
-def test_weigh_started_extracts_typed_provenance_and_drops_identity_payload() -> None:
+def test_weigh_start_extracts_typed_provenance() -> None:
     actor_id = uuid4()
     case_version_id = uuid4()
     session_id = uuid4()
@@ -70,7 +70,7 @@ def test_weigh_started_extracts_typed_provenance_and_drops_identity_payload() ->
     assert projected.payload == {}
 
 
-def test_commit_is_core_pre_result_and_keeps_only_allowlisted_facts() -> None:
+def test_commit_keeps_only_allowlisted_facts() -> None:
     projected = _projector().project(
         _source(
             "weigh.committed",
@@ -93,7 +93,7 @@ def test_commit_is_core_pre_result_and_keeps_only_allowlisted_facts() -> None:
     assert projected.metric_families == ("ACTIVATION", "QUALITY")
 
 
-def test_forbidden_payload_key_fails_closed_even_when_nested() -> None:
+def test_forbidden_nested_payload_key_fails_closed() -> None:
     with pytest.raises(AnalyticsProjectionError, match="reason_text"):
         _projector().project(
             _source(
@@ -134,7 +134,7 @@ def test_projection_identity_and_store_are_idempotent() -> None:
     assert store.list_by_source_event(source.id) == (first,)
 
 
-def test_composite_transport_retries_without_duplicate_analytics_fact() -> None:
+def test_composite_retry_does_not_duplicate_analytics() -> None:
     source = _source(
         "perspective.viewed",
         {
