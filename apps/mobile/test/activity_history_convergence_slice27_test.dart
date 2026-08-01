@@ -167,11 +167,7 @@ void main() {
         of: find.byKey(const ValueKey('activity-screen')),
         matching: find.byType(Scrollable),
       );
-      await tester.scrollUntilVisible(
-        empty,
-        250,
-        scrollable: activityScroll,
-      );
+      await tester.scrollUntilVisible(empty, 250, scrollable: activityScroll);
 
       expect(empty, findsOneWidget);
       expect(find.byKey(const ValueKey('saved-cases-section')), findsOneWidget);
