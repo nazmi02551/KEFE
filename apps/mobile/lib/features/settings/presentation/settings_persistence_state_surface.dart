@@ -35,27 +35,35 @@ class SettingsPersistenceStateSurface extends StatelessWidget {
         accent: accent,
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
         borderRadius: 18,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ExcludeSemantics(child: Icon(icon, color: accent, size: 22)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                message,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: visual.onSurfaceStrong,
-                  fontWeight: FontWeight.w700,
-                  height: 1.35,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ExcludeSemantics(child: Icon(icon, color: accent, size: 22)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    message,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: visual.onSurfaceStrong,
+                      fontWeight: FontWeight.w700,
+                      height: 1.35,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
             if (onRetry != null && retryLabel != null) ...[
-              const SizedBox(width: 10),
-              OutlinedButton(
-                key: retryKey,
-                onPressed: onRetry,
-                child: Text(retryLabel!),
+              const SizedBox(height: 10),
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: OutlinedButton(
+                  key: retryKey,
+                  onPressed: onRetry,
+                  child: Text(retryLabel!),
+                ),
               ),
             ],
           ],
