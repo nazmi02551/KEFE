@@ -275,10 +275,7 @@ class _UnavailableState extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ExcludeSemantics(
-              child: Icon(
-                Icons.info_outline_rounded,
-                color: visual.empathy,
-              ),
+              child: Icon(Icons.info_outline_rounded, color: visual.empathy),
             ),
             const SizedBox(width: 10),
             Expanded(
