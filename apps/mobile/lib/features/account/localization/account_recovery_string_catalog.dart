@@ -19,8 +19,7 @@ abstract final class AccountRecoveryStringCatalog {
       'account.requesting': 'Doğrulama kodu gönderiliyor…',
       'account.verifying': 'Kod doğrulanıyor…',
       'account.merging': 'Mevcut geçmişin korunuyor…',
-      'account.request_failure':
-          'Doğrulama kodu gönderilemedi · {code}',
+      'account.request_failure': 'Doğrulama kodu gönderilemedi · {code}',
       'account.verify_failure': 'Bu kod doğrulanamadı · {code}',
       'account.merge_failure':
           'Kod doğrulandı ancak geçmiş koruması tamamlanamadı · {code}',
