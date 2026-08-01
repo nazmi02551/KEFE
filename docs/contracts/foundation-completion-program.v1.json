@@ -1,0 +1,171 @@
+{
+  "contract_version": "1.0.0",
+  "updated_at": "2026-08-02",
+  "status": "working_execution_contract",
+  "source_issue": 180,
+  "purpose": "Define measurable infrastructure-completion waves that support the full KEFE capability portfolio without parallel product runtimes or silent roadmap loss.",
+  "authority": {
+    "published_documentation": "KEFE Documentation Ecosystem v3.4 CURRENT",
+    "working_documentation": "KEFE Documentation Ecosystem v3.5 WORKING",
+    "capability_portfolio": "docs/roadmap/capability-portfolio.v1.tsv",
+    "does_not_promote_working_to_current": true,
+    "does_not_promote_proposals_or_tests": true
+  },
+  "global_invariants": [
+    "COMMIT_FIRST",
+    "PRE_RESULT_ISOLATION",
+    "IMMUTABLE_PUBLISHED_CASE_VERSION",
+    "CASE_AGNOSTIC_COMPOSABLE_RUNTIME",
+    "PREVIEW_PRODUCTION_ISOLATION",
+    "MY_KEFE_DESCRIPTIVE_ONLY",
+    "COLLECTIVE_RESULT_IS_NOT_AUTOMATICALLY_SIGNAL",
+    "AI_IS_NOT_TRUTH_OR_PUBLICATION_AUTHORITY",
+    "PROPOSAL_ACCEPTANCE_IS_NOT_AUTHORING_APPROVAL",
+    "NO_AUTOMATIC_REVIEW_APPROVAL_OR_PUBLICATION"
+  ],
+  "definition_of_foundation_complete": {
+    "all_required_waves_must_be_complete": true,
+    "required_waves": ["F0", "F1", "F2", "F3", "F4", "F5", "F6", "F7"],
+    "capability_status_must_match_evidence": true,
+    "unresolved_external_or_human_gates_must_remain_explicit": true,
+    "future_feature_work_may_start_before_all_waves_complete": true,
+    "but_feature_must_not_bypass_its_required_wave": true
+  },
+  "waves": [
+    {
+      "id": "F0",
+      "name": "Delivery-line and contract convergence",
+      "capabilities": ["CAP-055", "CAP-057", "CAP-058", "CAP-059", "CAP-061", "CAP-062", "CAP-065", "CAP-126"],
+      "goal": "Make active-stack adoption boundaries explicit and prevent excluded or historical implementations from being treated as current runtime evidence.",
+      "exit_criteria": [
+        "PR_68_COMPATIBILITY_ASSESSED_AGAINST_ACTIVE_TOP",
+        "ADR_0028_AND_ADR_0029_BOUNDARIES_PRESERVED",
+        "EXACT_RUNTIME_SHA_DISTINGUISHED_FROM_DOCS_HEAD",
+        "NEXT_RUNTIME_SLICE_HAS_DETERMINISTIC_SCOPE",
+        "CAPABILITY_PORTFOLIO_AND_FOUNDATION_CONTRACT_VALIDATE"
+      ],
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": "F1",
+      "name": "Provider-neutral content supply and reviewed proposal runtime",
+      "capabilities": ["CAP-055", "CAP-056", "CAP-057", "CAP-058", "CAP-059", "CAP-060", "CAP-061"],
+      "depends_on": ["F0"],
+      "exit_criteria": [
+        "ACTIVE_LINE_INGESTION_RUNTIME_ADOPTED_OR_REIMPLEMENTED_BY_CONTRACT",
+        "PROVIDER_TYPES_STOP_AT_ADAPTERS",
+        "PROPOSALS_IMMUTABLE_AND_REPLAY_SAFE",
+        "TERMINAL_HUMAN_REVIEW_DURABLE",
+        "NO_AUTONOMOUS_CANONICAL_MUTATION",
+        "MEMORY_AND_POSTGRES_EVIDENCE",
+        "API_CI_EXACT_SHA_PASS"
+      ],
+      "status": "PENDING"
+    },
+    {
+      "id": "F2",
+      "name": "Editorial Projection into existing Content Authoring",
+      "capabilities": ["CAP-062", "CAP-065"],
+      "depends_on": ["F1"],
+      "binding_contracts": ["docs/adr/0029-reviewed-candidate-editorial-projection.md", "docs/contracts/editorial-projection.v1.yaml"],
+      "exit_criteria": [
+        "ACCEPTED_CANDIDATE_AND_DEPENDENCIES_VALIDATED",
+        "EXPLICIT_VERSIONED_PROJECTION_PROFILE",
+        "EXPLICIT_FLOW_SELECTION_NO_HIDDEN_INFERENCE",
+        "ATOMIC_DRAFT_AND_PROJECTION_RECORD",
+        "IDEMPOTENT_RETRY",
+        "DRAFT_ONLY_NO_REVIEW_APPROVAL_PUBLISH_SHORTCUT",
+        "MEMORY_AND_POSTGRES_EVIDENCE",
+        "API_CI_EXACT_SHA_PASS"
+      ],
+      "status": "PENDING"
+    },
+    {
+      "id": "F3",
+      "name": "Admin authoring, review, moderation and media operations",
+      "capabilities": ["CAP-063", "CAP-064", "CAP-065", "CAP-066", "CAP-067", "CAP-068", "CAP-094", "CAP-123"],
+      "depends_on": ["F2"],
+      "exit_criteria": [
+        "ONE_EXISTING_CONTENT_AUTHORING_AGGREGATE_REUSED",
+        "CASE_BUILDER_SCHEMA_DRIVEN",
+        "FLOW_COMPOSER_VERSIONED",
+        "RISK_AND_MAKER_CHECKER_GATES_ENFORCED",
+        "MODERATION_AND_AUDIT_OPERABLE",
+        "MEDIA_PROVIDER_NEUTRAL_AND_PREVIEW_ISOLATED",
+        "ADMIN_OPERATIONAL_REPORTS_AVAILABLE"
+      ],
+      "status": "PENDING"
+    },
+    {
+      "id": "F4",
+      "name": "Consumer identity, privacy, reachability and production readiness",
+      "capabilities": ["CAP-069", "CAP-070", "CAP-072", "CAP-073", "CAP-079", "CAP-084", "CAP-085", "CAP-092", "CAP-093", "CAP-095"],
+      "exit_criteria": [
+        "REAL_AUTH_AND_OTP_PROVIDER_BOUNDARY_OPERABLE",
+        "GUEST_ACCOUNT_MERGE_IDEMPOTENT",
+        "EXPORT_AND_DELETE_LIFECYCLE_IMPLEMENTED",
+        "PRODUCTION_AND_PREVIEW_SURFACE_REACHABILITY_INVENTORIED",
+        "ACCESSIBILITY_AND_LOW_END_GATES_CONTINUOUS",
+        "OBSERVABILITY_SLO_AND_ROLLBACK_EVIDENCE_EXPLICIT"
+      ],
+      "status": "PENDING"
+    },
+    {
+      "id": "F5",
+      "name": "Analytics, reporting, experimentation and FinOps platform",
+      "capabilities": ["CAP-114", "CAP-115", "CAP-116", "CAP-117", "CAP-118", "CAP-119", "CAP-120", "CAP-121", "CAP-122", "CAP-123", "CAP-124", "CAP-125"],
+      "exit_criteria": [
+        "VERSIONED_PRIVACY_SAFE_EVENT_ENVELOPE",
+        "MEANINGFUL_WEIGH_DEFINITION_EXECUTABLE",
+        "ACTIVATION_QUALITY_TRUST_FUNNELS_REPRODUCIBLE",
+        "AGGREGATE_REPORTING_PRIVACY_THRESHOLDS_ENFORCED",
+        "RESEARCH_EXPORT_REQUIRES_EXPLICIT_POLICY",
+        "PROVIDER_AND_UNIT_ECONOMIC_COSTS_OBSERVABLE",
+        "EXPERIMENT_ASSIGNMENT_AND_EXPOSURE_AUDITABLE"
+      ],
+      "status": "PENDING"
+    },
+    {
+      "id": "F6",
+      "name": "Methodology-qualified WE to SIGNAL to IMPACT",
+      "capabilities": ["CAP-032", "CAP-033", "CAP-036", "CAP-037", "CAP-038", "CAP-039", "CAP-042", "CAP-043", "CAP-046", "CAP-047", "CAP-048", "CAP-049", "CAP-051", "CAP-052", "CAP-053", "CAP-054"],
+      "depends_on": ["F5"],
+      "exit_criteria": [
+        "CONTRIBUTION_CLASSES_NEVER_SILENTLY_MIXED",
+        "SIGNAL_METHOD_AND_SCOPE_VERSION_PINNED",
+        "STAKEHOLDER_GAPS_NOT_HIDDEN",
+        "HIGH_PERCENTAGE_NOT_SUFFICIENT_FOR_SIGNAL",
+        "INSTITUTION_IDENTITY_AND_PROVENANCE_VERIFIED",
+        "IMPACT_EVIDENCE_AND_VERIFICATION_DISTINCT",
+        "NO_CAUSAL_CLAIM_WITHOUT_EVIDENCE"
+      ],
+      "status": "PENDING"
+    },
+    {
+      "id": "F7",
+      "name": "Commercial, entitlement, research and distribution foundation",
+      "capabilities": ["CAP-088", "CAP-090", "CAP-091", "CAP-103", "CAP-104", "CAP-105", "CAP-106", "CAP-107", "CAP-108", "CAP-109", "CAP-110", "CAP-111", "CAP-112", "CAP-113"],
+      "depends_on": ["F4", "F5"],
+      "exit_criteria": [
+        "ENTITLEMENT_PROVIDER_INDEPENDENT",
+        "STORE_PURCHASE_SERVER_VERIFIED",
+        "REGIONAL_CATALOG_NOT_HARDCODED",
+        "B2B_OUTPUT_AGGREGATE_ONLY",
+        "RESEARCH_CONSENT_AND_STUDY_BOUNDARY_EXPLICIT",
+        "SPONSORSHIP_TRANSPARENT_AND_NON_MANIPULATIVE",
+        "EMBED_AND_API_PRESERVE_SAMPLE_CLASS_AND_METHODOLOGY",
+        "PMF_GATES_BLOCK_PREMATURE_PREMIUM_RELEASE"
+      ],
+      "status": "PENDING"
+    }
+  ],
+  "next_runtime_slice": {
+    "capability": "CAP-062",
+    "name": "Editorial Projection runtime — first executable ADR-0029 slice",
+    "base": "feature/app-preferences-reliability-slice30",
+    "requires": ["F0"],
+    "must_not_require_external_provider_or_ai_calls": true,
+    "must_not_create_second_cms": true,
+    "must_not_create_new_case_runtime_classes": true
+  }
+}
