@@ -14,6 +14,9 @@ from kefe_api.infrastructure.postgres_flow_pinned_content_authoring import (
     PostgresFlowPinnedContentAuthoringRepository,
 )
 from kefe_api.infrastructure.postgres_identity import PostgresIdentityRepository
+from kefe_api.infrastructure.postgres_ingestion_orchestration import (
+    PostgresIngestionOrchestrationRepository,
+)
 from kefe_api.infrastructure.postgres_knowledge import PostgresKnowledgeRepository
 from kefe_api.infrastructure.postgres_privacy import PostgresPrivacyRepository
 from kefe_api.infrastructure.postgres_progress import PostgresProgressRepository
@@ -40,10 +43,20 @@ from kefe_api.modules.decision.bootstrap import build_demo_repository
 from kefe_api.modules.decision.in_memory import InMemoryDecisionRepository
 from kefe_api.modules.decision.lineage_in_memory import InMemoryLineageDecisionRepository
 from kefe_api.modules.decision.ports import DecisionRepository
+from kefe_api.modules.editorial_projection.ingestion_source import (
+    IngestionReviewedProposalSource,
+)
+from kefe_api.modules.editorial_projection.ports import ReviewedProposalSource
 from kefe_api.modules.identity.account_in_memory import InMemoryAccountContinuityRepository
 from kefe_api.modules.identity.account_ports import AccountContinuityRepository
 from kefe_api.modules.identity.in_memory import InMemoryIdentityRepository
 from kefe_api.modules.identity.ports import IdentityRepository
+from kefe_api.modules.ingestion_orchestration.in_memory import (
+    InMemoryIngestionOrchestrationRepository,
+)
+from kefe_api.modules.ingestion_orchestration.ports import (
+    IngestionOrchestrationRepository,
+)
 from kefe_api.modules.knowledge.in_memory import InMemoryKnowledgeRepository
 from kefe_api.modules.knowledge.ports import KnowledgeRepository
 from kefe_api.modules.privacy.in_memory import InMemoryPrivacyRepository
@@ -190,6 +203,24 @@ def build_knowledge_repository(settings: Settings) -> KnowledgeRepository:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
 
     return PostgresKnowledgeRepository(build_engine(settings.database_url))
+
+
+def build_ingestion_orchestration_repository(
+    settings: Settings,
+) -> IngestionOrchestrationRepository:
+    if settings.persistence_backend == "memory":
+        return InMemoryIngestionOrchestrationRepository()
+
+    if not settings.database_url:
+        raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
+
+    return PostgresIngestionOrchestrationRepository(build_engine(settings.database_url))
+
+
+def build_reviewed_proposal_source(
+    repository: IngestionOrchestrationRepository,
+) -> ReviewedProposalSource:
+    return IngestionReviewedProposalSource(repository)
 
 
 def build_admin_session_store(settings: Settings) -> AdminSessionStore:
