@@ -1,0 +1,145 @@
+{
+  "contract_version": "1.0.0",
+  "slice": 43,
+  "capabilities": ["CAP-054", "CAP-055", "CAP-061", "CAP-062", "CAP-065"],
+  "capability": {
+    "identity": "EXACT_VERSIONED_ADAPTER_CODE",
+    "configuration_immutable": true,
+    "lifecycle": ["ENABLED", "PAUSED", "RETIRED"],
+    "retired_terminal": true,
+    "secret_reference_only": true,
+    "allowed_secret_reference_schemes": ["secret", "vault", "kms", "envref"],
+    "secret_value_persisted": false,
+    "configuration": [
+      "quota_limit",
+      "quota_window_seconds",
+      "failure_threshold",
+      "circuit_open_seconds",
+      "permit_ttl_seconds"
+    ]
+  },
+  "quota": {
+    "algorithm": "FIXED_WINDOW",
+    "transactional": true,
+    "counts_provider_capture_attempts": true,
+    "retry_after_exact": true,
+    "bounds": {
+      "limit": {"minimum": 1, "maximum": 100000},
+      "window_seconds": {"minimum": 1, "maximum": 86400}
+    }
+  },
+  "circuit": {
+    "states": ["CLOSED", "OPEN", "HALF_OPEN"],
+    "failure_threshold_bounds": {"minimum": 1, "maximum": 1000},
+    "open_seconds_bounds": {"minimum": 1, "maximum": 86400},
+    "single_half_open_probe": true,
+    "probe_success": "CLOSED_AND_RESET_FAILURES",
+    "probe_failure": "OPEN_FROM_FAILURE_TIME"
+  },
+  "permit": {
+    "states": ["ACTIVE", "SUCCEEDED", "FAILED", "ABANDONED"],
+    "ttl_seconds_bounds": {"minimum": 5, "maximum": 3600},
+    "exact_permit_and_adapter_completion": true,
+    "expired_active_recovery": "ABANDONED_AND_COUNTED_AS_FAILURE",
+    "completion_after_expiry": false
+  },
+  "admission_outcomes": [
+    "ADMITTED",
+    "NOT_REGISTERED",
+    "PAUSED",
+    "RETIRED",
+    "RATE_LIMITED",
+    "CIRCUIT_OPEN"
+  ],
+  "acquisition_integration": {
+    "permit_before_adapter_capture": true,
+    "success_completion_before_artifact_persistence": true,
+    "typed_failure_completion_before_return": true,
+    "unexpected_failure_completion_before_return": true,
+    "permit_completion_failure": "FAIL_CLOSED_NO_ARTIFACT",
+    "strict_empty_production_registry": true
+  },
+  "operational_result": {
+    "allowed_fields": [
+      "outcome",
+      "adapter_code",
+      "permit_id",
+      "circuit_state",
+      "retry_after_seconds",
+      "reason_code"
+    ],
+    "forbidden_fields": [
+      "secret_ref",
+      "secret_value",
+      "credential",
+      "external_locator",
+      "provider_response",
+      "source_payload",
+      "raw_storage_ref",
+      "title",
+      "user_id"
+    ]
+  },
+  "persistence": {
+    "capability_table": "knowledge.source_provider_capability",
+    "permit_table": "knowledge.source_provider_capture_permit",
+    "admission_locking": "FOR_UPDATE",
+    "expired_permit_locking": "FOR_UPDATE_SKIP_LOCKED",
+    "active_half_open_probe_unique": true,
+    "migration_reversible": true
+  },
+  "composition": {
+    "provider_capability_registry_empty_by_default": true,
+    "adapter_registry_empty_by_default": true,
+    "actual_secret_resolver": false,
+    "actual_provider_adapter": false,
+    "background_task_started": false
+  },
+  "evidence": {
+    "memory": [
+      "lifecycle",
+      "quota_window",
+      "rate_limit_retry_after",
+      "failure_threshold_open",
+      "single_half_open_probe",
+      "probe_success_close",
+      "probe_failure_reopen",
+      "expired_permit_recovery",
+      "privacy_allowlist",
+      "acquisition_fail_closed"
+    ],
+    "postgres": [
+      "transactional_quota",
+      "concurrent_quota_safety",
+      "single_half_open_probe",
+      "stale_permit_recovery",
+      "exact_completion",
+      "migration_reversible"
+    ],
+    "required_workflows": [
+      "API CI",
+      "MVP Beta Gates",
+      "Global Readiness"
+    ]
+  },
+  "excluded": [
+    "credential_value",
+    "secret_resolution",
+    "real_provider_adapter",
+    "network_request",
+    "scraping",
+    "ai_call",
+    "provider_compliance_proof",
+    "automatic_retry_backoff",
+    "admin_http_ui",
+    "automatic_proposal_review",
+    "automatic_projection",
+    "automatic_publication",
+    "dashboard_alert_delivery",
+    "slo_proof",
+    "rollback_proof",
+    "case_builder",
+    "flow_composer",
+    "phone_behavior"
+  ]
+}
