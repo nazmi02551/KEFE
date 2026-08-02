@@ -41,6 +41,11 @@ def require_secret_reference(secret_ref: str) -> None:
         raise ValueError("secret_ref must use an allowed opaque reference scheme")
 
 
+class ProviderCredentialMode(StrEnum):
+    PUBLIC = "PUBLIC"
+    SECRET_REF = "SECRET_REF"
+
+
 class ProviderCapabilityLifecycle(StrEnum):
     ENABLED = "ENABLED"
     PAUSED = "PAUSED"
@@ -67,7 +72,8 @@ class ProviderCircuitState(StrEnum):
 @dataclass(frozen=True, slots=True)
 class SourceProviderCapability:
     adapter_code: str
-    secret_ref: str
+    credential_mode: ProviderCredentialMode
+    secret_ref: str | None
     lifecycle_state: ProviderCapabilityLifecycle
     quota_limit: int
     quota_window_seconds: int
@@ -84,7 +90,15 @@ class SourceProviderCapability:
 
     def __post_init__(self) -> None:
         require_versioned_adapter_code(self.adapter_code)
-        require_secret_reference(self.secret_ref)
+        if type(self.credential_mode) is not ProviderCredentialMode:
+            raise ValueError("credential_mode must be an exact ProviderCredentialMode")
+        if self.credential_mode is ProviderCredentialMode.PUBLIC:
+            if self.secret_ref is not None:
+                raise ValueError("PUBLIC provider capability cannot contain secret_ref")
+        else:
+            if self.secret_ref is None:
+                raise ValueError("SECRET_REF provider capability requires secret_ref")
+            require_secret_reference(self.secret_ref)
         if not MINIMUM_QUOTA_LIMIT <= self.quota_limit <= MAXIMUM_QUOTA_LIMIT:
             raise ValueError("quota_limit is outside the supported range")
         if not (
@@ -134,16 +148,18 @@ class SourceProviderCapability:
         cls,
         *,
         adapter_code: str,
-        secret_ref: str,
+        secret_ref: str | None,
         quota_limit: int,
         quota_window_seconds: int,
         failure_threshold: int,
         circuit_open_seconds: int,
         permit_ttl_seconds: int,
         created_at: datetime,
+        credential_mode: ProviderCredentialMode = ProviderCredentialMode.SECRET_REF,
     ) -> SourceProviderCapability:
         return cls(
             adapter_code=adapter_code,
+            credential_mode=credential_mode,
             secret_ref=secret_ref,
             lifecycle_state=ProviderCapabilityLifecycle.ENABLED,
             quota_limit=quota_limit,
@@ -164,6 +180,7 @@ class SourceProviderCapability:
     def immutable_configuration(self) -> tuple[object, ...]:
         return (
             self.adapter_code,
+            self.credential_mode,
             self.secret_ref,
             self.quota_limit,
             self.quota_window_seconds,
