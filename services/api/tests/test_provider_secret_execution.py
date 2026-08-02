@@ -35,6 +35,7 @@ from kefe_api.modules.knowledge.source_acquisition import (
     FinalSourceCaptureError,
     InMemorySourceCaptureRegistry,
     NoOpSourceAcquisitionObserver,
+    RetryableSourceCaptureError,
     SourceAcquisitionCommand,
     SourceAcquisitionOutcome,
     SourceAcquisitionService,
@@ -217,7 +218,7 @@ def test_secure_executor_zeroizes_after_adapter_or_resolution_failure() -> None:
             (CredentialAwareAdapter(),)
         ),
     )
-    with pytest.raises(Exception) as captured_error:
+    with pytest.raises(RetryableSourceCaptureError) as captured_error:
         retryable.capture(
             adapter_code=ADAPTER_CODE,
             permit_id=permit_id,
@@ -225,9 +226,7 @@ def test_secure_executor_zeroizes_after_adapter_or_resolution_failure() -> None:
             trace_id="trace-resolution",
             at=NOW,
         )
-    assert getattr(captured_error.value, "code", None) == (
-        "SOURCE_SECRET_RESOLUTION_RETRYABLE"
-    )
+    assert captured_error.value.code == "SOURCE_SECRET_RESOLUTION_RETRYABLE"
     assert SECRET_REF not in str(captured_error.value)
     assert SECRET_VALUE.decode() not in str(captured_error.value)
 
@@ -282,8 +281,8 @@ def test_secure_source_acquisition_completes_permit_before_persistence() -> None
     result = acquisition.acquire(command, trace_id="trace-acquisition")
 
     assert result.outcome is SourceAcquisitionOutcome.ADMITTED
-    assert len(knowledge.list_source_artifacts()) == 1
-    assert len(ingestion.list_runs()) == 1
+    assert len(knowledge._source_artifacts) == 1
+    assert len(ingestion._runs) == 1
     permit = next(iter(providers._permits.values()))
     assert permit.state.value == "SUCCEEDED"
     assert SECRET_REF not in repr(result.as_operational_dict())
@@ -298,8 +297,8 @@ def test_resolution_failure_closes_permit_and_writes_nothing() -> None:
 
     assert result.outcome is SourceAcquisitionOutcome.FINAL_FAILURE
     assert result.error_code == "SOURCE_SECRET_RESOLVER_NOT_REGISTERED"
-    assert knowledge.list_source_artifacts() == ()
-    assert ingestion.list_runs() == ()
+    assert len(knowledge._source_artifacts) == 0
+    assert len(ingestion._runs) == 0
     permit = next(iter(providers._permits.values()))
     assert permit.state.value == "FAILED"
     assert permit.failure_code == "SOURCE_SECRET_RESOLVER_NOT_REGISTERED"
