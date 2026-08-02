@@ -39,11 +39,29 @@ class Settings(BaseSettings):
     provider_http_dns_max_answers: int = Field(default=16, ge=1, le=64)
     provider_http_ca_bundle_path: str | None = None
 
+    raw_evidence_runtime_mode: Literal[
+        "DISABLED",
+        "EXTERNAL_DURABLE",
+    ] = "DISABLED"
+    raw_evidence_backend_profile_code: str | None = None
+
     @field_validator("provider_http_ca_bundle_path")
     @classmethod
     def validate_provider_http_ca_bundle_path(cls, value: str | None) -> str | None:
         if value is not None and not value.strip():
             raise ValueError("provider HTTP CA bundle path must not be blank")
+        return value
+
+    @field_validator("raw_evidence_backend_profile_code")
+    @classmethod
+    def validate_raw_evidence_backend_profile_code(
+        cls,
+        value: str | None,
+    ) -> str | None:
+        if value is not None and (not value or value != value.strip()):
+            raise ValueError(
+                "raw evidence backend profile code must not be blank or padded"
+            )
         return value
 
 
