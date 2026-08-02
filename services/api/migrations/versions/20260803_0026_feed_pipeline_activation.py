@@ -46,7 +46,7 @@ def upgrade() -> None:
             CONSTRAINT feed_pipeline_interval_ck
                 CHECK (interval_seconds BETWEEN 60 AND 2592000),
             CONSTRAINT feed_pipeline_dispatch_attempts_ck
-                CHECK (max_dispatch_attempts BETWEEN 1 AND 100),
+                CHECK (max_dispatch_attempts BETWEEN 1 AND 10),
             CONSTRAINT feed_pipeline_evidence_capability_ck
                 CHECK (
                     evidence_capability_ref ~
