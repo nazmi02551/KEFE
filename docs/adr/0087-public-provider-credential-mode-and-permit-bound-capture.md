@@ -9,7 +9,7 @@ The provider admission runtime currently requires every capability to contain a 
 
 ## Decision
 
-Public providers require no credentials when their exact capability mode is `PUBLIC`.
+public providers require no credentials when their exact capability mode is `PUBLIC`.
 
 1. Provider capabilities declare exactly one credential mode: `PUBLIC` or `SECRET_REF`.
 2. `PUBLIC` capabilities must have `secret_ref = None`. `SECRET_REF` capabilities must carry an exact opaque allowed secret reference.
