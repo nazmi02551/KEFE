@@ -35,6 +35,13 @@ class IngestionOrchestrationRepository(Protocol):
 
     def list_proposals(self, run_id: UUID) -> tuple[Proposal, ...]: ...
 
+    def list_pending_proposals(
+        self,
+        *,
+        proposal_kind: str | None = None,
+        limit: int = 50,
+    ) -> tuple[Proposal, ...]: ...
+
     def add_review_decision(self, decision: ProposalReviewDecision) -> None: ...
 
     def get_review_decision(
