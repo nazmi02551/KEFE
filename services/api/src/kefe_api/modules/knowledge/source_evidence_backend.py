@@ -10,10 +10,12 @@ from typing import Protocol
 from kefe_api.modules.knowledge.source_evidence import (
     MAX_EVIDENCE_BYTES,
     FinalRawSourceEvidenceError,
+    RawSourceEvidenceRead,
     RawSourceEvidenceSeal,
     RetryableRawSourceEvidenceError,
     canonical_content_hash,
     canonical_storage_ref,
+    content_hash_from_storage_ref,
 )
 from kefe_api.modules.knowledge.source_identity import require_versioned_adapter_code
 
@@ -266,6 +268,10 @@ class DurableRawSourceEvidenceStore:
     def profile_code(self) -> str:
         return self._profile.profile_code
 
+    def _object_key(self, content_hash: str) -> str:
+        digest = content_hash.removeprefix("sha256:")
+        return f"{self._profile.namespace}/sha256/{digest[:2]}/{digest}"
+
     def seal(
         self,
         *,
@@ -288,8 +294,7 @@ class DurableRawSourceEvidenceStore:
         owned_body = memoryview(body).tobytes()
         content_hash = canonical_content_hash(owned_body)
         storage_ref = canonical_storage_ref(content_hash)
-        digest = content_hash.removeprefix("sha256:")
-        object_key = f"{self._profile.namespace}/sha256/{digest[:2]}/{digest}"
+        object_key = self._object_key(content_hash)
 
         try:
             write_result = self._backend.put_if_absent(
@@ -327,15 +332,77 @@ class DurableRawSourceEvidenceStore:
                 "RAW_EVIDENCE_BACKEND_CONTRACT_INVALID"
             )
 
+        read_result = self._read_backend(
+            object_key=object_key,
+            missing_code="RAW_EVIDENCE_READ_AFTER_WRITE_MISSING",
+            missing_retryable=True,
+        )
+        if (
+            read_result.body != owned_body
+            or read_result.media_type != canonical_media_type
+        ):
+            raise FinalRawSourceEvidenceError(
+                "RAW_EVIDENCE_READ_AFTER_WRITE_MISMATCH"
+            )
+
+        return RawSourceEvidenceSeal(
+            content_hash=content_hash,
+            storage_ref=storage_ref,
+            byte_length=len(owned_body),
+            media_type=canonical_media_type,
+            sealed_at=sealed_at,
+        )
+
+    def read(
+        self,
+        *,
+        storage_ref: str,
+        expected_content_hash: str,
+    ) -> RawSourceEvidenceRead:
+        derived_content_hash = content_hash_from_storage_ref(storage_ref)
+        if derived_content_hash != expected_content_hash:
+            raise FinalRawSourceEvidenceError(
+                "RAW_EVIDENCE_REFERENCE_HASH_MISMATCH"
+            )
+        object_key = self._object_key(expected_content_hash)
+        read_result = self._read_backend(
+            object_key=object_key,
+            missing_code="RAW_EVIDENCE_OBJECT_NOT_FOUND",
+            missing_retryable=False,
+        )
+        owned_body = memoryview(read_result.body).tobytes()
+        if len(owned_body) > self._profile.max_object_bytes:
+            raise FinalRawSourceEvidenceError(
+                "RAW_EVIDENCE_BACKEND_CONTRACT_INVALID"
+            )
+        if canonical_content_hash(owned_body) != expected_content_hash:
+            raise FinalRawSourceEvidenceError(
+                "RAW_EVIDENCE_READ_DIGEST_MISMATCH"
+            )
+        return RawSourceEvidenceRead(
+            content_hash=expected_content_hash,
+            storage_ref=storage_ref,
+            body=owned_body,
+            media_type=read_result.media_type,
+            byte_length=len(owned_body),
+        )
+
+    def _read_backend(
+        self,
+        *,
+        object_key: str,
+        missing_code: str,
+        missing_retryable: bool,
+    ) -> RawEvidenceReadResult:
         try:
             read_result = self._backend.read_exact(
                 object_key=object_key,
                 timeout_ms=self._profile.read_timeout_ms,
             )
         except KeyError as exc:
-            raise RetryableRawSourceEvidenceError(
-                "RAW_EVIDENCE_READ_AFTER_WRITE_MISSING"
-            ) from exc
+            if missing_retryable:
+                raise RetryableRawSourceEvidenceError(missing_code) from exc
+            raise FinalRawSourceEvidenceError(missing_code) from exc
         except RetryableRawEvidenceBackendError as exc:
             raise RetryableRawSourceEvidenceError(exc.code) from exc
         except FinalRawEvidenceBackendError as exc:
@@ -361,21 +428,7 @@ class DurableRawSourceEvidenceStore:
             raise FinalRawSourceEvidenceError(
                 "RAW_EVIDENCE_BACKEND_CONTRACT_INVALID"
             )
-        if (
-            read_result.body != owned_body
-            or read_result.media_type != canonical_media_type
-        ):
-            raise FinalRawSourceEvidenceError(
-                "RAW_EVIDENCE_READ_AFTER_WRITE_MISMATCH"
-            )
-
-        return RawSourceEvidenceSeal(
-            content_hash=content_hash,
-            storage_ref=storage_ref,
-            byte_length=len(owned_body),
-            media_type=canonical_media_type,
-            sealed_at=sealed_at,
-        )
+        return read_result
 
 
 __all__ = [

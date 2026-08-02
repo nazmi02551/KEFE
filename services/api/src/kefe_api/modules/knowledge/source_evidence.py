@@ -48,6 +48,12 @@ def canonical_storage_ref(content_hash: str) -> str:
     return f"evidence://sha256/{content_hash.removeprefix('sha256:')}"
 
 
+def content_hash_from_storage_ref(storage_ref: str) -> str:
+    if _STORAGE_REF.fullmatch(storage_ref) is None:
+        raise ValueError("storage_ref must be canonical evidence reference")
+    return f"sha256:{storage_ref.rsplit('/', 1)[-1]}"
+
+
 @dataclass(frozen=True, slots=True, repr=False)
 class RawSourceEvidenceSeal:
     content_hash: str
@@ -79,6 +85,40 @@ class RawSourceEvidenceSeal:
         )
 
 
+@dataclass(frozen=True, slots=True, repr=False)
+class RawSourceEvidenceRead:
+    content_hash: str
+    storage_ref: str
+    body: bytes
+    media_type: str | None
+    byte_length: int
+
+    def __post_init__(self) -> None:
+        if _SHA256_HASH.fullmatch(self.content_hash) is None:
+            raise ValueError("content_hash must be canonical SHA-256")
+        if self.storage_ref != canonical_storage_ref(self.content_hash):
+            raise ValueError("storage_ref must derive from content_hash")
+        if type(self.body) is not bytes:
+            raise ValueError("body must be exact bytes")
+        if self.byte_length != len(self.body):
+            raise ValueError("byte_length must match the owned body")
+        if self.byte_length > MAX_EVIDENCE_BYTES:
+            raise ValueError("byte_length exceeds the supported evidence budget")
+        if canonical_content_hash(self.body) != self.content_hash:
+            raise ValueError("body digest must match content_hash")
+        normalized_media_type = _normalize_media_type(self.media_type)
+        if normalized_media_type != self.media_type:
+            raise ValueError("media_type must be canonical")
+
+    def __repr__(self) -> str:
+        return (
+            "RawSourceEvidenceRead("
+            f"content_hash={self.content_hash!r}, storage_ref=<redacted>, "
+            f"body=<redacted:{self.byte_length} bytes>, "
+            f"media_type={self.media_type!r}, byte_length={self.byte_length})"
+        )
+
+
 class RawSourceEvidenceError(Exception):
     def __init__(self, code: str) -> None:
         if _ERROR_CODE.fullmatch(code) is None:
@@ -98,6 +138,15 @@ class FinalRawSourceEvidenceError(RawSourceEvidenceError):
     pass
 
 
+class RawSourceEvidenceReader(Protocol):
+    def read(
+        self,
+        *,
+        storage_ref: str,
+        expected_content_hash: str,
+    ) -> RawSourceEvidenceRead: ...
+
+
 class RawSourceEvidenceStore(Protocol):
     def seal(
         self,
@@ -108,10 +157,18 @@ class RawSourceEvidenceStore(Protocol):
         sealed_at: datetime,
     ) -> RawSourceEvidenceSeal: ...
 
+    def read(
+        self,
+        *,
+        storage_ref: str,
+        expected_content_hash: str,
+    ) -> RawSourceEvidenceRead: ...
+
 
 class InMemoryRawSourceEvidenceStore:
     def __init__(self) -> None:
         self._bodies: dict[str, bytes] = {}
+        self._media_types: dict[str, str | None] = {}
         self._lock = Lock()
 
     def seal(
@@ -134,8 +191,14 @@ class InMemoryRawSourceEvidenceStore:
                 raise FinalRawSourceEvidenceError(
                     "RAW_EVIDENCE_DIGEST_COLLISION"
                 )
+            existing_media_type = self._media_types.get(content_hash)
+            if existing is not None and existing_media_type != normalized_media_type:
+                raise FinalRawSourceEvidenceError(
+                    "RAW_EVIDENCE_MEDIA_TYPE_MISMATCH"
+                )
             if existing is None:
                 self._bodies[content_hash] = owned_body
+                self._media_types[content_hash] = normalized_media_type
         return RawSourceEvidenceSeal(
             content_hash=content_hash,
             storage_ref=storage_ref,
@@ -144,16 +207,44 @@ class InMemoryRawSourceEvidenceStore:
             sealed_at=sealed_at,
         )
 
-    def read_owned_copy(self, storage_ref: str) -> bytes:
-        if _STORAGE_REF.fullmatch(storage_ref) is None:
-            raise ValueError("storage_ref must be canonical evidence reference")
-        content_hash = f"sha256:{storage_ref.rsplit('/', 1)[-1]}"
+    def read(
+        self,
+        *,
+        storage_ref: str,
+        expected_content_hash: str,
+    ) -> RawSourceEvidenceRead:
+        derived_content_hash = content_hash_from_storage_ref(storage_ref)
+        if expected_content_hash != derived_content_hash:
+            raise FinalRawSourceEvidenceError(
+                "RAW_EVIDENCE_REFERENCE_HASH_MISMATCH"
+            )
         with self._lock:
             try:
-                stored = self._bodies[content_hash]
+                stored = self._bodies[expected_content_hash]
+                media_type = self._media_types[expected_content_hash]
             except KeyError as exc:
-                raise KeyError(storage_ref) from exc
-            return memoryview(stored).tobytes()
+                raise FinalRawSourceEvidenceError(
+                    "RAW_EVIDENCE_OBJECT_NOT_FOUND"
+                ) from exc
+            owned_body = memoryview(stored).tobytes()
+        if canonical_content_hash(owned_body) != expected_content_hash:
+            raise FinalRawSourceEvidenceError(
+                "RAW_EVIDENCE_READ_DIGEST_MISMATCH"
+            )
+        return RawSourceEvidenceRead(
+            content_hash=expected_content_hash,
+            storage_ref=storage_ref,
+            body=owned_body,
+            media_type=media_type,
+            byte_length=len(owned_body),
+        )
+
+    def read_owned_copy(self, storage_ref: str) -> bytes:
+        content_hash = content_hash_from_storage_ref(storage_ref)
+        return self.read(
+            storage_ref=storage_ref,
+            expected_content_hash=content_hash,
+        ).body
 
     @property
     def object_count(self) -> int:
@@ -175,16 +266,30 @@ class UnconfiguredRawSourceEvidenceStore:
             "RAW_EVIDENCE_STORE_UNAVAILABLE"
         )
 
+    def read(
+        self,
+        *,
+        storage_ref: str,
+        expected_content_hash: str,
+    ) -> RawSourceEvidenceRead:
+        del storage_ref, expected_content_hash
+        raise RetryableRawSourceEvidenceError(
+            "RAW_EVIDENCE_READER_UNAVAILABLE"
+        )
+
 
 __all__ = [
     "FinalRawSourceEvidenceError",
     "InMemoryRawSourceEvidenceStore",
     "MAX_EVIDENCE_BYTES",
     "RawSourceEvidenceError",
+    "RawSourceEvidenceRead",
+    "RawSourceEvidenceReader",
     "RawSourceEvidenceSeal",
     "RawSourceEvidenceStore",
     "RetryableRawSourceEvidenceError",
     "UnconfiguredRawSourceEvidenceStore",
     "canonical_content_hash",
     "canonical_storage_ref",
+    "content_hash_from_storage_ref",
 ]

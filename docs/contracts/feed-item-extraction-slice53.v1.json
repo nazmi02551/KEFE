@@ -1,0 +1,132 @@
+{
+  "contract": "feed-item-extraction-slice53",
+  "version": "1.0.0",
+  "status": "accepted",
+  "parent_contracts": [
+    "rss-atom-public-capture-slice52.v1",
+    "raw-source-evidence-slice49.v1",
+    "durable-raw-evidence-backend-slice50.v1",
+    "ingestion-worker-runner-slice35.v1"
+  ],
+  "evidence_read": {
+    "inputs": ["storage_ref", "expected_content_hash"],
+    "output_fields": [
+      "content_hash",
+      "storage_ref",
+      "body",
+      "media_type",
+      "byte_length"
+    ],
+    "owned_body_copy": true,
+    "reference_hash_consistency_required": true,
+    "sha256_recomputed": true,
+    "backend_object_key_exposed": false,
+    "network_fallback": false,
+    "preview_fallback": false,
+    "unconfigured_failure": "RAW_EVIDENCE_READER_UNAVAILABLE"
+  },
+  "stage": {
+    "pipeline_code": "RSS_ATOM_FEED_ITEM_EXTRACTION",
+    "pipeline_version": "1.0.0",
+    "stage_code": "EXTRACT_FEED_ITEMS",
+    "stage_version": "1.0.0",
+    "executor_kind": "DETERMINISTIC",
+    "input_artifact_kind": "SOURCE_ARTIFACT",
+    "strict_source_artifact_match": true,
+    "strict_input_hash_match": true,
+    "strict_rss_atom_validation_before_extraction": true,
+    "second_permissive_parser": false,
+    "proposal_kind": "FEED_ITEM",
+    "payload_schema_ref": "kefe.feed-item",
+    "payload_schema_version": "1.0.0",
+    "automatic_review": false,
+    "automatic_materialization": false,
+    "automatic_publication": false
+  },
+  "item": {
+    "rss_identity": "GUID_ELSE_VALIDATED_LINK",
+    "atom_identity": "ENTRY_ID",
+    "duplicate_identity": "FAIL_CLOSED",
+    "deterministic_order": "ITEM_ID_ASC",
+    "allowed_payload_fields": [
+      "source_artifact_id",
+      "feed_content_hash",
+      "feed_storage_ref",
+      "feed_format",
+      "feed_title",
+      "item_id",
+      "item_title",
+      "item_url",
+      "published_at",
+      "summary_text"
+    ],
+    "max_item_id_chars": 4096,
+    "max_title_chars": 4096,
+    "max_url_chars": 4096,
+    "max_summary_chars": 16384,
+    "max_proposals": 256,
+    "max_total_output_chars": 524288,
+    "html_execution": false,
+    "ai_summarization": false,
+    "semantic_classification": false,
+    "truth_inference": false
+  },
+  "composition": {
+    "processor_factory_exposed": true,
+    "production_runtime_plans_registered": 0,
+    "production_processors_registered": 0,
+    "concrete_providers_registered": 0,
+    "live_network_in_tests": false
+  },
+  "failure_codes": [
+    "FEED_ITEM_STAGE_IDENTITY_INVALID",
+    "FEED_ITEM_INPUT_KIND_INVALID",
+    "FEED_ITEM_SOURCE_ARTIFACT_NOT_FOUND",
+    "FEED_ITEM_SOURCE_ARTIFACT_MISMATCH",
+    "FEED_ITEM_EVIDENCE_REFERENCE_MISSING",
+    "FEED_ITEM_EVIDENCE_RETRYABLE",
+    "FEED_ITEM_EVIDENCE_INVALID",
+    "FEED_ITEM_DOCUMENT_INVALID",
+    "FEED_ITEM_DUPLICATE_IDENTITY",
+    "FEED_ITEM_OUTPUT_BUDGET_EXCEEDED",
+    "FEED_ITEM_PAYLOAD_INVALID"
+  ],
+  "evidence": {
+    "required_workflows": [
+      "Feed Item Extraction CI",
+      "RSS Atom Public Capture CI",
+      "Raw Source Evidence CI",
+      "Durable Raw Evidence Backend CI",
+      "Ingestion Worker CI",
+      "API CI",
+      "MVP Beta Gates",
+      "Global Readiness"
+    ],
+    "behavior": [
+      "in_memory_evidence_read_integrity",
+      "durable_evidence_read_integrity",
+      "reference_hash_mismatch_rejected_before_backend",
+      "rss_item_proposals",
+      "atom_item_proposals",
+      "duplicate_identity_rejected",
+      "evidence_retryable_mapping",
+      "full_ingestion_worker_success",
+      "production_registry_empty"
+    ]
+  },
+  "excluded": [
+    "CONCRETE_PROVIDER",
+    "SCHEDULED_LIVE_CAPTURE",
+    "DEPLOYED_STORAGE_CAPABILITY_PROOF",
+    "SEMANTIC_CLASSIFICATION",
+    "CLAIM_EXTRACTION",
+    "AI_SUMMARIZATION",
+    "AUTOMATIC_REVIEW",
+    "AUTOMATIC_MATERIALIZATION",
+    "AUTOMATIC_PUBLICATION",
+    "ADMIN_UI",
+    "CASE_BUILDER",
+    "FLOW_COMPOSER",
+    "PHONE_FEED_BEHAVIOR"
+  ]
+}
