@@ -13,13 +13,16 @@ from kefe_api.core.settings import get_settings
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACTS = REPO_ROOT / "docs" / "contracts"
 BASE = CONTRACTS / "openapi.v1.json"
-CONSENSUS = CONTRACTS / "openapi-consensus.v0.18.overlay.json"
-MVP = CONTRACTS / "openapi-mvp.v0.19.overlay.json"
+PRE_GLOBAL_OVERLAYS = (
+    CONTRACTS / "openapi-consensus.v0.18.overlay.json",
+    CONTRACTS / "openapi-mvp.v0.19.overlay.json",
+    CONTRACTS / "openapi-admin-projection.v0.19.overlay.json",
+)
 
 
 def _load_pre_global_contract() -> dict[str, object]:
     expected = deepcopy(json.loads(BASE.read_text(encoding="utf-8")))
-    for path in (CONSENSUS, MVP):
+    for path in PRE_GLOBAL_OVERLAYS:
         _merge_overlay(expected, json.loads(path.read_text(encoding="utf-8")), path.name)
     return expected
 
@@ -54,7 +57,7 @@ def build_overlay() -> dict[str, object]:
     removed_schemas = sorted(before_schemas.keys() - generated_schemas.keys())
     if changed_existing_schemas or removed_schemas:
         raise SystemExit(
-            "Global API must remain additive over 0.19; changed/removed schemas: "
+            "Global API must remain additive over the composed 0.19 contract; "
             f"changed={changed_existing_schemas}, removed={removed_schemas}"
         )
 
@@ -68,7 +71,7 @@ def build_overlay() -> dict[str, object]:
     removed_paths = sorted(before_paths.keys() - generated_paths.keys())
     if changed_existing_paths or removed_paths:
         raise SystemExit(
-            "Global API must remain additive over 0.19; changed/removed paths: "
+            "Global API must remain additive over the composed 0.19 contract; "
             f"changed={changed_existing_paths}, removed={removed_paths}"
         )
 

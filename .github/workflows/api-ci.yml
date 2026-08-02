@@ -93,6 +93,9 @@ jobs:
       - name: Reviewed Proposal source contract
         working-directory: services/api
         run: python tools/check_reviewed_proposal_source_contract.py
+      - name: Admin Editorial Projection HTTP contract
+        working-directory: services/api
+        run: python tools/check_admin_projection_http_contract.py
       - name: Admin HTTP contract
         id: admin-http-contract
         continue-on-error: true
@@ -188,6 +191,7 @@ jobs:
           tests/test_reviewed_proposal_source_postgres.py
           tests/test_admin_sessions_postgres.py
           tests/test_admin_http_postgres.py
+          tests/test_admin_projection_http_postgres.py
           tests/test_content_configuration_postgres.py
           tests/test_admin_content_configuration_http_postgres.py
           tests/test_case_flow_pinning_postgres.py

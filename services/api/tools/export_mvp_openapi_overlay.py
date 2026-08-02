@@ -13,13 +13,17 @@ from kefe_api.core.settings import get_settings
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACTS = REPO_ROOT / "docs" / "contracts"
 BASE = CONTRACTS / "openapi.v1.json"
-CONSENSUS = CONTRACTS / "openapi-consensus.v0.18.overlay.json"
+NON_MVP_ADDITIVE_OVERLAYS = (
+    CONTRACTS / "openapi-consensus.v0.18.overlay.json",
+    CONTRACTS / "openapi-admin-projection.v0.19.overlay.json",
+)
 
 
-def _load_pre_mvp_contract() -> dict[str, object]:
+def _load_non_mvp_additive_contract() -> dict[str, object]:
     expected = deepcopy(json.loads(BASE.read_text(encoding="utf-8")))
-    consensus = json.loads(CONSENSUS.read_text(encoding="utf-8"))
-    _merge_overlay(expected, consensus, CONSENSUS.name)
+    for overlay_path in NON_MVP_ADDITIVE_OVERLAYS:
+        overlay = json.loads(overlay_path.read_text(encoding="utf-8"))
+        _merge_overlay(expected, overlay, overlay_path.name)
     return expected
 
 
@@ -38,7 +42,7 @@ def _build_mvp_runtime_openapi() -> dict[str, object]:
 
 
 def build_overlay() -> dict[str, object]:
-    before = _load_pre_mvp_contract()
+    before = _load_non_mvp_additive_contract()
     generated = _build_mvp_runtime_openapi()
     if generated.get("info", {}).get("version") != "0.19.0":
         raise SystemExit("MVP OpenAPI overlay generator expects runtime API version 0.19.0")
@@ -53,7 +57,7 @@ def build_overlay() -> dict[str, object]:
     removed_schemas = sorted(before_schemas.keys() - generated_schemas.keys())
     if changed_existing_schemas or removed_schemas:
         raise SystemExit(
-            "MVP API must remain additive over 0.18; changed/removed schemas: "
+            "MVP API must remain additive over the composed non-MVP contract; "
             f"changed={changed_existing_schemas}, removed={removed_schemas}"
         )
 
@@ -67,7 +71,7 @@ def build_overlay() -> dict[str, object]:
     removed_paths = sorted(before_paths.keys() - generated_paths.keys())
     if changed_existing_paths or removed_paths:
         raise SystemExit(
-            "MVP API must remain additive over 0.18; changed/removed paths: "
+            "MVP API must remain additive over the composed non-MVP contract; "
             f"changed={changed_existing_paths}, removed={removed_paths}"
         )
 

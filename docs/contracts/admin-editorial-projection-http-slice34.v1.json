@@ -1,0 +1,90 @@
+{
+  "contract_version": "1.0.0",
+  "updated_at": "2026-08-02",
+  "source_issue": 186,
+  "capabilities": ["CAP-061", "CAP-062", "CAP-065"],
+  "foundation_wave": "F2",
+  "authority": [
+    "docs/adr/0017-secured-admin-http-application-surface.md",
+    "docs/adr/0029-reviewed-candidate-editorial-projection.md",
+    "docs/contracts/admin-http-surface.v1.yaml",
+    "docs/contracts/editorial-projection.v1.yaml",
+    "docs/contracts/reviewed-proposal-source-slice33.v1.json"
+  ],
+  "operation": {
+    "method": "POST",
+    "path": "/internal/admin/v1/candidate-proposals/{candidate_proposal_id}/projection",
+    "application_service": "SecuredEditorialProjectionService",
+    "capability": "CONTENT_PROJECT",
+    "session_cookie": "kefe_admin_session",
+    "csrf_header": "X-KEFE-CSRF",
+    "csrf_required": true,
+    "consumer_credentials_accepted": false
+  },
+  "request": {
+    "strict_extra_forbidden": true,
+    "fields": [
+      "proposal_review_decision_id",
+      "profile_code",
+      "profile_version",
+      "idempotency_key",
+      "explicit_flow_template_code",
+      "explicit_flow_template_version"
+    ],
+    "forbidden_fields": [
+      "actor_ref",
+      "requested_by_admin_ref",
+      "admin_subject_id",
+      "roles",
+      "capabilities",
+      "state",
+      "lifecycle_state",
+      "authoring_case_id",
+      "authoring_case_version_id"
+    ],
+    "explicit_flow_code_and_version_pair_required": true
+  },
+  "response": {
+    "fields": [
+      "projection_record_id",
+      "candidate_proposal_id",
+      "proposal_review_decision_id",
+      "profile_code",
+      "profile_version",
+      "authoring_case_id",
+      "authoring_case_version_id",
+      "lifecycle_state",
+      "replayed",
+      "created_at"
+    ],
+    "lifecycle_state": "DRAFT",
+    "first_request_status": 200,
+    "replay_status": 200,
+    "session_or_csrf_secret_exposure_forbidden": true
+  },
+  "security": {
+    "actor_source": "AdminPrincipal.audit_actor_ref",
+    "request_supplied_actor_forbidden": true,
+    "authorization_before_projection": true,
+    "csrf_before_mutation": true,
+    "reviewer_role_without_content_project_forbidden": true
+  },
+  "semantics": {
+    "projection_is_explicit": true,
+    "same_input_same_idempotency_returns_replay": true,
+    "different_input_same_idempotency_conflicts": true,
+    "creates_draft_only": true,
+    "automatic_submit_review_approve_publish_forbidden": true,
+    "consumer_materialization_forbidden": true
+  },
+  "excluded": [
+    "ADMIN_UI",
+    "PROPOSAL_REVIEW_HTTP",
+    "EXTERNAL_PROVIDER_CALLS",
+    "AI_CALLS",
+    "AUTOMATIC_PROJECTION",
+    "CASE_BUILDER",
+    "FLOW_COMPOSER",
+    "PHONE_UI"
+  ]
+}

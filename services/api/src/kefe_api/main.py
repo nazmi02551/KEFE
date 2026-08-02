@@ -21,6 +21,9 @@ from kefe_api.modules.admin_security.content_authoring import SecuredContentAuth
 from kefe_api.modules.admin_security.content_configuration import (
     SecuredContentConfigurationService,
 )
+from kefe_api.modules.admin_security.editorial_projection_router import (
+    router as admin_editorial_projection_router,
+)
 from kefe_api.modules.admin_security.policy import default_admin_security_policy
 from kefe_api.modules.admin_security.router import router as admin_router
 from kefe_api.modules.admin_security.service import AdminSecurityService
@@ -231,6 +234,7 @@ def create_app() -> FastAPI:
     app.include_router(flow_runtime_router)
     app.include_router(progress_router)
     app.include_router(admin_router)
+    app.include_router(admin_editorial_projection_router)
     app.include_router(admin_content_configuration_router)
     app.include_router(community_reason_admin_router)
     return app

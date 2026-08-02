@@ -1,0 +1,203 @@
+{
+  "target_version": "0.19.0",
+  "components": {
+    "schemas": {
+      "EditorialProjectionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "explicit_flow_template_code": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explicit Flow Template Code"
+          },
+          "explicit_flow_template_version": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explicit Flow Template Version"
+          },
+          "idempotency_key": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "profile_code": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Profile Code",
+            "type": "string"
+          },
+          "profile_version": {
+            "minimum": 1.0,
+            "title": "Profile Version",
+            "type": "integer"
+          },
+          "proposal_review_decision_id": {
+            "format": "uuid",
+            "title": "Proposal Review Decision Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "proposal_review_decision_id",
+          "profile_code",
+          "profile_version",
+          "idempotency_key"
+        ],
+        "title": "EditorialProjectionRequest",
+        "type": "object"
+      },
+      "EditorialProjectionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "authoring_case_id": {
+            "format": "uuid",
+            "title": "Authoring Case Id",
+            "type": "string"
+          },
+          "authoring_case_version_id": {
+            "format": "uuid",
+            "title": "Authoring Case Version Id",
+            "type": "string"
+          },
+          "candidate_proposal_id": {
+            "format": "uuid",
+            "title": "Candidate Proposal Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "lifecycle_state": {
+            "title": "Lifecycle State",
+            "type": "string"
+          },
+          "profile_code": {
+            "title": "Profile Code",
+            "type": "string"
+          },
+          "profile_version": {
+            "title": "Profile Version",
+            "type": "integer"
+          },
+          "projection_record_id": {
+            "format": "uuid",
+            "title": "Projection Record Id",
+            "type": "string"
+          },
+          "proposal_review_decision_id": {
+            "format": "uuid",
+            "title": "Proposal Review Decision Id",
+            "type": "string"
+          },
+          "replayed": {
+            "title": "Replayed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "projection_record_id",
+          "candidate_proposal_id",
+          "proposal_review_decision_id",
+          "profile_code",
+          "profile_version",
+          "authoring_case_id",
+          "authoring_case_version_id",
+          "lifecycle_state",
+          "replayed",
+          "created_at"
+        ],
+        "title": "EditorialProjectionResponse",
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/internal/admin/v1/candidate-proposals/{candidate_proposal_id}/projection": {
+      "post": {
+        "operationId": "project_candidate_case_internal_admin_v1_candidate_proposals__candidate_proposal_id__projection_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "candidate_proposal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Candidate Proposal Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-KEFE-CSRF",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Csrf"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditorialProjectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EditorialProjectionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Project Candidate Case",
+        "tags": [
+          "Internal Admin"
+        ]
+      }
+    }
+  }
+}
