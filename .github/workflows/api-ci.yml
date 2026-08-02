@@ -110,6 +110,9 @@ jobs:
       - name: Ingestion worker runner contract
         working-directory: services/api
         run: python tools/check_ingestion_worker_runner_contract.py
+      - name: Source acquisition admission contract
+        working-directory: services/api
+        run: python tools/check_source_acquisition_contract.py
       - name: Editorial Projection contract
         working-directory: services/api
         run: python tools/check_editorial_projection_contract.py
@@ -228,6 +231,7 @@ jobs:
           tests/test_ingestion_projection_bridge_postgres.py
           tests/test_ingestion_run_leases_postgres.py
           tests/test_ingestion_worker_runner_postgres.py
+          tests/test_source_acquisition_postgres.py
           tests/test_admin_sessions_postgres.py
           tests/test_admin_http_postgres.py
           tests/test_admin_editorial_operations_http_postgres.py
