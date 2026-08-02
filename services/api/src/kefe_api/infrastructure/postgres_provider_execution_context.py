@@ -5,6 +5,7 @@ from uuid import UUID
 
 from sqlalchemy import Engine, text
 
+from kefe_api.modules.knowledge.provider_control import ProviderCredentialMode
 from kefe_api.modules.knowledge.provider_execution_context import (
     ProviderPermitContextError,
     ProviderPermitExecutionContext,
@@ -35,6 +36,7 @@ class PostgresProviderPermitExecutionContextRepository:
                         SELECT
                             permit.id AS permit_id,
                             permit.adapter_code,
+                            capability.credential_mode,
                             capability.secret_ref,
                             permit.expires_at AS permit_expires_at
                         FROM knowledge.source_provider_capture_permit AS permit
@@ -58,6 +60,7 @@ class PostgresProviderPermitExecutionContextRepository:
         return ProviderPermitExecutionContext(
             permit_id=row["permit_id"],
             adapter_code=row["adapter_code"],
+            credential_mode=ProviderCredentialMode(row["credential_mode"]),
             secret_ref=row["secret_ref"],
             permit_expires_at=row["permit_expires_at"],
         )
