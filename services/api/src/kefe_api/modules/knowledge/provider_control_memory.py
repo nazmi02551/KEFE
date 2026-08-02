@@ -14,6 +14,10 @@ from kefe_api.modules.knowledge.provider_control import (
     ProviderCircuitState,
     SourceProviderCapability,
 )
+from kefe_api.modules.knowledge.provider_execution_context import (
+    ProviderPermitContextError,
+    ProviderPermitExecutionContext,
+)
 from kefe_api.modules.knowledge.source_acquisition import (
     require_versioned_adapter_code,
 )
@@ -45,6 +49,32 @@ class InMemorySourceProviderAdmissionRepository:
         with self._lock:
             capability = self._capabilities.get(adapter_code)
             return deepcopy(capability) if capability is not None else None
+
+    def get_active_execution_context(
+        self,
+        *,
+        permit_id: UUID,
+        adapter_code: str,
+        at: datetime,
+    ) -> ProviderPermitExecutionContext:
+        require_versioned_adapter_code(adapter_code)
+        with self._lock:
+            permit = self._permits.get(permit_id)
+            capability = self._capabilities.get(adapter_code)
+            if permit is None or capability is None:
+                raise ProviderPermitContextError()
+            try:
+                permit.require_active(adapter_code=adapter_code, at=at)
+            except ValueError as exc:
+                raise ProviderPermitContextError() from exc
+            if capability.lifecycle_state is not ProviderCapabilityLifecycle.ENABLED:
+                raise ProviderPermitContextError()
+            return ProviderPermitExecutionContext(
+                permit_id=permit.id,
+                adapter_code=adapter_code,
+                secret_ref=capability.secret_ref,
+                permit_expires_at=permit.expires_at,
+            )
 
     def transition_lifecycle(
         self,

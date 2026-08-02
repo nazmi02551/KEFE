@@ -23,6 +23,9 @@ from kefe_api.infrastructure.postgres_knowledge import PostgresKnowledgeReposito
 from kefe_api.infrastructure.postgres_proposal_review_queue import (
     PostgresProposalReviewQueueRepository,
 )
+from kefe_api.infrastructure.postgres_provider_execution_context import (
+    PostgresProviderPermitExecutionContextRepository,
+)
 from kefe_api.infrastructure.postgres_source_acquisition_scheduler import (
     PostgresSourceAcquisitionSchedulerRepository,
 )
@@ -102,6 +105,14 @@ from kefe_api.modules.knowledge.provider_control_ports import (
 from kefe_api.modules.knowledge.provider_control_service import (
     SourceProviderAdmissionService,
 )
+from kefe_api.modules.knowledge.provider_secret_execution import (
+    CredentialAwareSourceCaptureRegistry,
+    InMemoryCredentialAwareSourceCaptureRegistry,
+    InMemorySecretResolverRegistry,
+    ProviderPermitExecutionContextRepository,
+    SecretResolverRegistry,
+    SecureProviderCaptureExecutor,
+)
 from kefe_api.modules.knowledge.source_acquisition import (
     InMemorySourceCaptureRegistry,
     NoOpSourceAcquisitionObserver,
@@ -128,6 +139,10 @@ class EditorialPipeline:
     source_capture_registry: SourceCaptureRegistry
     source_provider_admission_repository: SourceProviderAdmissionRepository
     source_provider_admission_service: SourceProviderAdmissionService
+    provider_execution_context_repository: ProviderPermitExecutionContextRepository
+    secret_resolver_registry: SecretResolverRegistry
+    credential_capture_registry: CredentialAwareSourceCaptureRegistry
+    secure_provider_capture_executor: SecureProviderCaptureExecutor
     source_acquisition_observer: SourceAcquisitionObserver
     source_acquisition_service: SourceAcquisitionService
     source_scheduler_repository: SourceAcquisitionSchedulerRepository
@@ -166,9 +181,13 @@ def build_editorial_pipeline(
                 "memory Editorial Projection requires in-memory Content Authoring"
             )
         knowledge_repository: KnowledgeRepository = InMemoryKnowledgeRepository()
+        memory_provider_admission = InMemorySourceProviderAdmissionRepository()
         source_provider_admission_repository: SourceProviderAdmissionRepository = (
-            InMemorySourceProviderAdmissionRepository()
+            memory_provider_admission
         )
+        provider_execution_context_repository: (
+            ProviderPermitExecutionContextRepository
+        ) = memory_provider_admission
         memory_scheduler = InMemorySourceAcquisitionSchedulerRepository()
         source_scheduler_repository: SourceAcquisitionSchedulerRepository = (
             memory_scheduler
@@ -201,6 +220,9 @@ def build_editorial_pipeline(
         source_provider_admission_repository = (
             PostgresSourceProviderAdmissionRepository(engine)
         )
+        provider_execution_context_repository = (
+            PostgresProviderPermitExecutionContextRepository(engine)
+        )
         source_scheduler_repository = PostgresSourceAcquisitionSchedulerRepository(engine)
         content_supply_cycle_repository = PostgresContentSupplyCycleRepository(engine)
         content_supply_health_repository = (
@@ -216,6 +238,17 @@ def build_editorial_pipeline(
     provider_admission_service = SourceProviderAdmissionService(
         source_provider_admission_repository
     )
+    secret_resolver_registry: SecretResolverRegistry = (
+        InMemorySecretResolverRegistry()
+    )
+    credential_capture_registry: CredentialAwareSourceCaptureRegistry = (
+        InMemoryCredentialAwareSourceCaptureRegistry()
+    )
+    secure_provider_capture_executor = SecureProviderCaptureExecutor(
+        contexts=provider_execution_context_repository,
+        resolvers=secret_resolver_registry,
+        adapters=credential_capture_registry,
+    )
     source_acquisition_observer: SourceAcquisitionObserver = (
         NoOpSourceAcquisitionObserver()
     )
@@ -225,6 +258,7 @@ def build_editorial_pipeline(
         registry=source_capture_registry,
         observer=source_acquisition_observer,
         admission=provider_admission_service,
+        capture_executor=secure_provider_capture_executor,
     )
     source_dispatch_observer: SourceDispatchObserver = NoOpSourceDispatchObserver()
     source_scheduler_service = SourceAcquisitionSchedulerService(
@@ -280,6 +314,12 @@ def build_editorial_pipeline(
         source_capture_registry=source_capture_registry,
         source_provider_admission_repository=source_provider_admission_repository,
         source_provider_admission_service=provider_admission_service,
+        provider_execution_context_repository=(
+            provider_execution_context_repository
+        ),
+        secret_resolver_registry=secret_resolver_registry,
+        credential_capture_registry=credential_capture_registry,
+        secure_provider_capture_executor=secure_provider_capture_executor,
         source_acquisition_observer=source_acquisition_observer,
         source_acquisition_service=source_acquisition_service,
         source_scheduler_repository=source_scheduler_repository,

@@ -10,6 +10,9 @@ from kefe_api.modules.knowledge.provider_control import (
     ProviderCapturePermit,
     SourceProviderCapability,
 )
+from kefe_api.modules.knowledge.provider_execution_context import (
+    ProviderPermitExecutionContext,
+)
 
 
 class SourceProviderAdmissionRepository(Protocol):
@@ -19,6 +22,14 @@ class SourceProviderAdmissionRepository(Protocol):
     ) -> SourceProviderCapability: ...
 
     def get(self, adapter_code: str) -> SourceProviderCapability | None: ...
+
+    def get_active_execution_context(
+        self,
+        *,
+        permit_id: UUID,
+        adapter_code: str,
+        at: datetime,
+    ) -> ProviderPermitExecutionContext: ...
 
     def transition_lifecycle(
         self,
