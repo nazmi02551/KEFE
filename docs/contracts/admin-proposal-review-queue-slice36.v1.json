@@ -1,0 +1,109 @@
+{
+  "contract_version": "1.0.0",
+  "slice": 36,
+  "title": "Durable Admin Proposal review queue and query semantics",
+  "issue": 196,
+  "parent_pr": 195,
+  "capabilities": [
+    "CAP-061",
+    "CAP-065"
+  ],
+  "foundation_waves": [
+    "F1",
+    "F3"
+  ],
+  "security": {
+    "route_prefix": "/internal/admin/v1",
+    "session_cookie": "kefe_admin_session",
+    "required_capability": "CONTENT_REVIEW",
+    "csrf_required_for_reads": false,
+    "consumer_credentials_accepted": false
+  },
+  "queue": {
+    "method": "GET",
+    "path": "/proposals",
+    "ordering": [
+      "created_at_ASC",
+      "proposal_id_ASC"
+    ],
+    "pagination": "OPAQUE_KEYSET_CURSOR",
+    "offset_supported": false,
+    "default_limit": 50,
+    "minimum_limit": 1,
+    "maximum_limit": 100,
+    "fetch_one_extra_for_continuation": true,
+    "payload_in_list": false,
+    "filters": [
+      "review_state",
+      "proposal_kind",
+      "risk_code",
+      "run_id",
+      "pipeline_code"
+    ],
+    "review_states": [
+      "PENDING",
+      "ACCEPTED",
+      "REJECTED",
+      "CHANGES_REQUESTED"
+    ]
+  },
+  "detail": {
+    "method": "GET",
+    "path": "/proposals/{proposal_id}",
+    "immutable_payload_included": true,
+    "terminal_review_summary_included": true,
+    "not_found_error": "INGESTION_PROPOSAL_NOT_FOUND"
+  },
+  "cursor": {
+    "contains": [
+      "created_at",
+      "proposal_id"
+    ],
+    "url_safe": true,
+    "strictly_validated": true,
+    "invalid_error": "ADMIN_PROPOSAL_QUEUE_CURSOR_INVALID",
+    "invalid_cursor_restarts_page_one": false,
+    "authorization_token": false
+  },
+  "data_boundary": {
+    "source_aggregates": [
+      "Proposal",
+      "IngestionRun",
+      "ProposalReviewDecision"
+    ],
+    "duplicate_queue_table": false,
+    "second_cms": false,
+    "provider_output_is_truth": false,
+    "accepted_review_triggers_projection": false,
+    "queue_read_mutates_proposal": false
+  },
+  "required_evidence": {
+    "memory_and_postgres_parity": true,
+    "deterministic_ordering": true,
+    "stable_keyset_pagination": true,
+    "filters": true,
+    "invalid_cursor_failure": true,
+    "list_excludes_payload": true,
+    "detail_includes_payload": true,
+    "review_reflected_after_write": true,
+    "authorization_failure": true,
+    "openapi_exact": true,
+    "api_ci_exact_sha": true,
+    "mvp_beta_gates_exact_sha": true,
+    "global_readiness_exact_sha": true
+  },
+  "excluded": [
+    "admin_web_ui",
+    "assignment_or_claim",
+    "lease_or_lock",
+    "bulk_review",
+    "autonomous_prioritization",
+    "ai_ranking",
+    "provider_call",
+    "projection_trigger",
+    "authoring_approval_or_publication",
+    "case_builder",
+    "flow_composer",
+    "phone_facing_behavior"
+  ]
+}
