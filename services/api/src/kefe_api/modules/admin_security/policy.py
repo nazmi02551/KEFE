@@ -39,6 +39,7 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
             AdminRole.REVIEWER: frozenset(
                 {
                     AdminCapability.CONTENT_REVIEW,
+                    AdminCapability.PROPOSAL_REVIEW,
                     AdminCapability.SOURCE_VERIFY,
                     AdminCapability.RISK_REVIEW,
                     AdminCapability.AUDIT_READ,
