@@ -7,11 +7,14 @@ from kefe_api.infrastructure.db import build_engine
 from kefe_api.infrastructure.postgres_editorial_projection import (
     PostgresEditorialProjectionRepository,
 )
-from kefe_api.infrastructure.postgres_ingestion_orchestration import (
-    PostgresIngestionOrchestrationRepository,
+from kefe_api.infrastructure.postgres_reviewable_ingestion import (
+    PostgresReviewableIngestionRepository,
 )
 from kefe_api.modules.admin_security.editorial_projection import (
     SecuredEditorialProjectionService,
+)
+from kefe_api.modules.admin_security.proposal_review import (
+    SecuredProposalReviewService,
 )
 from kefe_api.modules.admin_security.service import AdminSecurityService
 from kefe_api.modules.content_authoring.in_memory import (
@@ -43,6 +46,7 @@ from kefe_api.modules.ingestion_orchestration.service import (
 class EditorialPipeline:
     ingestion_repository: IngestionOrchestrationRepository
     ingestion_service: IngestionOrchestrationService
+    secured_proposal_review_service: SecuredProposalReviewService
     projection_repository: EditorialProjectionRepository
     projection_service: EditorialProjectionService
     secured_projection_service: SecuredEditorialProjectionService
@@ -74,9 +78,10 @@ def build_editorial_pipeline(
                 "KEFE_DATABASE_URL is required when persistence_backend=postgres"
             )
         engine = build_engine(settings.database_url)
-        ingestion_repository = PostgresIngestionOrchestrationRepository(engine)
+        ingestion_repository = PostgresReviewableIngestionRepository(engine)
         projection_repository = PostgresEditorialProjectionRepository(engine)
 
+    ingestion_service = IngestionOrchestrationService(ingestion_repository)
     profiles = InMemoryEditorialProjectionProfileRegistry(
         (
             EditorialProjectionProfile(
@@ -97,7 +102,12 @@ def build_editorial_pipeline(
     )
     return EditorialPipeline(
         ingestion_repository=ingestion_repository,
-        ingestion_service=IngestionOrchestrationService(ingestion_repository),
+        ingestion_service=ingestion_service,
+        secured_proposal_review_service=SecuredProposalReviewService(
+            repository=ingestion_repository,
+            orchestration=ingestion_service,
+            security=admin_security_service,
+        ),
         projection_repository=projection_repository,
         projection_service=projection_service,
         secured_projection_service=SecuredEditorialProjectionService(
