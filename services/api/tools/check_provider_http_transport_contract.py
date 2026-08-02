@@ -7,13 +7,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 API_ROOT = ROOT / "services" / "api"
 MODULE = API_ROOT / "src/kefe_api/modules/knowledge/provider_http_transport.py"
+RUNTIME = API_ROOT / "src/kefe_api/infrastructure/provider_http_runtime.py"
 COMPOSITION = API_ROOT / "src/kefe_api/infrastructure/editorial_pipeline.py"
 TEST = API_ROOT / "tests/test_provider_http_transport.py"
 ADR = ROOT / "docs/adr/0081-controlled-outbound-http-and-provider-adoption-conformance.md"
 CONTRACT = ROOT / "docs/contracts/provider-http-transport-slice45.v1.json"
 WORKFLOW = ROOT / ".github/workflows/provider-http-transport-ci.yml"
 
-REQUIRED_FILES = (MODULE, COMPOSITION, TEST, ADR, CONTRACT, WORKFLOW)
+REQUIRED_FILES = (MODULE, RUNTIME, COMPOSITION, TEST, ADR, CONTRACT, WORKFLOW)
 FORBIDDEN_MODULE_FRAGMENTS = (
     "import requests",
     "from requests",
@@ -64,10 +65,17 @@ REQUIRED_MODULE_FRAGMENTS = (
     "PROVIDER_HTTP_TOTAL_BUDGET_EXCEEDED",
     "def as_operational_dict",
 )
-REQUIRED_COMPOSITION_FRAGMENTS = (
-    "InMemoryProviderAdoptionRegistry()",
+REQUIRED_RUNTIME_FRAGMENTS = (
+    'if mode == "DISABLED"',
     "UnconfiguredProviderDnsResolver()",
     "UnconfiguredPinnedHttpBackend()",
+    'if mode == "PINNED_TLS"',
+)
+REQUIRED_COMPOSITION_FRAGMENTS = (
+    "InMemoryProviderAdoptionRegistry()",
+    "provider_http_runtime = build_provider_http_runtime(settings)",
+    "dns_resolver=provider_http_runtime.dns_resolver",
+    "backend=provider_http_runtime.backend",
     "provider_http_transport=provider_http_transport",
 )
 EXPECTED_OPERATIONAL_KEYS = {
@@ -124,6 +132,7 @@ def main() -> None:
         fail(f"missing provider HTTP transport files: {missing}")
 
     module_source = MODULE.read_text()
+    runtime_source = RUNTIME.read_text()
     composition_source = COMPOSITION.read_text()
     test_source = TEST.read_text()
     adr_source = ADR.read_text()
@@ -140,6 +149,9 @@ def main() -> None:
     for fragment in REQUIRED_MODULE_FRAGMENTS:
         if fragment not in module_source:
             fail(f"provider HTTP module is missing required fragment: {fragment}")
+    for fragment in REQUIRED_RUNTIME_FRAGMENTS:
+        if fragment not in runtime_source:
+            fail(f"provider HTTP runtime activation is missing: {fragment}")
     for fragment in REQUIRED_COMPOSITION_FRAGMENTS:
         if fragment not in composition_source:
             fail(f"provider HTTP production composition is missing: {fragment}")
