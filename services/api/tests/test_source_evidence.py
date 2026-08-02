@@ -6,9 +6,9 @@ from datetime import UTC, datetime
 import pytest
 
 from kefe_api.modules.knowledge.source_evidence import (
+    MAX_EVIDENCE_BYTES,
     FinalRawSourceEvidenceError,
     InMemoryRawSourceEvidenceStore,
-    MAX_EVIDENCE_BYTES,
     RawSourceEvidenceSeal,
     RetryableRawSourceEvidenceError,
     UnconfiguredRawSourceEvidenceStore,
