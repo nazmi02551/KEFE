@@ -32,6 +32,7 @@ from kefe_api.infrastructure.postgres_source_acquisition_scheduler import (
 from kefe_api.infrastructure.postgres_source_provider_admission import (
     PostgresSourceProviderAdmissionRepository,
 )
+from kefe_api.infrastructure.provider_http_runtime import build_provider_http_runtime
 from kefe_api.modules.admin_security.editorial_projection import (
     SecuredEditorialProjectionService,
 )
@@ -111,8 +112,6 @@ from kefe_api.modules.knowledge.provider_http_transport import (
     NoOpProviderHttpObserver,
     ProviderAdoptionRegistry,
     ProviderHttpObserver,
-    UnconfiguredPinnedHttpBackend,
-    UnconfiguredProviderDnsResolver,
 )
 from kefe_api.modules.knowledge.provider_secret_execution import (
     CredentialAwareSourceCaptureRegistry,
@@ -263,10 +262,11 @@ def build_editorial_pipeline(
         InMemoryProviderAdoptionRegistry()
     )
     provider_http_observer: ProviderHttpObserver = NoOpProviderHttpObserver()
+    provider_http_runtime = build_provider_http_runtime(settings)
     provider_http_transport = ControlledProviderHttpTransport(
         adoption_registry=provider_adoption_registry,
-        dns_resolver=UnconfiguredProviderDnsResolver(),
-        backend=UnconfiguredPinnedHttpBackend(),
+        dns_resolver=provider_http_runtime.dns_resolver,
+        backend=provider_http_runtime.backend,
         observer=provider_http_observer,
     )
     source_acquisition_observer: SourceAcquisitionObserver = (

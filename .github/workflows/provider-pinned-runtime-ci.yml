@@ -1,0 +1,62 @@
+name: Provider Pinned Runtime CI
+
+on:
+  pull_request:
+    paths:
+      - 'services/api/src/kefe_api/infrastructure/provider_http_runtime.py'
+      - 'services/api/src/kefe_api/core/settings.py'
+      - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
+      - 'services/api/tests/test_provider_pinned_runtime*.py'
+      - 'services/api/tools/check_provider_pinned_runtime_contract.py'
+      - 'docs/adr/0082-pinned-dns-tls-runtime-and-explicit-egress-activation.md'
+      - 'docs/contracts/provider-pinned-runtime-slice46.v1.json'
+      - '.github/workflows/provider-pinned-runtime-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/api/src/kefe_api/infrastructure/provider_http_runtime.py'
+      - 'services/api/src/kefe_api/core/settings.py'
+      - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
+      - 'services/api/tests/test_provider_pinned_runtime*.py'
+      - 'services/api/tools/check_provider_pinned_runtime_contract.py'
+      - 'docs/adr/0082-pinned-dns-tls-runtime-and-explicit-egress-activation.md'
+      - 'docs/contracts/provider-pinned-runtime-slice46.v1.json'
+      - '.github/workflows/provider-pinned-runtime-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  provider-pinned-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Ruff provider pinned runtime boundary
+        working-directory: services/api
+        run: >-
+          ruff check
+          src/kefe_api/infrastructure/provider_http_runtime.py
+          src/kefe_api/core/settings.py
+          src/kefe_api/infrastructure/editorial_pipeline.py
+          tests/test_provider_pinned_runtime.py
+          tests/test_provider_pinned_runtime_architecture.py
+          tools/check_provider_pinned_runtime_contract.py
+      - name: Provider pinned runtime architecture fitness
+        working-directory: services/api
+        run: python tools/check_provider_pinned_runtime_contract.py
+      - name: Provider pinned runtime behavior
+        working-directory: services/api
+        run: >-
+          pytest
+          tests/test_provider_pinned_runtime.py
+          tests/test_provider_pinned_runtime_architecture.py

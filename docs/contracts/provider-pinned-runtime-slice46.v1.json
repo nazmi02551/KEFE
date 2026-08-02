@@ -1,0 +1,150 @@
+{
+  "contract": "provider-pinned-runtime-slice46",
+  "version": "1.0.0",
+  "status": "accepted",
+  "issue": 217,
+  "parent_contract": "provider-http-transport-slice45",
+  "runtime_modes": [
+    "DISABLED",
+    "PINNED_TLS"
+  ],
+  "default_runtime_mode": "DISABLED",
+  "settings": {
+    "provider_http_runtime_mode": {
+      "type": "enum",
+      "values": [
+        "DISABLED",
+        "PINNED_TLS"
+      ],
+      "default": "DISABLED"
+    },
+    "provider_http_dns_max_answers": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 64,
+      "default": 16
+    },
+    "provider_http_ca_bundle_path": {
+      "type": "nullable-string",
+      "default": null,
+      "semantics": "null uses the system trust store; a non-null value is one explicit CA bundle path"
+    }
+  },
+  "dns_adapter": {
+    "returns": "deduplicated IP address literals",
+    "max_answers_setting": "provider_http_dns_max_answers",
+    "authorization": "none; ADR-0081 validates every answer",
+    "forbidden_behavior": [
+      "origin authorization",
+      "address filtering that hides mixed public/private answers",
+      "hostname substitution",
+      "provider-specific branching"
+    ]
+  },
+  "tls_backend": {
+    "connect_target": "PinnedOutboundHttpRequest.target_ip",
+    "connect_port": "PinnedOutboundHttpRequest.port",
+    "sni_identity": "PinnedOutboundHttpRequest.host",
+    "certificate_identity": "PinnedOutboundHttpRequest.host",
+    "minimum_tls": "TLSv1.2",
+    "certificate_verification": "required",
+    "hostname_verification": "required",
+    "compression": "disabled",
+    "trust_roots": [
+      "system trust store",
+      "one explicit CA bundle"
+    ],
+    "insecure_fallback": false
+  },
+  "http11_request": {
+    "allowed_methods": [
+      "GET",
+      "HEAD"
+    ],
+    "request_body": "forbidden",
+    "required_headers": {
+      "Host": "exact approved host with explicit port only when non-default",
+      "Connection": "close",
+      "Accept-Encoding": "identity"
+    },
+    "public_header_source": "PinnedOutboundHttpRequest.public_headers",
+    "automatic_redirects": false,
+    "cookie_jar": false,
+    "proxy_environment": false,
+    "connect_tunnel": false,
+    "ambient_credentials": false
+  },
+  "response_boundary": {
+    "projected_header_allowlist": [
+      "content-type",
+      "etag",
+      "last-modified",
+      "location",
+      "retry-after"
+    ],
+    "duplicate_projected_singleton_headers": "final failure",
+    "allowed_content_encoding": [
+      "identity",
+      "absent"
+    ],
+    "content_length": "must be one valid non-negative decimal and may not exceed max_response_bytes",
+    "body_read_limit": "max_response_bytes + 1",
+    "oversize": "final failure",
+    "connection_reuse": false
+  },
+  "error_codes": {
+    "retryable": [
+      "PROVIDER_HTTP_DNS_UNAVAILABLE",
+      "PROVIDER_HTTP_CONNECT_TIMEOUT",
+      "PROVIDER_HTTP_READ_TIMEOUT",
+      "PROVIDER_HTTP_UNAVAILABLE"
+    ],
+    "final": [
+      "PROVIDER_HTTP_DNS_INVALID",
+      "PROVIDER_HTTP_DNS_TOO_MANY_ANSWERS",
+      "PROVIDER_HTTP_TLS_REJECTED",
+      "PROVIDER_HTTP_PROTOCOL_INVALID",
+      "PROVIDER_HTTP_CONTENT_ENCODING_UNSUPPORTED",
+      "PROVIDER_HTTP_RESPONSE_TOO_LARGE",
+      "PROVIDER_HTTP_BACKEND_UNCONFIGURED"
+    ]
+  },
+  "composition": {
+    "disabled": [
+      "empty ProviderAdoptionRegistry",
+      "UnconfiguredProviderDnsResolver",
+      "UnconfiguredPinnedHttpBackend"
+    ],
+    "pinned_tls": [
+      "empty ProviderAdoptionRegistry",
+      "SystemProviderDnsResolver",
+      "PinnedTlsHttpBackend"
+    ],
+    "provider_profiles_registered": 0
+  },
+  "invariants": [
+    "The default runtime mode is DISABLED.",
+    "PINNED_TLS activation does not register or authorize a provider.",
+    "DNS returns all bounded address candidates so ADR-0081 can reject mixed answers.",
+    "The backend connects to the exact selected IP and never re-resolves the host.",
+    "TLS SNI and certificate verification use the exact approved host.",
+    "TLS verification cannot be disabled and has no insecure fallback.",
+    "No proxy, cookie, redirect, CONNECT tunnel or ambient credential behavior exists.",
+    "HTTP response headers and body are bounded before returning RawHttpResponse.",
+    "Operational evidence never contains exception text, URL, IP, headers or body.",
+    "CI does not require or claim a live external provider call."
+  ],
+  "exclusions": [
+    "real provider adapter",
+    "real provider adoption profile",
+    "live external request evidence",
+    "deployed firewall VPC NAT evidence",
+    "secret header injection",
+    "secret manager integration",
+    "provider compliance certification",
+    "autonomous retry backoff",
+    "Admin provider HTTP or UI",
+    "automatic editorial decision or publication",
+    "phone-facing behavior"
+  ]
+}

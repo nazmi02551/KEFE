@@ -48,3 +48,6 @@ select = ["E", "F", "I", "B", "UP"]
 "src/kefe_api/infrastructure/postgres_account_continuity.py" = ["E501"]
 "src/kefe_api/infrastructure/postgres_consensus.py" = ["E501"]
 "src/kefe_api/infrastructure/postgres_privacy.py" = ["E501"]
+# These tests intentionally pass socket.timeout to prove the network alias maps
+# to the canonical TimeoutError handling path in the pinned runtime.
+"tests/test_provider_pinned_runtime.py" = ["UP041"]

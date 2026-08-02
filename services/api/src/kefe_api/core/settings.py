@@ -1,6 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -33,6 +34,17 @@ class Settings(BaseSettings):
     outbox_retry_base_seconds: int = 5
     outbox_retry_max_seconds: int = 900
     outbox_max_attempts: int = 8
+
+    provider_http_runtime_mode: Literal["DISABLED", "PINNED_TLS"] = "DISABLED"
+    provider_http_dns_max_answers: int = Field(default=16, ge=1, le=64)
+    provider_http_ca_bundle_path: str | None = None
+
+    @field_validator("provider_http_ca_bundle_path")
+    @classmethod
+    def validate_provider_http_ca_bundle_path(cls, value: str | None) -> str | None:
+        if value is not None and not value.strip():
+            raise ValueError("provider HTTP CA bundle path must not be blank")
+        return value
 
 
 @lru_cache
