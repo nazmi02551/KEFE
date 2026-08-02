@@ -1,0 +1,160 @@
+{
+  "contract_version": "1.0.0",
+  "slice": 42,
+  "capabilities": ["CAP-055", "CAP-061", "CAP-062", "CAP-065"],
+  "policy": {
+    "immutable": true,
+    "thresholds_explicit": true,
+    "thresholds_are_slos": false,
+    "bounds": {
+      "backlog": {"minimum": 0, "maximum": 1000000},
+      "recent_non_success": {"minimum": 0, "maximum": 1000000},
+      "cycle_silence_seconds": {"minimum": 60, "maximum": 2592000},
+      "failure_window_seconds": {"minimum": 60, "maximum": 2592000}
+    }
+  },
+  "facts": {
+    "captured_at_explicit_utc": true,
+    "fields": [
+      "active_schedule_count",
+      "paused_schedule_count",
+      "due_schedule_count",
+      "pending_dispatch_count",
+      "running_dispatch_count",
+      "stale_dispatch_count",
+      "recent_dispatch_non_success_count",
+      "queued_ingestion_run_count",
+      "running_ingestion_run_count",
+      "stale_ingestion_lease_count",
+      "recent_failed_ingestion_run_count",
+      "unreviewed_proposal_count",
+      "running_cycle_count",
+      "stale_cycle_count",
+      "recent_non_success_cycle_count",
+      "latest_terminal_cycle_state",
+      "latest_terminal_cycle_completed_at"
+    ],
+    "postgres_consistency": "REPEATABLE_READ",
+    "mutation_allowed": false
+  },
+  "signals": {
+    "states": ["QUIET", "NOMINAL", "ATTENTION", "CRITICAL"],
+    "critical_only_from": [
+      "STALE_SOURCE_DISPATCH",
+      "STALE_INGESTION_LEASE",
+      "STALE_CONTENT_SUPPLY_CYCLE"
+    ],
+    "attention_from": [
+      "SOURCE_DISPATCH_BACKLOG",
+      "INGESTION_RUN_BACKLOG",
+      "PROPOSAL_REVIEW_BACKLOG",
+      "RECENT_SOURCE_DISPATCH_NON_SUCCESS",
+      "RECENT_INGESTION_FAILURE",
+      "RECENT_CONTENT_SUPPLY_CYCLE_NON_SUCCESS",
+      "LATEST_CONTENT_SUPPLY_CYCLE_NON_SUCCESS",
+      "CONTENT_SUPPLY_CYCLE_SILENT"
+    ],
+    "reason_codes_bounded": true,
+    "reason_codes_sorted": true,
+    "automatic_recovery": false
+  },
+  "snapshot": {
+    "allowed_fields": [
+      "signal",
+      "as_of",
+      "reason_codes",
+      "active_schedule_count",
+      "paused_schedule_count",
+      "due_schedule_count",
+      "pending_dispatch_count",
+      "running_dispatch_count",
+      "stale_dispatch_count",
+      "recent_dispatch_non_success_count",
+      "queued_ingestion_run_count",
+      "running_ingestion_run_count",
+      "stale_ingestion_lease_count",
+      "recent_failed_ingestion_run_count",
+      "unreviewed_proposal_count",
+      "running_cycle_count",
+      "stale_cycle_count",
+      "recent_non_success_cycle_count",
+      "latest_terminal_cycle_state",
+      "latest_terminal_cycle_completed_at",
+      "seconds_since_latest_terminal_cycle"
+    ],
+    "forbidden_fields": [
+      "external_locator",
+      "raw_storage_ref",
+      "source_payload",
+      "provider_response",
+      "proposal_payload",
+      "credential",
+      "user_id",
+      "title",
+      "reviewer_ref"
+    ]
+  },
+  "cli": {
+    "one_shot_only": true,
+    "json_allowlist_only": true,
+    "exit_codes": {
+      "QUIET_OR_NOMINAL": 0,
+      "ATTENTION": 2,
+      "CRITICAL": 3,
+      "INVALID_INPUT": 64
+    },
+    "daemon_mode": false
+  },
+  "composition": {
+    "public_http": false,
+    "admin_http": false,
+    "phone_surface": false,
+    "background_task_started": false
+  },
+  "evidence": {
+    "memory": [
+      "quiet",
+      "nominal",
+      "attention_thresholds",
+      "cycle_silence",
+      "critical_stale_ownership",
+      "reason_order",
+      "privacy_allowlist"
+    ],
+    "postgres": [
+      "repeatable_read",
+      "aggregate_counts",
+      "latest_terminal_cycle",
+      "no_mutation"
+    ],
+    "cli": ["exit_codes", "allowlist_json", "invalid_input"],
+    "required_workflows": [
+      "API CI",
+      "MVP Beta Gates",
+      "Global Readiness"
+    ]
+  },
+  "excluded": [
+    "recovery",
+    "heartbeat",
+    "claim",
+    "retry",
+    "backoff",
+    "schedule_mutation",
+    "run_transition",
+    "proposal_review",
+    "proposal_projection",
+    "publication",
+    "provider_adapter",
+    "network_request",
+    "admin_http_ui",
+    "dashboard",
+    "alert_delivery",
+    "metrics_backend",
+    "slo_proof",
+    "rollback_proof",
+    "case_builder",
+    "flow_composer",
+    "phone_behavior"
+  ]
+}
