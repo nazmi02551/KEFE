@@ -12,6 +12,7 @@ from kefe_api.modules.knowledge.provider_control import (
     ProviderCapturePermit,
     ProviderCapturePermitState,
     ProviderCircuitState,
+    ProviderCredentialMode,
     SourceProviderCapability,
 )
 
@@ -29,7 +30,7 @@ class PostgresSourceProviderAdmissionRepository:
                 text(
                     """
                     INSERT INTO knowledge.source_provider_capability (
-                        adapter_code, secret_ref, lifecycle_state,
+                        adapter_code, credential_mode, secret_ref, lifecycle_state,
                         quota_limit, quota_window_seconds,
                         failure_threshold, circuit_open_seconds,
                         permit_ttl_seconds, window_started_at,
@@ -37,7 +38,7 @@ class PostgresSourceProviderAdmissionRepository:
                         circuit_state, circuit_opened_at,
                         created_at, updated_at
                     ) VALUES (
-                        :adapter_code, :secret_ref, :lifecycle_state,
+                        :adapter_code, :credential_mode, :secret_ref, :lifecycle_state,
                         :quota_limit, :quota_window_seconds,
                         :failure_threshold, :circuit_open_seconds,
                         :permit_ttl_seconds, :window_started_at,
@@ -387,6 +388,7 @@ class PostgresSourceProviderAdmissionRepository:
     def _capability_params(capability: SourceProviderCapability) -> dict[str, object]:
         return {
             "adapter_code": capability.adapter_code,
+            "credential_mode": capability.credential_mode.value,
             "secret_ref": capability.secret_ref,
             "lifecycle_state": capability.lifecycle_state.value,
             "quota_limit": capability.quota_limit,
@@ -420,6 +422,7 @@ class PostgresSourceProviderAdmissionRepository:
     def _capability_from_row(row) -> SourceProviderCapability:
         return SourceProviderCapability(
             adapter_code=row["adapter_code"],
+            credential_mode=ProviderCredentialMode(row["credential_mode"]),
             secret_ref=row["secret_ref"],
             lifecycle_state=ProviderCapabilityLifecycle(row["lifecycle_state"]),
             quota_limit=row["quota_limit"],

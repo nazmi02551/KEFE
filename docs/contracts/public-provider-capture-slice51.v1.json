@@ -1,0 +1,67 @@
+{
+  "contract": "public-provider-capture-slice51",
+  "version": "1.0.0",
+  "status": "accepted",
+  "credential_modes": [
+    "PUBLIC",
+    "SECRET_REF"
+  ],
+  "capability_invariants": {
+    "public_secret_ref": null,
+    "secret_ref_mode_requires_reference": true,
+    "existing_rows_migrate_as": "SECRET_REF",
+    "admission_shared": true,
+    "quota_shared": true,
+    "circuit_breaker_shared": true,
+    "permit_completion_shared": true
+  },
+  "execution_context": {
+    "requires_active_permit": true,
+    "requires_unexpired_permit": true,
+    "requires_enabled_capability": true,
+    "contains_credential_mode": true,
+    "secret_reference_redacted": true
+  },
+  "credentialed_executor": {
+    "allowed_mode": "SECRET_REF",
+    "public_rejected_before_resolver_lookup": true
+  },
+  "public_executor": {
+    "allowed_mode": "PUBLIC",
+    "secret_access": false,
+    "auth_header_access": false,
+    "network_access": false,
+    "dns_access": false,
+    "tls_access": false,
+    "evidence_store_access": false,
+    "autonomous_retry": false,
+    "result_type": "CapturedSource"
+  },
+  "migration": {
+    "revision": "20260803_0025",
+    "down_revision": "20260802_0024",
+    "additive": true,
+    "downgrade_refuses_public_rows": true,
+    "database_cross_field_constraint": true
+  },
+  "composition": {
+    "production_public_adapters_registered": 0,
+    "public_registry_exposed": true,
+    "public_executor_exposed": true
+  },
+  "error_codes": [
+    "SOURCE_PROVIDER_CREDENTIAL_MODE_MISMATCH",
+    "SOURCE_PUBLIC_ADAPTER_NOT_REGISTERED",
+    "SOURCE_PUBLIC_CAPTURE_CONTRACT_INVALID",
+    "SOURCE_PROVIDER_PERMIT_CONTEXT_INVALID"
+  ],
+  "exclusions": [
+    "rss_atom_parser",
+    "concrete_public_feed",
+    "live_external_request",
+    "production_provider_registration",
+    "admin_provider_ui",
+    "automatic_editorial_publication",
+    "phone_facing_behavior"
+  ]
+}

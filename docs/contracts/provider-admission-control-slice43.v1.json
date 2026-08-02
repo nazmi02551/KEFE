@@ -1,5 +1,5 @@
 {
-  "contract_version": "1.0.0",
+  "contract_version": "1.1.0",
   "slice": 43,
   "capabilities": ["CAP-054", "CAP-055", "CAP-061", "CAP-062", "CAP-065"],
   "capability": {
@@ -7,10 +7,14 @@
     "configuration_immutable": true,
     "lifecycle": ["ENABLED", "PAUSED", "RETIRED"],
     "retired_terminal": true,
-    "secret_reference_only": true,
+    "credential_modes": ["PUBLIC", "SECRET_REF"],
+    "public_secret_reference": null,
+    "secret_ref_mode_reference_only": true,
     "allowed_secret_reference_schemes": ["secret", "vault", "kms", "envref"],
     "secret_value_persisted": false,
     "configuration": [
+      "credential_mode",
+      "secret_ref",
       "quota_limit",
       "quota_window_seconds",
       "failure_threshold",
@@ -69,6 +73,7 @@
       "reason_code"
     ],
     "forbidden_fields": [
+      "credential_mode",
       "secret_ref",
       "secret_value",
       "credential",
@@ -86,17 +91,21 @@
     "admission_locking": "FOR_UPDATE",
     "expired_permit_locking": "FOR_UPDATE_SKIP_LOCKED",
     "active_half_open_probe_unique": true,
-    "migration_reversible": true
+    "credential_mode_cross_field_constraint": true,
+    "existing_rows_migrate_as": "SECRET_REF",
+    "migration_reversible_when_no_public_rows": true
   },
   "composition": {
     "provider_capability_registry_empty_by_default": true,
-    "adapter_registry_empty_by_default": true,
+    "credential_adapter_registry_empty_by_default": true,
+    "public_adapter_registry_empty_by_default": true,
     "actual_secret_resolver": false,
     "actual_provider_adapter": false,
     "background_task_started": false
   },
   "evidence": {
     "memory": [
+      "credential_mode_cross_field_validation",
       "lifecycle",
       "quota_window",
       "rate_limit_retry_after",
@@ -109,22 +118,26 @@
       "acquisition_fail_closed"
     ],
     "postgres": [
+      "credential_mode_migration",
+      "credential_mode_cross_field_constraint",
       "transactional_quota",
       "concurrent_quota_safety",
       "single_half_open_probe",
       "stale_permit_recovery",
       "exact_completion",
-      "migration_reversible"
+      "conditional_migration_downgrade"
     ],
     "required_workflows": [
       "API CI",
+      "Provider Admission CI",
+      "Public Provider Capture CI",
       "MVP Beta Gates",
       "Global Readiness"
     ]
   },
   "excluded": [
     "credential_value",
-    "secret_resolution",
+    "secret_resolution_for_public_mode",
     "real_provider_adapter",
     "network_request",
     "scraping",

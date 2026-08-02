@@ -201,6 +201,21 @@ def create_app() -> FastAPI:
     app.state.raw_source_evidence_store = raw_source_evidence_store
     app.state.knowledge_repository = editorial_pipeline.knowledge_repository
     app.state.source_capture_registry = editorial_pipeline.source_capture_registry
+    app.state.provider_execution_context_repository = (
+        editorial_pipeline.provider_execution_context_repository
+    )
+    app.state.secret_resolver_registry = editorial_pipeline.secret_resolver_registry
+    app.state.credential_capture_registry = (
+        editorial_pipeline.credential_capture_registry
+    )
+    app.state.secure_provider_capture_executor = (
+        editorial_pipeline.secure_provider_capture_executor
+    )
+    app.state.public_capture_registry = editorial_pipeline.public_capture_registry
+    app.state.public_provider_capture_executor = (
+        editorial_pipeline.public_provider_capture_executor
+    )
+    app.state.provider_capture_executor = editorial_pipeline.provider_capture_executor
     app.state.source_acquisition_observer = (
         editorial_pipeline.source_acquisition_observer
     )
