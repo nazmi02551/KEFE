@@ -14,6 +14,7 @@ from kefe_api.modules.knowledge.provider_http_transport import (
     FinalProviderHttpError,
     OutboundHttpRequest,
     ProviderHttpCredentialBinding,
+    ProviderHttpError,
     ProviderHttpResponse,
     SensitiveHttpHeaderAccess,
 )
@@ -271,7 +272,7 @@ class SecureProviderHttpExecutor:
 
         try:
             return secret.use_bytes(use_secret, at=at)
-        except FinalProviderHttpError:
+        except ProviderHttpError:
             raise
         except RuntimeError as exc:
             raise FinalProviderHttpError(
