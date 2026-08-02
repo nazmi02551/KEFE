@@ -1,0 +1,112 @@
+{
+  "contract": "provider-http-capture-slice48",
+  "version": "1.0.0",
+  "status": "accepted",
+  "issue": 221,
+  "parent_pr": 220,
+  "parent_head": "8821ce3b7ab9ccdc7d6fe1f94a22ba09ab44266b",
+  "decision_ref": "docs/adr/0084-provider-neutral-http-capture-adapter-and-bounded-response-parsing.md",
+  "capabilities": ["CAP-054", "CAP-055", "CAP-065", "CAP-084"],
+  "limits": {
+    "max_external_locator_chars": 4096,
+    "max_trace_id_chars": 128,
+    "requests_per_capture": 1,
+    "autonomous_retries": 0
+  },
+  "plan": {
+    "type": "ProviderHttpCapturePlan",
+    "immutable": true,
+    "redacted_repr": true,
+    "fields": ["adapter_code", "request"],
+    "request_type": "OutboundHttpRequest",
+    "adapter_code_must_match_request": true
+  },
+  "definition_port": {
+    "type": "ProviderHttpCaptureDefinition",
+    "methods": [
+      {
+        "name": "build_plan",
+        "inputs": ["external_locator", "trace_id", "at"],
+        "output": "ProviderHttpCapturePlan"
+      },
+      {
+        "name": "parse_response",
+        "inputs": ["plan", "response", "trace_id", "at"],
+        "output": "CapturedSource"
+      }
+    ],
+    "forbidden_inputs": [
+      "SecretAccess",
+      "SecretLease",
+      "SensitiveHttpHeaderAccess",
+      "ProviderDnsResolver",
+      "PinnedHttpBackend",
+      "socket",
+      "ssl.SSLContext"
+    ]
+  },
+  "generic_adapter": {
+    "type": "ProviderHttpCaptureAdapter",
+    "implements": "CredentialAwareSourceCaptureAdapter",
+    "secret_behavior": "passes SecretAccess directly to SecureProviderHttpExecutor without calling use_bytes",
+    "planning_before_secret_access": true,
+    "parser_receives_bounded_response_only": true,
+    "result_type": "CapturedSource"
+  },
+  "factory": {
+    "type": "ProviderHttpCaptureAdapterFactory",
+    "purpose": "construct generic wrappers for later exact provider definitions",
+    "production_definitions_registered": 0,
+    "production_adapters_registered": 0
+  },
+  "error_codes": {
+    "fixed_final": [
+      "SOURCE_PROVIDER_HTTP_PLAN_INVALID",
+      "SOURCE_PROVIDER_HTTP_ADAPTER_MISMATCH",
+      "SOURCE_PROVIDER_HTTP_EXECUTION_INVALID",
+      "SOURCE_PROVIDER_HTTP_RESPONSE_INVALID"
+    ],
+    "mapped": {
+      "source": "validated PROVIDER_HTTP_*",
+      "target": "SOURCE_PROVIDER_HTTP_*",
+      "preserve_retryable_final_classification": true
+    },
+    "raw_exception_text_forbidden": true
+  },
+  "invariants": [
+    "Provider-specific definitions cannot read or resolve secret material.",
+    "Provider-specific definitions cannot perform DNS, TLS, socket, redirect or retry work.",
+    "The capture plan is validated before secret use or HTTP execution.",
+    "Definition, plan and request adapter codes are exact and equal.",
+    "Only SecureProviderHttpExecutor can apply credentials and execute the controlled transport.",
+    "The parser receives only ProviderHttpCapturePlan and bounded ProviderHttpResponse values.",
+    "The adapter performs no autonomous retry and no response persistence.",
+    "Production composition keeps all real provider definitions and adapters absent.",
+    "No live external request is required or claimed."
+  ],
+  "required_tests": [
+    "plan immutability, redaction and adapter matching",
+    "definition protocol excludes secret and network ports",
+    "planning occurs before secret/HTTP execution",
+    "generic wrapper never calls SecretAccess.use_bytes",
+    "retryable/final HTTP error classification is preserved",
+    "unexpected planning/execution/parsing failures are bounded",
+    "parser receives bounded response and returns exact CapturedSource",
+    "factory constructs exact wrapper and production registries remain empty",
+    "no provider-specific names or live network dependency"
+  ],
+  "excluded": [
+    "real provider",
+    "real adoption or auth profile",
+    "live network request",
+    "RSS Atom JSON or XML parser",
+    "raw-body storage",
+    "secret-manager SDK",
+    "OAuth or request signing",
+    "autonomous retries",
+    "Admin provider UI",
+    "automatic editorial publication",
+    "deployed egress SLO alert or rollback proof",
+    "phone-facing behavior"
+  ]
+}
