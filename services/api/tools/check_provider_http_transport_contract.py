@@ -165,7 +165,7 @@ def main() -> None:
         "DNS rebinding",
         "one hop at a time",
         "Production composition remains inert",
-        "does not claim external provider compliance",
+        "without claiming external provider compliance",
     ):
         if phrase not in adr_source:
             fail(f"ADR-0081 is missing required decision text: {phrase}")
