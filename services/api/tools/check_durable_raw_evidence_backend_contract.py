@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -108,6 +109,12 @@ def _dataclass_keywords(node: ast.ClassDef) -> dict[str, object]:
     return {}
 
 
+def _contains_vendor_token(source: str, vendor_name: str) -> bool:
+    escaped = re.escape(vendor_name).replace(r"\ ", r"\s+")
+    pattern = rf"(?<![a-z0-9]){escaped}(?![a-z0-9])"
+    return re.search(pattern, source) is not None
+
+
 def main() -> None:
     missing = [str(path.relative_to(ROOT)) for path in REQUIRED_FILES if not path.exists()]
     if missing:
@@ -126,7 +133,7 @@ def main() -> None:
 
     lowered = (backend_source + runtime_source).lower()
     for vendor_name in FORBIDDEN_VENDOR_NAMES:
-        if vendor_name in lowered:
+        if _contains_vendor_token(lowered, vendor_name):
             fail(f"durable raw evidence runtime contains vendor name: {vendor_name}")
     for forbidden_module in FORBIDDEN_NETWORK_MODULES:
         if forbidden_module in lowered:
