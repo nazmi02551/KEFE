@@ -200,6 +200,11 @@ def create_app() -> FastAPI:
         editorial_pipeline.source_acquisition_observer
     )
     app.state.source_acquisition_service = editorial_pipeline.source_acquisition_service
+    app.state.source_scheduler_repository = (
+        editorial_pipeline.source_scheduler_repository
+    )
+    app.state.source_dispatch_observer = editorial_pipeline.source_dispatch_observer
+    app.state.source_scheduler_service = editorial_pipeline.source_scheduler_service
     app.state.ingestion_orchestration_repository = (
         editorial_pipeline.ingestion_repository
     )
