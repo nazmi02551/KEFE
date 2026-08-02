@@ -1,0 +1,80 @@
+name: Raw Source Evidence CI
+
+on:
+  pull_request:
+    paths:
+      - 'services/api/src/kefe_api/modules/knowledge/source_evidence.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_http_evidence_capture.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_http_capture.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_http_auth.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_http_transport.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_secret_execution.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_acquisition.py'
+      - 'services/api/tests/test_source_evidence.py'
+      - 'services/api/tests/test_provider_http_evidence_capture.py'
+      - 'services/api/tests/test_raw_source_evidence_architecture.py'
+      - 'services/api/tools/check_raw_source_evidence_contract.py'
+      - 'docs/adr/0085-immutable-raw-source-evidence-and-content-addressed-capture-assembly.md'
+      - 'docs/contracts/raw-source-evidence-slice49.v1.json'
+      - '.github/workflows/raw-source-evidence-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/api/src/kefe_api/modules/knowledge/source_evidence.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_http_evidence_capture.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_http_capture.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_http_auth.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_http_transport.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_secret_execution.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_acquisition.py'
+      - 'services/api/tests/test_source_evidence.py'
+      - 'services/api/tests/test_provider_http_evidence_capture.py'
+      - 'services/api/tests/test_raw_source_evidence_architecture.py'
+      - 'services/api/tools/check_raw_source_evidence_contract.py'
+      - 'docs/adr/0085-immutable-raw-source-evidence-and-content-addressed-capture-assembly.md'
+      - 'docs/contracts/raw-source-evidence-slice49.v1.json'
+      - '.github/workflows/raw-source-evidence-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  raw-source-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Ruff raw source evidence boundary
+        working-directory: services/api
+        run: >-
+          ruff check
+          src/kefe_api/modules/knowledge/source_evidence.py
+          src/kefe_api/modules/knowledge/provider_http_evidence_capture.py
+          src/kefe_api/modules/knowledge/provider_http_capture.py
+          src/kefe_api/modules/knowledge/provider_http_auth.py
+          src/kefe_api/modules/knowledge/provider_http_transport.py
+          src/kefe_api/modules/knowledge/provider_secret_execution.py
+          src/kefe_api/modules/knowledge/source_acquisition.py
+          tests/test_source_evidence.py
+          tests/test_provider_http_evidence_capture.py
+          tests/test_raw_source_evidence_architecture.py
+          tools/check_raw_source_evidence_contract.py
+      - name: Raw source evidence architecture fitness
+        working-directory: services/api
+        run: python tools/check_raw_source_evidence_contract.py
+      - name: Raw source evidence behavior
+        working-directory: services/api
+        run: >-
+          pytest
+          tests/test_source_evidence.py
+          tests/test_provider_http_evidence_capture.py
+          tests/test_raw_source_evidence_architecture.py
