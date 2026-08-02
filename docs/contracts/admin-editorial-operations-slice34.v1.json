@@ -1,0 +1,106 @@
+{
+  "contract_version": "1.0.0",
+  "slice": 34,
+  "title": "Secured Admin Proposal review and Editorial Projection HTTP",
+  "issue": 192,
+  "parent_pr": 190,
+  "capabilities": [
+    "CAP-061",
+    "CAP-062",
+    "CAP-063",
+    "CAP-065"
+  ],
+  "foundation_waves": [
+    "F2",
+    "F3"
+  ],
+  "security": {
+    "route_prefix": "/internal/admin/v1",
+    "session_cookie": "kefe_admin_session",
+    "csrf_header": "X-KEFE-CSRF",
+    "csrf_bound_to_same_session": true,
+    "verify_before_mutation": true,
+    "actor_identity": "server_derived_admin_principal",
+    "forbidden_request_fields": [
+      "actor_ref",
+      "reviewer_ref",
+      "requested_by_admin_ref",
+      "admin_subject_id",
+      "roles",
+      "capabilities",
+      "lifecycle_state",
+      "publish"
+    ]
+  },
+  "proposal_review": {
+    "method": "POST",
+    "path": "/proposals/{proposal_id}/review",
+    "required_capability": "CONTENT_REVIEW",
+    "terminal": true,
+    "reviewer_ref_source": "AdminPrincipal.audit_actor_ref",
+    "allowed_decisions": [
+      "ACCEPTED",
+      "REJECTED",
+      "CHANGES_REQUESTED"
+    ],
+    "automatic_projection": false,
+    "errors": [
+      "ADMIN_CSRF_REQUIRED",
+      "ADMIN_CSRF_INVALID",
+      "ADMIN_FORBIDDEN",
+      "INGESTION_PROPOSAL_NOT_FOUND",
+      "INGESTION_PROPOSAL_ALREADY_REVIEWED"
+    ]
+  },
+  "editorial_projection": {
+    "method": "POST",
+    "path": "/candidate-proposals/{candidate_proposal_id}/projection",
+    "required_capability": "CONTENT_PROJECT",
+    "requested_by_source": "AdminPrincipal.audit_actor_ref",
+    "accepted_review_required": true,
+    "explicit_profile_required": true,
+    "idempotency_key_required": true,
+    "creates_lifecycle_state": "DRAFT",
+    "replay_status": 200,
+    "automatic_submit": false,
+    "automatic_authoring_review": false,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "consumer_materialization": false
+  },
+  "architecture": {
+    "proposal_review_facade": "SecuredProposalReviewService",
+    "projection_facade": "SecuredEditorialProjectionService",
+    "content_authoring_aggregate_reused": true,
+    "second_cms": false,
+    "provider_or_ai_dependency_in_admin_domain": false,
+    "review_service_may_invoke_projection": false
+  },
+  "required_evidence": {
+    "memory_http": true,
+    "postgres_http": true,
+    "strict_request_validation": true,
+    "server_derived_identity": true,
+    "no_auto_projection": true,
+    "draft_only_projection": true,
+    "idempotent_projection_replay": true,
+    "openapi_exact": true,
+    "api_ci_exact_sha": true,
+    "mvp_beta_gates_exact_sha": true,
+    "global_readiness_exact_sha": true
+  },
+  "excluded": [
+    "admin_queue_ui",
+    "case_builder_ui",
+    "flow_composer",
+    "external_provider_calls",
+    "ai_provider_calls",
+    "workers_or_schedulers",
+    "bulk_review",
+    "bulk_projection",
+    "autonomous_acceptance",
+    "automatic_authoring_lifecycle",
+    "consumer_materialization",
+    "phone_facing_behavior"
+  ]
+}
