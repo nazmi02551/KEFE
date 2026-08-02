@@ -177,7 +177,7 @@ def main() -> None:
     ordered = (
         "canonical_content_hash(",
         "put_if_absent(",
-        "read_exact(",
+        "self._read_backend(",
         "RawSourceEvidenceSeal(",
     )
     positions = tuple(seal_source.find(fragment) for fragment in ordered)
@@ -185,12 +185,17 @@ def main() -> None:
         fail("durable raw evidence order must be hash, put, read, seal")
     for fragment in (
         "write_result.object_key != object_key",
-        "read_result.object_key != object_key",
         "read_result.body != owned_body",
         "read_result.media_type != canonical_media_type",
     ):
         if fragment not in seal_source:
             fail(f"durable raw evidence verification is missing: {fragment}")
+    for fragment in (
+        "self._backend.read_exact(",
+        "read_result.object_key != object_key",
+    ):
+        if fragment not in backend_source:
+            fail(f"durable raw evidence read helper is missing: {fragment}")
     for error_code in FIXED_ERROR_CODES:
         if error_code not in backend_source:
             fail(f"durable raw evidence bounded error is missing: {error_code}")
