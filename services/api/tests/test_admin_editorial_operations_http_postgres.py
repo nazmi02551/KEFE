@@ -137,9 +137,7 @@ def _seed_candidate(app) -> tuple[tuple[Proposal, ...], Proposal]:
                         "base_format_code": "DILEMMA",
                         "primary_domain_code": "DAILY_LIFE",
                         "content_risk": "L0",
-                        "dependency_proposal_ids": [
-                            str(item.id) for item in dependencies
-                        ],
+                        "dependency_ids": [str(item.id) for item in dependencies],
                         "issues": [
                             {
                                 "code": "PRIMARY",
