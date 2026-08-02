@@ -47,10 +47,6 @@ class IngestionRunLeaseService:
             require_text(pipeline_code, "pipeline_code")
         if pipeline_version is not None:
             require_text(pipeline_version, "pipeline_version")
-        if (pipeline_code is None) != (pipeline_version is None):
-            raise ValueError(
-                "pipeline_code and pipeline_version must be provided together"
-            )
         claimed_at = now or utcnow()
         return self._repository.claim_next(
             worker_ref=worker_ref,
