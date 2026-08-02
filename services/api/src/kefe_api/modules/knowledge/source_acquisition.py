@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
@@ -16,9 +15,8 @@ from kefe_api.modules.ingestion_orchestration.service import (
 )
 from kefe_api.modules.knowledge.models import SourceArtifact
 from kefe_api.modules.knowledge.ports import KnowledgeRepository
-
-_VERSIONED_ADAPTER_CODE = re.compile(
-    r"^[a-z0-9][a-z0-9_-]*(?:\.[a-z0-9][a-z0-9_-]*)*\.v[1-9][0-9]*$"
+from kefe_api.modules.knowledge.source_identity import (
+    require_versioned_adapter_code as _require_versioned_adapter_code,
 )
 
 
@@ -28,11 +26,7 @@ def _require_text(value: str, field_name: str) -> None:
 
 
 def require_versioned_adapter_code(adapter_code: str) -> None:
-    _require_text(adapter_code, "adapter_code")
-    if _VERSIONED_ADAPTER_CODE.fullmatch(adapter_code) is None:
-        raise ValueError(
-            "adapter_code must be an immutable versioned identifier ending in .vN"
-        )
+    _require_versioned_adapter_code(adapter_code)
 
 
 @dataclass(frozen=True, slots=True)
@@ -108,6 +102,49 @@ class InMemorySourceCaptureRegistry:
             return self._adapters[adapter_code]
         except KeyError as exc:
             raise KeyError(adapter_code) from exc
+
+
+@dataclass(frozen=True, slots=True)
+class SourceCaptureAdmissionDecision:
+    allowed: bool
+    retryable: bool
+    permit_id: UUID | None
+    reason_code: str
+
+    def __post_init__(self) -> None:
+        _require_text(self.reason_code, "reason_code")
+        if self.allowed and self.permit_id is None:
+            raise ValueError("allowed capture admission requires permit_id")
+        if not self.allowed and self.permit_id is not None:
+            raise ValueError("denied capture admission cannot contain permit_id")
+        if self.allowed and self.retryable:
+            raise ValueError("allowed capture admission cannot be retryable")
+
+
+class SourceCaptureAdmission(Protocol):
+    def admit_capture(
+        self,
+        *,
+        adapter_code: str,
+        at: datetime,
+    ) -> SourceCaptureAdmissionDecision: ...
+
+    def complete_capture_success(
+        self,
+        *,
+        permit_id: UUID,
+        adapter_code: str,
+        at: datetime,
+    ) -> object: ...
+
+    def complete_capture_failure(
+        self,
+        *,
+        permit_id: UUID,
+        adapter_code: str,
+        failure_code: str,
+        at: datetime,
+    ) -> object: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -217,6 +254,7 @@ class SourceAcquisitionService:
         ingestion_service: IngestionOrchestrationService,
         registry: SourceCaptureRegistry,
         observer: SourceAcquisitionObserver,
+        admission: SourceCaptureAdmission | None = None,
         clock=utcnow,
         monotonic_clock=monotonic_ns,
     ) -> None:
@@ -224,6 +262,7 @@ class SourceAcquisitionService:
         self._ingestion_service = ingestion_service
         self._registry = registry
         self._observer = observer
+        self._admission = admission
         self._clock = clock
         self._monotonic_clock = monotonic_clock
 
@@ -250,6 +289,39 @@ class SourceAcquisitionService:
                 )
             )
 
+        permit_id: UUID | None = None
+        if self._admission is not None:
+            try:
+                decision = self._admission.admit_capture(
+                    adapter_code=command.adapter_code,
+                    at=self._clock(),
+                )
+            except Exception:
+                return self._emit(
+                    self._result(
+                        started_ns=started_ns,
+                        command=command,
+                        trace_id=resolved_trace_id,
+                        outcome=SourceAcquisitionOutcome.RETRYABLE_FAILURE,
+                        error_code="SOURCE_PROVIDER_ADMISSION_UNAVAILABLE",
+                    )
+                )
+            if not decision.allowed:
+                return self._emit(
+                    self._result(
+                        started_ns=started_ns,
+                        command=command,
+                        trace_id=resolved_trace_id,
+                        outcome=(
+                            SourceAcquisitionOutcome.RETRYABLE_FAILURE
+                            if decision.retryable
+                            else SourceAcquisitionOutcome.BLOCKED
+                        ),
+                        error_code=decision.reason_code,
+                    )
+                )
+            permit_id = decision.permit_id
+
         try:
             captured = adapter.capture(
                 external_locator=command.external_locator,
@@ -258,6 +330,16 @@ class SourceAcquisitionService:
             if not isinstance(captured, CapturedSource):
                 raise FinalSourceCaptureError("SOURCE_CAPTURE_CONTRACT_INVALID")
         except RetryableSourceCaptureError as exc:
+            if not self._complete_capture_failure(
+                permit_id=permit_id,
+                adapter_code=command.adapter_code,
+                failure_code=exc.code,
+            ):
+                return self._permit_completion_failed(
+                    started_ns=started_ns,
+                    command=command,
+                    trace_id=resolved_trace_id,
+                )
             return self._emit(
                 self._result(
                     started_ns=started_ns,
@@ -268,6 +350,16 @@ class SourceAcquisitionService:
                 )
             )
         except FinalSourceCaptureError as exc:
+            if not self._complete_capture_failure(
+                permit_id=permit_id,
+                adapter_code=command.adapter_code,
+                failure_code=exc.code,
+            ):
+                return self._permit_completion_failed(
+                    started_ns=started_ns,
+                    command=command,
+                    trace_id=resolved_trace_id,
+                )
             return self._emit(
                 self._result(
                     started_ns=started_ns,
@@ -278,14 +370,35 @@ class SourceAcquisitionService:
                 )
             )
         except Exception:
+            failure_code = "UNEXPECTED_SOURCE_CAPTURE_FAILURE"
+            if not self._complete_capture_failure(
+                permit_id=permit_id,
+                adapter_code=command.adapter_code,
+                failure_code=failure_code,
+            ):
+                return self._permit_completion_failed(
+                    started_ns=started_ns,
+                    command=command,
+                    trace_id=resolved_trace_id,
+                )
             return self._emit(
                 self._result(
                     started_ns=started_ns,
                     command=command,
                     trace_id=resolved_trace_id,
                     outcome=SourceAcquisitionOutcome.FINAL_FAILURE,
-                    error_code="UNEXPECTED_SOURCE_CAPTURE_FAILURE",
+                    error_code=failure_code,
                 )
+            )
+
+        if not self._complete_capture_success(
+            permit_id=permit_id,
+            adapter_code=command.adapter_code,
+        ):
+            return self._permit_completion_failed(
+                started_ns=started_ns,
+                command=command,
+                trace_id=resolved_trace_id,
             )
 
         if before_artifact_persist is not None:
@@ -373,6 +486,65 @@ class SourceAcquisitionService:
                 outcome=SourceAcquisitionOutcome.ADMITTED,
                 source_artifact_id=artifact.id,
                 ingestion_run_id=run.id,
+            )
+        )
+
+    def _complete_capture_success(
+        self,
+        *,
+        permit_id: UUID | None,
+        adapter_code: str,
+    ) -> bool:
+        if self._admission is None:
+            return True
+        if permit_id is None:
+            return False
+        try:
+            self._admission.complete_capture_success(
+                permit_id=permit_id,
+                adapter_code=adapter_code,
+                at=self._clock(),
+            )
+        except Exception:
+            return False
+        return True
+
+    def _complete_capture_failure(
+        self,
+        *,
+        permit_id: UUID | None,
+        adapter_code: str,
+        failure_code: str,
+    ) -> bool:
+        if self._admission is None:
+            return True
+        if permit_id is None:
+            return False
+        try:
+            self._admission.complete_capture_failure(
+                permit_id=permit_id,
+                adapter_code=adapter_code,
+                failure_code=failure_code,
+                at=self._clock(),
+            )
+        except Exception:
+            return False
+        return True
+
+    def _permit_completion_failed(
+        self,
+        *,
+        started_ns: int,
+        command: SourceAcquisitionCommand,
+        trace_id: str,
+    ) -> SourceAcquisitionResult:
+        return self._emit(
+            self._result(
+                started_ns=started_ns,
+                command=command,
+                trace_id=trace_id,
+                outcome=SourceAcquisitionOutcome.RETRYABLE_FAILURE,
+                error_code="SOURCE_PROVIDER_PERMIT_COMPLETION_FAILED",
             )
         )
 
