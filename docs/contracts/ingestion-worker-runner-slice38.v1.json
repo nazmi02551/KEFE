@@ -1,0 +1,139 @@
+{
+  "contract": "ingestion-worker-runner-slice38",
+  "version": "1.0.0",
+  "status": "accepted",
+  "issue": 200,
+  "parent_pr": 199,
+  "capabilities": ["CAP-055", "CAP-065"],
+  "runtime_plan": {
+    "identity": ["pipeline_code", "pipeline_version"],
+    "selection": "EXACT_ONLY",
+    "minimum_stages": 1,
+    "ordered": true,
+    "stage_identity": ["stage_code", "stage_version"],
+    "stage_fields": [
+      "stage_code",
+      "stage_version",
+      "max_attempts",
+      "executor_kind"
+    ],
+    "duplicate_plan_rejected": true,
+    "duplicate_stage_rejected": true,
+    "provider_inference_forbidden": true,
+    "case_type_inference_forbidden": true
+  },
+  "claim": {
+    "maximum_runs_per_invocation": 1,
+    "pipeline_code_filter": true,
+    "pipeline_version_filter": true,
+    "claim_before_processing": true,
+    "oldest_first": true,
+    "postgres_locking": "FOR_UPDATE_SKIP_LOCKED"
+  },
+  "resume": {
+    "successful_stage_reexecution": false,
+    "first_stage_input_hash": "RUN_INPUT_CONTENT_HASH",
+    "later_stage_input_hash": "PREVIOUS_SUCCESSFUL_STAGE_OUTPUT_HASH",
+    "retryable_attempts_use_existing_orchestration_limit": true,
+    "unknown_stage_history": "BLOCK_AND_REQUEUE_WHILE_LEASE_ACTIVE",
+    "all_stages_already_successful": "MARK_RUN_SUCCEEDED"
+  },
+  "lease_supervision": {
+    "heartbeat_before_processor": true,
+    "heartbeat_before_persistence": true,
+    "pre_persistence_guard_inside_orchestration": true,
+    "lease_loss_persists_stage_outcome": false,
+    "lease_loss_persists_proposals": false,
+    "lease_loss_mutates_run_state": false,
+    "expired_owner_releases_lease": false,
+    "stale_recovery_authority": "SLICE_37"
+  },
+  "outcomes": [
+    "IDLE",
+    "SUCCEEDED",
+    "RETRYABLE_FAILURE",
+    "FINAL_FAILURE",
+    "LEASE_LOST",
+    "BLOCKED"
+  ],
+  "completion": {
+    "all_stages_successful_run_state": "SUCCEEDED",
+    "successful_release_disposition": "TERMINAL",
+    "retryable_failure_run_state": "FAILED_RETRYABLE",
+    "retryable_failure_release_disposition": "TERMINAL",
+    "automatic_retry_or_requeue": false,
+    "final_failure_run_state": "FAILED_FINAL",
+    "final_failure_release_disposition": "TERMINAL"
+  },
+  "observer": {
+    "exactly_one_result_per_invocation": true,
+    "allowed_fields": [
+      "outcome",
+      "worker_ref",
+      "pipeline_code",
+      "pipeline_version",
+      "trace_id",
+      "run_id",
+      "lease_id",
+      "stage_code",
+      "stage_version",
+      "completed_stage_count",
+      "stage_attempt",
+      "duration_ms",
+      "error_code"
+    ],
+    "forbidden_fields": [
+      "source_payload",
+      "provider_response",
+      "proposal_payload",
+      "private_reason",
+      "credential",
+      "exception_text",
+      "consumer_actor_id",
+      "ideology",
+      "personality",
+      "psychometric",
+      "bias_score",
+      "causal_inference"
+    ]
+  },
+  "composition": {
+    "runner_exposed_in_application_state": true,
+    "default_registry": "EMPTY",
+    "default_observer": "NO_OP",
+    "external_provider_configured": false
+  },
+  "exclusions": [
+    "DAEMON_LOOP",
+    "SCHEDULER_POLICY",
+    "CRON",
+    "PROCESS_MANAGER",
+    "EXTERNAL_PROVIDER_ADAPTER",
+    "NETWORK_FETCH",
+    "AI_CALL",
+    "AUTOMATIC_RUN_CREATION",
+    "AUTOMATIC_RETRY_REQUEUE",
+    "AUTOMATIC_PROPOSAL_REVIEW",
+    "AUTOMATIC_EDITORIAL_PROJECTION",
+    "AUTHORING_LIFECYCLE_TRANSITION",
+    "ADMIN_HTTP_UI",
+    "CASE_BUILDER",
+    "FLOW_COMPOSER",
+    "PHONE_BEHAVIOR"
+  ],
+  "required_evidence": [
+    "MEMORY_EXACT_PLAN_FILTER",
+    "POSTGRES_EXACT_PLAN_FILTER",
+    "MULTI_STAGE_HASH_CHAIN",
+    "SUCCESSFUL_STAGE_RESUME",
+    "LEASE_LOSS_ZERO_DURABLE_OUTPUT",
+    "RETRYABLE_AND_FINAL_RELEASE",
+    "CRASH_RECOVERY_RESUME",
+    "OBSERVER_ALLOWLIST",
+    "EMPTY_PRODUCTION_REGISTRY",
+    "ARCHITECTURE_FITNESS",
+    "EXACT_HEAD_API_CI",
+    "EXACT_HEAD_MVP_BETA_GATES",
+    "EXACT_HEAD_GLOBAL_READINESS"
+  ]
+}
