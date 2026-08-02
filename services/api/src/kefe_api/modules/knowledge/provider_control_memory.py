@@ -72,6 +72,7 @@ class InMemorySourceProviderAdmissionRepository:
             return ProviderPermitExecutionContext(
                 permit_id=permit.id,
                 adapter_code=adapter_code,
+                credential_mode=capability.credential_mode,
                 secret_ref=capability.secret_ref,
                 permit_expires_at=permit.expires_at,
             )
