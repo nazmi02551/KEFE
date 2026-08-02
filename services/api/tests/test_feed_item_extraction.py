@@ -282,7 +282,7 @@ def test_evidence_retryable_and_reference_integrity_are_mapped() -> None:
 
     bad_artifact = SourceArtifact.create(
         adapter_code=artifact.adapter_code,
-        external_locator=artifact.external_locator,
+        external_locator="https://feeds.example.test/bad-reference.xml",
         captured_at=artifact.captured_at,
         content_hash=artifact.content_hash,
         raw_storage_ref=canonical_storage_ref(canonical_content_hash(b"wrong")),
