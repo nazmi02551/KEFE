@@ -10,6 +10,9 @@ from kefe_api.infrastructure.postgres_editorial_projection import (
 from kefe_api.infrastructure.postgres_ingestion_orchestration import (
     PostgresIngestionOrchestrationRepository,
 )
+from kefe_api.infrastructure.postgres_proposal_review_queue import (
+    PostgresProposalReviewQueueRepository,
+)
 from kefe_api.modules.admin_security.editorial_projection import (
     SecuredEditorialProjectionService,
 )
@@ -33,6 +36,7 @@ from kefe_api.modules.ingestion_orchestration.in_memory import (
 )
 from kefe_api.modules.ingestion_orchestration.ports import (
     IngestionOrchestrationRepository,
+    ProposalReviewQueueRepository,
 )
 from kefe_api.modules.ingestion_orchestration.service import (
     IngestionOrchestrationService,
@@ -43,6 +47,7 @@ from kefe_api.modules.ingestion_orchestration.service import (
 class EditorialPipeline:
     ingestion_repository: IngestionOrchestrationRepository
     ingestion_service: IngestionOrchestrationService
+    proposal_queue_repository: ProposalReviewQueueRepository
     projection_repository: EditorialProjectionRepository
     projection_service: EditorialProjectionService
     secured_projection_service: SecuredEditorialProjectionService
@@ -62,9 +67,9 @@ def build_editorial_pipeline(
             raise RuntimeError(
                 "memory Editorial Projection requires in-memory Content Authoring"
             )
-        ingestion_repository: IngestionOrchestrationRepository = (
-            InMemoryIngestionOrchestrationRepository()
-        )
+        memory_ingestion = InMemoryIngestionOrchestrationRepository()
+        ingestion_repository: IngestionOrchestrationRepository = memory_ingestion
+        proposal_queue_repository: ProposalReviewQueueRepository = memory_ingestion
         projection_repository: EditorialProjectionRepository = (
             InMemoryEditorialProjectionRepository(content_authoring_repository)
         )
@@ -75,6 +80,7 @@ def build_editorial_pipeline(
             )
         engine = build_engine(settings.database_url)
         ingestion_repository = PostgresIngestionOrchestrationRepository(engine)
+        proposal_queue_repository = PostgresProposalReviewQueueRepository(engine)
         projection_repository = PostgresEditorialProjectionRepository(engine)
 
     profiles = InMemoryEditorialProjectionProfileRegistry(
@@ -98,6 +104,7 @@ def build_editorial_pipeline(
     return EditorialPipeline(
         ingestion_repository=ingestion_repository,
         ingestion_service=IngestionOrchestrationService(ingestion_repository),
+        proposal_queue_repository=proposal_queue_repository,
         projection_repository=projection_repository,
         projection_service=projection_service,
         secured_projection_service=SecuredEditorialProjectionService(
