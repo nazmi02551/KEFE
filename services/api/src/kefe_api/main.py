@@ -17,6 +17,9 @@ from kefe_api.infrastructure.persistence import (
     build_progress_repository,
     build_share_repository,
 )
+from kefe_api.infrastructure.raw_evidence_runtime import (
+    build_raw_source_evidence_store,
+)
 from kefe_api.modules.admin_security.content_authoring import SecuredContentAuthoringService
 from kefe_api.modules.admin_security.content_configuration import (
     SecuredContentConfigurationService,
@@ -107,6 +110,7 @@ def create_app() -> FastAPI:
     content_authoring_repository = build_content_authoring_repository(settings)
     content_configuration_repository = build_content_configuration_repository(settings)
     admin_session_store = build_admin_session_store(settings)
+    raw_source_evidence_store = build_raw_source_evidence_store(settings)
 
     admin_security_service = AdminSecurityService(
         session_resolver=admin_session_store,
@@ -194,6 +198,7 @@ def create_app() -> FastAPI:
     app.state.privacy_service = PrivacyService(privacy_repository)
     app.state.content_authoring_repository = content_authoring_repository
     app.state.content_authoring_service = content_authoring_service
+    app.state.raw_source_evidence_store = raw_source_evidence_store
     app.state.knowledge_repository = editorial_pipeline.knowledge_repository
     app.state.source_capture_registry = editorial_pipeline.source_capture_registry
     app.state.source_acquisition_observer = (
