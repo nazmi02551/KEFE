@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 from types import SimpleNamespace
 from uuid import uuid4
@@ -59,7 +60,7 @@ def test_pipeline_target_parser_requires_exact_version_and_budget() -> None:
     assert target.pipeline_version == "1.2.0"
     assert target.max_runs == 7
 
-    with pytest.raises(Exception):
+    with pytest.raises(argparse.ArgumentTypeError):
         parse_pipeline_target("NEWS_PIPELINE:7")
 
 
