@@ -218,6 +218,15 @@ def create_app() -> FastAPI:
     )
     app.state.ingestion_worker_observer = editorial_pipeline.ingestion_worker_observer
     app.state.ingestion_worker_runner = editorial_pipeline.ingestion_worker_runner
+    app.state.content_supply_cycle_repository = (
+        editorial_pipeline.content_supply_cycle_repository
+    )
+    app.state.content_supply_cycle_observer = (
+        editorial_pipeline.content_supply_cycle_observer
+    )
+    app.state.content_supply_cycle_service = (
+        editorial_pipeline.content_supply_cycle_service
+    )
     app.state.proposal_review_queue_repository = (
         editorial_pipeline.proposal_queue_repository
     )
