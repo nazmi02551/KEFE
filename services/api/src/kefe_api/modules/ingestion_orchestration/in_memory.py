@@ -80,7 +80,10 @@ class InMemoryIngestionOrchestrationRepository:
             ]
             return tuple(
                 deepcopy(item)
-                for item in sorted(items, key=lambda value: (value.started_at, value.attempt_no))
+                for item in sorted(
+                    items,
+                    key=lambda value: (value.started_at, value.attempt_no),
+                )
             )
 
     def add_proposal(self, proposal: Proposal) -> None:
@@ -108,7 +111,11 @@ class InMemoryIngestionOrchestrationRepository:
             return tuple(
                 deepcopy(item)
                 for item in sorted(
-                    (proposal for proposal in self._proposals.values() if proposal.run_id == run_id),
+                    (
+                        proposal
+                        for proposal in self._proposals.values()
+                        if proposal.run_id == run_id
+                    ),
                     key=lambda value: (value.created_at, str(value.id)),
                 )
             )
