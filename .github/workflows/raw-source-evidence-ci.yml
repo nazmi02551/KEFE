@@ -4,6 +4,10 @@ on:
   pull_request:
     paths:
       - 'services/api/src/kefe_api/modules/knowledge/source_evidence.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_evidence_backend.py'
+      - 'services/api/src/kefe_api/infrastructure/raw_evidence_runtime.py'
+      - 'services/api/src/kefe_api/core/settings.py'
+      - 'services/api/src/kefe_api/main.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_evidence_capture.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_capture.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_auth.py'
@@ -11,16 +15,27 @@ on:
       - 'services/api/src/kefe_api/modules/knowledge/provider_secret_execution.py'
       - 'services/api/src/kefe_api/modules/knowledge/source_acquisition.py'
       - 'services/api/tests/test_source_evidence.py'
+      - 'services/api/tests/test_source_evidence_backend.py'
+      - 'services/api/tests/test_raw_evidence_runtime.py'
+      - 'services/api/tests/test_durable_raw_evidence_backend_architecture.py'
       - 'services/api/tests/test_provider_http_evidence_capture.py'
       - 'services/api/tests/test_raw_source_evidence_architecture.py'
       - 'services/api/tools/check_raw_source_evidence_contract.py'
+      - 'services/api/tools/check_durable_raw_evidence_backend_contract.py'
       - 'docs/adr/0085-immutable-raw-source-evidence-and-content-addressed-capture-assembly.md'
+      - 'docs/adr/0086-durable-raw-evidence-backend-capability-and-no-fallback-runtime.md'
       - 'docs/contracts/raw-source-evidence-slice49.v1.json'
+      - 'docs/contracts/durable-raw-evidence-backend-slice50.v1.json'
       - '.github/workflows/raw-source-evidence-ci.yml'
+      - '.github/workflows/durable-raw-evidence-backend-ci.yml'
   push:
     branches: [main]
     paths:
       - 'services/api/src/kefe_api/modules/knowledge/source_evidence.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_evidence_backend.py'
+      - 'services/api/src/kefe_api/infrastructure/raw_evidence_runtime.py'
+      - 'services/api/src/kefe_api/core/settings.py'
+      - 'services/api/src/kefe_api/main.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_evidence_capture.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_capture.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_auth.py'
@@ -28,12 +43,19 @@ on:
       - 'services/api/src/kefe_api/modules/knowledge/provider_secret_execution.py'
       - 'services/api/src/kefe_api/modules/knowledge/source_acquisition.py'
       - 'services/api/tests/test_source_evidence.py'
+      - 'services/api/tests/test_source_evidence_backend.py'
+      - 'services/api/tests/test_raw_evidence_runtime.py'
+      - 'services/api/tests/test_durable_raw_evidence_backend_architecture.py'
       - 'services/api/tests/test_provider_http_evidence_capture.py'
       - 'services/api/tests/test_raw_source_evidence_architecture.py'
       - 'services/api/tools/check_raw_source_evidence_contract.py'
+      - 'services/api/tools/check_durable_raw_evidence_backend_contract.py'
       - 'docs/adr/0085-immutable-raw-source-evidence-and-content-addressed-capture-assembly.md'
+      - 'docs/adr/0086-durable-raw-evidence-backend-capability-and-no-fallback-runtime.md'
       - 'docs/contracts/raw-source-evidence-slice49.v1.json'
+      - 'docs/contracts/durable-raw-evidence-backend-slice50.v1.json'
       - '.github/workflows/raw-source-evidence-ci.yml'
+      - '.github/workflows/durable-raw-evidence-backend-ci.yml'
 
 permissions:
   contents: read
