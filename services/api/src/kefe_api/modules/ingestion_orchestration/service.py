@@ -193,6 +193,7 @@ class IngestionOrchestrationService:
             self._repository.update_run(run.transition(IngestionRunState.FAILED_FINAL))
             return execution
 
+        completed_at = utcnow()
         execution = StageExecution(
             id=uuid4(),
             run_id=run_id,
@@ -205,13 +206,12 @@ class IngestionOrchestrationService:
             started_at=started_at,
             outcome=StageOutcome.SUCCEEDED,
             output_hash=result.output_hash,
-            completed_at=utcnow(),
+            completed_at=completed_at,
             execution_ref=execution_ref,
             trace_id=trace_id,
         )
-        self._repository.add_stage_execution(execution)
-        for draft in result.proposals:
-            proposal = Proposal(
+        proposals = tuple(
+            Proposal(
                 id=uuid4(),
                 proposal_kind=draft.proposal_kind,
                 payload_schema_ref=draft.payload_schema_ref,
@@ -220,7 +220,7 @@ class IngestionOrchestrationService:
                 payload_hash=stable_payload_hash(draft.payload),
                 run_id=run_id,
                 stage_execution_id=execution.id,
-                created_at=utcnow(),
+                created_at=completed_at,
                 taxonomy_version=draft.taxonomy_version,
                 configuration_version=draft.configuration_version,
                 methodology_version=draft.methodology_version,
@@ -230,7 +230,9 @@ class IngestionOrchestrationService:
                 provenance_ref=draft.provenance_ref,
                 supersedes_proposal_id=draft.supersedes_proposal_id,
             )
-            self._repository.add_proposal(proposal)
+            for draft in result.proposals
+        )
+        self._repository.complete_successful_stage(execution, proposals)
         return execution
 
     def requeue(self, run_id: UUID) -> IngestionRun:
