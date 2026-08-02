@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import subprocess
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
@@ -215,5 +216,34 @@ def test_postgres_public_context_rejects_wrong_or_expired_permit() -> None:
                 adapter_code=adapter_code,
                 at=base + timedelta(seconds=30),
             )
+    finally:
+        _cleanup(engine, adapter_code)
+
+
+def test_migration_downgrade_refuses_public_rows_and_preserves_head() -> None:
+    engine = create_engine(os.environ["KEFE_DATABASE_URL"])
+    base = datetime.now(UTC).replace(microsecond=0)
+    adapter_code = f"test.pg_downgrade_public_{uuid4().hex[:8]}.v1"
+    try:
+        _register(
+            engine,
+            adapter_code=adapter_code,
+            base=base,
+            mode=ProviderCredentialMode.PUBLIC,
+        )
+        result = subprocess.run(
+            ["alembic", "downgrade", "20260802_0024"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert result.returncode != 0
+        assert "cannot downgrade while PUBLIC provider capabilities exist" in (
+            result.stdout + result.stderr
+        )
+        with engine.connect() as connection:
+            assert connection.execute(
+                text("SELECT version_num FROM alembic_version")
+            ).scalar_one() == "20260803_0025"
     finally:
         _cleanup(engine, adapter_code)
