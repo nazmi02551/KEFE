@@ -20,9 +20,9 @@ def _require_utc(value: datetime, field_name: str) -> None:
 class ProviderPermitExecutionContext:
     permit_id: UUID
     adapter_code: str
-    credential_mode: ProviderCredentialMode
     secret_ref: str | None = field(repr=False)
     permit_expires_at: datetime
+    credential_mode: ProviderCredentialMode = ProviderCredentialMode.SECRET_REF
 
     def __post_init__(self) -> None:
         require_versioned_adapter_code(self.adapter_code)
