@@ -31,6 +31,7 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
             AdminRole.EDITOR: frozenset(
                 {
                     AdminCapability.CONTENT_CREATE,
+                    AdminCapability.CONTENT_PROJECT,
                     AdminCapability.CONTENT_EDIT,
                     AdminCapability.CONTENT_SUBMIT_REVIEW,
                 }
