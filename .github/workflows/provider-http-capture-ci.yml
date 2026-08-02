@@ -4,30 +4,46 @@ on:
   pull_request:
     paths:
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_capture.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_http_evidence_capture.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_evidence.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_auth.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_transport.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_secret_execution.py'
       - 'services/api/src/kefe_api/modules/knowledge/source_acquisition.py'
       - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
       - 'services/api/tests/test_provider_http_capture*.py'
+      - 'services/api/tests/test_provider_http_evidence_capture.py'
+      - 'services/api/tests/test_source_evidence.py'
       - 'services/api/tools/check_provider_http_capture_contract.py'
+      - 'services/api/tools/check_raw_source_evidence_contract.py'
       - 'docs/adr/0084-provider-neutral-http-capture-adapter-and-bounded-response-parsing.md'
+      - 'docs/adr/0085-immutable-raw-source-evidence-and-content-addressed-capture-assembly.md'
       - 'docs/contracts/provider-http-capture-slice48.v1.json'
+      - 'docs/contracts/raw-source-evidence-slice49.v1.json'
       - '.github/workflows/provider-http-capture-ci.yml'
+      - '.github/workflows/raw-source-evidence-ci.yml'
   push:
     branches: [main]
     paths:
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_capture.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_http_evidence_capture.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_evidence.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_auth.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_transport.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_secret_execution.py'
       - 'services/api/src/kefe_api/modules/knowledge/source_acquisition.py'
       - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
       - 'services/api/tests/test_provider_http_capture*.py'
+      - 'services/api/tests/test_provider_http_evidence_capture.py'
+      - 'services/api/tests/test_source_evidence.py'
       - 'services/api/tools/check_provider_http_capture_contract.py'
+      - 'services/api/tools/check_raw_source_evidence_contract.py'
       - 'docs/adr/0084-provider-neutral-http-capture-adapter-and-bounded-response-parsing.md'
+      - 'docs/adr/0085-immutable-raw-source-evidence-and-content-addressed-capture-assembly.md'
       - 'docs/contracts/provider-http-capture-slice48.v1.json'
+      - 'docs/contracts/raw-source-evidence-slice49.v1.json'
       - '.github/workflows/provider-http-capture-ci.yml'
+      - '.github/workflows/raw-source-evidence-ci.yml'
 
 permissions:
   contents: read
