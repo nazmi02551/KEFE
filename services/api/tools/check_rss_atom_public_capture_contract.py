@@ -63,7 +63,6 @@ def main() -> None:
 
     public_http = PUBLIC_HTTP.read_text(encoding="utf-8")
     rss_atom = RSS_ATOM.read_text(encoding="utf-8")
-    public_execution = PUBLIC_EXECUTION.read_text(encoding="utf-8")
     pipeline = PIPELINE.read_text(encoding="utf-8")
     main_source = MAIN.read_text(encoding="utf-8")
     tests = TEST.read_text(encoding="utf-8")
@@ -192,7 +191,10 @@ def main() -> None:
 
     if "InMemoryPublicSourceCaptureRegistry()" not in pipeline:
         fail("production public adapter registry must remain empty")
-    if "StrictRssAtomCaptureDefinition(" in pipeline or "StrictRssAtomCaptureDefinition(" in main_source:
+    if (
+        "StrictRssAtomCaptureDefinition(" in pipeline
+        or "StrictRssAtomCaptureDefinition(" in main_source
+    ):
         fail("production composition must not register an RSS/Atom adapter")
     if contract.get("composition", {}).get(
         "production_rss_atom_adapters_registered"
