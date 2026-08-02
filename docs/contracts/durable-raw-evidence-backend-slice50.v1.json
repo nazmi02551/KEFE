@@ -1,0 +1,80 @@
+{
+  "contract": "durable-raw-evidence-backend-slice50",
+  "version": "1.0.0",
+  "status": "accepted",
+  "runtime_modes": [
+    "DISABLED",
+    "EXTERNAL_DURABLE"
+  ],
+  "profile": {
+    "versioned_profile_code": true,
+    "versioned_backend_code": true,
+    "canonical_namespace_max_chars": 128,
+    "max_object_bytes": 10485760,
+    "min_timeout_ms": 50,
+    "max_timeout_ms": 30000,
+    "atomic_put_if_absent": true,
+    "immutable_objects": true,
+    "read_after_write_verification": true,
+    "capability_evidence_reference": "opaque-only"
+  },
+  "backend_port": {
+    "operations": [
+      "put_if_absent",
+      "read_exact"
+    ],
+    "credentials_exposed": false,
+    "endpoint_exposed": false,
+    "provider_context_exposed": false,
+    "autonomous_retries": 0
+  },
+  "durable_store_order": [
+    "validate-input",
+    "compute-canonical-sha256",
+    "derive-deterministic-object-key",
+    "atomic-put-if-absent",
+    "read-exact",
+    "verify-object-key-body-media-type",
+    "return-slice49-seal"
+  ],
+  "composition": {
+    "production_profiles_registered": 0,
+    "production_backends_registered": 0,
+    "disabled_store": "UnconfiguredRawSourceEvidenceStore",
+    "external_missing_selection": "startup-failure",
+    "external_missing_profile": "startup-failure",
+    "external_missing_backend": "startup-failure",
+    "external_in_memory_fallback": false,
+    "external_disabled_fallback": false
+  },
+  "fixed_error_codes": [
+    "RAW_EVIDENCE_BACKEND_TIMEOUT",
+    "RAW_EVIDENCE_BACKEND_UNAVAILABLE",
+    "RAW_EVIDENCE_BACKEND_CONTRACT_INVALID",
+    "RAW_EVIDENCE_READ_AFTER_WRITE_MISSING",
+    "RAW_EVIDENCE_READ_AFTER_WRITE_MISMATCH"
+  ],
+  "invariants": [
+    "KEFE computes the canonical SHA-256 before backend invocation.",
+    "The object key is deterministic and derived only from the capability namespace and canonical digest.",
+    "Every successful or already-existing write is followed by exact read-after-write verification.",
+    "The returned seal is created only after exact object-key, body and media-type verification.",
+    "EXTERNAL_DURABLE never falls back to in-memory or disabled storage.",
+    "No concrete storage vendor, endpoint, credential or production profile is introduced.",
+    "No raw evidence body or backend exception text enters repr, operational output or error text."
+  ],
+  "exclusions": [
+    "concrete-object-storage-backend",
+    "credentials-or-request-signing",
+    "encryption-or-kms-claim",
+    "retention-deletion-or-legal-hold",
+    "malware-scanning",
+    "compression-or-replication",
+    "deployed-storage-monitoring-slo-or-rollback",
+    "real-provider-parser",
+    "live-external-request",
+    "admin-provider-ui",
+    "automatic-editorial-publication",
+    "phone-facing-behavior"
+  ]
+}
