@@ -103,6 +103,7 @@ _ALLOWED_TRANSITIONS: dict[IngestionRunState, frozenset[IngestionRunState]] = {
     ),
     IngestionRunState.RUNNING: frozenset(
         {
+            IngestionRunState.QUEUED,
             IngestionRunState.SUCCEEDED,
             IngestionRunState.FAILED_RETRYABLE,
             IngestionRunState.FAILED_FINAL,
