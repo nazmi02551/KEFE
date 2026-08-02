@@ -19,6 +19,7 @@ class IngestionRunLeaseRepository(Protocol):
         claimed_at: datetime,
         expires_at: datetime,
         pipeline_code: str | None = None,
+        pipeline_version: str | None = None,
     ) -> IngestionRunLeaseClaim | None: ...
 
     def heartbeat(
