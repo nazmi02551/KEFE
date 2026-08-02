@@ -39,6 +39,7 @@ class PostgresIngestionRunLeaseRepository:
         claimed_at: datetime,
         expires_at: datetime,
         pipeline_code: str | None = None,
+        pipeline_version: str | None = None,
     ) -> IngestionRunLeaseClaim | None:
         try:
             with self._engine.begin() as connection:
@@ -57,6 +58,9 @@ class PostgresIngestionRunLeaseRepository:
                 if pipeline_code is not None:
                     clauses.append("r.pipeline_code = :pipeline_code")
                     params["pipeline_code"] = pipeline_code
+                if pipeline_version is not None:
+                    clauses.append("r.pipeline_version = :pipeline_version")
+                    params["pipeline_version"] = pipeline_version
                 row = connection.execute(
                     text(
                         "SELECT r.* FROM ingestion.ingestion_run r WHERE "
