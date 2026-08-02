@@ -9,6 +9,7 @@ from kefe_api.modules.knowledge.provider_control import (
     ProviderAdmissionResult,
     ProviderCapabilityLifecycle,
     ProviderCapturePermit,
+    ProviderCredentialMode,
     SourceProviderCapability,
 )
 from kefe_api.modules.knowledge.provider_control_ports import (
@@ -33,18 +34,20 @@ class SourceProviderAdmissionService:
         self,
         *,
         adapter_code: str,
-        secret_ref: str,
+        secret_ref: str | None,
         quota_limit: int,
         quota_window_seconds: int,
         failure_threshold: int,
         circuit_open_seconds: int,
         permit_ttl_seconds: int,
         created_at: datetime | None = None,
+        credential_mode: ProviderCredentialMode = ProviderCredentialMode.SECRET_REF,
     ) -> SourceProviderCapability:
         at = created_at or self._clock()
         return self._repository.create_or_get(
             SourceProviderCapability.create(
                 adapter_code=adapter_code,
+                credential_mode=credential_mode,
                 secret_ref=secret_ref,
                 quota_limit=quota_limit,
                 quota_window_seconds=quota_window_seconds,
