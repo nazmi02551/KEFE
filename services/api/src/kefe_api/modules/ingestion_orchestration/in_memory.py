@@ -116,6 +116,24 @@ class InMemoryIngestionOrchestrationRepository:
                 for item in sorted(items, key=lambda value: (value.created_at, str(value.id)))
             )
 
+    def list_pending_proposals(
+        self,
+        *,
+        proposal_kind: str | None = None,
+        limit: int = 50,
+    ) -> tuple[Proposal, ...]:
+        if not 1 <= limit <= 100:
+            raise ValueError("limit must be between 1 and 100")
+        with self._lock:
+            items = [
+                item
+                for item in self._proposals.values()
+                if item.id not in self._review_decisions
+                and (proposal_kind is None or item.proposal_kind == proposal_kind)
+            ]
+            ordered = sorted(items, key=lambda value: (value.created_at, str(value.id)))
+            return tuple(deepcopy(item) for item in ordered[:limit])
+
     def add_review_decision(self, decision: ProposalReviewDecision) -> None:
         with self._lock:
             if decision.proposal_id not in self._proposals:
