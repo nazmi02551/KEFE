@@ -5,6 +5,7 @@ from uuid import UUID
 
 from kefe_api.modules.ingestion_orchestration.models import utcnow
 from kefe_api.modules.knowledge.provider_control import (
+    ProviderAdmissionOutcome,
     ProviderAdmissionResult,
     ProviderCapabilityLifecycle,
     ProviderCapturePermit,
@@ -12,6 +13,9 @@ from kefe_api.modules.knowledge.provider_control import (
 )
 from kefe_api.modules.knowledge.provider_control_ports import (
     SourceProviderAdmissionRepository,
+)
+from kefe_api.modules.knowledge.source_acquisition import (
+    SourceCaptureAdmissionDecision,
 )
 
 
@@ -98,6 +102,25 @@ class SourceProviderAdmissionService:
             at=at or self._clock(),
         )
 
+    def admit_capture(
+        self,
+        *,
+        adapter_code: str,
+        at: datetime,
+    ) -> SourceCaptureAdmissionDecision:
+        result = self.admit(adapter_code=adapter_code, at=at)
+        retryable = result.outcome in {
+            ProviderAdmissionOutcome.PAUSED,
+            ProviderAdmissionOutcome.RATE_LIMITED,
+            ProviderAdmissionOutcome.CIRCUIT_OPEN,
+        }
+        return SourceCaptureAdmissionDecision(
+            allowed=result.outcome is ProviderAdmissionOutcome.ADMITTED,
+            retryable=retryable,
+            permit_id=result.permit_id,
+            reason_code=result.reason_code,
+        )
+
     def complete_success(
         self,
         *,
@@ -109,6 +132,19 @@ class SourceProviderAdmissionService:
             permit_id=permit_id,
             adapter_code=adapter_code,
             at=at or self._clock(),
+        )
+
+    def complete_capture_success(
+        self,
+        *,
+        permit_id: UUID,
+        adapter_code: str,
+        at: datetime,
+    ) -> ProviderCapturePermit:
+        return self.complete_success(
+            permit_id=permit_id,
+            adapter_code=adapter_code,
+            at=at,
         )
 
     def complete_failure(
@@ -124,4 +160,19 @@ class SourceProviderAdmissionService:
             adapter_code=adapter_code,
             at=at or self._clock(),
             failure_code=failure_code,
+        )
+
+    def complete_capture_failure(
+        self,
+        *,
+        permit_id: UUID,
+        adapter_code: str,
+        failure_code: str,
+        at: datetime,
+    ) -> ProviderCapturePermit:
+        return self.complete_failure(
+            permit_id=permit_id,
+            adapter_code=adapter_code,
+            failure_code=failure_code,
+            at=at,
         )
