@@ -190,7 +190,7 @@ def main() -> None:
             fail(f"feed item extraction class is missing: {class_name}")
     processor = extraction_classes["FeedItemExtractionStageProcessor"]
     process = method(processor, "process")
-    process_source = ast.get_source_segment(ast.parse(extraction), process) or ""
+    process_source = ast.get_source_segment(extraction, process) or ""
     validation_position = process_source.find("definition.parse_response(")
     traversal_position = process_source.find("self._extract_validated_document(")
     proposal_position = process_source.find("ProposalDraft(")
