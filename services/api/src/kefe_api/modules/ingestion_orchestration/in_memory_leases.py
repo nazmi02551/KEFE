@@ -43,6 +43,7 @@ class InMemoryIngestionRunLeaseRepository:
         claimed_at: datetime,
         expires_at: datetime,
         pipeline_code: str | None = None,
+        pipeline_version: str | None = None,
     ) -> IngestionRunLeaseClaim | None:
         with self._ingestion._lock:
             self._recover_expired_locked(at=claimed_at, limit=1000)
@@ -52,6 +53,10 @@ class InMemoryIngestionRunLeaseRepository:
                 if run.state is IngestionRunState.QUEUED
                 and run.id not in self._active_by_run
                 and (pipeline_code is None or run.pipeline_code == pipeline_code)
+                and (
+                    pipeline_version is None
+                    or run.pipeline_version == pipeline_version
+                )
             ]
             if not candidates:
                 return None

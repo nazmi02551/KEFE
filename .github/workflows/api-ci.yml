@@ -107,6 +107,9 @@ jobs:
       - name: Ingestion worker lease contract
         working-directory: services/api
         run: python tools/check_ingestion_worker_lease_contract.py
+      - name: Ingestion worker runner contract
+        working-directory: services/api
+        run: python tools/check_ingestion_worker_runner_contract.py
       - name: Editorial Projection contract
         working-directory: services/api
         run: python tools/check_editorial_projection_contract.py
@@ -224,6 +227,7 @@ jobs:
           tests/test_ingestion_orchestration_postgres.py
           tests/test_ingestion_projection_bridge_postgres.py
           tests/test_ingestion_run_leases_postgres.py
+          tests/test_ingestion_worker_runner_postgres.py
           tests/test_admin_sessions_postgres.py
           tests/test_admin_http_postgres.py
           tests/test_admin_editorial_operations_http_postgres.py
