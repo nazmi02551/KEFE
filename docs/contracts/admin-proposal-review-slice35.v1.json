@@ -1,0 +1,87 @@
+{
+  "contract_version": "1.0.0",
+  "updated_at": "2026-08-02",
+  "source_issue": 188,
+  "capabilities": ["CAP-061", "CAP-065"],
+  "foundation_waves": ["F1", "F3"],
+  "authority": [
+    "docs/adr/0017-secured-admin-http-application-surface.md",
+    "docs/adr/0028-ingestion-extraction-orchestration.md",
+    "docs/contracts/admin-http-surface.v1.yaml",
+    "docs/contracts/reviewed-proposal-source-slice33.v1.json"
+  ],
+  "security": {
+    "dedicated_capability": "PROPOSAL_REVIEW",
+    "default_role": "REVIEWER",
+    "session_cookie": "kefe_admin_session",
+    "write_csrf_header": "X-KEFE-CSRF",
+    "reviewer_identity_source": "AdminPrincipal.audit_actor_ref",
+    "request_supplied_reviewer_forbidden": true,
+    "consumer_credentials_accepted": false
+  },
+  "queue": {
+    "path": "/internal/admin/v1/proposals/review-queue",
+    "method": "GET",
+    "pending_only": true,
+    "deterministic_order": ["created_at", "id"],
+    "proposal_kind_filter": true,
+    "default_limit": 50,
+    "maximum_limit": 100,
+    "includes_payload_and_provenance": true,
+    "terminally_reviewed_items_excluded": true
+  },
+  "detail": {
+    "path": "/internal/admin/v1/proposals/{proposal_id}",
+    "method": "GET",
+    "includes_terminal_review_when_present": true
+  },
+  "review_command": {
+    "path": "/internal/admin/v1/proposals/{proposal_id}/review",
+    "method": "POST",
+    "strict_extra_forbidden": true,
+    "request_fields": [
+      "decision",
+      "rationale",
+      "reason_code",
+      "policy_version",
+      "risk_policy_version"
+    ],
+    "forbidden_fields": [
+      "reviewer_ref",
+      "admin_subject_id",
+      "roles",
+      "capabilities",
+      "decided_at",
+      "proposal_kind",
+      "payload",
+      "payload_hash"
+    ],
+    "allowed_decisions": [
+      "ACCEPTED",
+      "REJECTED",
+      "CHANGES_REQUESTED"
+    ],
+    "terminal_and_immutable": true,
+    "duplicate_review_conflict": true,
+    "automatic_projection_forbidden": true,
+    "automatic_materialization_forbidden": true,
+    "automatic_authoring_transition_forbidden": true
+  },
+  "persistence": {
+    "existing_tables_only": true,
+    "new_migration_required": false,
+    "memory_and_postgres_required": true,
+    "review_unique_per_proposal": true
+  },
+  "excluded": [
+    "ADMIN_UI",
+    "EXTERNAL_PROVIDER_CALLS",
+    "AI_CALLS",
+    "AUTOMATIC_PROJECTION",
+    "REVIEW_LEASE_OR_ASSIGNMENT",
+    "BULK_REVIEW",
+    "CASE_BUILDER",
+    "FLOW_COMPOSER",
+    "PHONE_UI"
+  ]
+}
