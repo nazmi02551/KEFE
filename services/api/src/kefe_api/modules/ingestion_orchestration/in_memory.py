@@ -18,7 +18,6 @@ from kefe_api.modules.ingestion_orchestration.models import (
 from kefe_api.modules.ingestion_orchestration.review_queue import (
     ProposalQueueQuery,
     ProposalQueueRecord,
-    ProposalQueueReviewState,
 )
 
 
@@ -252,7 +251,7 @@ class InMemoryIngestionOrchestrationRepository:
     ) -> bool:
         proposal = record.proposal
         run = record.run
-        if query.review_state is not None and record.review_state is not query.review_state:
+        if query.review_state is not None and record.review_state != query.review_state:
             return False
         if query.proposal_kind is not None and proposal.proposal_kind != query.proposal_kind:
             return False
