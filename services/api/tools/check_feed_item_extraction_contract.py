@@ -22,6 +22,7 @@ ADR = (
 )
 CONTRACT = ROOT / "docs/contracts/feed-item-extraction-slice53.v1.json"
 WORKFLOW = ROOT / ".github/workflows/feed-item-extraction-ci.yml"
+INGESTION_WORKFLOW = ROOT / ".github/workflows/ingestion-worker-ci.yml"
 
 REQUIRED = (
     EVIDENCE,
@@ -34,6 +35,7 @@ REQUIRED = (
     ADR,
     CONTRACT,
     WORKFLOW,
+    INGESTION_WORKFLOW,
 )
 
 
@@ -89,6 +91,7 @@ def main() -> None:
     adr = ADR.read_text(encoding="utf-8")
     contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
     workflow = WORKFLOW.read_text(encoding="utf-8")
+    ingestion_workflow = INGESTION_WORKFLOW.read_text(encoding="utf-8")
 
     if contract.get("contract") != "feed-item-extraction-slice53":
         fail("feed item extraction contract identity drifted")
@@ -272,6 +275,15 @@ def main() -> None:
     ):
         if phrase not in workflow:
             fail(f"feed item extraction CI step missing: {phrase}")
+
+    for phrase in (
+        "name: Ingestion Worker CI",
+        "services/api/src/kefe_api/modules/ingestion_orchestration/*.py",
+        "tests/test_feed_item_extraction.py",
+        "Ingestion worker PostgreSQL behavior",
+    ):
+        if phrase not in ingestion_workflow:
+            fail(f"dedicated ingestion worker CI evidence missing: {phrase}")
 
     print("feed item extraction contract: PASS")
 
