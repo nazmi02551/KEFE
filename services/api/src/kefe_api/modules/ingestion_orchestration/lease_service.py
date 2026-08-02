@@ -38,18 +38,26 @@ class IngestionRunLeaseService:
         worker_ref: str,
         ttl_seconds: int,
         pipeline_code: str | None = None,
+        pipeline_version: str | None = None,
         now=None,
     ) -> IngestionRunLeaseClaim | None:
         self._validate_worker_ref(worker_ref)
         self._validate_ttl(ttl_seconds)
         if pipeline_code is not None:
             require_text(pipeline_code, "pipeline_code")
+        if pipeline_version is not None:
+            require_text(pipeline_version, "pipeline_version")
+        if (pipeline_code is None) != (pipeline_version is None):
+            raise ValueError(
+                "pipeline_code and pipeline_version must be provided together"
+            )
         claimed_at = now or utcnow()
         return self._repository.claim_next(
             worker_ref=worker_ref,
             claimed_at=claimed_at,
             expires_at=claimed_at + timedelta(seconds=ttl_seconds),
             pipeline_code=pipeline_code,
+            pipeline_version=pipeline_version,
         )
 
     def heartbeat(
