@@ -46,16 +46,6 @@ class IngestionOrchestrationRepository(Protocol):
 
     def list_proposals(self, run_id: UUID) -> tuple[Proposal, ...]: ...
 
-    def list_proposal_queue(
-        self,
-        query: ProposalQueueQuery,
-    ) -> tuple[ProposalQueueRecord, ...]: ...
-
-    def get_proposal_queue_record(
-        self,
-        proposal_id: UUID,
-    ) -> ProposalQueueRecord | None: ...
-
     def add_review_decision(self, decision: ProposalReviewDecision) -> None: ...
 
     def get_review_decision(self, proposal_id: UUID) -> ProposalReviewDecision | None: ...
@@ -68,6 +58,18 @@ class IngestionOrchestrationRepository(Protocol):
         *,
         target_kind: str | None = None,
     ) -> ProposalMaterialization | None: ...
+
+
+class ProposalReviewQueueRepository(Protocol):
+    def list_proposal_queue(
+        self,
+        query: ProposalQueueQuery,
+    ) -> tuple[ProposalQueueRecord, ...]: ...
+
+    def get_proposal_queue_record(
+        self,
+        proposal_id: UUID,
+    ) -> ProposalQueueRecord | None: ...
 
 
 class StageProcessor(Protocol):
