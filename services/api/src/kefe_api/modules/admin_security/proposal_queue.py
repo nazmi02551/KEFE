@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import binascii
 import json
 from dataclasses import dataclass
 from datetime import datetime
@@ -127,7 +128,13 @@ class SecuredProposalQueueService:
                 raise ValueError("cursor datetime requires timezone")
             proposal_id = UUID(payload["proposal_id"])
             return created_at, proposal_id
-        except (TypeError, ValueError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        except (
+            TypeError,
+            ValueError,
+            UnicodeDecodeError,
+            json.JSONDecodeError,
+            binascii.Error,
+        ) as exc:
             raise DomainError(
                 "ADMIN_PROPOSAL_QUEUE_CURSOR_INVALID",
                 "Proposal queue cursor is invalid",
