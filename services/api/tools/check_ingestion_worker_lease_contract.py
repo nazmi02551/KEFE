@@ -197,7 +197,7 @@ def main() -> int:
             "with self._ingestion._lock:",
             "self._recover_expired_locked(at=claimed_at, limit=1000)",
             "key=lambda run: (run.updated_at, str(run.id))",
-            "run.transition(IngestionRunState.RUNNING",
+            "selected.transition(IngestionRunState.RUNNING",
             "run.transition(IngestionRunState.QUEUED",
             "self._active_by_run",
         ),
