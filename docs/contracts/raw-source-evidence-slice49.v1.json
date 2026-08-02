@@ -1,0 +1,76 @@
+{
+  "contract": "raw-source-evidence-slice49",
+  "version": 1,
+  "status": "accepted",
+  "parent_contract": "provider-http-capture-slice48",
+  "hash_algorithm": "sha256",
+  "content_hash_format": "sha256:<64-lowercase-hex>",
+  "storage_reference_format": "evidence://sha256/<64-lowercase-hex>",
+  "limits": {
+    "max_evidence_bytes": 10485760,
+    "max_adapter_code_chars": 160,
+    "autonomous_retries": 0
+  },
+  "execution_order": [
+    "build_plan",
+    "secure_http_execute",
+    "seal_raw_evidence",
+    "parse_bounded_response",
+    "assemble_captured_source"
+  ],
+  "seal_fields": [
+    "content_hash",
+    "storage_ref",
+    "byte_length",
+    "media_type",
+    "sealed_at"
+  ],
+  "parsed_source_fields": [
+    "external_id",
+    "canonical_url",
+    "publisher_or_issuer",
+    "published_at",
+    "language_code",
+    "jurisdiction_code"
+  ],
+  "fixed_error_codes": [
+    "SOURCE_RAW_EVIDENCE_STORE_UNAVAILABLE",
+    "SOURCE_RAW_EVIDENCE_STORE_FINAL",
+    "SOURCE_RAW_EVIDENCE_CONTRACT_INVALID",
+    "SOURCE_PROVIDER_HTTP_EVIDENCE_RESPONSE_INVALID"
+  ],
+  "invariants": [
+    "KEFE computes SHA-256 over the exact bounded HTTP response bytes before parsing.",
+    "Provider parsers cannot choose, supply or override content_hash or raw_storage_ref.",
+    "The evidence seal is immutable, slotted and repr-redacted.",
+    "The in-memory store owns an immutable byte copy and returns owned copies for inspection.",
+    "Identical bytes seal idempotently to the same canonical hash and reference.",
+    "A digest collision with different bytes fails closed.",
+    "The unconfigured store is retryable and does not claim production durability.",
+    "Raw body bytes never enter repr, operational results or bounded error text.",
+    "The parser receives only the redacted plan, bounded ProviderHttpResponse, trace_id and UTC time.",
+    "CapturedSource content_hash and raw_storage_ref come only from a validated evidence seal.",
+    "No live external request, concrete provider or durable object-store backend is required or claimed."
+  ],
+  "production": {
+    "concrete_provider_definitions_registered": 0,
+    "evidence_backed_adapters_registered": 0,
+    "durable_evidence_backend_configured": false
+  },
+  "exclusions": [
+    "S3/GCS/Azure/MinIO/filesystem production backend",
+    "encryption/KMS custody",
+    "retention/deletion/legal-hold policy",
+    "malware scanning",
+    "compression",
+    "real payload parser",
+    "real provider/adoption/auth profile",
+    "live external network",
+    "secret-manager integration",
+    "autonomous retry",
+    "Admin provider UI",
+    "automatic editorial publication",
+    "deployed SLO/alert/rollback evidence",
+    "phone-facing behavior"
+  ]
+}
