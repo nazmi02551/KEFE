@@ -1,0 +1,105 @@
+name: Provider Admission CI
+
+on:
+  pull_request:
+    paths:
+      - 'services/api/migrations/versions/20260802_0024_source_provider_admission.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_control*.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_acquisition.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_identity.py'
+      - 'services/api/src/kefe_api/infrastructure/postgres_source_provider_admission.py'
+      - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
+      - 'services/api/tests/test_provider_admission_*.py'
+      - 'services/api/tools/check_provider_admission_control_contract.py'
+      - 'docs/adr/0079-provider-capability-admission-control.md'
+      - 'docs/contracts/provider-admission-control-slice43.v1.json'
+      - '.github/workflows/provider-admission-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/api/migrations/versions/20260802_0024_source_provider_admission.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_control*.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_acquisition.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_identity.py'
+      - 'services/api/src/kefe_api/infrastructure/postgres_source_provider_admission.py'
+      - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
+      - 'services/api/tests/test_provider_admission_*.py'
+      - 'services/api/tools/check_provider_admission_control_contract.py'
+      - 'docs/adr/0079-provider-capability-admission-control.md'
+      - 'docs/contracts/provider-admission-control-slice43.v1.json'
+      - '.github/workflows/provider-admission-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  provider-admission:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: kefe
+          POSTGRES_USER: kefe
+          POSTGRES_PASSWORD: kefe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kefe -d kefe"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Ruff provider boundary
+        working-directory: services/api
+        run: >-
+          ruff check
+          src/kefe_api/modules/knowledge/provider_control.py
+          src/kefe_api/modules/knowledge/provider_control_ports.py
+          src/kefe_api/modules/knowledge/provider_control_memory.py
+          src/kefe_api/modules/knowledge/provider_control_service.py
+          src/kefe_api/modules/knowledge/source_acquisition.py
+          src/kefe_api/modules/knowledge/source_identity.py
+          src/kefe_api/infrastructure/postgres_source_provider_admission.py
+          tests/test_provider_admission_control.py
+          tests/test_provider_admission_control_postgres.py
+          tests/test_provider_admission_architecture.py
+          tools/check_provider_admission_control_contract.py
+      - name: Provider architecture fitness
+        working-directory: services/api
+        run: python tools/check_provider_admission_control_contract.py
+      - name: Provider memory and acquisition behavior
+        working-directory: services/api
+        run: >-
+          pytest
+          tests/test_provider_admission_control.py
+          tests/test_provider_admission_architecture.py
+      - name: Migrate PostgreSQL
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: alembic upgrade head
+      - name: Verify provider migration downgrade and upgrade
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: |
+          alembic downgrade 20260802_0023
+          alembic upgrade head
+      - name: PostgreSQL provider admission behavior
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+          KEFE_RUN_POSTGRES_TESTS: '1'
+        run: pytest tests/test_provider_admission_control_postgres.py
