@@ -124,6 +124,9 @@ from kefe_api.modules.knowledge.provider_public_execution import (
     PermitBoundPublicCaptureExecutor,
     PublicSourceCaptureRegistry,
 )
+from kefe_api.modules.knowledge.provider_public_http_capture import (
+    EvidenceBackedPublicHttpCaptureAdapterFactory,
+)
 from kefe_api.modules.knowledge.provider_secret_execution import (
     CredentialAwareSourceCaptureRegistry,
     InMemoryCredentialAwareSourceCaptureRegistry,
@@ -139,6 +142,7 @@ from kefe_api.modules.knowledge.source_acquisition import (
     SourceAcquisitionService,
     SourceCaptureRegistry,
 )
+from kefe_api.modules.knowledge.source_evidence import RawSourceEvidenceStore
 from kefe_api.modules.knowledge.source_scheduler_memory import (
     InMemorySourceAcquisitionSchedulerRepository,
 )
@@ -170,6 +174,7 @@ class EditorialPipeline:
     provider_http_observer: ProviderHttpObserver
     provider_http_transport: ControlledProviderHttpTransport
     secure_provider_http_executor: SecureProviderHttpExecutor
+    public_http_capture_adapter_factory: EvidenceBackedPublicHttpCaptureAdapterFactory
     source_acquisition_observer: SourceAcquisitionObserver
     source_acquisition_service: SourceAcquisitionService
     source_scheduler_repository: SourceAcquisitionSchedulerRepository
@@ -198,6 +203,7 @@ def build_editorial_pipeline(
     *,
     content_authoring_repository: ContentAuthoringRepository,
     admin_security_service: AdminSecurityService,
+    raw_source_evidence_store: RawSourceEvidenceStore,
 ) -> EditorialPipeline:
     if settings.persistence_backend == "memory":
         if not isinstance(
@@ -304,6 +310,12 @@ def build_editorial_pipeline(
         auth_registry=provider_http_auth_registry,
         transport=provider_http_transport,
     )
+    public_http_capture_adapter_factory = (
+        EvidenceBackedPublicHttpCaptureAdapterFactory(
+            transport=provider_http_transport,
+            evidence_store=raw_source_evidence_store,
+        )
+    )
     source_acquisition_observer: SourceAcquisitionObserver = (
         NoOpSourceAcquisitionObserver()
     )
@@ -381,6 +393,7 @@ def build_editorial_pipeline(
         provider_http_observer=provider_http_observer,
         provider_http_transport=provider_http_transport,
         secure_provider_http_executor=secure_provider_http_executor,
+        public_http_capture_adapter_factory=public_http_capture_adapter_factory,
         source_acquisition_observer=source_acquisition_observer,
         source_acquisition_service=source_acquisition_service,
         source_scheduler_repository=source_scheduler_repository,

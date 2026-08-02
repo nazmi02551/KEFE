@@ -130,6 +130,7 @@ def create_app() -> FastAPI:
         settings,
         content_authoring_repository=content_authoring_repository,
         admin_security_service=admin_security_service,
+        raw_source_evidence_store=raw_source_evidence_store,
     )
     content_configuration_service = ContentConfigurationService(
         repository=content_configuration_repository,
@@ -216,6 +217,9 @@ def create_app() -> FastAPI:
         editorial_pipeline.public_provider_capture_executor
     )
     app.state.provider_capture_executor = editorial_pipeline.provider_capture_executor
+    app.state.public_http_capture_adapter_factory = (
+        editorial_pipeline.public_http_capture_adapter_factory
+    )
     app.state.source_acquisition_observer = (
         editorial_pipeline.source_acquisition_observer
     )
