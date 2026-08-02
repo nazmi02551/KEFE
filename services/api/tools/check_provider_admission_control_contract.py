@@ -19,6 +19,14 @@ MIGRATION = (
     / "versions"
     / "20260802_0024_source_provider_admission.py"
 )
+PUBLIC_MIGRATION = (
+    REPO_ROOT
+    / "services"
+    / "api"
+    / "migrations"
+    / "versions"
+    / "20260803_0025_public_provider_credential_mode.py"
+)
 KNOWLEDGE = (
     REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "knowledge"
 )
@@ -28,6 +36,7 @@ PORT = KNOWLEDGE / "provider_control_ports.py"
 MEMORY = KNOWLEDGE / "provider_control_memory.py"
 SERVICE = KNOWLEDGE / "provider_control_service.py"
 ACQUISITION = KNOWLEDGE / "source_acquisition.py"
+PUBLIC_EXECUTION = KNOWLEDGE / "provider_public_execution.py"
 POSTGRES = (
     REPO_ROOT
     / "services"
@@ -90,12 +99,14 @@ def main() -> int:
     required = (
         CONTRACT,
         MIGRATION,
+        PUBLIC_MIGRATION,
         IDENTITY,
         DOMAIN,
         PORT,
         MEMORY,
         SERVICE,
         ACQUISITION,
+        PUBLIC_EXECUTION,
         POSTGRES,
         PIPELINE,
         MEMORY_TEST,
@@ -110,12 +121,14 @@ def main() -> int:
     problems: list[str] = []
     contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
     migration = MIGRATION.read_text(encoding="utf-8")
+    public_migration = PUBLIC_MIGRATION.read_text(encoding="utf-8")
     identity = IDENTITY.read_text(encoding="utf-8")
     domain = DOMAIN.read_text(encoding="utf-8")
     port = PORT.read_text(encoding="utf-8")
     memory = MEMORY.read_text(encoding="utf-8")
     service = SERVICE.read_text(encoding="utf-8")
     acquisition = ACQUISITION.read_text(encoding="utf-8")
+    public_execution = PUBLIC_EXECUTION.read_text(encoding="utf-8")
     postgres = POSTGRES.read_text(encoding="utf-8")
     pipeline = PIPELINE.read_text(encoding="utf-8")
     memory_test = MEMORY_TEST.read_text(encoding="utf-8")
@@ -124,8 +137,12 @@ def main() -> int:
     capability = contract.get("capability", {})
     if capability.get("configuration_immutable") is not True:
         problems.append("provider capability configuration must remain immutable")
-    if capability.get("secret_reference_only") is not True:
-        problems.append("provider capability must remain secret-reference-only")
+    if capability.get("credential_modes") != ["PUBLIC", "SECRET_REF"]:
+        problems.append("provider credential modes must be exact PUBLIC and SECRET_REF")
+    if capability.get("public_secret_reference", "missing") is not None:
+        problems.append("PUBLIC provider capability must not contain secret_ref")
+    if capability.get("secret_ref_mode_reference_only") is not True:
+        problems.append("SECRET_REF mode must remain opaque-reference-only")
     if capability.get("secret_value_persisted") is not False:
         problems.append("provider secret values may not be persisted")
     quota = contract.get("quota", {})
@@ -180,10 +197,35 @@ def main() -> int:
     )
     _require(
         problems,
+        "public credential migration",
+        public_migration,
+        (
+            'revision = "20260803_0025"',
+            'down_revision = "20260802_0024"',
+            "ADD COLUMN credential_mode text NOT NULL DEFAULT 'SECRET_REF'",
+            "ALTER COLUMN secret_ref DROP NOT NULL",
+            "source_provider_credential_mode_ck",
+            "source_provider_credential_binding_ck",
+            "credential_mode = 'PUBLIC' AND secret_ref IS NULL",
+            "credential_mode = 'SECRET_REF'",
+            "cannot downgrade while PUBLIC provider capabilities exist",
+            "ALTER COLUMN secret_ref SET NOT NULL",
+            "DROP COLUMN credential_mode",
+        ),
+    )
+    _require(
+        problems,
         "provider domain",
         domain,
         (
             "def require_secret_reference(",
+            "class ProviderCredentialMode(StrEnum):",
+            'PUBLIC = "PUBLIC"',
+            'SECRET_REF = "SECRET_REF"',
+            "credential_mode: ProviderCredentialMode",
+            "secret_ref: str | None",
+            "PUBLIC provider capability cannot contain secret_ref",
+            "SECRET_REF provider capability requires secret_ref",
             "class ProviderCapabilityLifecycle(StrEnum):",
             'RETIRED = "RETIRED"',
             "class ProviderCircuitState(StrEnum):",
@@ -209,6 +251,7 @@ def main() -> int:
         (
             "class SourceProviderAdmissionRepository(Protocol):",
             "def create_or_get(",
+            "def get_active_execution_context(",
             "def transition_lifecycle(",
             "def admit(",
             "def complete_success(",
@@ -221,6 +264,8 @@ def main() -> int:
         memory,
         (
             "with self._lock:",
+            "credential_mode=capability.credential_mode",
+            "secret_ref=capability.secret_ref",
             "capability.roll_quota_window(at=at)",
             "capability.prepare_circuit_for_admission(at=at)",
             "self._recover_expired_locked(capability, at=at)",
@@ -234,6 +279,8 @@ def main() -> int:
         "PostgreSQL provider control",
         postgres,
         (
+            "credential_mode",
+            "ProviderCredentialMode(row[\"credential_mode\"])",
             "FOR UPDATE",
             "FOR UPDATE SKIP LOCKED",
             "source_provider_capture_permit",
@@ -253,12 +300,27 @@ def main() -> int:
         service,
         (
             "class SourceProviderAdmissionService:",
+            "credential_mode: ProviderCredentialMode = ProviderCredentialMode.SECRET_REF",
             "def register(",
             "def admit_capture(",
             "ProviderAdmissionOutcome.RATE_LIMITED",
             "ProviderAdmissionOutcome.CIRCUIT_OPEN",
             "def complete_capture_success(",
             "def complete_capture_failure(",
+        ),
+    )
+    _require(
+        problems,
+        "public provider execution",
+        public_execution,
+        (
+            "class PublicSourceCaptureAdapter(Protocol):",
+            "class InMemoryPublicSourceCaptureRegistry:",
+            "class PermitBoundPublicCaptureExecutor:",
+            "class CredentialModeRoutingProviderCaptureExecutor:",
+            "ProviderCredentialMode.PUBLIC",
+            "ProviderCredentialMode.SECRET_REF",
+            "SOURCE_PROVIDER_CREDENTIAL_MODE_MISMATCH",
         ),
     )
     _require(
@@ -270,7 +332,7 @@ def main() -> int:
             "class SourceCaptureAdmission(Protocol):",
             "admission: SourceCaptureAdmission | None = None",
             "self._admission.admit_capture(",
-            "adapter.capture(",
+            "self._capture_executor.capture(",
             "self._admission.complete_capture_success(",
             "self._admission.complete_capture_failure(",
             "SOURCE_PROVIDER_PERMIT_COMPLETION_FAILED",
@@ -278,7 +340,7 @@ def main() -> int:
         ),
     )
     admit_position = acquisition.find("self._admission.admit_capture(")
-    capture_position = acquisition.find("adapter.capture(")
+    capture_position = acquisition.find("self._capture_executor.capture(")
     completion_position = acquisition.find(
         "self._admission.complete_capture_success("
     )
@@ -296,7 +358,10 @@ def main() -> int:
             "InMemorySourceProviderAdmissionRepository()",
             "PostgresSourceProviderAdmissionRepository(engine)",
             "SourceProviderAdmissionService(",
+            "InMemoryPublicSourceCaptureRegistry()",
+            "CredentialModeRoutingProviderCaptureExecutor(",
             "admission=provider_admission_service",
+            "capture_executor=provider_capture_executor",
             "source_capture_registry: SourceCaptureRegistry = InMemorySourceCaptureRegistry()",
         ),
     )
@@ -327,7 +392,9 @@ def main() -> int:
         ),
     )
 
-    forbidden_runtime = domain + port + memory + service + acquisition
+    forbidden_runtime = (
+        domain + port + memory + service + acquisition + public_execution
+    )
     for fragment in (
         "import requests",
         "import httpx",
