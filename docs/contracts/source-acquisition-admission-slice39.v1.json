@@ -1,0 +1,153 @@
+{
+  "contract": "source-acquisition-admission-slice39",
+  "version": "1.0.0",
+  "status": "accepted",
+  "issue": 202,
+  "parent_pr": 201,
+  "capabilities": ["CAP-054", "CAP-055", "CAP-065"],
+  "adapter_identity": {
+    "field": "adapter_code",
+    "selection": "EXACT_ONLY",
+    "format": "<namespace>.<name>.v<positive-integer>",
+    "immutable_semantics": true,
+    "duplicate_registration_rejected": true,
+    "provider_inference_forbidden": true,
+    "case_type_inference_forbidden": true
+  },
+  "capture_envelope": {
+    "type": "CapturedSource",
+    "required_fields": ["content_hash"],
+    "optional_fields": [
+      "external_id",
+      "canonical_url",
+      "publisher_or_issuer",
+      "published_at",
+      "language_code",
+      "jurisdiction_code",
+      "raw_storage_ref"
+    ],
+    "forbidden_fields": [
+      "raw_text",
+      "raw_body",
+      "raw_bytes",
+      "provider_response",
+      "sdk_object",
+      "credential",
+      "access_token",
+      "cookie"
+    ]
+  },
+  "command": {
+    "one_shot": true,
+    "adapter_code": "EXACT",
+    "pipeline_code": "EXACT",
+    "pipeline_version": "EXACT",
+    "configuration_hash_required": true,
+    "automatic_adapter_selection": false
+  },
+  "artifact": {
+    "aggregate": "SourceArtifact",
+    "fingerprint": ["adapter_code", "external_locator", "content_hash"],
+    "immutable": true,
+    "unchanged_capture_reuses_identity": true,
+    "changed_content_hash_creates_new_identity": true,
+    "raw_body_stored_in_domain": false
+  },
+  "run_admission": {
+    "aggregate": "IngestionRun",
+    "input_kind": "SOURCE_ARTIFACT",
+    "idempotency": "EXISTING_DETERMINISTIC_RUN_KEY",
+    "exact_pipeline_code": true,
+    "exact_pipeline_version": true,
+    "automatic_worker_invocation": false
+  },
+  "recovery": {
+    "write_sequence": ["SOURCE_ARTIFACT", "INGESTION_RUN"],
+    "cross_module_transaction_claimed": false,
+    "artifact_compensation_delete": false,
+    "preexisting_artifact_without_run_completed_by_replay": true
+  },
+  "outcomes": [
+    "ADMITTED",
+    "RETRYABLE_FAILURE",
+    "FINAL_FAILURE",
+    "BLOCKED"
+  ],
+  "failure_semantics": {
+    "retryable_capture_writes": false,
+    "final_capture_writes": false,
+    "missing_adapter_writes": false,
+    "unexpected_adapter_exception_text_exposed": false,
+    "persistence_admission_failure": "RETRYABLE_FAILURE"
+  },
+  "observer": {
+    "exactly_one_result_per_invocation": true,
+    "observer_failure_changes_result": false,
+    "allowed_fields": [
+      "outcome",
+      "adapter_code",
+      "pipeline_code",
+      "pipeline_version",
+      "trace_id",
+      "source_artifact_id",
+      "ingestion_run_id",
+      "duration_ms",
+      "error_code"
+    ],
+    "forbidden_fields": [
+      "raw_text",
+      "raw_body",
+      "raw_bytes",
+      "provider_response",
+      "proposal_payload",
+      "private_reason",
+      "credential",
+      "exception_text",
+      "consumer_actor_id",
+      "ideology",
+      "personality",
+      "psychometric",
+      "bias_score",
+      "causal_inference"
+    ]
+  },
+  "composition": {
+    "service_exposed_in_application_state": true,
+    "default_registry": "EMPTY",
+    "default_observer": "NO_OP",
+    "external_provider_configured": false
+  },
+  "exclusions": [
+    "REAL_PROVIDER_ADAPTER",
+    "NETWORK_REQUEST",
+    "SCRAPING",
+    "BROWSER_AUTOMATION",
+    "AI_CALL",
+    "NORMALIZATION",
+    "SCHEDULER_DAEMON",
+    "AUTOMATIC_RETRY_REQUEUE",
+    "WORKER_INVOCATION",
+    "AUTOMATIC_PROPOSAL_REVIEW",
+    "AUTOMATIC_EDITORIAL_PROJECTION",
+    "AUTHORING_LIFECYCLE_TRANSITION",
+    "ADMIN_HTTP_UI",
+    "CASE_BUILDER",
+    "FLOW_COMPOSER",
+    "PHONE_BEHAVIOR"
+  ],
+  "required_evidence": [
+    "EXACT_VERSIONED_ADAPTER_VALIDATION",
+    "EMPTY_PRODUCTION_REGISTRY",
+    "UNCHANGED_REPLAY_IDENTITY",
+    "CHANGED_HASH_NEW_IDENTITY",
+    "PREEXISTING_ARTIFACT_RECOVERY",
+    "FAILURE_ZERO_WRITES",
+    "CAPTURE_MODEL_PRIVACY_ALLOWLIST",
+    "OBSERVER_ALLOWLIST",
+    "MEMORY_POSTGRES_PARITY",
+    "ARCHITECTURE_FITNESS",
+    "EXACT_HEAD_API_CI",
+    "EXACT_HEAD_MVP_BETA_GATES",
+    "EXACT_HEAD_GLOBAL_READINESS"
+  ]
+}

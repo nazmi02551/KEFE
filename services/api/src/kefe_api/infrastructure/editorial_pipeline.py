@@ -13,6 +13,7 @@ from kefe_api.infrastructure.postgres_ingestion_orchestration import (
 from kefe_api.infrastructure.postgres_ingestion_run_leases import (
     PostgresIngestionRunLeaseRepository,
 )
+from kefe_api.infrastructure.postgres_knowledge import PostgresKnowledgeRepository
 from kefe_api.infrastructure.postgres_proposal_review_queue import (
     PostgresProposalReviewQueueRepository,
 )
@@ -62,10 +63,23 @@ from kefe_api.modules.ingestion_orchestration.worker_runtime import (
 from kefe_api.modules.ingestion_orchestration.worker_service import (
     IngestionWorkerRunner,
 )
+from kefe_api.modules.knowledge.in_memory import InMemoryKnowledgeRepository
+from kefe_api.modules.knowledge.ports import KnowledgeRepository
+from kefe_api.modules.knowledge.source_acquisition import (
+    InMemorySourceCaptureRegistry,
+    NoOpSourceAcquisitionObserver,
+    SourceAcquisitionObserver,
+    SourceAcquisitionService,
+    SourceCaptureRegistry,
+)
 
 
 @dataclass(frozen=True, slots=True)
 class EditorialPipeline:
+    knowledge_repository: KnowledgeRepository
+    source_capture_registry: SourceCaptureRegistry
+    source_acquisition_observer: SourceAcquisitionObserver
+    source_acquisition_service: SourceAcquisitionService
     ingestion_repository: IngestionOrchestrationRepository
     ingestion_service: IngestionOrchestrationService
     ingestion_lease_repository: IngestionRunLeaseRepository
@@ -93,6 +107,7 @@ def build_editorial_pipeline(
             raise RuntimeError(
                 "memory Editorial Projection requires in-memory Content Authoring"
             )
+        knowledge_repository: KnowledgeRepository = InMemoryKnowledgeRepository()
         memory_ingestion = InMemoryIngestionOrchestrationRepository()
         ingestion_repository: IngestionOrchestrationRepository = memory_ingestion
         ingestion_lease_repository: IngestionRunLeaseRepository = (
@@ -108,12 +123,23 @@ def build_editorial_pipeline(
                 "KEFE_DATABASE_URL is required when persistence_backend=postgres"
             )
         engine = build_engine(settings.database_url)
+        knowledge_repository = PostgresKnowledgeRepository(engine)
         ingestion_repository = PostgresIngestionOrchestrationRepository(engine)
         ingestion_lease_repository = PostgresIngestionRunLeaseRepository(engine)
         proposal_queue_repository = PostgresProposalReviewQueueRepository(engine)
         projection_repository = PostgresEditorialProjectionRepository(engine)
 
     ingestion_service = IngestionOrchestrationService(ingestion_repository)
+    source_capture_registry: SourceCaptureRegistry = InMemorySourceCaptureRegistry()
+    source_acquisition_observer: SourceAcquisitionObserver = (
+        NoOpSourceAcquisitionObserver()
+    )
+    source_acquisition_service = SourceAcquisitionService(
+        knowledge_repository=knowledge_repository,
+        ingestion_service=ingestion_service,
+        registry=source_capture_registry,
+        observer=source_acquisition_observer,
+    )
     ingestion_lease_service = IngestionRunLeaseService(ingestion_lease_repository)
     ingestion_worker_registry: IngestionWorkerRuntimeRegistry = (
         InMemoryIngestionWorkerRuntimeRegistry()
@@ -146,6 +172,10 @@ def build_editorial_pipeline(
         projection_repository,
     )
     return EditorialPipeline(
+        knowledge_repository=knowledge_repository,
+        source_capture_registry=source_capture_registry,
+        source_acquisition_observer=source_acquisition_observer,
+        source_acquisition_service=source_acquisition_service,
         ingestion_repository=ingestion_repository,
         ingestion_service=ingestion_service,
         ingestion_lease_repository=ingestion_lease_repository,

@@ -194,6 +194,12 @@ def create_app() -> FastAPI:
     app.state.privacy_service = PrivacyService(privacy_repository)
     app.state.content_authoring_repository = content_authoring_repository
     app.state.content_authoring_service = content_authoring_service
+    app.state.knowledge_repository = editorial_pipeline.knowledge_repository
+    app.state.source_capture_registry = editorial_pipeline.source_capture_registry
+    app.state.source_acquisition_observer = (
+        editorial_pipeline.source_acquisition_observer
+    )
+    app.state.source_acquisition_service = editorial_pipeline.source_acquisition_service
     app.state.ingestion_orchestration_repository = (
         editorial_pipeline.ingestion_repository
     )
