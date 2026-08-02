@@ -227,6 +227,12 @@ def create_app() -> FastAPI:
     app.state.content_supply_cycle_service = (
         editorial_pipeline.content_supply_cycle_service
     )
+    app.state.content_supply_health_repository = (
+        editorial_pipeline.content_supply_health_repository
+    )
+    app.state.content_supply_health_service = (
+        editorial_pipeline.content_supply_health_service
+    )
     app.state.proposal_review_queue_repository = (
         editorial_pipeline.proposal_queue_repository
     )
