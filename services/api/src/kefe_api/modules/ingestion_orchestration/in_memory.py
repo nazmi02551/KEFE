@@ -4,8 +4,12 @@ from copy import deepcopy
 from threading import RLock
 from uuid import UUID
 
+from kefe_api.modules.ingestion_orchestration.batch import (
+    order_successful_stage_batch,
+)
 from kefe_api.modules.ingestion_orchestration.models import (
     IngestionRun,
+    IngestionRunState,
     Proposal,
     ProposalMaterialization,
     ProposalReviewDecision,
@@ -51,17 +55,41 @@ class InMemoryIngestionOrchestrationRepository:
     def add_stage_execution(self, execution: StageExecution) -> None:
         with self._lock:
             self._require_run(execution.run_id)
-            if execution.id in self._stage_executions:
-                raise ValueError("stage execution already exists")
-            for current in self._stage_executions.values():
-                if (
-                    current.run_id == execution.run_id
-                    and current.stage_code == execution.stage_code
-                    and current.stage_version == execution.stage_version
-                    and current.attempt_no == execution.attempt_no
-                ):
-                    raise ValueError("stage attempt already exists")
+            self._validate_stage_execution_available(execution)
             self._stage_executions[execution.id] = deepcopy(execution)
+
+    def complete_successful_stage(
+        self,
+        execution: StageExecution,
+        proposals: tuple[Proposal, ...],
+    ) -> None:
+        with self._lock:
+            run = self._runs.get(execution.run_id)
+            if run is None:
+                raise KeyError(execution.run_id)
+            if run.state is not IngestionRunState.RUNNING:
+                raise ValueError("successful stage requires a RUNNING ingestion run")
+
+            ordered = order_successful_stage_batch(execution, proposals)
+            self._validate_stage_execution_available(execution)
+            batch_ids = {proposal.id for proposal in ordered}
+            for proposal in ordered:
+                if proposal.id in self._proposals:
+                    raise ValueError("proposal already exists")
+                target_id = proposal.supersedes_proposal_id
+                if target_id is None or target_id in batch_ids:
+                    continue
+                target = self._proposals.get(target_id)
+                if target is None:
+                    raise KeyError(target_id)
+                if target.run_id != execution.run_id:
+                    raise ValueError("proposal cannot supersede a proposal from another run")
+
+            execution_copy = deepcopy(execution)
+            proposal_copies = tuple(deepcopy(proposal) for proposal in ordered)
+            self._stage_executions[execution.id] = execution_copy
+            for proposal in proposal_copies:
+                self._proposals[proposal.id] = proposal
 
     def list_stage_executions(
         self,
@@ -95,8 +123,13 @@ class InMemoryIngestionOrchestrationRepository:
             if execution.run_id != proposal.run_id:
                 raise ValueError("proposal stage execution belongs to another run")
             if proposal.supersedes_proposal_id is not None:
-                if proposal.supersedes_proposal_id not in self._proposals:
+                superseded = self._proposals.get(proposal.supersedes_proposal_id)
+                if superseded is None:
                     raise KeyError(proposal.supersedes_proposal_id)
+                if superseded.run_id != proposal.run_id:
+                    raise ValueError(
+                        "proposal cannot supersede a proposal from another run"
+                    )
             if proposal.id in self._proposals:
                 raise ValueError("proposal already exists")
             self._proposals[proposal.id] = deepcopy(proposal)
@@ -168,6 +201,18 @@ class InMemoryIngestionOrchestrationRepository:
             if len(matches) > 1:
                 raise ValueError("proposal has multiple materialization target kinds")
             return deepcopy(matches[0])
+
+    def _validate_stage_execution_available(self, execution: StageExecution) -> None:
+        if execution.id in self._stage_executions:
+            raise ValueError("stage execution already exists")
+        for current in self._stage_executions.values():
+            if (
+                current.run_id == execution.run_id
+                and current.stage_code == execution.stage_code
+                and current.stage_version == execution.stage_version
+                and current.attempt_no == execution.attempt_no
+            ):
+                raise ValueError("stage attempt already exists")
 
     def _require_run(self, run_id: UUID) -> None:
         if run_id not in self._runs:

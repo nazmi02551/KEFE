@@ -6,6 +6,9 @@ from uuid import UUID
 from sqlalchemy import Engine, text
 from sqlalchemy.exc import IntegrityError
 
+from kefe_api.modules.ingestion_orchestration.batch import (
+    order_successful_stage_batch,
+)
 from kefe_api.modules.ingestion_orchestration.models import (
     ExecutorKind,
     IngestionRun,
@@ -109,36 +112,69 @@ class PostgresIngestionOrchestrationRepository:
                 raise KeyError(run.id)
 
     def add_stage_execution(self, execution: StageExecution) -> None:
-        self._insert(
-            """
-            INSERT INTO ingestion.stage_execution (
-                id, run_id, stage_code, stage_version, attempt_no, max_attempts,
-                executor_kind, input_hash, output_hash, started_at, completed_at,
-                outcome, error_code, execution_ref, trace_id
-            ) VALUES (
-                :id, :run_id, :stage_code, :stage_version, :attempt_no, :max_attempts,
-                :executor_kind, :input_hash, :output_hash, :started_at, :completed_at,
-                :outcome, :error_code, :execution_ref, :trace_id
-            )
-            """,
-            {
-                "id": execution.id,
-                "run_id": execution.run_id,
-                "stage_code": execution.stage_code,
-                "stage_version": execution.stage_version,
-                "attempt_no": execution.attempt_no,
-                "max_attempts": execution.max_attempts,
-                "executor_kind": execution.executor_kind.value,
-                "input_hash": execution.input_hash,
-                "output_hash": execution.output_hash,
-                "started_at": execution.started_at,
-                "completed_at": execution.completed_at,
-                "outcome": execution.outcome.value,
-                "error_code": execution.error_code,
-                "execution_ref": execution.execution_ref,
-                "trace_id": execution.trace_id,
-            },
-        )
+        try:
+            with self._engine.begin() as connection:
+                self._insert_stage_execution(connection, execution)
+        except IntegrityError as exc:
+            raise ValueError("ingestion persistence invariant violated") from exc
+
+    def complete_successful_stage(
+        self,
+        execution: StageExecution,
+        proposals: tuple[Proposal, ...],
+    ) -> None:
+        ordered = order_successful_stage_batch(execution, proposals)
+        batch_ids = {proposal.id for proposal in ordered}
+        try:
+            with self._engine.begin() as connection:
+                run_state = connection.execute(
+                    text(
+                        """
+                        SELECT state FROM ingestion.ingestion_run
+                        WHERE id = :run_id
+                        FOR UPDATE
+                        """
+                    ),
+                    {"run_id": execution.run_id},
+                ).scalar_one_or_none()
+                if run_state is None:
+                    raise KeyError(execution.run_id)
+                if run_state != IngestionRunState.RUNNING.value:
+                    raise ValueError(
+                        "successful stage requires a RUNNING ingestion run"
+                    )
+
+                for proposal in ordered:
+                    existing = connection.execute(
+                        text("SELECT 1 FROM ingestion.proposal WHERE id = :id"),
+                        {"id": proposal.id},
+                    ).scalar_one_or_none()
+                    if existing is not None:
+                        raise ValueError("proposal already exists")
+                    target_id = proposal.supersedes_proposal_id
+                    if target_id is None or target_id in batch_ids:
+                        continue
+                    target_run_id = connection.execute(
+                        text(
+                            """
+                            SELECT run_id FROM ingestion.proposal
+                            WHERE id = :proposal_id
+                            """
+                        ),
+                        {"proposal_id": target_id},
+                    ).scalar_one_or_none()
+                    if target_run_id is None:
+                        raise KeyError(target_id)
+                    if target_run_id != execution.run_id:
+                        raise ValueError(
+                            "proposal cannot supersede a proposal from another run"
+                        )
+
+                self._insert_stage_execution(connection, execution)
+                for proposal in ordered:
+                    self._insert_proposal(connection, proposal)
+        except IntegrityError as exc:
+            raise ValueError("ingestion persistence invariant violated") from exc
 
     def list_stage_executions(
         self,
@@ -165,42 +201,28 @@ class PostgresIngestionOrchestrationRepository:
         return tuple(self._stage_from_row(row) for row in rows)
 
     def add_proposal(self, proposal: Proposal) -> None:
-        self._insert(
-            """
-            INSERT INTO ingestion.proposal (
-                id, proposal_kind, payload_schema_ref, payload_schema_version,
-                payload, payload_hash, run_id, stage_execution_id,
-                taxonomy_version, configuration_version, methodology_version,
-                confidence, risk_code, ai_execution_ref, provenance_ref,
-                supersedes_proposal_id, created_at
-            ) VALUES (
-                :id, :proposal_kind, :payload_schema_ref, :payload_schema_version,
-                CAST(:payload AS jsonb), :payload_hash, :run_id, :stage_execution_id,
-                :taxonomy_version, :configuration_version, :methodology_version,
-                :confidence, :risk_code, :ai_execution_ref, :provenance_ref,
-                :supersedes_proposal_id, :created_at
-            )
-            """,
-            {
-                "id": proposal.id,
-                "proposal_kind": proposal.proposal_kind,
-                "payload_schema_ref": proposal.payload_schema_ref,
-                "payload_schema_version": proposal.payload_schema_version,
-                "payload": json.dumps(proposal.payload, sort_keys=True, default=str),
-                "payload_hash": proposal.payload_hash,
-                "run_id": proposal.run_id,
-                "stage_execution_id": proposal.stage_execution_id,
-                "taxonomy_version": proposal.taxonomy_version,
-                "configuration_version": proposal.configuration_version,
-                "methodology_version": proposal.methodology_version,
-                "confidence": proposal.confidence,
-                "risk_code": proposal.risk_code,
-                "ai_execution_ref": proposal.ai_execution_ref,
-                "provenance_ref": proposal.provenance_ref,
-                "supersedes_proposal_id": proposal.supersedes_proposal_id,
-                "created_at": proposal.created_at,
-            },
-        )
+        try:
+            with self._engine.begin() as connection:
+                target_id = proposal.supersedes_proposal_id
+                if target_id is not None:
+                    target_run_id = connection.execute(
+                        text(
+                            """
+                            SELECT run_id FROM ingestion.proposal
+                            WHERE id = :proposal_id
+                            """
+                        ),
+                        {"proposal_id": target_id},
+                    ).scalar_one_or_none()
+                    if target_run_id is None:
+                        raise KeyError(target_id)
+                    if target_run_id != proposal.run_id:
+                        raise ValueError(
+                            "proposal cannot supersede a proposal from another run"
+                        )
+                self._insert_proposal(connection, proposal)
+        except IntegrityError as exc:
+            raise ValueError("ingestion persistence invariant violated") from exc
 
     def get_proposal(self, proposal_id: UUID) -> Proposal | None:
         with self._engine.connect() as connection:
@@ -341,6 +363,89 @@ class PostgresIngestionOrchestrationRepository:
         if len(rows) > 1:
             raise ValueError("proposal has multiple materialization target kinds")
         return self._materialization_from_row(rows[0])
+
+    @staticmethod
+    def _insert_stage_execution(connection, execution: StageExecution) -> None:
+        connection.execute(
+            text(
+                """
+                INSERT INTO ingestion.stage_execution (
+                    id, run_id, stage_code, stage_version, attempt_no, max_attempts,
+                    executor_kind, input_hash, output_hash, started_at, completed_at,
+                    outcome, error_code, execution_ref, trace_id
+                ) VALUES (
+                    :id, :run_id, :stage_code, :stage_version,
+                    :attempt_no, :max_attempts, :executor_kind,
+                    :input_hash, :output_hash, :started_at, :completed_at,
+                    :outcome, :error_code, :execution_ref, :trace_id
+                )
+                """
+            ),
+            {
+                "id": execution.id,
+                "run_id": execution.run_id,
+                "stage_code": execution.stage_code,
+                "stage_version": execution.stage_version,
+                "attempt_no": execution.attempt_no,
+                "max_attempts": execution.max_attempts,
+                "executor_kind": execution.executor_kind.value,
+                "input_hash": execution.input_hash,
+                "output_hash": execution.output_hash,
+                "started_at": execution.started_at,
+                "completed_at": execution.completed_at,
+                "outcome": execution.outcome.value,
+                "error_code": execution.error_code,
+                "execution_ref": execution.execution_ref,
+                "trace_id": execution.trace_id,
+            },
+        )
+
+    @staticmethod
+    def _insert_proposal(connection, proposal: Proposal) -> None:
+        connection.execute(
+            text(
+                """
+                INSERT INTO ingestion.proposal (
+                    id, proposal_kind, payload_schema_ref, payload_schema_version,
+                    payload, payload_hash, run_id, stage_execution_id,
+                    taxonomy_version, configuration_version, methodology_version,
+                    confidence, risk_code, ai_execution_ref, provenance_ref,
+                    supersedes_proposal_id, created_at
+                ) VALUES (
+                    :id, :proposal_kind, :payload_schema_ref,
+                    :payload_schema_version, CAST(:payload AS jsonb),
+                    :payload_hash, :run_id, :stage_execution_id,
+                    :taxonomy_version, :configuration_version,
+                    :methodology_version, :confidence, :risk_code,
+                    :ai_execution_ref, :provenance_ref,
+                    :supersedes_proposal_id, :created_at
+                )
+                """
+            ),
+            {
+                "id": proposal.id,
+                "proposal_kind": proposal.proposal_kind,
+                "payload_schema_ref": proposal.payload_schema_ref,
+                "payload_schema_version": proposal.payload_schema_version,
+                "payload": json.dumps(
+                    proposal.payload,
+                    sort_keys=True,
+                    default=str,
+                ),
+                "payload_hash": proposal.payload_hash,
+                "run_id": proposal.run_id,
+                "stage_execution_id": proposal.stage_execution_id,
+                "taxonomy_version": proposal.taxonomy_version,
+                "configuration_version": proposal.configuration_version,
+                "methodology_version": proposal.methodology_version,
+                "confidence": proposal.confidence,
+                "risk_code": proposal.risk_code,
+                "ai_execution_ref": proposal.ai_execution_ref,
+                "provenance_ref": proposal.provenance_ref,
+                "supersedes_proposal_id": proposal.supersedes_proposal_id,
+                "created_at": proposal.created_at,
+            },
+        )
 
     def _insert(self, statement: str, params: dict[str, object]) -> None:
         try:

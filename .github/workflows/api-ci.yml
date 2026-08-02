@@ -90,6 +90,9 @@ jobs:
       - name: Ingestion orchestration contract
         working-directory: services/api
         run: python tools/check_ingestion_orchestration_contract.py
+      - name: Atomic ingestion stage batch contract
+        working-directory: services/api
+        run: python tools/check_atomic_ingestion_stage_batch_contract.py
       - name: Editorial Projection contract
         working-directory: services/api
         run: python tools/check_editorial_projection_contract.py

@@ -22,6 +22,12 @@ class IngestionOrchestrationRepository(Protocol):
 
     def add_stage_execution(self, execution: StageExecution) -> None: ...
 
+    def complete_successful_stage(
+        self,
+        execution: StageExecution,
+        proposals: tuple[Proposal, ...],
+    ) -> None: ...
+
     def list_stage_executions(
         self,
         run_id: UUID,

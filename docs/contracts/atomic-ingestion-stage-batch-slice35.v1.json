@@ -1,0 +1,79 @@
+{
+  "contract_version": "1.0.0",
+  "slice": 35,
+  "title": "Atomic ingestion StageExecution and Proposal batch",
+  "issue": 194,
+  "parent_pr": 193,
+  "capabilities": [
+    "CAP-055",
+    "CAP-061"
+  ],
+  "foundation_wave": "F1",
+  "transaction_boundary": {
+    "operation": "complete_successful_stage",
+    "aggregate": [
+      "SUCCEEDED_STAGE_EXECUTION",
+      "COMPLETE_IMMUTABLE_PROPOSAL_BATCH"
+    ],
+    "memory_single_critical_section": true,
+    "postgres_single_transaction": true,
+    "partial_visibility_allowed": false,
+    "schema_migration_required": false
+  },
+  "preconditions": {
+    "stage_outcome": "SUCCEEDED",
+    "completed_at_required": true,
+    "run_exists": true,
+    "run_state": "RUNNING",
+    "proposal_run_matches_stage_run": true,
+    "proposal_stage_execution_matches": true,
+    "proposal_ids_unique_in_batch": true,
+    "proposal_ids_must_not_exist": true,
+    "supersession_target_must_exist": true,
+    "supersession_same_run": true,
+    "same_batch_supersession_supported": true,
+    "supersession_cycle_forbidden": true
+  },
+  "failure_semantics": {
+    "validation_before_memory_mutation": true,
+    "postgres_rollback_on_any_error": true,
+    "failed_completion_persists_success_stage": false,
+    "failed_completion_persists_partial_proposals": false,
+    "run_remains_running": true,
+    "processor_failure_behavior_unchanged": true
+  },
+  "service_boundary": {
+    "construct_complete_proposal_tuple_before_repository_call": true,
+    "successful_stage_repository_calls": 1,
+    "one_by_one_success_stage_persistence_forbidden": true,
+    "one_by_one_success_proposal_persistence_forbidden": true,
+    "provider_types_in_domain_forbidden": true,
+    "ai_provider_types_in_domain_forbidden": true
+  },
+  "required_evidence": {
+    "memory_success_batch": true,
+    "memory_invalid_batch_rolls_back": true,
+    "memory_same_batch_supersession": true,
+    "memory_cycle_rejected": true,
+    "postgres_success_batch": true,
+    "postgres_invalid_batch_rolls_back": true,
+    "architecture_contract": true,
+    "api_ci_exact_sha": true,
+    "mvp_beta_gates_exact_sha": true,
+    "global_readiness_exact_sha": true
+  },
+  "excluded": [
+    "worker_or_scheduler",
+    "queue_claim_or_lease",
+    "external_provider_call",
+    "ai_provider_call",
+    "admin_review_queue_query",
+    "admin_ui",
+    "automatic_review",
+    "automatic_projection",
+    "authoring_lifecycle_transition",
+    "case_builder",
+    "flow_composer",
+    "phone_facing_behavior"
+  ]
+}
