@@ -347,7 +347,10 @@ def test_memory_repository_reads_live_aggregate_counts() -> None:
         worker_ref="terminal-cycle-worker",
         plan_hash="cycle-plan-terminal",
         state=ContentSupplyCycleState.DEGRADED,
-        counters=ContentSupplyCycleCounters(dispatch_attempted_count=1, dispatch_non_success_count=1),
+        counters=ContentSupplyCycleCounters(
+            dispatch_attempted_count=1,
+            dispatch_non_success_count=1,
+        ),
         started_at=base - timedelta(minutes=8),
         heartbeat_at=base - timedelta(minutes=7),
         expires_at=base + timedelta(minutes=1),
