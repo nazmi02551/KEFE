@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 
 from kefe_api.core.settings import get_settings
+from kefe_api.infrastructure.postgres_knowledge import PostgresKnowledgeRepository
 from kefe_api.main import create_app
 from kefe_api.modules.admin_security.router import ADMIN_CSRF_HEADER, ADMIN_SESSION_COOKIE
 from kefe_api.modules.ingestion_orchestration.models import (
@@ -19,6 +20,7 @@ from kefe_api.modules.ingestion_orchestration.models import (
     ProposalDraft,
     StageProcessorResult,
 )
+from kefe_api.modules.knowledge.models import SourceArtifact
 
 pytestmark = pytest.mark.skipif(
     os.getenv("KEFE_RUN_POSTGRES_TESTS") != "1",
@@ -79,13 +81,24 @@ def _admin_client(app, subject_id: UUID) -> tuple[TestClient, str]:
     return client, issued.csrf_token
 
 
-def _seed_candidate(app) -> tuple[tuple[Proposal, ...], Proposal]:
+def _seed_candidate(
+    app,
+    database_url: str,
+) -> tuple[tuple[Proposal, ...], Proposal]:
+    source = PostgresKnowledgeRepository(create_engine(database_url)).add_source_artifact(
+        SourceArtifact.create(
+            adapter_code="admin-editorial-operations-fixture",
+            external_locator=f"https://example.test/admin-editorial/{uuid4()}",
+            content_hash=f"sha256:admin-editorial-{uuid4()}",
+            language_code="en",
+        )
+    )
     service = app.state.ingestion_orchestration_service
     repository = app.state.ingestion_orchestration_repository
     run = service.start_run(
         input_artifact_kind=InputArtifactKind.SOURCE_ARTIFACT,
-        input_artifact_id=uuid4(),
-        input_content_hash=f"admin-operations-pg-{uuid4()}",
+        input_artifact_id=source.id,
+        input_content_hash=source.content_hash,
         pipeline_code="candidate-extraction",
         pipeline_version="1.0.0",
         configuration_hash="config-v1",
@@ -180,7 +193,7 @@ def test_postgres_admin_review_then_explicit_projection_is_audited_and_bounded(
 
     try:
         app = create_app()
-        proposals, candidate = _seed_candidate(app)
+        proposals, candidate = _seed_candidate(app, database_url)
         reviewer, reviewer_csrf = _admin_client(app, reviewer_id)
         review_ids: dict[UUID, UUID] = {}
         for proposal in proposals:
