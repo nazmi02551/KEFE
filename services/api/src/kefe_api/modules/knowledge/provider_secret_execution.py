@@ -7,7 +7,10 @@ from typing import Protocol, TypeVar
 from urllib.parse import urlsplit
 from uuid import UUID
 
-from kefe_api.modules.knowledge.provider_control import require_secret_reference
+from kefe_api.modules.knowledge.provider_control import (
+    ProviderCredentialMode,
+    require_secret_reference,
+)
 from kefe_api.modules.knowledge.provider_execution_context import (
     ProviderPermitContextError,
     ProviderPermitExecutionContext,
@@ -235,8 +238,17 @@ class SecureProviderCaptureExecutor:
                 "SOURCE_PROVIDER_PERMIT_CONTEXT_INVALID"
             ) from exc
 
+        if (
+            context.credential_mode is not ProviderCredentialMode.SECRET_REF
+            or context.secret_ref is None
+        ):
+            raise FinalSourceCaptureError(
+                "SOURCE_PROVIDER_CREDENTIAL_MODE_MISMATCH"
+            )
+        secret_ref = context.secret_ref
+
         try:
-            resolver = self._resolvers.get_for_reference(context.secret_ref)
+            resolver = self._resolvers.get_for_reference(secret_ref)
         except KeyError as exc:
             raise FinalSourceCaptureError(
                 "SOURCE_SECRET_RESOLVER_NOT_REGISTERED"
@@ -244,7 +256,7 @@ class SecureProviderCaptureExecutor:
 
         try:
             lease = resolver.resolve(
-                secret_ref=context.secret_ref,
+                secret_ref=secret_ref,
                 adapter_code=adapter_code,
                 permit_id=permit_id,
                 at=at,
