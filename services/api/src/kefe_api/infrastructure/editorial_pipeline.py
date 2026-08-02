@@ -53,6 +53,15 @@ from kefe_api.modules.ingestion_orchestration.ports import (
 from kefe_api.modules.ingestion_orchestration.service import (
     IngestionOrchestrationService,
 )
+from kefe_api.modules.ingestion_orchestration.worker_runtime import (
+    InMemoryIngestionWorkerRuntimeRegistry,
+    IngestionWorkerObserver,
+    IngestionWorkerRuntimeRegistry,
+    NoOpIngestionWorkerObserver,
+)
+from kefe_api.modules.ingestion_orchestration.worker_service import (
+    IngestionWorkerRunner,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -61,6 +70,9 @@ class EditorialPipeline:
     ingestion_service: IngestionOrchestrationService
     ingestion_lease_repository: IngestionRunLeaseRepository
     ingestion_lease_service: IngestionRunLeaseService
+    ingestion_worker_registry: IngestionWorkerRuntimeRegistry
+    ingestion_worker_observer: IngestionWorkerObserver
+    ingestion_worker_runner: IngestionWorkerRunner
     proposal_queue_repository: ProposalReviewQueueRepository
     projection_repository: EditorialProjectionRepository
     projection_service: EditorialProjectionService
@@ -101,6 +113,20 @@ def build_editorial_pipeline(
         proposal_queue_repository = PostgresProposalReviewQueueRepository(engine)
         projection_repository = PostgresEditorialProjectionRepository(engine)
 
+    ingestion_service = IngestionOrchestrationService(ingestion_repository)
+    ingestion_lease_service = IngestionRunLeaseService(ingestion_lease_repository)
+    ingestion_worker_registry: IngestionWorkerRuntimeRegistry = (
+        InMemoryIngestionWorkerRuntimeRegistry()
+    )
+    ingestion_worker_observer: IngestionWorkerObserver = NoOpIngestionWorkerObserver()
+    ingestion_worker_runner = IngestionWorkerRunner(
+        repository=ingestion_repository,
+        orchestration=ingestion_service,
+        leases=ingestion_lease_service,
+        registry=ingestion_worker_registry,
+        observer=ingestion_worker_observer,
+    )
+
     profiles = InMemoryEditorialProjectionProfileRegistry(
         (
             EditorialProjectionProfile(
@@ -121,9 +147,12 @@ def build_editorial_pipeline(
     )
     return EditorialPipeline(
         ingestion_repository=ingestion_repository,
-        ingestion_service=IngestionOrchestrationService(ingestion_repository),
+        ingestion_service=ingestion_service,
         ingestion_lease_repository=ingestion_lease_repository,
-        ingestion_lease_service=IngestionRunLeaseService(ingestion_lease_repository),
+        ingestion_lease_service=ingestion_lease_service,
+        ingestion_worker_registry=ingestion_worker_registry,
+        ingestion_worker_observer=ingestion_worker_observer,
+        ingestion_worker_runner=ingestion_worker_runner,
         proposal_queue_repository=proposal_queue_repository,
         projection_repository=projection_repository,
         projection_service=projection_service,
