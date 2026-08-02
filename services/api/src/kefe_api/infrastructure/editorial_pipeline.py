@@ -106,6 +106,11 @@ from kefe_api.modules.knowledge.provider_control_ports import (
 from kefe_api.modules.knowledge.provider_control_service import (
     SourceProviderAdmissionService,
 )
+from kefe_api.modules.knowledge.provider_http_auth import (
+    InMemoryProviderHttpAuthRegistry,
+    ProviderHttpAuthRegistry,
+    SecureProviderHttpExecutor,
+)
 from kefe_api.modules.knowledge.provider_http_transport import (
     ControlledProviderHttpTransport,
     InMemoryProviderAdoptionRegistry,
@@ -152,8 +157,10 @@ class EditorialPipeline:
     credential_capture_registry: CredentialAwareSourceCaptureRegistry
     secure_provider_capture_executor: SecureProviderCaptureExecutor
     provider_adoption_registry: ProviderAdoptionRegistry
+    provider_http_auth_registry: ProviderHttpAuthRegistry
     provider_http_observer: ProviderHttpObserver
     provider_http_transport: ControlledProviderHttpTransport
+    secure_provider_http_executor: SecureProviderHttpExecutor
     source_acquisition_observer: SourceAcquisitionObserver
     source_acquisition_service: SourceAcquisitionService
     source_scheduler_repository: SourceAcquisitionSchedulerRepository
@@ -261,6 +268,9 @@ def build_editorial_pipeline(
     provider_adoption_registry: ProviderAdoptionRegistry = (
         InMemoryProviderAdoptionRegistry()
     )
+    provider_http_auth_registry: ProviderHttpAuthRegistry = (
+        InMemoryProviderHttpAuthRegistry()
+    )
     provider_http_observer: ProviderHttpObserver = NoOpProviderHttpObserver()
     provider_http_runtime = build_provider_http_runtime(settings)
     provider_http_transport = ControlledProviderHttpTransport(
@@ -268,6 +278,10 @@ def build_editorial_pipeline(
         dns_resolver=provider_http_runtime.dns_resolver,
         backend=provider_http_runtime.backend,
         observer=provider_http_observer,
+    )
+    secure_provider_http_executor = SecureProviderHttpExecutor(
+        auth_registry=provider_http_auth_registry,
+        transport=provider_http_transport,
     )
     source_acquisition_observer: SourceAcquisitionObserver = (
         NoOpSourceAcquisitionObserver()
@@ -339,8 +353,10 @@ def build_editorial_pipeline(
         credential_capture_registry=credential_capture_registry,
         secure_provider_capture_executor=secure_provider_capture_executor,
         provider_adoption_registry=provider_adoption_registry,
+        provider_http_auth_registry=provider_http_auth_registry,
         provider_http_observer=provider_http_observer,
         provider_http_transport=provider_http_transport,
+        secure_provider_http_executor=secure_provider_http_executor,
         source_acquisition_observer=source_acquisition_observer,
         source_acquisition_service=source_acquisition_service,
         source_scheduler_repository=source_scheduler_repository,

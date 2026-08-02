@@ -1,0 +1,135 @@
+{
+  "contract": "provider-http-auth-slice47",
+  "version": "1.0.0",
+  "status": "accepted",
+  "issue": 219,
+  "parent_pr": 218,
+  "auth_schemes": [
+    "BEARER_AUTHORIZATION",
+    "HEADER_TOKEN"
+  ],
+  "profile": {
+    "identity": [
+      "adapter_code"
+    ],
+    "immutable_fields": [
+      "adapter_code",
+      "scheme",
+      "credential_origin",
+      "header_name",
+      "max_secret_bytes",
+      "auth_evidence_ref"
+    ],
+    "credential_origin": "exact canonical HTTPS origin",
+    "header_name": "exact lowercase HTTP token",
+    "max_secret_bytes": {
+      "minimum": 1,
+      "maximum": 8192
+    }
+  },
+  "secret_material": {
+    "source": "SecretAccess.use_bytes callback only",
+    "encoding": "visible ASCII token bytes only",
+    "forbidden": [
+      "empty",
+      "whitespace",
+      "control bytes",
+      "CR",
+      "LF",
+      "text decoding",
+      "URL placement",
+      "public request model placement",
+      "operational result placement",
+      "exception text placement"
+    ]
+  },
+  "sensitive_envelope": {
+    "storage": "owned mutable bytearray",
+    "exposure": "callback-scoped read-only memoryview",
+    "repr": "redacted",
+    "hash": "forbidden",
+    "equality": "forbidden",
+    "serialization": "forbidden",
+    "close": "idempotent deterministic zeroization of owned buffers"
+  },
+  "transport": {
+    "credential_argument": "SensitiveHttpHeaderAccess port only",
+    "same_origin_redirect": "allowed within existing redirect budget",
+    "cross_origin_redirect": "fail before next backend call",
+    "cross_origin_error": "PROVIDER_HTTP_AUTH_REDIRECT_BLOCKED",
+    "backend_revalidates_header_names": true,
+    "endheaders_inside_secret_callback": true
+  },
+  "header_policy": {
+    "bearer_header": "authorization",
+    "bearer_prefix": "Bearer ",
+    "header_token_forbidden_names": [
+      "accept-encoding",
+      "authorization",
+      "connection",
+      "content-length",
+      "cookie",
+      "forwarded",
+      "host",
+      "proxy-authenticate",
+      "proxy-authorization",
+      "set-cookie",
+      "te",
+      "trailer",
+      "transfer-encoding",
+      "upgrade",
+      "via",
+      "x-forwarded-for",
+      "x-forwarded-host",
+      "x-forwarded-proto"
+    ]
+  },
+  "production_composition": {
+    "auth_registry": "empty",
+    "secure_executor": "present",
+    "real_auth_profile": false,
+    "real_provider_adapter": false
+  },
+  "operational_result": {
+    "unchanged": true,
+    "forbidden_fields": [
+      "auth_scheme",
+      "credential_origin",
+      "header_name",
+      "credential",
+      "secret",
+      "authorization"
+    ]
+  },
+  "invariants": [
+    "A secret is resolved and exposed only through SecretAccess.use_bytes.",
+    "Secret material is never decoded to text by the auth module.",
+    "Only owned mutable sensitive-header buffers are deterministically zeroized.",
+    "Credentials are bound to one exact canonical HTTPS origin.",
+    "A cross-origin redirect fails before a second credential-bearing backend call.",
+    "The pinned backend sends and ends headers inside the sensitive access callback.",
+    "Production auth and provider adoption registries remain empty.",
+    "No operational result or exception contains credential-derived material."
+  ],
+  "honesty_boundary": "No deterministic erasure claim is made for interpreter, http.client, TLS, kernel or remote copies.",
+  "excluded": [
+    "real provider auth profile",
+    "real provider adapter",
+    "live external request",
+    "OAuth exchange or refresh",
+    "request signing or HMAC",
+    "query credentials",
+    "cookie or session auth",
+    "secret-manager SDK",
+    "credential rotation",
+    "deployed egress proof",
+    "provider compliance certification",
+    "autonomous retries",
+    "Admin provider UI",
+    "automatic editorial publication",
+    "deployed SLO or rollback proof",
+    "Case Builder",
+    "Flow Composer",
+    "phone-facing behavior"
+  ]
+}
