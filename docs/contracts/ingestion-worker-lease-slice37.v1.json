@@ -1,0 +1,108 @@
+{
+  "contract_version": "1.0.0",
+  "slice": 37,
+  "title": "Durable ingestion worker claim, lease and stale recovery",
+  "issue": 198,
+  "parent_pr": 197,
+  "capabilities": [
+    "CAP-055",
+    "CAP-065"
+  ],
+  "foundation_wave": "F1",
+  "lease_model": {
+    "states": [
+      "ACTIVE",
+      "RELEASED",
+      "EXPIRED"
+    ],
+    "one_active_lease_per_run": true,
+    "history_preserved": true,
+    "minimum_ttl_seconds": 5,
+    "maximum_ttl_seconds": 900,
+    "identity_match_required": [
+      "lease_id",
+      "worker_ref"
+    ]
+  },
+  "claim": {
+    "eligible_run_state": "QUEUED",
+    "ordering": [
+      "updated_at_ASC",
+      "run_id_ASC"
+    ],
+    "postgres_locking": "FOR_UPDATE_SKIP_LOCKED",
+    "recover_expired_before_select": true,
+    "run_transition": "QUEUED_TO_RUNNING",
+    "run_and_lease_atomic": true,
+    "optional_pipeline_filter": true
+  },
+  "heartbeat": {
+    "active_unexpired_required": true,
+    "exact_owner_required": true,
+    "advances_heartbeat": true,
+    "extends_expiry": true,
+    "ttl_bounds_enforced": true
+  },
+  "assert_active": {
+    "future_worker_admission_boundary": true,
+    "reject_unknown": true,
+    "reject_foreign_owner": true,
+    "reject_released": true,
+    "reject_expired": true
+  },
+  "release": {
+    "dispositions": [
+      "REQUEUE",
+      "TERMINAL"
+    ],
+    "requeue_requires_run_state": "RUNNING",
+    "requeue_target_state": "QUEUED",
+    "terminal_requires_run_states": [
+      "SUCCEEDED",
+      "FAILED_RETRYABLE",
+      "FAILED_FINAL",
+      "CANCELED"
+    ],
+    "release_invents_terminal_state": false
+  },
+  "recovery": {
+    "expired_active_lease_transition": "EXPIRED",
+    "running_run_transition": "QUEUED",
+    "terminal_run_unchanged": true,
+    "reclaim_uses_new_lease_id": true
+  },
+  "persistence": {
+    "schema": "ingestion",
+    "table": "run_lease",
+    "migration_revision": "20260802_0021",
+    "partial_unique_active_run_index": true,
+    "active_expiry_index": true
+  },
+  "required_evidence": {
+    "memory_atomic_claim": true,
+    "memory_wrong_owner_failure": true,
+    "memory_expiry_recovery_and_reclaim": true,
+    "postgres_concurrent_claim": true,
+    "postgres_heartbeat": true,
+    "postgres_expiry_recovery_and_reclaim": true,
+    "postgres_release_rules": true,
+    "migration_upgrade_downgrade": true,
+    "architecture_contract": true,
+    "api_ci_exact_sha": true,
+    "mvp_beta_gates_exact_sha": true,
+    "global_readiness_exact_sha": true
+  },
+  "excluded": [
+    "scheduler_loop",
+    "cron_trigger",
+    "provider_adapter",
+    "network_fetch",
+    "ai_call",
+    "stage_processor_implementation",
+    "admin_http_lease_endpoint",
+    "automatic_review_or_projection",
+    "case_builder",
+    "flow_composer",
+    "phone_facing_behavior"
+  ]
+}
