@@ -4,7 +4,10 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from uuid import UUID
 
-from kefe_api.modules.knowledge.provider_control import require_secret_reference
+from kefe_api.modules.knowledge.provider_control import (
+    ProviderCredentialMode,
+    require_secret_reference,
+)
 from kefe_api.modules.knowledge.source_identity import require_versioned_adapter_code
 
 
@@ -17,12 +20,21 @@ def _require_utc(value: datetime, field_name: str) -> None:
 class ProviderPermitExecutionContext:
     permit_id: UUID
     adapter_code: str
-    secret_ref: str = field(repr=False)
+    credential_mode: ProviderCredentialMode
+    secret_ref: str | None = field(repr=False)
     permit_expires_at: datetime
 
     def __post_init__(self) -> None:
         require_versioned_adapter_code(self.adapter_code)
-        require_secret_reference(self.secret_ref)
+        if type(self.credential_mode) is not ProviderCredentialMode:
+            raise ValueError("credential_mode must be an exact ProviderCredentialMode")
+        if self.credential_mode is ProviderCredentialMode.PUBLIC:
+            if self.secret_ref is not None:
+                raise ValueError("PUBLIC permit context cannot contain secret_ref")
+        else:
+            if self.secret_ref is None:
+                raise ValueError("SECRET_REF permit context requires secret_ref")
+            require_secret_reference(self.secret_ref)
         _require_utc(self.permit_expires_at, "permit_expires_at")
 
     def __repr__(self) -> str:
@@ -30,6 +42,7 @@ class ProviderPermitExecutionContext:
             "ProviderPermitExecutionContext("
             f"permit_id={self.permit_id!r}, "
             f"adapter_code={self.adapter_code!r}, "
+            f"credential_mode={self.credential_mode.value!r}, "
             "secret_ref=<REDACTED>, "
             f"permit_expires_at={self.permit_expires_at!r})"
         )
