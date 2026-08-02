@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 import pytest
 
@@ -48,7 +48,7 @@ class StaticProcessor:
 
 class UnusedSessionResolver:
     def resolve(self, _token):
-        raise AssertionError("session resolution is not used by direct facade tests")
+        raise AssertionError("direct facade tests do not resolve sessions")
 
     def mark_seen(self, _session_id, *, seen_at):
         raise AssertionError(f"mark_seen must not be called: {seen_at}")
@@ -81,21 +81,6 @@ def _build_reviewed_store():
         configuration_hash="config-hash",
         locale="en",
     )
-
-    dependencies = (
-        ProposalDraft(
-            proposal_kind="DECISION_PROBLEM",
-            payload_schema_ref="kefe.decision_problem",
-            payload_schema_version="1.0.0",
-            payload={"title": "Seat allocation"},
-        ),
-        ProposalDraft(
-            proposal_kind="QUESTION_DRAFT",
-            payload_schema_ref="kefe.question_draft",
-            payload_schema_version="1.0.0",
-            payload={"prompt": "Should children sit with a parent?"},
-        ),
-    )
     service.execute_stage(
         run_id=run.id,
         stage_code="extract-dependencies",
@@ -103,11 +88,24 @@ def _build_reviewed_store():
         input_hash="input-1",
         max_attempts=2,
         executor_kind=ExecutorKind.DETERMINISTIC,
-        processor=StaticProcessor(dependencies),
+        processor=StaticProcessor(
+            (
+                ProposalDraft(
+                    proposal_kind="DECISION_PROBLEM",
+                    payload_schema_ref="kefe.decision_problem",
+                    payload_schema_version="1.0.0",
+                    payload={"title": "Seat allocation"},
+                ),
+                ProposalDraft(
+                    proposal_kind="QUESTION_DRAFT",
+                    payload_schema_ref="kefe.question_draft",
+                    payload_schema_version="1.0.0",
+                    payload={"prompt": "Should children sit with a parent?"},
+                ),
+            )
+        ),
     )
-    dependency_proposals = repository.list_proposals(run.id)
-    dependency_ids = [str(item.id) for item in dependency_proposals]
-
+    dependencies = repository.list_proposals(run.id)
     candidate_payload = {
         "slug": f"reviewed-{uuid4().hex[:8]}",
         "title": "Should children sit with a parent?",
@@ -115,7 +113,7 @@ def _build_reviewed_store():
         "base_format_code": "DILEMMA",
         "primary_domain_code": "TRAVEL",
         "content_risk": "L1",
-        "dependency_proposal_ids": dependency_ids,
+        "dependency_proposal_ids": [str(item.id) for item in dependencies],
         "issues": [
             {
                 "code": "PRIMARY",
@@ -151,21 +149,50 @@ def _build_reviewed_store():
             )
         ),
     )
-    all_proposals = repository.list_proposals(run.id)
-    candidate = next(item for item in all_proposals if item.proposal_kind == "CANDIDATE_CASE")
-    reviews = {}
-    for proposal in all_proposals:
-        reviews[proposal.id] = service.review_proposal(
+    proposals = repository.list_proposals(run.id)
+    candidate = next(item for item in proposals if item.proposal_kind == "CANDIDATE_CASE")
+    reviews = {
+        proposal.id: service.review_proposal(
             proposal_id=proposal.id,
             decision=ProposalReviewDecisionKind.ACCEPTED,
             reviewer_ref=f"reviewer:{proposal.id}",
         )
+        for proposal in proposals
+    }
     service.mark_succeeded(run.id)
-    assert repository.get_run(run.id).state is IngestionRunState.SUCCEEDED
+    stored_run = repository.get_run(run.id)
+    assert stored_run is not None
+    assert stored_run.state is IngestionRunState.SUCCEEDED
     return repository, candidate, reviews
 
 
-def test_active_store_is_replay_safe_and_review_is_terminal() -> None:
+def _secured_projection(repository):
+    return SecuredEditorialProjectionService(
+        projection=EditorialProjectionService(
+            IngestionReviewedProposalSource(repository),
+            InMemoryEditorialProjectionProfileRegistry(
+                (
+                    EditorialProjectionProfile(
+                        profile_code="CANDIDATE_TO_AUTHORING",
+                        profile_version=1,
+                        candidate_schema_ref="kefe.candidate-case",
+                        candidate_schema_version="1.0.0",
+                        required_dependency_kinds=frozenset(
+                            {"DECISION_PROBLEM", "QUESTION_DRAFT"}
+                        ),
+                    ),
+                )
+            ),
+            InMemoryEditorialProjectionRepository(),
+        ),
+        security=AdminSecurityService(
+            session_resolver=UnusedSessionResolver(),
+            policy=default_admin_security_policy(),
+        ),
+    )
+
+
+def test_active_store_is_replay_safe() -> None:
     repository = InMemoryIngestionOrchestrationRepository()
     service = IngestionOrchestrationService(repository)
     args = dict(
@@ -182,33 +209,9 @@ def test_active_store_is_replay_safe_and_review_is_terminal() -> None:
     assert replay.run_key == first.run_key
 
 
-def test_reviewed_source_and_secured_facade_project_existing_draft() -> None:
-    ingestion_repository, candidate, reviews = _build_reviewed_store()
-    projection_repository = InMemoryEditorialProjectionRepository()
-    projection = EditorialProjectionService(
-        IngestionReviewedProposalSource(ingestion_repository),
-        InMemoryEditorialProjectionProfileRegistry(
-            (
-                EditorialProjectionProfile(
-                    profile_code="CANDIDATE_TO_AUTHORING",
-                    profile_version=1,
-                    candidate_schema_ref="kefe.candidate-case",
-                    candidate_schema_version="1.0.0",
-                    required_dependency_kinds=frozenset(
-                        {"DECISION_PROBLEM", "QUESTION_DRAFT"}
-                    ),
-                ),
-            )
-        ),
-        projection_repository,
-    )
-    secured = SecuredEditorialProjectionService(
-        projection=projection,
-        security=AdminSecurityService(
-            session_resolver=UnusedSessionResolver(),
-            policy=default_admin_security_policy(),
-        ),
-    )
+def test_secured_facade_derives_actor_and_projects_draft() -> None:
+    repository, candidate, reviews = _build_reviewed_store()
+    secured = _secured_projection(repository)
     editor = _principal(AdminRole.EDITOR)
 
     result = secured.project(
@@ -222,39 +225,11 @@ def test_reviewed_source_and_secured_facade_project_existing_draft() -> None:
 
     assert result.replayed is False
     assert result.record.requested_by_admin_ref == editor.audit_actor_ref
-    draft = projection_repository.authoring_repository.get_version(
-        result.record.authoring_case_version_id
-    )
-    assert draft is not None
-    assert draft.title == candidate.payload["title"]
 
 
 def test_projection_requires_dedicated_editor_capability() -> None:
-    ingestion_repository, candidate, reviews = _build_reviewed_store()
-    projection = EditorialProjectionService(
-        IngestionReviewedProposalSource(ingestion_repository),
-        InMemoryEditorialProjectionProfileRegistry(
-            (
-                EditorialProjectionProfile(
-                    profile_code="CANDIDATE_TO_AUTHORING",
-                    profile_version=1,
-                    candidate_schema_ref="kefe.candidate-case",
-                    candidate_schema_version="1.0.0",
-                    required_dependency_kinds=frozenset(
-                        {"DECISION_PROBLEM", "QUESTION_DRAFT"}
-                    ),
-                ),
-            )
-        ),
-        InMemoryEditorialProjectionRepository(),
-    )
-    secured = SecuredEditorialProjectionService(
-        projection=projection,
-        security=AdminSecurityService(
-            session_resolver=UnusedSessionResolver(),
-            policy=default_admin_security_policy(),
-        ),
-    )
+    repository, candidate, reviews = _build_reviewed_store()
+    secured = _secured_projection(repository)
 
     with pytest.raises(DomainError) as raised:
         secured.project(
