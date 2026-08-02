@@ -170,7 +170,7 @@ class _ExactIpHttpsConnection(http.client.HTTPSConnection):
                 (self._target_ip, self.port),
                 self.timeout,
             )
-        except (TimeoutError, socket.timeout) as exc:
+        except TimeoutError as exc:
             raise _ConnectTimedOut from exc
         except OSError as exc:
             raise _ConnectUnavailable from exc
@@ -184,7 +184,7 @@ class _ExactIpHttpsConnection(http.client.HTTPSConnection):
         except (ssl.SSLCertVerificationError, ssl.SSLError) as exc:
             raw_socket.close()
             raise _TlsRejected from exc
-        except (TimeoutError, socket.timeout) as exc:
+        except TimeoutError as exc:
             raw_socket.close()
             raise _ConnectTimedOut from exc
         except OSError as exc:
@@ -374,7 +374,7 @@ class PinnedTlsHttpBackend:
             raise RetryableProviderHttpError("PROVIDER_HTTP_UNAVAILABLE") from exc
         except _TlsRejected as exc:
             raise FinalProviderHttpError("PROVIDER_HTTP_TLS_REJECTED") from exc
-        except (TimeoutError, socket.timeout) as exc:
+        except TimeoutError as exc:
             raise RetryableProviderHttpError("PROVIDER_HTTP_READ_TIMEOUT") from exc
         except (http.client.RemoteDisconnected, http.client.IncompleteRead) as exc:
             raise RetryableProviderHttpError("PROVIDER_HTTP_UNAVAILABLE") from exc
