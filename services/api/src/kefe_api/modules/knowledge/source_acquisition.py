@@ -86,6 +86,18 @@ class SourceCaptureRegistry(Protocol):
     def get(self, adapter_code: str) -> SourceCaptureAdapter: ...
 
 
+class SourceCaptureExecutor(Protocol):
+    def capture(
+        self,
+        *,
+        adapter_code: str,
+        permit_id: UUID,
+        external_locator: str,
+        trace_id: str,
+        at: datetime,
+    ) -> CapturedSource: ...
+
+
 class InMemorySourceCaptureRegistry:
     def __init__(self, adapters: tuple[SourceCaptureAdapter, ...] = ()) -> None:
         adapter_map: dict[str, SourceCaptureAdapter] = {}
@@ -255,6 +267,7 @@ class SourceAcquisitionService:
         registry: SourceCaptureRegistry,
         observer: SourceAcquisitionObserver,
         admission: SourceCaptureAdmission | None = None,
+        capture_executor: SourceCaptureExecutor | None = None,
         clock=utcnow,
         monotonic_clock=monotonic_ns,
     ) -> None:
@@ -263,6 +276,7 @@ class SourceAcquisitionService:
         self._registry = registry
         self._observer = observer
         self._admission = admission
+        self._capture_executor = capture_executor
         self._clock = clock
         self._monotonic_clock = monotonic_clock
 
@@ -276,18 +290,20 @@ class SourceAcquisitionService:
     ) -> SourceAcquisitionResult:
         started_ns = self._monotonic_clock()
         resolved_trace_id = trace_id or str(uuid4())
-        try:
-            adapter = self._registry.get(command.adapter_code)
-        except KeyError:
-            return self._emit(
-                self._result(
-                    started_ns=started_ns,
-                    command=command,
-                    trace_id=resolved_trace_id,
-                    outcome=SourceAcquisitionOutcome.BLOCKED,
-                    error_code="SOURCE_CAPTURE_ADAPTER_NOT_REGISTERED",
+        adapter: SourceCaptureAdapter | None = None
+        if self._capture_executor is None:
+            try:
+                adapter = self._registry.get(command.adapter_code)
+            except KeyError:
+                return self._emit(
+                    self._result(
+                        started_ns=started_ns,
+                        command=command,
+                        trace_id=resolved_trace_id,
+                        outcome=SourceAcquisitionOutcome.BLOCKED,
+                        error_code="SOURCE_CAPTURE_ADAPTER_NOT_REGISTERED",
+                    )
                 )
-            )
 
         permit_id: UUID | None = None
         if self._admission is not None:
@@ -323,10 +339,24 @@ class SourceAcquisitionService:
             permit_id = decision.permit_id
 
         try:
-            captured = adapter.capture(
-                external_locator=command.external_locator,
-                trace_id=resolved_trace_id,
-            )
+            if self._capture_executor is not None:
+                if permit_id is None:
+                    raise FinalSourceCaptureError(
+                        "SOURCE_PROVIDER_PERMIT_CONTEXT_INVALID"
+                    )
+                captured = self._capture_executor.capture(
+                    adapter_code=command.adapter_code,
+                    permit_id=permit_id,
+                    external_locator=command.external_locator,
+                    trace_id=resolved_trace_id,
+                    at=self._clock(),
+                )
+            else:
+                assert adapter is not None
+                captured = adapter.capture(
+                    external_locator=command.external_locator,
+                    trace_id=resolved_trace_id,
+                )
             if not isinstance(captured, CapturedSource):
                 raise FinalSourceCaptureError("SOURCE_CAPTURE_CONTRACT_INVALID")
         except RetryableSourceCaptureError as exc:
