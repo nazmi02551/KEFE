@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from uuid import UUID, uuid4
 
@@ -96,6 +97,7 @@ class IngestionOrchestrationService:
         processor: StageProcessor,
         execution_ref: str | None = None,
         trace_id: str | None = None,
+        before_persist: Callable[[], None] | None = None,
     ) -> StageExecution:
         run = self._require_run(run_id)
         if run.state is IngestionRunState.QUEUED:
@@ -122,6 +124,7 @@ class IngestionOrchestrationService:
                 input_hash=input_hash,
             )
         except RetryableStageError as exc:
+            self._admit_persistence(before_persist)
             outcome = (
                 StageOutcome.FAILED_RETRYABLE
                 if attempt_no < max_attempts
@@ -153,6 +156,7 @@ class IngestionOrchestrationService:
             )
             return execution
         except FinalStageError as exc:
+            self._admit_persistence(before_persist)
             execution = StageExecution(
                 id=uuid4(),
                 run_id=run_id,
@@ -173,6 +177,7 @@ class IngestionOrchestrationService:
             self._repository.update_run(run.transition(IngestionRunState.FAILED_FINAL))
             return execution
         except Exception:
+            self._admit_persistence(before_persist)
             execution = StageExecution(
                 id=uuid4(),
                 run_id=run_id,
@@ -193,6 +198,7 @@ class IngestionOrchestrationService:
             self._repository.update_run(run.transition(IngestionRunState.FAILED_FINAL))
             return execution
 
+        self._admit_persistence(before_persist)
         completed_at = utcnow()
         execution = StageExecution(
             id=uuid4(),
@@ -314,6 +320,11 @@ class IngestionOrchestrationService:
             proposal_id,
             target_kind=target_kind,
         ) or materialization
+
+    @staticmethod
+    def _admit_persistence(before_persist: Callable[[], None] | None) -> None:
+        if before_persist is not None:
+            before_persist()
 
     def _require_run(self, run_id: UUID) -> IngestionRun:
         run = self._repository.get_run(run_id)
