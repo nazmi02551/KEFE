@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
@@ -231,6 +232,8 @@ class SourceAcquisitionService:
         command: SourceAcquisitionCommand,
         *,
         trace_id: str | None = None,
+        before_artifact_persist: Callable[[], None] | None = None,
+        before_run_admission: Callable[[], None] | None = None,
     ) -> SourceAcquisitionResult:
         started_ns = self._monotonic_clock()
         resolved_trace_id = trace_id or str(uuid4())
@@ -285,6 +288,8 @@ class SourceAcquisitionService:
                 )
             )
 
+        if before_artifact_persist is not None:
+            before_artifact_persist()
         try:
             artifact = self._knowledge_repository.add_source_artifact(
                 SourceArtifact.create(
@@ -301,6 +306,30 @@ class SourceAcquisitionService:
                     raw_storage_ref=captured.raw_storage_ref,
                 )
             )
+        except ValueError:
+            return self._emit(
+                self._result(
+                    started_ns=started_ns,
+                    command=command,
+                    trace_id=resolved_trace_id,
+                    outcome=SourceAcquisitionOutcome.FINAL_FAILURE,
+                    error_code="SOURCE_ACQUISITION_ADMISSION_INVALID",
+                )
+            )
+        except Exception:
+            return self._emit(
+                self._result(
+                    started_ns=started_ns,
+                    command=command,
+                    trace_id=resolved_trace_id,
+                    outcome=SourceAcquisitionOutcome.RETRYABLE_FAILURE,
+                    error_code="SOURCE_ACQUISITION_ADMISSION_RETRYABLE",
+                )
+            )
+
+        if before_run_admission is not None:
+            before_run_admission()
+        try:
             run = self._ingestion_service.start_run(
                 input_artifact_kind=InputArtifactKind.SOURCE_ARTIFACT,
                 input_artifact_id=artifact.id,

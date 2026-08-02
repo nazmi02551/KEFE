@@ -113,6 +113,9 @@ jobs:
       - name: Source acquisition admission contract
         working-directory: services/api
         run: python tools/check_source_acquisition_contract.py
+      - name: Source acquisition scheduler contract
+        working-directory: services/api
+        run: python tools/check_source_acquisition_scheduler_contract.py
       - name: Editorial Projection contract
         working-directory: services/api
         run: python tools/check_editorial_projection_contract.py
@@ -196,7 +199,7 @@ jobs:
         env:
           KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
         run: alembic upgrade head
-      - name: Verify lease migration downgrade and upgrade
+      - name: Verify ingestion migrations downgrade and upgrade
         working-directory: services/api
         env:
           KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
@@ -232,6 +235,7 @@ jobs:
           tests/test_ingestion_run_leases_postgres.py
           tests/test_ingestion_worker_runner_postgres.py
           tests/test_source_acquisition_postgres.py
+          tests/test_source_acquisition_scheduler_postgres.py
           tests/test_admin_sessions_postgres.py
           tests/test_admin_http_postgres.py
           tests/test_admin_editorial_operations_http_postgres.py
