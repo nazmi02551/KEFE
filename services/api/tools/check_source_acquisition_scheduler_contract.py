@@ -227,7 +227,10 @@ def main() -> int:
             "FOR UPDATE SKIP LOCKED",
             "FOR UPDATE OF d SKIP LOCKED",
             "ON CONFLICT (schedule_key) DO NOTHING",
-            "schedule.next_due_at\n                        + timedelta(seconds=schedule.interval_seconds)",
+            (
+                "schedule.next_due_at\n"
+                "                        + timedelta(seconds=schedule.interval_seconds)"
+            ),
             "self._recover_stale(connection, at=claimed_at, limit=1000)",
         ),
     )
