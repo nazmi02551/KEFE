@@ -4,9 +4,12 @@ on:
   pull_request:
     paths:
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_transport.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_http_capture.py'
       - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
       - 'services/api/tests/test_provider_http_transport*.py'
+      - 'services/api/tests/test_provider_http_capture*.py'
       - 'services/api/tools/check_provider_http_transport_contract.py'
+      - 'services/api/tools/check_provider_http_capture_contract.py'
       - 'docs/adr/0081-controlled-outbound-http-and-provider-adoption-conformance.md'
       - 'docs/contracts/provider-http-transport-slice45.v1.json'
       - '.github/workflows/provider-http-transport-ci.yml'
@@ -14,9 +17,12 @@ on:
     branches: [main]
     paths:
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_transport.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_http_capture.py'
       - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
       - 'services/api/tests/test_provider_http_transport*.py'
+      - 'services/api/tests/test_provider_http_capture*.py'
       - 'services/api/tools/check_provider_http_transport_contract.py'
+      - 'services/api/tools/check_provider_http_capture_contract.py'
       - 'docs/adr/0081-controlled-outbound-http-and-provider-adoption-conformance.md'
       - 'docs/contracts/provider-http-transport-slice45.v1.json'
       - '.github/workflows/provider-http-transport-ci.yml'
