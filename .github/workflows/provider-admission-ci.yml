@@ -4,51 +4,69 @@ on:
   pull_request:
     paths:
       - 'services/api/migrations/versions/20260802_0024_source_provider_admission.py'
+      - 'services/api/migrations/versions/20260803_0025_public_provider_credential_mode.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_control*.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_execution_context.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_public_execution.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_capture.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_evidence_capture.py'
       - 'services/api/src/kefe_api/modules/knowledge/source_evidence.py'
       - 'services/api/src/kefe_api/modules/knowledge/source_acquisition.py'
       - 'services/api/src/kefe_api/modules/knowledge/source_identity.py'
       - 'services/api/src/kefe_api/infrastructure/postgres_source_provider_admission.py'
+      - 'services/api/src/kefe_api/infrastructure/postgres_provider_execution_context.py'
       - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
       - 'services/api/tests/test_provider_admission_*.py'
+      - 'services/api/tests/test_public_provider_capture*.py'
       - 'services/api/tests/test_provider_http_capture*.py'
       - 'services/api/tests/test_provider_http_evidence_capture.py'
       - 'services/api/tests/test_source_evidence.py'
       - 'services/api/tools/check_provider_admission_control_contract.py'
+      - 'services/api/tools/check_public_provider_capture_contract.py'
       - 'services/api/tools/check_provider_http_capture_contract.py'
       - 'services/api/tools/check_raw_source_evidence_contract.py'
       - 'docs/adr/0079-provider-capability-admission-control.md'
+      - 'docs/adr/0087-public-provider-credential-mode-and-permit-bound-capture.md'
       - 'docs/adr/0085-immutable-raw-source-evidence-and-content-addressed-capture-assembly.md'
       - 'docs/contracts/provider-admission-control-slice43.v1.json'
+      - 'docs/contracts/public-provider-capture-slice51.v1.json'
       - 'docs/contracts/raw-source-evidence-slice49.v1.json'
       - '.github/workflows/provider-admission-ci.yml'
+      - '.github/workflows/public-provider-capture-ci.yml'
       - '.github/workflows/raw-source-evidence-ci.yml'
   push:
     branches: [main]
     paths:
       - 'services/api/migrations/versions/20260802_0024_source_provider_admission.py'
+      - 'services/api/migrations/versions/20260803_0025_public_provider_credential_mode.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_control*.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_execution_context.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_public_execution.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_capture.py'
       - 'services/api/src/kefe_api/modules/knowledge/provider_http_evidence_capture.py'
       - 'services/api/src/kefe_api/modules/knowledge/source_evidence.py'
       - 'services/api/src/kefe_api/modules/knowledge/source_acquisition.py'
       - 'services/api/src/kefe_api/modules/knowledge/source_identity.py'
       - 'services/api/src/kefe_api/infrastructure/postgres_source_provider_admission.py'
+      - 'services/api/src/kefe_api/infrastructure/postgres_provider_execution_context.py'
       - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
       - 'services/api/tests/test_provider_admission_*.py'
+      - 'services/api/tests/test_public_provider_capture*.py'
       - 'services/api/tests/test_provider_http_capture*.py'
       - 'services/api/tests/test_provider_http_evidence_capture.py'
       - 'services/api/tests/test_source_evidence.py'
       - 'services/api/tools/check_provider_admission_control_contract.py'
+      - 'services/api/tools/check_public_provider_capture_contract.py'
       - 'services/api/tools/check_provider_http_capture_contract.py'
       - 'services/api/tools/check_raw_source_evidence_contract.py'
       - 'docs/adr/0079-provider-capability-admission-control.md'
+      - 'docs/adr/0087-public-provider-credential-mode-and-permit-bound-capture.md'
       - 'docs/adr/0085-immutable-raw-source-evidence-and-content-addressed-capture-assembly.md'
       - 'docs/contracts/provider-admission-control-slice43.v1.json'
+      - 'docs/contracts/public-provider-capture-slice51.v1.json'
       - 'docs/contracts/raw-source-evidence-slice49.v1.json'
       - '.github/workflows/provider-admission-ci.yml'
+      - '.github/workflows/public-provider-capture-ci.yml'
       - '.github/workflows/raw-source-evidence-ci.yml'
 
 permissions:
@@ -91,13 +109,20 @@ jobs:
           src/kefe_api/modules/knowledge/provider_control_ports.py
           src/kefe_api/modules/knowledge/provider_control_memory.py
           src/kefe_api/modules/knowledge/provider_control_service.py
+          src/kefe_api/modules/knowledge/provider_execution_context.py
+          src/kefe_api/modules/knowledge/provider_public_execution.py
           src/kefe_api/modules/knowledge/source_acquisition.py
           src/kefe_api/modules/knowledge/source_identity.py
           src/kefe_api/infrastructure/postgres_source_provider_admission.py
+          src/kefe_api/infrastructure/postgres_provider_execution_context.py
           tests/test_provider_admission_control.py
           tests/test_provider_admission_control_postgres.py
           tests/test_provider_admission_architecture.py
+          tests/test_public_provider_capture.py
+          tests/test_public_provider_capture_architecture.py
+          tests/test_public_provider_capture_postgres.py
           tools/check_provider_admission_control_contract.py
+          tools/check_public_provider_capture_contract.py
       - name: Provider architecture fitness
         working-directory: services/api
         run: python tools/check_provider_admission_control_contract.py
