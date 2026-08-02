@@ -1,4 +1,4 @@
-contract_version: 1.2.0
+contract_version: 1.3.0
 updated_at: '2026-08-02'
 route_prefix: /internal/admin/v1
 security:
@@ -30,6 +30,7 @@ security:
   admin_login_endpoint_in_scope: false
 application_boundary:
   facade: SecuredContentAuthoringService
+  proposal_queue_facade: SecuredProposalQueueService
   proposal_review_facade: SecuredProposalReviewService
   projection_facade: SecuredEditorialProjectionService
   direct_repository_mutation_from_http: forbidden
@@ -44,6 +45,20 @@ operations:
     path: /cases
     csrf: true
     capability: CONTENT_CREATE
+  - method: GET
+    path: /proposals
+    csrf: false
+    capability: CONTENT_REVIEW
+    ordering: [created_at_ASC, proposal_id_ASC]
+    pagination: opaque_keyset_cursor
+    maximum_limit: 100
+    offset_pagination: forbidden
+    payload_in_list: false
+  - method: GET
+    path: /proposals/{proposal_id}
+    csrf: false
+    capability: CONTENT_REVIEW
+    immutable_payload_included: true
   - method: POST
     path: /proposals/{proposal_id}/review
     csrf: true
@@ -110,6 +125,9 @@ errors:
     - ADMIN_FORBIDDEN
     - ADMIN_STEP_UP_REQUIRED
     - ADMIN_SEPARATION_OF_DUTIES
+  proposal_queue:
+    - ADMIN_PROPOSAL_QUEUE_CURSOR_INVALID
+    - INGESTION_PROPOSAL_NOT_FOUND
   proposal_review:
     - INGESTION_PROPOSAL_NOT_FOUND
     - INGESTION_PROPOSAL_ALREADY_REVIEWED

@@ -11,6 +11,10 @@ from kefe_api.modules.ingestion_orchestration.models import (
     StageExecution,
     StageProcessorResult,
 )
+from kefe_api.modules.ingestion_orchestration.review_queue import (
+    ProposalQueueQuery,
+    ProposalQueueRecord,
+)
 
 
 class IngestionOrchestrationRepository(Protocol):
@@ -54,6 +58,18 @@ class IngestionOrchestrationRepository(Protocol):
         *,
         target_kind: str | None = None,
     ) -> ProposalMaterialization | None: ...
+
+
+class ProposalReviewQueueRepository(Protocol):
+    def list_proposal_queue(
+        self,
+        query: ProposalQueueQuery,
+    ) -> tuple[ProposalQueueRecord, ...]: ...
+
+    def get_proposal_queue_record(
+        self,
+        proposal_id: UUID,
+    ) -> ProposalQueueRecord | None: ...
 
 
 class StageProcessor(Protocol):

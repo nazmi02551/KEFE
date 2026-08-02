@@ -1,0 +1,5 @@
+registry_version: 1.0.0
+errors:
+- code: ADMIN_PROPOSAL_QUEUE_CURSOR_INVALID
+  http_status: 422
+  retryable: false

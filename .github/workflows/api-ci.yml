@@ -57,6 +57,17 @@ jobs:
           name: openapi-generated
           path: services/api/openapi.generated.json
           if-no-files-found: error
+      - name: Export Admin Proposal queue OpenAPI overlay
+        working-directory: services/api
+        run: >-
+          python tools/export_admin_proposal_queue_openapi_overlay.py
+          --output openapi-admin-proposal-queue.generated.json
+      - name: Upload Admin Proposal queue OpenAPI overlay
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-admin-proposal-queue-generated
+          path: services/api/openapi-admin-proposal-queue.generated.json
+          if-no-files-found: error
       - name: Contract sync
         id: contract-sync
         continue-on-error: true
@@ -99,6 +110,9 @@ jobs:
       - name: Admin editorial operations HTTP contract
         working-directory: services/api
         run: python tools/check_admin_projection_http_contract.py
+      - name: Admin Proposal review queue contract
+        working-directory: services/api
+        run: python tools/check_admin_proposal_queue_contract.py
       - name: Admin HTTP contract
         id: admin-http-contract
         continue-on-error: true
@@ -129,6 +143,12 @@ jobs:
       - name: Enforce unit tests
         if: always()
         run: test '${{ steps.unit-tests.outcome }}' = 'success'
+      - name: Admin Proposal queue OpenAPI overlay exact gate
+        working-directory: services/api
+        run: >-
+          python tools/export_admin_proposal_queue_openapi_overlay.py
+          --output ../../docs/contracts/openapi-admin-proposal-queue.v0.19.overlay.json
+          --check
       - name: OpenAPI drift gate
         working-directory: services/api
         run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
@@ -196,6 +216,7 @@ jobs:
           tests/test_admin_sessions_postgres.py
           tests/test_admin_http_postgres.py
           tests/test_admin_editorial_operations_http_postgres.py
+          tests/test_admin_proposal_queue_http_postgres.py
           tests/test_content_configuration_postgres.py
           tests/test_admin_content_configuration_http_postgres.py
           tests/test_case_flow_pinning_postgres.py
