@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
-from types import MappingProxyType
 from urllib.parse import urlsplit
 from xml.etree import ElementTree
 
@@ -56,8 +55,6 @@ MAX_ITEM_URL_CHARS = 4096
 MAX_SUMMARY_CHARS = 16_384
 MAX_PROPOSALS = 256
 MAX_TOTAL_OUTPUT_CHARS = 524_288
-
-_XML_LANGUAGE_ATTRIBUTE = "{http://www.w3.org/XML/1998/namespace}lang"
 
 
 def _fail(code: str) -> None:
@@ -202,15 +199,16 @@ class FeedItemExtractionStageProcessor:
         *,
         knowledge: KnowledgeRepository,
         evidence: RawSourceEvidenceReader,
-        profile: StrictRssAtomParseProfile = StrictRssAtomParseProfile(),
+        profile: StrictRssAtomParseProfile | None = None,
     ) -> None:
-        if not isinstance(profile, StrictRssAtomParseProfile):
+        resolved_profile = profile or StrictRssAtomParseProfile()
+        if not isinstance(resolved_profile, StrictRssAtomParseProfile):
             raise ValueError("feed item extraction requires an exact parser profile")
-        if profile.max_items > MAX_PROPOSALS:
+        if resolved_profile.max_items > MAX_PROPOSALS:
             raise ValueError("parser item budget exceeds proposal budget")
         self._knowledge = knowledge
         self._evidence = evidence
-        self._profile = profile
+        self._profile = resolved_profile
 
     def process(
         self,
@@ -595,12 +593,6 @@ class FeedItemExtractionStageProcessor:
         if len(set(found)) > 1:
             _fail("FEED_ITEM_PAYLOAD_INVALID")
         return found[0] if found else None
-
-
-@dataclass(frozen=True, slots=True)
-class FeedItemExtractionRuntimeBundle:
-    plan: IngestionRuntimePlan
-    processors: MappingProxyType
 
 
 def build_feed_item_extraction_runtime(
