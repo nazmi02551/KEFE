@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
+
+from export_openapi import load_expected_contract
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACT = (
@@ -52,7 +53,7 @@ def main() -> int:
     policy = POLICY.read_text(encoding="utf-8")
     router = ROUTER.read_text(encoding="utf-8")
     app = MAIN.read_text(encoding="utf-8")
-    openapi = json.loads(OPENAPI.read_text(encoding="utf-8"))
+    openapi = load_expected_contract(OPENAPI)
 
     required_contract = (
         '"application_service": "SecuredEditorialProjectionService"',
