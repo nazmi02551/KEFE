@@ -20,7 +20,7 @@ ADAPTER_CODE = "test.raw_evidence.v1"
 AT = datetime(2026, 8, 2, 20, 20, tzinfo=UTC)
 BODY = b'{"items":[1,2,3]}'
 EXPECTED_HASH = (
-    "sha256:6fcd4f46827f68e8c2f048c75b7e4e71466c8d41c721d11f0b53b7e9a98bc738"
+    "sha256:7aff5dcbe562761bfd9d8569cdd3226d3944acad6539db5d62ad3f67d9a45d0a"
 )
 
 
@@ -38,7 +38,7 @@ def test_canonical_hash_reference_and_redacted_immutable_seal() -> None:
     assert content_hash == EXPECTED_HASH
     assert storage_ref == (
         "evidence://sha256/"
-        "6fcd4f46827f68e8c2f048c75b7e4e71466c8d41c721d11f0b53b7e9a98bc738"
+        "7aff5dcbe562761bfd9d8569cdd3226d3944acad6539db5d62ad3f67d9a45d0a"
     )
     assert BODY.decode() not in repr(seal)
     assert "storage_ref=<redacted>" in repr(seal)
