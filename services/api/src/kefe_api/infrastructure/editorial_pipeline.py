@@ -54,9 +54,9 @@ from kefe_api.modules.ingestion_orchestration.service import (
     IngestionOrchestrationService,
 )
 from kefe_api.modules.ingestion_orchestration.worker_runtime import (
-    InMemoryIngestionWorkerRuntimeRegistry,
     IngestionWorkerObserver,
     IngestionWorkerRuntimeRegistry,
+    InMemoryIngestionWorkerRuntimeRegistry,
     NoOpIngestionWorkerObserver,
 )
 from kefe_api.modules.ingestion_orchestration.worker_service import (
