@@ -89,11 +89,11 @@ class RawEvidenceBackendProfile:
         ):
             if not MIN_BACKEND_TIMEOUT_MS <= value <= MAX_BACKEND_TIMEOUT_MS:
                 raise ValueError(f"{field_name} is outside the supported range")
-        if not self.atomic_put_if_absent:
+        if self.atomic_put_if_absent is not True:
             raise ValueError("atomic put-if-absent is mandatory")
-        if not self.immutable_objects:
+        if self.immutable_objects is not True:
             raise ValueError("immutable objects are mandatory")
-        if not self.read_after_write_verification:
+        if self.read_after_write_verification is not True:
             raise ValueError("read-after-write verification is mandatory")
         if _EVIDENCE_REFERENCE.fullmatch(self.capability_evidence_ref) is None:
             raise ValueError("capability_evidence_ref must be opaque")
@@ -150,6 +150,8 @@ class RawEvidenceWriteResult:
     byte_length: int
 
     def __post_init__(self) -> None:
+        if type(self.outcome) is not RawEvidencePutOutcome:
+            raise ValueError("outcome must be exact RawEvidencePutOutcome")
         _require_object_key(self.object_key)
         if not 0 <= self.byte_length <= MAX_EVIDENCE_BYTES:
             raise ValueError("byte_length is outside the supported range")
