@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from kefe_api.modules.ingestion_orchestration.in_memory import (
     InMemoryIngestionOrchestrationRepository,
@@ -26,11 +26,11 @@ from kefe_api.modules.ingestion_orchestration.service import (
     RetryableStageError,
 )
 from kefe_api.modules.ingestion_orchestration.worker_runtime import (
-    InMemoryIngestionWorkerObserver,
-    InMemoryIngestionWorkerRuntimeRegistry,
     IngestionRuntimePlan,
     IngestionRuntimeStage,
     IngestionWorkerRunOutcome,
+    InMemoryIngestionWorkerObserver,
+    InMemoryIngestionWorkerRuntimeRegistry,
 )
 from kefe_api.modules.ingestion_orchestration.worker_service import (
     IngestionWorkerRunner,
@@ -104,34 +104,28 @@ def _plan(*stages: IngestionRuntimeStage, version: str = "1.0.0"):
     )
 
 
-def _runtime(
-    plan: IngestionRuntimePlan,
-    processors,
-    *,
-    clock=None,
-):
+def _processor_key(stage_code: str, *, version: str = "1.0.0"):
+    return "TEST_PIPELINE", version, stage_code, "1.0.0"
+
+
+def _runtime(plan, processors, *, clock=None):
     repository = InMemoryIngestionOrchestrationRepository()
     lease_repository = InMemoryIngestionRunLeaseRepository(repository)
     orchestration = IngestionOrchestrationService(repository)
     leases = IngestionRunLeaseService(lease_repository)
     observer = InMemoryIngestionWorkerObserver()
-    registry = InMemoryIngestionWorkerRuntimeRegistry((plan,), processors)
     runner = IngestionWorkerRunner(
         repository=repository,
         orchestration=orchestration,
         leases=leases,
-        registry=registry,
+        registry=InMemoryIngestionWorkerRuntimeRegistry((plan,), processors),
         observer=observer,
         clock=clock or (lambda: datetime.now(UTC)),
     )
     return repository, lease_repository, orchestration, leases, observer, runner
 
 
-def _start(
-    orchestration: IngestionOrchestrationService,
-    *,
-    version: str = "1.0.0",
-):
+def _start(orchestration, *, version: str = "1.0.0"):
     return orchestration.start_run(
         input_artifact_kind=InputArtifactKind.SOURCE_ARTIFACT,
         input_artifact_id=uuid4(),
@@ -140,10 +134,6 @@ def _start(
         pipeline_version=version,
         configuration_hash="sha256:test-config",
     )
-
-
-def _processor_key(stage_code: str, *, version: str = "1.0.0"):
-    return "TEST_PIPELINE", version, stage_code, "1.0.0"
 
 
 def test_worker_claims_exact_pipeline_version_and_reports_idle() -> None:
@@ -238,20 +228,21 @@ def test_lease_loss_before_persistence_leaves_zero_stage_output() -> None:
     orchestration = IngestionOrchestrationService(repository)
     leases = IngestionRunLeaseService(lease_repository)
     observer = InMemoryIngestionWorkerObserver()
-    expiring_processor = RecordingProcessor(
+    processor = RecordingProcessor(
         marker="must-not-persist",
         proposal_payload={"payload": "must-not-persist"},
-        before_return=lambda: leases.recover_expired(now=base + timedelta(seconds=6)),
-    )
-    registry = InMemoryIngestionWorkerRuntimeRegistry(
-        (plan,),
-        {_processor_key("EXTRACT"): expiring_processor},
+        before_return=lambda: leases.recover_expired(
+            now=base + timedelta(seconds=6)
+        ),
     )
     runner = IngestionWorkerRunner(
         repository=repository,
         orchestration=orchestration,
         leases=leases,
-        registry=registry,
+        registry=InMemoryIngestionWorkerRuntimeRegistry(
+            (plan,),
+            {_processor_key("EXTRACT"): processor},
+        ),
         observer=observer,
         clock=lambda: base,
     )
@@ -277,30 +268,30 @@ def test_lease_loss_before_persistence_leaves_zero_stage_output() -> None:
 
 def test_crash_recovery_resumes_after_successful_stage_without_reexecution() -> None:
     base = datetime(2026, 8, 2, 9, 0, tzinfo=UTC)
-    first_processor = RecordingProcessor(marker="first")
     plan = _plan(_stage("FIRST"), _stage("SECOND"))
     repository = InMemoryIngestionOrchestrationRepository()
     lease_repository = InMemoryIngestionRunLeaseRepository(repository)
     orchestration = IngestionOrchestrationService(repository)
     leases = IngestionRunLeaseService(lease_repository)
-    first_observer = InMemoryIngestionWorkerObserver()
+    first_processor = RecordingProcessor(marker="first")
     expiring_second = RecordingProcessor(
         marker="second-expired",
-        before_return=lambda: leases.recover_expired(now=base + timedelta(seconds=6)),
-    )
-    first_registry = InMemoryIngestionWorkerRuntimeRegistry(
-        (plan,),
-        {
-            _processor_key("FIRST"): first_processor,
-            _processor_key("SECOND"): expiring_second,
-        },
+        before_return=lambda: leases.recover_expired(
+            now=base + timedelta(seconds=6)
+        ),
     )
     first_runner = IngestionWorkerRunner(
         repository=repository,
         orchestration=orchestration,
         leases=leases,
-        registry=first_registry,
-        observer=first_observer,
+        registry=InMemoryIngestionWorkerRuntimeRegistry(
+            (plan,),
+            {
+                _processor_key("FIRST"): first_processor,
+                _processor_key("SECOND"): expiring_second,
+            },
+        ),
+        observer=InMemoryIngestionWorkerObserver(),
         clock=lambda: base,
     )
     run = _start(orchestration)
@@ -317,20 +308,18 @@ def test_crash_recovery_resumes_after_successful_stage_without_reexecution() -> 
     assert repository.get_run(run.id).state is IngestionRunState.QUEUED
 
     resumed_second = RecordingProcessor(marker="second-success")
-    second_observer = InMemoryIngestionWorkerObserver()
-    second_registry = InMemoryIngestionWorkerRuntimeRegistry(
-        (plan,),
-        {
-            _processor_key("FIRST"): first_processor,
-            _processor_key("SECOND"): resumed_second,
-        },
-    )
     second_runner = IngestionWorkerRunner(
         repository=repository,
         orchestration=orchestration,
         leases=leases,
-        registry=second_registry,
-        observer=second_observer,
+        registry=InMemoryIngestionWorkerRuntimeRegistry(
+            (plan,),
+            {
+                _processor_key("FIRST"): first_processor,
+                _processor_key("SECOND"): resumed_second,
+            },
+        ),
+        observer=InMemoryIngestionWorkerObserver(),
         clock=lambda: base + timedelta(seconds=7),
     )
     resumed = second_runner.run_once(
@@ -356,7 +345,6 @@ def test_retryable_and_final_failures_release_without_automatic_requeue() -> Non
         {_processor_key("RETRY"): RetryableProcessor()},
     )
     retry_run = _start(retry_orchestration)
-
     retry_result = retry_runner.run_once(
         worker_ref="worker-retry",
         pipeline_code=retry_plan.pipeline_code,
