@@ -1,0 +1,153 @@
+{
+  "contract": "feed-pipeline-activation-slice54",
+  "version": "1.0.0",
+  "status": "accepted",
+  "parent_contracts": [
+    "public-provider-capture-slice51.v1",
+    "rss-atom-public-capture-slice52.v1",
+    "feed-item-extraction-slice53.v1"
+  ],
+  "definition": {
+    "identity": "EXACT_VERSIONED_FEED_CODE",
+    "configuration_immutable": true,
+    "semantic_change_requires_new_version": true,
+    "fields": [
+      "feed_code",
+      "adapter_code",
+      "external_locator",
+      "adoption_configuration_hash",
+      "parser_configuration_hash",
+      "extraction_pipeline_code",
+      "extraction_pipeline_version",
+      "acquisition_configuration_hash",
+      "interval_seconds",
+      "max_dispatch_attempts",
+      "evidence_capability_ref"
+    ]
+  },
+  "lifecycle": {
+    "states": ["DRAFT", "PAUSED", "ENABLED", "RETIRED"],
+    "retired_terminal": true,
+    "enable_requires_preflight": true,
+    "resume_requires_preflight": true,
+    "pause_creates_schedule": false,
+    "retire_creates_schedule": false
+  },
+  "preflight": {
+    "read_only": true,
+    "network_request": false,
+    "dns_resolution": false,
+    "socket_open": false,
+    "secret_resolution": false,
+    "evidence_write": false,
+    "schedule_create": false,
+    "dispatch_create": false,
+    "ingestion_run_create": false,
+    "proposal_create": false,
+    "checks": [
+      "PUBLIC_PROVIDER_CAPABILITY_ENABLED",
+      "ADOPTION_PROFILE_HASH_EXACT",
+      "HTTP_AUTH_PROFILE_ABSENT",
+      "RAW_EVIDENCE_CAPABILITY_EXACT",
+      "PUBLIC_HTTP_ADAPTER_CONSTRUCTIBLE",
+      "EXTRACTION_RUNTIME_PLAN_EXACT",
+      "SCHEDULE_BOUNDS_VALID"
+    ],
+    "failed_preflight_mutates_lifecycle": false,
+    "successful_preflight_records_dependency_fingerprint": true
+  },
+  "operational_result": {
+    "allowed_fields": [
+      "outcome",
+      "feed_code",
+      "lifecycle_state",
+      "reason_code",
+      "dependency_fingerprint",
+      "verified_at"
+    ],
+    "forbidden_fields": [
+      "external_locator",
+      "evidence_capability_ref",
+      "terms_evidence_ref",
+      "rate_limit_evidence_ref",
+      "auth_evidence_ref",
+      "secret_ref",
+      "credential",
+      "provider_response",
+      "source_payload",
+      "user_id"
+    ]
+  },
+  "persistence": {
+    "table": "knowledge.feed_pipeline_definition",
+    "create_or_get": true,
+    "transactional_lifecycle_lock": "FOR_UPDATE",
+    "configuration_hash_unique": false,
+    "migration_reversible": true,
+    "downgrade_requires_empty_table": true
+  },
+  "composition": {
+    "production_feed_definitions_registered": 0,
+    "production_enabled_feeds": 0,
+    "production_schedules_created": 0,
+    "concrete_provider_registered": false,
+    "live_network_in_tests": false
+  },
+  "failure_codes": [
+    "FEED_ACTIVATION_DEFINITION_NOT_FOUND",
+    "FEED_ACTIVATION_CONFIGURATION_IMMUTABLE",
+    "FEED_ACTIVATION_LIFECYCLE_INVALID",
+    "FEED_ACTIVATION_PROVIDER_NOT_REGISTERED",
+    "FEED_ACTIVATION_PROVIDER_NOT_PUBLIC",
+    "FEED_ACTIVATION_PROVIDER_NOT_ENABLED",
+    "FEED_ACTIVATION_ADOPTION_PROFILE_NOT_REGISTERED",
+    "FEED_ACTIVATION_ADOPTION_PROFILE_MISMATCH",
+    "FEED_ACTIVATION_AUTH_PROFILE_FORBIDDEN",
+    "FEED_ACTIVATION_EVIDENCE_UNAVAILABLE",
+    "FEED_ACTIVATION_EVIDENCE_CAPABILITY_MISMATCH",
+    "FEED_ACTIVATION_PUBLIC_ADAPTER_INVALID",
+    "FEED_ACTIVATION_RUNTIME_PLAN_NOT_REGISTERED",
+    "FEED_ACTIVATION_RUNTIME_PLAN_MISMATCH",
+    "FEED_ACTIVATION_SCHEDULE_INVALID",
+    "FEED_ACTIVATION_DEPENDENCY_DRIFT"
+  ],
+  "evidence": {
+    "required_workflows": [
+      "Feed Activation Governance CI",
+      "Public Provider Capture CI",
+      "RSS Atom Public Capture CI",
+      "Feed Item Extraction CI",
+      "Ingestion Worker CI",
+      "Provider Admission CI",
+      "Raw Source Evidence CI",
+      "Durable Raw Evidence Backend CI",
+      "API CI",
+      "MVP Beta Gates",
+      "Global Readiness"
+    ],
+    "behavior": [
+      "immutable_create_or_get",
+      "enable_success_records_fingerprint",
+      "provider_mode_and_lifecycle_fail_closed",
+      "adoption_hash_mismatch_fail_closed",
+      "auth_profile_presence_fail_closed",
+      "evidence_capability_fail_closed",
+      "runtime_plan_mismatch_fail_closed",
+      "preflight_has_no_side_effects",
+      "postgres_transactional_lifecycle",
+      "production_repository_empty"
+    ]
+  },
+  "excluded": [
+    "CONCRETE_FEED",
+    "LIVE_CAPTURE",
+    "SCHEDULE_MATERIALIZATION",
+    "AUTONOMOUS_DISPATCH",
+    "PROVIDER_COMPLIANCE_PROOF",
+    "AUTOMATIC_EDITORIAL_ACTION",
+    "ADMIN_UI",
+    "CASE_BUILDER",
+    "FLOW_COMPOSER",
+    "PHONE_FEED_BEHAVIOR"
+  ]
+}

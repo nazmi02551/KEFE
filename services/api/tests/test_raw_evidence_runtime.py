@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from kefe_api.core.settings import Settings
 from kefe_api.infrastructure.raw_evidence_runtime import (
+    ConfiguredRawSourceEvidenceStore,
     build_raw_source_evidence_store,
 )
 from kefe_api.modules.knowledge.source_evidence import (
@@ -15,7 +16,6 @@ from kefe_api.modules.knowledge.source_evidence import (
     UnconfiguredRawSourceEvidenceStore,
 )
 from kefe_api.modules.knowledge.source_evidence_backend import (
-    DurableRawSourceEvidenceStore,
     InMemoryRawEvidenceBackendProfileRegistry,
     InMemoryRawEvidenceBackendRegistry,
     RawEvidenceBackendProfile,
@@ -88,6 +88,8 @@ def test_disabled_mode_returns_only_bounded_unconfigured_store() -> None:
     store = build_raw_source_evidence_store(Settings())
 
     assert type(store) is UnconfiguredRawSourceEvidenceStore
+    assert store.configured is False
+    assert store.capability_ref is None
     assert not isinstance(store, InMemoryRawSourceEvidenceStore)
     with pytest.raises(RetryableRawSourceEvidenceError) as caught:
         store.seal(
@@ -155,7 +157,9 @@ def test_external_mode_builds_only_exact_durable_store_without_fallback() -> Non
         backends=InMemoryRawEvidenceBackendRegistry((backend,)),
     )
 
-    assert type(store) is DurableRawSourceEvidenceStore
+    assert type(store) is ConfiguredRawSourceEvidenceStore
+    assert store.configured is True
+    assert store.capability_ref == "evidence://capability/test-raw-backend"
     assert not isinstance(store, InMemoryRawSourceEvidenceStore)
     assert not isinstance(store, UnconfiguredRawSourceEvidenceStore)
     seal = store.seal(
@@ -166,6 +170,11 @@ def test_external_mode_builds_only_exact_durable_store_without_fallback() -> Non
     )
     assert seal.byte_length == 4
     assert len(backend.objects) == 1
+    read = store.read(
+        storage_ref=seal.storage_ref,
+        expected_content_hash=seal.content_hash,
+    )
+    assert read.body == b"body"
 
 
 def test_profile_selector_rejects_blank_or_padded_values() -> None:

@@ -1,0 +1,92 @@
+name: Slice 54 Install Validated Stack Bootstrap
+
+on:
+  push:
+    branches:
+      - feature/feed-activation-governance-slice54
+    paths:
+      - '.github/workflows/slice54-bootstrap-install.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/feed-activation-governance-slice54
+          fetch-depth: 0
+          show-progress: false
+      - name: Extend exact-head finalizer with validated child branch creation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/feed-activation-governance-ci.yml')
+          text = workflow.read_text(encoding='utf-8')
+          if 'feed-activation-finalize:' not in text:
+              raise RuntimeError('exact-head finalizer is not installed')
+          text = text.replace(
+              '  contents: read\n',
+              '  contents: write\n',
+              1,
+          )
+          marker = "          print(json.dumps({'head_sha': head_sha, 'runs': evidence}, sort_keys=True))\n"
+          if "feature/feed-schedule-materialization-slice55" not in text:
+              replacement = r'''          child_branch = 'feature/feed-schedule-materialization-slice55'
+          encoded_branch = urllib.parse.quote(child_branch, safe='/')
+          try:
+              api(
+                  f'/repos/{repository}/git/ref/heads/{encoded_branch}'
+              )
+          except urllib.error.HTTPError as exc:
+              if exc.code != 404:
+                  raise
+              api(
+                  f'/repos/{repository}/git/refs',
+                  method='POST',
+                  payload={
+                      'ref': f'refs/heads/{child_branch}',
+                      'sha': head_sha,
+                  },
+              )
+          else:
+              api(
+                  f'/repos/{repository}/git/refs/heads/{encoded_branch}',
+                  method='PATCH',
+                  payload={'sha': head_sha, 'force': False},
+              )
+          print(json.dumps({'head_sha': head_sha, 'runs': evidence}, sort_keys=True))
+'''
+              if marker not in text:
+                  raise RuntimeError('finalizer print marker is missing')
+              text = text.replace(marker, replacement, 1)
+          workflow.write_text(text, encoding='utf-8')
+
+          validation = Path(
+              'docs/contracts/feed-pipeline-activation-slice54.validation.md'
+          )
+          current = validation.read_text(encoding='utf-8')
+          note = (
+              '\nThe exact-head finalizer also creates or fast-forwards '
+              '`feature/feed-schedule-materialization-slice55` only after '
+              'all required checks succeed.\n'
+          )
+          if note.strip() not in current:
+              validation.write_text(current.rstrip() + '\n' + note, encoding='utf-8')
+          PY
+          rm -f \
+            .github/workflows/slice54-autofix.yml \
+            .github/workflows/slice54-parent-filters.yml \
+            .github/workflows/slice54-finalizer-patch.yml \
+            .github/workflows/slice54-bootstrap-install.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'ci: bootstrap Slice 55 from validated Slice 54 head'
+          git push origin HEAD:feature/feed-activation-governance-slice54

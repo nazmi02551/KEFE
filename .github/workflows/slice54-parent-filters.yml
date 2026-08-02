@@ -1,0 +1,141 @@
+name: Slice 54 Parent Trigger Normalize
+
+on:
+  push:
+    branches:
+      - feature/feed-activation-governance-slice54
+    paths:
+      - '.github/workflows/slice54-parent-filters.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/feed-activation-governance-slice54
+          fetch-depth: 0
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Normalize sources and parent workflow triggers
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          postgres_test = Path('services/api/tests/test_feed_activation_postgres.py')
+          content = postgres_test.read_text(encoding='utf-8')
+          if 'from sqlalchemy.exc import IntegrityError\n' not in content:
+              content = content.replace(
+                  'from sqlalchemy import create_engine, text\n',
+                  'from sqlalchemy import create_engine, text\n'
+                  'from sqlalchemy.exc import IntegrityError\n',
+              )
+          content = content.replace(
+              'with pytest.raises(Exception):',
+              'with pytest.raises(IntegrityError):',
+          )
+          postgres_test.write_text(content, encoding='utf-8')
+
+          workflow_paths = (
+              '.github/workflows/provider-admission-ci.yml',
+              '.github/workflows/provider-secret-execution-ci.yml',
+              '.github/workflows/provider-http-transport-ci.yml',
+              '.github/workflows/provider-pinned-runtime-ci.yml',
+              '.github/workflows/provider-http-auth-ci.yml',
+              '.github/workflows/provider-http-capture-ci.yml',
+              '.github/workflows/public-provider-capture-ci.yml',
+              '.github/workflows/rss-atom-public-capture-ci.yml',
+              '.github/workflows/raw-source-evidence-ci.yml',
+              '.github/workflows/durable-raw-evidence-backend-ci.yml',
+              '.github/workflows/feed-item-extraction-ci.yml',
+              '.github/workflows/ingestion-worker-ci.yml',
+          )
+          entries = (
+              "      - 'services/api/migrations/versions/20260803_0026_feed_pipeline_activation.py'",
+              "      - 'services/api/src/kefe_api/modules/knowledge/feed_activation.py'",
+              "      - 'services/api/src/kefe_api/infrastructure/feed_activation_runtime.py'",
+              "      - 'services/api/src/kefe_api/infrastructure/postgres_feed_activation.py'",
+              "      - 'services/api/tests/test_feed_activation*.py'",
+              "      - 'services/api/tools/check_feed_activation_contract.py'",
+              "      - 'docs/adr/0090-feed-pipeline-activation-governance-and-read-only-preflight.md'",
+              "      - 'docs/contracts/feed-pipeline-activation-slice54*'",
+              "      - '.github/workflows/feed-activation-governance-ci.yml'",
+          )
+          marker = "    paths:\n"
+          insertion = "\n".join(entries) + "\n"
+          for name in workflow_paths:
+              path = Path(name)
+              text = path.read_text(encoding='utf-8')
+              if entries[0] in text:
+                  continue
+              occurrences = text.count(marker)
+              if occurrences != 2:
+                  raise RuntimeError(f'unexpected paths blocks in {name}: {occurrences}')
+              text = text.replace(marker, marker + insertion)
+              path.write_text(text, encoding='utf-8')
+          PY
+          cd services/api
+          ruff check --fix \
+            src/kefe_api/modules/knowledge/feed_activation.py \
+            src/kefe_api/modules/knowledge/source_evidence.py \
+            src/kefe_api/infrastructure/feed_activation_runtime.py \
+            src/kefe_api/infrastructure/postgres_feed_activation.py \
+            src/kefe_api/infrastructure/raw_evidence_runtime.py \
+            tests/test_feed_activation.py \
+            tests/test_feed_activation_postgres.py \
+            tests/test_feed_activation_runtime.py \
+            tests/test_feed_activation_architecture.py \
+            tests/test_raw_evidence_runtime.py \
+            tools/check_feed_activation_contract.py
+          ruff format \
+            src/kefe_api/modules/knowledge/feed_activation.py \
+            src/kefe_api/modules/knowledge/source_evidence.py \
+            src/kefe_api/infrastructure/feed_activation_runtime.py \
+            src/kefe_api/infrastructure/postgres_feed_activation.py \
+            src/kefe_api/infrastructure/raw_evidence_runtime.py \
+            tests/test_feed_activation.py \
+            tests/test_feed_activation_postgres.py \
+            tests/test_feed_activation_runtime.py \
+            tests/test_feed_activation_architecture.py \
+            tests/test_raw_evidence_runtime.py \
+            tools/check_feed_activation_contract.py
+          ruff check \
+            src/kefe_api/modules/knowledge/feed_activation.py \
+            src/kefe_api/modules/knowledge/source_evidence.py \
+            src/kefe_api/infrastructure/feed_activation_runtime.py \
+            src/kefe_api/infrastructure/postgres_feed_activation.py \
+            src/kefe_api/infrastructure/raw_evidence_runtime.py \
+            tests/test_feed_activation.py \
+            tests/test_feed_activation_postgres.py \
+            tests/test_feed_activation_runtime.py \
+            tests/test_feed_activation_architecture.py \
+            tests/test_raw_evidence_runtime.py \
+            tools/check_feed_activation_contract.py
+          pytest -q \
+            tests/test_feed_activation.py \
+            tests/test_feed_activation_runtime.py \
+            tests/test_feed_activation_architecture.py \
+            tests/test_raw_evidence_runtime.py
+      - name: Commit normalized sources and trigger surfaces
+        run: |
+          rm -f \
+            .github/workflows/slice54-autofix.yml \
+            .github/workflows/slice54-parent-filters.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'fix: normalize Slice 54 and extend parent CI triggers'
+          git push origin HEAD:feature/feed-activation-governance-slice54
