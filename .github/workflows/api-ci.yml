@@ -116,6 +116,9 @@ jobs:
       - name: Source acquisition scheduler contract
         working-directory: services/api
         run: python tools/check_source_acquisition_scheduler_contract.py
+      - name: Content supply process cycle contract
+        working-directory: services/api
+        run: python tools/check_content_supply_cycle_contract.py
       - name: Editorial Projection contract
         working-directory: services/api
         run: python tools/check_editorial_projection_contract.py
@@ -236,6 +239,7 @@ jobs:
           tests/test_ingestion_worker_runner_postgres.py
           tests/test_source_acquisition_postgres.py
           tests/test_source_acquisition_scheduler_postgres.py
+          tests/test_content_supply_cycle_postgres.py
           tests/test_admin_sessions_postgres.py
           tests/test_admin_http_postgres.py
           tests/test_admin_editorial_operations_http_postgres.py
