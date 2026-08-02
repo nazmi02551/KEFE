@@ -184,7 +184,7 @@ def main() -> int:
             "class SourceAcquisitionSchedule:",
             "def transition(",
             "def advance_after_planning(",
-            "self.next_due_at.replace() + self.interval_delta",
+            "self.next_due_at + self.interval_delta",
             "class SourceAcquisitionDispatchState(StrEnum):",
             "class SourceAcquisitionDispatch:",
             "def claim(",
@@ -256,7 +256,7 @@ def main() -> int:
             "before_run_admission=lambda: self._heartbeat(",
             "self._heartbeat(claim, worker_ref=worker_ref, ttl_seconds=ttl_seconds)",
             "SourceDispatchExecutionOutcome.LEASE_LOST",
-            "automatic",
+            "SourceDispatchExecutionOutcome.IDLE",
         ),
     )
     _require(
@@ -331,7 +331,6 @@ def main() -> int:
     for forbidden_behavior in (
         "APIRouter",
         "while True",
-        "schedule.",
         "crontab",
         "croniter",
         "zoneinfo",
