@@ -2,14 +2,17 @@ from __future__ import annotations
 
 import ipaddress
 import re
-from dataclasses import dataclass
+from collections.abc import Callable
+from dataclasses import dataclass, field
 from enum import StrEnum
 from time import monotonic_ns
 from types import MappingProxyType
-from typing import Protocol
+from typing import Protocol, TypeVar
 from urllib.parse import parse_qsl, urljoin, urlsplit
 
 from kefe_api.modules.knowledge.source_identity import require_versioned_adapter_code
+
+T = TypeVar("T")
 
 _EVIDENCE_REFERENCE = re.compile(r"^(?:docref|evidence)://[A-Za-z0-9._/@:+-]+$")
 _MEDIA_TYPE = re.compile(r"^[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+-]*$")
@@ -178,6 +181,29 @@ class InMemoryProviderAdoptionRegistry:
             raise KeyError(adapter_code) from exc
 
 
+class SensitiveHttpHeaderAccess(Protocol):
+    def use_headers(
+        self,
+        callback: Callable[[tuple[tuple[str, memoryview], ...]], T],
+    ) -> T: ...
+
+
+@dataclass(frozen=True, slots=True, repr=False, eq=False)
+class ProviderHttpCredentialBinding:
+    credential_origin: str
+    headers: SensitiveHttpHeaderAccess = field(repr=False, compare=False)
+
+    def __post_init__(self) -> None:
+        if self.credential_origin != _canonical_origin(self.credential_origin):
+            raise ValueError("credential_origin must be canonical")
+
+    def __repr__(self) -> str:
+        return (
+            "ProviderHttpCredentialBinding("
+            f"credential_origin={self.credential_origin!r}, headers=<REDACTED>)"
+        )
+
+
 @dataclass(frozen=True, slots=True, repr=False)
 class OutboundHttpRequest:
     adapter_code: str
@@ -222,13 +248,19 @@ class PinnedOutboundHttpRequest:
     connect_timeout_ms: int
     read_timeout_ms: int
     max_response_bytes: int
+    sensitive_headers: SensitiveHttpHeaderAccess | None = field(
+        default=None,
+        repr=False,
+        compare=False,
+    )
 
     def __repr__(self) -> str:
         return (
             "PinnedOutboundHttpRequest("
             f"adapter_code={self.adapter_code!r}, method={self.method.value!r}, "
             f"host={self.host!r}, port={self.port}, target_ip=<redacted>, "
-            "request_target=<redacted>, public_headers=<redacted>)"
+            "request_target=<redacted>, public_headers=<redacted>, "
+            "sensitive_headers=<redacted>)"
         )
 
 
@@ -402,7 +434,12 @@ class ControlledProviderHttpTransport:
         self._observer = observer
         self._monotonic_clock = monotonic_clock
 
-    def execute(self, request: OutboundHttpRequest) -> ProviderHttpResponse:
+    def execute(
+        self,
+        request: OutboundHttpRequest,
+        *,
+        credential: ProviderHttpCredentialBinding | None = None,
+    ) -> ProviderHttpResponse:
         started_ns = self._monotonic_clock()
         status_code: int | None = None
         redirect_hops = 0
@@ -417,10 +454,25 @@ class ControlledProviderHttpTransport:
                 ) from exc
             if request.method not in profile.allowed_methods:
                 raise FinalProviderHttpError("PROVIDER_HTTP_METHOD_NOT_ALLOWED")
+            if (
+                credential is not None
+                and credential.credential_origin not in profile.allowed_origins
+            ):
+                raise FinalProviderHttpError("PROVIDER_HTTP_AUTH_ORIGIN_NOT_ALLOWED")
 
             current_url = request.url
             while True:
-                host, port, request_target = self._validate_url(profile, current_url)
+                origin, host, port, request_target = self._validate_url(
+                    profile,
+                    current_url,
+                )
+                sensitive_headers = None
+                if credential is not None:
+                    if origin != credential.credential_origin:
+                        raise FinalProviderHttpError(
+                            "PROVIDER_HTTP_AUTH_REDIRECT_BLOCKED"
+                        )
+                    sensitive_headers = credential.headers
                 target_ip = self._resolve_public_target(host)
                 pinned = PinnedOutboundHttpRequest(
                     adapter_code=request.adapter_code,
@@ -433,6 +485,7 @@ class ControlledProviderHttpTransport:
                     connect_timeout_ms=profile.connect_timeout_ms,
                     read_timeout_ms=profile.read_timeout_ms,
                     max_response_bytes=profile.max_response_bytes,
+                    sensitive_headers=sensitive_headers,
                 )
                 try:
                     raw = self._backend.execute(pinned)
@@ -534,7 +587,7 @@ class ControlledProviderHttpTransport:
         self,
         profile: ProviderAdoptionProfile,
         url: str,
-    ) -> tuple[str, int, str]:
+    ) -> tuple[str, str, int, str]:
         try:
             parsed = urlsplit(url)
             port = parsed.port
@@ -564,7 +617,7 @@ class ControlledProviderHttpTransport:
                 )
         path = parsed.path or "/"
         request_target = f"{path}?{parsed.query}" if parsed.query else path
-        return host, 443, request_target
+        return origin, host, 443, request_target
 
     def _resolve_public_target(self, host: str) -> str:
         try:
