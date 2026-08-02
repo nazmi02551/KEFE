@@ -66,6 +66,7 @@ class PostgresContentSupplyOperationalFactsRepository:
                                     'RETRYABLE_FAILURE','FINAL_FAILURE','BLOCKED'
                                 )
                                   AND completed_at >= :window_start
+                                  AND completed_at <= :as_of
                             ) AS recent_dispatch_non_success_count,
                             (
                                 SELECT count(*)
@@ -87,6 +88,7 @@ class PostgresContentSupplyOperationalFactsRepository:
                                 FROM ingestion.ingestion_run
                                 WHERE state IN ('FAILED_RETRYABLE','FAILED_FINAL')
                                   AND updated_at >= :window_start
+                                  AND updated_at <= :as_of
                             ) AS recent_failed_ingestion_run_count,
                             (
                                 SELECT count(*)
@@ -112,11 +114,13 @@ class PostgresContentSupplyOperationalFactsRepository:
                                 FROM ingestion.content_supply_cycle
                                 WHERE state IN ('DEGRADED','FAILED','ABANDONED')
                                   AND completed_at >= :window_start
+                                  AND completed_at <= :as_of
                             ) AS recent_non_success_cycle_count,
                             (
                                 SELECT state
                                 FROM ingestion.content_supply_cycle
                                 WHERE state <> 'RUNNING'
+                                  AND completed_at <= :as_of
                                 ORDER BY completed_at DESC, id DESC
                                 LIMIT 1
                             ) AS latest_terminal_cycle_state,
@@ -124,6 +128,7 @@ class PostgresContentSupplyOperationalFactsRepository:
                                 SELECT completed_at
                                 FROM ingestion.content_supply_cycle
                                 WHERE state <> 'RUNNING'
+                                  AND completed_at <= :as_of
                                 ORDER BY completed_at DESC, id DESC
                                 LIMIT 1
                             ) AS latest_terminal_cycle_completed_at
