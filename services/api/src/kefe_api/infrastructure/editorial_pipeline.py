@@ -4,6 +4,9 @@ from dataclasses import dataclass
 
 from kefe_api.core.settings import Settings
 from kefe_api.infrastructure.db import build_engine
+from kefe_api.infrastructure.postgres_content_supply_cycle import (
+    PostgresContentSupplyCycleRepository,
+)
 from kefe_api.infrastructure.postgres_editorial_projection import (
     PostgresEditorialProjectionRepository,
 )
@@ -28,6 +31,15 @@ from kefe_api.modules.content_authoring.in_memory import (
     InMemoryContentAuthoringRepository,
 )
 from kefe_api.modules.content_authoring.ports import ContentAuthoringRepository
+from kefe_api.modules.content_supply_cycle.in_memory import (
+    InMemoryContentSupplyCycleRepository,
+)
+from kefe_api.modules.content_supply_cycle.ports import ContentSupplyCycleRepository
+from kefe_api.modules.content_supply_cycle.service import (
+    ContentSupplyCycleObserver,
+    ContentSupplyCycleService,
+    NoOpContentSupplyCycleObserver,
+)
 from kefe_api.modules.editorial_projection.in_memory import (
     InMemoryEditorialProjectionProfileRegistry,
     InMemoryEditorialProjectionRepository,
@@ -104,6 +116,9 @@ class EditorialPipeline:
     ingestion_worker_registry: IngestionWorkerRuntimeRegistry
     ingestion_worker_observer: IngestionWorkerObserver
     ingestion_worker_runner: IngestionWorkerRunner
+    content_supply_cycle_repository: ContentSupplyCycleRepository
+    content_supply_cycle_observer: ContentSupplyCycleObserver
+    content_supply_cycle_service: ContentSupplyCycleService
     proposal_queue_repository: ProposalReviewQueueRepository
     projection_repository: EditorialProjectionRepository
     projection_service: EditorialProjectionService
@@ -128,6 +143,9 @@ def build_editorial_pipeline(
         source_scheduler_repository: SourceAcquisitionSchedulerRepository = (
             InMemorySourceAcquisitionSchedulerRepository()
         )
+        content_supply_cycle_repository: ContentSupplyCycleRepository = (
+            InMemoryContentSupplyCycleRepository()
+        )
         memory_ingestion = InMemoryIngestionOrchestrationRepository()
         ingestion_repository: IngestionOrchestrationRepository = memory_ingestion
         ingestion_lease_repository: IngestionRunLeaseRepository = (
@@ -145,6 +163,7 @@ def build_editorial_pipeline(
         engine = build_engine(settings.database_url)
         knowledge_repository = PostgresKnowledgeRepository(engine)
         source_scheduler_repository = PostgresSourceAcquisitionSchedulerRepository(engine)
+        content_supply_cycle_repository = PostgresContentSupplyCycleRepository(engine)
         ingestion_repository = PostgresIngestionOrchestrationRepository(engine)
         ingestion_lease_repository = PostgresIngestionRunLeaseRepository(engine)
         proposal_queue_repository = PostgresProposalReviewQueueRepository(engine)
@@ -178,6 +197,15 @@ def build_editorial_pipeline(
         leases=ingestion_lease_service,
         registry=ingestion_worker_registry,
         observer=ingestion_worker_observer,
+    )
+    content_supply_cycle_observer: ContentSupplyCycleObserver = (
+        NoOpContentSupplyCycleObserver()
+    )
+    content_supply_cycle_service = ContentSupplyCycleService(
+        repository=content_supply_cycle_repository,
+        scheduler=source_scheduler_service,
+        ingestion_worker=ingestion_worker_runner,
+        observer=content_supply_cycle_observer,
     )
 
     profiles = InMemoryEditorialProjectionProfileRegistry(
@@ -213,6 +241,9 @@ def build_editorial_pipeline(
         ingestion_worker_registry=ingestion_worker_registry,
         ingestion_worker_observer=ingestion_worker_observer,
         ingestion_worker_runner=ingestion_worker_runner,
+        content_supply_cycle_repository=content_supply_cycle_repository,
+        content_supply_cycle_observer=content_supply_cycle_observer,
+        content_supply_cycle_service=content_supply_cycle_service,
         proposal_queue_repository=proposal_queue_repository,
         projection_repository=projection_repository,
         projection_service=projection_service,
