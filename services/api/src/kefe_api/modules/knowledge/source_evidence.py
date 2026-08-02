@@ -12,6 +12,7 @@ from kefe_api.modules.knowledge.source_identity import require_versioned_adapter
 
 _SHA256_HASH = re.compile(r"^sha256:[0-9a-f]{64}$")
 _STORAGE_REF = re.compile(r"^evidence://sha256/[0-9a-f]{64}$")
+_CAPABILITY_REF = re.compile(r"^evidence://capability/[A-Za-z0-9._/@:+-]+$")
 _MEDIA_TYPE = re.compile(
     r"^[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+-]*$"
 )
@@ -32,6 +33,11 @@ def _normalize_media_type(value: str | None) -> str | None:
     if normalized != value or _MEDIA_TYPE.fullmatch(normalized) is None:
         raise ValueError("media_type must be an exact lowercase media type")
     return normalized
+
+
+def _require_capability_ref(value: str) -> None:
+    if _CAPABILITY_REF.fullmatch(value) is None:
+        raise ValueError("capability_ref must be an opaque evidence capability reference")
 
 
 def canonical_content_hash(body: bytes) -> str:
@@ -148,6 +154,12 @@ class RawSourceEvidenceReader(Protocol):
 
 
 class RawSourceEvidenceStore(Protocol):
+    @property
+    def configured(self) -> bool: ...
+
+    @property
+    def capability_ref(self) -> str | None: ...
+
     def seal(
         self,
         *,
@@ -166,10 +178,24 @@ class RawSourceEvidenceStore(Protocol):
 
 
 class InMemoryRawSourceEvidenceStore:
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        *,
+        capability_ref: str = "evidence://capability/in-memory-test-v1",
+    ) -> None:
+        _require_capability_ref(capability_ref)
+        self._capability_ref = capability_ref
         self._bodies: dict[str, bytes] = {}
         self._media_types: dict[str, str | None] = {}
         self._lock = Lock()
+
+    @property
+    def configured(self) -> bool:
+        return True
+
+    @property
+    def capability_ref(self) -> str:
+        return self._capability_ref
 
     def seal(
         self,
@@ -253,6 +279,14 @@ class InMemoryRawSourceEvidenceStore:
 
 
 class UnconfiguredRawSourceEvidenceStore:
+    @property
+    def configured(self) -> bool:
+        return False
+
+    @property
+    def capability_ref(self) -> None:
+        return None
+
     def seal(
         self,
         *,
