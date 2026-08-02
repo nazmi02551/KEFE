@@ -97,12 +97,13 @@ class ProviderHttpCaptureAdapter:
         http_executor: SecureProviderHttpExecutor,
     ) -> None:
         require_versioned_adapter_code(definition.adapter_code)
+        self._adapter_code = definition.adapter_code
         self._definition = definition
         self._http_executor = http_executor
 
     @property
     def adapter_code(self) -> str:
-        return self._definition.adapter_code
+        return self._adapter_code
 
     def capture(
         self,
@@ -112,17 +113,22 @@ class ProviderHttpCaptureAdapter:
         secret: SecretAccess,
         at: datetime,
     ) -> CapturedSource:
-        _require_bounded_text(
-            external_locator,
-            field_name="external_locator",
-            max_chars=MAX_EXTERNAL_LOCATOR_CHARS,
-        )
-        _require_bounded_text(
-            trace_id,
-            field_name="trace_id",
-            max_chars=MAX_TRACE_ID_CHARS,
-        )
-        _require_utc(at, "at")
+        try:
+            _require_bounded_text(
+                external_locator,
+                field_name="external_locator",
+                max_chars=MAX_EXTERNAL_LOCATOR_CHARS,
+            )
+            _require_bounded_text(
+                trace_id,
+                field_name="trace_id",
+                max_chars=MAX_TRACE_ID_CHARS,
+            )
+            _require_utc(at, "at")
+        except ValueError as exc:
+            raise FinalSourceCaptureError(
+                "SOURCE_PROVIDER_HTTP_PLAN_INVALID"
+            ) from exc
 
         try:
             plan = self._definition.build_plan(
@@ -168,6 +174,10 @@ class ProviderHttpCaptureAdapter:
             raise FinalSourceCaptureError(
                 "SOURCE_PROVIDER_HTTP_EXECUTION_INVALID"
             ) from exc
+        if type(response) is not ProviderHttpResponse:
+            raise FinalSourceCaptureError(
+                "SOURCE_PROVIDER_HTTP_EXECUTION_INVALID"
+            )
 
         try:
             captured = self._definition.parse_response(
