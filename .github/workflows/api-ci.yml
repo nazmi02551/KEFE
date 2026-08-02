@@ -87,6 +87,9 @@ jobs:
       - name: Claim Argument ingestion contract
         working-directory: services/api
         run: python tools/check_claim_argument_ingestion_contract.py
+      - name: Ingestion orchestration contract
+        working-directory: services/api
+        run: python tools/check_ingestion_orchestration_contract.py
       - name: Admin HTTP contract
         id: admin-http-contract
         continue-on-error: true
@@ -186,6 +189,7 @@ jobs:
           tests/test_flow_runtime_postgres.py
           tests/test_decision_revision_lineage_postgres.py
           tests/test_knowledge_graph_postgres.py
+          tests/test_ingestion_orchestration_postgres.py
           > postgres-test-output.txt 2>&1
       - name: Upload PostgreSQL diagnostics on failure
         if: steps.postgres-tests.outcome == 'failure'
