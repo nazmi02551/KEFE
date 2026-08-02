@@ -26,6 +26,9 @@ from kefe_api.infrastructure.postgres_proposal_review_queue import (
 from kefe_api.infrastructure.postgres_source_acquisition_scheduler import (
     PostgresSourceAcquisitionSchedulerRepository,
 )
+from kefe_api.infrastructure.postgres_source_provider_admission import (
+    PostgresSourceProviderAdmissionRepository,
+)
 from kefe_api.modules.admin_security.editorial_projection import (
     SecuredEditorialProjectionService,
 )
@@ -90,6 +93,15 @@ from kefe_api.modules.ingestion_orchestration.worker_service import (
 )
 from kefe_api.modules.knowledge.in_memory import InMemoryKnowledgeRepository
 from kefe_api.modules.knowledge.ports import KnowledgeRepository
+from kefe_api.modules.knowledge.provider_control_memory import (
+    InMemorySourceProviderAdmissionRepository,
+)
+from kefe_api.modules.knowledge.provider_control_ports import (
+    SourceProviderAdmissionRepository,
+)
+from kefe_api.modules.knowledge.provider_control_service import (
+    SourceProviderAdmissionService,
+)
 from kefe_api.modules.knowledge.source_acquisition import (
     InMemorySourceCaptureRegistry,
     NoOpSourceAcquisitionObserver,
@@ -114,6 +126,8 @@ from kefe_api.modules.knowledge.source_scheduler_service import (
 class EditorialPipeline:
     knowledge_repository: KnowledgeRepository
     source_capture_registry: SourceCaptureRegistry
+    source_provider_admission_repository: SourceProviderAdmissionRepository
+    source_provider_admission_service: SourceProviderAdmissionService
     source_acquisition_observer: SourceAcquisitionObserver
     source_acquisition_service: SourceAcquisitionService
     source_scheduler_repository: SourceAcquisitionSchedulerRepository
@@ -152,6 +166,9 @@ def build_editorial_pipeline(
                 "memory Editorial Projection requires in-memory Content Authoring"
             )
         knowledge_repository: KnowledgeRepository = InMemoryKnowledgeRepository()
+        source_provider_admission_repository: SourceProviderAdmissionRepository = (
+            InMemorySourceProviderAdmissionRepository()
+        )
         memory_scheduler = InMemorySourceAcquisitionSchedulerRepository()
         source_scheduler_repository: SourceAcquisitionSchedulerRepository = (
             memory_scheduler
@@ -181,6 +198,9 @@ def build_editorial_pipeline(
             )
         engine = build_engine(settings.database_url)
         knowledge_repository = PostgresKnowledgeRepository(engine)
+        source_provider_admission_repository = (
+            PostgresSourceProviderAdmissionRepository(engine)
+        )
         source_scheduler_repository = PostgresSourceAcquisitionSchedulerRepository(engine)
         content_supply_cycle_repository = PostgresContentSupplyCycleRepository(engine)
         content_supply_health_repository = (
@@ -193,6 +213,9 @@ def build_editorial_pipeline(
 
     ingestion_service = IngestionOrchestrationService(ingestion_repository)
     source_capture_registry: SourceCaptureRegistry = InMemorySourceCaptureRegistry()
+    provider_admission_service = SourceProviderAdmissionService(
+        source_provider_admission_repository
+    )
     source_acquisition_observer: SourceAcquisitionObserver = (
         NoOpSourceAcquisitionObserver()
     )
@@ -201,6 +224,7 @@ def build_editorial_pipeline(
         ingestion_service=ingestion_service,
         registry=source_capture_registry,
         observer=source_acquisition_observer,
+        admission=provider_admission_service,
     )
     source_dispatch_observer: SourceDispatchObserver = NoOpSourceDispatchObserver()
     source_scheduler_service = SourceAcquisitionSchedulerService(
@@ -254,6 +278,8 @@ def build_editorial_pipeline(
     return EditorialPipeline(
         knowledge_repository=knowledge_repository,
         source_capture_registry=source_capture_registry,
+        source_provider_admission_repository=source_provider_admission_repository,
+        source_provider_admission_service=provider_admission_service,
         source_acquisition_observer=source_acquisition_observer,
         source_acquisition_service=source_acquisition_service,
         source_scheduler_repository=source_scheduler_repository,
