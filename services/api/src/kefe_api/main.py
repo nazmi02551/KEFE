@@ -198,6 +198,10 @@ def create_app() -> FastAPI:
         editorial_pipeline.ingestion_repository
     )
     app.state.ingestion_orchestration_service = editorial_pipeline.ingestion_service
+    app.state.ingestion_run_lease_repository = (
+        editorial_pipeline.ingestion_lease_repository
+    )
+    app.state.ingestion_run_lease_service = editorial_pipeline.ingestion_lease_service
     app.state.proposal_review_queue_repository = (
         editorial_pipeline.proposal_queue_repository
     )
