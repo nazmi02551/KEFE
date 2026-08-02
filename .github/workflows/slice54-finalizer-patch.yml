@@ -1,0 +1,214 @@
+name: Slice 54 Install Exact Head Finalizer
+
+on:
+  push:
+    branches:
+      - feature/feed-activation-governance-slice54
+    paths:
+      - '.github/workflows/slice54-finalizer-patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/feed-activation-governance-slice54
+          fetch-depth: 0
+          show-progress: false
+      - name: Install exact-head finalizer and remove one-shot helpers
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('.github/workflows/feed-activation-governance-ci.yml')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace(
+              'permissions:\n  contents: read\n',
+              'permissions:\n'
+              '  actions: read\n'
+              '  contents: read\n'
+              '  issues: write\n'
+              '  pull-requests: write\n',
+          )
+          marker = '  feed-activation-finalize:\n'
+          if marker not in text:
+              text += r'''
+
+  feed-activation-finalize:
+    if: github.event_name == 'pull_request'
+    needs:
+      - feed-activation-memory
+      - feed-activation-postgres
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify exact-head parent workflows and mark ready
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          CURRENT_RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          token = os.environ['GH_TOKEN']
+          repository = os.environ['REPOSITORY']
+          head_sha = os.environ['HEAD_SHA']
+          pr_number = int(os.environ['PR_NUMBER'])
+          current_run_number = int(os.environ['CURRENT_RUN_NUMBER'])
+          required = {
+              'API CI',
+              'Provider Admission CI',
+              'Provider Secret Execution CI',
+              'Provider HTTP Transport CI',
+              'Provider Pinned Runtime CI',
+              'Provider HTTP Authentication CI',
+              'Provider HTTP Capture CI',
+              'Raw Source Evidence CI',
+              'Durable Raw Evidence Backend CI',
+              'Public Provider Capture CI',
+              'RSS Atom Public Capture CI',
+              'Feed Item Extraction CI',
+              'Ingestion Worker CI',
+              'MVP Beta Gates',
+              'Global Readiness',
+          }
+
+          def api(path: str, *, method: str = 'GET', payload=None):
+              data = None
+              headers = {
+                  'Accept': 'application/vnd.github+json',
+                  'Authorization': f'Bearer {token}',
+                  'X-GitHub-Api-Version': '2022-11-28',
+              }
+              if payload is not None:
+                  data = json.dumps(payload).encode('utf-8')
+                  headers['Content-Type'] = 'application/json'
+              request = urllib.request.Request(
+                  f'https://api.github.com{path}',
+                  data=data,
+                  headers=headers,
+                  method=method,
+              )
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  return json.load(response)
+
+          selected = {}
+          for _ in range(120):
+              query = urllib.parse.urlencode(
+                  {
+                      'head_sha': head_sha,
+                      'event': 'pull_request',
+                      'per_page': 100,
+                  }
+              )
+              payload = api(
+                  f'/repos/{repository}/actions/runs?{query}'
+              )
+              runs = payload.get('workflow_runs', [])
+              selected = {}
+              for run in sorted(runs, key=lambda item: item['id'], reverse=True):
+                  name = run['name']
+                  if name in required and name not in selected:
+                      selected[name] = run
+              missing = required.difference(selected)
+              failed = {
+                  name: run.get('conclusion')
+                  for name, run in selected.items()
+                  if run.get('status') == 'completed'
+                  and run.get('conclusion') != 'success'
+              }
+              if failed:
+                  raise SystemExit(
+                      'exact-head workflow failure: '
+                      + json.dumps(failed, sort_keys=True)
+                  )
+              if not missing and all(
+                  run.get('status') == 'completed'
+                  and run.get('conclusion') == 'success'
+                  for run in selected.values()
+              ):
+                  break
+              time.sleep(15)
+          else:
+              raise SystemExit(
+                  'exact-head workflow timeout; missing='
+                  + ','.join(sorted(required.difference(selected)))
+              )
+
+          pr = api(f'/repos/{repository}/pulls/{pr_number}')
+          evidence = {
+              name: run['run_number']
+              for name, run in selected.items()
+          }
+          evidence['Feed Activation Governance CI'] = current_run_number
+          lines = [
+              '## Automated exact-head validation — PASS',
+              '',
+              f'Verified runtime SHA: `{head_sha}`',
+              '',
+          ]
+          for name in sorted(evidence):
+              lines.append(f'- {name} #{evidence[name]}: PASS')
+          lines.extend(
+              [
+                  '',
+                  'The finalizer only marks this PR ready after every listed '
+                  'workflow succeeds on the same head SHA. It does not merge '
+                  'the PR or activate a production feed.',
+              ]
+          )
+          body = pr.get('body') or ''
+          body = body.split(
+              '## Automated exact-head validation — PASS',
+              1,
+          )[0].rstrip()
+          body = body + '\n\n' + '\n'.join(lines)
+          api(
+              f'/repos/{repository}/pulls/{pr_number}',
+              method='PATCH',
+              payload={'body': body},
+          )
+          if pr.get('draft'):
+              api(
+                  '/graphql',
+                  method='POST',
+                  payload={
+                      'query': (
+                          'mutation($id:ID!){'
+                          'markPullRequestReadyForReview('
+                          'input:{pullRequestId:$id})'
+                          '{pullRequest{isDraft}}}'
+                      ),
+                      'variables': {'id': pr['node_id']},
+                  },
+              )
+          print(json.dumps({'head_sha': head_sha, 'runs': evidence}, sort_keys=True))
+          PY
+'''
+          path.write_text(text, encoding='utf-8')
+          PY
+          rm -f \
+            .github/workflows/slice54-autofix.yml \
+            .github/workflows/slice54-parent-filters.yml \
+            .github/workflows/slice54-finalizer-patch.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'ci: enforce exact-head Slice 54 readiness'
+          git push origin HEAD:feature/feed-activation-governance-slice54
