@@ -332,7 +332,11 @@ class DurableRawSourceEvidenceStore:
                 "RAW_EVIDENCE_BACKEND_CONTRACT_INVALID"
             )
 
-        read_result = self._read_backend(object_key=object_key)
+        read_result = self._read_backend(
+            object_key=object_key,
+            missing_code="RAW_EVIDENCE_READ_AFTER_WRITE_MISSING",
+            missing_retryable=True,
+        )
         if (
             read_result.body != owned_body
             or read_result.media_type != canonical_media_type
@@ -361,7 +365,11 @@ class DurableRawSourceEvidenceStore:
                 "RAW_EVIDENCE_REFERENCE_HASH_MISMATCH"
             )
         object_key = self._object_key(expected_content_hash)
-        read_result = self._read_backend(object_key=object_key)
+        read_result = self._read_backend(
+            object_key=object_key,
+            missing_code="RAW_EVIDENCE_OBJECT_NOT_FOUND",
+            missing_retryable=False,
+        )
         owned_body = memoryview(read_result.body).tobytes()
         if len(owned_body) > self._profile.max_object_bytes:
             raise FinalRawSourceEvidenceError(
@@ -379,16 +387,22 @@ class DurableRawSourceEvidenceStore:
             byte_length=len(owned_body),
         )
 
-    def _read_backend(self, *, object_key: str) -> RawEvidenceReadResult:
+    def _read_backend(
+        self,
+        *,
+        object_key: str,
+        missing_code: str,
+        missing_retryable: bool,
+    ) -> RawEvidenceReadResult:
         try:
             read_result = self._backend.read_exact(
                 object_key=object_key,
                 timeout_ms=self._profile.read_timeout_ms,
             )
         except KeyError as exc:
-            raise FinalRawSourceEvidenceError(
-                "RAW_EVIDENCE_OBJECT_NOT_FOUND"
-            ) from exc
+            if missing_retryable:
+                raise RetryableRawSourceEvidenceError(missing_code) from exc
+            raise FinalRawSourceEvidenceError(missing_code) from exc
         except RetryableRawEvidenceBackendError as exc:
             raise RetryableRawSourceEvidenceError(exc.code) from exc
         except FinalRawEvidenceBackendError as exc:
