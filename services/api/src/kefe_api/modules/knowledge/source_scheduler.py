@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 from hashlib import sha256
 from json import dumps
@@ -157,14 +157,12 @@ class SourceAcquisitionSchedule:
             raise ValueError("only ACTIVE schedules may be planned")
         return replace(
             self,
-            next_due_at=self.next_due_at.replace() + self.interval_delta,
+            next_due_at=self.next_due_at + self.interval_delta,
             updated_at=at,
         )
 
     @property
-    def interval_delta(self):
-        from datetime import timedelta
-
+    def interval_delta(self) -> timedelta:
         return timedelta(seconds=self.interval_seconds)
 
     def acquisition_command(self) -> SourceAcquisitionCommand:
