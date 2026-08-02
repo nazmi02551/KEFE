@@ -85,6 +85,8 @@ class InMemoryContentSupplyOperationalFactsRepository:
                         cycle
                         for cycle in cycles
                         if cycle.state is not ContentSupplyCycleState.RUNNING
+                        and cycle.completed_at is not None
+                        and cycle.completed_at <= as_of
                     )
                     latest_terminal = max(
                         terminal_cycles,
@@ -130,7 +132,7 @@ class InMemoryContentSupplyOperationalFactsRepository:
                         recent_dispatch_non_success_count=sum(
                             dispatch.state in _DISPATCH_NON_SUCCESS_STATES
                             and dispatch.completed_at is not None
-                            and dispatch.completed_at >= window_start
+                            and window_start <= dispatch.completed_at <= as_of
                             for dispatch in dispatches
                         ),
                         queued_ingestion_run_count=sum(
@@ -146,7 +148,7 @@ class InMemoryContentSupplyOperationalFactsRepository:
                         ),
                         recent_failed_ingestion_run_count=sum(
                             run.state in _FAILED_RUN_STATES
-                            and run.updated_at >= window_start
+                            and window_start <= run.updated_at <= as_of
                             for run in runs
                         ),
                         unreviewed_proposal_count=sum(
@@ -165,7 +167,7 @@ class InMemoryContentSupplyOperationalFactsRepository:
                         recent_non_success_cycle_count=sum(
                             cycle.state in _CYCLE_NON_SUCCESS_STATES
                             and cycle.completed_at is not None
-                            and cycle.completed_at >= window_start
+                            and window_start <= cycle.completed_at <= as_of
                             for cycle in cycles
                         ),
                         latest_terminal_cycle_state=(
