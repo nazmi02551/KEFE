@@ -131,10 +131,10 @@ def _executor(
     *,
     adoption_profile: ProviderAdoptionProfile | None = None,
     auth_profile: ProviderHttpAuthProfile | None = None,
-    outcomes=(_response(),),
+    outcomes=None,
 ):
     resolver = FakeDnsResolver()
-    backend = FakeBackend(outcomes)
+    backend = FakeBackend((_response(),) if outcomes is None else outcomes)
     observer = InMemoryProviderHttpObserver()
     transport = ControlledProviderHttpTransport(
         adoption_registry=InMemoryProviderAdoptionRegistry(
@@ -250,7 +250,7 @@ def test_secure_executor_applies_bearer_header_and_closes_envelope() -> None:
 
     assert response.body == b"{}"
     assert resolver.calls == ["api.example.com"]
-    assert backend.credentials == [(('authorization', b'Bearer topsecret'),)]
+    assert backend.credentials == [(("authorization", b"Bearer topsecret"),)]
     assert backend.requests[0].sensitive_headers is not None
     assert backend.requests[0].sensitive_headers.closed is True
     assert "topsecret" not in repr(backend.requests[0])
@@ -282,7 +282,7 @@ def test_header_token_scheme_has_no_implicit_prefix() -> None:
 
     executor.execute(_request(), secret=lease, at=AT)
 
-    assert backend.credentials == [(('x-api-key', b'key-123'),)]
+    assert backend.credentials == [(("x-api-key", b"key-123"),)]
     lease.close()
 
 
@@ -493,7 +493,7 @@ class TrackingConnection:
         assert skip_accept_encoding is True
 
     def putheader(self, header: str, *values: str | bytes) -> None:
-        if header.lower() == self.access.name:
+        if isinstance(values[0], bytes):
             assert self.access.active is True
         self.headers.append((header, values[0]))
 
