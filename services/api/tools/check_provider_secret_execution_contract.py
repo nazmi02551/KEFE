@@ -34,6 +34,7 @@ MEMORY_TEST = REPO_ROOT / "services/api/tests/test_provider_secret_execution.py"
 POSTGRES_TEST = (
     REPO_ROOT / "services/api/tests/test_provider_secret_execution_postgres.py"
 )
+PUBLIC_TEST = REPO_ROOT / "services/api/tests/test_public_provider_capture.py"
 
 
 def _require(
@@ -71,6 +72,7 @@ def main() -> int:
         PIPELINE,
         MEMORY_TEST,
         POSTGRES_TEST,
+        PUBLIC_TEST,
     )
     missing = [path for path in required if not path.exists()]
     if missing:
@@ -87,6 +89,7 @@ def main() -> int:
     pipeline = PIPELINE.read_text(encoding="utf-8")
     memory_test = MEMORY_TEST.read_text(encoding="utf-8")
     postgres_test = POSTGRES_TEST.read_text(encoding="utf-8")
+    public_test = PUBLIC_TEST.read_text(encoding="utf-8")
 
     lease = contract.get("secret_lease", {})
     if lease.get("access") != "CALLBACK_SCOPED_BYTES":
@@ -103,10 +106,20 @@ def main() -> int:
         problems.append("resolver fallback must remain forbidden")
     if contract.get("adapter_registry", {}).get("default_registry") != "EMPTY":
         problems.append("credential-aware adapter registry must default empty")
+    permit_contract = contract.get("permit_context", {})
+    if permit_contract.get("required_credential_mode") != "SECRET_REF":
+        problems.append("secret execution must require SECRET_REF mode")
+    if permit_contract.get("public_rejected_before_resolver_lookup") is not True:
+        problems.append("PUBLIC mode must be rejected before resolver lookup")
     if contract.get("production_composition", {}).get("network") is not False:
         problems.append("network must remain excluded")
     if contract.get("production_composition", {}).get("provider_adapter") is not False:
         problems.append("real provider adapter must remain excluded")
+    if (
+        contract.get("production_composition", {}).get("source_capture_path")
+        != "CREDENTIAL_MODE_ROUTER"
+    ):
+        problems.append("source capture must enter through credential-mode router")
 
     context_fields = _dataclass_fields(context, "ProviderPermitExecutionContext")
     expected_context_fields = (
@@ -114,6 +127,7 @@ def main() -> int:
         "adapter_code",
         "secret_ref",
         "permit_expires_at",
+        "credential_mode",
     )
     if context_fields != expected_context_fields:
         problems.append(
@@ -140,6 +154,8 @@ def main() -> int:
             "class InMemoryCredentialAwareSourceCaptureRegistry:",
             "class SecureProviderCaptureExecutor:",
             "get_active_execution_context(",
+            "context.credential_mode is not ProviderCredentialMode.SECRET_REF",
+            "SOURCE_PROVIDER_CREDENTIAL_MODE_MISMATCH",
             "resolver.resolve(",
             "adapter.capture(",
             "finally:\n            lease.close()",
@@ -150,12 +166,22 @@ def main() -> int:
             "SOURCE_CREDENTIAL_ADAPTER_NOT_REGISTERED",
         ),
     )
+    mode_position = execution.find(
+        "context.credential_mode is not ProviderCredentialMode.SECRET_REF"
+    )
+    resolver_position = execution.find("self._resolvers.get_for_reference(secret_ref)")
+    if not 0 <= mode_position < resolver_position:
+        problems.append("PUBLIC mode is not rejected before resolver selection")
+
     _require(
         problems,
         "permit context",
         context,
         (
-            "secret_ref: str = field(repr=False)",
+            "secret_ref: str | None = field(repr=False)",
+            "credential_mode: ProviderCredentialMode",
+            "PUBLIC permit context cannot contain secret_ref",
+            "SECRET_REF permit context requires secret_ref",
             "secret_ref=<REDACTED>",
             "class ProviderPermitContextError(Exception):",
             "SOURCE_PROVIDER_PERMIT_CONTEXT_INVALID",
@@ -168,6 +194,8 @@ def main() -> int:
         (
             'isolation_level="REPEATABLE READ"',
             "SET TRANSACTION READ ONLY",
+            "capability.credential_mode",
+            "ProviderCredentialMode(row[\"credential_mode\"])",
             "permit.id = :permit_id",
             "permit.adapter_code = :adapter_code",
             "permit.state = 'ACTIVE'",
@@ -207,7 +235,9 @@ def main() -> int:
             "SecureProviderCaptureExecutor(",
             "PostgresProviderPermitExecutionContextRepository(engine)",
             "contexts=provider_execution_context_repository",
-            "capture_executor=secure_provider_capture_executor",
+            "CredentialModeRoutingProviderCaptureExecutor(",
+            "credentialed_executor=secure_provider_capture_executor",
+            "capture_executor=provider_capture_executor",
         ),
     )
     _require(
@@ -222,6 +252,15 @@ def main() -> int:
             "test_secure_source_acquisition_completes_permit_before_persistence",
             "test_resolution_failure_closes_permit_and_writes_nothing",
             "test_empty_production_style_registries_fail_closed",
+        ),
+    )
+    _require(
+        problems,
+        "public mode rejection evidence",
+        public_test,
+        (
+            "test_public_and_credentialed_executors_reject_cross_mode_before_side_effects",
+            "resolver_spy.called is False",
         ),
     )
     _require(
