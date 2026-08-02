@@ -581,7 +581,15 @@ class ControlledProviderHttpTransport:
                 address = ipaddress.ip_address(answer)
             except ValueError as exc:
                 raise FinalProviderHttpError("PROVIDER_HTTP_DNS_INVALID") from exc
-            if not address.is_global:
+            if (
+                not address.is_global
+                or address.is_loopback
+                or address.is_private
+                or address.is_link_local
+                or address.is_multicast
+                or address.is_reserved
+                or address.is_unspecified
+            ):
                 raise FinalProviderHttpError("PROVIDER_HTTP_TARGET_NOT_PUBLIC")
             parsed_addresses.append(address)
         selected = sorted(
