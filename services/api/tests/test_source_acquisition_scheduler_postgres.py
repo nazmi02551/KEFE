@@ -7,7 +7,7 @@ from threading import Barrier
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 from kefe_api.infrastructure.postgres_ingestion_orchestration import (
     PostgresIngestionOrchestrationRepository,
@@ -38,6 +38,18 @@ pytestmark = pytest.mark.skipif(
     os.getenv("KEFE_RUN_POSTGRES_TESTS") != "1",
     reason="PostgreSQL integration tests are opt-in",
 )
+
+
+@pytest.fixture(autouse=True)
+def _isolate_scheduler_ledger():
+    if os.getenv("KEFE_RUN_POSTGRES_TESTS") != "1":
+        yield
+        return
+    engine = create_engine(os.environ["KEFE_DATABASE_URL"])
+    with engine.begin() as connection:
+        connection.execute(text("DELETE FROM knowledge.source_acquisition_dispatch"))
+        connection.execute(text("DELETE FROM knowledge.source_acquisition_schedule"))
+    yield
 
 
 class CaptureAdapter:
