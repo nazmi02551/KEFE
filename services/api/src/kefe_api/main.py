@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from kefe_api.core.exception_handlers import install_exception_handlers
 from kefe_api.core.settings import get_settings
+from kefe_api.infrastructure.editorial_pipeline import build_editorial_pipeline
 from kefe_api.infrastructure.persistence import (
     build_account_continuity_repository,
     build_admin_session_store,
@@ -115,6 +116,11 @@ def create_app() -> FastAPI:
         repository=content_authoring_repository,
         security=admin_security_service,
     )
+    editorial_pipeline = build_editorial_pipeline(
+        settings,
+        content_authoring_repository=content_authoring_repository,
+        admin_security_service=admin_security_service,
+    )
     content_configuration_service = ContentConfigurationService(
         repository=content_configuration_repository,
         security=admin_security_service,
@@ -182,6 +188,17 @@ def create_app() -> FastAPI:
     app.state.privacy_service = PrivacyService(privacy_repository)
     app.state.content_authoring_repository = content_authoring_repository
     app.state.content_authoring_service = content_authoring_service
+    app.state.ingestion_orchestration_repository = (
+        editorial_pipeline.ingestion_repository
+    )
+    app.state.ingestion_orchestration_service = editorial_pipeline.ingestion_service
+    app.state.editorial_projection_repository = (
+        editorial_pipeline.projection_repository
+    )
+    app.state.editorial_projection_service = editorial_pipeline.projection_service
+    app.state.secured_editorial_projection_service = (
+        editorial_pipeline.secured_projection_service
+    )
     app.state.content_configuration_repository = content_configuration_repository
     app.state.content_configuration_service = content_configuration_service
     app.state.admin_session_store = admin_session_store

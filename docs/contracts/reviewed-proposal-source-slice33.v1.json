@@ -1,0 +1,65 @@
+{
+  "contract_version": "1.0.0",
+  "updated_at": "2026-08-02",
+  "source_issue": 184,
+  "capabilities": ["CAP-055", "CAP-061", "CAP-062", "CAP-065"],
+  "foundation_waves": ["F1", "F2"],
+  "authority": [
+    "docs/adr/0028-ingestion-extraction-orchestration.md",
+    "docs/adr/0029-reviewed-candidate-editorial-projection.md",
+    "docs/contracts/editorial-projection.v1.yaml",
+    "docs/contracts/admin-http-surface.v1.yaml"
+  ],
+  "runtime": {
+    "provider_neutral": true,
+    "run_identity_replay_safe": true,
+    "stage_attempts_append_only": true,
+    "proposal_payload_immutable_and_hashed": true,
+    "one_terminal_review_per_proposal": true,
+    "candidate_dependencies_explicit_in_payload": "dependency_proposal_ids",
+    "unreviewed_dependency_fails_projection": true,
+    "automatic_canonical_mutation_forbidden": true,
+    "external_provider_calls_in_scope": false,
+    "ai_calls_in_scope": false
+  },
+  "projection_source": {
+    "adapter": "IngestionReviewedProposalSource",
+    "candidate_kind": "CANDIDATE_CASE",
+    "review_decision_id_must_match": true,
+    "dependency_proposals_loaded_by_explicit_id": true,
+    "provider_types_must_not_cross_adapter": true
+  },
+  "admin_security": {
+    "dedicated_capability": "CONTENT_PROJECT",
+    "default_role": "EDITOR",
+    "request_supplied_actor_forbidden": true,
+    "audit_actor_source": "AdminPrincipal.audit_actor_ref",
+    "secured_facade_required": true,
+    "http_route_in_scope": false
+  },
+  "persistence": {
+    "schema": "ingestion",
+    "migration_revision": "20260802_0020",
+    "down_revision": "20260802_0019",
+    "memory_and_postgres_required": true,
+    "review_decision_unique_per_proposal": true,
+    "stage_attempt_unique_key": ["run_id", "stage_code", "stage_version", "attempt_no"]
+  },
+  "excluded": [
+    "WHOLESALE_PR_68_MERGE",
+    "KNOWLEDGE_MATERIALIZATION_CHANGE",
+    "AUTOMATIC_PROJECTION",
+    "AUTOMATIC_AUTHORING_REVIEW_APPROVAL_PUBLICATION",
+    "ADMIN_HTTP_ROUTE",
+    "ADMIN_UI",
+    "CASE_BUILDER",
+    "FLOW_COMPOSER"
+  ],
+  "evidence": {
+    "contract_fitness": true,
+    "unit_tests": true,
+    "postgres_integration": true,
+    "exact_sha_api_ci": true,
+    "active_stack_regression_gates": true
+  }
+}
