@@ -1,0 +1,160 @@
+{
+  "contract_version": "1.0.0",
+  "slice": 41,
+  "capabilities": ["CAP-055", "CAP-061", "CAP-062", "CAP-065"],
+  "command": {
+    "immutable": true,
+    "exact_pipeline_targets": true,
+    "duplicate_pipeline_targets_rejected": true,
+    "budgets": {
+      "plan": {"minimum": 0, "maximum": 100},
+      "dispatch": {"minimum": 0, "maximum": 100},
+      "pipeline_runs": {"minimum": 1, "maximum": 100}
+    },
+    "ttl_seconds": {"minimum": 5, "maximum": 3600},
+    "deterministic_plan_hash": true,
+    "inference_forbidden": [
+      "provider",
+      "locale",
+      "jurisdiction",
+      "case_type",
+      "title",
+      "payload"
+    ]
+  },
+  "phase_order": [
+    "PLAN_DUE_SOURCE_OCCURRENCES",
+    "EXECUTE_PENDING_SOURCE_DISPATCHES",
+    "EXECUTE_EXACT_INGESTION_PIPELINES"
+  ],
+  "bounded_execution": {
+    "one_shot": true,
+    "stop_on_idle": true,
+    "continuous_loop": false,
+    "sleep_or_polling": false,
+    "automatic_retry_or_backoff": false
+  },
+  "journal": {
+    "table": "ingestion.content_supply_cycle",
+    "states": [
+      "RUNNING",
+      "IDLE",
+      "SUCCEEDED",
+      "DEGRADED",
+      "FAILED",
+      "ABANDONED"
+    ],
+    "running_requires": [
+      "worker_ref",
+      "started_at",
+      "heartbeat_at",
+      "expires_at"
+    ],
+    "terminal_requires": ["completed_at"],
+    "exact_owner_heartbeat": true,
+    "exact_owner_completion": true,
+    "stale_recovery_target": "ABANDONED",
+    "stale_recovery_mutates_delegated_work": false,
+    "aggregate_counters_only": true
+  },
+  "outcomes": {
+    "IDLE": "NO_DELEGATED_WORK",
+    "SUCCEEDED": "WORK_WITHOUT_NON_SUCCESS",
+    "DEGRADED": "COMPLETED_WITH_DELEGATED_NON_SUCCESS",
+    "FAILED": "SUPERVISOR_UNEXPECTED_FAILURE",
+    "LEASE_LOST": "CYCLE_OWNER_NO_LONGER_ACTIVE"
+  },
+  "delegated_non_success_outcomes": [
+    "RETRYABLE_FAILURE",
+    "FINAL_FAILURE",
+    "BLOCKED",
+    "LEASE_LOST"
+  ],
+  "observer": {
+    "allowed_fields": [
+      "outcome",
+      "cycle_id",
+      "worker_ref",
+      "plan_hash",
+      "planned_count",
+      "dispatch_attempted_count",
+      "dispatch_succeeded_count",
+      "dispatch_non_success_count",
+      "ingestion_attempted_count",
+      "ingestion_succeeded_count",
+      "ingestion_non_success_count",
+      "duration_ms",
+      "error_code"
+    ],
+    "forbidden_fields": [
+      "external_locator",
+      "raw_storage_ref",
+      "source_payload",
+      "provider_response",
+      "proposal_payload",
+      "credential",
+      "user_id",
+      "title"
+    ],
+    "observer_failure_authoritative": false
+  },
+  "cli": {
+    "one_shot_only": true,
+    "json_allowlist_only": true,
+    "exit_codes": {
+      "IDLE_OR_SUCCEEDED": 0,
+      "DEGRADED": 2,
+      "FAILED_OR_LEASE_LOST": 3,
+      "INVALID_INPUT": 64
+    },
+    "daemon_mode": false
+  },
+  "composition": {
+    "empty_default_provider_registry": true,
+    "empty_default_runtime_registry": true,
+    "empty_default_schedule_ledger": true,
+    "background_task_started": false
+  },
+  "evidence": {
+    "memory": [
+      "bounded_phase_order",
+      "stop_on_idle",
+      "degraded_mapping",
+      "heartbeat_owner_enforcement",
+      "stale_recovery",
+      "lease_loss",
+      "observer_allowlist"
+    ],
+    "postgres": [
+      "migration_reversible",
+      "durable_heartbeat",
+      "stale_abandonment",
+      "concurrent_cycle_safety",
+      "crash_recovery"
+    ],
+    "required_workflows": [
+      "API CI",
+      "MVP Beta Gates",
+      "Global Readiness"
+    ]
+  },
+  "excluded": [
+    "continuous_daemon",
+    "cron_parser",
+    "sleep_polling",
+    "os_service_manager",
+    "deployment_manifest",
+    "real_provider_adapter",
+    "network_request",
+    "scraping",
+    "ai_call",
+    "automatic_provider_retry",
+    "automatic_proposal_review",
+    "automatic_projection",
+    "automatic_publication",
+    "admin_http_ui",
+    "case_builder",
+    "flow_composer",
+    "phone_behavior"
+  ]
+}
