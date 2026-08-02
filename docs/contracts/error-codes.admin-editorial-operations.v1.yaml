@@ -1,0 +1,8 @@
+registry_version: 1.0.0
+errors:
+- code: INGESTION_PROPOSAL_NOT_FOUND
+  http_status: 404
+  retryable: false
+- code: INGESTION_PROPOSAL_ALREADY_REVIEWED
+  http_status: 409
+  retryable: false

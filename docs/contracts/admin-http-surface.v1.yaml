@@ -1,5 +1,5 @@
-contract_version: 1.0.0
-updated_at: '2026-07-28'
+contract_version: 1.2.0
+updated_at: '2026-08-02'
 route_prefix: /internal/admin/v1
 security:
   session_cookie:
@@ -19,13 +19,19 @@ security:
     source: server_resolved_admin_session
     forbidden_request_fields:
       - actor_ref
+      - reviewer_ref
+      - requested_by_admin_ref
       - admin_subject_id
       - roles
       - capabilities
+      - state
+      - lifecycle_state
   consumer_credentials_accepted: false
   admin_login_endpoint_in_scope: false
 application_boundary:
   facade: SecuredContentAuthoringService
+  proposal_review_facade: SecuredProposalReviewService
+  projection_facade: SecuredEditorialProjectionService
   direct_repository_mutation_from_http: forbidden
   audit_actor_ref: server_derived
   provider_specific_identity_sdk_in_domain: forbidden
@@ -38,6 +44,22 @@ operations:
     path: /cases
     csrf: true
     capability: CONTENT_CREATE
+  - method: POST
+    path: /proposals/{proposal_id}/review
+    csrf: true
+    capability: CONTENT_REVIEW
+    reviewer_identity: server_derived
+    terminal_decision: true
+    automatic_projection: forbidden
+  - method: POST
+    path: /candidate-proposals/{candidate_proposal_id}/projection
+    csrf: true
+    capability: CONTENT_PROJECT
+    facade: SecuredEditorialProjectionService
+    actor_identity: server_derived
+    creates_lifecycle_state: DRAFT
+    idempotent_replay_status: 200
+    automatic_review_approval_publication: forbidden
   - method: POST
     path: /case-versions/{version_id}/revisions
     csrf: true
@@ -88,6 +110,18 @@ errors:
     - ADMIN_FORBIDDEN
     - ADMIN_STEP_UP_REQUIRED
     - ADMIN_SEPARATION_OF_DUTIES
+  proposal_review:
+    - INGESTION_PROPOSAL_NOT_FOUND
+    - INGESTION_PROPOSAL_ALREADY_REVIEWED
+  projection:
+    - EDITORIAL_PROJECTION_PROFILE_NOT_FOUND
+    - EDITORIAL_PROJECTION_SOURCE_NOT_FOUND
+    - EDITORIAL_PROJECTION_SOURCE_NOT_ACCEPTED
+    - EDITORIAL_PROJECTION_DEPENDENCY_NOT_READY
+    - EDITORIAL_PROJECTION_IDEMPOTENCY_CONFLICT
+    - EDITORIAL_PROJECTION_CANDIDATE_ALREADY_PROJECTED
+    - EDITORIAL_PROJECTION_FLOW_REFERENCE_INVALID
+    - EDITORIAL_PROJECTION_PERSISTENCE_CONFLICT
 logging:
   forbidden_secret_fields:
     - session_cookie_value
