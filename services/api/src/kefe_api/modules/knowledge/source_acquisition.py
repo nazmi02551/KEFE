@@ -391,15 +391,25 @@ class SourceAcquisitionService:
                 )
             )
 
-        if not self._complete_capture_success(
-            permit_id=permit_id,
-            adapter_code=command.adapter_code,
-        ):
-            return self._permit_completion_failed(
-                started_ns=started_ns,
-                command=command,
-                trace_id=resolved_trace_id,
-            )
+        if self._admission is not None:
+            if permit_id is None:
+                return self._permit_completion_failed(
+                    started_ns=started_ns,
+                    command=command,
+                    trace_id=resolved_trace_id,
+                )
+            try:
+                self._admission.complete_capture_success(
+                    permit_id=permit_id,
+                    adapter_code=command.adapter_code,
+                    at=self._clock(),
+                )
+            except Exception:
+                return self._permit_completion_failed(
+                    started_ns=started_ns,
+                    command=command,
+                    trace_id=resolved_trace_id,
+                )
 
         if before_artifact_persist is not None:
             before_artifact_persist()
@@ -488,26 +498,6 @@ class SourceAcquisitionService:
                 ingestion_run_id=run.id,
             )
         )
-
-    def _complete_capture_success(
-        self,
-        *,
-        permit_id: UUID | None,
-        adapter_code: str,
-    ) -> bool:
-        if self._admission is None:
-            return True
-        if permit_id is None:
-            return False
-        try:
-            self._admission.complete_capture_success(
-                permit_id=permit_id,
-                adapter_code=adapter_code,
-                at=self._clock(),
-            )
-        except Exception:
-            return False
-        return True
 
     def _complete_capture_failure(
         self,
