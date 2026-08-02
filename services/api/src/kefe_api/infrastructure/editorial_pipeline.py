@@ -105,6 +105,15 @@ from kefe_api.modules.knowledge.provider_control_ports import (
 from kefe_api.modules.knowledge.provider_control_service import (
     SourceProviderAdmissionService,
 )
+from kefe_api.modules.knowledge.provider_http_transport import (
+    ControlledProviderHttpTransport,
+    InMemoryProviderAdoptionRegistry,
+    NoOpProviderHttpObserver,
+    ProviderAdoptionRegistry,
+    ProviderHttpObserver,
+    UnconfiguredPinnedHttpBackend,
+    UnconfiguredProviderDnsResolver,
+)
 from kefe_api.modules.knowledge.provider_secret_execution import (
     CredentialAwareSourceCaptureRegistry,
     InMemoryCredentialAwareSourceCaptureRegistry,
@@ -143,6 +152,9 @@ class EditorialPipeline:
     secret_resolver_registry: SecretResolverRegistry
     credential_capture_registry: CredentialAwareSourceCaptureRegistry
     secure_provider_capture_executor: SecureProviderCaptureExecutor
+    provider_adoption_registry: ProviderAdoptionRegistry
+    provider_http_observer: ProviderHttpObserver
+    provider_http_transport: ControlledProviderHttpTransport
     source_acquisition_observer: SourceAcquisitionObserver
     source_acquisition_service: SourceAcquisitionService
     source_scheduler_repository: SourceAcquisitionSchedulerRepository
@@ -238,9 +250,7 @@ def build_editorial_pipeline(
     provider_admission_service = SourceProviderAdmissionService(
         source_provider_admission_repository
     )
-    secret_resolver_registry: SecretResolverRegistry = (
-        InMemorySecretResolverRegistry()
-    )
+    secret_resolver_registry: SecretResolverRegistry = InMemorySecretResolverRegistry()
     credential_capture_registry: CredentialAwareSourceCaptureRegistry = (
         InMemoryCredentialAwareSourceCaptureRegistry()
     )
@@ -248,6 +258,16 @@ def build_editorial_pipeline(
         contexts=provider_execution_context_repository,
         resolvers=secret_resolver_registry,
         adapters=credential_capture_registry,
+    )
+    provider_adoption_registry: ProviderAdoptionRegistry = (
+        InMemoryProviderAdoptionRegistry()
+    )
+    provider_http_observer: ProviderHttpObserver = NoOpProviderHttpObserver()
+    provider_http_transport = ControlledProviderHttpTransport(
+        adoption_registry=provider_adoption_registry,
+        dns_resolver=UnconfiguredProviderDnsResolver(),
+        backend=UnconfiguredPinnedHttpBackend(),
+        observer=provider_http_observer,
     )
     source_acquisition_observer: SourceAcquisitionObserver = (
         NoOpSourceAcquisitionObserver()
@@ -314,12 +334,13 @@ def build_editorial_pipeline(
         source_capture_registry=source_capture_registry,
         source_provider_admission_repository=source_provider_admission_repository,
         source_provider_admission_service=provider_admission_service,
-        provider_execution_context_repository=(
-            provider_execution_context_repository
-        ),
+        provider_execution_context_repository=provider_execution_context_repository,
         secret_resolver_registry=secret_resolver_registry,
         credential_capture_registry=credential_capture_registry,
         secure_provider_capture_executor=secure_provider_capture_executor,
+        provider_adoption_registry=provider_adoption_registry,
+        provider_http_observer=provider_http_observer,
+        provider_http_transport=provider_http_transport,
         source_acquisition_observer=source_acquisition_observer,
         source_acquisition_service=source_acquisition_service,
         source_scheduler_repository=source_scheduler_repository,

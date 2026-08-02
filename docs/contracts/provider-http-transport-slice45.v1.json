@@ -1,0 +1,151 @@
+{
+  "contract": "provider-http-transport-slice45",
+  "version": "1.0.0",
+  "status": "accepted",
+  "issue": 215,
+  "parent_pr": 214,
+  "invariants": [
+    "adapter_code is exact immutable and versioned",
+    "provider adoption profiles are immutable and exact-origin only",
+    "only HTTPS GET and HEAD are eligible",
+    "wildcards userinfo fragments and non-443 ports are rejected",
+    "credential-like query parameter names are rejected",
+    "all DNS answers must be valid globally routable addresses",
+    "mixed public and non-public DNS answers fail closed",
+    "backend receives exact host SNI and a deterministically pinned IP",
+    "backend performs one request only and never follows redirects",
+    "every redirect is revalidated re-resolved and repinned by the service",
+    "timeouts media types response size and redirect hops are bounded",
+    "operational output contains no URL headers credential body provider text or exception text",
+    "production adoption registry resolver and backend are empty or unconfigured",
+    "terms and rate-limit references are evidence pointers not compliance claims"
+  ],
+  "allowed_methods": ["GET", "HEAD"],
+  "allowed_origin_rules": {
+    "scheme": "https",
+    "port": 443,
+    "wildcards": false,
+    "userinfo": false,
+    "path": "/",
+    "query": false,
+    "fragment": false
+  },
+  "dns_policy": {
+    "require_all_answers_global": true,
+    "reject_categories": [
+      "loopback",
+      "private",
+      "link_local",
+      "multicast",
+      "reserved",
+      "unspecified",
+      "documentation_or_test"
+    ],
+    "selection": "sorted_ip_packed_first",
+    "backend_re_resolution": false
+  },
+  "request_policy": {
+    "safe_public_headers": [
+      "accept",
+      "user-agent",
+      "if-none-match",
+      "if-modified-since"
+    ],
+    "forbidden_headers": [
+      "authorization",
+      "cookie",
+      "proxy-authorization",
+      "set-cookie"
+    ],
+    "forbidden_query_names": [
+      "access_token",
+      "api_key",
+      "apikey",
+      "auth",
+      "authorization",
+      "key",
+      "password",
+      "secret",
+      "sig",
+      "signature",
+      "token"
+    ]
+  },
+  "response_policy": {
+    "success": [200, 299],
+    "not_modified": 304,
+    "retryable_statuses": [408, 425, 429, 500, 502, 503, 504],
+    "redirect_statuses": [301, 302, 303, 307, 308],
+    "media_type_required_for_get_body": true,
+    "body_limit_enforced_before_return": true
+  },
+  "bounded_error_codes": [
+    "PROVIDER_HTTP_PROFILE_NOT_REGISTERED",
+    "PROVIDER_HTTP_METHOD_NOT_ALLOWED",
+    "PROVIDER_HTTP_URL_NOT_ALLOWED",
+    "PROVIDER_HTTP_CREDENTIAL_QUERY_FORBIDDEN",
+    "PROVIDER_HTTP_HEADER_NOT_ALLOWED",
+    "PROVIDER_HTTP_DNS_UNAVAILABLE",
+    "PROVIDER_HTTP_DNS_INVALID",
+    "PROVIDER_HTTP_TARGET_NOT_PUBLIC",
+    "PROVIDER_HTTP_BACKEND_UNCONFIGURED",
+    "PROVIDER_HTTP_TIMEOUT",
+    "PROVIDER_HTTP_UNAVAILABLE",
+    "PROVIDER_HTTP_REDIRECT_BLOCKED",
+    "PROVIDER_HTTP_REDIRECT_INVALID",
+    "PROVIDER_HTTP_STATUS_RETRYABLE",
+    "PROVIDER_HTTP_STATUS_FINAL",
+    "PROVIDER_HTTP_MEDIA_TYPE_NOT_ALLOWED",
+    "PROVIDER_HTTP_RESPONSE_TOO_LARGE",
+    "PROVIDER_HTTP_TOTAL_BUDGET_EXCEEDED",
+    "PROVIDER_HTTP_RESPONSE_INVALID"
+  ],
+  "operational_allowlist": [
+    "outcome",
+    "adapter_code",
+    "method",
+    "status_code",
+    "redirect_hops",
+    "response_bytes",
+    "elapsed_ms",
+    "error_code"
+  ],
+  "required_evidence": [
+    "profile validation and immutability",
+    "exact registry duplicate conflict",
+    "URL origin and query policy",
+    "public and non-public IP classification",
+    "mixed DNS answer rejection",
+    "deterministic address pinning",
+    "redirect revalidation and hop limit",
+    "status retryability mapping",
+    "media type and body size enforcement",
+    "timeout and backend failure mapping",
+    "operational redaction",
+    "empty production composition",
+    "architecture fitness",
+    "exact-head API CI",
+    "parent provider admission CI",
+    "parent secret execution CI",
+    "MVP Beta Gates",
+    "Global Readiness"
+  ],
+  "excluded": [
+    "real provider adapter",
+    "live external network",
+    "system DNS resolver activation",
+    "TLS or socket backend",
+    "ambient proxy or cookie jar",
+    "browser automation or scraping",
+    "secret manager SDK",
+    "credential rotation",
+    "provider compliance certification",
+    "autonomous retry or backoff",
+    "Admin HTTP or UI",
+    "automatic Proposal review projection or publication",
+    "deployed SLO alert or rollback proof",
+    "Case Builder",
+    "Flow Composer",
+    "phone-facing behavior"
+  ]
+}

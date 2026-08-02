@@ -1,0 +1,59 @@
+name: Provider HTTP Transport CI
+
+on:
+  pull_request:
+    paths:
+      - 'services/api/src/kefe_api/modules/knowledge/provider_http_transport.py'
+      - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
+      - 'services/api/tests/test_provider_http_transport*.py'
+      - 'services/api/tools/check_provider_http_transport_contract.py'
+      - 'docs/adr/0081-controlled-outbound-http-and-provider-adoption-conformance.md'
+      - 'docs/contracts/provider-http-transport-slice45.v1.json'
+      - '.github/workflows/provider-http-transport-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/api/src/kefe_api/modules/knowledge/provider_http_transport.py'
+      - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
+      - 'services/api/tests/test_provider_http_transport*.py'
+      - 'services/api/tools/check_provider_http_transport_contract.py'
+      - 'docs/adr/0081-controlled-outbound-http-and-provider-adoption-conformance.md'
+      - 'docs/contracts/provider-http-transport-slice45.v1.json'
+      - '.github/workflows/provider-http-transport-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  provider-http-transport:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Ruff provider HTTP transport boundary
+        working-directory: services/api
+        run: >-
+          ruff check
+          src/kefe_api/modules/knowledge/provider_http_transport.py
+          src/kefe_api/infrastructure/editorial_pipeline.py
+          tests/test_provider_http_transport.py
+          tests/test_provider_http_transport_architecture.py
+          tools/check_provider_http_transport_contract.py
+      - name: Provider HTTP transport architecture fitness
+        working-directory: services/api
+        run: python tools/check_provider_http_transport_contract.py
+      - name: Provider HTTP transport behavior
+        working-directory: services/api
+        run: >-
+          pytest
+          tests/test_provider_http_transport.py
+          tests/test_provider_http_transport_architecture.py
