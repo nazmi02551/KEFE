@@ -1,0 +1,141 @@
+name: Feed Activation Governance CI
+
+on:
+  pull_request:
+    paths:
+      - 'services/api/migrations/versions/20260803_0026_feed_pipeline_activation.py'
+      - 'services/api/src/kefe_api/modules/knowledge/feed_activation.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_evidence.py'
+      - 'services/api/src/kefe_api/infrastructure/feed_activation_runtime.py'
+      - 'services/api/src/kefe_api/infrastructure/postgres_feed_activation.py'
+      - 'services/api/src/kefe_api/infrastructure/raw_evidence_runtime.py'
+      - 'services/api/tests/test_feed_activation*.py'
+      - 'services/api/tests/test_raw_evidence_runtime.py'
+      - 'services/api/tools/check_feed_activation_contract.py'
+      - 'docs/adr/0090-feed-pipeline-activation-governance-and-read-only-preflight.md'
+      - 'docs/contracts/feed-pipeline-activation-slice54.v1.json'
+      - '.github/workflows/feed-activation-governance-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/api/migrations/versions/20260803_0026_feed_pipeline_activation.py'
+      - 'services/api/src/kefe_api/modules/knowledge/feed_activation.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_evidence.py'
+      - 'services/api/src/kefe_api/infrastructure/feed_activation_runtime.py'
+      - 'services/api/src/kefe_api/infrastructure/postgres_feed_activation.py'
+      - 'services/api/src/kefe_api/infrastructure/raw_evidence_runtime.py'
+      - 'services/api/tests/test_feed_activation*.py'
+      - 'services/api/tests/test_raw_evidence_runtime.py'
+      - 'services/api/tools/check_feed_activation_contract.py'
+      - 'docs/adr/0090-feed-pipeline-activation-governance-and-read-only-preflight.md'
+      - 'docs/contracts/feed-pipeline-activation-slice54.v1.json'
+      - '.github/workflows/feed-activation-governance-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  feed-activation-memory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Ruff feed activation boundary
+        working-directory: services/api
+        run: >-
+          ruff check
+          src/kefe_api/modules/knowledge/feed_activation.py
+          src/kefe_api/modules/knowledge/source_evidence.py
+          src/kefe_api/infrastructure/feed_activation_runtime.py
+          src/kefe_api/infrastructure/postgres_feed_activation.py
+          src/kefe_api/infrastructure/raw_evidence_runtime.py
+          tests/test_feed_activation.py
+          tests/test_feed_activation_runtime.py
+          tests/test_feed_activation_architecture.py
+          tests/test_raw_evidence_runtime.py
+          tools/check_feed_activation_contract.py
+      - name: Feed activation governance architecture fitness
+        working-directory: services/api
+        run: python tools/check_feed_activation_contract.py
+      - name: Parent public provider architecture fitness
+        working-directory: services/api
+        run: python tools/check_public_provider_capture_contract.py
+      - name: Parent RSS Atom architecture fitness
+        working-directory: services/api
+        run: python tools/check_rss_atom_public_capture_contract.py
+      - name: Parent feed item extraction architecture fitness
+        working-directory: services/api
+        run: python tools/check_feed_item_extraction_contract.py
+      - name: Parent ingestion worker architecture fitness
+        working-directory: services/api
+        run: python tools/check_ingestion_worker_runner_contract.py
+      - name: Parent raw evidence architecture fitness
+        working-directory: services/api
+        run: python tools/check_raw_source_evidence_contract.py
+      - name: Parent durable evidence architecture fitness
+        working-directory: services/api
+        run: python tools/check_durable_raw_evidence_backend_contract.py
+      - name: Feed activation governance memory behavior
+        working-directory: services/api
+        run: >-
+          pytest
+          tests/test_feed_activation.py
+          tests/test_feed_activation_runtime.py
+          tests/test_feed_activation_architecture.py
+          tests/test_raw_evidence_runtime.py
+
+  feed-activation-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: kefe
+          POSTGRES_USER: kefe
+          POSTGRES_PASSWORD: kefe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kefe -d kefe"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Migrate PostgreSQL
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: alembic upgrade head
+      - name: Feed activation governance PostgreSQL behavior
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+          KEFE_RUN_POSTGRES_TESTS: '1'
+        run: pytest tests/test_feed_activation_postgres.py
+      - name: Verify empty-table downgrade and upgrade
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: |
+          alembic downgrade 20260803_0025
+          alembic upgrade head
