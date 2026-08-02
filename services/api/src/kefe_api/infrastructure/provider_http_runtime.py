@@ -33,6 +33,28 @@ _RESPONSE_HEADER_ALLOWLIST = (
     "retry-after",
 )
 _DECIMAL = re.compile(r"^[0-9]+$")
+_SENSITIVE_HEADER_NAME = re.compile(r"^[!#$%&'*+.^_`|~0-9a-z-]+$")
+_FORBIDDEN_SENSITIVE_HEADER_NAMES = frozenset(
+    {
+        "accept-encoding",
+        "connection",
+        "content-length",
+        "cookie",
+        "forwarded",
+        "host",
+        "proxy-authenticate",
+        "proxy-authorization",
+        "set-cookie",
+        "te",
+        "trailer",
+        "transfer-encoding",
+        "upgrade",
+        "via",
+        "x-forwarded-for",
+        "x-forwarded-host",
+        "x-forwarded-proto",
+    }
+)
 
 
 class _ConnectTimedOut(Exception):
@@ -64,7 +86,7 @@ class PinnedHttpsConnection(Protocol):
         skip_accept_encoding: bool = False,
     ) -> None: ...
 
-    def putheader(self, header: str, *values: str) -> None: ...
+    def putheader(self, header: str, *values: str | bytes) -> None: ...
 
     def endheaders(self) -> None: ...
 
@@ -294,6 +316,63 @@ def _host_header(host: str, port: int) -> str:
     return f"{rendered}:{port}"
 
 
+def _send_request_headers(
+    connection: PinnedHttpsConnection,
+    request: PinnedOutboundHttpRequest,
+) -> None:
+    connection.putheader("Host", _host_header(request.host, request.port))
+    connection.putheader("Connection", "close")
+    connection.putheader("Accept-Encoding", "identity")
+    public_names: set[str] = set()
+    for name, value in request.public_headers:
+        normalized = name.strip().lower()
+        if normalized in {"host", "connection", "accept-encoding"}:
+            raise FinalProviderHttpError("PROVIDER_HTTP_PROTOCOL_INVALID")
+        public_names.add(normalized)
+        connection.putheader(name, value)
+
+    if request.sensitive_headers is None:
+        connection.endheaders()
+        return
+
+    def emit_sensitive(
+        entries: tuple[tuple[str, memoryview], ...],
+    ) -> None:
+        if len(entries) != 1:
+            raise FinalProviderHttpError("PROVIDER_HTTP_AUTH_HEADERS_INVALID")
+        seen = set(public_names)
+        for name, value in entries:
+            normalized = name.strip().lower()
+            if (
+                name != normalized
+                or _SENSITIVE_HEADER_NAME.fullmatch(normalized) is None
+                or normalized in _FORBIDDEN_SENSITIVE_HEADER_NAMES
+                or normalized in seen
+            ):
+                raise FinalProviderHttpError("PROVIDER_HTTP_AUTH_HEADERS_INVALID")
+            if (
+                not value
+                or value[0] == 0x20
+                or value[-1] == 0x20
+                or any(item < 0x20 or item > 0x7E for item in value)
+            ):
+                raise FinalProviderHttpError("PROVIDER_HTTP_AUTH_HEADERS_INVALID")
+            connection.putheader(normalized, bytes(value))
+            seen.add(normalized)
+        connection.endheaders()
+
+    try:
+        request.sensitive_headers.use_headers(emit_sensitive)
+    except ProviderHttpError:
+        raise
+    except RuntimeError as exc:
+        raise FinalProviderHttpError(
+            "PROVIDER_HTTP_AUTH_HEADERS_UNAVAILABLE"
+        ) from exc
+    except Exception as exc:
+        raise FinalProviderHttpError("PROVIDER_HTTP_AUTH_HEADERS_INVALID") from exc
+
+
 class PinnedTlsHttpBackend:
     def __init__(
         self,
@@ -318,15 +397,7 @@ class PinnedTlsHttpBackend:
                 skip_host=True,
                 skip_accept_encoding=True,
             )
-            connection.putheader("Host", _host_header(request.host, request.port))
-            connection.putheader("Connection", "close")
-            connection.putheader("Accept-Encoding", "identity")
-            for name, value in request.public_headers:
-                normalized = name.strip().lower()
-                if normalized in {"host", "connection", "accept-encoding"}:
-                    raise FinalProviderHttpError("PROVIDER_HTTP_PROTOCOL_INVALID")
-                connection.putheader(name, value)
-            connection.endheaders()
+            _send_request_headers(connection, request)
             response = connection.getresponse()
             if response.version not in {10, 11}:
                 raise FinalProviderHttpError("PROVIDER_HTTP_PROTOCOL_INVALID")
