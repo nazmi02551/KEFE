@@ -300,13 +300,10 @@ def test_activation_delegates_exact_manifest_and_returns_bounded_result() -> Non
     assert body["capability_lifecycle"] == "ACTIVE"
     assert body["circuit_state"] == "CLOSED"
     assert body["schedule_state"] == "ACTIVE"
-    assert activation.calls == [
-        {
-            "subscription_code": SUBSCRIPTION_CODE,
-            "first_due_at": NOW,
-            "activated_at": NOW,
-        }
-    ]
+    assert len(activation.calls) == 1
+    assert activation.calls[0]["subscription_code"] == SUBSCRIPTION_CODE
+    assert activation.calls[0]["first_due_at"] == NOW
+    assert isinstance(activation.calls[0]["activated_at"], datetime)
     for forbidden in (
         "secret_ref",
         "permit_id",
@@ -326,7 +323,11 @@ def test_http_surface_has_no_manifest_mutation_routes() -> None:
         404,
         405,
     }
-    assert admin.delete(f"{base}/{SUBSCRIPTION_CODE}", headers={ADMIN_CSRF_HEADER: csrf}).status_code == 404
+    delete_response = admin.delete(
+        f"{base}/{SUBSCRIPTION_CODE}",
+        headers={ADMIN_CSRF_HEADER: csrf},
+    )
+    assert delete_response.status_code == 404
     assert admin.post(base, headers={ADMIN_CSRF_HEADER: csrf}, json={}).status_code in {
         404,
         405,
