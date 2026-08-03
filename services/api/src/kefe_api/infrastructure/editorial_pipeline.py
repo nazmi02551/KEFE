@@ -141,6 +141,9 @@ from kefe_api.modules.knowledge.rss_atom_route import (
     RssAtomRouteFactory,
     RssAtomRouteRegistry,
 )
+from kefe_api.modules.knowledge.rss_atom_route_scheduling import (
+    RssAtomRouteScheduleService,
+)
 from kefe_api.modules.knowledge.source_acquisition import (
     InMemorySourceCaptureRegistry,
     NoOpSourceAcquisitionObserver,
@@ -182,6 +185,7 @@ class EditorialPipeline:
     public_http_capture_adapter_factory: EvidenceBackedPublicHttpCaptureAdapterFactory
     rss_atom_route_factory: RssAtomRouteFactory
     rss_atom_route_registry: RssAtomRouteRegistry
+    rss_atom_route_schedule_service: RssAtomRouteScheduleService
     source_acquisition_observer: SourceAcquisitionObserver
     source_acquisition_service: SourceAcquisitionService
     source_scheduler_repository: SourceAcquisitionSchedulerRepository
@@ -348,6 +352,10 @@ def build_editorial_pipeline(
         acquisition=source_acquisition_service,
         observer=source_dispatch_observer,
     )
+    rss_atom_route_schedule_service = RssAtomRouteScheduleService(
+        routes=rss_atom_route_registry,
+        scheduler=source_scheduler_service,
+    )
     ingestion_lease_service = IngestionRunLeaseService(ingestion_lease_repository)
     ingestion_worker_registry: IngestionWorkerRuntimeRegistry = (
         InMemoryIngestionWorkerRuntimeRegistry()
@@ -411,6 +419,7 @@ def build_editorial_pipeline(
         public_http_capture_adapter_factory=public_http_capture_adapter_factory,
         rss_atom_route_factory=rss_atom_route_factory,
         rss_atom_route_registry=rss_atom_route_registry,
+        rss_atom_route_schedule_service=rss_atom_route_schedule_service,
         source_acquisition_observer=source_acquisition_observer,
         source_acquisition_service=source_acquisition_service,
         source_scheduler_repository=source_scheduler_repository,

@@ -1,0 +1,101 @@
+{
+  "contract": "rss-atom-route-scheduling-slice55",
+  "version": 1,
+  "status": "accepted",
+  "request": {
+    "fields": [
+      "route_code",
+      "external_locator",
+      "first_due_at",
+      "interval_seconds",
+      "max_dispatch_attempts"
+    ],
+    "adapter_override": false,
+    "pipeline_override": false,
+    "configuration_override": false,
+    "locale_override": false,
+    "jurisdiction_override": false
+  },
+  "derivation": {
+    "route_lookup": "route_code",
+    "adapter_code": "route_command",
+    "pipeline_code": "route_command",
+    "pipeline_version": "route_command",
+    "configuration_hash": "route_command",
+    "taxonomy_version": "route_command",
+    "methodology_version": "route_command",
+    "locale": "route_command",
+    "jurisdiction_code": "route_command",
+    "schedule_key": "existing_generic_canonical_builder"
+  },
+  "delegation": {
+    "generic_scheduler_create": true,
+    "new_schedule_state_machine": false,
+    "new_lease_state_machine": false,
+    "new_retry_loop": false,
+    "new_dispatch_executor": false,
+    "pause_resume_retire_owned_by_generic_scheduler": true
+  },
+  "reconciliation": {
+    "route_resolved_by_unique_adapter_code": true,
+    "external_locator_replayed_through_route_command": true,
+    "checked_fields": [
+      "adapter_code",
+      "pipeline_code",
+      "pipeline_version",
+      "configuration_hash",
+      "taxonomy_version",
+      "methodology_version",
+      "locale",
+      "jurisdiction_code"
+    ],
+    "missing_route": "fail_closed",
+    "field_drift": "fail_closed",
+    "generic_fallback": false,
+    "preview_fallback": false
+  },
+  "execution_order": [
+    "resolve_route",
+    "derive_route_command",
+    "create_generic_schedule",
+    "verify_canonical_schedule_key",
+    "plan_due_dispatch",
+    "execute_generic_dispatch",
+    "persist_source_artifact_and_ingestion_run",
+    "execute_route_worker",
+    "emit_review_required_feed_item_proposals"
+  ],
+  "authority": {
+    "secret_resolution": false,
+    "credential_bytes": false,
+    "network_backend": false,
+    "automatic_review": false,
+    "automatic_materialization": false,
+    "automatic_projection": false,
+    "automatic_case_creation": false,
+    "automatic_publication": false
+  },
+  "persistence": {
+    "route_code_column_added": false,
+    "route_recovered_by_unique_adapter_code": true,
+    "in_memory_idempotency": true,
+    "postgres_idempotency": true,
+    "schema_migration": false
+  },
+  "composition": {
+    "production_route_schedule_service_composed": true,
+    "production_route_registry_entries": 0,
+    "production_route_schedules_created": 0,
+    "concrete_provider_registered": false,
+    "live_external_capture": false
+  },
+  "validation": {
+    "dedicated_ci": "RSS Atom Route Scheduling CI",
+    "memory_vertical_test": true,
+    "postgres_route_schedule_test": true,
+    "parent_scheduler_gate": true,
+    "parent_route_gate": true,
+    "parent_ingestion_gate": true,
+    "api_mvp_global_gates": true
+  }
+}
