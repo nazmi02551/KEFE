@@ -75,11 +75,12 @@ def _seed_subject(database_url: str, role: str) -> UUID:
 
 
 def _client(app, subject_id: UUID) -> tuple[TestClient, str]:
+    issued_at = datetime.now(UTC)
     issued = app.state.admin_session_store.issue(
         admin_subject_id=subject_id,
-        authenticated_at=NOW,
-        mfa_satisfied_at=NOW,
-        expires_at=NOW + timedelta(hours=1),
+        authenticated_at=issued_at,
+        mfa_satisfied_at=issued_at,
+        expires_at=issued_at + timedelta(hours=1),
     )
     client = TestClient(app)
     client.cookies.set(ADMIN_SESSION_COOKIE, issued.session_token)
