@@ -234,13 +234,12 @@ def test_rejected_unsupported_and_conflicting_statuses_are_bounded(
             decision=ProposalReviewDecisionKind.ACCEPTED,
             reviewer_ref="admin:status-reviewer",
         )
-        wrong_review_id = uuid4()
         repository.add_materialization(
             ProposalMaterialization(
                 id=uuid4(),
                 proposal_id=conflict_proposal.id,
-                review_decision_id=wrong_review_id,
-                target_kind="NORMALIZED_ARTIFACT",
+                review_decision_id=accepted.id,
+                target_kind="CLAIM",
                 target_id=uuid4(),
                 materialized_at=datetime.now(UTC),
             )
@@ -250,6 +249,5 @@ def test_rejected_unsupported_and_conflicting_statuses_are_bounded(
         assert conflict.json()["code"] == (
             "INGESTION_FEED_ITEM_MATERIALIZATION_STATUS_CONFLICT"
         )
-        assert accepted.id != wrong_review_id
     finally:
         get_settings.cache_clear()
