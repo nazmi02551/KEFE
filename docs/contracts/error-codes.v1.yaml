@@ -1,4 +1,4 @@
-registry_version: 1.14.0
+registry_version: 1.15.0
 errors:
 - code: AUTH_REQUIRED
   http_status: 401
@@ -146,6 +146,15 @@ errors:
   retryable: false
 - code: CONTENT_CONFIG_FLOW_INVALID
   http_status: 422
+  retryable: false
+- code: PUBLIC_FEED_CATALOG_NOT_FOUND
+  http_status: 404
+  retryable: false
+- code: PUBLIC_FEED_CATALOG_CONFLICT
+  http_status: 409
+  retryable: false
+- code: PUBLIC_FEED_CATALOG_TRANSITION_INVALID
+  http_status: 409
   retryable: false
 - code: FLOW_RUNTIME_UNAVAILABLE
   http_status: 409
