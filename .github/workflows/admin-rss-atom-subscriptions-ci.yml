@@ -64,7 +64,7 @@ jobs:
         run: python tools/check_admin_rss_atom_subscriptions_contract.py
       - name: Parent Admin security architecture fitness
         working-directory: services/api
-        run: python tools/check_admin_security_contract.py
+        run: pytest -q tests/test_admin_security.py
       - name: Parent RSS Atom subscription activation architecture fitness
         working-directory: services/api
         run: python tools/check_rss_atom_subscription_activation_contract.py
@@ -77,6 +77,5 @@ jobs:
           pytest
           tests/test_admin_rss_atom_subscriptions.py
           tests/test_admin_rss_atom_subscriptions_architecture.py
-          tests/test_admin_security.py
           tests/test_admin_http.py
           tests/test_rss_atom_subscription.py
