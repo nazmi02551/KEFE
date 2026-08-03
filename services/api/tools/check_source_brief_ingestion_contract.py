@@ -164,9 +164,10 @@ def main() -> None:
     ):
         if name not in service_classes:
             fail(f"Source Brief Admin class missing: {name}")
+    service_class = service_classes["SecuredSourceBriefIngestionService"]
     build_source = ast.get_source_segment(
         service,
-        method(service_classes["SecuredSourceBriefIngestionService"], "build"),
+        method(service_class, "build"),
     ) or ""
     ordered = (
         "self._feed_items.detail(",
@@ -178,19 +179,28 @@ def main() -> None:
     positions = tuple(build_source.find(fragment) for fragment in ordered)
     if any(position < 0 for position in positions) or positions != tuple(sorted(positions)):
         fail("Source Brief admission execution order drifted")
-    for fragment in (
-        "ProposalReviewDecisionKind.ACCEPTED",
-        "uuid5(",
-        "ArtifactKind.EXTERNAL_EVIDENCE",
-        "canonical_normalized_content_hash(mapping)",
-        "InputArtifactKind.NORMALIZED_ARTIFACT",
-        "self._repository.complete_successful_stage(execution, (proposal,))",
-        "self._ingestion.mark_succeeded(current.id)",
-        "self._recover(",
-        "repository.find_materialization",
+    execute_source = ast.get_source_segment(
+        service,
+        method(service_class, "_execute"),
+    ) or ""
+    recover_source = ast.get_source_segment(
+        service,
+        method(service_class, "_recover"),
+    ) or ""
+    for fragment, source in (
+        ("ProposalReviewDecisionKind.ACCEPTED", service),
+        ("uuid5(", service),
+        ("ArtifactKind.EXTERNAL_EVIDENCE", service),
+        ("canonical_normalized_content_hash(mapping)", service),
+        ("InputArtifactKind.NORMALIZED_ARTIFACT", build_source),
+        (
+            "self._repository.complete_successful_stage(execution, (proposal,))",
+            execute_source,
+        ),
+        ("self._ingestion.mark_succeeded(current.id)", execute_source + recover_source),
+        ("self._recover(", execute_source),
     ):
-        search = service.replace("self._repository", "repository")
-        if fragment not in search:
+        if fragment not in source:
             fail(f"Source Brief service invariant missing: {fragment}")
 
     forbidden = (
