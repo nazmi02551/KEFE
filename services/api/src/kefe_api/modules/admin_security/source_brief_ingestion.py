@@ -15,7 +15,6 @@ from kefe_api.modules.ingestion_orchestration.models import (
     IngestionRunState,
     InputArtifactKind,
     Proposal,
-    ProposalMaterialization,
     ProposalReviewDecision,
     ProposalReviewDecisionKind,
     StageExecution,
@@ -33,7 +32,6 @@ from kefe_api.modules.ingestion_orchestration.service import (
 from kefe_api.modules.ingestion_orchestration.source_brief_ingestion import (
     CONFIGURATION_HASH,
     NORMALIZED_SCHEMA_VERSION,
-    NormalizedFeedItemMetadata,
     PIPELINE_CODE,
     PIPELINE_VERSION,
     SOURCE_BRIEF_KIND,
@@ -42,6 +40,7 @@ from kefe_api.modules.ingestion_orchestration.source_brief_ingestion import (
     SOURCE_BRIEF_SCHEMA_VERSION,
     STAGE_CODE,
     STAGE_VERSION,
+    NormalizedFeedItemMetadata,
     SourceBriefStageProcessor,
     canonical_normalized_content_hash,
     require_source_brief_normalized_artifact,
