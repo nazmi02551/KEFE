@@ -320,9 +320,12 @@ class _FlowStepSection extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    final onExposed = () => ref
-        .read(decisionControllerProvider.notifier)
-        .recordContextExposure(step.code);
+    void onExposed() {
+      ref
+          .read(decisionControllerProvider.notifier)
+          .recordContextExposure(step.code);
+    }
+
     if (progressiveContextAdvance &&
         step.state == FlowStepRuntimeState.ready) {
       return _ProgressiveContextStep(
