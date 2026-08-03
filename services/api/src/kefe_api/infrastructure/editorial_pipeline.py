@@ -89,7 +89,6 @@ from kefe_api.modules.ingestion_orchestration.service import (
 from kefe_api.modules.ingestion_orchestration.worker_runtime import (
     IngestionWorkerObserver,
     IngestionWorkerRuntimeRegistry,
-    InMemoryIngestionWorkerRuntimeRegistry,
     NoOpIngestionWorkerObserver,
 )
 from kefe_api.modules.ingestion_orchestration.worker_service import (
@@ -113,14 +112,12 @@ from kefe_api.modules.knowledge.provider_http_auth import (
 )
 from kefe_api.modules.knowledge.provider_http_transport import (
     ControlledProviderHttpTransport,
-    InMemoryProviderAdoptionRegistry,
     NoOpProviderHttpObserver,
     ProviderAdoptionRegistry,
     ProviderHttpObserver,
 )
 from kefe_api.modules.knowledge.provider_public_execution import (
     CredentialModeRoutingProviderCaptureExecutor,
-    InMemoryPublicSourceCaptureRegistry,
     PermitBoundPublicCaptureExecutor,
     PublicSourceCaptureRegistry,
 )
@@ -134,6 +131,13 @@ from kefe_api.modules.knowledge.provider_secret_execution import (
     ProviderPermitExecutionContextRepository,
     SecretResolverRegistry,
     SecureProviderCaptureExecutor,
+)
+from kefe_api.modules.knowledge.rss_atom_subscription import (
+    RssAtomSubscriptionActivationService,
+    RssAtomSubscriptionManifestRegistry,
+    build_rss_atom_ingestion_worker_registry,
+    build_rss_atom_provider_adoption_registry,
+    build_rss_atom_public_capture_registry,
 )
 from kefe_api.modules.knowledge.source_acquisition import (
     InMemorySourceCaptureRegistry,
@@ -175,6 +179,8 @@ class EditorialPipeline:
     provider_http_transport: ControlledProviderHttpTransport
     secure_provider_http_executor: SecureProviderHttpExecutor
     public_http_capture_adapter_factory: EvidenceBackedPublicHttpCaptureAdapterFactory
+    rss_atom_subscription_registry: RssAtomSubscriptionManifestRegistry
+    rss_atom_subscription_activation_service: RssAtomSubscriptionActivationService
     source_acquisition_observer: SourceAcquisitionObserver
     source_acquisition_service: SourceAcquisitionService
     source_scheduler_repository: SourceAcquisitionSchedulerRepository
@@ -271,29 +277,9 @@ def build_editorial_pipeline(
     provider_admission_service = SourceProviderAdmissionService(
         source_provider_admission_repository
     )
-    secret_resolver_registry: SecretResolverRegistry = InMemorySecretResolverRegistry()
-    credential_capture_registry: CredentialAwareSourceCaptureRegistry = (
-        InMemoryCredentialAwareSourceCaptureRegistry()
-    )
-    secure_provider_capture_executor = SecureProviderCaptureExecutor(
-        contexts=provider_execution_context_repository,
-        resolvers=secret_resolver_registry,
-        adapters=credential_capture_registry,
-    )
-    public_capture_registry: PublicSourceCaptureRegistry = (
-        InMemoryPublicSourceCaptureRegistry()
-    )
-    public_provider_capture_executor = PermitBoundPublicCaptureExecutor(
-        contexts=provider_execution_context_repository,
-        adapters=public_capture_registry,
-    )
-    provider_capture_executor = CredentialModeRoutingProviderCaptureExecutor(
-        contexts=provider_execution_context_repository,
-        public_executor=public_provider_capture_executor,
-        credentialed_executor=secure_provider_capture_executor,
-    )
-    provider_adoption_registry: ProviderAdoptionRegistry = (
-        InMemoryProviderAdoptionRegistry()
+    rss_atom_subscription_registry = RssAtomSubscriptionManifestRegistry()
+    provider_adoption_registry = build_rss_atom_provider_adoption_registry(
+        rss_atom_subscription_registry
     )
     provider_http_auth_registry: ProviderHttpAuthRegistry = (
         InMemoryProviderHttpAuthRegistry()
@@ -316,6 +302,28 @@ def build_editorial_pipeline(
             evidence_store=raw_source_evidence_store,
         )
     )
+    public_capture_registry = build_rss_atom_public_capture_registry(
+        registry=rss_atom_subscription_registry,
+        factory=public_http_capture_adapter_factory,
+    )
+    secret_resolver_registry: SecretResolverRegistry = InMemorySecretResolverRegistry()
+    credential_capture_registry: CredentialAwareSourceCaptureRegistry = (
+        InMemoryCredentialAwareSourceCaptureRegistry()
+    )
+    secure_provider_capture_executor = SecureProviderCaptureExecutor(
+        contexts=provider_execution_context_repository,
+        resolvers=secret_resolver_registry,
+        adapters=credential_capture_registry,
+    )
+    public_provider_capture_executor = PermitBoundPublicCaptureExecutor(
+        contexts=provider_execution_context_repository,
+        adapters=public_capture_registry,
+    )
+    provider_capture_executor = CredentialModeRoutingProviderCaptureExecutor(
+        contexts=provider_execution_context_repository,
+        public_executor=public_provider_capture_executor,
+        credentialed_executor=secure_provider_capture_executor,
+    )
     source_acquisition_observer: SourceAcquisitionObserver = (
         NoOpSourceAcquisitionObserver()
     )
@@ -333,9 +341,16 @@ def build_editorial_pipeline(
         acquisition=source_acquisition_service,
         observer=source_dispatch_observer,
     )
+    rss_atom_subscription_activation_service = RssAtomSubscriptionActivationService(
+        registry=rss_atom_subscription_registry,
+        admission=provider_admission_service,
+        scheduler=source_scheduler_service,
+    )
     ingestion_lease_service = IngestionRunLeaseService(ingestion_lease_repository)
-    ingestion_worker_registry: IngestionWorkerRuntimeRegistry = (
-        InMemoryIngestionWorkerRuntimeRegistry()
+    ingestion_worker_registry = build_rss_atom_ingestion_worker_registry(
+        registry=rss_atom_subscription_registry,
+        knowledge=knowledge_repository,
+        evidence=raw_source_evidence_store,
     )
     ingestion_worker_observer: IngestionWorkerObserver = NoOpIngestionWorkerObserver()
     ingestion_worker_runner = IngestionWorkerRunner(
@@ -394,6 +409,10 @@ def build_editorial_pipeline(
         provider_http_transport=provider_http_transport,
         secure_provider_http_executor=secure_provider_http_executor,
         public_http_capture_adapter_factory=public_http_capture_adapter_factory,
+        rss_atom_subscription_registry=rss_atom_subscription_registry,
+        rss_atom_subscription_activation_service=(
+            rss_atom_subscription_activation_service
+        ),
         source_acquisition_observer=source_acquisition_observer,
         source_acquisition_service=source_acquisition_service,
         source_scheduler_repository=source_scheduler_repository,
