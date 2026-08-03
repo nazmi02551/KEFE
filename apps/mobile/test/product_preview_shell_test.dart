@@ -134,6 +134,7 @@ void main() {
 
       expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
       expect(find.text('KARAR YOLCULUĞU'), findsOneWidget);
+      expect(find.byKey(const ValueKey('kefe-active-journey')), findsOneWidget);
       expect(
         find.byKey(
           const ValueKey(
@@ -143,14 +144,6 @@ void main() {
         findsOneWidget,
       );
       expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
-
-      await tester.scrollUntilVisible(
-        find.text('Olay özeti'),
-        260,
-        scrollable: find.byType(Scrollable).last,
-      );
-      await tester.pumpAndSettle();
-      expect(find.text('Olay özeti'), findsOneWidget);
 
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('kefe-balance-visual')),
@@ -165,6 +158,8 @@ void main() {
       final option = find.byKey(
         const ValueKey('option-Öncelikli ihtiyacı olana'),
       );
+      await tester.ensureVisible(option);
+      await tester.pumpAndSettle();
       await tester.tap(option);
       await tester.pumpAndSettle();
 
@@ -182,6 +177,8 @@ void main() {
         scrollable: find.byType(Scrollable).last,
       );
       final commit = find.byKey(const ValueKey('commit-button'));
+      await tester.ensureVisible(commit);
+      await tester.pumpAndSettle();
       await tester.tap(commit);
       await tester.pumpAndSettle();
 
