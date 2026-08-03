@@ -33,7 +33,9 @@ void main() {
         decisionRepositoryProvider.overrideWithValue(
           PreviewJourneyDecisionRepository(),
         ),
-        decisionDraftStoreProvider.overrideWithValue(MemoryDecisionDraftStore()),
+        decisionDraftStoreProvider.overrideWithValue(
+          MemoryDecisionDraftStore(),
+        ),
         kefeContentLocalizerProvider.overrideWithValue(
           const PreviewContentLocalizer(),
         ),
