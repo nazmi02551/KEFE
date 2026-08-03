@@ -7,6 +7,7 @@ on:
       - 'apps/mobile/**'
       - 'docs/contracts/**'
       - 'docs/adr/0036-mvp-code-completion-and-beta-gate.md'
+      - 'docs/adr/0090-installable-phone-preview-and-unconfigured-production-shell-boundary.md'
       - 'docs/runbooks/MVP_BETA_OPERATIONS.md'
       - '.github/workflows/mvp-beta-gates.yml'
   push:
@@ -15,6 +16,7 @@ on:
       - 'services/api/**'
       - 'apps/mobile/**'
       - 'docs/contracts/**'
+      - 'docs/adr/0090-installable-phone-preview-and-unconfigured-production-shell-boundary.md'
       - '.github/workflows/mvp-beta-gates.yml'
 
 permissions:
@@ -188,6 +190,9 @@ jobs:
       - name: Resolve dependencies
         working-directory: apps/mobile
         run: flutter pub get
+      - name: Phone artifact boundary gate
+        working-directory: apps/mobile
+        run: python tool/check_installable_phone_artifact_boundary.py
       - name: Normalize Dart formatting for exact drift evidence
         working-directory: apps/mobile
         run: dart format lib test
@@ -237,15 +242,11 @@ jobs:
           assert 'android:scheme="kefe"' in manifest
           assert 'android:host="share"' not in manifest
           PY
-      - name: Build production-entry MVP candidate APK
+      - name: Build non-installable production shell compile proof
         working-directory: apps/mobile
-        run: >-
-          flutter build apk --debug
-          -t lib/main.dart
-          --dart-define=KEFE_API_BASE_URL=https://beta-api.invalid/
-      - name: Upload internal MVP candidate
-        uses: actions/upload-artifact@v4
-        with:
-          name: kefe-mvp-beta-internal
-          path: apps/mobile/build/app/outputs/flutter-apk/app-debug.apk
-          if-no-files-found: error
+        run: |
+          flutter build apk --debug \
+            -t lib/main.dart \
+            --dart-define=KEFE_API_BASE_URL=https://beta-api.invalid/
+          test -f build/app/outputs/flutter-apk/app-debug.apk
+          echo "Production shell APK is intentionally not uploaded"
