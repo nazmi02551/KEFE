@@ -150,7 +150,9 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
 }
 
 void main() {
-  testWidgets('Reveal is visible before Perspective disclosure', (tester) async {
+  testWidgets('Reveal is visible before Perspective disclosure', (
+    tester,
+  ) async {
     tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
     addTearDown(tester.platformDispatcher.clearLocaleTestValue);
     final repository = DisclosureRepository();

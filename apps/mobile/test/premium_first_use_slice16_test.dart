@@ -193,10 +193,7 @@ void main() {
       contains('onboardingStoreProvider.overrideWithValue'),
     );
     expect(previewMainSource, contains('MemoryOnboardingStore()'));
-    expect(
-      productionAppSource,
-      contains('const OnboardingExperienceScreen()'),
-    );
+    expect(productionAppSource, contains('const OnboardingExperienceScreen()'));
     expect(onboardingExperienceSource, contains('OnboardingGateScreen('));
     expect(productionMainSource, isNot(contains('MemoryOnboardingStore')));
   });

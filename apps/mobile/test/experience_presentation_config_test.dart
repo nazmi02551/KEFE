@@ -40,7 +40,10 @@ void main() {
       decisionRollbackOnly.decisionJourneyMode,
       DecisionJourneyPresentationMode.legacyLongScroll,
     );
-    expect(decisionRollbackOnly.onboardingVersion, OnboardingExperienceVersion.v2);
+    expect(
+      decisionRollbackOnly.onboardingVersion,
+      OnboardingExperienceVersion.v2,
+    );
     expect(
       onboardingRollbackOnly.decisionJourneyMode,
       DecisionJourneyPresentationMode.progressive,

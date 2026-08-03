@@ -307,11 +307,7 @@ class _PromisePage extends StatelessWidget {
                           ),
                         ),
                         child: ExcludeSemantics(
-                          child: Icon(
-                            data.icon,
-                            color: data.accent,
-                            size: 29,
-                          ),
+                          child: Icon(data.icon, color: data.accent, size: 29),
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -457,10 +453,7 @@ class _MotifSurface extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         borderRadius: 18,
         semanticContainer: false,
-        child: SizedBox(
-          height: 60,
-          child: Row(children: children),
-        ),
+        child: SizedBox(height: 60, child: Row(children: children)),
       ),
     );
   }

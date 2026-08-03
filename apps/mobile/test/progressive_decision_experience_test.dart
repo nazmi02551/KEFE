@@ -166,7 +166,9 @@ Future<void> pumpCase(
     ProviderScope(
       overrides: [
         decisionRepositoryProvider.overrideWithValue(repository),
-        decisionDraftStoreProvider.overrideWithValue(MemoryDecisionDraftStore()),
+        decisionDraftStoreProvider.overrideWithValue(
+          MemoryDecisionDraftStore(),
+        ),
         experiencePresentationConfigProvider.overrideWithValue(config),
       ],
       child: const KefeApp(initialLocation: '/case/$journeyCaseId'),
@@ -191,7 +193,10 @@ void main() {
       findsOneWidget,
     );
     expect(repository.contextExposed, isFalse);
-    expect(find.byKey(const ValueKey('context-continue-button')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('context-continue-button')),
+      findsOneWidget,
+    );
     expect(find.byKey(const ValueKey('option-A')), findsNothing);
 
     final continueButton = find.byKey(

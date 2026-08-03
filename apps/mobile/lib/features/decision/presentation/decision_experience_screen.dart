@@ -43,10 +43,7 @@ class DecisionExperienceScreen extends ConsumerWidget {
         DecisionJourneyPresentationMode.legacyLongScroll) {
       return DecisionFlowScreen(caseId: caseId, firstUse: firstUse);
     }
-    return _ProgressiveDecisionFlowScreen(
-      caseId: caseId,
-      firstUse: firstUse,
-    );
+    return _ProgressiveDecisionFlowScreen(caseId: caseId, firstUse: firstUse);
   }
 }
 
@@ -89,7 +86,10 @@ class _ProgressiveDecisionFlowScreenState
     final strings = KefeStrings.of(context);
     final state = ref.watch(decisionControllerProvider);
 
-    ref.listen<DecisionState>(decisionControllerProvider, (previous, next) async {
+    ref.listen<DecisionState>(decisionControllerProvider, (
+      previous,
+      next,
+    ) async {
       if (widget.firstUse && previous?.reveal == null && next.reveal != null) {
         await ref.read(onboardingControllerProvider).complete();
       }
@@ -255,19 +255,19 @@ class _ActiveFlowStep extends ConsumerWidget {
       'COLLECTIVE_RESULT' => _resultStep(context, ref),
       'REFLECTION' => _reflectionStep(),
       _ => _JourneyMessageSurface(
-          message: KefeStrings.of(context).flowCapabilityPendingBody(
-            step.reasonCode,
-          ),
-        ),
+        message: KefeStrings.of(
+          context,
+        ).flowCapabilityPendingBody(step.reasonCode),
+      ),
     };
   }
 
   Widget _contextStep(BuildContext context, WidgetRef ref) {
     if (step.state == FlowStepRuntimeState.unsupported) {
       return _JourneyMessageSurface(
-        message: KefeStrings.of(context).flowCapabilityPendingBody(
-          step.reasonCode,
-        ),
+        message: KefeStrings.of(
+          context,
+        ).flowCapabilityPendingBody(step.reasonCode),
       );
     }
     if (step.state != FlowStepRuntimeState.ready) {
@@ -293,9 +293,9 @@ class _ActiveFlowStep extends ConsumerWidget {
   Widget _decisionStep(BuildContext context, WidgetRef ref) {
     if (step.state == FlowStepRuntimeState.unsupported) {
       return _JourneyMessageSurface(
-        message: KefeStrings.of(context).flowCapabilityPendingBody(
-          step.reasonCode,
-        ),
+        message: KefeStrings.of(
+          context,
+        ).flowCapabilityPendingBody(step.reasonCode),
       );
     }
     if (step.state != FlowStepRuntimeState.ready) {
@@ -365,9 +365,9 @@ class _ActiveFlowStep extends ConsumerWidget {
   Widget _resultStep(BuildContext context, WidgetRef ref) {
     if (step.state == FlowStepRuntimeState.unsupported) {
       return _JourneyMessageSurface(
-        message: KefeStrings.of(context).flowCapabilityPendingBody(
-          step.reasonCode,
-        ),
+        message: KefeStrings.of(
+          context,
+        ).flowCapabilityPendingBody(step.reasonCode),
       );
     }
     if (step.state != FlowStepRuntimeState.ready || state.reveal == null) {
@@ -389,10 +389,7 @@ class _ActiveFlowStep extends ConsumerWidget {
         if (!showPerspectives) ...[
           _PerspectiveDisclosurePanel(onPressed: onShowPerspectives),
           const SizedBox(height: 20),
-          ConsensusSection(
-            sessionId: sessionId,
-            caseVersionId: caseVersionId,
-          ),
+          ConsensusSection(sessionId: sessionId, caseVersionId: caseVersionId),
           const SizedBox(height: 20),
           CommunityReasonSection(
             sessionId: sessionId,
@@ -488,10 +485,7 @@ class _JourneyCaseHeader extends StatelessWidget {
 }
 
 class _ContextAdvancePanel extends StatelessWidget {
-  const _ContextAdvancePanel({
-    required this.enabled,
-    required this.onContinue,
-  });
+  const _ContextAdvancePanel({required this.enabled, required this.onContinue});
 
   final bool enabled;
   final VoidCallback onContinue;
