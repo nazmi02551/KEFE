@@ -1,0 +1,114 @@
+{
+  "contract": "feed-item-normalization-slice54",
+  "version": 1,
+  "status": "accepted",
+  "review_gate": {
+    "required_decision": "ACCEPTED",
+    "review_must_reference_proposal": true,
+    "automatic_review": false,
+    "direct_materializer_defense_in_depth": true
+  },
+  "proposal": {
+    "kind": "FEED_ITEM",
+    "payload_schema_ref": "kefe.feed-item",
+    "payload_schema_version": "1.0.0",
+    "risk_code": "UNREVIEWED_EXTERNAL_FEED_ITEM",
+    "ai_execution_ref_allowed": false,
+    "exact_payload_keys": [
+      "feed_content_hash",
+      "feed_format",
+      "feed_storage_ref",
+      "feed_title",
+      "item_id",
+      "item_title",
+      "item_url",
+      "published_at",
+      "source_artifact_id",
+      "summary_text"
+    ]
+  },
+  "authority": {
+    "source_artifact_loaded": true,
+    "source_artifact_id_exact": true,
+    "feed_content_hash_exact": true,
+    "feed_storage_ref_exact": true,
+    "proposal_provenance_ref_exact": true,
+    "language_from_source_artifact": true,
+    "jurisdiction_from_source_artifact": true,
+    "proposal_may_override_source_authority": false
+  },
+  "target": {
+    "target_kind": "NORMALIZED_ARTIFACT",
+    "artifact_kind": "EXTERNAL_EVIDENCE",
+    "target_uuid": "uuid5(proposal_id,target_kind)",
+    "normalized_at": "review.decided_at",
+    "text_representation": "item_title + optional two-newline summary_text",
+    "content_hash": "sha256(canonical approved feed item fields)",
+    "generated_interpretation": false,
+    "semantic_classification": false
+  },
+  "validation": {
+    "feed_formats": [
+      "ATOM_1_0",
+      "RSS_2_0"
+    ],
+    "max_item_id_chars": 4096,
+    "max_item_title_chars": 4096,
+    "max_feed_title_chars": 4096,
+    "max_item_url_chars": 4096,
+    "max_summary_chars": 16384,
+    "max_reviewer_ref_chars": 512,
+    "max_optional_review_field_chars": 4096,
+    "utc_timestamp_required_when_present": true,
+    "http_https_url_only": true,
+    "url_userinfo_forbidden": true,
+    "url_fragment_forbidden": true,
+    "url_nonstandard_port_forbidden": true,
+    "unknown_payload_fields_forbidden": true
+  },
+  "provenance_metadata": {
+    "bounded": true,
+    "json_safe": true,
+    "includes_proposal_id": true,
+    "includes_review_id": true,
+    "includes_reviewer_ref": true,
+    "includes_source_artifact_id": true,
+    "includes_feed_content_hash": true,
+    "includes_feed_storage_ref": true,
+    "includes_item_identity": true,
+    "raw_xml_included": false,
+    "response_headers_included": false,
+    "credentials_included": false,
+    "backend_object_key_included": false
+  },
+  "idempotency": {
+    "deterministic_target_id": true,
+    "exact_existing_target_reused": true,
+    "conflicting_existing_target_rejected": true,
+    "repository_race_reread": true,
+    "partial_success_retry_safe": true
+  },
+  "forbidden_outputs": {
+    "claim": true,
+    "argument": true,
+    "case": true,
+    "editorial_projection": true,
+    "publication": true,
+    "provider_activation": true,
+    "scheduler_activation": true,
+    "phone_surface": true
+  },
+  "composition": {
+    "automatic_materialization_workers_registered": 0,
+    "production_feed_providers_registered": 0,
+    "production_feed_ingestion_plans_registered": 0
+  },
+  "required_ci": [
+    "Feed Item Normalization CI",
+    "Feed Item Extraction CI",
+    "Ingestion Worker CI",
+    "API CI",
+    "MVP Beta Gates",
+    "Global Readiness"
+  ]
+}
