@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from hashlib import sha256
 from json import dumps
 from types import MappingProxyType
@@ -191,7 +191,7 @@ class PublicFeedDefinition:
         _optional_code(self.jurisdiction_code, "jurisdiction_code")
         self.to_adoption_profile()
         self.capability_template.instantiate(
-            created_at=datetime(2026, 1, 1, tzinfo=__import__("datetime").UTC)
+            created_at=datetime(2026, 1, 1, tzinfo=UTC)
         )
 
     @property
@@ -359,6 +359,8 @@ def build_public_feed_runtime_bundle(
     knowledge: KnowledgeRepository,
     evidence: RawSourceEvidenceReader,
 ) -> PublicFeedRuntimeBundle:
+    if not definitions:
+        raise ValueError("at least one public feed definition is required")
     registry = InMemoryPublicFeedDefinitionRegistry(definitions)
     adoption_profiles = tuple(
         sorted(
