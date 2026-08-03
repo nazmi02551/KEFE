@@ -27,6 +27,12 @@ from kefe_api.modules.admin_security.content_configuration import (
 from kefe_api.modules.admin_security.editorial_projection_router import (
     router as admin_editorial_projection_router,
 )
+from kefe_api.modules.admin_security.feed_item_materialization import (
+    SecuredFeedItemMaterializationService,
+)
+from kefe_api.modules.admin_security.feed_item_materialization_router import (
+    router as admin_feed_item_materialization_router,
+)
 from kefe_api.modules.admin_security.policy import default_admin_security_policy
 from kefe_api.modules.admin_security.proposal_queue_router import (
     router as admin_proposal_queue_router,
@@ -132,6 +138,14 @@ def create_app() -> FastAPI:
         admin_security_service=admin_security_service,
         raw_source_evidence_store=raw_source_evidence_store,
     )
+    secured_feed_item_materialization_service = (
+        SecuredFeedItemMaterializationService(
+            orchestration=editorial_pipeline.ingestion_service,
+            repository=editorial_pipeline.ingestion_repository,
+            materializer=editorial_pipeline.feed_item_proposal_materializer,
+            security=admin_security_service,
+        )
+    )
     content_configuration_service = ContentConfigurationService(
         repository=content_configuration_repository,
         security=admin_security_service,
@@ -233,6 +247,12 @@ def create_app() -> FastAPI:
         editorial_pipeline.ingestion_repository
     )
     app.state.ingestion_orchestration_service = editorial_pipeline.ingestion_service
+    app.state.feed_item_proposal_materializer = (
+        editorial_pipeline.feed_item_proposal_materializer
+    )
+    app.state.secured_feed_item_materialization_service = (
+        secured_feed_item_materialization_service
+    )
     app.state.ingestion_run_lease_repository = (
         editorial_pipeline.ingestion_lease_repository
     )
@@ -301,6 +321,7 @@ def create_app() -> FastAPI:
     app.include_router(admin_router)
     app.include_router(admin_proposal_queue_router)
     app.include_router(admin_editorial_projection_router)
+    app.include_router(admin_feed_item_materialization_router)
     app.include_router(admin_content_configuration_router)
     app.include_router(community_reason_admin_router)
     return app
