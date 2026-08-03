@@ -118,16 +118,17 @@ def _issue_admin(
 ) -> tuple[TestClient, UUID, str]:
     store = app.state.admin_session_store
     assert isinstance(store, InMemoryAdminSessionStore)
+    current = datetime.now(UTC)
     subject_id = uuid4()
     store.upsert_subject(subject_id, roles=frozenset(roles))
     issued = store.issue(
         admin_subject_id=subject_id,
-        authenticated_at=NOW,
-        mfa_satisfied_at=NOW,
-        expires_at=NOW + timedelta(hours=12),
+        authenticated_at=current,
+        mfa_satisfied_at=current,
+        expires_at=current + timedelta(hours=12),
     )
     if step_up:
-        store.record_step_up(issued.session_id, step_up_at=NOW)
+        store.record_step_up(issued.session_id, step_up_at=current)
     client = TestClient(app)
     client.cookies.set(ADMIN_SESSION_COOKIE, issued.session_token)
     return client, subject_id, issued.csrf_token
