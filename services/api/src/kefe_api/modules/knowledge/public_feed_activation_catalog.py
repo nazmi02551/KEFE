@@ -124,10 +124,23 @@ class PublicFeedActivationCatalogEntry:
             raise ValueError("manifest schema version is unsupported")
         if canonical_manifest_hash(self.manifest_json) != self.configuration_hash:
             raise ValueError("manifest hash does not match configuration_hash")
+        payload = json.loads(self.manifest_json)
+        if (
+            payload.get("activation_code") != self.activation_code
+            or payload.get("adapter_code") != self.adapter_code
+        ):
+            raise ValueError("catalog identity does not match activation manifest")
         if _EVIDENCE_REF.fullmatch(self.evidence_ref) is None:
             raise ValueError("evidence_ref must be opaque")
         if _ADMIN_ACTOR.fullmatch(self.recorded_by) is None:
             raise ValueError("recorded_by must be an Admin actor reference")
+        actor_value = self.recorded_by.removeprefix("admin:")
+        try:
+            actor_id = UUID(actor_value)
+        except ValueError as exc:
+            raise ValueError("recorded_by must contain a valid Admin UUID") from exc
+        if str(actor_id) != actor_value:
+            raise ValueError("recorded_by must use canonical Admin UUID text")
         _require_utc(self.recorded_at, "recorded_at")
 
     @classmethod
@@ -174,6 +187,11 @@ class PublicFeedActivationCatalogEntry:
             raise ValueError("stored activation manifest is invalid")
         if canonical_manifest_hash(self.manifest_json) != self.configuration_hash:
             raise ValueError("stored activation manifest integrity failed")
+        if (
+            payload.get("activation_code") != self.activation_code
+            or payload.get("adapter_code") != self.adapter_code
+        ):
+            raise ValueError("stored activation manifest identity failed")
         return payload
 
     def __repr__(self) -> str:
