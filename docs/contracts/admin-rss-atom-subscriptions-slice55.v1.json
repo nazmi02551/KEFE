@@ -1,0 +1,108 @@
+{
+  "contract": "admin-rss-atom-subscriptions-slice55",
+  "version": "1.0.0",
+  "status": "accepted",
+  "routes": {
+    "list": {
+      "method": "GET",
+      "path": "/internal/admin/v1/source-subscriptions",
+      "capability": "SOURCE_SUBSCRIPTION_READ",
+      "csrf_required": false,
+      "step_up_required": false
+    },
+    "activate": {
+      "method": "POST",
+      "path": "/internal/admin/v1/source-subscriptions/{subscription_code}/activate",
+      "capability": "SOURCE_SUBSCRIPTION_ACTIVATE",
+      "csrf_required": true,
+      "step_up_required": true,
+      "expected_configuration_hash_required": true
+    }
+  },
+  "role_policy": {
+    "REVIEWER": ["SOURCE_SUBSCRIPTION_READ"],
+    "ACCESS_ADMIN": [
+      "SOURCE_SUBSCRIPTION_READ",
+      "SOURCE_SUBSCRIPTION_ACTIVATE"
+    ]
+  },
+  "inventory": {
+    "deterministic_order": "subscription_code_ascending",
+    "max_items": 256,
+    "manifest_mutation_allowed": false,
+    "allowed_fields": [
+      "subscription_code",
+      "adapter_code",
+      "external_locator",
+      "interval_seconds",
+      "max_dispatch_attempts",
+      "quota_limit",
+      "quota_window_seconds",
+      "failure_threshold",
+      "circuit_open_seconds",
+      "permit_ttl_seconds",
+      "connect_timeout_ms",
+      "read_timeout_ms",
+      "total_timeout_ms",
+      "max_redirect_hops",
+      "locale",
+      "jurisdiction_code",
+      "configuration_hash"
+    ],
+    "forbidden_fields": [
+      "terms_evidence_ref",
+      "rate_limit_evidence_ref",
+      "secret_ref",
+      "credential",
+      "authorization",
+      "raw_body",
+      "raw_storage_ref",
+      "object_key",
+      "exception_text"
+    ]
+  },
+  "activation": {
+    "hash_comparison": "constant_time",
+    "stale_hash_status": 409,
+    "stale_hash_code": "SOURCE_SUBSCRIPTION_CONFIGURATION_STALE",
+    "side_effect_before_hash_match": false,
+    "delegate": "RssAtomSubscriptionActivationService.activate",
+    "alternate_provider_path": false,
+    "alternate_scheduler_path": false,
+    "allowed_response_fields": [
+      "subscription_code",
+      "adapter_code",
+      "configuration_hash",
+      "capability_lifecycle",
+      "circuit_state",
+      "schedule_id",
+      "schedule_state",
+      "next_due_at"
+    ]
+  },
+  "production": {
+    "registered_manifests": 0,
+    "inventory_items": 0,
+    "startup_activation": false,
+    "concrete_feed": false
+  },
+  "excluded": {
+    "create_manifest_route": false,
+    "update_manifest_route": false,
+    "delete_manifest_route": false,
+    "bulk_activation_route": false,
+    "live_network_test": false,
+    "automatic_review": false,
+    "automatic_materialization": false,
+    "automatic_publication": false,
+    "phone_facing_behavior": false
+  },
+  "required_tests": [
+    "test_inventory_requires_read_capability_and_is_deterministic_redacted",
+    "test_activation_requires_csrf_activation_capability_and_step_up",
+    "test_stale_configuration_hash_fails_before_activation_side_effect",
+    "test_activation_delegates_exact_manifest_and_returns_bounded_result",
+    "test_http_surface_has_no_manifest_mutation_routes",
+    "test_production_inventory_is_empty_and_startup_remains_dormant"
+  ]
+}
