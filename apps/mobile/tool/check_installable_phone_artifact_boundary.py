@@ -82,7 +82,8 @@ def main() -> None:
     for fragment in (
         "features/decision/data/decision_draft_store.dart",
         "PreviewJourneyDecisionRepository()",
-        "decisionDraftStoreProvider.overrideWithValue(MemoryDecisionDraftStore())",
+        "decisionDraftStoreProvider.overrideWithValue(",
+        "MemoryDecisionDraftStore(),",
         "MemoryOnboardingStore()",
         "ProductPreviewApp()",
     ):
