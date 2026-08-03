@@ -220,6 +220,12 @@ def create_app() -> FastAPI:
     app.state.public_http_capture_adapter_factory = (
         editorial_pipeline.public_http_capture_adapter_factory
     )
+    app.state.rss_atom_subscription_registry = (
+        editorial_pipeline.rss_atom_subscription_registry
+    )
+    app.state.rss_atom_subscription_activation_service = (
+        editorial_pipeline.rss_atom_subscription_activation_service
+    )
     app.state.source_acquisition_observer = (
         editorial_pipeline.source_acquisition_observer
     )
