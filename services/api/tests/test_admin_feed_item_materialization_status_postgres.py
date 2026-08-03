@@ -151,8 +151,8 @@ def test_postgres_status_progression_and_conflict_are_persisted() -> None:
         ProposalMaterialization(
             id=uuid4(),
             proposal_id=conflict_proposal.id,
-            review_decision_id=uuid4(),
-            target_kind="NORMALIZED_ARTIFACT",
+            review_decision_id=conflict_review.id,
+            target_kind="CLAIM",
             target_id=uuid4(),
             materialized_at=datetime.now(UTC),
         )
@@ -160,6 +160,3 @@ def test_postgres_status_progression_and_conflict_are_persisted() -> None:
     with pytest.raises(DomainError) as conflict:
         status.observe(principal, proposal_id=conflict_proposal.id)
     assert conflict.value.code == "INGESTION_FEED_ITEM_MATERIALIZATION_STATUS_CONFLICT"
-    assert conflict_review.id != repository.find_materialization(
-        conflict_proposal.id
-    ).review_decision_id
