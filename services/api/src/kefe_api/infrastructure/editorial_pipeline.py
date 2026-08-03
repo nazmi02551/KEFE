@@ -135,6 +135,12 @@ from kefe_api.modules.knowledge.provider_secret_execution import (
     SecretResolverRegistry,
     SecureProviderCaptureExecutor,
 )
+from kefe_api.modules.knowledge.rss_atom_route import (
+    InMemoryRssAtomRouteRegistry,
+    ReadableRawSourceEvidenceStore,
+    RssAtomRouteFactory,
+    RssAtomRouteRegistry,
+)
 from kefe_api.modules.knowledge.source_acquisition import (
     InMemorySourceCaptureRegistry,
     NoOpSourceAcquisitionObserver,
@@ -142,7 +148,6 @@ from kefe_api.modules.knowledge.source_acquisition import (
     SourceAcquisitionService,
     SourceCaptureRegistry,
 )
-from kefe_api.modules.knowledge.source_evidence import RawSourceEvidenceStore
 from kefe_api.modules.knowledge.source_scheduler_memory import (
     InMemorySourceAcquisitionSchedulerRepository,
 )
@@ -175,6 +180,8 @@ class EditorialPipeline:
     provider_http_transport: ControlledProviderHttpTransport
     secure_provider_http_executor: SecureProviderHttpExecutor
     public_http_capture_adapter_factory: EvidenceBackedPublicHttpCaptureAdapterFactory
+    rss_atom_route_factory: RssAtomRouteFactory
+    rss_atom_route_registry: RssAtomRouteRegistry
     source_acquisition_observer: SourceAcquisitionObserver
     source_acquisition_service: SourceAcquisitionService
     source_scheduler_repository: SourceAcquisitionSchedulerRepository
@@ -203,7 +210,7 @@ def build_editorial_pipeline(
     *,
     content_authoring_repository: ContentAuthoringRepository,
     admin_security_service: AdminSecurityService,
-    raw_source_evidence_store: RawSourceEvidenceStore,
+    raw_source_evidence_store: ReadableRawSourceEvidenceStore,
 ) -> EditorialPipeline:
     if settings.persistence_backend == "memory":
         if not isinstance(
@@ -316,6 +323,14 @@ def build_editorial_pipeline(
             evidence_store=raw_source_evidence_store,
         )
     )
+    rss_atom_route_factory = RssAtomRouteFactory(
+        transport=provider_http_transport,
+        evidence_store=raw_source_evidence_store,
+        knowledge_repository=knowledge_repository,
+    )
+    rss_atom_route_registry: RssAtomRouteRegistry = (
+        InMemoryRssAtomRouteRegistry()
+    )
     source_acquisition_observer: SourceAcquisitionObserver = (
         NoOpSourceAcquisitionObserver()
     )
@@ -394,6 +409,8 @@ def build_editorial_pipeline(
         provider_http_transport=provider_http_transport,
         secure_provider_http_executor=secure_provider_http_executor,
         public_http_capture_adapter_factory=public_http_capture_adapter_factory,
+        rss_atom_route_factory=rss_atom_route_factory,
+        rss_atom_route_registry=rss_atom_route_registry,
         source_acquisition_observer=source_acquisition_observer,
         source_acquisition_service=source_acquisition_service,
         source_scheduler_repository=source_scheduler_repository,
