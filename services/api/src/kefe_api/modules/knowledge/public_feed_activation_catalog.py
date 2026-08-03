@@ -158,17 +158,14 @@ class PublicFeedActivationCatalogEntry:
         )
 
     @property
-    def immutable_identity(self) -> tuple[object, ...]:
+    def catalog_content_identity(self) -> tuple[object, ...]:
         return (
-            self.id,
             self.activation_code,
             self.adapter_code,
             self.configuration_hash,
             self.manifest_schema_version,
             self.manifest_json,
             self.evidence_ref,
-            self.recorded_by,
-            self.recorded_at,
         )
 
     def manifest_payload(self) -> dict[str, Any]:
@@ -237,7 +234,7 @@ class InMemoryPublicFeedActivationCatalogRepository:
         with self._lock:
             existing = self._by_activation.get(entry.activation_code)
             if existing is not None:
-                if existing.immutable_identity == entry.immutable_identity:
+                if existing.catalog_content_identity == entry.catalog_content_identity:
                     return existing
                 raise ValueError("conflicting public feed activation catalog entry")
             if entry.adapter_code in self._by_adapter:
