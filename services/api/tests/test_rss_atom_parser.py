@@ -23,7 +23,8 @@ def test_parses_rss_20_in_source_order_and_collapses_markup_text() -> None:
         b"""<rss version='2.0'><channel><title>  KEFE   Feed </title>
         <link>https://example.test/feed</link>
         <item><guid>one</guid><title> First   item </title>
-        <link>https://example.test/one</link><pubDate>Mon, 03 Aug 2026 01:00:00 GMT</pubDate>
+        <link>https://example.test/one</link>
+        <pubDate>Mon, 03 Aug 2026 01:00:00 GMT</pubDate>
         <description>Hello <b>world</b></description></item>
         <item><link>https://example.test/two</link><title>Second</title></item>
         </channel></rss>"""
@@ -44,7 +45,8 @@ def test_parses_atom_10_with_exact_namespace_and_alternate_links() -> None:
         b"""<feed xmlns='http://www.w3.org/2005/Atom'>
         <title>Atom feed</title><link rel='alternate' href='https://example.test/'/>
         <entry><id>tag:example.test,2026:1</id><title>Entry</title>
-        <link href='https://example.test/1'/><updated>2026-08-03T01:00:00Z</updated>
+        <link href='https://example.test/1'/>
+        <updated>2026-08-03T01:00:00Z</updated>
         <summary>Alpha <em>beta</em></summary></entry></feed>"""
     )
     assert parsed.format is FeedFormat.ATOM_1_0
@@ -69,26 +71,55 @@ def test_rejects_forbidden_xml_surfaces_before_parsing(document: bytes) -> None:
 
 def test_rejects_empty_oversized_malformed_and_unsupported_documents() -> None:
     _error(b"", "SOURCE_FEED_DOCUMENT_EMPTY")
-    _error(b"<rss version='2.0'/>" * 2, "SOURCE_FEED_DOCUMENT_TOO_LARGE", max_document_bytes=10)
+    _error(
+        b"<rss version='2.0'/>" * 2,
+        "SOURCE_FEED_DOCUMENT_TOO_LARGE",
+        max_document_bytes=10,
+    )
     _error(b"<rss>", "SOURCE_FEED_XML_MALFORMED")
     _error(b"<feed/>", "SOURCE_FEED_FORMAT_UNSUPPORTED")
-    _error(b"<rss version='1.0'><channel/></rss>", "SOURCE_FEED_FORMAT_UNSUPPORTED")
+    _error(
+        b"<rss version='1.0'><channel/></rss>",
+        "SOURCE_FEED_FORMAT_UNSUPPORTED",
+    )
 
 
 def test_enforces_depth_element_entry_and_text_limits() -> None:
-    _error(b"<rss version='2.0'><channel><item/></channel></rss>", "SOURCE_FEED_LIMIT_EXCEEDED", max_depth=2)
-    _error(b"<rss version='2.0'><channel><title>x</title></channel></rss>", "SOURCE_FEED_LIMIT_EXCEEDED", max_elements=2)
-    _error(b"<rss version='2.0'><channel><item><guid>1</guid></item><item><guid>2</guid></item></channel></rss>", "SOURCE_FEED_LIMIT_EXCEEDED", max_entries=1)
-    _error(b"<rss version='2.0'><channel><title>12345</title></channel></rss>", "SOURCE_FEED_LIMIT_EXCEEDED", max_text_chars=4)
+    _error(
+        b"<rss version='2.0'><channel><item/></channel></rss>",
+        "SOURCE_FEED_LIMIT_EXCEEDED",
+        max_depth=2,
+    )
+    _error(
+        b"<rss version='2.0'><channel><title>x</title></channel></rss>",
+        "SOURCE_FEED_LIMIT_EXCEEDED",
+        max_elements=2,
+    )
+    _error(
+        b"<rss version='2.0'><channel>"
+        b"<item><guid>1</guid></item>"
+        b"<item><guid>2</guid></item>"
+        b"</channel></rss>",
+        "SOURCE_FEED_LIMIT_EXCEEDED",
+        max_entries=1,
+    )
+    _error(
+        b"<rss version='2.0'><channel><title>12345</title></channel></rss>",
+        "SOURCE_FEED_LIMIT_EXCEEDED",
+        max_text_chars=4,
+    )
 
 
 def test_rejects_entries_without_stable_identity() -> None:
     _error(
-        b"<rss version='2.0'><channel><item><title>missing</title></item></channel></rss>",
+        b"<rss version='2.0'><channel>"
+        b"<item><title>missing</title></item>"
+        b"</channel></rss>",
         "SOURCE_FEED_ENTRY_IDENTITY_MISSING",
     )
     _error(
-        b"<feed xmlns='http://www.w3.org/2005/Atom'><entry><title>missing</title></entry></feed>",
+        b"<feed xmlns='http://www.w3.org/2005/Atom'>"
+        b"<entry><title>missing</title></entry></feed>",
         "SOURCE_FEED_ENTRY_IDENTITY_MISSING",
     )
 
