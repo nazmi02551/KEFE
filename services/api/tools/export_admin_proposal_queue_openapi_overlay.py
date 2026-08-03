@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 from copy import deepcopy
 from pathlib import Path
 
@@ -18,6 +19,11 @@ BEFORE_QUEUE_OVERLAYS = (
     CONTRACTS / "openapi-mvp.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-projection.v0.19.overlay.json",
 )
+QUEUE_PATHS = (
+    "/internal/admin/v1/proposals",
+    "/internal/admin/v1/proposals/{proposal_id}",
+)
+_SCHEMA_REF = re.compile(r"^#/components/schemas/([^/]+)$")
 
 
 def _load_before_queue_contract() -> dict[str, object]:
@@ -39,6 +45,42 @@ def _build_queue_runtime_openapi() -> dict[str, object]:
         else:
             os.environ["KEFE_API_VERSION"] = previous
         get_settings.cache_clear()
+
+
+def _referenced_schema_names(value: object) -> set[str]:
+    found: set[str] = set()
+    if isinstance(value, dict):
+        reference = value.get("$ref")
+        if isinstance(reference, str):
+            match = _SCHEMA_REF.fullmatch(reference)
+            if match is not None:
+                found.add(match.group(1))
+        for child in value.values():
+            found.update(_referenced_schema_names(child))
+    elif isinstance(value, list):
+        for child in value:
+            found.update(_referenced_schema_names(child))
+    return found
+
+
+def _queue_schema_names(
+    *,
+    selected_paths: dict[str, object],
+    generated_schemas: dict[str, object],
+    before_schemas: dict[str, object],
+) -> tuple[str, ...]:
+    pending = list(_referenced_schema_names(selected_paths))
+    selected: set[str] = set()
+    while pending:
+        name = pending.pop()
+        if name in selected or name in before_schemas:
+            continue
+        schema = generated_schemas.get(name)
+        if schema is None:
+            raise SystemExit(f"Admin Proposal queue schema reference is missing: {name}")
+        selected.add(name)
+        pending.extend(_referenced_schema_names(schema) - selected)
+    return tuple(sorted(selected))
 
 
 def build_overlay() -> dict[str, object]:
@@ -77,14 +119,25 @@ def build_overlay() -> dict[str, object]:
             f"changed={changed_paths}, removed={removed_paths}"
         )
 
-    new_schema_names = sorted(generated_schemas.keys() - before_schemas.keys())
-    new_path_names = sorted(generated_paths.keys() - before_paths.keys())
+    selected_paths: dict[str, object] = {}
+    for path in QUEUE_PATHS:
+        if path in before_paths:
+            raise SystemExit(f"Admin Proposal queue path already exists before overlay: {path}")
+        try:
+            selected_paths[path] = generated_paths[path]
+        except KeyError as exc:
+            raise SystemExit(f"Admin Proposal queue path is missing: {path}") from exc
+    schema_names = _queue_schema_names(
+        selected_paths=selected_paths,
+        generated_schemas=generated_schemas,
+        before_schemas=before_schemas,
+    )
     return {
         "target_version": "0.19.0",
         "components": {
-            "schemas": {name: generated_schemas[name] for name in new_schema_names}
+            "schemas": {name: generated_schemas[name] for name in schema_names}
         },
-        "paths": {path: generated_paths[path] for path in new_path_names},
+        "paths": selected_paths,
     }
 
 
