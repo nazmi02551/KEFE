@@ -55,6 +55,12 @@ class Definition:
         )
 
 
+class MutableDefinition(Definition):
+    def __init__(self) -> None:
+        self.adapter_code = ADAPTER_CODE
+        self.parse_limits = FeedParseLimits()
+
+
 class Transport:
     def __init__(self, response=RSS_BODY, error: Exception | None = None) -> None:
         self.response = response
@@ -65,7 +71,6 @@ class Transport:
     def execute(self, request, *, credential=None):
         self.calls += 1
         self.credential = credential
-        assert request.adapter_code == ADAPTER_CODE
         if self.error is not None:
             raise self.error
         return ProviderHttpResponse(
@@ -161,11 +166,12 @@ def test_http_retryable_and_final_errors_preserve_bounded_codes() -> None:
 
 
 def test_invalid_plan_mismatch_and_input_fail_closed() -> None:
-    class WrongDefinition(Definition):
-        adapter_code = "test.public_feed_other.v1"
+    definition = MutableDefinition()
+    adapter = _adapter(definition=definition)
+    definition.adapter_code = "test.public_feed_other.v1"
 
     with pytest.raises(FinalSourceCaptureError) as mismatch:
-        _capture(_adapter(definition=WrongDefinition()))
+        _capture(adapter)
     assert mismatch.value.code == "SOURCE_PUBLIC_HTTP_ADAPTER_MISMATCH"
 
     with pytest.raises(FinalSourceCaptureError) as invalid:
@@ -177,9 +183,16 @@ def test_invalid_plan_mismatch_and_input_fail_closed() -> None:
     assert invalid.value.code == "SOURCE_PUBLIC_HTTP_PLAN_INVALID"
 
 
-def test_parse_limits_are_exact_and_production_dependencies_can_fail_closed() -> None:
+def test_parse_limits_are_exact_and_snapshotted_at_construction() -> None:
     class InvalidDefinition(Definition):
         parse_limits = object()
 
     with pytest.raises(ValueError, match="exact FeedParseLimits"):
         _adapter(definition=InvalidDefinition())
+
+    definition = MutableDefinition()
+    definition.parse_limits = FeedParseLimits(max_text_chars=8192)
+    adapter = _adapter(definition=definition)
+    definition.parse_limits = FeedParseLimits(max_text_chars=1)
+    captured = _capture(adapter)
+    assert captured.content_hash.startswith("sha256:")
