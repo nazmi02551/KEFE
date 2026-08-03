@@ -1,0 +1,79 @@
+{
+  "contract": "public-feed-activation-slice54",
+  "version": "1.0.0",
+  "status": "accepted",
+  "activation": {
+    "identity_versioned": true,
+    "adapter_identity_exact_across_components": true,
+    "configuration_hash": "sha256-canonical-json",
+    "runtime_registry_mutation": false,
+    "network_during_bundle_build": false,
+    "preview_fallback": false
+  },
+  "provider": {
+    "credential_mode": "PUBLIC",
+    "secret_ref": false,
+    "lifecycle": "ENABLED",
+    "initial_quota_count": 0,
+    "initial_failure_count": 0,
+    "initial_circuit_state": "CLOSED",
+    "allowed_methods": [
+      "GET"
+    ],
+    "single_exact_origin": true,
+    "https_only": true,
+    "userinfo": false,
+    "non_443_port": false,
+    "fragment": false,
+    "credential_named_query_parameters": false
+  },
+  "parser_transport_binding": {
+    "http_media_types_equal_parser_media_types": true,
+    "http_response_bytes_equal_parser_document_bytes": true,
+    "rss_atom_definition": "StrictRssAtomCaptureDefinition",
+    "evidence_backed_public_adapter": true
+  },
+  "schedule": {
+    "pipeline_code": "RSS_ATOM_FEED_ITEM_EXTRACTION",
+    "pipeline_version": "1.0.0",
+    "configuration_hash_from_activation": true,
+    "bounded_interval": true,
+    "bounded_dispatch_attempts": true,
+    "explicit_installation_only": true
+  },
+  "vertical_path": [
+    "plan_due_schedule",
+    "claim_dispatch",
+    "admit_public_provider_permit",
+    "controlled_public_http_capture",
+    "seal_raw_evidence",
+    "persist_source_artifact",
+    "admit_ingestion_run",
+    "run_feed_item_extraction",
+    "persist_review_required_proposals"
+  ],
+  "editorial": {
+    "automatic_review": false,
+    "automatic_materialization": false,
+    "automatic_projection": false,
+    "automatic_publication": false
+  },
+  "production": {
+    "public_feed_activations_registered": 0,
+    "rss_atom_public_adapters_registered": 0,
+    "feed_item_runtime_plans_registered": 0,
+    "concrete_external_feeds": 0
+  },
+  "excluded": [
+    "live_external_network",
+    "provider_terms_approval_claim",
+    "deployed_egress_proof",
+    "deployed_object_storage_proof",
+    "automatic_environment_activation",
+    "admin_provider_ui",
+    "semantic_classification",
+    "claim_or_case_creation",
+    "ai_summarization",
+    "phone_facing_feed_behavior"
+  ]
+}
