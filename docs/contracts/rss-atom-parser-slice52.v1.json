@@ -1,0 +1,48 @@
+{
+  "contract": "rss-atom-parser-slice52",
+  "version": "1.0.0",
+  "status": "accepted",
+  "formats": ["RSS_2_0", "ATOM_1_0"],
+  "input": {
+    "type": "IMMUTABLE_BYTES",
+    "network": false,
+    "filesystem": false,
+    "default_max_document_bytes": 1048576
+  },
+  "forbidden_xml": ["DOCTYPE", "ENTITY", "PROCESSING_INSTRUCTION", "XINCLUDE"],
+  "limits": {
+    "max_depth": 24,
+    "max_elements": 5000,
+    "max_entries": 200,
+    "max_text_chars": 8192
+  },
+  "normalization": {
+    "whitespace": "COLLAPSE",
+    "markup": "TEXT_ONLY",
+    "ordering": "SOURCE_ORDER",
+    "immutable_output": true
+  },
+  "identity": {
+    "rss": ["guid", "link"],
+    "atom": ["id", "alternate_link_href"],
+    "missing": "REJECT_ENTRY"
+  },
+  "errors": [
+    "SOURCE_FEED_DOCUMENT_EMPTY",
+    "SOURCE_FEED_DOCUMENT_TOO_LARGE",
+    "SOURCE_FEED_XML_FORBIDDEN",
+    "SOURCE_FEED_XML_MALFORMED",
+    "SOURCE_FEED_FORMAT_UNSUPPORTED",
+    "SOURCE_FEED_LIMIT_EXCEEDED",
+    "SOURCE_FEED_ENTRY_IDENTITY_MISSING"
+  ],
+  "excluded": [
+    "REAL_FEED",
+    "LIVE_NETWORK",
+    "HTML_SANITIZER",
+    "DATE_INTERPRETATION",
+    "TRUST_INFERENCE",
+    "AUTOMATIC_EDITORIAL_ACTION",
+    "PUBLICATION"
+  ]
+}
