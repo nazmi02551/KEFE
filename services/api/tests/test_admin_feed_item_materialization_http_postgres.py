@@ -132,23 +132,27 @@ def test_postgres_admin_feed_item_materialization_http_is_idempotent(
             f"{proposal.id}/materialization"
         )
         payload = {"proposal_review_decision_id": str(review_id)}
+        assert repository.find_materialization(
+            proposal.id,
+            target_kind="NORMALIZED_ARTIFACT",
+        ) is None
 
         first = client.post(
             path,
             headers={ADMIN_CSRF_HEADER: issued.csrf_token},
             json=payload,
         )
+        assert first.status_code == 200
+        first_body = first.json()
+        assert first_body["replayed"] is False
+
         replay = client.post(
             path,
             headers={ADMIN_CSRF_HEADER: issued.csrf_token},
             json=payload,
         )
-
-        assert first.status_code == 200
         assert replay.status_code == 200
-        first_body = first.json()
         replay_body = replay.json()
-        assert first_body["replayed"] is False
         assert replay_body["replayed"] is True
         assert replay_body["proposal_materialization_id"] == (
             first_body["proposal_materialization_id"]
