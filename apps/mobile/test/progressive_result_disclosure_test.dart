@@ -182,8 +182,7 @@ void main() {
     expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
     expect(find.byKey(const ValueKey('perspective-section')), findsNothing);
 
-    await tester.tap(find.byKey(const ValueKey('option-A')));
-    await tester.pump();
+    await tapVisible(tester, find.byKey(const ValueKey('option-A')));
     await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
 
     expect(repository.commitCalls, 1);
