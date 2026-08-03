@@ -126,7 +126,7 @@ def upgrade() -> None:
                 (OLD.lifecycle_state = 'MANUAL_CAPTURE_APPROVED'
                  AND NEW.lifecycle_state = 'RETIRED')
             ) THEN
-                RAISE EXCEPTION 'public feed lifecycle transition is invalid';
+                RAISE EXCEPTION 'public_feed lifecycle transition is invalid';
             END IF;
             RETURN NEW;
         END
