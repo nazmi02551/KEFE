@@ -232,13 +232,22 @@ def main() -> None:
             fail(f"public provider migration invariant missing: {fragment}")
 
     for fragment in (
-        "InMemoryPublicSourceCaptureRegistry()",
+        "RssAtomSubscriptionManifestRegistry()",
+        "build_rss_atom_public_capture_registry(",
         "PermitBoundPublicCaptureExecutor(",
         "CredentialModeRoutingProviderCaptureExecutor(",
         "capture_executor=provider_capture_executor",
     ):
         if fragment not in pipeline:
             fail(f"public provider composition missing: {fragment}")
+    if "RssAtomSubscriptionManifest(" in pipeline or (
+        "RssAtomSubscriptionManifest(" in main_source
+    ):
+        fail("production public provider composition contains a concrete feed manifest")
+    if "rss_atom_subscription_activation_service.activate(" in pipeline or (
+        "rss_atom_subscription_activation_service.activate(" in main_source
+    ):
+        fail("production startup must not activate a public provider")
     for fragment in (
         "app.state.public_capture_registry",
         "app.state.public_provider_capture_executor",
