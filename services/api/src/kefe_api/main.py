@@ -15,6 +15,7 @@ from kefe_api.infrastructure.persistence import (
     build_identity_repository,
     build_privacy_repository,
     build_progress_repository,
+    build_public_feed_catalog_repository,
     build_share_repository,
 )
 from kefe_api.infrastructure.raw_evidence_runtime import (
@@ -30,6 +31,9 @@ from kefe_api.modules.admin_security.editorial_projection_router import (
 from kefe_api.modules.admin_security.policy import default_admin_security_policy
 from kefe_api.modules.admin_security.proposal_queue_router import (
     router as admin_proposal_queue_router,
+)
+from kefe_api.modules.admin_security.public_feed_catalog_router import (
+    router as admin_public_feed_catalog_router,
 )
 from kefe_api.modules.admin_security.router import router as admin_router
 from kefe_api.modules.admin_security.service import AdminSecurityService
@@ -71,6 +75,7 @@ from kefe_api.modules.identity.admission import (
 from kefe_api.modules.identity.otp_delivery import CapturingOtpDelivery, DisabledOtpDelivery
 from kefe_api.modules.identity.router import router as identity_router
 from kefe_api.modules.identity.service import IdentityService
+from kefe_api.modules.knowledge.public_feed_catalog import PublicFeedCatalogService
 from kefe_api.modules.privacy.router import router as privacy_router
 from kefe_api.modules.privacy.service import PrivacyService
 from kefe_api.modules.progress.router import router as progress_router
@@ -109,12 +114,17 @@ def create_app() -> FastAPI:
     )
     content_authoring_repository = build_content_authoring_repository(settings)
     content_configuration_repository = build_content_configuration_repository(settings)
+    public_feed_catalog_repository = build_public_feed_catalog_repository(settings)
     admin_session_store = build_admin_session_store(settings)
     raw_source_evidence_store = build_raw_source_evidence_store(settings)
 
     admin_security_service = AdminSecurityService(
         session_resolver=admin_session_store,
         policy=default_admin_security_policy(),
+    )
+    public_feed_catalog_service = PublicFeedCatalogService(
+        repository=public_feed_catalog_repository,
+        security=admin_security_service,
     )
     content_authoring_service = ContentAuthoringService(
         content_authoring_repository,
@@ -206,9 +216,7 @@ def create_app() -> FastAPI:
         editorial_pipeline.provider_execution_context_repository
     )
     app.state.secret_resolver_registry = editorial_pipeline.secret_resolver_registry
-    app.state.credential_capture_registry = (
-        editorial_pipeline.credential_capture_registry
-    )
+    app.state.credential_capture_registry = editorial_pipeline.credential_capture_registry
     app.state.secure_provider_capture_executor = (
         editorial_pipeline.secure_provider_capture_executor
     )
@@ -220,55 +228,35 @@ def create_app() -> FastAPI:
     app.state.public_http_capture_adapter_factory = (
         editorial_pipeline.public_http_capture_adapter_factory
     )
-    app.state.source_acquisition_observer = (
-        editorial_pipeline.source_acquisition_observer
-    )
+    app.state.source_acquisition_observer = editorial_pipeline.source_acquisition_observer
     app.state.source_acquisition_service = editorial_pipeline.source_acquisition_service
-    app.state.source_scheduler_repository = (
-        editorial_pipeline.source_scheduler_repository
-    )
+    app.state.source_scheduler_repository = editorial_pipeline.source_scheduler_repository
     app.state.source_dispatch_observer = editorial_pipeline.source_dispatch_observer
     app.state.source_scheduler_service = editorial_pipeline.source_scheduler_service
-    app.state.ingestion_orchestration_repository = (
-        editorial_pipeline.ingestion_repository
-    )
+    app.state.ingestion_orchestration_repository = editorial_pipeline.ingestion_repository
     app.state.ingestion_orchestration_service = editorial_pipeline.ingestion_service
-    app.state.ingestion_run_lease_repository = (
-        editorial_pipeline.ingestion_lease_repository
-    )
+    app.state.ingestion_run_lease_repository = editorial_pipeline.ingestion_lease_repository
     app.state.ingestion_run_lease_service = editorial_pipeline.ingestion_lease_service
-    app.state.ingestion_worker_runtime_registry = (
-        editorial_pipeline.ingestion_worker_registry
-    )
+    app.state.ingestion_worker_runtime_registry = editorial_pipeline.ingestion_worker_registry
     app.state.ingestion_worker_observer = editorial_pipeline.ingestion_worker_observer
     app.state.ingestion_worker_runner = editorial_pipeline.ingestion_worker_runner
-    app.state.content_supply_cycle_repository = (
-        editorial_pipeline.content_supply_cycle_repository
-    )
-    app.state.content_supply_cycle_observer = (
-        editorial_pipeline.content_supply_cycle_observer
-    )
-    app.state.content_supply_cycle_service = (
-        editorial_pipeline.content_supply_cycle_service
-    )
+    app.state.content_supply_cycle_repository = editorial_pipeline.content_supply_cycle_repository
+    app.state.content_supply_cycle_observer = editorial_pipeline.content_supply_cycle_observer
+    app.state.content_supply_cycle_service = editorial_pipeline.content_supply_cycle_service
     app.state.content_supply_health_repository = (
         editorial_pipeline.content_supply_health_repository
     )
-    app.state.content_supply_health_service = (
-        editorial_pipeline.content_supply_health_service
-    )
-    app.state.proposal_review_queue_repository = (
-        editorial_pipeline.proposal_queue_repository
-    )
-    app.state.editorial_projection_repository = (
-        editorial_pipeline.projection_repository
-    )
+    app.state.content_supply_health_service = editorial_pipeline.content_supply_health_service
+    app.state.proposal_review_queue_repository = editorial_pipeline.proposal_queue_repository
+    app.state.editorial_projection_repository = editorial_pipeline.projection_repository
     app.state.editorial_projection_service = editorial_pipeline.projection_service
     app.state.secured_editorial_projection_service = (
         editorial_pipeline.secured_projection_service
     )
     app.state.content_configuration_repository = content_configuration_repository
     app.state.content_configuration_service = content_configuration_service
+    app.state.public_feed_catalog_repository = public_feed_catalog_repository
+    app.state.public_feed_catalog_service = public_feed_catalog_service
     app.state.admin_session_store = admin_session_store
     app.state.admin_csrf_verifier = admin_session_store
     app.state.admin_security_service = admin_security_service
@@ -302,6 +290,7 @@ def create_app() -> FastAPI:
     app.include_router(admin_proposal_queue_router)
     app.include_router(admin_editorial_projection_router)
     app.include_router(admin_content_configuration_router)
+    app.include_router(admin_public_feed_catalog_router)
     app.include_router(community_reason_admin_router)
     return app
 
