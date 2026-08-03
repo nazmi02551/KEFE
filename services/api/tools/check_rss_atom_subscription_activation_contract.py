@@ -180,7 +180,7 @@ def main() -> None:
         "require_versioned_adapter_code(self.adapter_code)",
         'if parsed.scheme != "https":',
         "parsed.username is not None or parsed.password is not None",
-        "parsed.hostname != hostname",
+        "parsed.netloc != rendered_host",
         "_FORBIDDEN_QUERY_NAMES",
         "query_pairs != sorted(query_pairs)",
         "ProviderCredentialMode.PUBLIC",
