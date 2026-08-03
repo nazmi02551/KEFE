@@ -1,0 +1,128 @@
+name: Admin Source Brief Review CI
+
+on:
+  pull_request:
+    paths:
+      - 'services/api/src/kefe_api/modules/admin_security/source_brief_review.py'
+      - 'services/api/src/kefe_api/modules/admin_security/source_brief_review_router.py'
+      - 'services/api/src/kefe_api/modules/admin_security/feed_item_review.py'
+      - 'services/api/src/kefe_api/modules/admin_security/feed_item_review_router.py'
+      - 'services/api/src/kefe_api/modules/ingestion_orchestration/source_brief_ingestion.py'
+      - 'services/api/src/kefe_api/modules/knowledge/**'
+      - 'services/api/src/kefe_api/main.py'
+      - 'services/api/tests/test_admin_source_brief_review_http.py'
+      - 'services/api/tests/test_admin_source_brief_review_http_postgres.py'
+      - 'services/api/tools/check_admin_source_brief_review_contract.py'
+      - 'services/api/tools/check_source_brief_ingestion_contract.py'
+      - 'services/api/tools/check_admin_feed_item_review_contract.py'
+      - 'docs/adr/0092-lineage-safe-admin-source-brief-review-surface.md'
+      - 'docs/contracts/admin-source-brief-review-slice56.v1.json'
+      - 'docs/contracts/error-codes.admin-source-brief-review.v1.yaml'
+      - '.github/workflows/admin-source-brief-review-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/api/src/kefe_api/modules/admin_security/source_brief_review.py'
+      - 'services/api/src/kefe_api/modules/admin_security/source_brief_review_router.py'
+      - 'services/api/src/kefe_api/modules/admin_security/feed_item_review.py'
+      - 'services/api/src/kefe_api/modules/admin_security/feed_item_review_router.py'
+      - 'services/api/src/kefe_api/modules/ingestion_orchestration/source_brief_ingestion.py'
+      - 'services/api/src/kefe_api/modules/knowledge/**'
+      - 'services/api/src/kefe_api/main.py'
+      - 'services/api/tests/test_admin_source_brief_review_http.py'
+      - 'services/api/tests/test_admin_source_brief_review_http_postgres.py'
+      - 'services/api/tools/check_admin_source_brief_review_contract.py'
+      - 'services/api/tools/check_source_brief_ingestion_contract.py'
+      - 'services/api/tools/check_admin_feed_item_review_contract.py'
+      - 'docs/adr/0092-lineage-safe-admin-source-brief-review-surface.md'
+      - 'docs/contracts/admin-source-brief-review-slice56.v1.json'
+      - 'docs/contracts/error-codes.admin-source-brief-review.v1.yaml'
+      - '.github/workflows/admin-source-brief-review-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  source-brief-review-memory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Ruff Admin Source Brief review boundary
+        working-directory: services/api
+        run: >-
+          ruff check
+          src/kefe_api/modules/admin_security/source_brief_review.py
+          src/kefe_api/modules/admin_security/source_brief_review_router.py
+          tests/test_admin_source_brief_review_http.py
+          tests/test_admin_source_brief_review_http_postgres.py
+          tools/check_admin_source_brief_review_contract.py
+      - name: Admin Source Brief review architecture and OpenAPI fitness
+        working-directory: services/api
+        run: python tools/check_admin_source_brief_review_contract.py
+      - name: Parent Source Brief ingestion architecture fitness
+        working-directory: services/api
+        run: python tools/check_source_brief_ingestion_contract.py
+      - name: Parent Admin feed item review architecture fitness
+        working-directory: services/api
+        run: python tools/check_admin_feed_item_review_contract.py
+      - name: Admin Source Brief review memory HTTP
+        working-directory: services/api
+        run: >-
+          pytest
+          tests/test_admin_source_brief_review_http.py
+          tests/test_source_brief_ingestion_http.py
+          tests/test_admin_feed_item_review_http.py
+
+  source-brief-review-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: kefe
+          POSTGRES_USER: kefe
+          POSTGRES_PASSWORD: kefe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kefe -d kefe"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Migrate PostgreSQL
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: alembic upgrade head
+      - name: Admin Source Brief review PostgreSQL HTTP
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+          KEFE_RUN_POSTGRES_TESTS: '1'
+        run: >-
+          pytest
+          tests/test_admin_source_brief_review_http_postgres.py
+          tests/test_source_brief_ingestion_http_postgres.py
+          tests/test_admin_feed_item_review_http_postgres.py

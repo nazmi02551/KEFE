@@ -1,0 +1,8 @@
+registry_version: 1.0.0
+errors:
+- code: ADMIN_SOURCE_BRIEF_NOT_FOUND
+  http_status: 404
+  retryable: false
+- code: ADMIN_SOURCE_BRIEF_CONTRACT_INVALID
+  http_status: 409
+  retryable: false
