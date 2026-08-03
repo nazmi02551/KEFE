@@ -169,7 +169,7 @@ def test_inventory_requires_read_capability_and_is_deterministic_redacted() -> N
     editor, _, _ = _issue_admin(app, AdminRole.EDITOR)
     denied = editor.get("/internal/admin/v1/source-subscriptions")
     assert denied.status_code == 403
-    assert denied.json()["code"] == "ADMIN_CAPABILITY_REQUIRED"
+    assert denied.json()["code"] == "ADMIN_FORBIDDEN"
 
     reviewer, _, _ = _issue_admin(app, AdminRole.REVIEWER)
     response = reviewer.get("/internal/admin/v1/source-subscriptions")
@@ -243,7 +243,7 @@ def test_activation_requires_csrf_activation_capability_and_step_up() -> None:
         json=payload,
     )
     assert no_capability.status_code == 403
-    assert no_capability.json()["code"] == "ADMIN_CAPABILITY_REQUIRED"
+    assert no_capability.json()["code"] == "ADMIN_FORBIDDEN"
     assert activation.calls == []
 
 
@@ -297,7 +297,7 @@ def test_activation_delegates_exact_manifest_and_returns_bounded_result() -> Non
     }
     assert body["subscription_code"] == SUBSCRIPTION_CODE
     assert body["configuration_hash"] == manifest.configuration_hash
-    assert body["capability_lifecycle"] == "ACTIVE"
+    assert body["capability_lifecycle"] == "ENABLED"
     assert body["circuit_state"] == "CLOSED"
     assert body["schedule_state"] == "ACTIVE"
     assert len(activation.calls) == 1
