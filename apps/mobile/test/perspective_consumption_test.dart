@@ -206,6 +206,13 @@ Future<void> commitChoice(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+Future<void> disclosePerspectives(WidgetTester tester) async {
+  final disclosure = find.byKey(const ValueKey('show-perspectives-button'));
+  await makeVisible(tester, disclosure);
+  await tester.tap(disclosure);
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('Perspective is not requested or visible before Commit', (
     tester,
@@ -219,7 +226,7 @@ void main() {
   });
 
   testWidgets(
-    'Reveal automatically continues into bounded curated Perspective',
+    'Reveal prepares Perspective but discloses it only after user action',
     (tester) async {
       useTurkishLocale(tester);
       final repository = PerspectiveFakeRepository();
@@ -230,6 +237,13 @@ void main() {
       expect(repository.revealCalls, 1);
       expect(repository.perspectiveCalls, 1);
       expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
+      expect(find.byKey(const ValueKey('perspective-section')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('perspective-disclosure-prompt')),
+        findsOneWidget,
+      );
+
+      await disclosePerspectives(tester);
 
       final section = find.byKey(const ValueKey('perspective-section'));
       await makeVisible(tester, section);
@@ -271,6 +285,7 @@ void main() {
       await tester.pump();
       await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
       await tester.pumpAndSettle();
+      await disclosePerspectives(tester);
 
       expect(repository.reasonCalls, 1);
       final pending = find.byKey(const ValueKey('reason-pending-moderation'));
@@ -294,6 +309,7 @@ void main() {
         ..perspectiveTransportFailures = 1;
       await pumpPerspectiveCase(tester, repository);
       await commitChoice(tester);
+      await disclosePerspectives(tester);
 
       expect(repository.answerCalls, 1);
       expect(repository.commitCalls, 1);
