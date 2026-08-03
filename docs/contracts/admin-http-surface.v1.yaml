@@ -1,5 +1,5 @@
-contract_version: 1.3.0
-updated_at: '2026-08-02'
+contract_version: 1.4.0
+updated_at: '2026-08-03'
 route_prefix: /internal/admin/v1
 security:
   session_cookie:
@@ -32,6 +32,7 @@ application_boundary:
   facade: SecuredContentAuthoringService
   proposal_queue_facade: SecuredProposalQueueService
   proposal_review_facade: SecuredProposalReviewService
+  feed_item_materialization_facade: SecuredFeedItemMaterializationService
   projection_facade: SecuredEditorialProjectionService
   direct_repository_mutation_from_http: forbidden
   audit_actor_ref: server_derived
@@ -66,6 +67,18 @@ operations:
     reviewer_identity: server_derived
     terminal_decision: true
     automatic_projection: forbidden
+  - method: POST
+    path: /proposals/{proposal_id}/feed-item-materialization
+    csrf: true
+    capabilities: [CONTENT_REVIEW, SOURCE_VERIFY]
+    facade: SecuredFeedItemMaterializationService
+    exact_proposal_kind: FEED_ITEM
+    exact_target_kind: NORMALIZED_ARTIFACT
+    exact_review_binding_required: true
+    review_created_by_command: false
+    idempotent_replay_status: 200
+    generic_materialization: forbidden
+    automatic_review_projection_publication: forbidden
   - method: POST
     path: /candidate-proposals/{candidate_proposal_id}/projection
     csrf: true
@@ -131,6 +144,13 @@ errors:
   proposal_review:
     - INGESTION_PROPOSAL_NOT_FOUND
     - INGESTION_PROPOSAL_ALREADY_REVIEWED
+  feed_item_materialization:
+    - INGESTION_PROPOSAL_NOT_FOUND
+    - INGESTION_FEED_ITEM_MATERIALIZATION_UNSUPPORTED
+    - INGESTION_PROPOSAL_REVIEW_NOT_ACCEPTED
+    - INGESTION_PROPOSAL_REVIEW_BINDING_MISMATCH
+    - INGESTION_FEED_ITEM_MATERIALIZATION_CONFLICT
+    - INGESTION_FEED_ITEM_MATERIALIZATION_INVALID
   projection:
     - EDITORIAL_PROJECTION_PROFILE_NOT_FOUND
     - EDITORIAL_PROJECTION_SOURCE_NOT_FOUND

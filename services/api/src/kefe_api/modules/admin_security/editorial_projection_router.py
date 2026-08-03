@@ -10,6 +10,9 @@ from pydantic import Field, model_validator
 from kefe_api.modules.admin_security.editorial_projection import (
     SecuredEditorialProjectionService,
 )
+from kefe_api.modules.admin_security.feed_item_materialization import (
+    SecuredFeedItemMaterializationService,
+)
 from kefe_api.modules.admin_security.proposal_review import (
     SecuredProposalReviewService,
 )
@@ -43,6 +46,19 @@ class ProposalReviewResponse(StrictModel):
     reason_code: str | None
     policy_version: str | None
     risk_policy_version: str | None
+
+
+class FeedItemMaterializationRequest(StrictModel):
+    proposal_review_decision_id: UUID
+
+
+class FeedItemMaterializationResponse(StrictModel):
+    proposal_materialization_id: UUID
+    proposal_id: UUID
+    proposal_review_decision_id: UUID
+    target_kind: str
+    target_id: UUID
+    materialized_at: datetime
 
 
 class EditorialProjectionRequest(StrictModel):
@@ -88,6 +104,17 @@ def get_proposal_review(request: Request) -> SecuredProposalReviewService:
     )
 
 
+def get_feed_item_materialization(
+    request: Request,
+) -> SecuredFeedItemMaterializationService:
+    return SecuredFeedItemMaterializationService(
+        orchestration=request.app.state.ingestion_orchestration_service,
+        repository=request.app.state.ingestion_orchestration_repository,
+        knowledge=request.app.state.knowledge_repository,
+        security=request.app.state.admin_security_service,
+    )
+
+
 def get_projection(request: Request) -> SecuredEditorialProjectionService:
     return request.app.state.secured_editorial_projection_service
 
@@ -95,6 +122,10 @@ def get_projection(request: Request) -> SecuredEditorialProjectionService:
 ProposalReviewDep = Annotated[
     SecuredProposalReviewService,
     Depends(get_proposal_review),
+]
+FeedItemMaterializationDep = Annotated[
+    SecuredFeedItemMaterializationService,
+    Depends(get_feed_item_materialization),
 ]
 ProjectionDep = Annotated[
     SecuredEditorialProjectionService,
@@ -132,6 +163,31 @@ def review_proposal(
         reason_code=decision.reason_code,
         policy_version=decision.policy_version,
         risk_policy_version=decision.risk_policy_version,
+    )
+
+
+@router.post(
+    "/proposals/{proposal_id}/feed-item-materialization",
+    response_model=FeedItemMaterializationResponse,
+)
+def materialize_feed_item(
+    proposal_id: UUID,
+    body: FeedItemMaterializationRequest,
+    principal: WritePrincipalDep,
+    materialization: FeedItemMaterializationDep,
+) -> FeedItemMaterializationResponse:
+    record = materialization.materialize(
+        principal,
+        proposal_id=proposal_id,
+        proposal_review_decision_id=body.proposal_review_decision_id,
+    )
+    return FeedItemMaterializationResponse(
+        proposal_materialization_id=record.id,
+        proposal_id=record.proposal_id,
+        proposal_review_decision_id=record.review_decision_id,
+        target_kind=record.target_kind,
+        target_id=record.target_id,
+        materialized_at=record.materialized_at,
     )
 
 
