@@ -58,7 +58,7 @@ jobs:
           src/kefe_api/infrastructure/public_feed_activation_catalog_runtime.py
           src/kefe_api/modules/admin_security/public_feed_activation_catalog.py
           src/kefe_api/modules/admin_security/public_feed_activation_catalog_router.py
-          main.py
+          src/kefe_api/main.py
           tests/test_public_feed_activation_catalog.py
           tests/test_public_feed_activation_catalog_postgres.py
           tools/check_public_feed_activation_catalog_contract.py
