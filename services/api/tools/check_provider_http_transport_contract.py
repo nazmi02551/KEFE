@@ -72,7 +72,8 @@ REQUIRED_RUNTIME_FRAGMENTS = (
     'if mode == "PINNED_TLS"',
 )
 REQUIRED_COMPOSITION_FRAGMENTS = (
-    "InMemoryProviderAdoptionRegistry()",
+    "RssAtomSubscriptionManifestRegistry()",
+    "build_rss_atom_provider_adoption_registry(",
     "provider_http_runtime = build_provider_http_runtime(settings)",
     "dns_resolver=provider_http_runtime.dns_resolver",
     "backend=provider_http_runtime.backend",
@@ -155,6 +156,8 @@ def main() -> None:
     for fragment in REQUIRED_COMPOSITION_FRAGMENTS:
         if fragment not in composition_source:
             fail(f"provider HTTP production composition is missing: {fragment}")
+    if "RssAtomSubscriptionManifest(" in composition_source:
+        fail("provider HTTP production composition contains a concrete feed manifest")
 
     keys = operational_keys(module_source)
     if keys != EXPECTED_OPERATIONAL_KEYS:

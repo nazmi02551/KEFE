@@ -57,9 +57,10 @@ def test_credentialed_executor_rejects_public_before_resolver_lookup() -> None:
 
 def test_production_composition_keeps_public_registry_empty_and_routes_by_mode() -> None:
     source = PIPELINE.read_text()
-    assert "InMemoryPublicSourceCaptureRegistry()" in source
+    assert "RssAtomSubscriptionManifestRegistry()" in source
+    assert "build_rss_atom_public_capture_registry(" in source
     assert "CredentialModeRoutingProviderCaptureExecutor(" in source
     assert "capture_executor=provider_capture_executor" in source
+    assert "RssAtomSubscriptionManifest(" not in source
+    assert "rss_atom_subscription_activation_service.activate(" not in source
     assert "PublicAdapter(" not in source
-    assert "RSS" not in source
-    assert "ATOM" not in source

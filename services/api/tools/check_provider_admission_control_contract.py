@@ -358,13 +358,19 @@ def main() -> int:
             "InMemorySourceProviderAdmissionRepository()",
             "PostgresSourceProviderAdmissionRepository(engine)",
             "SourceProviderAdmissionService(",
-            "InMemoryPublicSourceCaptureRegistry()",
+            "RssAtomSubscriptionManifestRegistry()",
+            "build_rss_atom_public_capture_registry(",
             "CredentialModeRoutingProviderCaptureExecutor(",
             "admission=provider_admission_service",
             "capture_executor=provider_capture_executor",
             "source_capture_registry: SourceCaptureRegistry = InMemorySourceCaptureRegistry()",
         ),
     )
+    if "RssAtomSubscriptionManifest(" in pipeline:
+        problems.append("strict production composition contains a concrete feed manifest")
+    if "rss_atom_subscription_activation_service.activate(" in pipeline:
+        problems.append("strict production composition auto-activates a provider")
+
     _require(
         problems,
         "memory/acquisition evidence",

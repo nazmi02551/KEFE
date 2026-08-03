@@ -168,12 +168,17 @@ def main() -> int:
         "composition",
         pipeline,
         (
-            "InMemoryIngestionWorkerRuntimeRegistry()",
+            "RssAtomSubscriptionManifestRegistry()",
+            "build_rss_atom_ingestion_worker_registry(",
             "NoOpIngestionWorkerObserver()",
             "IngestionWorkerRunner(",
             "ingestion_worker_runner=ingestion_worker_runner",
         ),
     )
+    if "RssAtomSubscriptionManifest(" in pipeline:
+        problems.append("composition contains a concrete RSS/Atom subscription")
+    if "rss_atom_subscription_activation_service.activate(" in pipeline:
+        problems.append("composition auto-activates an ingestion pipeline")
     _require(
         problems,
         "application state",

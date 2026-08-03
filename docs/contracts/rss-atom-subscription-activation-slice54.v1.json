@@ -1,0 +1,79 @@
+{
+  "contract": "rss-atom-subscription-activation-slice54",
+  "version": "1.0.0",
+  "status": "accepted",
+  "manifest": {
+    "immutable": true,
+    "versioned_subscription_code": true,
+    "versioned_adapter_code": true,
+    "credential_mode": "PUBLIC",
+    "secret_ref_allowed": false,
+    "locator_scheme": "https",
+    "locator_userinfo_allowed": false,
+    "locator_fragment_allowed": false,
+    "configuration_hash": "sha256-canonical-manifest",
+    "parser_profile": "STRICT_RSS_ATOM_SLICE52_DEFAULT",
+    "pipeline_code": "RSS_ATOM_FEED_ITEM_EXTRACTION",
+    "pipeline_version": "1.0.0",
+    "stage_code": "EXTRACT_FEED_ITEMS",
+    "stage_version": "1.0.0"
+  },
+  "shared_adapter": {
+    "multiple_subscriptions_supported": true,
+    "adapter_policy_must_match_exactly": true,
+    "allowed_origins_source": "manifest-locators-only",
+    "allowed_origins_canonical_unique_sorted": true,
+    "one_adoption_profile_per_adapter": true,
+    "one_public_capture_adapter_per_adapter": true
+  },
+  "assembly": {
+    "capture_definition": "StrictRssAtomCaptureDefinition",
+    "capture_factory": "EvidenceBackedPublicHttpCaptureAdapterFactory",
+    "adoption_registry": "InMemoryProviderAdoptionRegistry",
+    "public_capture_registry": "InMemoryPublicSourceCaptureRegistry",
+    "ingestion_registry": "InMemoryIngestionWorkerRuntimeRegistry",
+    "second_parser": false,
+    "second_pipeline": false,
+    "live_network_test": false
+  },
+  "activation": {
+    "explicit_only": true,
+    "startup_auto_activation": false,
+    "order": [
+      "register_public_provider_capability",
+      "create_fixed_interval_schedule"
+    ],
+    "idempotent": true,
+    "partial_capability_without_schedule_is_inert": true,
+    "configuration_drift_fails_closed": true
+  },
+  "production": {
+    "subscription_manifests_registered": 0,
+    "rss_atom_adoption_profiles_registered": 0,
+    "rss_atom_public_adapters_registered": 0,
+    "feed_ingestion_plans_registered": 0,
+    "feed_ingestion_processors_registered": 0,
+    "source_schedules_auto_created": 0,
+    "concrete_external_feeds": 0
+  },
+  "preserved_boundaries": {
+    "provider_specific_code": false,
+    "credentials": false,
+    "automatic_review": false,
+    "automatic_materialization": false,
+    "automatic_case_creation": false,
+    "automatic_publication": false,
+    "admin_subscription_api": false,
+    "phone_facing_feed_behavior": false
+  },
+  "required_tests": [
+    "test_manifest_is_immutable_canonical_and_hash_stable",
+    "test_registry_groups_shared_adapter_and_rejects_policy_drift",
+    "test_component_assembly_derives_exact_origins_and_existing_runtime",
+    "test_empty_registry_builds_zero_runtime_components",
+    "test_activation_orders_public_capability_before_schedule_and_is_idempotent",
+    "test_activation_failure_leaves_only_inert_capability_and_retries_cleanly",
+    "test_complete_scheduled_capture_to_feed_item_worker_vertical_path",
+    "test_production_pipeline_composes_empty_registry_without_activation"
+  ]
+}

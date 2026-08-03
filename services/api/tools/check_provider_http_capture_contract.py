@@ -259,11 +259,16 @@ def main() -> None:
 
     for fragment in (
         "InMemoryCredentialAwareSourceCaptureRegistry()",
-        "InMemoryProviderAdoptionRegistry()",
+        "RssAtomSubscriptionManifestRegistry()",
+        "build_rss_atom_provider_adoption_registry(",
         "InMemoryProviderHttpAuthRegistry()",
     ):
         if fragment not in composition_source:
             fail(f"production empty-registry composition drifted: {fragment}")
+    if "RssAtomSubscriptionManifest(" in composition_source:
+        fail("production composition contains a concrete RSS/Atom manifest")
+    if "rss_atom_subscription_activation_service.activate(" in composition_source:
+        fail("production composition auto-activates a provider")
 
     for test_name in (
         "test_plan_is_immutable_redacted_and_requires_exact_request_adapter",

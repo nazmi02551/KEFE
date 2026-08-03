@@ -212,6 +212,7 @@ def create_app() -> FastAPI:
     app.state.secure_provider_capture_executor = (
         editorial_pipeline.secure_provider_capture_executor
     )
+    app.state.provider_adoption_registry = editorial_pipeline.provider_adoption_registry
     app.state.public_capture_registry = editorial_pipeline.public_capture_registry
     app.state.public_provider_capture_executor = (
         editorial_pipeline.public_provider_capture_executor
@@ -219,6 +220,12 @@ def create_app() -> FastAPI:
     app.state.provider_capture_executor = editorial_pipeline.provider_capture_executor
     app.state.public_http_capture_adapter_factory = (
         editorial_pipeline.public_http_capture_adapter_factory
+    )
+    app.state.rss_atom_subscription_registry = (
+        editorial_pipeline.rss_atom_subscription_registry
+    )
+    app.state.rss_atom_subscription_activation_service = (
+        editorial_pipeline.rss_atom_subscription_activation_service
     )
     app.state.source_acquisition_observer = (
         editorial_pipeline.source_acquisition_observer
