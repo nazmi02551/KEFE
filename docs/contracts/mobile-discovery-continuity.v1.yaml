@@ -1,0 +1,122 @@
+contract_version: 1.2.0
+updated_at: '2026-07-30'
+authority:
+  documentation_package: KEFE_Documentation_Ecosystem_2026-07-28_v3.4_CURRENT
+  master_product_document: KEFE_Master_Product_Document_v1.3.0
+  product_bible: KEFE_Product_Bible_v1.5.0
+  documentation_governance: KEFE_Documentation_Governance_v1.5.0
+  analytics_dictionary: KEFE_Analytics_Event_Dictionary_v1.2.0
+  adr: docs/adr/0034-mobile-discovery-continuity-and-release-promotion.md
+  issue: 89
+release:
+  next_promoted_version: v9
+  current_candidate: v9-rc1
+  android_candidate_version: 0.9.0-rc.1+9
+  ci_artifact_generation: continuous_internal
+  release_candidate_distribution: exact_green_head_only
+  numbered_apk_promotion: milestone_and_phone_test_gated
+  candidate_requires:
+    - all_capabilities_implemented
+    - mobile_ci_pass
+    - api_ci_pass
+    - production_preview_isolation_pass
+    - drive_v3_4_alignment_checkpoint_recorded
+    - phone_test_checklist_available
+    - candidate_identity_and_hashes_recorded
+    - visible_prerelease_identity
+  promotion_requires:
+    - candidate_gate_pass
+    - applicable_phone_test_items_pass
+    - blocking_feedback_resolved
+    - final_merge_commit_recorded
+    - final_artifact_identity_and_sha256_recorded
+    - prerelease_suffix_removed
+  naming:
+    internal_ci_artifact_must_not_be_called_release: true
+    candidate_label_pattern: v9-rcN
+    promoted_label: v9
+navigation:
+  primary_destinations:
+    - EXPLORE
+    - WEIGH
+    - ACTIVITY
+    - MY_KEFE
+  shared_between_production_and_preview: true
+  radar_primary_destination: forbidden
+  atlas_primary_destination: forbidden
+  preview_secondary_surfaces:
+    - RADAR
+    - ATLAS
+capabilities:
+  explore_search:
+    scope: currently_fetched_case_collection
+    fields:
+      - title
+      - summary
+    server_contract_change: false
+  domain_filter:
+    all_state_required: true
+    reset_required: true
+    no_result_state_required: true
+  saved_cases:
+    actions:
+      - save
+      - unsave
+    storage: device_local_shared_preferences
+    store_port: SavedCaseStore
+    case_version_pinned: true
+    snapshot_fields:
+      - case_id
+      - case_version_id
+      - title
+      - summary
+      - domain
+      - format
+      - risk
+      - saved_at
+  activity_continuation:
+    saved_cases_visible: true
+    recent_committed_decisions_visible: true
+    decision_update_markers_visible: true
+    reflection_completion_markers_visible: true
+    saved_case_route: /case/:caseId
+    historical_case_route: /case/:caseId
+    saving_does_not_count_as:
+      - weigh
+      - revisit
+      - reflection
+  my_kefe:
+    saved_cases_visible: false
+    responsibility: descriptive_progress_and_insights
+    forbidden_inferences:
+      - personality
+      - ideology
+      - psychometrics
+      - causality
+sharing:
+  production_and_preview_use_same_feature: true
+  production_and_preview_use_same_primary_shell: true
+  preview_fallback_in_production: forbidden
+analytics:
+  schema: docs/contracts/mobile-discovery-analytics.v1.yaml
+  raw_search_query: forbidden
+  provider_neutral_port_required_before_delivery: true
+privacy:
+  account_sync_claim: forbidden
+  cross_device_claim: forbidden
+  targeting: forbidden
+  sensitive_inference: forbidden
+  private_reason_storage: forbidden
+deferred:
+  - server_saved_case_sync
+  - account_migration
+  - cross_device_restore
+  - server_search
+  - pagination
+  - ranking
+  - recommendations
+  - saved_case_notifications
+  - production_radar_contract
+  - production_atlas_contract
+  - non_noop_analytics_delivery
+  - consensus_card_participation
