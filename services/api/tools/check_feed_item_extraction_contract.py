@@ -230,12 +230,24 @@ def main() -> None:
         if forbidden in extraction:
             fail(f"forbidden behavior leaked into extraction stage: {forbidden}")
 
-    if "InMemoryIngestionWorkerRuntimeRegistry()" not in pipeline:
-        fail("production ingestion runtime registry must remain empty")
+    for fragment in (
+        "RssAtomSubscriptionManifestRegistry()",
+        "build_rss_atom_ingestion_worker_registry(",
+    ):
+        if fragment not in pipeline:
+            fail(f"dormant feed extraction composition missing: {fragment}")
+    if "RssAtomSubscriptionManifest(" in pipeline or (
+        "RssAtomSubscriptionManifest(" in main_source
+    ):
+        fail("production composition contains a concrete feed subscription")
+    if "rss_atom_subscription_activation_service.activate(" in pipeline or (
+        "rss_atom_subscription_activation_service.activate(" in main_source
+    ):
+        fail("production startup must not activate feed item extraction")
     if "build_feed_item_extraction_runtime(" in pipeline or (
         "build_feed_item_extraction_runtime(" in main_source
     ):
-        fail("production composition must not activate feed item extraction")
+        fail("production composition must not directly activate feed item extraction")
     composition = contract.get("composition", {})
     if composition.get("production_runtime_plans_registered") != 0:
         fail("production feed item runtime plan registry must remain empty")
