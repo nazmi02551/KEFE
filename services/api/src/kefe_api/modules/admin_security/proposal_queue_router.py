@@ -6,6 +6,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request
 
+from kefe_api.modules.admin_security.feed_item_materialization_status import (
+    SecuredFeedItemMaterializationStatusService,
+)
 from kefe_api.modules.admin_security.proposal_queue import (
     SecuredProposalQueueService,
 )
@@ -67,6 +70,17 @@ class ProposalDetailResponse(ProposalQueueItemResponse):
     payload: dict[str, Any]
 
 
+class FeedItemMaterializationStatusResponse(StrictModel):
+    proposal_id: UUID
+    status: str
+    proposal_review_decision_id: UUID | None
+    proposal_review_decision: str | None
+    proposal_materialization_id: UUID | None
+    target_kind: str | None
+    target_id: UUID | None
+    materialized_at: datetime | None
+
+
 def get_proposal_queue(request: Request) -> SecuredProposalQueueService:
     return SecuredProposalQueueService(
         repository=request.app.state.proposal_review_queue_repository,
@@ -74,9 +88,22 @@ def get_proposal_queue(request: Request) -> SecuredProposalQueueService:
     )
 
 
+def get_feed_item_materialization_status(
+    request: Request,
+) -> SecuredFeedItemMaterializationStatusService:
+    return SecuredFeedItemMaterializationStatusService(
+        repository=request.app.state.ingestion_orchestration_repository,
+        security=request.app.state.admin_security_service,
+    )
+
+
 ProposalQueueDep = Annotated[
     SecuredProposalQueueService,
     Depends(get_proposal_queue),
+]
+FeedItemMaterializationStatusDep = Annotated[
+    SecuredFeedItemMaterializationStatusService,
+    Depends(get_feed_item_materialization_status),
 ]
 
 
@@ -105,6 +132,32 @@ def list_proposals(
     return ProposalQueueResponse(
         items=[_item_response(record) for record in page.items],
         next_cursor=page.next_cursor,
+    )
+
+
+@router.get(
+    "/proposals/{proposal_id}/feed-item-materialization-status",
+    response_model=FeedItemMaterializationStatusResponse,
+)
+def feed_item_materialization_status(
+    proposal_id: UUID,
+    principal: ReadPrincipalDep,
+    status_service: FeedItemMaterializationStatusDep,
+) -> FeedItemMaterializationStatusResponse:
+    snapshot = status_service.observe(principal, proposal_id=proposal_id)
+    return FeedItemMaterializationStatusResponse(
+        proposal_id=snapshot.proposal_id,
+        status=snapshot.status.value,
+        proposal_review_decision_id=snapshot.proposal_review_decision_id,
+        proposal_review_decision=(
+            snapshot.proposal_review_decision.value
+            if snapshot.proposal_review_decision is not None
+            else None
+        ),
+        proposal_materialization_id=snapshot.proposal_materialization_id,
+        target_kind=snapshot.target_kind,
+        target_id=snapshot.target_id,
+        materialized_at=snapshot.materialized_at,
     )
 
 
