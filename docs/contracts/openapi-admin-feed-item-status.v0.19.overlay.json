@@ -1,0 +1,148 @@
+{
+  "components": {
+    "schemas": {
+      "FeedItemMaterializationStatusResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "materialized_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Materialized At"
+          },
+          "proposal_id": {
+            "format": "uuid",
+            "title": "Proposal Id",
+            "type": "string"
+          },
+          "proposal_materialization_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposal Materialization Id"
+          },
+          "proposal_review_decision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposal Review Decision"
+          },
+          "proposal_review_decision_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposal Review Decision Id"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "target_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Id"
+          },
+          "target_kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Kind"
+          }
+        },
+        "required": [
+          "proposal_id",
+          "status",
+          "proposal_review_decision_id",
+          "proposal_review_decision",
+          "proposal_materialization_id",
+          "target_kind",
+          "target_id",
+          "materialized_at"
+        ],
+        "title": "FeedItemMaterializationStatusResponse",
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/internal/admin/v1/proposals/{proposal_id}/feed-item-materialization-status": {
+      "get": {
+        "operationId": "feed_item_materialization_status_internal_admin_v1_proposals__proposal_id__feed_item_materialization_status_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "proposal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Proposal Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedItemMaterializationStatusResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Feed Item Materialization Status",
+        "tags": [
+          "Internal Admin"
+        ]
+      }
+    }
+  },
+  "target_version": "0.19.0"
+}
