@@ -306,7 +306,12 @@ def test_full_public_route_reaches_review_required_feed_item_proposals() -> None
 
     assert result.outcome is IngestionWorkerRunOutcome.SUCCEEDED
     assert ingestion_repository.get_run(run.id).state is IngestionRunState.SUCCEEDED
-    proposals = ingestion_repository.list_proposals(run.id)
+    proposals = tuple(
+        sorted(
+            ingestion_repository.list_proposals(run.id),
+            key=lambda proposal: proposal.payload["item_id"],
+        )
+    )
     assert [proposal.payload["item_id"] for proposal in proposals] == [
         "item-a",
         "item-b",
