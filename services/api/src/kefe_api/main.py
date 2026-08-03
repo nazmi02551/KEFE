@@ -212,6 +212,7 @@ def create_app() -> FastAPI:
     app.state.secure_provider_capture_executor = (
         editorial_pipeline.secure_provider_capture_executor
     )
+    app.state.provider_adoption_registry = editorial_pipeline.provider_adoption_registry
     app.state.public_capture_registry = editorial_pipeline.public_capture_registry
     app.state.public_provider_capture_executor = (
         editorial_pipeline.public_provider_capture_executor
