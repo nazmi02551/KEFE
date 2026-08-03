@@ -1,15 +1,18 @@
 from __future__ import annotations
 
+import re
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from enum import StrEnum
 from types import MappingProxyType
-import re
-import xml.etree.ElementTree as ET
 
 from kefe_api.modules.knowledge.source_acquisition import FinalSourceCaptureError
 
 _ATOM_NS = "http://www.w3.org/2005/Atom"
-_FORBIDDEN_XML = re.compile(br"<\s*(?:!DOCTYPE|!ENTITY|\?xml-stylesheet|\?[^>]+|xi:include)", re.IGNORECASE)
+_FORBIDDEN_XML = re.compile(
+    br"<\s*(?:!DOCTYPE|!ENTITY|\?xml-stylesheet|\?[^>]+|xi:include)",
+    re.IGNORECASE,
+)
 _SPACE = re.compile(r"\s+")
 
 
@@ -166,13 +169,14 @@ def _atom(root: ET.Element, limits: FeedParseLimits) -> ParsedFeed:
 def parse_rss_atom(
     document: bytes,
     *,
-    limits: FeedParseLimits = FeedParseLimits(),
+    limits: FeedParseLimits | None = None,
 ) -> ParsedFeed:
+    resolved_limits = limits or FeedParseLimits()
     if type(document) is not bytes:
         raise TypeError("document must be exact bytes")
     if not document:
         raise FinalSourceCaptureError("SOURCE_FEED_DOCUMENT_EMPTY")
-    if len(document) > limits.max_document_bytes:
+    if len(document) > resolved_limits.max_document_bytes:
         raise FinalSourceCaptureError("SOURCE_FEED_DOCUMENT_TOO_LARGE")
     if _FORBIDDEN_XML.search(document):
         raise FinalSourceCaptureError("SOURCE_FEED_XML_FORBIDDEN")
@@ -180,11 +184,11 @@ def parse_rss_atom(
         root = ET.fromstring(document)
     except ET.ParseError as exc:
         raise FinalSourceCaptureError("SOURCE_FEED_XML_MALFORMED") from exc
-    _validate_tree(root, limits)
+    _validate_tree(root, resolved_limits)
     if root.tag == "rss":
-        return _rss(root, limits)
+        return _rss(root, resolved_limits)
     if root.tag == f"{{{_ATOM_NS}}}feed":
-        return _atom(root, limits)
+        return _atom(root, resolved_limits)
     raise FinalSourceCaptureError("SOURCE_FEED_FORMAT_UNSUPPORTED")
 
 
