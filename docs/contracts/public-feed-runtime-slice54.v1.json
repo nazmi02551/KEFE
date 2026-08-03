@@ -1,0 +1,53 @@
+{
+  "contract": "public-feed-runtime-slice54",
+  "version": 1,
+  "status": "accepted",
+  "definition": {
+    "immutable": true,
+    "versioned_feed_code": true,
+    "versioned_adapter_code": true,
+    "unique_feed_code": true,
+    "unique_adapter_code": true,
+    "https_only": true,
+    "userinfo_allowed": false,
+    "fragment_allowed": false,
+    "non_443_port_allowed": false,
+    "sensitive_query_names_allowed": false,
+    "single_origin_profile": true,
+    "credential_mode": "PUBLIC",
+    "secret_ref": null,
+    "parser": "STRICT_RSS_ATOM",
+    "pipeline_code": "RSS_ATOM_FEED_ITEM_EXTRACTION",
+    "pipeline_version": "1.0.0"
+  },
+  "derived_runtime": {
+    "provider_adoption_profile_per_definition": 1,
+    "public_capture_adapter_per_definition": 1,
+    "provider_capability_template_per_definition": 1,
+    "feed_definition_registry": true,
+    "feed_item_ingestion_registry": true,
+    "network_calls_during_build": 0,
+    "provider_repository_mutations_during_build": 0
+  },
+  "manual_capture": {
+    "definition_lookup_required": true,
+    "source_acquisition_commands_per_invocation": 1,
+    "automatic_schedule": false,
+    "automatic_worker_run": false,
+    "automatic_review": false,
+    "automatic_materialization": false,
+    "automatic_publication": false
+  },
+  "composition": {
+    "production_concrete_feed_definitions_registered": 0,
+    "production_public_feed_adapters_registered": 0,
+    "production_feed_ingestion_plans_registered": 0,
+    "preview_fallback": false,
+    "live_network_in_tests": false
+  },
+  "errors": {
+    "definition_not_found": "PUBLIC_FEED_DEFINITION_NOT_FOUND",
+    "definition_invalid": "PUBLIC_FEED_DEFINITION_INVALID",
+    "runtime_conflict": "PUBLIC_FEED_RUNTIME_CONFLICT"
+  }
+}
