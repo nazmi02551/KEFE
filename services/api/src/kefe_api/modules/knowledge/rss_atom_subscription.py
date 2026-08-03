@@ -125,10 +125,14 @@ def _validate_locator(value: str) -> tuple[str, str]:
     except UnicodeEncodeError as exc:
         raise ValueError("external_locator hostname must be ASCII") from exc
     hostname = parsed.hostname.lower()
-    if parsed.hostname != hostname or "*" in hostname:
-        raise ValueError("external_locator hostname must be canonical lowercase")
+    if "*" in hostname:
+        raise ValueError("external_locator hostname cannot contain wildcards")
     if port is not None:
         raise ValueError("external_locator must omit an explicit port")
+    rendered_host = f"[{hostname}]" if ":" in hostname else hostname
+    if parsed.netloc != rendered_host:
+        raise ValueError("external_locator hostname must be canonical lowercase")
+
     query_pairs = parse_qsl(parsed.query, keep_blank_values=True)
     query_names = tuple(_normalized_query_name(name) for name, _ in query_pairs)
     if any(name in _FORBIDDEN_QUERY_NAMES for name in query_names):
@@ -137,7 +141,6 @@ def _validate_locator(value: str) -> tuple[str, str]:
         raise ValueError("external_locator query names must be unique")
     if query_pairs != sorted(query_pairs):
         raise ValueError("external_locator query parameters must be sorted")
-    rendered_host = f"[{hostname}]" if ":" in hostname else hostname
     return value, f"https://{rendered_host}"
 
 
@@ -341,17 +344,17 @@ class RssAtomSubscriptionManifestRegistry:
             adapters.setdefault(manifest.adapter_code, []).append(manifest)
             locators.add(locator_key)
 
-        ordered_subscriptions = {
-            code: subscriptions[code] for code in sorted(subscriptions)
-        }
-        ordered_adapters = {
-            code: tuple(
-                sorted(adapters[code], key=lambda item: item.subscription_code)
-            )
-            for code in sorted(adapters)
-        }
-        self._subscriptions = MappingProxyType(ordered_subscriptions)
-        self._adapters = MappingProxyType(ordered_adapters)
+        self._subscriptions = MappingProxyType(
+            {code: subscriptions[code] for code in sorted(subscriptions)}
+        )
+        self._adapters = MappingProxyType(
+            {
+                code: tuple(
+                    sorted(adapters[code], key=lambda item: item.subscription_code)
+                )
+                for code in sorted(adapters)
+            }
+        )
 
     def get(self, subscription_code: str) -> RssAtomSubscriptionManifest:
         require_versioned_adapter_code(subscription_code)
