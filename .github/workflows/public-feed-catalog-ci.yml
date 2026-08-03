@@ -19,6 +19,7 @@ on:
       - "services/api/tools/check_public_feed_catalog_contract.py"
       - "services/api/tools/export_public_feed_catalog_openapi_overlay.py"
       - "services/api/tools/export_admin_proposal_queue_openapi_overlay.py"
+      - "services/api/tools/export_mvp_openapi_overlay.py"
       - "services/api/tools/export_openapi.py"
       - "docs/adr/0091-durable-public-feed-catalog-and-secured-admin-lifecycle.md"
       - "docs/contracts/public-feed-catalog-slice55.v1.json"
@@ -82,6 +83,7 @@ jobs:
           tools/check_public_feed_catalog_contract.py
           tools/export_public_feed_catalog_openapi_overlay.py
           tools/export_admin_proposal_queue_openapi_overlay.py
+          tools/export_mvp_openapi_overlay.py
           tools/export_openapi.py
           migrations/versions/20260803_0026_public_feed_catalog.py
       - name: Public feed catalog architecture fitness
@@ -96,6 +98,11 @@ jobs:
         run: >-
           python tools/export_public_feed_catalog_openapi_overlay.py
           --output ../../docs/contracts/openapi-public-feed-catalog.v0.19.overlay.json
+          --check
+      - name: MVP OpenAPI overlay isolation gate
+        run: >-
+          python tools/export_mvp_openapi_overlay.py
+          --output ../../docs/contracts/openapi-mvp.v0.19.overlay.json
           --check
       - name: Composed OpenAPI exact gate
         run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
