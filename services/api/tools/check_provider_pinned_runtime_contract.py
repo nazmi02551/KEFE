@@ -68,7 +68,8 @@ REQUIRED_SETTINGS_FRAGMENTS = (
     "provider_http_ca_bundle_path: str | None = None",
 )
 REQUIRED_COMPOSITION_FRAGMENTS = (
-    "InMemoryProviderAdoptionRegistry()",
+    "RssAtomSubscriptionManifestRegistry()",
+    "build_rss_atom_provider_adoption_registry(",
     "provider_http_runtime = build_provider_http_runtime(settings)",
     "dns_resolver=provider_http_runtime.dns_resolver",
     "backend=provider_http_runtime.backend",
@@ -108,6 +109,10 @@ def main() -> None:
     for fragment in REQUIRED_COMPOSITION_FRAGMENTS:
         if fragment not in composition_source:
             fail(f"provider pinned runtime composition drifted: {fragment}")
+    if "RssAtomSubscriptionManifest(" in composition_source:
+        fail("provider pinned runtime composition contains a concrete feed manifest")
+    if "rss_atom_subscription_activation_service.activate(" in composition_source:
+        fail("provider pinned runtime composition auto-activates egress")
 
     if contract.get("contract") != "provider-pinned-runtime-slice46":
         fail("provider pinned runtime contract identity drifted")
