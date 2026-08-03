@@ -18,13 +18,18 @@ void main() {
 
   test('Product Preview retains the generic Case route', () {
     final source = File('lib/app/product_preview_app.dart').readAsStringSync();
+    final experience = File(
+      'lib/features/decision/presentation/decision_experience_screen.dart',
+    ).readAsStringSync();
 
     expect(source, contains("path: '/case/:caseId'"));
-    expect(source, contains('DecisionFlowScreen('));
+    expect(source, contains('DecisionExperienceScreen('));
     expect(source, contains("state.pathParameters['caseId']!"));
+    expect(experience, contains('DecisionFlowScreen('));
     expect(
       source,
       isNot(contains("caseId == '11111111-1111-4111-8111-111111111113'")),
     );
+    expect(experience, isNot(contains('caseId ==')));
   });
 }

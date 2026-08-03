@@ -9,9 +9,9 @@ import '../core/localization/settings_strings.dart';
 import '../core/preferences/app_preferences.dart';
 import '../features/account/presentation/account_conversion_screen.dart';
 import '../features/activity/presentation/activity_screen.dart';
-import '../features/decision/presentation/decision_flow_screen.dart';
+import '../features/decision/presentation/decision_experience_screen.dart';
 import '../features/explore/presentation/discovery_explore_screen.dart';
-import '../features/onboarding/presentation/onboarding_gate_screen.dart';
+import '../features/onboarding/presentation/onboarding_experience_screen.dart';
 import '../features/privacy/presentation/privacy_screen.dart';
 import '../features/progress/presentation/my_kefe_journey_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
@@ -35,7 +35,7 @@ class _KefeAppState extends ConsumerState<KefeApp> {
       GoRoute(path: '/', redirect: (_, _) => '/welcome'),
       GoRoute(
         path: '/welcome',
-        builder: (context, state) => const OnboardingGateScreen(),
+        builder: (context, state) => const OnboardingExperienceScreen(),
       ),
       GoRoute(
         path: '/explore',
@@ -90,7 +90,7 @@ class _KefeAppState extends ConsumerState<KefeApp> {
       ),
       GoRoute(
         path: '/case/:caseId',
-        builder: (context, state) => DecisionFlowScreen(
+        builder: (context, state) => DecisionExperienceScreen(
           caseId: state.pathParameters['caseId']!,
           firstUse: state.uri.queryParameters['firstUse'] == '1',
         ),

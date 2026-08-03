@@ -67,7 +67,7 @@ void main() {
 
     test('Shared routes render the same production presentation surfaces', () {
       const sharedScreens = <String>[
-        'OnboardingGateScreen',
+        'OnboardingExperienceScreen',
         'DiscoveryExploreScreen',
         'WeighHubScreen',
         'ActivityScreen',
@@ -76,7 +76,7 @@ void main() {
         'SettingsScreen',
         'PrivacyScreen',
         'PublicShareScreen',
-        'DecisionFlowScreen',
+        'DecisionExperienceScreen',
       ];
 
       for (final screen in sharedScreens) {
@@ -91,6 +91,15 @@ void main() {
           reason: 'Preview router must reuse $screen instead of a silent fork',
         );
       }
+
+      final decisionExperience = File(
+        'lib/features/decision/presentation/decision_experience_screen.dart',
+      ).readAsStringSync();
+      final onboardingExperience = File(
+        'lib/features/onboarding/presentation/onboarding_experience_screen.dart',
+      ).readAsStringSync();
+      expect(decisionExperience, contains('DecisionFlowScreen('));
+      expect(onboardingExperience, contains('OnboardingGateScreen('));
     });
 
     test('Preview substitutions remain explicit and production-isolated', () {
@@ -128,6 +137,7 @@ void main() {
           'communityReasonExperienceEnabledProvider.overrideWithValue(true)',
           'shareExperienceEnabledProvider.overrideWithValue(true)',
           'privacyExperienceEnabledProvider.overrideWithValue(true)',
+          'experiencePresentationConfigProvider.overrideWithValue(',
         ];
 
         for (final flag in governedFlags) {

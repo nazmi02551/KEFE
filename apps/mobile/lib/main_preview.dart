@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/product_preview/preview_content_localizer.dart';
 import 'app/product_preview_app.dart';
+import 'core/config/experience_presentation_config.dart';
 import 'core/design/product_preview_visual_mode.dart';
 import 'core/localization/kefe_content_localizer.dart';
 import 'features/account/application/account_controller.dart';
@@ -30,6 +31,9 @@ void main() {
   runApp(
     ProviderScope(
       overrides: [
+        experiencePresentationConfigProvider.overrideWithValue(
+          ExperiencePresentationConfig.fromEnvironment(),
+        ),
         decisionRepositoryProvider.overrideWithValue(
           PreviewJourneyDecisionRepository(),
         ),

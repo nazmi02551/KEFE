@@ -11,9 +11,9 @@ import '../core/localization/settings_strings.dart';
 import '../core/preferences/app_preferences.dart';
 import '../features/account/presentation/account_conversion_screen.dart';
 import '../features/activity/presentation/activity_screen.dart';
-import '../features/decision/presentation/decision_flow_screen.dart';
+import '../features/decision/presentation/decision_experience_screen.dart';
 import '../features/explore/presentation/discovery_explore_screen.dart';
-import '../features/onboarding/presentation/onboarding_gate_screen.dart';
+import '../features/onboarding/presentation/onboarding_experience_screen.dart';
 import '../features/privacy/presentation/privacy_screen.dart';
 import '../features/progress/presentation/my_kefe_journey_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
@@ -37,7 +37,7 @@ class _ProductPreviewAppState extends ConsumerState<ProductPreviewApp> {
       GoRoute(path: '/', redirect: (_, _) => '/explore'),
       GoRoute(
         path: '/welcome',
-        builder: (_, state) => OnboardingGateScreen(
+        builder: (_, state) => OnboardingExperienceScreen(
           reviewMode: state.uri.queryParameters['review'] == '1',
         ),
       ),
@@ -106,7 +106,7 @@ class _ProductPreviewAppState extends ConsumerState<ProductPreviewApp> {
       ),
       GoRoute(
         path: '/case/:caseId',
-        builder: (_, state) => DecisionFlowScreen(
+        builder: (_, state) => DecisionExperienceScreen(
           caseId: state.pathParameters['caseId']!,
           firstUse: state.uri.queryParameters['firstUse'] == '1',
         ),
