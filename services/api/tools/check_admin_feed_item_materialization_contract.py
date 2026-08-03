@@ -15,22 +15,36 @@ ROUTER = (
     / "src/kefe_api/modules/admin_security/editorial_projection_router.py"
 )
 MAIN = API / "src/kefe_api/main.py"
+EXPORT = API / "tools/export_openapi.py"
 HTTP_TEST = API / "tests/test_admin_feed_item_materialization_http.py"
 OPENAPI_TEST = API / "tests/test_admin_feed_item_materialization_openapi.py"
 POSTGRES_TEST = API / "tests/test_admin_feed_item_materialization_postgres.py"
 ADR = ROOT / "docs/adr/0091-secured-admin-feed-item-materialization-command.md"
 CONTRACT = ROOT / "docs/contracts/admin-feed-item-materialization-slice55.v1.json"
+POLICY = ROOT / "docs/contracts/admin-http-surface.v1.yaml"
+ERRORS = (
+    ROOT
+    / "docs/contracts/error-codes-admin-feed-item-materialization.v1.yaml"
+)
+OPENAPI_OVERLAY = (
+    ROOT
+    / "docs/contracts/openapi-admin-feed-item-materialization.v0.19.overlay.json"
+)
 WORKFLOW = ROOT / ".github/workflows/admin-feed-item-materialization-ci.yml"
 
 REQUIRED = (
     SERVICE,
     ROUTER,
     MAIN,
+    EXPORT,
     HTTP_TEST,
     OPENAPI_TEST,
     POSTGRES_TEST,
     ADR,
     CONTRACT,
+    POLICY,
+    ERRORS,
+    OPENAPI_OVERLAY,
     WORKFLOW,
 )
 
@@ -71,12 +85,16 @@ def main() -> None:
     service = SERVICE.read_text(encoding="utf-8")
     router = ROUTER.read_text(encoding="utf-8")
     main_source = MAIN.read_text(encoding="utf-8")
+    export = EXPORT.read_text(encoding="utf-8")
     tests = "\n".join(
         path.read_text(encoding="utf-8")
         for path in (HTTP_TEST, OPENAPI_TEST, POSTGRES_TEST)
     )
     adr = ADR.read_text(encoding="utf-8")
     contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
+    policy = POLICY.read_text(encoding="utf-8")
+    errors = ERRORS.read_text(encoding="utf-8")
+    overlay = json.loads(OPENAPI_OVERLAY.read_text(encoding="utf-8"))
     workflow = WORKFLOW.read_text(encoding="utf-8")
 
     if contract.get("contract") != "admin-feed-item-materialization-slice55":
@@ -87,9 +105,10 @@ def main() -> None:
     http = contract.get("http", {})
     if http.get("method") != "POST":
         fail("Admin feed item materialization method drifted")
-    if http.get("path") != (
+    exact_path = (
         "/internal/admin/v1/proposals/{proposal_id}/feed-item-materialization"
-    ):
+    )
+    if http.get("path") != exact_path:
         fail("Admin feed item materialization path drifted")
     if http.get("write_principal_required") is not True:
         fail("Admin feed item materialization must require write principal")
@@ -227,6 +246,52 @@ def main() -> None:
     if "app.include_router(admin_editorial_projection_router)" not in main_source:
         fail("Admin editorial projection/materialization router is not composed")
 
+    for fragment in (
+        "feed_item_materialization_facade: SecuredFeedItemMaterializationService",
+        "path: /proposals/{proposal_id}/feed-item-materialization",
+        "capabilities: [CONTENT_REVIEW, SOURCE_VERIFY]",
+        "exact_proposal_kind: FEED_ITEM",
+        "exact_target_kind: NORMALIZED_ARTIFACT",
+        "review_created_by_command: false",
+        "generic_materialization: forbidden",
+    ):
+        if fragment not in policy:
+            fail(f"Admin HTTP policy missing feed item boundary: {fragment}")
+
+    expected_errors = contract.get("errors", {})
+    for code in expected_errors.values():
+        if f"- code: {code}" not in errors and code != "INGESTION_PROPOSAL_NOT_FOUND":
+            fail(f"Slice 55 error registry missing: {code}")
+
+    if overlay.get("target_version") != "0.19.0":
+        fail("Admin feed item OpenAPI overlay target version drifted")
+    overlay_paths = overlay.get("paths", {})
+    if set(overlay_paths) != {exact_path}:
+        fail("Admin feed item OpenAPI overlay path set drifted")
+    overlay_schemas = overlay.get("components", {}).get("schemas", {})
+    if set(overlay_schemas) != {
+        "FeedItemMaterializationRequest",
+        "FeedItemMaterializationResponse",
+    }:
+        fail("Admin feed item OpenAPI overlay schema set drifted")
+    response_properties = overlay_schemas[
+        "FeedItemMaterializationResponse"
+    ].get("properties", {})
+    if set(response_properties) != {
+        "proposal_materialization_id",
+        "proposal_id",
+        "proposal_review_decision_id",
+        "target_kind",
+        "target_id",
+        "materialized_at",
+    }:
+        fail("Admin feed item OpenAPI response properties drifted")
+    if (
+        '"openapi-admin-feed-item-materialization.v0.19.overlay.json"'
+        not in export
+    ):
+        fail("Admin feed item OpenAPI overlay is not composed")
+
     for test_name in (
         "test_command_requires_auth_csrf_and_both_reviewer_capabilities",
         "test_accepted_command_is_bounded_idempotent_and_persists_exact_target",
@@ -255,9 +320,11 @@ def main() -> None:
         "Parent feed item normalization architecture fitness",
         "Parent Admin Proposal queue HTTP behavior",
         "check_admin_feed_item_materialization_contract.py",
+        "openapi-admin-feed-item-materialization.v0.19.overlay.json",
+        "tools/export_openapi.py",
     ):
         if phrase not in workflow:
-            fail(f"Admin feed item materialization CI step missing: {phrase}")
+            fail(f"Admin feed item materialization CI step/path missing: {phrase}")
 
     print("Admin feed item materialization contract: PASS")
 
