@@ -179,11 +179,19 @@ def main() -> None:
     retire_source = ast.get_source_segment(domain, method(service, "retire")) or ""
     if "AdminCapability.SOURCE_MANAGE" not in register_source:
         fail("catalog registration must require SOURCE_MANAGE")
+    if "now = self._clock()" not in register_source or "now=now" not in register_source:
+        fail("catalog registration must use one injected authorization clock")
     for label, source in (("approval", approve_source), ("retirement", retire_source)):
         if "AdminCapability.SOURCE_MANAGE" not in source:
             fail(f"catalog {label} must require SOURCE_MANAGE")
-        if "self._security.require_fresh_step_up(principal)" not in source:
-            fail(f"catalog {label} must require fresh step-up")
+        for fragment in (
+            "now = self._clock()",
+            "now=now",
+            "self._security.require_fresh_step_up(",
+            "at=now",
+        ):
+            if fragment not in source:
+                fail(f"catalog {label} clock/step-up guard missing: {fragment}")
 
     for fragment in (
         'SOURCE_MANAGE = "SOURCE_MANAGE"',
