@@ -45,9 +45,9 @@ def main() -> None:
         if fragment not in source:
             fail(f"public HTTP feed invariant missing: {fragment}")
 
-    seal_position = source.find("self._evidence_store.seal(")
-    parse_position = source.find("parse_rss_atom(")
-    assembly_position = source.find("return CapturedSource(")
+    seal_position = source.find("seal = self._seal(")
+    parse_position = source.find("parsed = parse_rss_atom(", seal_position)
+    assembly_position = source.find("return CapturedSource(", parse_position)
     if not 0 <= seal_position < parse_position < assembly_position:
         fail("HTTP feed seal/parse/assembly order drifted")
 
@@ -78,6 +78,7 @@ def main() -> None:
         "test_strict_parser_rejects_malformed_or_unsupported_body_after_seal",
         "test_http_retryable_and_final_errors_preserve_bounded_codes",
         "test_invalid_plan_mismatch_and_input_fail_closed",
+        "test_parse_limits_are_exact_and_snapshotted_at_construction",
     ):
         if evidence not in tests:
             fail(f"public HTTP feed evidence missing: {evidence}")
