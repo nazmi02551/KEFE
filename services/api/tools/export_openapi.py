@@ -13,6 +13,7 @@ OPENAPI_OVERLAYS = (
     "openapi-admin-projection.v0.19.overlay.json",
     "openapi-admin-proposal-queue.v0.19.overlay.json",
     "openapi-admin-feed-item-materialization.v0.19.overlay.json",
+    "openapi-admin-feed-item-status.v0.19.overlay.json",
 )
 
 

@@ -18,6 +18,7 @@ NON_MVP_ADDITIVE_OVERLAYS = (
     CONTRACTS / "openapi-admin-projection.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-proposal-queue.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-feed-item-materialization.v0.19.overlay.json",
+    CONTRACTS / "openapi-admin-feed-item-status.v0.19.overlay.json",
 )
 
 

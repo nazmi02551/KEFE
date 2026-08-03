@@ -1,0 +1,103 @@
+{
+  "contract": "admin-feed-item-materialization-status-slice56",
+  "version": 1,
+  "status": "accepted",
+  "http": {
+    "method": "GET",
+    "path": "/internal/admin/v1/proposals/{proposal_id}/feed-item-materialization-status",
+    "internal_admin_only": true,
+    "read_principal_required": true,
+    "csrf_required": false,
+    "response_fields": [
+      "materialized_at",
+      "proposal_id",
+      "proposal_materialization_id",
+      "proposal_review_decision",
+      "proposal_review_decision_id",
+      "status",
+      "target_id",
+      "target_kind"
+    ],
+    "response_includes_payload": false,
+    "response_includes_normalized_text": false,
+    "response_includes_evidence": false
+  },
+  "authorization": {
+    "required_capabilities": [
+      "CONTENT_REVIEW",
+      "SOURCE_VERIFY"
+    ],
+    "editor_only_allowed": false,
+    "publisher_only_allowed": false,
+    "reviewer_allowed": true,
+    "publication_step_up_required": false
+  },
+  "proposal_scope": {
+    "kind": "FEED_ITEM",
+    "payload_schema_ref": "kefe.feed-item",
+    "payload_schema_version": "1.0.0",
+    "risk_code": "UNREVIEWED_EXTERNAL_FEED_ITEM",
+    "ai_execution_ref_allowed": false
+  },
+  "states": {
+    "REVIEW_REQUIRED": {
+      "accepted_review_exists": false,
+      "materialization_exists": false,
+      "target_identity_exposed": false
+    },
+    "READY": {
+      "accepted_review_exists": true,
+      "materialization_exists": false,
+      "target_identity_exposed": false
+    },
+    "MATERIALIZED": {
+      "accepted_review_exists": true,
+      "materialization_exists": true,
+      "target_kind": "NORMALIZED_ARTIFACT",
+      "review_binding_exact": true
+    }
+  },
+  "persistence_conflicts": {
+    "materialization_without_accepted_review": true,
+    "review_binding_mismatch": true,
+    "proposal_binding_mismatch": true,
+    "unexpected_target_kind": true,
+    "best_effort_guessing": false
+  },
+  "observation": {
+    "reads_proposal": true,
+    "reads_terminal_review": true,
+    "reads_exact_materialization": true,
+    "reads_normalized_artifact": false,
+    "reads_raw_evidence": false,
+    "revalidates_payload": false,
+    "mutates_state": false
+  },
+  "errors": {
+    "not_found": "INGESTION_PROPOSAL_NOT_FOUND",
+    "unsupported": "INGESTION_FEED_ITEM_MATERIALIZATION_UNSUPPORTED",
+    "conflict": "INGESTION_FEED_ITEM_MATERIALIZATION_STATUS_CONFLICT"
+  },
+  "forbidden": {
+    "review_creation": true,
+    "materialization_command": true,
+    "generic_status_endpoint": true,
+    "payload_disclosure": true,
+    "normalized_artifact_disclosure": true,
+    "evidence_disclosure": true,
+    "case_creation": true,
+    "projection": true,
+    "publication": true,
+    "provider_activation": true,
+    "polling_worker": true,
+    "phone_surface": true
+  },
+  "required_ci": [
+    "Admin Feed Item Status CI",
+    "Admin Feed Item Materialization CI",
+    "Admin Proposal Queue CI",
+    "API CI",
+    "MVP Beta Gates",
+    "Global Readiness"
+  ]
+}

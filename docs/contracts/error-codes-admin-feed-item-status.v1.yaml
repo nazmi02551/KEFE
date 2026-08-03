@@ -1,0 +1,5 @@
+registry_version: 1.0.0
+errors:
+- code: INGESTION_FEED_ITEM_MATERIALIZATION_STATUS_CONFLICT
+  http_status: 409
+  retryable: false
