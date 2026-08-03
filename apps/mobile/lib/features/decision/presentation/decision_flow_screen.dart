@@ -10,6 +10,7 @@ import '../../../core/design/product_preview_visual_mode.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../context/presentation/context_section.dart';
 import '../../onboarding/application/onboarding_controller.dart';
+import '../../progress/presentation/progress_section.dart';
 import '../application/decision_controller.dart';
 import '../domain/decision_models.dart';
 import 'case_hero_header.dart';
@@ -475,6 +476,15 @@ class _FlowStepSection extends ConsumerWidget {
               ],
             ),
           ),
+          const SizedBox(height: 20),
+          PerspectiveSection(
+            state: PerspectiveUiState.idle,
+            result: null,
+            reasonPendingModeration: state.reasonPendingModeration,
+            onRetry: controller.retryPerspective,
+          ),
+          const SizedBox(height: 20),
+          const ProgressSection(),
         ] else ...[
           const SizedBox(height: 20),
           PerspectiveSection(
