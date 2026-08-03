@@ -115,6 +115,15 @@ def main() -> None:
     ):
         if target.get(name) is not True:
             fail(f"feed item target invariant drifted: {name}")
+    metadata = contract.get("metadata", {})
+    for name in (
+        "raw_feed_bytes",
+        "raw_storage_ref_copied",
+        "credential_material",
+        "backend_object_key",
+    ):
+        if metadata.get(name) is not False:
+            fail(f"normalized feed item metadata boundary drifted: {name}")
 
     classes = class_map(materializer)
     item_class = classes.get("FeedItemProposalMaterializer")
@@ -152,10 +161,16 @@ def main() -> None:
     ):
         if fragment not in materialize_source:
             fail(f"normalized feed item assembly invariant missing: {fragment}")
-    if '"feed_storage_ref"' in materialize_source.split(
-        "media_metadata={", 1
-    )[-1].split("},", 1)[0]:
-        fail("raw storage reference leaked into normalized metadata")
+    metadata_source = materialize_source.split("media_metadata={", 1)[-1].split(
+        "},", 1
+    )[0]
+    for forbidden in (
+        '"feed_storage_ref"',
+        "source.raw_storage_ref",
+        "proposal.provenance_ref",
+    ):
+        if forbidden in metadata_source:
+            fail(f"raw evidence reference leaked into normalized metadata: {forbidden}")
 
     lineage_source = segment(materializer, method(item_class, "_require_source_lineage"))
     for fragment in (
@@ -165,6 +180,13 @@ def main() -> None:
     ):
         if fragment not in lineage_source:
             fail(f"feed item source lineage guard missing: {fragment}")
+    provenance_source = segment(materializer, method(item_class, "_provenance"))
+    if 'value = f"proposal:{proposal.id};review:{review.id}"' not in (
+        provenance_source
+    ):
+        fail("feed item provenance must derive only from proposal and review IDs")
+    if "proposal.provenance_ref" in provenance_source:
+        fail("raw proposal provenance cannot flow into normalized metadata")
     add_source = segment(materializer, method(item_class, "_add_exact"))
     for fragment in (
         "existing != artifact",
