@@ -12,8 +12,12 @@ on:
       - 'services/api/src/kefe_api/main.py'
       - 'services/api/tests/test_public_feed_activation_catalog*.py'
       - 'services/api/tools/check_public_feed_activation_catalog_contract.py'
+      - 'services/api/tools/export_public_feed_activation_catalog_openapi_overlay.py'
+      - 'services/api/tools/export_admin_proposal_queue_openapi_overlay.py'
+      - 'services/api/tools/export_openapi.py'
       - 'docs/adr/0091-immutable-public-feed-activation-catalog-and-read-only-admin-inspection.md'
       - 'docs/contracts/public-feed-activation-catalog-slice55.v1.json'
+      - 'docs/contracts/openapi-public-feed-activation-catalog.v0.19.overlay.json'
       - '.github/workflows/public-feed-activation-catalog-ci.yml'
   push:
     branches: [main]
@@ -27,8 +31,12 @@ on:
       - 'services/api/src/kefe_api/main.py'
       - 'services/api/tests/test_public_feed_activation_catalog*.py'
       - 'services/api/tools/check_public_feed_activation_catalog_contract.py'
+      - 'services/api/tools/export_public_feed_activation_catalog_openapi_overlay.py'
+      - 'services/api/tools/export_admin_proposal_queue_openapi_overlay.py'
+      - 'services/api/tools/export_openapi.py'
       - 'docs/adr/0091-immutable-public-feed-activation-catalog-and-read-only-admin-inspection.md'
       - 'docs/contracts/public-feed-activation-catalog-slice55.v1.json'
+      - 'docs/contracts/openapi-public-feed-activation-catalog.v0.19.overlay.json'
       - '.github/workflows/public-feed-activation-catalog-ci.yml'
 
 permissions:
@@ -62,6 +70,9 @@ jobs:
           tests/test_public_feed_activation_catalog.py
           tests/test_public_feed_activation_catalog_postgres.py
           tools/check_public_feed_activation_catalog_contract.py
+          tools/export_public_feed_activation_catalog_openapi_overlay.py
+          tools/export_admin_proposal_queue_openapi_overlay.py
+          tools/export_openapi.py
       - name: Activation catalog architecture fitness
         working-directory: services/api
         run: python tools/check_public_feed_activation_catalog_contract.py
@@ -71,6 +82,12 @@ jobs:
       - name: Parent Admin HTTP architecture fitness
         working-directory: services/api
         run: python tools/check_admin_http_contract.py
+      - name: Activation catalog OpenAPI overlay exact gate
+        working-directory: services/api
+        run: >-
+          python tools/export_public_feed_activation_catalog_openapi_overlay.py
+          --output ../../docs/contracts/openapi-public-feed-activation-catalog.v0.19.overlay.json
+          --check
       - name: Activation catalog memory and Admin HTTP behavior
         working-directory: services/api
         run: pytest tests/test_public_feed_activation_catalog.py
