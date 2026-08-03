@@ -1,0 +1,40 @@
+{
+  "contract": "installable-phone-preview-hotfix",
+  "version": "1.0.0",
+  "status": "accepted",
+  "production_entry": {
+    "entrypoint": "lib/main.dart",
+    "placeholder_endpoint": "https://beta-api.invalid/",
+    "compile_proof_required": true,
+    "apk_uploaded": false,
+    "preview_fallback": false
+  },
+  "installable_phone_preview": {
+    "entrypoint": "lib/main_preview.dart",
+    "workflow_artifact_name": "kefe-installable-phone-preview",
+    "apk_filename_prefix": "KEFE-phone-preview-",
+    "candidate_sha_in_filename": true,
+    "decision_repository": "PreviewJourneyDecisionRepository",
+    "decision_draft_store": "MemoryDecisionDraftStore",
+    "network_required_for_first_weighing": false
+  },
+  "isolation": {
+    "preview_repositories_in_production_main": 0,
+    "preview_draft_reads_secure_production_state": false,
+    "production_uses_secure_decision_draft_store": true,
+    "production_falls_back_to_preview": false
+  },
+  "ci": {
+    "dedicated_workflow": ".github/workflows/phone-artifact-boundary-ci.yml",
+    "checker": "apps/mobile/tool/check_installable_phone_artifact_boundary.py",
+    "mvp_gate_runs_checker": true,
+    "global_gate_runs_checker": true
+  },
+  "non_goals": [
+    "deploy_beta_api",
+    "approve_production_endpoint",
+    "merge_stacked_pull_requests",
+    "change_commit_first_blind_first",
+    "use_preview_as_production_fallback"
+  ]
+}

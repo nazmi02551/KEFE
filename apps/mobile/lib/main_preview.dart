@@ -12,6 +12,7 @@ import 'features/community_reason/data/preview_community_reason_repository.dart'
 import 'features/consensus/application/consensus_controller.dart';
 import 'features/consensus/data/preview_consensus_repository.dart';
 import 'features/decision/application/decision_controller.dart';
+import 'features/decision/data/decision_draft_store.dart';
 import 'features/decision/data/preview_journey_decision_repository.dart';
 import 'features/media_presentation/application/case_media_provider.dart';
 import 'features/media_presentation/data/preview_case_media_repository.dart';
@@ -31,6 +32,9 @@ void main() {
       overrides: [
         decisionRepositoryProvider.overrideWithValue(
           PreviewJourneyDecisionRepository(),
+        ),
+        decisionDraftStoreProvider.overrideWithValue(
+          MemoryDecisionDraftStore(),
         ),
         kefeContentLocalizerProvider.overrideWithValue(
           const PreviewContentLocalizer(),

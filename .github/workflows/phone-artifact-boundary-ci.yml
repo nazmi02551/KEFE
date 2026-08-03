@@ -1,0 +1,40 @@
+name: Phone Artifact Boundary CI
+
+on:
+  pull_request:
+    paths:
+      - 'apps/mobile/lib/main.dart'
+      - 'apps/mobile/lib/main_preview.dart'
+      - 'apps/mobile/tool/check_installable_phone_artifact_boundary.py'
+      - '.github/workflows/mvp-beta-gates.yml'
+      - '.github/workflows/global-readiness.yml'
+      - '.github/workflows/phone-artifact-boundary-ci.yml'
+      - 'docs/adr/0090-installable-phone-preview-and-unconfigured-production-shell-boundary.md'
+      - 'docs/contracts/installable-phone-preview-hotfix.v1.json'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile/lib/main.dart'
+      - 'apps/mobile/lib/main_preview.dart'
+      - 'apps/mobile/tool/check_installable_phone_artifact_boundary.py'
+      - '.github/workflows/mvp-beta-gates.yml'
+      - '.github/workflows/global-readiness.yml'
+      - '.github/workflows/phone-artifact-boundary-ci.yml'
+      - 'docs/adr/0090-installable-phone-preview-and-unconfigured-production-shell-boundary.md'
+      - 'docs/contracts/installable-phone-preview-hotfix.v1.json'
+
+permissions:
+  contents: read
+
+jobs:
+  phone-artifact-boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Phone artifact boundary contract
+        run: python apps/mobile/tool/check_installable_phone_artifact_boundary.py
