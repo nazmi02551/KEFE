@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import replace
 from datetime import UTC, datetime
 from hashlib import sha256
-from uuid import uuid4
+from uuid import NAMESPACE_URL, uuid4, uuid5
 
 import pytest
 
@@ -31,7 +31,11 @@ from kefe_api.modules.ingestion_orchestration.service import (
     IngestionOrchestrationService,
 )
 from kefe_api.modules.knowledge.in_memory import InMemoryKnowledgeRepository
-from kefe_api.modules.knowledge.models import ArtifactKind, SourceArtifact
+from kefe_api.modules.knowledge.models import (
+    ArtifactKind,
+    NormalizedArtifact,
+    SourceArtifact,
+)
 from kefe_api.modules.knowledge.source_evidence import (
     canonical_content_hash,
     canonical_storage_ref,
@@ -172,9 +176,9 @@ def test_accepted_feed_item_materializes_deterministic_normalized_artifact() -> 
         "proposal_id": str(proposal.id),
         "review_id": str(review.id),
         "reviewer_ref": review.reviewer_ref,
-        "provenance_ref": f"{source.raw_storage_ref};review:{review.id}",
+        "provenance_ref": f"proposal:{proposal.id};review:{review.id}",
     }
-    assert "feed_storage_ref" not in artifact.media_metadata
+    assert source.raw_storage_ref not in repr(artifact.media_metadata)
     assert repository.find_materialization(
         proposal.id,
         target_kind=TARGET_KIND,
@@ -292,4 +296,24 @@ def test_noncanonical_item_fields_and_conflicting_target_fail_closed() -> None:
             ),
             review=review,
         )
+
+    target_id = uuid5(
+        NAMESPACE_URL,
+        f"kefe:proposal:{proposal.id}:{TARGET_KIND}",
+    )
+    knowledge.add_normalized_artifact(
+        NormalizedArtifact(
+            id=target_id,
+            source_artifact_id=source.id,
+            artifact_kind=ArtifactKind.EXTERNAL_EVIDENCE,
+            normalized_at=review.decided_at,
+            content_hash=f"sha256:{'0' * 64}",
+            text="conflicting target",
+            language_code=source.language_code,
+            jurisdiction_code=source.jurisdiction_code,
+            media_metadata={},
+        )
+    )
+    with pytest.raises(ValueError, match="conflicts"):
+        materializer.materialize(proposal=proposal, review=review)
     assert knowledge.get_source_artifact(source.id) == source
