@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/config/experience_presentation_config.dart';
+import '../../../core/design/kefe_active_journey.dart';
+import '../../../core/design/kefe_surface.dart';
+import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/design/product_preview_visual_mode.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../context/presentation/context_section.dart';
@@ -9,6 +13,7 @@ import '../../onboarding/application/onboarding_controller.dart';
 import '../application/decision_controller.dart';
 import '../domain/decision_models.dart';
 import 'case_hero_header.dart';
+import 'decision_journey_stage_resolver.dart';
 import 'perspective_section.dart';
 import 'question_input.dart';
 import 'reason_input.dart';
@@ -54,6 +59,7 @@ class _DecisionFlowScreenState extends ConsumerState<DecisionFlowScreen> {
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
     final state = ref.watch(decisionControllerProvider);
+    final experience = ref.watch(experiencePresentationConfigProvider);
 
     ref.listen<DecisionState>(decisionControllerProvider, (
       previous,
@@ -84,8 +90,15 @@ class _DecisionFlowScreenState extends ConsumerState<DecisionFlowScreen> {
                   retryLabel: strings.retry,
                   onRetry: _load,
                 )
-              : _DecisionContent(
-                  key: ValueKey('content-${state.caseData!.id}'),
+              : experience.decisionJourneyMode ==
+                    DecisionJourneyPresentationMode.progressive
+              ? _ProgressiveDecisionContent(
+                  key: ValueKey('progressive-content-${state.caseData!.id}'),
+                  state: state,
+                  firstUse: widget.firstUse,
+                )
+              : _LegacyDecisionContent(
+                  key: ValueKey('legacy-content-${state.caseData!.id}'),
                   state: state,
                   firstUse: widget.firstUse,
                 ),
@@ -95,8 +108,102 @@ class _DecisionFlowScreenState extends ConsumerState<DecisionFlowScreen> {
   }
 }
 
-class _DecisionContent extends ConsumerWidget {
-  const _DecisionContent({
+class _ProgressiveDecisionContent extends ConsumerStatefulWidget {
+  const _ProgressiveDecisionContent({
+    required this.state,
+    required this.firstUse,
+    super.key,
+  });
+
+  final DecisionState state;
+  final bool firstUse;
+
+  @override
+  ConsumerState<_ProgressiveDecisionContent> createState() =>
+      _ProgressiveDecisionContentState();
+}
+
+class _ProgressiveDecisionContentState
+    extends ConsumerState<_ProgressiveDecisionContent> {
+  bool _showPerspectives = false;
+
+  @override
+  void didUpdateWidget(covariant _ProgressiveDecisionContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final previousStep = DecisionJourneyStageResolver.primary(
+      oldWidget.state.flowRuntime!,
+    );
+    final nextStep = DecisionJourneyStageResolver.primary(
+      widget.state.flowRuntime!,
+    );
+    if (oldWidget.state.caseData?.id != widget.state.caseData?.id ||
+        previousStep?.code != nextStep?.code ||
+        widget.state.reveal == null) {
+      _showPerspectives = false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
+    final state = widget.state;
+    final caseData = state.caseData!;
+    final flowRuntime = state.flowRuntime!;
+    final productPreviewVisual = ref.watch(productPreviewVisualModeProvider);
+    final activeStep = DecisionJourneyStageResolver.primary(flowRuntime);
+
+    return ListView(
+      key: const ValueKey('progressive-decision-journey'),
+      padding: const EdgeInsets.all(20),
+      children: [
+        if (productPreviewVisual)
+          CaseHeroHeader(caseData: caseData, flowRuntime: flowRuntime)
+        else ...[
+          Text(
+            caseData.title,
+            key: const ValueKey('case-title'),
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          const SizedBox(height: 12),
+          Text(caseData.summary, style: Theme.of(context).textTheme.bodyLarge),
+        ],
+        const SizedBox(height: 20),
+        if (activeStep == null)
+          _JourneyUnavailableCard(message: strings.flowRuntimeUnavailable)
+        else
+          KefeActiveJourney(
+            stageId: activeStep.code,
+            eyebrow: strings.activeJourneyEyebrow,
+            title: strings.activeJourneyTitle(activeStep.primitiveCode),
+            subtitle: strings.activeJourneyHelper,
+            progressLabel: strings.activeJourneyProgress(
+              DecisionJourneyStageResolver.ordinal(flowRuntime, activeStep),
+              flowRuntime.steps.length,
+            ),
+            icon: _iconForPrimitive(activeStep.primitiveCode),
+            child: _FlowStepSection(
+              key: ValueKey('active-flow-step-${activeStep.code}'),
+              step: activeStep,
+              state: state,
+              firstUse: widget.firstUse,
+              progressiveResultDisclosure: true,
+              showPerspectives: _showPerspectives,
+              onShowPerspectives: () {
+                setState(() => _showPerspectives = true);
+              },
+            ),
+          ),
+        if (state.errorCode != null) ...[
+          const SizedBox(height: 16),
+          _DecisionStatusMessage(state: state),
+        ],
+      ],
+    );
+  }
+}
+
+class _LegacyDecisionContent extends ConsumerWidget {
+  const _LegacyDecisionContent({
     required this.state,
     required this.firstUse,
     super.key,
@@ -107,12 +214,12 @@ class _DecisionContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final strings = KefeStrings.of(context);
     final caseData = state.caseData!;
     final flowRuntime = state.flowRuntime!;
     final productPreviewVisual = ref.watch(productPreviewVisualModeProvider);
 
     return ListView(
+      key: const ValueKey('legacy-decision-long-scroll'),
       padding: const EdgeInsets.all(20),
       children: [
         if (productPreviewVisual)
@@ -136,21 +243,33 @@ class _DecisionContent extends ConsumerWidget {
           ),
         if (state.errorCode != null) ...[
           const SizedBox(height: 16),
-          Semantics(
-            liveRegion: true,
-            child: Text(
-              strings.messageForCode(state.errorCode),
-              key: const ValueKey('decision-status-message'),
-              style: TextStyle(
-                color: state.offlineDraft
-                    ? Theme.of(context).colorScheme.secondary
-                    : Theme.of(context).colorScheme.error,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
+          _DecisionStatusMessage(state: state),
         ],
       ],
+    );
+  }
+}
+
+class _DecisionStatusMessage extends StatelessWidget {
+  const _DecisionStatusMessage({required this.state});
+
+  final DecisionState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
+    return Semantics(
+      liveRegion: true,
+      child: Text(
+        strings.messageForCode(state.errorCode),
+        key: const ValueKey('decision-status-message'),
+        style: TextStyle(
+          color: state.offlineDraft
+              ? Theme.of(context).colorScheme.secondary
+              : Theme.of(context).colorScheme.error,
+        ),
+        textAlign: TextAlign.center,
+      ),
     );
   }
 }
@@ -160,12 +279,18 @@ class _FlowStepSection extends ConsumerWidget {
     required this.step,
     required this.state,
     required this.firstUse,
+    this.progressiveResultDisclosure = false,
+    this.showPerspectives = true,
+    this.onShowPerspectives,
     super.key,
   });
 
   final FlowRuntimeStep step;
   final DecisionState state;
   final bool firstUse;
+  final bool progressiveResultDisclosure;
+  final bool showPerspectives;
+  final VoidCallback? onShowPerspectives;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -292,6 +417,7 @@ class _FlowStepSection extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    final strings = KefeStrings.of(context);
     final controller = ref.read(decisionControllerProvider.notifier);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -300,16 +426,53 @@ class _FlowStepSection extends ConsumerWidget {
           reveal: state.reveal!,
           selectedOption: state.selectedOption,
         ),
-        const SizedBox(height: 20),
-        PerspectiveSection(
-          state: state.perspectiveState,
-          result: state.perspective,
-          reasonPendingModeration: state.reasonPendingModeration,
-          onRetry: controller.retryPerspective,
-        ),
-        if (firstUse) ...[
+        if (progressiveResultDisclosure && !showPerspectives) ...[
+          const SizedBox(height: 16),
+          KefeSurface(
+            key: const ValueKey('perspective-disclosure-prompt'),
+            tone: KefeSurfaceTone.raised,
+            borderRadius: 18,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  strings.perspectiveDisclosureTitle,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: context.kefeVisual.foreground,
+                        fontWeight: FontWeight.w900,
+                      ),
+                ),
+                const SizedBox(height: 7),
+                Text(
+                  strings.perspectiveDisclosureBody,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: context.kefeVisual.mutedForeground,
+                        height: 1.4,
+                      ),
+                ),
+                const SizedBox(height: 14),
+                FilledButton.icon(
+                  key: const ValueKey('show-perspectives-button'),
+                  onPressed: onShowPerspectives,
+                  icon: const Icon(Icons.forum_outlined),
+                  label: Text(strings.perspectiveDisclosureAction),
+                ),
+              ],
+            ),
+          ),
+        ] else ...[
           const SizedBox(height: 20),
-          _FirstUseCompletionCard(onContinue: () => context.go('/explore')),
+          PerspectiveSection(
+            state: state.perspectiveState,
+            result: state.perspective,
+            reasonPendingModeration: state.reasonPendingModeration,
+            onRetry: controller.retryPerspective,
+          ),
+          if (firstUse) ...[
+            const SizedBox(height: 20),
+            _FirstUseCompletionCard(onContinue: () => context.go('/explore')),
+          ],
         ],
       ],
     );
@@ -401,6 +564,23 @@ class _CapabilityPendingCard extends StatelessWidget {
   }
 }
 
+class _JourneyUnavailableCard extends StatelessWidget {
+  const _JourneyUnavailableCard({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      key: const ValueKey('active-journey-unavailable'),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Text(message),
+      ),
+    );
+  }
+}
+
 class _FirstUseCompletionCard extends StatelessWidget {
   const _FirstUseCompletionCard({required this.onContinue});
 
@@ -459,3 +639,11 @@ class _ErrorState extends StatelessWidget {
     );
   }
 }
+
+IconData _iconForPrimitive(String primitiveCode) => switch (primitiveCode) {
+  'CONTEXT' => Icons.article_outlined,
+  'DECISION' => Icons.balance_rounded,
+  'COLLECTIVE_RESULT' => Icons.insights_rounded,
+  'REFLECTION' => Icons.route_rounded,
+  _ => Icons.extension_outlined,
+};
