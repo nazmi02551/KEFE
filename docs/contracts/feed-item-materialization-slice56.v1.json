@@ -1,0 +1,88 @@
+{
+  "contract": "feed-item-materialization-slice56",
+  "version": 1,
+  "status": "accepted",
+  "input": {
+    "proposal_kind": "FEED_ITEM",
+    "payload_schema_ref": "kefe.feed-item",
+    "payload_schema_version": "1.0.0",
+    "exact_payload_fields": [
+      "source_artifact_id",
+      "feed_content_hash",
+      "feed_storage_ref",
+      "feed_format",
+      "feed_title",
+      "item_id",
+      "item_title",
+      "item_url",
+      "published_at",
+      "summary_text"
+    ],
+    "review_decision": "ACCEPTED",
+    "review_required": true
+  },
+  "lineage": {
+    "source_artifact_required": true,
+    "source_id_exact_match": true,
+    "feed_content_hash_exact_match": true,
+    "feed_storage_ref_exact_match": true,
+    "language_inherited_from_source": true,
+    "jurisdiction_inherited_from_source": true
+  },
+  "target": {
+    "target_kind": "NORMALIZED_ARTIFACT",
+    "artifact_kind": "EXTERNAL_EVIDENCE",
+    "deterministic_uuid_v5": true,
+    "normalized_at": "review_decided_at",
+    "canonical_text": "title_blank_line_optional_summary",
+    "content_hash": "sha256_utf8_canonical_text",
+    "idempotent_exact_replay": true,
+    "conflicting_target": "fail_closed"
+  },
+  "metadata": {
+    "fields": [
+      "schema_ref",
+      "schema_version",
+      "feed_format",
+      "feed_title",
+      "item_id",
+      "item_url",
+      "published_at",
+      "proposal_id",
+      "review_id",
+      "reviewer_ref",
+      "provenance_ref"
+    ],
+    "raw_feed_bytes": false,
+    "raw_storage_ref_copied": false,
+    "credential_material": false,
+    "backend_object_key": false
+  },
+  "separation": {
+    "dedicated_materializer": true,
+    "knowledge_materializer_feed_item_handler": false,
+    "automatic_review": false,
+    "automatic_claim_creation": false,
+    "automatic_case_creation": false,
+    "automatic_projection": false,
+    "automatic_publication": false
+  },
+  "persistence": {
+    "memory_idempotency": true,
+    "postgres_idempotency": true,
+    "schema_migration": false
+  },
+  "composition": {
+    "production_materializer_composed": true,
+    "production_automatic_materializations": 0
+  },
+  "validation": {
+    "dedicated_ci": "Feed Item Materialization CI",
+    "memory_behavior": true,
+    "postgres_behavior": true,
+    "parent_ingestion_gate": true,
+    "parent_feed_item_gate": true,
+    "parent_route_gate": true,
+    "api_mvp_global_gates": true
+  }
+}
