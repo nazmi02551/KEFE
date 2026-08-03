@@ -130,7 +130,6 @@ def main() -> None:
     if states["MATERIALIZED"].get("review_binding_exact") is not True:
         fail("MATERIALIZED review binding drifted")
 
-    service_tree = ast.parse(service)
     classes = class_map(service)
     enum_node = classes.get("FeedItemMaterializationStatus")
     snapshot = classes.get("FeedItemMaterializationStatusSnapshot")
