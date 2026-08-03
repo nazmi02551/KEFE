@@ -1,0 +1,114 @@
+{
+  "contract": "current-stack-progressive-decision-journey",
+  "version": "1.0.0",
+  "date": "2026-08-03",
+  "issue": 277,
+  "adr": "ADR-0094",
+  "base_pr": 276,
+  "base_sha": "a2602b27bf238e7d7e886afa90c9d2acd8338115",
+  "capabilities": [
+    "CAP-001",
+    "CAP-008",
+    "CAP-009",
+    "CAP-031",
+    "CAP-035",
+    "CAP-095"
+  ],
+  "scope": {
+    "mobile_decision_presentation": true,
+    "onboarding_v2": true,
+    "shared_progressive_component": true,
+    "backend_change": false,
+    "api_change": false,
+    "migration_change": false,
+    "persistence_change": false,
+    "flow_contract_change": false
+  },
+  "visual_foundation": {
+    "current_stack_authoritative": true,
+    "semantic_tokens_required": true,
+    "kefe_surface_required": true,
+    "reduce_motion_required": true,
+    "dark_and_light_required": true,
+    "older_pr118_screen_replacement_forbidden": true
+  },
+  "active_step": {
+    "runtime_authoritative": true,
+    "furthest_ready_preferred": true,
+    "furthest_unsupported_fallback": true,
+    "furthest_completed_terminal_fallback": true,
+    "one_primary_runtime_step": true,
+    "case_specific_order_forbidden": true,
+    "repeated_primitives_supported": true,
+    "blocked_content_hidden": true
+  },
+  "context": {
+    "progressive_explicit_continue": true,
+    "continue_label_tr": "İnceledim — devam et",
+    "legacy_automatic_exposure_preserved": true,
+    "new_domain_primitive": false
+  },
+  "result_disclosure": {
+    "result_before_perspectives": true,
+    "perspective_user_action_required": true,
+    "perspective_before_commit": false,
+    "commit_replay": false,
+    "answer_replay": false,
+    "private_reason_replay": false,
+    "independent_post_commit_capabilities_remain_reachable": true
+  },
+  "onboarding": {
+    "v2_page_count": 3,
+    "own_decision_first": true,
+    "decision_distribution_position": true,
+    "different_perspectives": true,
+    "observed_journey_language": true,
+    "person_social_rank_claim": false,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "causal_inference": false,
+    "tr_en_required": true,
+    "legacy_v1_retained": true
+  },
+  "rollback": {
+    "legacy_decision_screen_retained": true,
+    "legacy_onboarding_retained": true,
+    "decision_build_switch": "KEFE_PROGRESSIVE_DECISION_JOURNEY",
+    "onboarding_build_switch": "KEFE_ONBOARDING_V2",
+    "new_build_default": true,
+    "direct_app_provider_default_legacy": true,
+    "remote_kill_switch_claimed": false,
+    "operator_validated_rollback_claimed": false
+  },
+  "apk": {
+    "installable_entrypoint": "lib/main_preview.dart",
+    "production_entrypoint_handoff_forbidden": true,
+    "phone_artifact_contract_inherited_from_pr": 276,
+    "exact_head_required": true,
+    "artifact_id_required": true,
+    "apk_sha256_required": true
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first_where_applicable": true,
+    "immutable_case_version": true,
+    "generic_runtime": true,
+    "preview_production_isolation": true,
+    "my_kefe_descriptive_only": true,
+    "signal_scope_broadening": false
+  },
+  "verification": {
+    "api_ci_required": true,
+    "mobile_ci_required": true,
+    "mvp_beta_gates_required": true,
+    "global_readiness_required": true,
+    "phone_artifact_boundary_required": true,
+    "active_step_tests_required": true,
+    "explicit_context_tests_required": true,
+    "result_disclosure_tests_required": true,
+    "legacy_rollback_tests_required": true,
+    "onboarding_v2_tests_required": true,
+    "human_visual_approval_inferred_from_ci": false
+  }
+}
