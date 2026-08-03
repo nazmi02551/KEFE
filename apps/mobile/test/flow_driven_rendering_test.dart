@@ -264,7 +264,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('option-A')), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('option-A')));
+    await tapVisible(tester, find.byKey(const ValueKey('option-A')));
     await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
     await tester.pumpAndSettle();
 
@@ -286,7 +286,7 @@ void main() {
     expect(repository.exposureCalls, 1);
     expect(find.byKey(const ValueKey('option-B')), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('option-B')));
+    await tapVisible(tester, find.byKey(const ValueKey('option-B')));
     await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
     await tester.pumpAndSettle();
 
