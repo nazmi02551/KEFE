@@ -79,9 +79,11 @@ class PublicHttpFeedCaptureAdapter:
         evidence_store: RawSourceEvidenceStore,
     ) -> None:
         require_versioned_adapter_code(definition.adapter_code)
-        if type(definition.parse_limits) is not FeedParseLimits:
+        parse_limits = definition.parse_limits
+        if type(parse_limits) is not FeedParseLimits:
             raise ValueError("parse_limits must be exact FeedParseLimits")
         self._adapter_code = definition.adapter_code
+        self._parse_limits = parse_limits
         self._definition = definition
         self._transport = transport
         self._evidence_store = evidence_store
@@ -124,12 +126,9 @@ class PublicHttpFeedCaptureAdapter:
         ):
             raise FinalSourceCaptureError("SOURCE_PUBLIC_HTTP_ADAPTER_MISMATCH")
 
-        response = self._execute(plan, at=at)
+        response = self._execute(plan)
         seal = self._seal(response, at=at)
-        parsed = parse_rss_atom(
-            response.body,
-            limits=self._definition.parse_limits,
-        )
+        parsed = parse_rss_atom(response.body, limits=self._parse_limits)
         canonical_url = parsed.canonical_url or external_locator
         return CapturedSource(
             content_hash=seal.content_hash,
@@ -138,13 +137,7 @@ class PublicHttpFeedCaptureAdapter:
             raw_storage_ref=seal.storage_ref,
         )
 
-    def _execute(
-        self,
-        plan: ProviderHttpCapturePlan,
-        *,
-        at: datetime,
-    ) -> ProviderHttpResponse:
-        del at
+    def _execute(self, plan: ProviderHttpCapturePlan) -> ProviderHttpResponse:
         try:
             response = self._transport.execute(plan.request, credential=None)
         except RetryableProviderHttpError as exc:
