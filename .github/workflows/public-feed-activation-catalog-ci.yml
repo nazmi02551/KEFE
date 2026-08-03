@@ -15,6 +15,7 @@ on:
       - 'services/api/tools/export_public_feed_activation_catalog_openapi_overlay.py'
       - 'services/api/tools/export_admin_proposal_queue_openapi_overlay.py'
       - 'services/api/tools/export_mvp_openapi_overlay.py'
+      - 'services/api/tools/export_global_openapi_overlay.py'
       - 'services/api/tools/export_openapi.py'
       - 'docs/adr/0091-immutable-public-feed-activation-catalog-and-read-only-admin-inspection.md'
       - 'docs/contracts/public-feed-activation-catalog-slice55.v1.json'
@@ -35,6 +36,7 @@ on:
       - 'services/api/tools/export_public_feed_activation_catalog_openapi_overlay.py'
       - 'services/api/tools/export_admin_proposal_queue_openapi_overlay.py'
       - 'services/api/tools/export_mvp_openapi_overlay.py'
+      - 'services/api/tools/export_global_openapi_overlay.py'
       - 'services/api/tools/export_openapi.py'
       - 'docs/adr/0091-immutable-public-feed-activation-catalog-and-read-only-admin-inspection.md'
       - 'docs/contracts/public-feed-activation-catalog-slice55.v1.json'
@@ -75,6 +77,7 @@ jobs:
           tools/export_public_feed_activation_catalog_openapi_overlay.py
           tools/export_admin_proposal_queue_openapi_overlay.py
           tools/export_mvp_openapi_overlay.py
+          tools/export_global_openapi_overlay.py
           tools/export_openapi.py
       - name: Activation catalog architecture fitness
         working-directory: services/api
