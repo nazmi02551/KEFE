@@ -40,6 +40,7 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
                 {
                     AdminCapability.CONTENT_REVIEW,
                     AdminCapability.SOURCE_VERIFY,
+                    AdminCapability.SOURCE_MANAGE,
                     AdminCapability.RISK_REVIEW,
                     AdminCapability.AUDIT_READ,
                 }
