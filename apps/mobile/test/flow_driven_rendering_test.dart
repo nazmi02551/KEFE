@@ -269,8 +269,21 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repository.initialCommitted, isTrue);
-    expect(repository.contextExposed, isTrue);
+    expect(repository.contextExposed, isFalse);
     expect(repository.revealCalls, 0);
+    expect(
+      find.byKey(const ValueKey('context-continue-button')),
+      findsOneWidget,
+    );
+
+    await tapVisible(
+      tester,
+      find.byKey(const ValueKey('context-continue-button')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(repository.contextExposed, isTrue);
+    expect(repository.exposureCalls, 1);
     expect(find.byKey(const ValueKey('option-B')), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('option-B')));
