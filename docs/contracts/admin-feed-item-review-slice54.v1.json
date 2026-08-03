@@ -1,0 +1,119 @@
+{
+  "contract": "admin-feed-item-review-slice54",
+  "status": "accepted",
+  "api": {
+    "minimum_version": "0.21.0",
+    "absent_before_version": "0.21.0",
+    "list_path": "/internal/admin/v1/feed-items",
+    "detail_path": "/internal/admin/v1/feed-items/{proposal_id}",
+    "authorization_capability": "CONTENT_REVIEW",
+    "mutation_endpoint_added": false,
+    "raw_evidence_dereference_endpoint_added": false
+  },
+  "source_contract": {
+    "proposal_kind": "FEED_ITEM",
+    "payload_schema_ref": "kefe.feed-item",
+    "payload_schema_version": "1.0.0",
+    "pipeline_code": "RSS_ATOM_FEED_ITEM_EXTRACTION",
+    "pipeline_version": "1.0.0",
+    "risk_code": "UNREVIEWED_EXTERNAL_FEED_ITEM",
+    "input_artifact_kind": "SOURCE_ARTIFACT",
+    "exact_payload_keys": [
+      "feed_content_hash",
+      "feed_format",
+      "feed_storage_ref",
+      "feed_title",
+      "item_id",
+      "item_title",
+      "item_url",
+      "published_at",
+      "source_artifact_id",
+      "summary_text"
+    ]
+  },
+  "integrity": {
+    "canonical_uuid": true,
+    "canonical_sha256": true,
+    "canonical_evidence_reference": true,
+    "canonical_http_url": true,
+    "canonical_utc_timestamp": true,
+    "source_artifact_match": true,
+    "run_input_identity_match": true,
+    "proposal_provenance_match": true,
+    "configuration_version_match": true,
+    "malformed_record_behavior": "FAIL_CLOSED"
+  },
+  "list_response_fields": [
+    "created_at",
+    "feed_format",
+    "feed_title",
+    "item_id",
+    "item_title",
+    "item_url",
+    "jurisdiction_code",
+    "locale",
+    "proposal_id",
+    "published_at",
+    "review_state",
+    "risk_code",
+    "source_artifact_id"
+  ],
+  "detail_additional_fields": [
+    "configuration_version",
+    "evidence_ref",
+    "feed_content_hash",
+    "pipeline_code",
+    "pipeline_version",
+    "review",
+    "run_id",
+    "summary_text"
+  ],
+  "forbidden_response_fields": [
+    "backend_object_key",
+    "credential",
+    "headers",
+    "payload",
+    "raw_body",
+    "raw_bytes",
+    "request_query",
+    "secret"
+  ],
+  "pagination": {
+    "mode": "KEYSET",
+    "cursor_owner": "SecuredProposalQueueService",
+    "offset_supported": false,
+    "max_limit": 100
+  },
+  "review": {
+    "existing_generic_review_endpoint_only": true,
+    "automatic_acceptance": false,
+    "automatic_materialization": false,
+    "automatic_projection": false,
+    "automatic_case_creation": false,
+    "automatic_publication": false
+  },
+  "evidence": {
+    "memory_http": true,
+    "postgres_http": true,
+    "openapi_exact_gate": true,
+    "architecture_fitness": true,
+    "parent_feed_item_gate": true,
+    "parent_admin_queue_gate": true
+  },
+  "error_codes": {
+    "not_found": "ADMIN_FEED_ITEM_NOT_FOUND",
+    "contract_invalid": "ADMIN_FEED_ITEM_CONTRACT_INVALID"
+  },
+  "non_goals": [
+    "admin_web_ui",
+    "raw_evidence_viewer",
+    "provider_activation",
+    "live_feed_scheduling",
+    "semantic_classification",
+    "ai_summarization",
+    "candidate_case_generation",
+    "automatic_editorial_action",
+    "mobile_feed_ui",
+    "store_release"
+  ]
+}
