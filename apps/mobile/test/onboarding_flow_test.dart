@@ -196,8 +196,7 @@ void main() {
 
       await completeOnboardingPages(tester);
 
-      await tester.tap(find.byKey(const ValueKey('option-A')));
-      await tester.pump();
+      await tapVisible(tester, find.byKey(const ValueKey('option-A')));
       await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
 
       expect(repository.commitCalls, 1);
