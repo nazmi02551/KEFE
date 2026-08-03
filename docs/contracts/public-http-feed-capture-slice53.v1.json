@@ -1,0 +1,54 @@
+{
+  "contract": "public-http-feed-capture-slice53",
+  "version": "1.0.0",
+  "status": "accepted",
+  "execution": {
+    "credential_mode": "PUBLIC",
+    "secret_access": false,
+    "auth_registry_access": false,
+    "transport": "CONTROLLED_PROVIDER_HTTP_TRANSPORT",
+    "credential_argument": null,
+    "single_request_plan": true
+  },
+  "order": [
+    "VALIDATE_INPUT",
+    "BUILD_EXACT_PLAN",
+    "EXECUTE_CONTROLLED_HTTP",
+    "SEAL_RAW_EVIDENCE",
+    "VERIFY_EVIDENCE",
+    "PARSE_STRICT_RSS_ATOM",
+    "ASSEMBLE_CAPTURED_SOURCE"
+  ],
+  "trusted_fields": {
+    "content_hash": "RAW_EVIDENCE_SEAL",
+    "raw_storage_ref": "RAW_EVIDENCE_SEAL",
+    "byte_length": "RAW_EVIDENCE_SEAL",
+    "media_type": "RAW_EVIDENCE_SEAL"
+  },
+  "parser": {
+    "contract": "rss-atom-parser-slice52",
+    "runs_after_valid_seal": true,
+    "can_set_integrity_fields": false
+  },
+  "failure_codes": [
+    "SOURCE_PUBLIC_HTTP_PLAN_INVALID",
+    "SOURCE_PUBLIC_HTTP_ADAPTER_MISMATCH",
+    "SOURCE_PUBLIC_HTTP_EXECUTION_INVALID",
+    "SOURCE_RAW_EVIDENCE_STORE_UNAVAILABLE",
+    "SOURCE_RAW_EVIDENCE_STORE_FINAL",
+    "SOURCE_RAW_EVIDENCE_CONTRACT_INVALID"
+  ],
+  "composition": {
+    "production_public_adapters_registered": 0,
+    "production_adoption_profiles_registered": 0,
+    "real_network_backend": false
+  },
+  "excluded": [
+    "REAL_FEED",
+    "LIVE_ENDPOINT",
+    "ENTRY_STAGING",
+    "AUTOMATIC_SCHEDULING",
+    "AUTOMATIC_EDITORIAL_ACTION",
+    "PUBLICATION"
+  ]
+}
