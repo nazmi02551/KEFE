@@ -22,9 +22,9 @@ FlowRuntimeSnapshot runtime(List<FlowRuntimeStep> steps) => FlowRuntimeSnapshot(
     );
 
 void main() {
-  test('prefers the first runtime-ready step', () {
+  test('prefers the furthest runtime-ready step', () {
     final snapshot = runtime([
-      step('context', FlowStepRuntimeState.completed),
+      step('context', FlowStepRuntimeState.ready),
       step('decision', FlowStepRuntimeState.ready),
       step('result', FlowStepRuntimeState.blocked),
     ]);
