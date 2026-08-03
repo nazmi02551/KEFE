@@ -273,8 +273,7 @@ class FeedItemProposalMaterializer:
         proposal: Proposal,
         review: ProposalReviewDecision,
     ) -> str:
-        base = proposal.provenance_ref or f"proposal:{proposal.id}"
-        value = f"{base};review:{review.id}"
+        value = f"proposal:{proposal.id};review:{review.id}"
         if len(value) > MAX_PROVENANCE_CHARS:
             raise ValueError("feed item provenance exceeds the supported budget")
         return value
