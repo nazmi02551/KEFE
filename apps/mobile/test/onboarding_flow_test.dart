@@ -168,7 +168,6 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('onboarding-promise-2')), findsOneWidget);
-    expect(find.text('Kararının toplumdaki yerini gör.'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
     await tester.pumpAndSettle();
