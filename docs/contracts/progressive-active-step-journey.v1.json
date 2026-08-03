@@ -1,0 +1,84 @@
+{
+  "contract": "progressive-active-step-journey",
+  "version": "1.0.0",
+  "date": "2026-08-03",
+  "issue": 277,
+  "base_pr": 118,
+  "scope": {
+    "mobile_decision_flow_presentation": true,
+    "onboarding_copy_v2": true,
+    "shared_active_journey_component": true,
+    "backend_change": false,
+    "api_change": false,
+    "persistence_change": false,
+    "flow_contract_change": false
+  },
+  "active_step": {
+    "runtime_authoritative": true,
+    "ready_step_preferred": true,
+    "unsupported_step_fallback": true,
+    "invented_default_order_forbidden": true,
+    "one_primary_runtime_step": true,
+    "completed_steps_full_render_default": false,
+    "blocked_step_content_rendered": false,
+    "repeated_primitives_supported": true,
+    "local_result_disclosure_is_not_flow_step": true
+  },
+  "rollback": {
+    "legacy_renderer_retained": true,
+    "decision_presentation_build_switch_required": true,
+    "onboarding_version_build_switch_required": true,
+    "new_experience_default": true,
+    "git_revert_supported": true,
+    "remote_kill_switch_claimed": false,
+    "operator_validated_rollback_claimed": false
+  },
+  "onboarding": {
+    "page_count_v2": 3,
+    "own_decision_first": true,
+    "community_distribution_position": true,
+    "different_perspectives": true,
+    "observed_journey_language": true,
+    "person_social_rank_claim": false,
+    "personality_inference": false,
+    "ideology_inference": false,
+    "causal_inference": false,
+    "tr_en_copy_required": true,
+    "legacy_copy_available": true
+  },
+  "reuse_policy": {
+    "shared_design_component_required": true,
+    "authoritative_current_stage_required": true,
+    "domain_state_controls_advancement": true,
+    "feeds_are_not_wizards": true,
+    "dashboards_are_not_wizards": true,
+    "comparison_views_are_not_wizards": true,
+    "reference_information_uses_progressive_disclosure": true
+  },
+  "invariants": {
+    "commit_first": true,
+    "blind_first": true,
+    "immutable_case_version": true,
+    "generic_runtime": true,
+    "preview_production_isolation": true,
+    "private_reason_not_replayed": true,
+    "result_before_commit": false,
+    "perspective_before_commit": false,
+    "signal_in_scope": false,
+    "impact_in_scope": false
+  },
+  "verification": {
+    "active_step_widget_tests_required": true,
+    "legacy_mode_widget_tests_required": true,
+    "onboarding_v2_widget_tests_required": true,
+    "onboarding_legacy_widget_tests_required": true,
+    "tr_en_required": true,
+    "light_dark_required": true,
+    "reduced_motion_required": true,
+    "format_required": true,
+    "analyzer_required": true,
+    "mobile_regression_required": true,
+    "phone_acceptance_required": true,
+    "exact_head_ci_required": true
+  }
+}
