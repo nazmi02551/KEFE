@@ -13,9 +13,17 @@ from kefe_api.modules.admin_security.router import ADMIN_CSRF_HEADER, ADMIN_SESS
 from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
     PAYLOAD_SCHEMA_REF,
     PAYLOAD_SCHEMA_VERSION,
+)
+from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
     PIPELINE_CODE as FEED_PIPELINE_CODE,
+)
+from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
     PIPELINE_VERSION as FEED_PIPELINE_VERSION,
+)
+from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
     PROPOSAL_KIND as FEED_ITEM_KIND,
+)
+from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
     RISK_CODE as FEED_ITEM_RISK,
 )
 from kefe_api.modules.ingestion_orchestration.models import (
@@ -142,9 +150,9 @@ def _seed_feed_item(app) -> tuple[UUID, UUID, SourceArtifact]:
         provenance_ref=source.raw_storage_ref,
     )
     repository.complete_successful_stage(execution, (proposal,))
-    repository.update_run(
-        repository.get_run(run.id).transition(IngestionRunState.SUCCEEDED)
-    )
+    parent = repository.get_run(run.id)
+    assert parent is not None
+    repository.update_run(parent.transition(IngestionRunState.SUCCEEDED))
     return run.id, proposal.id, source
 
 
