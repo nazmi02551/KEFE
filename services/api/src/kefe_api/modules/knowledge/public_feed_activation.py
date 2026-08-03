@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from hashlib import sha256
 from json import dumps
+from time import monotonic_ns
 from types import MappingProxyType
 from typing import Protocol
 from urllib.parse import parse_qsl, urlsplit
@@ -20,10 +21,14 @@ from kefe_api.modules.knowledge.provider_control import (
     SourceProviderCapability,
 )
 from kefe_api.modules.knowledge.provider_http_transport import (
+    ControlledProviderHttpTransport,
     InMemoryProviderAdoptionRegistry,
+    PinnedHttpBackend,
     ProviderAdoptionProfile,
     ProviderAdoptionRegistry,
+    ProviderDnsResolver,
     ProviderHttpMethod,
+    ProviderHttpObserver,
 )
 from kefe_api.modules.knowledge.provider_public_execution import (
     InMemoryPublicSourceCaptureRegistry,
@@ -36,6 +41,7 @@ from kefe_api.modules.knowledge.rss_atom_capture import (
     StrictRssAtomCaptureDefinition,
     StrictRssAtomParseProfile,
 )
+from kefe_api.modules.knowledge.source_evidence import RawSourceEvidenceStore
 from kefe_api.modules.knowledge.source_identity import require_versioned_adapter_code
 from kefe_api.modules.knowledge.source_scheduler import (
     MAXIMUM_DISPATCH_ATTEMPTS,
@@ -410,6 +416,7 @@ class PublicFeedActivationBundle:
     activation_registry: PublicFeedActivationRegistry
     adoption_registry: ProviderAdoptionRegistry
     public_capture_registry: PublicSourceCaptureRegistry
+    provider_http_transport: ControlledProviderHttpTransport
     capabilities: tuple[SourceProviderCapability, ...]
     schedule_seeds: tuple[PublicFeedScheduleSeed, ...]
 
@@ -418,9 +425,17 @@ class PublicFeedActivationBundleFactory:
     def __init__(
         self,
         *,
-        adapter_factory: EvidenceBackedPublicHttpCaptureAdapterFactory,
+        dns_resolver: ProviderDnsResolver,
+        backend: PinnedHttpBackend,
+        observer: ProviderHttpObserver,
+        evidence_store: RawSourceEvidenceStore,
+        monotonic_clock=monotonic_ns,
     ) -> None:
-        self._adapter_factory = adapter_factory
+        self._dns_resolver = dns_resolver
+        self._backend = backend
+        self._observer = observer
+        self._evidence_store = evidence_store
+        self._monotonic_clock = monotonic_clock
 
     def build(
         self,
@@ -431,8 +446,19 @@ class PublicFeedActivationBundleFactory:
         adoption_registry = InMemoryProviderAdoptionRegistry(
             tuple(item.adoption_profile for item in ordered)
         )
+        transport = ControlledProviderHttpTransport(
+            adoption_registry=adoption_registry,
+            dns_resolver=self._dns_resolver,
+            backend=self._backend,
+            observer=self._observer,
+            monotonic_clock=self._monotonic_clock,
+        )
+        adapter_factory = EvidenceBackedPublicHttpCaptureAdapterFactory(
+            transport=transport,
+            evidence_store=self._evidence_store,
+        )
         adapters = tuple(
-            self._adapter_factory.create(item.capture_definition())
+            adapter_factory.create(item.capture_definition())
             for item in ordered
         )
         public_capture_registry = InMemoryPublicSourceCaptureRegistry(adapters)
@@ -440,6 +466,7 @@ class PublicFeedActivationBundleFactory:
             activation_registry=activation_registry,
             adoption_registry=adoption_registry,
             public_capture_registry=public_capture_registry,
+            provider_http_transport=transport,
             capabilities=tuple(item.capability for item in ordered),
             schedule_seeds=tuple(item.schedule_seed() for item in ordered),
         )
