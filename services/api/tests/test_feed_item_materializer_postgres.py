@@ -13,8 +13,8 @@ from kefe_api.infrastructure.postgres_ingestion_orchestration import (
 )
 from kefe_api.infrastructure.postgres_knowledge import PostgresKnowledgeRepository
 from kefe_api.modules.ingestion_orchestration.feed_item_materializer import (
-    FeedItemProposalMaterializer,
     TARGET_KIND,
+    FeedItemProposalMaterializer,
 )
 from kefe_api.modules.ingestion_orchestration.models import (
     ExecutorKind,
