@@ -375,7 +375,7 @@ class SecuredSourceBriefIngestionService:
         )
         try:
             self._repository.complete_successful_stage(execution, (proposal,))
-        except ValueError:
+        except ValueError as exc:
             recovered = self._recover(
                 run=current,
                 stage_id=expected_stage_id,
@@ -383,7 +383,10 @@ class SecuredSourceBriefIngestionService:
             )
             if recovered is not None:
                 return recovered
-            raise
+            raise _domain_error(
+                "ADMIN_SOURCE_BRIEF_RUN_INVALID",
+                "Source Brief atomic stage batch could not be recovered",
+            ) from exc
         completed = self._ingestion.mark_succeeded(current.id)
         return completed, proposal
 
