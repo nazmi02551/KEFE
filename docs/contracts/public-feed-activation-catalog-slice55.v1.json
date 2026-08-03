@@ -1,0 +1,77 @@
+{
+  "contract": "public-feed-activation-catalog-slice55",
+  "version": "1.0.0",
+  "status": "accepted",
+  "entry": {
+    "frozen": true,
+    "slotted": true,
+    "manifest_schema": "kefe.public-feed-activation-manifest/1.0.0",
+    "manifest_encoding": "canonical-json",
+    "configuration_hash": "sha256-canonical-json",
+    "manifest_owned_on_read": true,
+    "secret_ref": false,
+    "authorization_header": false,
+    "cookie_header": false,
+    "backend_object_key": false
+  },
+  "repository": {
+    "operations": [
+      "create_or_get",
+      "get_by_activation_code",
+      "get_by_adapter_code",
+      "list_entries"
+    ],
+    "update": false,
+    "delete": false,
+    "enable": false,
+    "schedule": false,
+    "capture": false,
+    "activate": false,
+    "exact_rerecord_idempotent": true,
+    "activation_code_unique": true,
+    "adapter_code_unique": true,
+    "configuration_hash_unique": true,
+    "bounded_deterministic_listing": true
+  },
+  "postgres": {
+    "revision": "20260803_0026",
+    "down_revision": "20260803_0025",
+    "table": "knowledge.public_feed_activation_catalog",
+    "insert_only_repository": true,
+    "downgrade_blocked_when_nonempty": true
+  },
+  "admin_http": {
+    "required_capability": "SOURCE_VERIFY",
+    "routes": [
+      "GET /internal/admin/v1/public-feed-activations",
+      "GET /internal/admin/v1/public-feed-activations/{activation_code}"
+    ],
+    "post": false,
+    "put": false,
+    "patch": false,
+    "delete": false,
+    "csrf_for_reads": false,
+    "authentication_required": true
+  },
+  "production": {
+    "catalog_entries_seeded": 0,
+    "activation_bundles_built": 0,
+    "schedules_installed": 0,
+    "public_feed_adapters_registered": 0,
+    "feed_item_workers_registered": 0
+  },
+  "excluded": [
+    "provider_approval",
+    "feed_activation",
+    "schedule_installation",
+    "capture_execution",
+    "live_network",
+    "deployed_egress_proof",
+    "deployed_object_storage_proof",
+    "automatic_review",
+    "automatic_publication",
+    "admin_write_api",
+    "admin_ui",
+    "phone_facing_provider_behavior"
+  ]
+}

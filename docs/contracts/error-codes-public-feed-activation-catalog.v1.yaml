@@ -1,0 +1,5 @@
+registry_version: 1.0.0
+errors:
+- code: PUBLIC_FEED_ACTIVATION_CATALOG_NOT_FOUND
+  http_status: 404
+  retryable: false

@@ -244,6 +244,6 @@ def test_migration_downgrade_refuses_public_rows_and_preserves_head() -> None:
         with engine.connect() as connection:
             assert connection.execute(
                 text("SELECT version_num FROM alembic_version")
-            ).scalar_one() == "20260803_0025"
+            ).scalar_one() == "20260803_0026"
     finally:
         _cleanup(engine, adapter_code)

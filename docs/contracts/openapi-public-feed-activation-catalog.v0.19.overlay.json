@@ -1,0 +1,255 @@
+{
+  "components": {
+    "schemas": {
+      "PublicFeedActivationCatalogDetailResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "activation_code": {
+            "title": "Activation Code",
+            "type": "string"
+          },
+          "adapter_code": {
+            "title": "Adapter Code",
+            "type": "string"
+          },
+          "configuration_hash": {
+            "title": "Configuration Hash",
+            "type": "string"
+          },
+          "evidence_ref": {
+            "title": "Evidence Ref",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "manifest": {
+            "additionalProperties": true,
+            "title": "Manifest",
+            "type": "object"
+          },
+          "manifest_schema_version": {
+            "title": "Manifest Schema Version",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "recorded_by": {
+            "title": "Recorded By",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "activation_code",
+          "adapter_code",
+          "configuration_hash",
+          "manifest_schema_version",
+          "evidence_ref",
+          "recorded_by",
+          "recorded_at",
+          "manifest"
+        ],
+        "title": "PublicFeedActivationCatalogDetailResponse",
+        "type": "object"
+      },
+      "PublicFeedActivationCatalogItemResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "activation_code": {
+            "title": "Activation Code",
+            "type": "string"
+          },
+          "adapter_code": {
+            "title": "Adapter Code",
+            "type": "string"
+          },
+          "configuration_hash": {
+            "title": "Configuration Hash",
+            "type": "string"
+          },
+          "evidence_ref": {
+            "title": "Evidence Ref",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "manifest_schema_version": {
+            "title": "Manifest Schema Version",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "recorded_by": {
+            "title": "Recorded By",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "activation_code",
+          "adapter_code",
+          "configuration_hash",
+          "manifest_schema_version",
+          "evidence_ref",
+          "recorded_by",
+          "recorded_at"
+        ],
+        "title": "PublicFeedActivationCatalogItemResponse",
+        "type": "object"
+      },
+      "PublicFeedActivationCatalogListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PublicFeedActivationCatalogItemResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "PublicFeedActivationCatalogListResponse",
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/internal/admin/v1/public-feed-activations": {
+      "get": {
+        "operationId": "list_public_feed_activations_internal_admin_v1_public_feed_activations_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "after_activation_code",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "minLength": 4,
+                  "pattern": "^[a-z0-9][a-z0-9_-]*(?:\\.[a-z0-9][a-z0-9_-]*)*\\.v[1-9][0-9]*$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "After Activation Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicFeedActivationCatalogListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Public Feed Activations",
+        "tags": [
+          "Internal Admin"
+        ]
+      }
+    },
+    "/internal/admin/v1/public-feed-activations/{activation_code}": {
+      "get": {
+        "operationId": "public_feed_activation_detail_internal_admin_v1_public_feed_activations__activation_code__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activation_code",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 4,
+              "pattern": "^[a-z0-9][a-z0-9_-]*(?:\\.[a-z0-9][a-z0-9_-]*)*\\.v[1-9][0-9]*$",
+              "title": "Activation Code",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicFeedActivationCatalogDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Public Feed Activation Detail",
+        "tags": [
+          "Internal Admin"
+        ]
+      }
+    }
+  },
+  "target_version": "0.19.0"
+}

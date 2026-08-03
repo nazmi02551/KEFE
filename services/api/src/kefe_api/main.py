@@ -17,6 +17,9 @@ from kefe_api.infrastructure.persistence import (
     build_progress_repository,
     build_share_repository,
 )
+from kefe_api.infrastructure.public_feed_activation_catalog_runtime import (
+    build_public_feed_activation_catalog_repository,
+)
 from kefe_api.infrastructure.raw_evidence_runtime import (
     build_raw_source_evidence_store,
 )
@@ -30,6 +33,12 @@ from kefe_api.modules.admin_security.editorial_projection_router import (
 from kefe_api.modules.admin_security.policy import default_admin_security_policy
 from kefe_api.modules.admin_security.proposal_queue_router import (
     router as admin_proposal_queue_router,
+)
+from kefe_api.modules.admin_security.public_feed_activation_catalog import (
+    SecuredPublicFeedActivationCatalogService,
+)
+from kefe_api.modules.admin_security.public_feed_activation_catalog_router import (
+    router as admin_public_feed_activation_catalog_router,
 )
 from kefe_api.modules.admin_security.router import router as admin_router
 from kefe_api.modules.admin_security.service import AdminSecurityService
@@ -111,6 +120,9 @@ def create_app() -> FastAPI:
     content_configuration_repository = build_content_configuration_repository(settings)
     admin_session_store = build_admin_session_store(settings)
     raw_source_evidence_store = build_raw_source_evidence_store(settings)
+    public_feed_activation_catalog_repository = (
+        build_public_feed_activation_catalog_repository(settings)
+    )
 
     admin_security_service = AdminSecurityService(
         session_resolver=admin_session_store,
@@ -140,6 +152,12 @@ def create_app() -> FastAPI:
         configuration=content_configuration_service,
         repository=content_configuration_repository,
         security=admin_security_service,
+    )
+    secured_public_feed_activation_catalog_service = (
+        SecuredPublicFeedActivationCatalogService(
+            repository=public_feed_activation_catalog_repository,
+            security=admin_security_service,
+        )
     )
     flow_runtime_service = FlowRuntimeService(decision_repository)
     otp_delivery = (
@@ -200,6 +218,12 @@ def create_app() -> FastAPI:
     app.state.content_authoring_repository = content_authoring_repository
     app.state.content_authoring_service = content_authoring_service
     app.state.raw_source_evidence_store = raw_source_evidence_store
+    app.state.public_feed_activation_catalog_repository = (
+        public_feed_activation_catalog_repository
+    )
+    app.state.secured_public_feed_activation_catalog_service = (
+        secured_public_feed_activation_catalog_service
+    )
     app.state.knowledge_repository = editorial_pipeline.knowledge_repository
     app.state.source_capture_registry = editorial_pipeline.source_capture_registry
     app.state.provider_execution_context_repository = (
@@ -301,6 +325,7 @@ def create_app() -> FastAPI:
     app.include_router(admin_router)
     app.include_router(admin_proposal_queue_router)
     app.include_router(admin_editorial_projection_router)
+    app.include_router(admin_public_feed_activation_catalog_router)
     app.include_router(admin_content_configuration_router)
     app.include_router(community_reason_admin_router)
     return app
