@@ -1,0 +1,141 @@
+name: Admin Feed Item Materialization CI
+
+on:
+  pull_request:
+    paths:
+      - 'services/api/src/kefe_api/modules/admin_security/feed_item_materialization.py'
+      - 'services/api/src/kefe_api/modules/admin_security/editorial_projection_router.py'
+      - 'services/api/src/kefe_api/modules/admin_security/proposal_review.py'
+      - 'services/api/src/kefe_api/modules/admin_security/proposal_queue*.py'
+      - 'services/api/src/kefe_api/modules/ingestion_orchestration/knowledge_materializer.py'
+      - 'services/api/src/kefe_api/modules/ingestion_orchestration/service.py'
+      - 'services/api/src/kefe_api/infrastructure/postgres_knowledge.py'
+      - 'services/api/src/kefe_api/infrastructure/postgres_ingestion_orchestration.py'
+      - 'services/api/tests/test_admin_feed_item_materialization*.py'
+      - 'services/api/tests/test_admin_proposal_queue_http*.py'
+      - 'services/api/tests/test_feed_item_normalization_materialization*.py'
+      - 'services/api/tools/check_admin_feed_item_materialization_contract.py'
+      - 'services/api/tools/check_admin_proposal_queue_contract.py'
+      - 'services/api/tools/check_feed_item_normalization_contract.py'
+      - 'docs/adr/0091-secured-admin-feed-item-materialization-command.md'
+      - 'docs/contracts/admin-feed-item-materialization-slice55.v1.json'
+      - '.github/workflows/admin-feed-item-materialization-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/api/src/kefe_api/modules/admin_security/feed_item_materialization.py'
+      - 'services/api/src/kefe_api/modules/admin_security/editorial_projection_router.py'
+      - 'services/api/src/kefe_api/modules/admin_security/proposal_review.py'
+      - 'services/api/src/kefe_api/modules/admin_security/proposal_queue*.py'
+      - 'services/api/src/kefe_api/modules/ingestion_orchestration/knowledge_materializer.py'
+      - 'services/api/src/kefe_api/modules/ingestion_orchestration/service.py'
+      - 'services/api/src/kefe_api/infrastructure/postgres_knowledge.py'
+      - 'services/api/src/kefe_api/infrastructure/postgres_ingestion_orchestration.py'
+      - 'services/api/tests/test_admin_feed_item_materialization*.py'
+      - 'services/api/tests/test_admin_proposal_queue_http*.py'
+      - 'services/api/tests/test_feed_item_normalization_materialization*.py'
+      - 'services/api/tools/check_admin_feed_item_materialization_contract.py'
+      - 'services/api/tools/check_admin_proposal_queue_contract.py'
+      - 'services/api/tools/check_feed_item_normalization_contract.py'
+      - 'docs/adr/0091-secured-admin-feed-item-materialization-command.md'
+      - 'docs/contracts/admin-feed-item-materialization-slice55.v1.json'
+      - '.github/workflows/admin-feed-item-materialization-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  admin-feed-item-memory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Ruff Admin feed item materialization boundary
+        working-directory: services/api
+        run: >-
+          ruff check
+          src/kefe_api/modules/admin_security/feed_item_materialization.py
+          src/kefe_api/modules/admin_security/editorial_projection_router.py
+          tests/test_admin_feed_item_materialization_http.py
+          tests/test_admin_feed_item_materialization_openapi.py
+          tests/test_admin_feed_item_materialization_postgres.py
+          tools/check_admin_feed_item_materialization_contract.py
+      - name: Admin feed item materialization architecture fitness
+        working-directory: services/api
+        run: python tools/check_admin_feed_item_materialization_contract.py
+      - name: Parent feed item normalization architecture fitness
+        working-directory: services/api
+        run: python tools/check_feed_item_normalization_contract.py
+      - name: Parent Admin Proposal queue architecture fitness
+        working-directory: services/api
+        run: python tools/check_admin_proposal_queue_contract.py
+      - name: Parent ingestion orchestration architecture fitness
+        working-directory: services/api
+        run: python tools/check_ingestion_orchestration_contract.py
+      - name: Admin feed item materialization HTTP behavior
+        working-directory: services/api
+        run: >-
+          pytest
+          tests/test_admin_feed_item_materialization_http.py
+          tests/test_admin_feed_item_materialization_openapi.py
+      - name: Parent Admin Proposal queue HTTP behavior
+        working-directory: services/api
+        run: pytest tests/test_admin_proposal_queue_http.py
+      - name: Parent feed item normalization memory behavior
+        working-directory: services/api
+        run: pytest tests/test_feed_item_normalization_materialization.py
+
+  admin-feed-item-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: kefe
+          POSTGRES_USER: kefe
+          POSTGRES_PASSWORD: kefe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kefe -d kefe"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Migrate PostgreSQL
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: alembic upgrade head
+      - name: Admin feed item materialization PostgreSQL behavior
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+          KEFE_RUN_POSTGRES_TESTS: '1'
+        run: pytest tests/test_admin_feed_item_materialization_postgres.py
+      - name: Parent Admin Proposal queue PostgreSQL behavior
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+          KEFE_RUN_POSTGRES_TESTS: '1'
+        run: pytest tests/test_admin_proposal_queue_http_postgres.py
