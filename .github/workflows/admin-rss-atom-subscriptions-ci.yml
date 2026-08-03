@@ -1,0 +1,81 @@
+name: Admin RSS Atom Subscriptions CI
+
+on:
+  pull_request:
+    paths:
+      - 'services/api/src/kefe_api/modules/admin_security/models.py'
+      - 'services/api/src/kefe_api/modules/admin_security/policy.py'
+      - 'services/api/src/kefe_api/modules/admin_security/source_subscriptions.py'
+      - 'services/api/src/kefe_api/modules/admin_security/source_subscription_router.py'
+      - 'services/api/src/kefe_api/modules/knowledge/rss_atom_subscription.py'
+      - 'services/api/src/kefe_api/main.py'
+      - 'services/api/tests/test_admin_rss_atom_subscriptions*.py'
+      - 'services/api/tools/check_admin_rss_atom_subscriptions_contract.py'
+      - 'docs/adr/0091-admin-rss-atom-subscription-inventory-and-step-up-activation.md'
+      - 'docs/contracts/admin-rss-atom-subscriptions-slice55.v1.json'
+      - '.github/workflows/admin-rss-atom-subscriptions-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/api/src/kefe_api/modules/admin_security/models.py'
+      - 'services/api/src/kefe_api/modules/admin_security/policy.py'
+      - 'services/api/src/kefe_api/modules/admin_security/source_subscriptions.py'
+      - 'services/api/src/kefe_api/modules/admin_security/source_subscription_router.py'
+      - 'services/api/src/kefe_api/modules/knowledge/rss_atom_subscription.py'
+      - 'services/api/src/kefe_api/main.py'
+      - 'services/api/tests/test_admin_rss_atom_subscriptions*.py'
+      - 'services/api/tools/check_admin_rss_atom_subscriptions_contract.py'
+      - 'docs/adr/0091-admin-rss-atom-subscription-inventory-and-step-up-activation.md'
+      - 'docs/contracts/admin-rss-atom-subscriptions-slice55.v1.json'
+      - '.github/workflows/admin-rss-atom-subscriptions-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  admin-rss-atom-subscriptions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Ruff Admin RSS Atom subscription boundary
+        working-directory: services/api
+        run: >-
+          ruff check
+          src/kefe_api/modules/admin_security/models.py
+          src/kefe_api/modules/admin_security/policy.py
+          src/kefe_api/modules/admin_security/source_subscriptions.py
+          src/kefe_api/modules/admin_security/source_subscription_router.py
+          src/kefe_api/main.py
+          tests/test_admin_rss_atom_subscriptions.py
+          tests/test_admin_rss_atom_subscriptions_architecture.py
+          tools/check_admin_rss_atom_subscriptions_contract.py
+      - name: Admin RSS Atom subscription architecture fitness
+        working-directory: services/api
+        run: python tools/check_admin_rss_atom_subscriptions_contract.py
+      - name: Parent Admin security architecture fitness
+        working-directory: services/api
+        run: pytest -q tests/test_admin_security.py
+      - name: Parent RSS Atom subscription activation architecture fitness
+        working-directory: services/api
+        run: python tools/check_rss_atom_subscription_activation_contract.py
+      - name: Parent source scheduler architecture fitness
+        working-directory: services/api
+        run: python tools/check_source_acquisition_scheduler_contract.py
+      - name: Admin RSS Atom subscription behavior
+        working-directory: services/api
+        run: >-
+          pytest
+          tests/test_admin_rss_atom_subscriptions.py
+          tests/test_admin_rss_atom_subscriptions_architecture.py
+          tests/test_admin_http.py
+          tests/test_rss_atom_subscription.py

@@ -33,6 +33,12 @@ from kefe_api.modules.admin_security.proposal_queue_router import (
 )
 from kefe_api.modules.admin_security.router import router as admin_router
 from kefe_api.modules.admin_security.service import AdminSecurityService
+from kefe_api.modules.admin_security.source_subscription_router import (
+    router as admin_source_subscription_router,
+)
+from kefe_api.modules.admin_security.source_subscriptions import (
+    SecuredRssAtomSubscriptionService,
+)
 from kefe_api.modules.community_reason.admin_router import router as community_reason_admin_router
 from kefe_api.modules.community_reason.router import router as community_reason_router
 from kefe_api.modules.community_reason.service import CommunityReasonService
@@ -132,6 +138,11 @@ def create_app() -> FastAPI:
         admin_security_service=admin_security_service,
         raw_source_evidence_store=raw_source_evidence_store,
     )
+    secured_rss_atom_subscription_service = SecuredRssAtomSubscriptionService(
+        registry=editorial_pipeline.rss_atom_subscription_registry,
+        activation=editorial_pipeline.rss_atom_subscription_activation_service,
+        security=admin_security_service,
+    )
     content_configuration_service = ContentConfigurationService(
         repository=content_configuration_repository,
         security=admin_security_service,
@@ -227,6 +238,9 @@ def create_app() -> FastAPI:
     app.state.rss_atom_subscription_activation_service = (
         editorial_pipeline.rss_atom_subscription_activation_service
     )
+    app.state.secured_rss_atom_subscription_service = (
+        secured_rss_atom_subscription_service
+    )
     app.state.source_acquisition_observer = (
         editorial_pipeline.source_acquisition_observer
     )
@@ -309,6 +323,7 @@ def create_app() -> FastAPI:
     app.include_router(admin_proposal_queue_router)
     app.include_router(admin_editorial_projection_router)
     app.include_router(admin_content_configuration_router)
+    app.include_router(admin_source_subscription_router)
     app.include_router(community_reason_admin_router)
     return app
 

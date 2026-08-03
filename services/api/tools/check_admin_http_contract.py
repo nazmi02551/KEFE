@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
+
+from export_openapi import load_expected_contract
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACTS = REPO_ROOT / "docs" / "contracts"
@@ -14,6 +15,16 @@ ROUTER = (
     / "modules"
     / "admin_security"
     / "router.py"
+)
+SOURCE_SUBSCRIPTION_ROUTER = (
+    REPO_ROOT
+    / "services"
+    / "api"
+    / "src"
+    / "kefe_api"
+    / "modules"
+    / "admin_security"
+    / "source_subscription_router.py"
 )
 CONFIG_ROUTER = (
     REPO_ROOT
@@ -44,6 +55,10 @@ EXPECTED_PATHS = {
     "/internal/admin/v1/content-configuration/drafts": {"post"},
     "/internal/admin/v1/content-configuration/versions/{version_id}/publish": {"post"},
     "/internal/admin/v1/content-configuration/versions/{version_id}/rollback-drafts": {
+        "post"
+    },
+    "/internal/admin/v1/source-subscriptions": {"get"},
+    "/internal/admin/v1/source-subscriptions/{subscription_code}/activate": {
         "post"
     },
 }
@@ -89,8 +104,11 @@ def main() -> None:
         encoding="utf-8"
     )
     router_source = ROUTER.read_text(encoding="utf-8")
+    source_subscription_router = SOURCE_SUBSCRIPTION_ROUTER.read_text(
+        encoding="utf-8"
+    )
     config_router_source = CONFIG_ROUTER.read_text(encoding="utf-8")
-    openapi = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
+    openapi = load_expected_contract(CONTRACTS / "openapi.v1.json")
     schemas = openapi.get("components", {}).get("schemas", {})
     paths = openapi.get("paths", {})
 
@@ -139,6 +157,23 @@ def main() -> None:
         if fragment not in router_source:
             problems.append(f"Admin HTTP router missing: {fragment}")
 
+    required_source_subscription_source = {
+        'prefix="/internal/admin/v1/source-subscriptions"',
+        "SecuredRssAtomSubscriptionService",
+        "principal: ReadPrincipalDep",
+        "principal: WritePrincipalDep",
+        '"/{subscription_code}/activate"',
+        'pattern=r"^sha256:[0-9a-f]{64}$"',
+    }
+    for fragment in sorted(required_source_subscription_source):
+        if fragment not in source_subscription_router:
+            problems.append(f"Admin source subscription router missing: {fragment}")
+    for forbidden in ("@router.put", "@router.delete", '@router.post(""'):
+        if forbidden in source_subscription_router:
+            problems.append(
+                f"Admin source subscription router exposes mutation route: {forbidden}"
+            )
+
     required_config_source = {
         'prefix="/internal/admin/v1/content-configuration"',
         "SecuredContentConfigurationService",
@@ -161,6 +196,12 @@ def main() -> None:
         if item is None:
             problems.append(f"OpenAPI missing Admin path: {path}")
             continue
+        unexpected_methods = set(item) - methods
+        if unexpected_methods:
+            problems.append(
+                f"OpenAPI exposes unexpected Admin methods at {path}: "
+                + ", ".join(sorted(unexpected_methods))
+            )
         for method in methods:
             operation = item.get(method)
             if operation is None:
@@ -199,7 +240,12 @@ def main() -> None:
         if not (
             schema_name.startswith("Admin")
             or schema_name.startswith("Configuration")
-            or schema_name in {"AuthoringVersionResponse", "AuditTrailResponse"}
+            or schema_name.startswith("SourceSubscription")
+            or schema_name in {
+                "ActivateSourceSubscriptionRequest",
+                "AuthoringVersionResponse",
+                "AuditTrailResponse",
+            }
         ):
             continue
         properties = schema.get("properties", {})
@@ -213,8 +259,9 @@ def main() -> None:
         raise SystemExit("\n".join(problems))
 
     print(
-        "Admin HTTP contract OK: authoring + composable configuration routes, "
-        "same-session CSRF, server-derived identity and secret non-disclosure verified."
+        "Admin HTTP contract OK: authoring, composable configuration and guarded "
+        "source subscriptions; same-session CSRF, server-derived identity and "
+        "secret non-disclosure verified."
     )
 
 

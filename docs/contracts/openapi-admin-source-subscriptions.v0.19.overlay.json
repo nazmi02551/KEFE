@@ -1,0 +1,295 @@
+{
+  "components": {
+    "schemas": {
+      "ActivateSourceSubscriptionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_configuration_hash": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Expected Configuration Hash",
+            "type": "string"
+          },
+          "first_due_at": {
+            "format": "date-time",
+            "title": "First Due At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expected_configuration_hash",
+          "first_due_at"
+        ],
+        "title": "ActivateSourceSubscriptionRequest",
+        "type": "object"
+      },
+      "SourceSubscriptionActivationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "adapter_code": {
+            "title": "Adapter Code",
+            "type": "string"
+          },
+          "capability_lifecycle": {
+            "title": "Capability Lifecycle",
+            "type": "string"
+          },
+          "circuit_state": {
+            "title": "Circuit State",
+            "type": "string"
+          },
+          "configuration_hash": {
+            "title": "Configuration Hash",
+            "type": "string"
+          },
+          "next_due_at": {
+            "format": "date-time",
+            "title": "Next Due At",
+            "type": "string"
+          },
+          "schedule_id": {
+            "format": "uuid",
+            "title": "Schedule Id",
+            "type": "string"
+          },
+          "schedule_state": {
+            "title": "Schedule State",
+            "type": "string"
+          },
+          "subscription_code": {
+            "title": "Subscription Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subscription_code",
+          "adapter_code",
+          "configuration_hash",
+          "capability_lifecycle",
+          "circuit_state",
+          "schedule_id",
+          "schedule_state",
+          "next_due_at"
+        ],
+        "title": "SourceSubscriptionActivationResponse",
+        "type": "object"
+      },
+      "SourceSubscriptionInventoryResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SourceSubscriptionResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "SourceSubscriptionInventoryResponse",
+        "type": "object"
+      },
+      "SourceSubscriptionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "adapter_code": {
+            "title": "Adapter Code",
+            "type": "string"
+          },
+          "circuit_open_seconds": {
+            "title": "Circuit Open Seconds",
+            "type": "integer"
+          },
+          "configuration_hash": {
+            "title": "Configuration Hash",
+            "type": "string"
+          },
+          "connect_timeout_ms": {
+            "title": "Connect Timeout Ms",
+            "type": "integer"
+          },
+          "external_locator": {
+            "title": "External Locator",
+            "type": "string"
+          },
+          "failure_threshold": {
+            "title": "Failure Threshold",
+            "type": "integer"
+          },
+          "interval_seconds": {
+            "title": "Interval Seconds",
+            "type": "integer"
+          },
+          "jurisdiction_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jurisdiction Code"
+          },
+          "locale": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locale"
+          },
+          "max_dispatch_attempts": {
+            "title": "Max Dispatch Attempts",
+            "type": "integer"
+          },
+          "max_redirect_hops": {
+            "title": "Max Redirect Hops",
+            "type": "integer"
+          },
+          "permit_ttl_seconds": {
+            "title": "Permit Ttl Seconds",
+            "type": "integer"
+          },
+          "quota_limit": {
+            "title": "Quota Limit",
+            "type": "integer"
+          },
+          "quota_window_seconds": {
+            "title": "Quota Window Seconds",
+            "type": "integer"
+          },
+          "read_timeout_ms": {
+            "title": "Read Timeout Ms",
+            "type": "integer"
+          },
+          "subscription_code": {
+            "title": "Subscription Code",
+            "type": "string"
+          },
+          "total_timeout_ms": {
+            "title": "Total Timeout Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "subscription_code",
+          "adapter_code",
+          "external_locator",
+          "interval_seconds",
+          "max_dispatch_attempts",
+          "quota_limit",
+          "quota_window_seconds",
+          "failure_threshold",
+          "circuit_open_seconds",
+          "permit_ttl_seconds",
+          "connect_timeout_ms",
+          "read_timeout_ms",
+          "total_timeout_ms",
+          "max_redirect_hops",
+          "locale",
+          "jurisdiction_code",
+          "configuration_hash"
+        ],
+        "title": "SourceSubscriptionResponse",
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/internal/admin/v1/source-subscriptions": {
+      "get": {
+        "operationId": "list_source_subscriptions_internal_admin_v1_source_subscriptions_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceSubscriptionInventoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Source Subscriptions",
+        "tags": [
+          "Internal Admin Source Subscriptions"
+        ]
+      }
+    },
+    "/internal/admin/v1/source-subscriptions/{subscription_code}/activate": {
+      "post": {
+        "operationId": "activate_source_subscription_internal_admin_v1_source_subscriptions__subscription_code__activate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "subscription_code",
+            "required": true,
+            "schema": {
+              "title": "Subscription Code",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-KEFE-CSRF",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Csrf"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivateSourceSubscriptionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceSubscriptionActivationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Activate Source Subscription",
+        "tags": [
+          "Internal Admin Source Subscriptions"
+        ]
+      }
+    }
+  },
+  "target_version": "0.19.0"
+}

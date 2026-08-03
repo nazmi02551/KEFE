@@ -13,16 +13,17 @@ from kefe_api.core.settings import get_settings
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACTS = REPO_ROOT / "docs" / "contracts"
 BASE = CONTRACTS / "openapi.v1.json"
-BEFORE_QUEUE_OVERLAYS = (
+NON_QUEUE_OVERLAYS = (
     CONTRACTS / "openapi-consensus.v0.18.overlay.json",
     CONTRACTS / "openapi-mvp.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-projection.v0.19.overlay.json",
+    CONTRACTS / "openapi-admin-source-subscriptions.v0.19.overlay.json",
 )
 
 
-def _load_before_queue_contract() -> dict[str, object]:
+def _load_without_queue_contract() -> dict[str, object]:
     expected = deepcopy(json.loads(BASE.read_text(encoding="utf-8")))
-    for path in BEFORE_QUEUE_OVERLAYS:
+    for path in NON_QUEUE_OVERLAYS:
         _merge_overlay(expected, json.loads(path.read_text(encoding="utf-8")), path.name)
     return expected
 
@@ -42,7 +43,7 @@ def _build_queue_runtime_openapi() -> dict[str, object]:
 
 
 def build_overlay() -> dict[str, object]:
-    before = _load_before_queue_contract()
+    before = _load_without_queue_contract()
     generated = _build_queue_runtime_openapi()
     if generated.get("info", {}).get("version") != "0.19.0":
         raise SystemExit(

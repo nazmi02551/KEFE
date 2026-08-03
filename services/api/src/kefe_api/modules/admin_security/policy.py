@@ -40,6 +40,7 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
                 {
                     AdminCapability.CONTENT_REVIEW,
                     AdminCapability.SOURCE_VERIFY,
+                    AdminCapability.SOURCE_SUBSCRIPTION_READ,
                     AdminCapability.RISK_REVIEW,
                     AdminCapability.AUDIT_READ,
                 }
@@ -60,6 +61,8 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
             AdminRole.ACCESS_ADMIN: frozenset(
                 {
                     AdminCapability.ADMIN_ACCESS_MANAGE,
+                    AdminCapability.SOURCE_SUBSCRIPTION_READ,
+                    AdminCapability.SOURCE_SUBSCRIPTION_ACTIVATE,
                     AdminCapability.AUDIT_READ,
                 }
             ),
@@ -69,6 +72,7 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
                 AdminCapability.CONTENT_PUBLISH,
                 AdminCapability.CONTENT_WITHDRAW,
                 AdminCapability.ADMIN_ACCESS_MANAGE,
+                AdminCapability.SOURCE_SUBSCRIPTION_ACTIVATE,
             }
         ),
         absolute_lifetime=timedelta(hours=12),
