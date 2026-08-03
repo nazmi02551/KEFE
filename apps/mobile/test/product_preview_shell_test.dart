@@ -134,7 +134,10 @@ void main() {
 
       expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
       expect(find.text('KARAR YOLCULUĞU'), findsOneWidget);
-      expect(find.byKey(const ValueKey('kefe-active-journey')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('progressive-decision-journey')),
+        findsOneWidget,
+      );
       expect(
         find.byKey(
           const ValueKey(
