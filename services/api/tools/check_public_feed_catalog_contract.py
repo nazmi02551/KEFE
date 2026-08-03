@@ -23,6 +23,16 @@ MIGRATION = (
 MEMORY_TEST = API / "tests/test_public_feed_catalog.py"
 HTTP_TEST = API / "tests/test_public_feed_catalog_http.py"
 POSTGRES_TEST = API / "tests/test_public_feed_catalog_postgres.py"
+CATALOG_OPENAPI_EXPORTER = (
+    API / "tools/export_public_feed_catalog_openapi_overlay.py"
+)
+PROPOSAL_OPENAPI_EXPORTER = (
+    API / "tools/export_admin_proposal_queue_openapi_overlay.py"
+)
+OPENAPI_COMPOSER = API / "tools/export_openapi.py"
+CATALOG_OPENAPI_OVERLAY = (
+    ROOT / "docs/contracts/openapi-public-feed-catalog.v0.19.overlay.json"
+)
 ADR = (
     ROOT
     / "docs/adr/0091-durable-public-feed-catalog-and-secured-admin-lifecycle.md"
@@ -43,9 +53,23 @@ REQUIRED = (
     MEMORY_TEST,
     HTTP_TEST,
     POSTGRES_TEST,
+    CATALOG_OPENAPI_EXPORTER,
+    PROPOSAL_OPENAPI_EXPORTER,
+    OPENAPI_COMPOSER,
+    CATALOG_OPENAPI_OVERLAY,
     ADR,
     CONTRACT,
     WORKFLOW,
+)
+CATALOG_PATHS = frozenset(
+    {
+        "/internal/admin/v1/public-feeds",
+        "/internal/admin/v1/public-feeds/audit",
+        "/internal/admin/v1/public-feeds/{entry_id}",
+        "/internal/admin/v1/public-feeds/{entry_id}/approve-manual-capture",
+        "/internal/admin/v1/public-feeds/{entry_id}/audit",
+        "/internal/admin/v1/public-feeds/{entry_id}/retire",
+    }
 )
 
 
@@ -83,6 +107,12 @@ def main() -> None:
     persistence = PERSISTENCE.read_text(encoding="utf-8")
     main_source = MAIN.read_text(encoding="utf-8")
     migration = MIGRATION.read_text(encoding="utf-8")
+    catalog_exporter = CATALOG_OPENAPI_EXPORTER.read_text(encoding="utf-8")
+    proposal_exporter = PROPOSAL_OPENAPI_EXPORTER.read_text(encoding="utf-8")
+    openapi_composer = OPENAPI_COMPOSER.read_text(encoding="utf-8")
+    catalog_overlay = json.loads(
+        CATALOG_OPENAPI_OVERLAY.read_text(encoding="utf-8")
+    )
     tests = "".join(
         path.read_text(encoding="utf-8")
         for path in (MEMORY_TEST, HTTP_TEST, POSTGRES_TEST)
@@ -234,6 +264,44 @@ def main() -> None:
         if forbidden in domain or forbidden in router or forbidden in postgres:
             fail(f"forbidden runtime authority leaked into catalog: {forbidden}")
 
+    if catalog_overlay.get("target_version") != "0.19.0":
+        fail("public feed catalog OpenAPI target version drifted")
+    overlay_paths = catalog_overlay.get("paths", {})
+    if frozenset(overlay_paths) != CATALOG_PATHS:
+        fail(f"public feed catalog OpenAPI path set drifted: {sorted(overlay_paths)}")
+    overlay_schemas = catalog_overlay.get("components", {}).get("schemas", {})
+    for schema_name in (
+        "PublicFeedCatalogAuditListResponse",
+        "PublicFeedCatalogAuditResponse",
+        "PublicFeedCatalogEntryResponse",
+        "PublicFeedCatalogListResponse",
+        "RegisterPublicFeedRequest",
+        "RetirementRequest",
+        "RssAtomParseProfileInput",
+        "RssAtomParseProfileResponse",
+    ):
+        if schema_name not in overlay_schemas:
+            fail(f"public feed catalog OpenAPI schema missing: {schema_name}")
+    if "HTTPValidationError" in overlay_schemas:
+        fail("catalog OpenAPI overlay must not duplicate base schemas")
+    for fragment in (
+        'CATALOG_PATH_PREFIX = "/internal/admin/v1/public-feeds"',
+        "_schema_reference_closure(",
+        '"target_version": "0.19.0"',
+    ):
+        if fragment not in catalog_exporter:
+            fail(f"catalog OpenAPI exporter invariant missing: {fragment}")
+    if 'PROPOSAL_PATH_PREFIX = "/internal/admin/v1/proposals"' not in proposal_exporter:
+        fail("Proposal Queue OpenAPI exporter is not path-scoped")
+    catalog_overlay_position = openapi_composer.find(
+        '"openapi-public-feed-catalog.v0.19.overlay.json"'
+    )
+    proposal_overlay_position = openapi_composer.find(
+        '"openapi-admin-proposal-queue.v0.19.overlay.json"'
+    )
+    if not 0 <= proposal_overlay_position < catalog_overlay_position:
+        fail("catalog OpenAPI overlay must compose after Proposal Queue overlay")
+
     composition = contract.get("composition", {})
     for key in (
         "repository_composed",
@@ -294,6 +362,8 @@ def main() -> None:
 
     for phrase in (
         "Public feed catalog architecture fitness",
+        "Public feed catalog OpenAPI overlay exact gate",
+        "Composed OpenAPI exact gate",
         "Public feed catalog memory and Admin HTTP behavior",
         "Public feed catalog PostgreSQL behavior",
         "check_public_feed_catalog_contract.py",
