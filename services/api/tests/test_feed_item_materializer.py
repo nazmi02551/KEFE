@@ -25,6 +25,7 @@ from kefe_api.modules.ingestion_orchestration.models import (
     ProposalDraft,
     ProposalReviewDecisionKind,
     StageProcessorResult,
+    stable_payload_hash,
 )
 from kefe_api.modules.ingestion_orchestration.service import (
     IngestionOrchestrationService,
@@ -78,6 +79,14 @@ def _payload(source: SourceArtifact) -> dict[str, object]:
         "published_at": "2026-08-03T08:55:00+00:00",
         "summary_text": ITEM_SUMMARY,
     }
+
+
+def _with_payload(proposal, payload: dict[str, object]):
+    return replace(
+        proposal,
+        payload=payload,
+        payload_hash=stable_payload_hash(payload),
+    )
 
 
 def _proposal_fixture():
@@ -210,27 +219,32 @@ def test_schema_payload_and_source_lineage_drift_fail_closed() -> None:
             proposal=replace(proposal, payload_schema_version="2.0.0"),
             review=review,
         )
+    missing_item_id = {
+        key: value
+        for key, value in proposal.payload.items()
+        if key != "item_id"
+    }
     with pytest.raises(ValueError, match="payload fields"):
         materializer.materialize(
-            proposal=replace(
-                proposal,
-                payload={key: value for key, value in proposal.payload.items() if key != "item_id"},
-            ),
+            proposal=_with_payload(proposal, missing_item_id),
             review=review,
         )
     with pytest.raises(ValueError, match="content hash"):
         materializer.materialize(
-            proposal=replace(
+            proposal=_with_payload(
                 proposal,
-                payload={**proposal.payload, "feed_content_hash": canonical_content_hash(b"wrong")},
+                {
+                    **proposal.payload,
+                    "feed_content_hash": canonical_content_hash(b"wrong"),
+                },
             ),
             review=review,
         )
     with pytest.raises(ValueError, match="storage reference"):
         materializer.materialize(
-            proposal=replace(
+            proposal=_with_payload(
                 proposal,
-                payload={
+                {
                     **proposal.payload,
                     "feed_storage_ref": canonical_storage_ref(
                         canonical_content_hash(b"wrong")
@@ -261,17 +275,20 @@ def test_noncanonical_item_fields_and_conflicting_target_fail_closed() -> None:
 
     with pytest.raises(ValueError, match="item_title"):
         materializer.materialize(
-            proposal=replace(
+            proposal=_with_payload(
                 proposal,
-                payload={**proposal.payload, "item_title": " padded title "},
+                {**proposal.payload, "item_title": " padded title "},
             ),
             review=review,
         )
     with pytest.raises(ValueError, match="item_url"):
         materializer.materialize(
-            proposal=replace(
+            proposal=_with_payload(
                 proposal,
-                payload={**proposal.payload, "item_url": "https://user@example.test/x"},
+                {
+                    **proposal.payload,
+                    "item_url": "https://user@example.test/x",
+                },
             ),
             review=review,
         )
