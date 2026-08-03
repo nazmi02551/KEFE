@@ -76,7 +76,10 @@ def fields(node: ast.ClassDef) -> tuple[str, ...]:
 
 def dataclass_keywords(node: ast.ClassDef) -> dict[str, object]:
     for decorator in node.decorator_list:
-        if isinstance(decorator, ast.Call) and ast.unparse(decorator.func) == "dataclass":
+        if (
+            isinstance(decorator, ast.Call)
+            and ast.unparse(decorator.func) == "dataclass"
+        ):
             return {
                 keyword.arg: keyword.value.value
                 for keyword in decorator.keywords
@@ -203,9 +206,15 @@ def main() -> None:
     ):
         if forbidden in domain or forbidden in postgres:
             fail(f"forbidden catalog behavior leaked into repository: {forbidden}")
-    for forbidden_sql in ("UPDATE knowledge.public_feed_activation_catalog", "DELETE FROM knowledge.public_feed_activation_catalog"):
+    for forbidden_sql in (
+        "UPDATE knowledge.public_feed_activation_catalog",
+        "DELETE FROM knowledge.public_feed_activation_catalog",
+    ):
         if forbidden_sql in postgres:
-            fail(f"insert-only PostgreSQL repository contains mutation SQL: {forbidden_sql}")
+            fail(
+                "insert-only PostgreSQL repository contains mutation SQL: "
+                f"{forbidden_sql}"
+            )
 
     postgres_contract = contract.get("postgres", {})
     if postgres_contract != {
