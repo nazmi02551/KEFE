@@ -231,7 +231,10 @@ class SecuredSourceBriefReviewService:
             now=now,
         )
         return SourceBriefReviewPage(
-            items=tuple(self._adapt(principal, record) for record in page.items),
+            items=tuple(
+                self._adapt(principal, record, now=now)
+                for record in page.items
+            ),
             next_cursor=page.next_cursor,
         )
 
@@ -249,12 +252,14 @@ class SecuredSourceBriefReviewService:
                 "Source Brief proposal not found",
                 404,
             )
-        return self._adapt(principal, record)
+        return self._adapt(principal, record, now=now)
 
     def _adapt(
         self,
         principal: AdminPrincipal,
         record: ProposalQueueRecord,
+        *,
+        now: datetime | None,
     ) -> SourceBriefReviewRecord:
         proposal = record.proposal
         run = record.run
@@ -291,7 +296,7 @@ class SecuredSourceBriefReviewService:
         parent = self._feed_items.detail(
             principal,
             payload.parent_feed_item_proposal_id,
-            now=record.proposal.created_at,
+            now=now,
         )
         parent_review = parent.queue_record.review
         if (
