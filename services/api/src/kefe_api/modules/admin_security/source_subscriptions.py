@@ -86,7 +86,7 @@ class AdminRssAtomActivationView:
             subscription_code=result.subscription_code,
             adapter_code=result.adapter_code,
             configuration_hash=manifest.configuration_hash,
-            capability_lifecycle=result.provider_capability.lifecycle.value,
+            capability_lifecycle=result.provider_capability.lifecycle_state.value,
             circuit_state=result.provider_capability.circuit_state.value,
             schedule_id=result.schedule.id,
             schedule_state=result.schedule.state.value,
