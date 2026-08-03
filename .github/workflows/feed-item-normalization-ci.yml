@@ -6,6 +6,8 @@ on:
       - 'services/api/src/kefe_api/modules/ingestion_orchestration/knowledge_materializer.py'
       - 'services/api/src/kefe_api/modules/ingestion_orchestration/service.py'
       - 'services/api/src/kefe_api/modules/ingestion_orchestration/feed_item_extraction.py'
+      - 'services/api/src/kefe_api/modules/admin_security/feed_item_materialization.py'
+      - 'services/api/src/kefe_api/modules/admin_security/editorial_projection_router.py'
       - 'services/api/src/kefe_api/modules/knowledge/models.py'
       - 'services/api/src/kefe_api/modules/knowledge/source_evidence.py'
       - 'services/api/src/kefe_api/modules/knowledge/in_memory.py'
@@ -13,16 +15,23 @@ on:
       - 'services/api/src/kefe_api/infrastructure/postgres_ingestion_orchestration.py'
       - 'services/api/tests/test_feed_item_normalization_materialization.py'
       - 'services/api/tests/test_feed_item_normalization_materialization_postgres.py'
+      - 'services/api/tests/test_admin_feed_item_materialization*.py'
       - 'services/api/tools/check_feed_item_normalization_contract.py'
+      - 'services/api/tools/check_admin_feed_item_materialization_contract.py'
       - 'docs/adr/0090-human-reviewed-feed-item-normalization-materialization.md'
       - 'docs/contracts/feed-item-normalization-slice54.v1.json'
+      - 'docs/adr/0091-secured-admin-feed-item-materialization-command.md'
+      - 'docs/contracts/admin-feed-item-materialization-slice55.v1.json'
       - '.github/workflows/feed-item-normalization-ci.yml'
+      - '.github/workflows/admin-feed-item-materialization-ci.yml'
   push:
     branches: [main]
     paths:
       - 'services/api/src/kefe_api/modules/ingestion_orchestration/knowledge_materializer.py'
       - 'services/api/src/kefe_api/modules/ingestion_orchestration/service.py'
       - 'services/api/src/kefe_api/modules/ingestion_orchestration/feed_item_extraction.py'
+      - 'services/api/src/kefe_api/modules/admin_security/feed_item_materialization.py'
+      - 'services/api/src/kefe_api/modules/admin_security/editorial_projection_router.py'
       - 'services/api/src/kefe_api/modules/knowledge/models.py'
       - 'services/api/src/kefe_api/modules/knowledge/source_evidence.py'
       - 'services/api/src/kefe_api/modules/knowledge/in_memory.py'
@@ -30,10 +39,15 @@ on:
       - 'services/api/src/kefe_api/infrastructure/postgres_ingestion_orchestration.py'
       - 'services/api/tests/test_feed_item_normalization_materialization.py'
       - 'services/api/tests/test_feed_item_normalization_materialization_postgres.py'
+      - 'services/api/tests/test_admin_feed_item_materialization*.py'
       - 'services/api/tools/check_feed_item_normalization_contract.py'
+      - 'services/api/tools/check_admin_feed_item_materialization_contract.py'
       - 'docs/adr/0090-human-reviewed-feed-item-normalization-materialization.md'
       - 'docs/contracts/feed-item-normalization-slice54.v1.json'
+      - 'docs/adr/0091-secured-admin-feed-item-materialization-command.md'
+      - 'docs/contracts/admin-feed-item-materialization-slice55.v1.json'
       - '.github/workflows/feed-item-normalization-ci.yml'
+      - '.github/workflows/admin-feed-item-materialization-ci.yml'
 
 permissions:
   contents: read
