@@ -176,8 +176,8 @@ def test_factory_pins_one_profile_store_adapter_processor_and_registry() -> None
     assert route.capture_definition.profile is profile.parser_profile
     assert route.capture_definition.adapter_code == ADAPTER_CODE
     assert route.public_adapter.adapter_code == ADAPTER_CODE
-    assert getattr(route.extraction_processor, "_profile") is profile.parser_profile
-    assert getattr(route.extraction_processor, "_evidence") is evidence
+    assert route.extraction_processor._profile is profile.parser_profile  # noqa: SLF001
+    assert route.extraction_processor._evidence is evidence  # noqa: SLF001
     assert route.ingestion_registry.get_processor(
         pipeline_code="RSS_ATOM_FEED_ITEM_EXTRACTION",
         pipeline_version="1.0.0",
