@@ -189,13 +189,25 @@ def main() -> None:
         if forbidden in rss_atom:
             fail(f"excluded dependency/behavior leaked into RSS/Atom parser: {forbidden}")
 
-    if "InMemoryPublicSourceCaptureRegistry()" not in pipeline:
-        fail("production public adapter registry must remain empty")
+    for fragment in (
+        "RssAtomSubscriptionManifestRegistry()",
+        "build_rss_atom_public_capture_registry(",
+    ):
+        if fragment not in pipeline:
+            fail(f"dormant RSS/Atom public composition missing: {fragment}")
+    if "RssAtomSubscriptionManifest(" in pipeline or (
+        "RssAtomSubscriptionManifest(" in main_source
+    ):
+        fail("production composition must not contain a concrete RSS/Atom manifest")
+    if "rss_atom_subscription_activation_service.activate(" in pipeline or (
+        "rss_atom_subscription_activation_service.activate(" in main_source
+    ):
+        fail("production startup must not activate an RSS/Atom subscription")
     if (
         "StrictRssAtomCaptureDefinition(" in pipeline
         or "StrictRssAtomCaptureDefinition(" in main_source
     ):
-        fail("production composition must not register an RSS/Atom adapter")
+        fail("production composition must not directly register an RSS/Atom adapter")
     if contract.get("composition", {}).get(
         "production_rss_atom_adapters_registered"
     ) != 0:
