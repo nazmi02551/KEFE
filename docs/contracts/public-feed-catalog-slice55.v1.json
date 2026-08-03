@@ -1,0 +1,60 @@
+{
+  "contract": "public-feed-catalog-slice55",
+  "version": 1,
+  "status": "accepted",
+  "lifecycle": {
+    "states": ["REGISTERED", "MANUAL_CAPTURE_APPROVED", "RETIRED"],
+    "transitions": {
+      "REGISTERED": ["MANUAL_CAPTURE_APPROVED", "RETIRED"],
+      "MANUAL_CAPTURE_APPROVED": ["RETIRED"],
+      "RETIRED": []
+    },
+    "definition_immutable": true,
+    "configuration_hash_immutable": true,
+    "backward_transition": false
+  },
+  "authorization": {
+    "capability": "SOURCE_MANAGE",
+    "registration_requires_csrf": true,
+    "approval_requires_csrf": true,
+    "approval_requires_step_up": true,
+    "retirement_requires_csrf": true,
+    "retirement_requires_step_up": true,
+    "audit_read_requires_capability": true
+  },
+  "repository": {
+    "memory_and_postgres_equivalent": true,
+    "unique_feed_code": true,
+    "unique_adapter_code": true,
+    "idempotent_exact_registration": true,
+    "conflicting_registration": "PUBLIC_FEED_CATALOG_CONFLICT",
+    "atomic_entry_and_audit_mutation": true,
+    "ordered_append_only_audit": true,
+    "zero_seed_entries": true
+  },
+  "http": {
+    "prefix": "/internal/admin/v1/public-feeds",
+    "strict_models": true,
+    "operations": ["LIST", "DETAIL", "REGISTER", "APPROVE_MANUAL_CAPTURE", "RETIRE", "AUDIT"]
+  },
+  "composition": {
+    "repository_composed": true,
+    "secured_service_composed": true,
+    "router_composed": true,
+    "runtime_bundle_constructed": false,
+    "capture_adapter_registered": false,
+    "provider_admission_mutated": false,
+    "scheduler_mutated": false,
+    "network_calls": 0,
+    "ingestion_worker_runs": 0,
+    "automatic_review": false,
+    "automatic_materialization": false,
+    "automatic_publication": false
+  },
+  "migration": {
+    "revision": "20260803_0026",
+    "down_revision": "20260803_0025",
+    "schema": "knowledge",
+    "clean_upgrade_downgrade_upgrade": true
+  }
+}
