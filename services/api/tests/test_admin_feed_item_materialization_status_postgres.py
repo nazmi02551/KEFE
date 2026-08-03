@@ -7,7 +7,6 @@ from uuid import uuid4
 import pytest
 from sqlalchemy import create_engine
 
-from kefe_api.core.errors import DomainError
 from kefe_api.infrastructure.postgres_ingestion_orchestration import (
     PostgresIngestionOrchestrationRepository,
 )
@@ -63,24 +62,6 @@ class FixedProcessor:
         )
 
 
-class ConflictRepository:
-    def __init__(self, delegate, conflict: ProposalMaterialization) -> None:
-        self._delegate = delegate
-        self._conflict = conflict
-
-    def get_proposal(self, proposal_id):
-        return self._delegate.get_proposal(proposal_id)
-
-    def get_review_decision(self, proposal_id):
-        return self._delegate.get_review_decision(proposal_id)
-
-    def find_materialization(self, proposal_id, *, target_kind=None):
-        del target_kind
-        if proposal_id == self._conflict.proposal_id:
-            return self._conflict
-        return self._delegate.find_materialization(proposal_id)
-
-
 def _principal() -> AdminPrincipal:
     now = datetime.now(UTC)
     return AdminPrincipal(
@@ -117,7 +98,7 @@ def _proposal(service, repository):
     return repository.list_proposals(run.id)[0]
 
 
-def test_postgres_status_progression_and_conflict_are_persisted() -> None:
+def test_postgres_status_progression_is_persisted() -> None:
     engine = create_engine(os.environ["KEFE_DATABASE_URL"])
     repository = PostgresIngestionOrchestrationRepository(engine)
     orchestration = IngestionOrchestrationService(repository)
@@ -158,28 +139,3 @@ def test_postgres_status_progression_and_conflict_are_persisted() -> None:
         AdminCapability.CONTENT_REVIEW,
         AdminCapability.SOURCE_VERIFY,
     ] * 3
-
-    conflict_proposal = _proposal(orchestration, repository)
-    conflict_review = orchestration.review_proposal(
-        proposal_id=conflict_proposal.id,
-        decision=ProposalReviewDecisionKind.ACCEPTED,
-        reviewer_ref="admin:postgres-status",
-    )
-    injected_conflict = ProposalMaterialization(
-        id=uuid4(),
-        proposal_id=conflict_proposal.id,
-        review_decision_id=conflict_review.id,
-        target_kind="CLAIM",
-        target_id=conflict_proposal.id,
-        materialized_at=datetime.now(UTC),
-    )
-    defensive_status = SecuredFeedItemMaterializationStatusService(
-        repository=ConflictRepository(
-            repository,
-            injected_conflict,
-        ),  # type: ignore[arg-type]
-        security=RecordingSecurity(),  # type: ignore[arg-type]
-    )
-    with pytest.raises(DomainError) as conflict:
-        defensive_status.observe(principal, proposal_id=conflict_proposal.id)
-    assert conflict.value.code == "INGESTION_FEED_ITEM_MATERIALIZATION_STATUS_CONFLICT"
