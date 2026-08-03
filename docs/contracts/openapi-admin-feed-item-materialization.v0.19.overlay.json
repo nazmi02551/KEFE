@@ -1,0 +1,136 @@
+{
+  "components": {
+    "schemas": {
+      "FeedItemMaterializationRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "proposal_review_decision_id": {
+            "format": "uuid",
+            "title": "Proposal Review Decision Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "proposal_review_decision_id"
+        ],
+        "title": "FeedItemMaterializationRequest",
+        "type": "object"
+      },
+      "FeedItemMaterializationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "proposal_id": {
+            "format": "uuid",
+            "title": "Proposal Id",
+            "type": "string"
+          },
+          "proposal_materialization_id": {
+            "format": "uuid",
+            "title": "Proposal Materialization Id",
+            "type": "string"
+          },
+          "proposal_review_decision_id": {
+            "format": "uuid",
+            "title": "Proposal Review Decision Id",
+            "type": "string"
+          },
+          "replayed": {
+            "title": "Replayed",
+            "type": "boolean"
+          },
+          "target_id": {
+            "format": "uuid",
+            "title": "Target Id",
+            "type": "string"
+          },
+          "target_kind": {
+            "title": "Target Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "proposal_materialization_id",
+          "proposal_id",
+          "proposal_review_decision_id",
+          "target_kind",
+          "target_id",
+          "replayed"
+        ],
+        "title": "FeedItemMaterializationResponse",
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/internal/admin/v1/feed-item-proposals/{proposal_id}/materialization": {
+      "post": {
+        "operationId": "materialize_feed_item_internal_admin_v1_feed_item_proposals__proposal_id__materialization_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "proposal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Proposal Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-KEFE-CSRF",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Csrf"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedItemMaterializationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedItemMaterializationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Materialize Feed Item",
+        "tags": [
+          "Internal Admin"
+        ]
+      }
+    }
+  },
+  "target_version": "0.19.0"
+}
