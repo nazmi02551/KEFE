@@ -1,0 +1,107 @@
+{
+  "contract": "source-brief-ingestion-slice55",
+  "status": "accepted",
+  "api": {
+    "minimum_version": "0.22.0",
+    "absent_before_version": "0.22.0",
+    "path": "/internal/admin/v1/feed-items/{proposal_id}/source-brief",
+    "method": "POST",
+    "csrf_required": true,
+    "authorization_capability": "CONTENT_REVIEW",
+    "request_body": false
+  },
+  "parent": {
+    "proposal_kind": "FEED_ITEM",
+    "payload_schema_ref": "kefe.feed-item",
+    "payload_schema_version": "1.0.0",
+    "required_review_decision": "ACCEPTED",
+    "source_artifact_integrity_revalidated": true,
+    "evidence_reference_integrity_revalidated": true
+  },
+  "normalization": {
+    "target_kind": "NORMALIZED_ARTIFACT",
+    "artifact_kind": "EXTERNAL_EVIDENCE",
+    "schema_ref": "kefe.normalized-feed-item",
+    "schema_version": "1.0.0",
+    "deterministic_identity": true,
+    "canonical_json_sha256": true,
+    "raw_evidence_read": false,
+    "backend_object_key_exposed": false,
+    "provider_access": false,
+    "idempotent": true
+  },
+  "ingestion": {
+    "input_artifact_kind": "NORMALIZED_ARTIFACT",
+    "pipeline_code": "FEED_ITEM_SOURCE_BRIEF",
+    "pipeline_version": "1.0.0",
+    "stage_code": "BUILD_SOURCE_BRIEF",
+    "stage_version": "1.0.0",
+    "executor_kind": "DETERMINISTIC",
+    "max_attempts": 1,
+    "deterministic_stage_identity": true,
+    "deterministic_proposal_identity": true,
+    "atomic_successful_stage_batch": true,
+    "recoverable_success_marking": true,
+    "autonomous_retry": false
+  },
+  "output": {
+    "proposal_kind": "SOURCE_BRIEF",
+    "payload_schema_ref": "kefe.source-brief",
+    "payload_schema_version": "1.0.0",
+    "risk_code": "UNREVIEWED_SOURCE_BRIEF",
+    "review_state": "PENDING",
+    "automatic_acceptance": false,
+    "automatic_materialization": false,
+    "automatic_projection": false,
+    "automatic_case_creation": false,
+    "automatic_publication": false
+  },
+  "response_fields": [
+    "normalized_artifact_id",
+    "proposal_review_state",
+    "run_id",
+    "run_state",
+    "source_brief_proposal_id"
+  ],
+  "forbidden": [
+    "ai_execution",
+    "backend_object_key",
+    "case_creation",
+    "credential",
+    "evidence_body",
+    "http_header",
+    "network_access",
+    "provider_sdk",
+    "publication",
+    "raw_bytes"
+  ],
+  "errors": {
+    "review_required": "ADMIN_SOURCE_BRIEF_REVIEW_REQUIRED",
+    "normalization_invalid": "ADMIN_SOURCE_BRIEF_NORMALIZATION_INVALID",
+    "run_invalid": "ADMIN_SOURCE_BRIEF_RUN_INVALID",
+    "build_invalid": "ADMIN_SOURCE_BRIEF_BUILD_INVALID"
+  },
+  "evidence": {
+    "memory_http": true,
+    "postgres_http": true,
+    "idempotency": true,
+    "failed_stage_persistence": true,
+    "openapi_exact_gate": true,
+    "architecture_fitness": true,
+    "parent_feed_review_gate": true,
+    "parent_ingestion_gate": true,
+    "api_mvp_global": true
+  },
+  "non_goals": [
+    "provider_activation",
+    "live_scheduling",
+    "raw_evidence_viewer",
+    "ai_summarization",
+    "semantic_classification",
+    "candidate_case_materialization",
+    "automatic_editorial_action",
+    "publication",
+    "admin_web_ui",
+    "mobile_feed_ui"
+  ]
+}
