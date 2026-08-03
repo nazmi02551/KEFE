@@ -5,6 +5,7 @@ import json
 import os
 from copy import deepcopy
 from pathlib import Path
+from typing import Any
 
 from export_openapi import _merge_overlay, build_openapi
 
@@ -18,6 +19,7 @@ BEFORE_QUEUE_OVERLAYS = (
     CONTRACTS / "openapi-mvp.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-projection.v0.19.overlay.json",
 )
+PROPOSAL_PATH_PREFIX = "/internal/admin/v1/proposals"
 
 
 def _load_before_queue_contract() -> dict[str, object]:
@@ -39,6 +41,39 @@ def _build_queue_runtime_openapi() -> dict[str, object]:
         else:
             os.environ["KEFE_API_VERSION"] = previous
         get_settings.cache_clear()
+
+
+def _schema_reference_closure(
+    path_items: dict[str, object],
+    schemas: dict[str, object],
+) -> set[str]:
+    referenced: set[str] = set()
+
+    def visit(value: Any) -> None:
+        if isinstance(value, dict):
+            reference = value.get("$ref")
+            if isinstance(reference, str) and reference.startswith(
+                "#/components/schemas/"
+            ):
+                referenced.add(reference.rsplit("/", 1)[-1])
+            for child in value.values():
+                visit(child)
+        elif isinstance(value, list):
+            for child in value:
+                visit(child)
+
+    for path_item in path_items.values():
+        visit(path_item)
+    pending = list(referenced)
+    while pending:
+        name = pending.pop()
+        schema = schemas.get(name)
+        if schema is None:
+            continue
+        before = set(referenced)
+        visit(schema)
+        pending.extend(sorted(referenced - before))
+    return referenced
 
 
 def build_overlay() -> dict[str, object]:
@@ -77,14 +112,27 @@ def build_overlay() -> dict[str, object]:
             f"changed={changed_paths}, removed={removed_paths}"
         )
 
-    new_schema_names = sorted(generated_schemas.keys() - before_schemas.keys())
-    new_path_names = sorted(generated_paths.keys() - before_paths.keys())
+    new_path_names = sorted(
+        path
+        for path in generated_paths.keys() - before_paths.keys()
+        if path.startswith(PROPOSAL_PATH_PREFIX)
+    )
+    selected_paths = {path: generated_paths[path] for path in new_path_names}
+    referenced_schemas = _schema_reference_closure(
+        selected_paths,
+        generated_schemas,
+    )
+    new_schema_names = sorted(
+        name
+        for name in generated_schemas.keys() - before_schemas.keys()
+        if name in referenced_schemas
+    )
     return {
         "target_version": "0.19.0",
         "components": {
             "schemas": {name: generated_schemas[name] for name in new_schema_names}
         },
-        "paths": {path: generated_paths[path] for path in new_path_names},
+        "paths": selected_paths,
     }
 
 
