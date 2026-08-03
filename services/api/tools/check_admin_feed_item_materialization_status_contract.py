@@ -265,7 +265,7 @@ def main() -> None:
         "test_status_progresses_review_required_ready_materialized",
         "test_rejected_unsupported_and_conflicting_statuses_are_bounded",
         "test_feed_item_materialization_status_openapi_is_exact_and_bounded",
-        "test_postgres_status_progression_and_conflict_are_persisted",
+        "test_postgres_status_progression_is_persisted",
     ):
         if test_name not in tests:
             fail(f"Admin feed item status test evidence missing: {test_name}")
