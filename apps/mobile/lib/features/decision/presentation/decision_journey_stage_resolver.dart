@@ -1,3 +1,5 @@
+export 'decision_journey_strings.dart';
+
 import '../domain/decision_models.dart';
 
 abstract final class DecisionJourneyStageResolver {
