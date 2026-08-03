@@ -16,9 +16,14 @@ on:
       - 'services/api/tests/test_feed_item_normalization_materialization*.py'
       - 'services/api/tools/check_admin_feed_item_materialization_contract.py'
       - 'services/api/tools/check_admin_proposal_queue_contract.py'
+      - 'services/api/tools/check_admin_http_contract.py'
+      - 'services/api/tools/check_contract_sync.py'
       - 'services/api/tools/check_feed_item_normalization_contract.py'
       - 'docs/adr/0091-secured-admin-feed-item-materialization-command.md'
       - 'docs/contracts/admin-feed-item-materialization-slice55.v1.json'
+      - 'docs/contracts/admin-http-surface.v1.yaml'
+      - 'docs/contracts/error-codes-admin-feed-item-materialization.v1.yaml'
+      - 'docs/contracts/openapi.v1.json'
       - '.github/workflows/admin-feed-item-materialization-ci.yml'
   push:
     branches: [main]
@@ -36,9 +41,14 @@ on:
       - 'services/api/tests/test_feed_item_normalization_materialization*.py'
       - 'services/api/tools/check_admin_feed_item_materialization_contract.py'
       - 'services/api/tools/check_admin_proposal_queue_contract.py'
+      - 'services/api/tools/check_admin_http_contract.py'
+      - 'services/api/tools/check_contract_sync.py'
       - 'services/api/tools/check_feed_item_normalization_contract.py'
       - 'docs/adr/0091-secured-admin-feed-item-materialization-command.md'
       - 'docs/contracts/admin-feed-item-materialization-slice55.v1.json'
+      - 'docs/contracts/admin-http-surface.v1.yaml'
+      - 'docs/contracts/error-codes-admin-feed-item-materialization.v1.yaml'
+      - 'docs/contracts/openapi.v1.json'
       - '.github/workflows/admin-feed-item-materialization-ci.yml'
 
 permissions:
@@ -78,9 +88,15 @@ jobs:
       - name: Parent Admin Proposal queue architecture fitness
         working-directory: services/api
         run: python tools/check_admin_proposal_queue_contract.py
+      - name: Parent Admin HTTP architecture fitness
+        working-directory: services/api
+        run: python tools/check_admin_http_contract.py
       - name: Parent ingestion orchestration architecture fitness
         working-directory: services/api
         run: python tools/check_ingestion_orchestration_contract.py
+      - name: Contract registry sync
+        working-directory: services/api
+        run: python tools/check_contract_sync.py
       - name: Admin feed item materialization HTTP behavior
         working-directory: services/api
         run: >-
