@@ -5,8 +5,10 @@ import json
 import os
 from copy import deepcopy
 from pathlib import Path
-from typing import Any
 
+from export_admin_proposal_queue_openapi_overlay import (
+    _schema_reference_closure,
+)
 from export_openapi import _merge_overlay, build_openapi
 
 from kefe_api.core.settings import get_settings
@@ -14,22 +16,23 @@ from kefe_api.core.settings import get_settings
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACTS = REPO_ROOT / "docs" / "contracts"
 BASE = CONTRACTS / "openapi.v1.json"
-BEFORE_QUEUE_OVERLAYS = (
+BEFORE_CATALOG_OVERLAYS = (
     CONTRACTS / "openapi-consensus.v0.18.overlay.json",
     CONTRACTS / "openapi-mvp.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-projection.v0.19.overlay.json",
+    CONTRACTS / "openapi-admin-proposal-queue.v0.19.overlay.json",
 )
-PROPOSAL_PATH_PREFIX = "/internal/admin/v1/proposals"
+CATALOG_PATH_PREFIX = "/internal/admin/v1/public-feeds"
 
 
-def _load_before_queue_contract() -> dict[str, object]:
+def _load_before_catalog_contract() -> dict[str, object]:
     expected = deepcopy(json.loads(BASE.read_text(encoding="utf-8")))
-    for path in BEFORE_QUEUE_OVERLAYS:
+    for path in BEFORE_CATALOG_OVERLAYS:
         _merge_overlay(expected, json.loads(path.read_text(encoding="utf-8")), path.name)
     return expected
 
 
-def _build_queue_runtime_openapi() -> dict[str, object]:
+def _build_catalog_runtime_openapi() -> dict[str, object]:
     previous = os.environ.get("KEFE_API_VERSION")
     os.environ["KEFE_API_VERSION"] = "0.19.0"
     get_settings.cache_clear()
@@ -43,45 +46,12 @@ def _build_queue_runtime_openapi() -> dict[str, object]:
         get_settings.cache_clear()
 
 
-def _schema_reference_closure(
-    path_items: dict[str, object],
-    schemas: dict[str, object],
-) -> set[str]:
-    referenced: set[str] = set()
-
-    def visit(value: Any) -> None:
-        if isinstance(value, dict):
-            reference = value.get("$ref")
-            if isinstance(reference, str) and reference.startswith(
-                "#/components/schemas/"
-            ):
-                referenced.add(reference.rsplit("/", 1)[-1])
-            for child in value.values():
-                visit(child)
-        elif isinstance(value, list):
-            for child in value:
-                visit(child)
-
-    for path_item in path_items.values():
-        visit(path_item)
-    pending = list(referenced)
-    while pending:
-        name = pending.pop()
-        schema = schemas.get(name)
-        if schema is None:
-            continue
-        before = set(referenced)
-        visit(schema)
-        pending.extend(sorted(referenced - before))
-    return referenced
-
-
 def build_overlay() -> dict[str, object]:
-    before = _load_before_queue_contract()
-    generated = _build_queue_runtime_openapi()
+    before = _load_before_catalog_contract()
+    generated = _build_catalog_runtime_openapi()
     if generated.get("info", {}).get("version") != "0.19.0":
         raise SystemExit(
-            "Admin Proposal queue overlay generator expects runtime API version 0.19.0"
+            "Public feed catalog overlay generator expects runtime API version 0.19.0"
         )
 
     before_schemas = before.get("components", {}).get("schemas", {})
@@ -94,7 +64,7 @@ def build_overlay() -> dict[str, object]:
     removed_schemas = sorted(before_schemas.keys() - generated_schemas.keys())
     if changed_schemas or removed_schemas:
         raise SystemExit(
-            "Admin Proposal queue API must remain additive; "
+            "Public feed catalog API must remain additive; "
             f"changed={changed_schemas}, removed={removed_schemas}"
         )
 
@@ -108,14 +78,14 @@ def build_overlay() -> dict[str, object]:
     removed_paths = sorted(before_paths.keys() - generated_paths.keys())
     if changed_paths or removed_paths:
         raise SystemExit(
-            "Admin Proposal queue API must remain additive; "
+            "Public feed catalog API must remain additive; "
             f"changed={changed_paths}, removed={removed_paths}"
         )
 
     new_path_names = sorted(
         path
         for path in generated_paths.keys() - before_paths.keys()
-        if path.startswith(PROPOSAL_PATH_PREFIX)
+        if path.startswith(CATALOG_PATH_PREFIX)
     )
     selected_paths = {path: generated_paths[path] for path in new_path_names}
     referenced_schemas = _schema_reference_closure(
@@ -138,7 +108,7 @@ def build_overlay() -> dict[str, object]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Generate additive Admin Proposal queue OpenAPI overlay"
+        description="Generate additive public feed catalog OpenAPI overlay"
     )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--check", action="store_true")
@@ -153,20 +123,20 @@ def main() -> None:
     ) + "\n"
     if args.check:
         if not args.output.exists():
-            raise SystemExit("Checked-in Admin Proposal queue OpenAPI overlay is missing")
+            raise SystemExit("Checked-in public feed catalog OpenAPI overlay is missing")
         try:
             checked = json.loads(args.output.read_text(encoding="utf-8"))
         except json.JSONDecodeError as exc:
             raise SystemExit(
-                "Checked-in Admin Proposal queue OpenAPI overlay is invalid JSON"
+                "Checked-in public feed catalog OpenAPI overlay is invalid JSON"
             ) from exc
         if checked != overlay:
-            raise SystemExit("Checked-in Admin Proposal queue OpenAPI overlay is stale")
-        print(f"Admin Proposal queue OpenAPI overlay matches {args.output}")
+            raise SystemExit("Checked-in public feed catalog OpenAPI overlay is stale")
+        print(f"Public feed catalog OpenAPI overlay matches {args.output}")
         return
 
     args.output.write_text(rendered, encoding="utf-8")
-    print(f"Admin Proposal queue OpenAPI overlay written to {args.output}")
+    print(f"Public feed catalog OpenAPI overlay written to {args.output}")
 
 
 if __name__ == "__main__":

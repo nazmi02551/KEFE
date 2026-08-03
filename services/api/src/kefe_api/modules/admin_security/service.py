@@ -102,15 +102,30 @@ class AdminSecurityService:
             )
 
         if capability in self._policy.step_up_capabilities:
-            step_up_at = principal.step_up_at
-            if step_up_at is None or current - step_up_at > self._policy.step_up_freshness:
-                self._deny(principal, capability, "step_up_required")
-                raise DomainError(
-                    "ADMIN_STEP_UP_REQUIRED",
-                    "Recent Admin step-up authentication is required",
-                    403,
-                    meta={"required_capability": capability.value},
-                )
+            self.require_fresh_step_up(
+                principal,
+                capability=capability,
+                now=current,
+            )
+
+    def require_fresh_step_up(
+        self,
+        principal: AdminPrincipal,
+        *,
+        capability: AdminCapability = AdminCapability.SOURCE_MANAGE,
+        now: datetime | None = None,
+    ) -> None:
+        current = now or datetime.now(UTC)
+        self._assert_principal_assurance(principal, current=current)
+        step_up_at = principal.step_up_at
+        if step_up_at is None or current - step_up_at > self._policy.step_up_freshness:
+            self._deny(principal, capability, "step_up_required")
+            raise DomainError(
+                "ADMIN_STEP_UP_REQUIRED",
+                "Recent Admin step-up authentication is required",
+                403,
+                meta={"required_capability": capability.value},
+            )
 
     def enforce_reviewer_separation(
         self,

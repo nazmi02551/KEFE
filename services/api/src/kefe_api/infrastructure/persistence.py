@@ -20,6 +20,9 @@ from kefe_api.infrastructure.postgres_ingestion_orchestration import (
 from kefe_api.infrastructure.postgres_knowledge import PostgresKnowledgeRepository
 from kefe_api.infrastructure.postgres_privacy import PostgresPrivacyRepository
 from kefe_api.infrastructure.postgres_progress import PostgresProgressRepository
+from kefe_api.infrastructure.postgres_public_feed_catalog import (
+    PostgresPublicFeedCatalogRepository,
+)
 from kefe_api.infrastructure.postgres_reflection_decision import (
     PostgresReflectionDecisionRepository,
 )
@@ -59,6 +62,10 @@ from kefe_api.modules.ingestion_orchestration.ports import (
 )
 from kefe_api.modules.knowledge.in_memory import InMemoryKnowledgeRepository
 from kefe_api.modules.knowledge.ports import KnowledgeRepository
+from kefe_api.modules.knowledge.public_feed_catalog import (
+    InMemoryPublicFeedCatalogRepository,
+    PublicFeedCatalogRepository,
+)
 from kefe_api.modules.privacy.in_memory import InMemoryPrivacyRepository
 from kefe_api.modules.privacy.ports import PrivacyRepository
 from kefe_api.modules.progress.in_memory import InMemoryProgressRepository
@@ -70,30 +77,24 @@ from kefe_api.modules.sharing.ports import ShareRepository
 def build_decision_repository(settings: Settings) -> DecisionRepository:
     if settings.persistence_backend == "memory":
         return build_demo_repository()
-
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
-
     return PostgresReflectionDecisionRepository(build_engine(settings.database_url))
 
 
 def build_consensus_repository(settings: Settings) -> ConsensusRepository:
     if settings.persistence_backend == "memory":
         return build_demo_consensus_repository()
-
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
-
     return PostgresConsensusRepository(build_engine(settings.database_url))
 
 
 def build_context_repository(settings: Settings) -> ContextRepository:
     if settings.persistence_backend == "memory":
         return build_demo_context_repository()
-
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
-
     return PostgresContextRepository(build_engine(settings.database_url))
 
 
@@ -105,20 +106,16 @@ def build_progress_repository(
         if not isinstance(decision_repository, InMemoryLineageDecisionRepository):
             raise RuntimeError("memory progress requires the in-memory decision repository")
         return InMemoryProgressRepository(decision_repository)
-
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
-
     return PostgresProgressRepository(build_engine(settings.database_url))
 
 
 def build_identity_repository(settings: Settings) -> IdentityRepository:
     if settings.persistence_backend == "memory":
         return InMemoryIdentityRepository()
-
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
-
     return PostgresIdentityRepository(build_engine(settings.database_url))
 
 
@@ -173,10 +170,8 @@ def build_privacy_repository(
 def build_content_authoring_repository(settings: Settings) -> ContentAuthoringRepository:
     if settings.persistence_backend == "memory":
         return InMemoryContentAuthoringRepository()
-
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
-
     return PostgresFlowPinnedContentAuthoringRepository(build_engine(settings.database_url))
 
 
@@ -186,10 +181,8 @@ def build_content_configuration_repository(
     seed = build_default_content_configuration()
     if settings.persistence_backend == "memory":
         return InMemoryContentConfigurationRepository(seed)
-
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
-
     repository = PostgresContentConfigurationRepository(build_engine(settings.database_url))
     repository.seed_if_empty(seed)
     return repository
@@ -198,10 +191,8 @@ def build_content_configuration_repository(
 def build_knowledge_repository(settings: Settings) -> KnowledgeRepository:
     if settings.persistence_backend == "memory":
         return InMemoryKnowledgeRepository()
-
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
-
     return PostgresKnowledgeRepository(build_engine(settings.database_url))
 
 
@@ -210,11 +201,19 @@ def build_ingestion_orchestration_repository(
 ) -> IngestionOrchestrationRepository:
     if settings.persistence_backend == "memory":
         return InMemoryIngestionOrchestrationRepository()
-
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
-
     return PostgresIngestionOrchestrationRepository(build_engine(settings.database_url))
+
+
+def build_public_feed_catalog_repository(
+    settings: Settings,
+) -> PublicFeedCatalogRepository:
+    if settings.persistence_backend == "memory":
+        return InMemoryPublicFeedCatalogRepository()
+    if not settings.database_url:
+        raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
+    return PostgresPublicFeedCatalogRepository(build_engine(settings.database_url))
 
 
 def build_reviewed_proposal_source(
@@ -226,8 +225,6 @@ def build_reviewed_proposal_source(
 def build_admin_session_store(settings: Settings) -> AdminSessionStore:
     if settings.persistence_backend == "memory":
         return InMemoryAdminSessionStore()
-
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
-
     return PostgresAdminSessionStore(build_engine(settings.database_url))

@@ -224,6 +224,10 @@ def test_migration_downgrade_refuses_public_rows_and_preserves_head() -> None:
     engine = create_engine(os.environ["KEFE_DATABASE_URL"])
     base = datetime.now(UTC).replace(microsecond=0)
     adapter_code = f"test.pg_downgrade_public_{uuid4().hex[:8]}.v1"
+    with engine.connect() as connection:
+        expected_head = connection.execute(
+            text("SELECT version_num FROM alembic_version")
+        ).scalar_one()
     try:
         _register(
             engine,
@@ -244,6 +248,6 @@ def test_migration_downgrade_refuses_public_rows_and_preserves_head() -> None:
         with engine.connect() as connection:
             assert connection.execute(
                 text("SELECT version_num FROM alembic_version")
-            ).scalar_one() == "20260803_0025"
+            ).scalar_one() == expected_head
     finally:
         _cleanup(engine, adapter_code)
