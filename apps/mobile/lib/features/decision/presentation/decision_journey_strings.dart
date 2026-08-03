@@ -13,6 +13,9 @@ abstract final class DecisionJourneyStringCatalog {
       'active.result': 'Compare your decision with the community',
       'active.reflection': 'Look back at your decision journey',
       'active.default': 'Continue the decision journey',
+      'context_advance.action': 'I reviewed it — continue',
+      'context_advance.helper':
+          'The next step opens only after you choose to continue.',
       'perspective_disclosure.title': 'Your result is clear. Now widen the view.',
       'perspective_disclosure.body':
           'Inspect different perspectives without changing or resending the decision you committed.',
@@ -28,6 +31,9 @@ abstract final class DecisionJourneyStringCatalog {
       'active.result': 'Kararını toplumla karşılaştır',
       'active.reflection': 'Karar yolculuğuna yeniden bak',
       'active.default': 'Karar yolculuğuna devam et',
+      'context_advance.action': 'İnceledim — devam et',
+      'context_advance.helper':
+          'Sıradaki adım ancak sen devam etmeyi seçtiğinde açılır.',
       'perspective_disclosure.title': 'Sonucun netleşti. Şimdi bakışını genişlet.',
       'perspective_disclosure.body':
           'Sabitlediğin kararı değiştirmeden veya yeniden göndermeden farklı bakış açılarını incele.',
@@ -61,6 +67,8 @@ extension DecisionJourneyStrings on KefeStrings {
         _ => _journeyText('active.default'),
       };
 
+  String get contextAdvanceAction => _journeyText('context_advance.action');
+  String get contextAdvanceHelper => _journeyText('context_advance.helper');
   String get perspectiveDisclosureTitle =>
       _journeyText('perspective_disclosure.title');
   String get perspectiveDisclosureBody =>
