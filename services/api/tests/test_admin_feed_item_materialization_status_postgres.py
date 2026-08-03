@@ -63,6 +63,24 @@ class FixedProcessor:
         )
 
 
+class ConflictRepository:
+    def __init__(self, delegate, conflict: ProposalMaterialization) -> None:
+        self._delegate = delegate
+        self._conflict = conflict
+
+    def get_proposal(self, proposal_id):
+        return self._delegate.get_proposal(proposal_id)
+
+    def get_review_decision(self, proposal_id):
+        return self._delegate.get_review_decision(proposal_id)
+
+    def find_materialization(self, proposal_id, *, target_kind=None):
+        del target_kind
+        if proposal_id == self._conflict.proposal_id:
+            return self._conflict
+        return self._delegate.find_materialization(proposal_id)
+
+
 def _principal() -> AdminPrincipal:
     now = datetime.now(UTC)
     return AdminPrincipal(
@@ -147,16 +165,21 @@ def test_postgres_status_progression_and_conflict_are_persisted() -> None:
         decision=ProposalReviewDecisionKind.ACCEPTED,
         reviewer_ref="admin:postgres-status",
     )
-    repository.add_materialization(
-        ProposalMaterialization(
-            id=uuid4(),
-            proposal_id=conflict_proposal.id,
-            review_decision_id=conflict_review.id,
-            target_kind=f"UNEXPECTED_STATUS_TARGET_{uuid4().hex}",
-            target_id=conflict_proposal.id,
-            materialized_at=datetime.now(UTC),
-        )
+    injected_conflict = ProposalMaterialization(
+        id=uuid4(),
+        proposal_id=conflict_proposal.id,
+        review_decision_id=conflict_review.id,
+        target_kind="CLAIM",
+        target_id=conflict_proposal.id,
+        materialized_at=datetime.now(UTC),
+    )
+    defensive_status = SecuredFeedItemMaterializationStatusService(
+        repository=ConflictRepository(
+            repository,
+            injected_conflict,
+        ),  # type: ignore[arg-type]
+        security=RecordingSecurity(),  # type: ignore[arg-type]
     )
     with pytest.raises(DomainError) as conflict:
-        status.observe(principal, proposal_id=conflict_proposal.id)
+        defensive_status.observe(principal, proposal_id=conflict_proposal.id)
     assert conflict.value.code == "INGESTION_FEED_ITEM_MATERIALIZATION_STATUS_CONFLICT"
