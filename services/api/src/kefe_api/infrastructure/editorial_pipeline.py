@@ -67,6 +67,9 @@ from kefe_api.modules.editorial_projection.ingestion_source import (
 from kefe_api.modules.editorial_projection.models import EditorialProjectionProfile
 from kefe_api.modules.editorial_projection.ports import EditorialProjectionRepository
 from kefe_api.modules.editorial_projection.service import EditorialProjectionService
+from kefe_api.modules.ingestion_orchestration.feed_item_materializer import (
+    FeedItemProposalMaterializer,
+)
 from kefe_api.modules.ingestion_orchestration.in_memory import (
     InMemoryIngestionOrchestrationRepository,
 )
@@ -193,6 +196,7 @@ class EditorialPipeline:
     source_scheduler_service: SourceAcquisitionSchedulerService
     ingestion_repository: IngestionOrchestrationRepository
     ingestion_service: IngestionOrchestrationService
+    feed_item_proposal_materializer: FeedItemProposalMaterializer
     ingestion_lease_repository: IngestionRunLeaseRepository
     ingestion_lease_service: IngestionRunLeaseService
     ingestion_worker_registry: IngestionWorkerRuntimeRegistry
@@ -278,6 +282,9 @@ def build_editorial_pipeline(
         projection_repository = PostgresEditorialProjectionRepository(engine)
 
     ingestion_service = IngestionOrchestrationService(ingestion_repository)
+    feed_item_proposal_materializer = FeedItemProposalMaterializer(
+        knowledge_repository=knowledge_repository
+    )
     source_capture_registry: SourceCaptureRegistry = InMemorySourceCaptureRegistry()
     provider_admission_service = SourceProviderAdmissionService(
         source_provider_admission_repository
@@ -427,6 +434,7 @@ def build_editorial_pipeline(
         source_scheduler_service=source_scheduler_service,
         ingestion_repository=ingestion_repository,
         ingestion_service=ingestion_service,
+        feed_item_proposal_materializer=feed_item_proposal_materializer,
         ingestion_lease_repository=ingestion_lease_repository,
         ingestion_lease_service=ingestion_lease_service,
         ingestion_worker_registry=ingestion_worker_registry,
