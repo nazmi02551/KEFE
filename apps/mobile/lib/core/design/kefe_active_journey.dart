@@ -62,16 +62,17 @@ class KefeActiveJourney extends StatelessWidget {
                       Text(
                         title,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: visual.foreground,
-                              fontWeight: FontWeight.w900,
-                              height: 1.16,
-                            ),
+                          color: visual.foreground,
+                          fontWeight: FontWeight.w900,
+                          height: 1.16,
+                        ),
                       ),
                       if (subtitle != null) ...[
                         const SizedBox(height: 6),
                         Text(
                           subtitle!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
                                 color: visual.mutedForeground,
                                 height: 1.4,
                               ),
@@ -82,7 +83,10 @@ class KefeActiveJourney extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: visual.gold.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(99),
@@ -93,9 +97,9 @@ class KefeActiveJourney extends StatelessWidget {
                   child: Text(
                     progressLabel,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: visual.goldSoft,
-                          fontWeight: FontWeight.w900,
-                        ),
+                      color: visual.goldSoft,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
               ],
