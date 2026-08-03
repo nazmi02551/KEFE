@@ -1,0 +1,93 @@
+{
+  "contract": "public-feed-manual-capture-slice56",
+  "version": 1,
+  "status": "accepted",
+  "authorization": {
+    "capability": "SOURCE_MANAGE",
+    "csrf_required": true,
+    "fresh_step_up_required": true,
+    "server_derived_actor": true
+  },
+  "catalog_gate": {
+    "required_state": "MANUAL_CAPTURE_APPROVED",
+    "registered_allowed": false,
+    "retired_allowed": false,
+    "request_may_supply_runtime_fields": false,
+    "immutable_definition_source": true,
+    "configuration_hash_verified": true
+  },
+  "runtime": {
+    "scope": "INVOCATION",
+    "global_registry_mutation": false,
+    "exact_adoption_profile": true,
+    "controlled_http_transport": true,
+    "strict_rss_atom_adapter": true,
+    "evidence_backed_capture": true,
+    "permit_bound_capture": true,
+    "provider_capability_registration": "IDEMPOTENT_EXACT",
+    "source_acquisition_commands_per_invocation": 1,
+    "source_acquisition_attempts_per_invocation": 1
+  },
+  "downstream": {
+    "source_artifact_commit_allowed": true,
+    "ingestion_run_queue_allowed": true,
+    "ingestion_worker_auto_run": false,
+    "schedule_create_or_mutate": false,
+    "automatic_review": false,
+    "automatic_materialization": false,
+    "automatic_case_creation": false,
+    "automatic_publication": false
+  },
+  "audit": {
+    "append_only": true,
+    "memory_and_postgres_equivalent": true,
+    "fields": [
+      "execution_id",
+      "catalog_entry_id",
+      "feed_code",
+      "configuration_hash",
+      "actor_ref",
+      "trace_id",
+      "outcome",
+      "source_artifact_id",
+      "ingestion_run_id",
+      "duration_ms",
+      "error_code",
+      "occurred_at"
+    ],
+    "locator_stored": false,
+    "raw_body_stored": false,
+    "credential_or_secret_stored": false,
+    "headers_stored": false,
+    "exception_text_stored": false
+  },
+  "http": {
+    "method": "POST",
+    "path": "/internal/admin/v1/public-feeds/{entry_id}/capture-once",
+    "request_body": false,
+    "capture_audit_paths": [
+      "/internal/admin/v1/public-feeds/capture-audit",
+      "/internal/admin/v1/public-feeds/{entry_id}/capture-audit"
+    ],
+    "bounded_operational_response": true
+  },
+  "composition": {
+    "service_composed": true,
+    "runtime_factory_composed": true,
+    "catalog_entries_seeded": 0,
+    "global_adoption_profiles_registered": 0,
+    "global_public_adapters_registered": 0,
+    "automatic_capture_on_startup": false
+  },
+  "migration": {
+    "revision": "20260803_0027",
+    "down_revision": "20260803_0026",
+    "schema": "knowledge",
+    "clean_upgrade_downgrade_upgrade": true
+  },
+  "testing": {
+    "live_network": false,
+    "fake_dns_backend_transport": true,
+    "full_approved_capture_vertical_path": true
+  }
+}
