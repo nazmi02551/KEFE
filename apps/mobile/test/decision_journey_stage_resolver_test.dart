@@ -2,7 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kefe_mobile/features/decision/domain/decision_models.dart';
 import 'package:kefe_mobile/features/decision/presentation/decision_journey_stage_resolver.dart';
 
-FlowRuntimeStep step(String code, FlowStepRuntimeState state) => FlowRuntimeStep(
+FlowRuntimeStep step(String code, FlowStepRuntimeState state) =>
+    FlowRuntimeStep(
       code: code,
       primitiveCode: code.toUpperCase(),
       capabilityCodes: const [],
@@ -11,15 +12,15 @@ FlowRuntimeStep step(String code, FlowStepRuntimeState state) => FlowRuntimeStep
     );
 
 FlowRuntimeSnapshot runtime(List<FlowRuntimeStep> steps) => FlowRuntimeSnapshot(
-      sessionId: 'session-1',
-      caseVersionId: 'version-1',
-      sessionState: 'ACTIVE',
-      templateCode: 'TEST',
-      templateVersionNo: 1,
-      entryStepCode: steps.first.code,
-      executionSupport: FlowExecutionSupport.full,
-      steps: steps,
-    );
+  sessionId: 'session-1',
+  caseVersionId: 'version-1',
+  sessionState: 'ACTIVE',
+  templateCode: 'TEST',
+  templateVersionNo: 1,
+  entryStepCode: steps.first.code,
+  executionSupport: FlowExecutionSupport.full,
+  steps: steps,
+);
 
 void main() {
   test('prefers the furthest runtime-ready step', () {

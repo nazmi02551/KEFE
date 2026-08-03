@@ -202,10 +202,7 @@ void main() {
       expect(repository.commitCalls, 1);
       expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
       expect(onboardingStore.completed, isTrue);
-      expect(
-        find.byKey(const ValueKey('first-use-completion')),
-        findsNothing,
-      );
+      expect(find.byKey(const ValueKey('first-use-completion')), findsNothing);
 
       await tapVisible(
         tester,

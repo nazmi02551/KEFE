@@ -13,7 +13,8 @@ abstract final class OnboardingV2StringCatalog {
       'page_two.body':
           'The distribution opens only after you commit. It does not classify you; it only compares this decision with other answers.',
       'page_three.eyebrow': 'WIDEN THE VIEW',
-      'page_three.title': 'Explore other perspectives and your decision journey.',
+      'page_three.title':
+          'Explore other perspectives and your decision journey.',
       'page_three.body':
           'Inspect different viewpoints. In re-weigh journeys, compare your first and final decisions without KEFE claiming what caused a change.',
       'continue': 'Continue',
@@ -40,29 +41,24 @@ abstract final class OnboardingV2StringCatalog {
 
 extension OnboardingV2Strings on KefeStrings {
   String _onboardingV2Text(String key) => KefeLocaleCatalog.resolve(
-        locale: locale,
-        resources: OnboardingV2StringCatalog.resources,
-        key: key,
-      );
+    locale: locale,
+    resources: OnboardingV2StringCatalog.resources,
+    key: key,
+  );
 
   String get onboardingV2PageOneEyebrow =>
       _onboardingV2Text('page_one.eyebrow');
-  String get onboardingV2PageOneTitle =>
-      _onboardingV2Text('page_one.title');
-  String get onboardingV2PageOneBody =>
-      _onboardingV2Text('page_one.body');
+  String get onboardingV2PageOneTitle => _onboardingV2Text('page_one.title');
+  String get onboardingV2PageOneBody => _onboardingV2Text('page_one.body');
   String get onboardingV2PageTwoEyebrow =>
       _onboardingV2Text('page_two.eyebrow');
-  String get onboardingV2PageTwoTitle =>
-      _onboardingV2Text('page_two.title');
-  String get onboardingV2PageTwoBody =>
-      _onboardingV2Text('page_two.body');
+  String get onboardingV2PageTwoTitle => _onboardingV2Text('page_two.title');
+  String get onboardingV2PageTwoBody => _onboardingV2Text('page_two.body');
   String get onboardingV2PageThreeEyebrow =>
       _onboardingV2Text('page_three.eyebrow');
   String get onboardingV2PageThreeTitle =>
       _onboardingV2Text('page_three.title');
-  String get onboardingV2PageThreeBody =>
-      _onboardingV2Text('page_three.body');
+  String get onboardingV2PageThreeBody => _onboardingV2Text('page_three.body');
   String get onboardingV2Continue => _onboardingV2Text('continue');
   String get onboardingV2Start => _onboardingV2Text('start');
 }

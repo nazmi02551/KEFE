@@ -326,8 +326,7 @@ class _FlowStepSection extends ConsumerWidget {
           .recordContextExposure(step.code);
     }
 
-    if (progressiveContextAdvance &&
-        step.state == FlowStepRuntimeState.ready) {
+    if (progressiveContextAdvance && step.state == FlowStepRuntimeState.ready) {
       return _ProgressiveContextStep(
         caseVersionId: state.caseData!.versionId,
         enabled: !state.offlineDraft,
@@ -457,17 +456,17 @@ class _FlowStepSection extends ConsumerWidget {
                 Text(
                   strings.perspectiveDisclosureTitle,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: context.kefeVisual.foreground,
-                        fontWeight: FontWeight.w900,
-                      ),
+                    color: context.kefeVisual.foreground,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
                 const SizedBox(height: 7),
                 Text(
                   strings.perspectiveDisclosureBody,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: context.kefeVisual.mutedForeground,
-                        height: 1.4,
-                      ),
+                    color: context.kefeVisual.mutedForeground,
+                    height: 1.4,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 FilledButton.icon(
@@ -529,9 +528,9 @@ class _ProgressiveContextStep extends StatelessWidget {
           strings.contextAdvanceHelper,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: context.kefeVisual.mutedForeground,
-                height: 1.4,
-              ),
+            color: context.kefeVisual.mutedForeground,
+            height: 1.4,
+          ),
         ),
         const SizedBox(height: 10),
         FilledButton.icon(
@@ -640,10 +639,7 @@ class _JourneyUnavailableCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       key: const ValueKey('active-journey-unavailable'),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Text(message),
-      ),
+      child: Padding(padding: const EdgeInsets.all(20), child: Text(message)),
     );
   }
 }

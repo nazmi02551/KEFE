@@ -16,7 +16,8 @@ abstract final class DecisionJourneyStringCatalog {
       'context_advance.action': 'I reviewed it — continue',
       'context_advance.helper':
           'The next step opens only after you choose to continue.',
-      'perspective_disclosure.title': 'Your result is clear. Now widen the view.',
+      'perspective_disclosure.title':
+          'Your result is clear. Now widen the view.',
       'perspective_disclosure.body':
           'Inspect different perspectives without changing or resending the decision you committed.',
       'perspective_disclosure.action': 'See different perspectives',
@@ -34,7 +35,8 @@ abstract final class DecisionJourneyStringCatalog {
       'context_advance.action': 'İnceledim — devam et',
       'context_advance.helper':
           'Sıradaki adım ancak sen devam etmeyi seçtiğinde açılır.',
-      'perspective_disclosure.title': 'Sonucun netleşti. Şimdi bakışını genişlet.',
+      'perspective_disclosure.title':
+          'Sonucun netleşti. Şimdi bakışını genişlet.',
       'perspective_disclosure.body':
           'Sabitlediğin kararı değiştirmeden veya yeniden göndermeden farklı bakış açılarını incele.',
       'perspective_disclosure.action': 'Farklı bakışları gör',
@@ -47,25 +49,25 @@ extension DecisionJourneyStrings on KefeStrings {
     String key, {
     Map<String, Object?> placeholders = const {},
   }) => KefeLocaleCatalog.resolve(
-        locale: locale,
-        resources: DecisionJourneyStringCatalog.resources,
-        key: key,
-        placeholders: placeholders,
-      );
+    locale: locale,
+    resources: DecisionJourneyStringCatalog.resources,
+    key: key,
+    placeholders: placeholders,
+  );
 
   String get activeJourneyEyebrow => _journeyText('active.eyebrow');
   String get activeJourneyHelper => _journeyText('active.helper');
   String activeJourneyProgress(int current, int total) => _journeyText(
-        'active.progress',
-        placeholders: {'current': current, 'total': total},
-      );
+    'active.progress',
+    placeholders: {'current': current, 'total': total},
+  );
   String activeJourneyTitle(String primitiveCode) => switch (primitiveCode) {
-        'CONTEXT' => _journeyText('active.context'),
-        'DECISION' => _journeyText('active.decision'),
-        'COLLECTIVE_RESULT' => _journeyText('active.result'),
-        'REFLECTION' => _journeyText('active.reflection'),
-        _ => _journeyText('active.default'),
-      };
+    'CONTEXT' => _journeyText('active.context'),
+    'DECISION' => _journeyText('active.decision'),
+    'COLLECTIVE_RESULT' => _journeyText('active.result'),
+    'REFLECTION' => _journeyText('active.reflection'),
+    _ => _journeyText('active.default'),
+  };
 
   String get contextAdvanceAction => _journeyText('context_advance.action');
   String get contextAdvanceHelper => _journeyText('context_advance.helper');

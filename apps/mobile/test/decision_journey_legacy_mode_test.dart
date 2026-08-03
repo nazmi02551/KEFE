@@ -43,29 +43,29 @@ class LegacyModeRepository
 
   @override
   Future<GuestCredential> ensureGuestCredential() async => GuestCredential(
-        actorId: 'legacy-actor',
-        accessToken: 'legacy-token',
-        expiresAt: DateTime.utc(2026, 9),
-      );
+    actorId: 'legacy-actor',
+    accessToken: 'legacy-token',
+    expiresAt: DateTime.utc(2026, 9),
+  );
 
   @override
   Future<DecisionCase> fetchCase(String caseId) async => const DecisionCase(
-        id: legacyCaseId,
-        versionId: 'legacy-version-1',
-        title: 'Legacy sunum testi',
-        summary: 'Eski uzun akış geri dönüş için korunur.',
-        format: 'DILEMMA',
-        domain: 'DAILY_LIFE',
-        risk: 'L0',
-        questions: [
-          DecisionQuestion(
-            id: 'legacy-question',
-            prompt: 'Bir seçenek seç',
-            responseType: 'SINGLE_CHOICE',
-            options: ['A', 'B'],
-          ),
-        ],
-      );
+    id: legacyCaseId,
+    versionId: 'legacy-version-1',
+    title: 'Legacy sunum testi',
+    summary: 'Eski uzun akış geri dönüş için korunur.',
+    format: 'DILEMMA',
+    domain: 'DAILY_LIFE',
+    risk: 'L0',
+    questions: [
+      DecisionQuestion(
+        id: 'legacy-question',
+        prompt: 'Bir seçenek seç',
+        responseType: 'SINGLE_CHOICE',
+        options: ['A', 'B'],
+      ),
+    ],
+  );
 
   @override
   Future<List<DecisionCaseSummary>> fetchExploreCases({int limit = 20}) async =>
@@ -73,11 +73,11 @@ class LegacyModeRepository
 
   @override
   Future<RevealResult> reveal(String sessionId) async => const RevealResult(
-        layer: 'TRUSTED',
-        sampleSize: 10,
-        confidence: 'LOW',
-        values: {'A': 0.5, 'B': 0.5},
-      );
+    layer: 'TRUSTED',
+    sampleSize: 10,
+    confidence: 'LOW',
+    values: {'A': 0.5, 'B': 0.5},
+  );
 
   @override
   Future<String> startSession(String caseId) async => 'legacy-session';

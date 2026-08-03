@@ -12,16 +12,19 @@ void main() {
     expect(config.onboardingVersion, OnboardingExperienceVersion.v2);
   });
 
-  test('legacy modes remain explicitly constructible for provider overrides', () {
-    const config = ExperiencePresentationConfig(
-      decisionJourneyMode: DecisionJourneyPresentationMode.legacyLongScroll,
-      onboardingVersion: OnboardingExperienceVersion.legacyV1,
-    );
+  test(
+    'legacy modes remain explicitly constructible for provider overrides',
+    () {
+      const config = ExperiencePresentationConfig(
+        decisionJourneyMode: DecisionJourneyPresentationMode.legacyLongScroll,
+        onboardingVersion: OnboardingExperienceVersion.legacyV1,
+      );
 
-    expect(
-      config.decisionJourneyMode,
-      DecisionJourneyPresentationMode.legacyLongScroll,
-    );
-    expect(config.onboardingVersion, OnboardingExperienceVersion.legacyV1);
-  });
+      expect(
+        config.decisionJourneyMode,
+        DecisionJourneyPresentationMode.legacyLongScroll,
+      );
+      expect(config.onboardingVersion, OnboardingExperienceVersion.legacyV1);
+    },
+  );
 }

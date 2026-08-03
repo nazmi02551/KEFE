@@ -112,7 +112,9 @@ class _OnboardingGateScreenState extends ConsumerState<OnboardingGateScreen> {
                             decoration: BoxDecoration(
                               color: index == currentPage
                                   ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.outlineVariant,
+                                  : Theme.of(
+                                      context,
+                                    ).colorScheme.outlineVariant,
                               borderRadius: BorderRadius.circular(99),
                             ),
                           ),
@@ -130,7 +132,8 @@ class _OnboardingGateScreenState extends ConsumerState<OnboardingGateScreen> {
                             curve: Curves.easeOut,
                           ),
                     child: Text(
-                      experience.onboardingVersion == OnboardingExperienceVersion.v2
+                      experience.onboardingVersion ==
+                              OnboardingExperienceVersion.v2
                           ? lastPage
                                 ? strings.onboardingV2Start
                                 : strings.onboardingV2Continue
@@ -149,40 +152,40 @@ class _OnboardingGateScreenState extends ConsumerState<OnboardingGateScreen> {
   }
 
   List<_OnboardingPageData> _v2Pages(KefeStrings strings) => [
-        _OnboardingPageData(
-          eyebrow: strings.onboardingV2PageOneEyebrow,
-          title: strings.onboardingV2PageOneTitle,
-          body: strings.onboardingV2PageOneBody,
-          icon: Icons.balance_rounded,
-        ),
-        _OnboardingPageData(
-          eyebrow: strings.onboardingV2PageTwoEyebrow,
-          title: strings.onboardingV2PageTwoTitle,
-          body: strings.onboardingV2PageTwoBody,
-          icon: Icons.groups_2_outlined,
-        ),
-        _OnboardingPageData(
-          eyebrow: strings.onboardingV2PageThreeEyebrow,
-          title: strings.onboardingV2PageThreeTitle,
-          body: strings.onboardingV2PageThreeBody,
-          icon: Icons.route_rounded,
-        ),
-      ];
+    _OnboardingPageData(
+      eyebrow: strings.onboardingV2PageOneEyebrow,
+      title: strings.onboardingV2PageOneTitle,
+      body: strings.onboardingV2PageOneBody,
+      icon: Icons.balance_rounded,
+    ),
+    _OnboardingPageData(
+      eyebrow: strings.onboardingV2PageTwoEyebrow,
+      title: strings.onboardingV2PageTwoTitle,
+      body: strings.onboardingV2PageTwoBody,
+      icon: Icons.groups_2_outlined,
+    ),
+    _OnboardingPageData(
+      eyebrow: strings.onboardingV2PageThreeEyebrow,
+      title: strings.onboardingV2PageThreeTitle,
+      body: strings.onboardingV2PageThreeBody,
+      icon: Icons.route_rounded,
+    ),
+  ];
 
   List<_OnboardingPageData> _legacyPages(KefeStrings strings) => [
-        _OnboardingPageData(
-          eyebrow: strings.appName,
-          title: strings.onboardingTitleOne,
-          body: strings.onboardingBodyOne,
-          icon: Icons.balance_rounded,
-        ),
-        _OnboardingPageData(
-          eyebrow: strings.onboardingStepTwoEyebrow,
-          title: strings.onboardingTitleTwo,
-          body: strings.onboardingBodyTwo,
-          icon: Icons.compare_arrows_rounded,
-        ),
-      ];
+    _OnboardingPageData(
+      eyebrow: strings.appName,
+      title: strings.onboardingTitleOne,
+      body: strings.onboardingBodyOne,
+      icon: Icons.balance_rounded,
+    ),
+    _OnboardingPageData(
+      eyebrow: strings.onboardingStepTwoEyebrow,
+      title: strings.onboardingTitleTwo,
+      body: strings.onboardingBodyTwo,
+      icon: Icons.compare_arrows_rounded,
+    ),
+  ];
 }
 
 class _PromisePage extends StatelessWidget {
@@ -240,9 +243,9 @@ class _PromisePage extends StatelessWidget {
               const SizedBox(height: 20),
               Text(
                 body,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  height: 1.5,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(height: 1.5),
               ),
             ],
           ),
