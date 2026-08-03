@@ -186,6 +186,7 @@ class _ProgressiveDecisionContentState
               step: activeStep,
               state: state,
               firstUse: widget.firstUse,
+              progressiveContextAdvance: true,
               progressiveResultDisclosure: true,
               showPerspectives: _showPerspectives,
               onShowPerspectives: () {
@@ -279,6 +280,7 @@ class _FlowStepSection extends ConsumerWidget {
     required this.step,
     required this.state,
     required this.firstUse,
+    this.progressiveContextAdvance = false,
     this.progressiveResultDisclosure = false,
     this.showPerspectives = true,
     this.onShowPerspectives,
@@ -288,6 +290,7 @@ class _FlowStepSection extends ConsumerWidget {
   final FlowRuntimeStep step;
   final DecisionState state;
   final bool firstUse;
+  final bool progressiveContextAdvance;
   final bool progressiveResultDisclosure;
   final bool showPerspectives;
   final VoidCallback? onShowPerspectives;
@@ -299,7 +302,7 @@ class _FlowStepSection extends ConsumerWidget {
     }
 
     return switch (step.primitiveCode) {
-      'CONTEXT' => _contextStep(ref),
+      'CONTEXT' => _contextStep(context, ref),
       'DECISION' => _decisionStep(context, ref),
       'COLLECTIVE_RESULT' => _resultStep(context, ref),
       'REFLECTION' => _reflectionStep(),
@@ -310,19 +313,30 @@ class _FlowStepSection extends ConsumerWidget {
     };
   }
 
-  Widget _contextStep(WidgetRef ref) {
+  Widget _contextStep(BuildContext context, WidgetRef ref) {
     if (step.state != FlowStepRuntimeState.ready &&
         step.state != FlowStepRuntimeState.completed) {
       return const SizedBox.shrink();
     }
+
+    final onExposed = () => ref
+        .read(decisionControllerProvider.notifier)
+        .recordContextExposure(step.code);
+    if (progressiveContextAdvance &&
+        step.state == FlowStepRuntimeState.ready) {
+      return _ProgressiveContextStep(
+        caseVersionId: state.caseData!.versionId,
+        enabled: !state.offlineDraft,
+        onContinue: onExposed,
+      );
+    }
+
     return _ExposureAwareContextStep(
       caseVersionId: state.caseData!.versionId,
       stepCode: step.code,
       shouldRecordExposure:
           step.state == FlowStepRuntimeState.ready && !state.offlineDraft,
-      onExposed: () => ref
-          .read(decisionControllerProvider.notifier)
-          .recordContextExposure(step.code),
+      onExposed: onExposed,
     );
   }
 
@@ -474,6 +488,46 @@ class _FlowStepSection extends ConsumerWidget {
             _FirstUseCompletionCard(onContinue: () => context.go('/explore')),
           ],
         ],
+      ],
+    );
+  }
+}
+
+class _ProgressiveContextStep extends StatelessWidget {
+  const _ProgressiveContextStep({
+    required this.caseVersionId,
+    required this.enabled,
+    required this.onContinue,
+  });
+
+  final String caseVersionId;
+  final bool enabled;
+  final VoidCallback onContinue;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ContextSection(caseVersionId: caseVersionId),
+        const SizedBox(height: 14),
+        Text(
+          strings.contextAdvanceHelper,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: context.kefeVisual.mutedForeground,
+                height: 1.4,
+              ),
+        ),
+        const SizedBox(height: 10),
+        FilledButton.icon(
+          key: const ValueKey('context-continue-button'),
+          onPressed: enabled ? onContinue : null,
+          icon: const Icon(Icons.arrow_forward_rounded),
+          label: Text(strings.contextAdvanceAction),
+        ),
+        const SizedBox(height: 20),
       ],
     );
   }
