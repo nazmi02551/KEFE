@@ -18,6 +18,17 @@ BEFORE_QUEUE_OVERLAYS = (
     CONTRACTS / "openapi-mvp.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-projection.v0.19.overlay.json",
 )
+QUEUE_SCHEMA_NAMES = (
+    "ProposalDetailResponse",
+    "ProposalQueueItemResponse",
+    "ProposalQueueResponse",
+    "ProposalQueueReviewState",
+    "ProposalReviewSummaryResponse",
+)
+QUEUE_PATH_NAMES = (
+    "/internal/admin/v1/proposals",
+    "/internal/admin/v1/proposals/{proposal_id}",
+)
 
 
 def _load_before_queue_contract() -> dict[str, object]:
@@ -77,14 +88,33 @@ def build_overlay() -> dict[str, object]:
             f"changed={changed_paths}, removed={removed_paths}"
         )
 
-    new_schema_names = sorted(generated_schemas.keys() - before_schemas.keys())
-    new_path_names = sorted(generated_paths.keys() - before_paths.keys())
+    missing_schemas = sorted(
+        name for name in QUEUE_SCHEMA_NAMES if name not in generated_schemas
+    )
+    missing_paths = sorted(
+        path for path in QUEUE_PATH_NAMES if path not in generated_paths
+    )
+    colliding_schemas = sorted(
+        name for name in QUEUE_SCHEMA_NAMES if name in before_schemas
+    )
+    colliding_paths = sorted(
+        path for path in QUEUE_PATH_NAMES if path in before_paths
+    )
+    if missing_schemas or missing_paths or colliding_schemas or colliding_paths:
+        raise SystemExit(
+            "Admin Proposal queue exact surface is invalid; "
+            f"missing_schemas={missing_schemas}, missing_paths={missing_paths}, "
+            f"colliding_schemas={colliding_schemas}, colliding_paths={colliding_paths}"
+        )
+
     return {
         "target_version": "0.19.0",
         "components": {
-            "schemas": {name: generated_schemas[name] for name in new_schema_names}
+            "schemas": {
+                name: generated_schemas[name] for name in QUEUE_SCHEMA_NAMES
+            }
         },
-        "paths": {path: generated_paths[path] for path in new_path_names},
+        "paths": {path: generated_paths[path] for path in QUEUE_PATH_NAMES},
     }
 
 
