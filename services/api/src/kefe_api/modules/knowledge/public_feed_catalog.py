@@ -288,7 +288,12 @@ class PublicFeedCatalogService:
         self,
         principal: AdminPrincipal,
     ) -> tuple[PublicFeedCatalogEntry, ...]:
-        self._security.authorize(principal, AdminCapability.SOURCE_MANAGE)
+        now = self._clock()
+        self._security.authorize(
+            principal,
+            AdminCapability.SOURCE_MANAGE,
+            now=now,
+        )
         return self._repository.list_entries()
 
     def get(
@@ -296,7 +301,12 @@ class PublicFeedCatalogService:
         principal: AdminPrincipal,
         entry_id: UUID,
     ) -> PublicFeedCatalogEntry:
-        self._security.authorize(principal, AdminCapability.SOURCE_MANAGE)
+        now = self._clock()
+        self._security.authorize(
+            principal,
+            AdminCapability.SOURCE_MANAGE,
+            now=now,
+        )
         entry = self._repository.get(entry_id)
         if entry is None:
             raise DomainError(
@@ -311,8 +321,12 @@ class PublicFeedCatalogService:
         principal: AdminPrincipal,
         definition: PublicFeedDefinition,
     ) -> PublicFeedCatalogEntry:
-        self._security.authorize(principal, AdminCapability.SOURCE_MANAGE)
         now = self._clock()
+        self._security.authorize(
+            principal,
+            AdminCapability.SOURCE_MANAGE,
+            now=now,
+        )
         entry = PublicFeedCatalogEntry(
             id=uuid4(),
             definition=definition,
@@ -345,13 +359,19 @@ class PublicFeedCatalogService:
         principal: AdminPrincipal,
         entry_id: UUID,
     ) -> PublicFeedCatalogEntry:
-        self._security.authorize(principal, AdminCapability.SOURCE_MANAGE)
-        self._security.require_fresh_step_up(principal)
+        now = self._clock()
+        self._security.authorize(
+            principal,
+            AdminCapability.SOURCE_MANAGE,
+            now=now,
+        )
+        self._security.require_fresh_step_up(principal, now=now)
         return self._transition(
             principal=principal,
             entry_id=entry_id,
             target=PublicFeedCatalogState.MANUAL_CAPTURE_APPROVED,
             command="APPROVE_MANUAL_CAPTURE",
+            at=now,
         )
 
     def retire(
@@ -361,14 +381,20 @@ class PublicFeedCatalogService:
         *,
         rationale: str,
     ) -> PublicFeedCatalogEntry:
-        self._security.authorize(principal, AdminCapability.SOURCE_MANAGE)
-        self._security.require_fresh_step_up(principal)
+        now = self._clock()
+        self._security.authorize(
+            principal,
+            AdminCapability.SOURCE_MANAGE,
+            now=now,
+        )
+        self._security.require_fresh_step_up(principal, now=now)
         return self._transition(
             principal=principal,
             entry_id=entry_id,
             target=PublicFeedCatalogState.RETIRED,
             command="RETIRE",
             rationale=rationale,
+            at=now,
         )
 
     def list_audit(
@@ -376,7 +402,12 @@ class PublicFeedCatalogService:
         principal: AdminPrincipal,
         entry_id: UUID | None = None,
     ) -> tuple[PublicFeedCatalogAuditEntry, ...]:
-        self._security.authorize(principal, AdminCapability.SOURCE_MANAGE)
+        now = self._clock()
+        self._security.authorize(
+            principal,
+            AdminCapability.SOURCE_MANAGE,
+            now=now,
+        )
         return self._repository.list_audit(entry_id)
 
     def _transition(
@@ -386,6 +417,7 @@ class PublicFeedCatalogService:
         entry_id: UUID,
         target: PublicFeedCatalogState,
         command: str,
+        at: datetime,
         rationale: str | None = None,
     ) -> PublicFeedCatalogEntry:
         current = self._repository.get(entry_id)
@@ -395,12 +427,11 @@ class PublicFeedCatalogService:
                 "Public feed catalog entry was not found",
                 404,
             )
-        now = self._clock()
         try:
             updated = current.transition(
                 target,
                 actor_ref=principal.audit_actor_ref,
-                at=now,
+                at=at,
                 rationale=rationale,
             )
         except ValueError as exc:
@@ -417,7 +448,7 @@ class PublicFeedCatalogService:
             command=command,
             previous_state=current.state,
             new_state=updated.state,
-            occurred_at=now,
+            occurred_at=at,
             rationale=rationale,
         )
         try:
