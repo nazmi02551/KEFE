@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import FrozenInstanceError, replace
 from datetime import UTC, datetime, timedelta
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
@@ -11,7 +11,10 @@ from kefe_api.main import create_app
 from kefe_api.modules.admin_security.in_memory import InMemoryAdminSessionStore
 from kefe_api.modules.admin_security.models import AdminRole
 from kefe_api.modules.admin_security.router import ADMIN_SESSION_COOKIE
-from kefe_api.modules.knowledge.provider_control import SourceProviderCapability
+from kefe_api.modules.knowledge.provider_control import (
+    ProviderCredentialMode,
+    SourceProviderCapability,
+)
 from kefe_api.modules.knowledge.provider_http_transport import (
     ProviderAdoptionProfile,
     ProviderHttpMethod,
@@ -34,9 +37,11 @@ NOW = datetime(2026, 8, 3, 8, 30, tzinfo=UTC)
 def _definition(
     suffix: str = "one",
     *,
+    adapter_suffix: str | None = None,
     interval_seconds: int = 300,
 ) -> PublicFeedActivationDefinition:
-    adapter_code = f"test.catalog_feed_{suffix}.v1"
+    resolved_adapter_suffix = adapter_suffix or suffix
+    adapter_code = f"test.catalog_feed_{resolved_adapter_suffix}.v1"
     activation_code = f"test.catalog_activation_{suffix}.v1"
     parser = StrictRssAtomParseProfile(
         max_document_bytes=4096,
@@ -45,7 +50,7 @@ def _definition(
     capability = SourceProviderCapability.create(
         adapter_code=adapter_code,
         secret_ref=None,
-        credential_mode="PUBLIC",
+        credential_mode=ProviderCredentialMode.PUBLIC,
         quota_limit=10,
         quota_window_seconds=60,
         failure_threshold=3,
@@ -84,13 +89,18 @@ def _definition(
 def _entry(
     suffix: str = "one",
     *,
+    adapter_suffix: str | None = None,
     recorded_at: datetime = NOW,
     recorded_by: str | None = None,
     evidence_ref: str | None = None,
     interval_seconds: int = 300,
 ) -> PublicFeedActivationCatalogEntry:
     return PublicFeedActivationCatalogEntry.from_definition(
-        _definition(suffix, interval_seconds=interval_seconds),
+        _definition(
+            suffix,
+            adapter_suffix=adapter_suffix,
+            interval_seconds=interval_seconds,
+        ),
         evidence_ref=evidence_ref or f"evidence://catalog/{suffix}/review-v1",
         recorded_by=recorded_by or f"admin:{uuid4()}",
         recorded_at=recorded_at,
@@ -122,7 +132,7 @@ def test_catalog_entry_is_canonical_immutable_redacted_and_owned_on_read() -> No
     assert entry.configuration_hash == definition.configuration_hash
     assert canonical_manifest_hash(entry.manifest_json) == entry.configuration_hash
     assert entry.manifest_json == canonical_manifest_json(definition.configuration_payload)
-    assert entry.activation_code not in repr(entry) or "manifest_json=<redacted" in repr(entry)
+    assert "manifest_json=<redacted" in repr(entry)
     assert entry.evidence_ref not in repr(entry)
 
     first = entry.manifest_payload()
@@ -152,6 +162,21 @@ def test_catalog_manifest_rejects_sensitive_fields_and_integrity_drift() -> None
         replace(entry, configuration_hash="sha256:" + "0" * 64)
     with pytest.raises(ValueError, match="canonical JSON"):
         replace(entry, manifest_json="{ \"a\": 1 }")
+    payload = entry.manifest_payload()
+    payload["activation_code"] = "test.other_activation.v1"
+    forged_json = canonical_manifest_json(payload)
+    with pytest.raises(ValueError, match="catalog identity"):
+        PublicFeedActivationCatalogEntry(
+            id=uuid4(),
+            activation_code=entry.activation_code,
+            adapter_code=entry.adapter_code,
+            configuration_hash=canonical_manifest_hash(forged_json),
+            manifest_schema_version=entry.manifest_schema_version,
+            manifest_json=forged_json,
+            evidence_ref=entry.evidence_ref,
+            recorded_by=entry.recorded_by,
+            recorded_at=entry.recorded_at,
+        )
 
 
 def test_memory_catalog_is_idempotent_conflict_safe_and_deterministic() -> None:
@@ -177,10 +202,7 @@ def test_memory_catalog_is_idempotent_conflict_safe_and_deterministic() -> None:
     with pytest.raises(ValueError, match="conflicting"):
         repository.create_or_get(conflict)
 
-    duplicate_adapter = replace(
-        _entry("two"),
-        adapter_code=first.adapter_code,
-    )
+    duplicate_adapter = _entry("two", adapter_suffix="one")
     with pytest.raises(ValueError, match="adapter"):
         repository.create_or_get(duplicate_adapter)
 
@@ -241,7 +263,11 @@ def test_admin_catalog_list_detail_pagination_and_read_only_method_matrix() -> N
     assert next_page.status_code == 200
     assert len(next_page.json()["items"]) == 1
 
-    selected = first if first.activation_code == body["items"][0]["activation_code"] else second
+    selected = (
+        first
+        if first.activation_code == body["items"][0]["activation_code"]
+        else second
+    )
     detail = reviewer.get(
         f"/internal/admin/v1/public-feed-activations/{selected.activation_code}"
     )
