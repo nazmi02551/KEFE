@@ -17,8 +17,12 @@ on:
       - "services/api/tests/test_public_feed_catalog_postgres.py"
       - "services/api/tests/test_public_feed_catalog_architecture.py"
       - "services/api/tools/check_public_feed_catalog_contract.py"
+      - "services/api/tools/export_public_feed_catalog_openapi_overlay.py"
+      - "services/api/tools/export_admin_proposal_queue_openapi_overlay.py"
+      - "services/api/tools/export_openapi.py"
       - "docs/adr/0091-durable-public-feed-catalog-and-secured-admin-lifecycle.md"
       - "docs/contracts/public-feed-catalog-slice55.v1.json"
+      - "docs/contracts/openapi-public-feed-catalog.v0.19.overlay.json"
       - "docs/contracts/error-codes.v1.yaml"
       - ".github/workflows/public-feed-catalog-ci.yml"
   workflow_dispatch:
@@ -76,6 +80,9 @@ jobs:
           tests/test_public_feed_catalog_postgres.py
           tests/test_public_feed_catalog_architecture.py
           tools/check_public_feed_catalog_contract.py
+          tools/export_public_feed_catalog_openapi_overlay.py
+          tools/export_admin_proposal_queue_openapi_overlay.py
+          tools/export_openapi.py
           migrations/versions/20260803_0026_public_feed_catalog.py
       - name: Public feed catalog architecture fitness
         run: python tools/check_public_feed_catalog_contract.py
@@ -85,6 +92,13 @@ jobs:
         run: python tools/check_admin_http_contract.py
       - name: Contract registry sync
         run: python tools/check_contract_sync.py
+      - name: Public feed catalog OpenAPI overlay exact gate
+        run: >-
+          python tools/export_public_feed_catalog_openapi_overlay.py
+          --output ../../docs/contracts/openapi-public-feed-catalog.v0.19.overlay.json
+          --check
+      - name: Composed OpenAPI exact gate
+        run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
       - name: Public feed catalog memory and Admin HTTP behavior
         run: >-
           pytest
