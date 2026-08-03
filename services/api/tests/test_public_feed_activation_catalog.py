@@ -284,8 +284,9 @@ def test_admin_catalog_list_detail_pagination_and_read_only_method_matrix() -> N
     assert missing.status_code == 404
     assert missing.json()["code"] == "PUBLIC_FEED_ACTIVATION_CATALOG_NOT_FOUND"
 
-    for method in ("post", "put", "patch", "delete"):
-        response = getattr(reviewer, method)(
+    for method in ("POST", "PUT", "PATCH", "DELETE"):
+        response = reviewer.request(
+            method,
             "/internal/admin/v1/public-feed-activations",
             json={"activation_code": "forbidden"},
         )
