@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/kefe_app.dart';
+import 'core/config/experience_presentation_config.dart';
 import 'features/community_reason/application/community_reason_controller.dart';
 import 'features/consensus/application/consensus_controller.dart';
 import 'features/decision/application/decision_controller.dart';
@@ -14,6 +15,9 @@ void main() {
   runApp(
     ProviderScope(
       overrides: [
+        experiencePresentationConfigProvider.overrideWithValue(
+          ExperiencePresentationConfig.fromEnvironment(),
+        ),
         decisionRepositoryProvider.overrideWith(
           (ref) => HttpReflectionDecisionRepository(
             config: ref.watch(appConfigProvider),
