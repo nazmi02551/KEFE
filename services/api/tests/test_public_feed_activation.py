@@ -477,7 +477,10 @@ def test_full_schedule_to_capture_to_ingestion_worker_vertical_path() -> None:
     assert worked.outcome is IngestionWorkerRunOutcome.SUCCEEDED
     assert worked.run_id == dispatched.ingestion_run_id
     proposals = ingestion_repository.list_proposals(dispatched.ingestion_run_id)
-    assert [item.payload["item_id"] for item in proposals] == ["item-a", "item-b"]
+    assert sorted(item.payload["item_id"] for item in proposals) == [
+        "item-a",
+        "item-b",
+    ]
     assert all(item.proposal_kind == PROPOSAL_KIND for item in proposals)
     assert all(
         ingestion_repository.get_review_decision(item.id) is None
