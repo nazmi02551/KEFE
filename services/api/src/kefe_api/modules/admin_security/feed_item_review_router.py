@@ -116,6 +116,7 @@ def feed_item_detail(
     proposal = queue_record.proposal
     run = queue_record.run
     decision = queue_record.review
+    assert proposal.configuration_version is not None
     review_response = None
     if decision is not None:
         review_response = FeedItemReviewDecisionResponse(
@@ -136,7 +137,7 @@ def feed_item_detail(
         run_id=run.id,
         pipeline_code=run.pipeline_code,
         pipeline_version=run.pipeline_version,
-        configuration_version=proposal.configuration_version or "",
+        configuration_version=proposal.configuration_version,
         review=review_response,
     )
 
@@ -146,6 +147,7 @@ def _summary(record: FeedItemReviewRecord) -> FeedItemReviewSummaryResponse:
     proposal = queue_record.proposal
     run = queue_record.run
     payload = record.payload
+    assert proposal.risk_code is not None
     return FeedItemReviewSummaryResponse(
         proposal_id=proposal.id,
         source_artifact_id=payload.source_artifact_id,
@@ -157,7 +159,7 @@ def _summary(record: FeedItemReviewRecord) -> FeedItemReviewSummaryResponse:
         published_at=payload.published_at,
         created_at=proposal.created_at,
         review_state=queue_record.review_state.value,
-        risk_code=proposal.risk_code or "",
+        risk_code=proposal.risk_code,
         locale=run.locale,
         jurisdiction_code=run.jurisdiction_code,
     )
