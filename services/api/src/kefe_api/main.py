@@ -36,6 +36,9 @@ from kefe_api.modules.admin_security.proposal_queue_router import (
 )
 from kefe_api.modules.admin_security.router import router as admin_router
 from kefe_api.modules.admin_security.service import AdminSecurityService
+from kefe_api.modules.admin_security.source_brief_ingestion_router import (
+    router as admin_source_brief_ingestion_router,
+)
 from kefe_api.modules.community_reason.admin_router import router as community_reason_admin_router
 from kefe_api.modules.community_reason.router import router as community_reason_router
 from kefe_api.modules.community_reason.service import CommunityReasonService
@@ -305,6 +308,8 @@ def create_app() -> FastAPI:
     app.include_router(admin_proposal_queue_router)
     if _api_at_least(settings.api_version, 0, 21):
         app.include_router(admin_feed_item_review_router)
+    if _api_at_least(settings.api_version, 0, 22):
+        app.include_router(admin_source_brief_ingestion_router)
     app.include_router(admin_editorial_projection_router)
     app.include_router(admin_content_configuration_router)
     app.include_router(community_reason_admin_router)
