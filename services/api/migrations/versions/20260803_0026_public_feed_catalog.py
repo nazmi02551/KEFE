@@ -106,7 +106,7 @@ def upgrade() -> None:
     )
     op.execute(
         """
-        CREATE FUNCTION knowledge.prevent_public_feed_definition_mutation()
+        CREATE FUNCTION knowledge.guard_public_feed_catalog_update()
         RETURNS trigger
         LANGUAGE plpgsql
         AS $$
@@ -119,6 +119,15 @@ def upgrade() -> None:
                OR NEW.registered_at IS DISTINCT FROM OLD.registered_at THEN
                 RAISE EXCEPTION 'public feed definition is immutable';
             END IF;
+            IF NOT (
+                (OLD.lifecycle_state = 'REGISTERED'
+                 AND NEW.lifecycle_state IN ('MANUAL_CAPTURE_APPROVED', 'RETIRED'))
+                OR
+                (OLD.lifecycle_state = 'MANUAL_CAPTURE_APPROVED'
+                 AND NEW.lifecycle_state = 'RETIRED')
+            ) THEN
+                RAISE EXCEPTION 'public feed lifecycle transition is invalid';
+            END IF;
             RETURN NEW;
         END
         $$
@@ -126,19 +135,46 @@ def upgrade() -> None:
     )
     op.execute(
         """
-        CREATE TRIGGER public_feed_catalog_definition_immutable_trg
+        CREATE TRIGGER public_feed_catalog_update_guard_trg
         BEFORE UPDATE ON knowledge.public_feed_catalog
         FOR EACH ROW
-        EXECUTE FUNCTION knowledge.prevent_public_feed_definition_mutation()
+        EXECUTE FUNCTION knowledge.guard_public_feed_catalog_update()
+        """
+    )
+    op.execute(
+        """
+        CREATE FUNCTION knowledge.reject_public_feed_catalog_audit_mutation()
+        RETURNS trigger
+        LANGUAGE plpgsql
+        AS $$
+        BEGIN
+            RAISE EXCEPTION 'public feed catalog audit is append-only';
+        END
+        $$
+        """
+    )
+    op.execute(
+        """
+        CREATE TRIGGER public_feed_catalog_audit_append_only_trg
+        BEFORE UPDATE OR DELETE ON knowledge.public_feed_catalog_audit
+        FOR EACH ROW
+        EXECUTE FUNCTION knowledge.reject_public_feed_catalog_audit_mutation()
         """
     )
 
 
 def downgrade() -> None:
     op.execute(
-        "DROP TRIGGER public_feed_catalog_definition_immutable_trg "
+        "DROP TRIGGER public_feed_catalog_audit_append_only_trg "
+        "ON knowledge.public_feed_catalog_audit"
+    )
+    op.execute(
+        "DROP FUNCTION knowledge.reject_public_feed_catalog_audit_mutation()"
+    )
+    op.execute(
+        "DROP TRIGGER public_feed_catalog_update_guard_trg "
         "ON knowledge.public_feed_catalog"
     )
-    op.execute("DROP FUNCTION knowledge.prevent_public_feed_definition_mutation()")
+    op.execute("DROP FUNCTION knowledge.guard_public_feed_catalog_update()")
     op.execute("DROP TABLE knowledge.public_feed_catalog_audit")
     op.execute("DROP TABLE knowledge.public_feed_catalog")
