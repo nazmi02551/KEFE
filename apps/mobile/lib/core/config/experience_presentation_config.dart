@@ -34,6 +34,7 @@ class ExperiencePresentationConfig {
   final OnboardingExperienceVersion onboardingVersion;
 }
 
-final experiencePresentationConfigProvider = Provider<ExperiencePresentationConfig>(
-  (ref) => ExperiencePresentationConfig.fromEnvironment(),
-);
+final experiencePresentationConfigProvider =
+    Provider<ExperiencePresentationConfig>(
+      (ref) => ExperiencePresentationConfig.fromEnvironment(),
+    );
