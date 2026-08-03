@@ -138,24 +138,24 @@ class PostgresPublicFeedActivationCatalogRepository:
     ) -> tuple[PublicFeedActivationCatalogEntry, ...]:
         if not 1 <= limit <= MAX_CATALOG_PAGE_SIZE:
             raise ValueError("catalog list limit is outside the supported range")
+        parameters: dict[str, object] = {"limit": limit}
+        where_clause = ""
         if after_activation_code is not None:
             require_versioned_adapter_code(after_activation_code)
+            where_clause = "WHERE activation_code > :after_activation_code"
+            parameters["after_activation_code"] = after_activation_code
         with self._engine.connect() as connection:
             rows = connection.execute(
                 text(
                     f"""
                     SELECT {_SELECT_COLUMNS}
                     FROM knowledge.public_feed_activation_catalog
-                    WHERE :after_activation_code IS NULL
-                       OR activation_code > :after_activation_code
+                    {where_clause}
                     ORDER BY activation_code
                     LIMIT :limit
                     """
                 ),
-                {
-                    "after_activation_code": after_activation_code,
-                    "limit": limit,
-                },
+                parameters,
             ).mappings().all()
         return tuple(self._from_row(row) for row in rows)
 
