@@ -1,0 +1,109 @@
+{
+  "contract": "admin-feed-item-materialization-http-slice57",
+  "version": 1,
+  "status": "accepted",
+  "http": {
+    "method": "POST",
+    "path": "/internal/admin/v1/feed-item-proposals/{proposal_id}/materialization",
+    "request_fields": [
+      "proposal_review_decision_id"
+    ],
+    "success_status": 200,
+    "response_fields": [
+      "proposal_materialization_id",
+      "proposal_id",
+      "proposal_review_decision_id",
+      "target_kind",
+      "target_id",
+      "replayed"
+    ],
+    "extra_request_fields": "forbidden"
+  },
+  "security": {
+    "principal_dependency": "WritePrincipalDep",
+    "session_required": true,
+    "csrf_required": true,
+    "capability": "SOURCE_VERIFY",
+    "step_up_required": false,
+    "review_endpoint_reused": false,
+    "review_created_or_changed": false
+  },
+  "preconditions": {
+    "proposal_exists": true,
+    "stored_review_exists": true,
+    "supplied_review_id_exact_match": true,
+    "stored_review_decision": "ACCEPTED",
+    "proposal_kind": "FEED_ITEM",
+    "payload_schema_ref": "kefe.feed-item",
+    "payload_schema_version": "1.0.0",
+    "all_checked_before_target_write": true
+  },
+  "delegation": {
+    "orchestration_method": "materialize_accepted_proposal",
+    "materializer": "FeedItemProposalMaterializer",
+    "http_layer_payload_validation": false,
+    "http_layer_source_lineage_validation": false,
+    "http_layer_target_assembly": false
+  },
+  "idempotency": {
+    "stable_http_status": 200,
+    "first_replayed": false,
+    "repeat_replayed": true,
+    "duplicate_normalized_artifact": false,
+    "duplicate_proposal_materialization": false
+  },
+  "errors": {
+    "proposal_missing": {
+      "code": "ADMIN_FEED_ITEM_PROPOSAL_NOT_FOUND",
+      "status": 404
+    },
+    "review_missing": {
+      "code": "ADMIN_FEED_ITEM_REVIEW_REQUIRED",
+      "status": 409
+    },
+    "review_mismatch": {
+      "code": "ADMIN_FEED_ITEM_REVIEW_MISMATCH",
+      "status": 409
+    },
+    "review_not_accepted": {
+      "code": "ADMIN_FEED_ITEM_REVIEW_NOT_ACCEPTED",
+      "status": 409
+    },
+    "proposal_schema_invalid": {
+      "code": "ADMIN_FEED_ITEM_PROPOSAL_SCHEMA_INVALID",
+      "status": 422
+    },
+    "materialization_conflict": {
+      "code": "ADMIN_FEED_ITEM_MATERIALIZATION_CONFLICT",
+      "status": 409
+    },
+    "raw_payload_in_response": false,
+    "raw_storage_ref_in_response": false,
+    "exception_text_in_response": false
+  },
+  "authority": {
+    "automatic_review": false,
+    "claim_creation": false,
+    "case_creation": false,
+    "editorial_projection": false,
+    "publication": false,
+    "provider_or_network": false,
+    "secret_or_storage_backend": false
+  },
+  "composition": {
+    "secured_service_composed": true,
+    "router_registered": true,
+    "automatic_invocations": 0
+  },
+  "validation": {
+    "dedicated_ci": "Admin Feed Item Materialization CI",
+    "memory_service_tests": true,
+    "memory_http_tests": true,
+    "postgres_http_tests": true,
+    "openapi_exact_gate": true,
+    "parent_admin_gate": true,
+    "parent_ingestion_gate": true,
+    "parent_materialization_gate": true,
+    "api_mvp_global_gates": true
+  }
+}
