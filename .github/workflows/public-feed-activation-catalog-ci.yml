@@ -1,0 +1,123 @@
+name: Public Feed Activation Catalog CI
+
+on:
+  pull_request:
+    paths:
+      - 'services/api/migrations/versions/20260803_0026_public_feed_activation_catalog.py'
+      - 'services/api/src/kefe_api/modules/knowledge/public_feed_activation_catalog.py'
+      - 'services/api/src/kefe_api/infrastructure/postgres_public_feed_activation_catalog.py'
+      - 'services/api/src/kefe_api/infrastructure/public_feed_activation_catalog_runtime.py'
+      - 'services/api/src/kefe_api/modules/admin_security/public_feed_activation_catalog.py'
+      - 'services/api/src/kefe_api/modules/admin_security/public_feed_activation_catalog_router.py'
+      - 'services/api/src/kefe_api/main.py'
+      - 'services/api/tests/test_public_feed_activation_catalog*.py'
+      - 'services/api/tools/check_public_feed_activation_catalog_contract.py'
+      - 'docs/adr/0091-immutable-public-feed-activation-catalog-and-read-only-admin-inspection.md'
+      - 'docs/contracts/public-feed-activation-catalog-slice55.v1.json'
+      - '.github/workflows/public-feed-activation-catalog-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/api/migrations/versions/20260803_0026_public_feed_activation_catalog.py'
+      - 'services/api/src/kefe_api/modules/knowledge/public_feed_activation_catalog.py'
+      - 'services/api/src/kefe_api/infrastructure/postgres_public_feed_activation_catalog.py'
+      - 'services/api/src/kefe_api/infrastructure/public_feed_activation_catalog_runtime.py'
+      - 'services/api/src/kefe_api/modules/admin_security/public_feed_activation_catalog.py'
+      - 'services/api/src/kefe_api/modules/admin_security/public_feed_activation_catalog_router.py'
+      - 'services/api/src/kefe_api/main.py'
+      - 'services/api/tests/test_public_feed_activation_catalog*.py'
+      - 'services/api/tools/check_public_feed_activation_catalog_contract.py'
+      - 'docs/adr/0091-immutable-public-feed-activation-catalog-and-read-only-admin-inspection.md'
+      - 'docs/contracts/public-feed-activation-catalog-slice55.v1.json'
+      - '.github/workflows/public-feed-activation-catalog-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  activation-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Ruff activation catalog boundary
+        working-directory: services/api
+        run: >-
+          ruff check
+          src/kefe_api/modules/knowledge/public_feed_activation_catalog.py
+          src/kefe_api/infrastructure/postgres_public_feed_activation_catalog.py
+          src/kefe_api/infrastructure/public_feed_activation_catalog_runtime.py
+          src/kefe_api/modules/admin_security/public_feed_activation_catalog.py
+          src/kefe_api/modules/admin_security/public_feed_activation_catalog_router.py
+          main.py
+          tests/test_public_feed_activation_catalog.py
+          tests/test_public_feed_activation_catalog_postgres.py
+          tools/check_public_feed_activation_catalog_contract.py
+      - name: Activation catalog architecture fitness
+        working-directory: services/api
+        run: python tools/check_public_feed_activation_catalog_contract.py
+      - name: Parent public feed activation architecture fitness
+        working-directory: services/api
+        run: python tools/check_public_feed_activation_contract.py
+      - name: Parent Admin HTTP architecture fitness
+        working-directory: services/api
+        run: python tools/check_admin_http_contract.py
+      - name: Activation catalog memory and Admin HTTP behavior
+        working-directory: services/api
+        run: pytest tests/test_public_feed_activation_catalog.py
+
+  activation-catalog-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: kefe
+          POSTGRES_USER: kefe
+          POSTGRES_PASSWORD: kefe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kefe -d kefe"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Migrate PostgreSQL
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: alembic upgrade head
+      - name: Verify clean catalog downgrade and upgrade
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: |
+          alembic downgrade 20260803_0025
+          alembic upgrade head
+      - name: Activation catalog PostgreSQL behavior
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+          KEFE_RUN_POSTGRES_TESTS: '1'
+        run: pytest tests/test_public_feed_activation_catalog_postgres.py
