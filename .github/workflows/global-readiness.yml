@@ -6,7 +6,9 @@ on:
       - 'apps/mobile/**'
       - 'services/api/**'
       - 'docs/adr/0038-internal-alpha-localization-and-phone-acceptance.md'
+      - 'docs/adr/0090-installable-phone-preview-and-unconfigured-production-shell-boundary.md'
       - 'docs/contracts/internal-alpha-hardening.v1.json'
+      - 'docs/contracts/installable-phone-preview-hotfix.v1.json'
       - 'docs/contracts/openapi-global.v0.20.overlay.json'
       - 'docs/contracts/global-readiness.v1.yaml'
       - '.github/workflows/global-readiness.yml'
@@ -110,6 +112,8 @@ jobs:
         run: flutter pub get
       - name: Production copy boundary gate
         run: python tool/check_production_copy_boundary.py
+      - name: Phone artifact boundary gate
+        run: python tool/check_installable_phone_artifact_boundary.py
       - name: Normalize Dart formatting
         run: dart format lib test
       - name: Upload normalized mobile source
@@ -130,16 +134,19 @@ jobs:
         run: flutter test test/internal_alpha_phone_acceptance_test.dart --reporter expanded
       - name: Generate transient Android host
         run: flutter create --platforms=android --project-name kefe_mobile .
-      - name: Build internal phone candidate
+      - name: Build installable phone preview
         env:
           CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-        run: >-
-          flutter build apk --debug -t lib/main_preview.dart
-          --dart-define=KEFE_PREVIEW_VERSION=internal-alpha-rc1
-          --dart-define=KEFE_PREVIEW_COMMIT=${CANDIDATE_SHA}
-      - name: Upload internal phone candidate
+        run: |
+          flutter build apk --debug -t lib/main_preview.dart \
+            --dart-define=KEFE_PREVIEW_VERSION=internal-alpha-rc1 \
+            --dart-define=KEFE_PREVIEW_COMMIT=${CANDIDATE_SHA}
+          mkdir -p build/phone-preview
+          cp build/app/outputs/flutter-apk/app-debug.apk \
+            "build/phone-preview/KEFE-phone-preview-${CANDIDATE_SHA}.apk"
+      - name: Upload installable phone preview
         uses: actions/upload-artifact@v4
         with:
-          name: kefe-internal-alpha-phone-preview
-          path: apps/mobile/build/app/outputs/flutter-apk/app-debug.apk
+          name: kefe-installable-phone-preview
+          path: apps/mobile/build/phone-preview/KEFE-phone-preview-*.apk
           if-no-files-found: error
