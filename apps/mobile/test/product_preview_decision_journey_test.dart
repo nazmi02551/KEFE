@@ -82,6 +82,13 @@ void main() {
       expect(find.text('Karşı görüş'), findsOneWidget);
       expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
 
+      final contextContinue = find.byKey(
+        const ValueKey('context-continue-button'),
+      );
+      await scrollTo(tester, contextContinue);
+      await tester.tap(contextContinue);
+      await tester.pumpAndSettle();
+
       final finalNo = find.byKey(const ValueKey('option-Hayır'));
       await scrollTo(tester, finalNo);
       await tester.tap(finalNo);
