@@ -6,34 +6,17 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 API = ROOT / "services/api"
-SERVICE = (
-    API
-    / "src/kefe_api/modules/admin_security/feed_item_materialization_status.py"
-)
-ROUTER = (
-    API / "src/kefe_api/modules/admin_security/proposal_queue_router.py"
-)
+SERVICE = API / "src/kefe_api/modules/admin_security/feed_item_materialization_status.py"
+ROUTER = API / "src/kefe_api/modules/admin_security/proposal_queue_router.py"
 MAIN = API / "src/kefe_api/main.py"
-HTTP_TEST = (
-    API / "tests/test_admin_feed_item_materialization_status_http.py"
-)
-OPENAPI_TEST = (
-    API / "tests/test_admin_feed_item_materialization_status_openapi.py"
-)
-POSTGRES_TEST = (
-    API / "tests/test_admin_feed_item_materialization_status_postgres.py"
-)
+HTTP_TEST = API / "tests/test_admin_feed_item_materialization_status_http.py"
+OPENAPI_TEST = API / "tests/test_admin_feed_item_materialization_status_openapi.py"
+POSTGRES_TEST = API / "tests/test_admin_feed_item_materialization_status_postgres.py"
 ADR = ROOT / "docs/adr/0092-secured-admin-feed-item-materialization-status.md"
-CONTRACT = (
-    ROOT
-    / "docs/contracts/admin-feed-item-materialization-status-slice56.v1.json"
-)
+CONTRACT = ROOT / "docs/contracts/admin-feed-item-materialization-status-slice56.v1.json"
 POLICY = ROOT / "docs/contracts/admin-http-surface.v1.yaml"
 ERRORS = ROOT / "docs/contracts/error-codes-admin-feed-item-status.v1.yaml"
-OPENAPI_OVERLAY = (
-    ROOT
-    / "docs/contracts/openapi-admin-feed-item-status.v0.19.overlay.json"
-)
+OPENAPI_OVERLAY = ROOT / "docs/contracts/openapi-admin-feed-item-status.v0.19.overlay.json"
 EXPORT = API / "tools/export_openapi.py"
 WORKFLOW = ROOT / ".github/workflows/admin-feed-item-status-ci.yml"
 
@@ -77,8 +60,7 @@ def fields(node: ast.ClassDef) -> tuple[str, ...]:
     return tuple(
         child.target.id
         for child in node.body
-        if isinstance(child, ast.AnnAssign)
-        and isinstance(child.target, ast.Name)
+        if isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name)
     )
 
 
@@ -102,24 +84,17 @@ def main() -> None:
     export = EXPORT.read_text(encoding="utf-8")
     workflow = WORKFLOW.read_text(encoding="utf-8")
 
-    if contract.get("contract") != (
-        "admin-feed-item-materialization-status-slice56"
-    ):
+    if contract.get("contract") != "admin-feed-item-materialization-status-slice56":
         fail("Admin feed item status contract identity drifted")
     if contract.get("status") != "accepted":
         fail("Admin feed item status contract is not accepted")
 
+    exact_path = "/internal/admin/v1/proposals/{proposal_id}/feed-item-materialization-status"
     http = contract.get("http", {})
-    exact_path = (
-        "/internal/admin/v1/proposals/{proposal_id}/"
-        "feed-item-materialization-status"
-    )
     if http.get("method") != "GET" or http.get("path") != exact_path:
         fail("Admin feed item status HTTP identity drifted")
-    if http.get("read_principal_required") is not True:
-        fail("Admin feed item status requires read principal")
-    if http.get("csrf_required") is not False:
-        fail("Admin feed item status GET cannot require CSRF")
+    if http.get("read_principal_required") is not True or http.get("csrf_required") is not False:
+        fail("Admin feed item status read/CSRF boundary drifted")
     if http.get("response_fields") != [
         "materialized_at",
         "proposal_id",
@@ -131,20 +106,17 @@ def main() -> None:
         "target_kind",
     ]:
         fail("Admin feed item status response fields drifted")
-    for name in (
+    for key in (
         "response_includes_payload",
         "response_includes_normalized_text",
         "response_includes_evidence",
     ):
-        if http.get(name) is not False:
-            fail(f"Admin feed item status disclosure drifted: {name}")
+        if http.get(key) is not False:
+            fail(f"Admin feed item status disclosure drifted: {key}")
 
     authorization = contract.get("authorization", {})
-    if authorization.get("required_capabilities") != [
-        "CONTENT_REVIEW",
-        "SOURCE_VERIFY",
-    ]:
-        fail("Admin feed item status capability set drifted")
+    if authorization.get("required_capabilities") != ["CONTENT_REVIEW", "SOURCE_VERIFY"]:
+        fail("Admin feed item status capabilities drifted")
     if authorization.get("editor_only_allowed") is not False:
         fail("Editor-only Admin cannot read feed item status")
     if authorization.get("publisher_only_allowed") is not False:
@@ -156,17 +128,18 @@ def main() -> None:
     if states["MATERIALIZED"].get("target_kind") != "NORMALIZED_ARTIFACT":
         fail("MATERIALIZED target kind drifted")
     if states["MATERIALIZED"].get("review_binding_exact") is not True:
-        fail("MATERIALIZED review binding must remain exact")
+        fail("MATERIALIZED review binding drifted")
 
+    service_tree = ast.parse(service)
     classes = class_map(service)
-    status_enum = classes.get("FeedItemMaterializationStatus")
+    enum_node = classes.get("FeedItemMaterializationStatus")
     snapshot = classes.get("FeedItemMaterializationStatusSnapshot")
     secured = classes.get("SecuredFeedItemMaterializationStatusService")
-    if status_enum is None or snapshot is None or secured is None:
+    if enum_node is None or snapshot is None or secured is None:
         fail("Admin feed item status classes are missing")
     enum_values = {
         child.targets[0].id: child.value.value
-        for child in status_enum.body
+        for child in enum_node.body
         if isinstance(child, ast.Assign)
         and isinstance(child.targets[0], ast.Name)
         and isinstance(child.value, ast.Constant)
@@ -177,7 +150,7 @@ def main() -> None:
         "MATERIALIZED": "MATERIALIZED",
     }:
         fail(f"Admin feed item status enum drifted: {enum_values}")
-    if fields(snapshot) != (
+    expected_fields = (
         "proposal_id",
         "status",
         "proposal_review_decision_id",
@@ -186,10 +159,12 @@ def main() -> None:
         "target_kind",
         "target_id",
         "materialized_at",
-    ):
+    )
+    if fields(snapshot) != expected_fields:
         fail("Admin feed item status snapshot fields drifted")
 
-    observe_source = ast.get_source_segment(service, method(secured, "observe")) or ""
+    observe = method(secured, "observe")
+    observe_source = ast.get_source_segment(service, observe) or ""
     ordered = (
         "AdminCapability.CONTENT_REVIEW",
         "AdminCapability.SOURCE_VERIFY",
@@ -198,9 +173,7 @@ def main() -> None:
         "self._repository.find_materialization(proposal_id)",
     )
     positions = tuple(observe_source.find(fragment) for fragment in ordered)
-    if any(position < 0 for position in positions) or positions != tuple(
-        sorted(positions)
-    ):
+    if any(position < 0 for position in positions) or positions != tuple(sorted(positions)):
         fail("Admin feed item status observation order drifted")
     for fragment in (
         "proposal.proposal_kind != _FEED_ITEM_KIND",
@@ -218,8 +191,13 @@ def main() -> None:
     ):
         if fragment not in observe_source:
             fail(f"Admin feed item status guard missing: {fragment}")
+
+    if any(
+        isinstance(node, ast.Attribute) and node.attr == "payload"
+        for node in ast.walk(observe)
+    ):
+        fail("Admin feed item status cannot read proposal payload")
     for forbidden in (
-        ".payload",
         "KnowledgeProposalMaterializer",
         "materialize_accepted_proposal(",
         "review_proposal(",
@@ -238,16 +216,7 @@ def main() -> None:
 
     router_classes = class_map(router)
     response = router_classes.get("FeedItemMaterializationStatusResponse")
-    if response is None or fields(response) != (
-        "proposal_id",
-        "status",
-        "proposal_review_decision_id",
-        "proposal_review_decision",
-        "proposal_materialization_id",
-        "target_kind",
-        "target_id",
-        "materialized_at",
-    ):
+    if response is None or fields(response) != expected_fields:
         fail("FeedItemMaterializationStatusResponse fields drifted")
     for fragment in (
         '"/proposals/{proposal_id}/feed-item-materialization-status"',
@@ -266,7 +235,6 @@ def main() -> None:
     ):
         if forbidden in router:
             fail(f"forbidden mutation leaked into status router: {forbidden}")
-
     if "app.include_router(admin_proposal_queue_router)" not in main_source:
         fail("Admin proposal/status router is not composed")
 
@@ -302,7 +270,6 @@ def main() -> None:
     ):
         if test_name not in tests:
             fail(f"Admin feed item status test evidence missing: {test_name}")
-
     for phrase in (
         "Add one read-only additive endpoint",
         "Three persisted states",
@@ -312,7 +279,6 @@ def main() -> None:
     ):
         if phrase not in adr:
             fail(f"ADR-0092 decision text missing: {phrase}")
-
     for phrase in (
         "Admin feed item status architecture fitness",
         "Admin feed item status HTTP behavior",
