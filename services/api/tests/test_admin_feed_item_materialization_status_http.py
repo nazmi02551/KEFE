@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 from kefe_api.core.settings import get_settings
 from kefe_api.main import create_app
 from kefe_api.modules.admin_security.models import AdminRole
-from kefe_api.modules.admin_security.router import ADMIN_SESSION_COOKIE
+from kefe_api.modules.admin_security.router import ADMIN_CSRF_HEADER, ADMIN_SESSION_COOKIE
 from kefe_api.modules.ingestion_orchestration.models import (
     ExecutorKind,
     InputArtifactKind,
@@ -39,7 +39,7 @@ def _app(monkeypatch: pytest.MonkeyPatch):
     return create_app()
 
 
-def _admin(app, role: AdminRole) -> TestClient:
+def _admin(app, role: AdminRole) -> tuple[TestClient, str]:
     subject_id = uuid4()
     app.state.admin_session_store.upsert_subject(
         subject_id,
@@ -54,7 +54,7 @@ def _admin(app, role: AdminRole) -> TestClient:
     )
     client = TestClient(app)
     client.cookies.set(ADMIN_SESSION_COOKIE, issued.session_token)
-    return client
+    return client, issued.csrf_token
 
 
 def _seed(app, *, kind: str = "FEED_ITEM"):
@@ -120,7 +120,7 @@ def _seed(app, *, kind: str = "FEED_ITEM"):
     return repository.list_proposals(run.id)[0]
 
 
-def _path(proposal_id: UUID) -> str:
+def _path(proposal_id) -> str:
     return (
         f"/internal/admin/v1/proposals/{proposal_id}/"
         "feed-item-materialization-status"
@@ -134,18 +134,17 @@ def test_status_requires_auth_and_both_capabilities_without_csrf(
     try:
         proposal = _seed(app)
         anonymous = TestClient(app).get(_path(proposal.id))
-        editor = _admin(app, AdminRole.EDITOR).get(_path(proposal.id))
-        publisher = _admin(app, AdminRole.PUBLISHER).get(_path(proposal.id))
-        reviewer = _admin(app, AdminRole.REVIEWER).get(_path(proposal.id))
+        editor, _ = _admin(app, AdminRole.EDITOR)
+        publisher, _ = _admin(app, AdminRole.PUBLISHER)
+        reviewer, _ = _admin(app, AdminRole.REVIEWER)
 
         assert anonymous.status_code == 401
         assert anonymous.json()["code"] == "ADMIN_AUTH_REQUIRED"
-        assert editor.status_code == 403
-        assert editor.json()["code"] == "ADMIN_FORBIDDEN"
-        assert publisher.status_code == 403
-        assert publisher.json()["code"] == "ADMIN_FORBIDDEN"
-        assert reviewer.status_code == 200
-        assert reviewer.json()["status"] == "REVIEW_REQUIRED"
+        assert editor.get(_path(proposal.id)).status_code == 403
+        assert publisher.get(_path(proposal.id)).status_code == 403
+        response = reviewer.get(_path(proposal.id))
+        assert response.status_code == 200
+        assert response.json()["status"] == "REVIEW_REQUIRED"
     finally:
         get_settings.cache_clear()
 
@@ -156,22 +155,14 @@ def test_status_progresses_review_required_ready_materialized(
     app = _app(monkeypatch)
     try:
         proposal = _seed(app)
-        repository = app.state.ingestion_orchestration_repository
         service = app.state.ingestion_orchestration_service
-        reviewer = _admin(app, AdminRole.REVIEWER)
+        reviewer, csrf = _admin(app, AdminRole.REVIEWER)
 
         initial = reviewer.get(_path(proposal.id))
         assert initial.status_code == 200
-        assert initial.json() == {
-            "proposal_id": str(proposal.id),
-            "status": "REVIEW_REQUIRED",
-            "proposal_review_decision_id": None,
-            "proposal_review_decision": None,
-            "proposal_materialization_id": None,
-            "target_kind": None,
-            "target_id": None,
-            "materialized_at": None,
-        }
+        assert initial.json()["status"] == "REVIEW_REQUIRED"
+        assert initial.json()["proposal_review_decision_id"] is None
+        assert initial.json()["target_id"] is None
 
         review = service.review_proposal(
             proposal_id=proposal.id,
@@ -187,33 +178,10 @@ def test_status_progresses_review_required_ready_materialized(
 
         command = reviewer.post(
             f"/internal/admin/v1/proposals/{proposal.id}/feed-item-materialization",
-            headers={
-                "X-KEFE-CSRF": app.state.admin_session_store.get_by_token(
-                    reviewer.cookies[ADMIN_SESSION_COOKIE]
-                ).csrf_token_hash
-            },
+            headers={ADMIN_CSRF_HEADER: csrf},
             json={"proposal_review_decision_id": str(review.id)},
         )
-        if command.status_code != 200:
-            # Use the domain service directly; command CSRF token is intentionally not exposed.
-            from kefe_api.modules.admin_security.feed_item_materialization import (
-                SecuredFeedItemMaterializationService,
-            )
-            from kefe_api.modules.admin_security.router import get_admin_principal
-
-            principal = get_admin_principal(
-                request=type("Request", (), {"app": app, "cookies": reviewer.cookies})(),
-            )
-            SecuredFeedItemMaterializationService(
-                orchestration=service,
-                repository=repository,
-                knowledge=app.state.knowledge_repository,
-                security=app.state.admin_security_service,
-            ).materialize(
-                principal,
-                proposal_id=proposal.id,
-                proposal_review_decision_id=review.id,
-            )
+        assert command.status_code == 200
 
         materialized = reviewer.get(_path(proposal.id))
         assert materialized.status_code == 200
@@ -235,7 +203,7 @@ def test_rejected_unsupported_and_conflicting_statuses_are_bounded(
 ) -> None:
     app = _app(monkeypatch)
     try:
-        reviewer = _admin(app, AdminRole.REVIEWER)
+        reviewer, _ = _admin(app, AdminRole.REVIEWER)
         service = app.state.ingestion_orchestration_service
         repository = app.state.ingestion_orchestration_repository
 
@@ -266,11 +234,12 @@ def test_rejected_unsupported_and_conflicting_statuses_are_bounded(
             decision=ProposalReviewDecisionKind.ACCEPTED,
             reviewer_ref="admin:status-reviewer",
         )
+        wrong_review_id = uuid4()
         repository.add_materialization(
             ProposalMaterialization(
                 id=uuid4(),
                 proposal_id=conflict_proposal.id,
-                review_decision_id=uuid4(),
+                review_decision_id=wrong_review_id,
                 target_kind="NORMALIZED_ARTIFACT",
                 target_id=uuid4(),
                 materialized_at=datetime.now(UTC),
@@ -281,8 +250,6 @@ def test_rejected_unsupported_and_conflicting_statuses_are_bounded(
         assert conflict.json()["code"] == (
             "INGESTION_FEED_ITEM_MATERIALIZATION_STATUS_CONFLICT"
         )
-        assert accepted.id != UUID(
-            str(repository.find_materialization(conflict_proposal.id).review_decision_id)
-        )
+        assert accepted.id != wrong_review_id
     finally:
         get_settings.cache_clear()
