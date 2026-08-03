@@ -8,10 +8,10 @@ from uuid import uuid4
 import pytest
 
 from kefe_api.modules.ingestion_orchestration.feed_item_materializer import (
-    FeedItemProposalMaterializer,
     NORMALIZED_SCHEMA_REF,
     NORMALIZED_SCHEMA_VERSION,
     TARGET_KIND,
+    FeedItemProposalMaterializer,
 )
 from kefe_api.modules.ingestion_orchestration.in_memory import (
     InMemoryIngestionOrchestrationRepository,
