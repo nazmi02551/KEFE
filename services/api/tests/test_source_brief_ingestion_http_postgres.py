@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from datetime import UTC, datetime, timedelta
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from fastapi.testclient import TestClient
@@ -14,9 +14,17 @@ from kefe_api.modules.admin_security.router import ADMIN_CSRF_HEADER, ADMIN_SESS
 from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
     PAYLOAD_SCHEMA_REF,
     PAYLOAD_SCHEMA_VERSION,
+)
+from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
     PIPELINE_CODE as FEED_PIPELINE_CODE,
+)
+from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
     PIPELINE_VERSION as FEED_PIPELINE_VERSION,
+)
+from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
     PROPOSAL_KIND as FEED_ITEM_KIND,
+)
+from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
     RISK_CODE as FEED_ITEM_RISK,
 )
 from kefe_api.modules.ingestion_orchestration.models import (
@@ -47,7 +55,7 @@ pytestmark = pytest.mark.skipif(
 SOURCE_AT = datetime(2026, 8, 3, 10, 30, tzinfo=UTC)
 
 
-def _subject(database_url: str) -> object:
+def _subject(database_url: str) -> UUID:
     subject_id = uuid4()
     engine = create_engine(database_url)
     with engine.begin() as connection:
@@ -75,7 +83,7 @@ def _subject(database_url: str) -> object:
     return subject_id
 
 
-def _client(app, subject_id) -> tuple[TestClient, str]:
+def _client(app, subject_id: UUID) -> tuple[TestClient, str]:
     issued_at = datetime.now(UTC)
     issued = app.state.admin_session_store.issue(
         admin_subject_id=subject_id,
@@ -88,7 +96,7 @@ def _client(app, subject_id) -> tuple[TestClient, str]:
     return client, issued.csrf_token
 
 
-def _seed(app) -> tuple[object, SourceArtifact]:
+def _seed(app) -> tuple[UUID, SourceArtifact]:
     body = f"postgres-source-brief-{uuid4()}".encode()
     content_hash = canonical_content_hash(body)
     source = app.state.knowledge_repository.add_source_artifact(
@@ -158,9 +166,9 @@ def _seed(app) -> tuple[object, SourceArtifact]:
         provenance_ref=source.raw_storage_ref,
     )
     repository.complete_successful_stage(execution, (proposal,))
-    repository.update_run(
-        repository.get_run(run.id).transition(IngestionRunState.SUCCEEDED)
-    )
+    parent = repository.get_run(run.id)
+    assert parent is not None
+    repository.update_run(parent.transition(IngestionRunState.SUCCEEDED))
     return proposal.id, source
 
 
