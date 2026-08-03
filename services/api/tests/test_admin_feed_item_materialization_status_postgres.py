@@ -152,8 +152,8 @@ def test_postgres_status_progression_and_conflict_are_persisted() -> None:
             id=uuid4(),
             proposal_id=conflict_proposal.id,
             review_decision_id=conflict_review.id,
-            target_kind="CLAIM",
-            target_id=uuid4(),
+            target_kind=f"UNEXPECTED_STATUS_TARGET_{uuid4().hex}",
+            target_id=conflict_proposal.id,
             materialized_at=datetime.now(UTC),
         )
     )
