@@ -1,0 +1,96 @@
+name: RSS Atom Route CI
+
+on:
+  pull_request:
+    paths:
+      - 'services/api/src/kefe_api/modules/knowledge/rss_atom_route.py'
+      - 'services/api/src/kefe_api/modules/knowledge/rss_atom_capture.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_public_http_capture.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_acquisition.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_evidence.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_evidence_backend.py'
+      - 'services/api/src/kefe_api/modules/ingestion_orchestration/feed_item_extraction.py'
+      - 'services/api/src/kefe_api/modules/ingestion_orchestration/worker_*.py'
+      - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
+      - 'services/api/tests/test_rss_atom_route.py'
+      - 'services/api/tests/test_rss_atom_route_architecture.py'
+      - 'services/api/tools/check_rss_atom_route_contract.py'
+      - 'docs/adr/0090-immutable-rss-atom-route-assembly-and-exact-parser-profile-pinning.md'
+      - 'docs/contracts/rss-atom-route-slice54.v1.json'
+      - '.github/workflows/rss-atom-route-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/api/src/kefe_api/modules/knowledge/rss_atom_route.py'
+      - 'services/api/src/kefe_api/modules/knowledge/rss_atom_capture.py'
+      - 'services/api/src/kefe_api/modules/knowledge/provider_public_http_capture.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_acquisition.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_evidence.py'
+      - 'services/api/src/kefe_api/modules/knowledge/source_evidence_backend.py'
+      - 'services/api/src/kefe_api/modules/ingestion_orchestration/feed_item_extraction.py'
+      - 'services/api/src/kefe_api/modules/ingestion_orchestration/worker_*.py'
+      - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
+      - 'services/api/tests/test_rss_atom_route.py'
+      - 'services/api/tests/test_rss_atom_route_architecture.py'
+      - 'services/api/tools/check_rss_atom_route_contract.py'
+      - 'docs/adr/0090-immutable-rss-atom-route-assembly-and-exact-parser-profile-pinning.md'
+      - 'docs/contracts/rss-atom-route-slice54.v1.json'
+      - '.github/workflows/rss-atom-route-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  rss-atom-route:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Ruff RSS Atom route boundary
+        working-directory: services/api
+        run: >-
+          ruff check
+          src/kefe_api/modules/knowledge/rss_atom_route.py
+          tests/test_rss_atom_route.py
+          tests/test_rss_atom_route_architecture.py
+          tools/check_rss_atom_route_contract.py
+      - name: RSS Atom route architecture fitness
+        working-directory: services/api
+        run: python tools/check_rss_atom_route_contract.py
+      - name: Parent public provider architecture fitness
+        working-directory: services/api
+        run: python tools/check_public_provider_capture_contract.py
+      - name: Parent raw evidence architecture fitness
+        working-directory: services/api
+        run: python tools/check_raw_source_evidence_contract.py
+      - name: Parent durable evidence architecture fitness
+        working-directory: services/api
+        run: python tools/check_durable_raw_evidence_backend_contract.py
+      - name: Parent RSS Atom architecture fitness
+        working-directory: services/api
+        run: python tools/check_rss_atom_public_capture_contract.py
+      - name: Parent feed item extraction architecture fitness
+        working-directory: services/api
+        run: python tools/check_feed_item_extraction_contract.py
+      - name: Parent ingestion worker architecture fitness
+        working-directory: services/api
+        run: python tools/check_ingestion_worker_runner_contract.py
+      - name: RSS Atom route behavior
+        working-directory: services/api
+        run: >-
+          pytest
+          tests/test_rss_atom_public_capture.py
+          tests/test_source_evidence.py
+          tests/test_source_evidence_backend.py
+          tests/test_source_evidence_reading.py
+          tests/test_feed_item_extraction.py
+          tests/test_rss_atom_route.py

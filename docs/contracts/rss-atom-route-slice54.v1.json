@@ -1,0 +1,87 @@
+{
+  "contract": "rss-atom-route-slice54",
+  "version": 1,
+  "status": "accepted",
+  "route_profile": {
+    "fields": [
+      "route_code",
+      "adapter_code",
+      "parser_profile",
+      "locale",
+      "jurisdiction_code"
+    ],
+    "immutable": true,
+    "versioned_route_code": true,
+    "versioned_adapter_code": true,
+    "configuration_hash": "canonical_sha256",
+    "caller_supplied_configuration_hash": false
+  },
+  "exact_pipeline": {
+    "pipeline_code": "RSS_ATOM_FEED_ITEM_EXTRACTION",
+    "pipeline_version": "1.0.0",
+    "stage_code": "EXTRACT_FEED_ITEMS",
+    "stage_version": "1.0.0",
+    "proposal_kind": "FEED_ITEM",
+    "payload_schema_ref": "kefe.feed-item",
+    "payload_schema_version": "1.0.0"
+  },
+  "assembly": {
+    "capture_definition_count": 1,
+    "public_adapter_count": 1,
+    "extraction_processor_count": 1,
+    "worker_plan_count": 1,
+    "shared_parser_profile_identity": true,
+    "shared_evidence_store_for_seal_and_read": true,
+    "arbitrary_pipeline_override": false,
+    "arbitrary_configuration_override": false
+  },
+  "registry": {
+    "duplicate_route_code": "reject",
+    "duplicate_adapter_code": "reject",
+    "bundle_profile_drift": "reject",
+    "missing_route": "fail_closed"
+  },
+  "execution_order": [
+    "public_permit",
+    "controlled_http",
+    "seal_raw_evidence",
+    "strict_feed_snapshot_parse",
+    "persist_source_artifact",
+    "admit_exact_ingestion_run",
+    "read_integrity_verified_evidence",
+    "same_profile_validation",
+    "emit_feed_item_proposals"
+  ],
+  "authority": {
+    "secret_resolution": false,
+    "credential_bytes": false,
+    "dns_or_socket_backend": false,
+    "backend_object_key": false,
+    "automatic_retry": false,
+    "network_fallback": false,
+    "preview_fallback": false,
+    "automatic_review": false,
+    "automatic_materialization": false,
+    "automatic_projection": false,
+    "automatic_case_creation": false,
+    "automatic_publication": false
+  },
+  "composition": {
+    "production_route_factory_composed": true,
+    "production_route_bundles_registered": 0,
+    "production_rss_atom_adapters_registered": 0,
+    "production_feed_item_worker_plans_registered": 0,
+    "concrete_provider_registered": false,
+    "live_external_capture": false
+  },
+  "validation": {
+    "dedicated_ci": "RSS Atom Route CI",
+    "full_vertical_test": true,
+    "parent_provider_gates": true,
+    "parent_evidence_gates": true,
+    "parent_rss_atom_gate": true,
+    "parent_feed_item_gate": true,
+    "parent_ingestion_worker_gate": true,
+    "api_mvp_global_gates": true
+  }
+}
