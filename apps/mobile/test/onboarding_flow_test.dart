@@ -140,8 +140,15 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
   await tester.pumpAndSettle();
 }
 
+Future<void> completeOnboardingPages(WidgetTester tester) async {
+  for (var index = 0; index < 3; index++) {
+    await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
+    await tester.pumpAndSettle();
+  }
+}
+
 void main() {
-  testWidgets('fresh user sees two promises before the first real Case', (
+  testWidgets('fresh user sees three promises before the first real Case', (
     tester,
   ) async {
     useTurkishLocale(tester);
@@ -161,6 +168,11 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('onboarding-promise-2')), findsOneWidget);
+    expect(find.text('Kararının toplumdaki yerini gör.'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('onboarding-promise-3')), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
     await tester.pumpAndSettle();
@@ -183,10 +195,7 @@ void main() {
         onboardingStore: onboardingStore,
       );
 
-      await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('onboarding-primary-button')));
-      await tester.pumpAndSettle();
+      await completeOnboardingPages(tester);
 
       await tester.tap(find.byKey(const ValueKey('option-A')));
       await tester.pump();
@@ -195,6 +204,15 @@ void main() {
       expect(repository.commitCalls, 1);
       expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
       expect(onboardingStore.completed, isTrue);
+      expect(
+        find.byKey(const ValueKey('first-use-completion')),
+        findsNothing,
+      );
+
+      await tapVisible(
+        tester,
+        find.byKey(const ValueKey('show-perspectives-button')),
+      );
 
       final continueButton = find.byKey(const ValueKey('continue-as-guest'));
       await tester.scrollUntilVisible(
