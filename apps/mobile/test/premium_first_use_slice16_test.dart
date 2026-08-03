@@ -148,6 +148,9 @@ void main() {
     final onboardingSource = File(
       'lib/features/onboarding/presentation/onboarding_gate_screen.dart',
     ).readAsStringSync();
+    final onboardingExperienceSource = File(
+      'lib/features/onboarding/presentation/onboarding_experience_screen.dart',
+    ).readAsStringSync();
     final decisionSource = File(
       'lib/features/decision/presentation/decision_flow_screen.dart',
     ).readAsStringSync();
@@ -190,7 +193,11 @@ void main() {
       contains('onboardingStoreProvider.overrideWithValue'),
     );
     expect(previewMainSource, contains('MemoryOnboardingStore()'));
-    expect(productionAppSource, contains('const OnboardingGateScreen()'));
+    expect(
+      productionAppSource,
+      contains('const OnboardingExperienceScreen()'),
+    );
+    expect(onboardingExperienceSource, contains('OnboardingGateScreen('));
     expect(productionMainSource, isNot(contains('MemoryOnboardingStore')));
   });
 }
