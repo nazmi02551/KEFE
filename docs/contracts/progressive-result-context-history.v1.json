@@ -1,0 +1,93 @@
+{
+  "contract": "progressive-result-context-history",
+  "version": "1.0.0",
+  "status": "accepted_for_implementation",
+  "base_sha": "08b5c0b97fc0dd3402b2d86ee1422d9595031e58",
+  "issue": 285,
+  "invariants": [
+    "commit_first",
+    "blind_first_when_applicable",
+    "generic_runtime_authority",
+    "published_case_version_immutable",
+    "preview_production_isolation",
+    "private_reason_not_replayed",
+    "my_kefe_observed_descriptive_only",
+    "legacy_rollback_preserved"
+  ],
+  "post_commit": {
+    "authoritative_primitive": "COLLECTIVE_RESULT",
+    "presentation_only": true,
+    "stages": [
+      "RESULT",
+      "PERSPECTIVES",
+      "PARTICIPATION",
+      "COMPLETION"
+    ],
+    "one_focused_stage": true,
+    "back_navigation_mutates_commit": false,
+    "required_reachable_capabilities": [
+      "REVEAL",
+      "PERSPECTIVE",
+      "CONSENSUS",
+      "COMMUNITY_REASON",
+      "PROGRESS",
+      "SHARE"
+    ],
+    "perspective_retry_replays": []
+  },
+  "context": {
+    "authoritative_primitive": "CONTEXT",
+    "presentation_only": true,
+    "layers": [
+      "ESSENTIAL",
+      "DETAILS_IF_PRESENT",
+      "SOURCES_IF_PRESENT"
+    ],
+    "continue_requires_optional_layers": false,
+    "legacy_default_unchanged": true
+  },
+  "reweigh_reflection": {
+    "reweigh_detection": "earlier_DECISION_in_same_pinned_runtime",
+    "case_specific_branching": false,
+    "reflection_focused_terminal_card": true,
+    "causal_claims": false
+  },
+  "my_kefe": {
+    "whole_screen_wizard": false,
+    "recent_journey_expandable": true,
+    "allowed_fields": [
+      "initial_committed_at",
+      "decision_update_count",
+      "latest_decision_at",
+      "reflection_completed"
+    ],
+    "forbidden_inferences": [
+      "personality",
+      "ideology",
+      "psychometric",
+      "bias",
+      "morality",
+      "social_worth",
+      "causality"
+    ]
+  },
+  "non_targets": [
+    "EXPLORE",
+    "RADAR",
+    "WEIGH_HUB",
+    "ATLAS_CURRENT_COMPARE",
+    "ONBOARDING_ALREADY_STAGED",
+    "ADMIN_STUDIO"
+  ],
+  "required_evidence": [
+    "API_CI",
+    "MOBILE_CI",
+    "MVP_BETA_GATES",
+    "GLOBAL_READINESS",
+    "INSTALLABLE_PHONE_ARTIFACT_BOUNDARY",
+    "POST_COMMIT_STAGE_TESTS",
+    "CONTEXT_LAYER_TESTS",
+    "REPEATED_DECISION_LABEL_TESTS",
+    "MY_KEFE_EXPANSION_TESTS"
+  ]
+}
