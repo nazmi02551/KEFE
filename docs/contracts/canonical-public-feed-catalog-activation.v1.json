@@ -1,0 +1,151 @@
+{
+  "contract_version": "1.0.0",
+  "status": "accepted_for_execution",
+  "date": "2026-08-04",
+  "source_issue": 291,
+  "source_adr": "docs/adr/0098-canonical-public-feed-catalog-activation.md",
+  "base_pr": 290,
+  "base_sha": "140960ac80881faec5841008eac9444ab67d9b7a",
+  "capabilities": [
+    "CAP-055",
+    "CAP-056",
+    "CAP-061",
+    "CAP-065",
+    "CAP-094",
+    "CAP-095",
+    "CAP-123",
+    "CAP-126"
+  ],
+  "conflict_resolution": {
+    "group": "PUBLIC_FEED_MODEL",
+    "source_prs": [267, 273],
+    "wholesale_merge_forbidden": true,
+    "canonical_migration_revision": "20260804_0026",
+    "canonical_down_revision": "20260803_0025",
+    "forbidden_migration_revision": "20260803_0026"
+  },
+  "catalog_definition": {
+    "identity": ["feed_code", "definition_version"],
+    "immutable_fields": [
+      "display_name",
+      "adapter_code",
+      "external_locator",
+      "parser_profile",
+      "connect_timeout_ms",
+      "read_timeout_ms",
+      "total_timeout_ms",
+      "max_response_bytes",
+      "max_redirect_hops",
+      "terms_evidence_ref",
+      "rate_limit_evidence_ref",
+      "quota_limit",
+      "quota_window_seconds",
+      "failure_threshold",
+      "circuit_open_seconds",
+      "permit_ttl_seconds",
+      "interval_seconds",
+      "max_dispatch_attempts",
+      "language_code",
+      "jurisdiction_code"
+    ],
+    "configuration_hash_covers_all_fields": true,
+    "lifecycle": ["DRAFT", "APPROVED", "RETIRED"],
+    "in_place_mutation_forbidden": true,
+    "new_version_required_for_definition_change": true
+  },
+  "preflight": {
+    "read_only": true,
+    "network_forbidden": true,
+    "provider_registration_forbidden": true,
+    "schedule_creation_forbidden": true,
+    "worker_execution_forbidden": true,
+    "must_validate": [
+      "PUBLIC_PROVIDER_CAPABILITY_TEMPLATE",
+      "PROVIDER_ADOPTION_PROFILE",
+      "STRICT_RSS_ATOM_CAPTURE_DEFINITION",
+      "FEED_ITEM_ACQUISITION_COMMAND",
+      "GENERIC_SCHEDULE_COMMAND"
+    ]
+  },
+  "approval": {
+    "requires": [
+      "AUTHENTICATED_ADMIN_WRITE_PRINCIPAL",
+      "VALID_CSRF",
+      "SOURCE_MANAGE_CAPABILITY",
+      "RECENT_STEP_UP",
+      "MAKER_CHECKER_DIFFERENT_ACTOR",
+      "EXACT_EXPECTED_CONFIGURATION_HASH",
+      "SUCCESSFUL_PREFLIGHT"
+    ],
+    "does_not_activate": true
+  },
+  "activation_projection": {
+    "requires_exact_approved_version": true,
+    "requires_recent_step_up": true,
+    "order": [
+      "REGISTER_OR_VERIFY_PUBLIC_PROVIDER_CAPABILITY",
+      "REGISTER_OR_VERIFY_RUNTIME_PROFILE",
+      "CREATE_OR_VERIFY_GENERIC_SOURCE_SCHEDULE"
+    ],
+    "capability_first_schedule_second": true,
+    "exact_replay_idempotent": true,
+    "partial_retry_requires_exact_equality": true,
+    "states": ["ACTIVE", "PAUSED", "RETIRED"],
+    "delegates_scheduler_lifecycle": true,
+    "parallel_scheduler_state_machine_forbidden": true
+  },
+  "production_composition": {
+    "catalog_service_present": true,
+    "seeded_definitions": 0,
+    "startup_activation": false,
+    "automatic_network_operation": false,
+    "preview_fallback_to_production": false
+  },
+  "downstream_invariants": [
+    "CANONICAL_TYPED_FEED_ITEM_REVIEW_PRESERVED",
+    "CANONICAL_SOURCE_BRIEF_BUILD_AND_REVIEW_PRESERVED",
+    "NO_AUTOMATIC_REVIEW",
+    "NO_AUTOMATIC_NORMALIZATION",
+    "NO_CANDIDATE_CASE_GENERATION",
+    "NO_EDITORIAL_PROJECTION",
+    "NO_APPROVAL_OR_PUBLICATION",
+    "RAW_EVIDENCE_AND_BACKEND_KEYS_NOT_EXPOSED"
+  ],
+  "required_exact_head_workflows": [
+    "CANONICAL_PUBLIC_FEED_CI",
+    "PROVIDER_ADMISSION_CI",
+    "PROVIDER_SECRET_EXECUTION_CI",
+    "PROVIDER_HTTP_TRANSPORT_CI",
+    "PROVIDER_PINNED_RUNTIME_CI",
+    "PROVIDER_HTTP_CAPTURE_CI",
+    "RAW_SOURCE_EVIDENCE_CI",
+    "DURABLE_RAW_EVIDENCE_BACKEND_CI",
+    "PUBLIC_PROVIDER_CAPTURE_CI",
+    "RSS_ATOM_PUBLIC_CAPTURE_CI",
+    "FEED_ITEM_EXTRACTION_CI",
+    "INGESTION_WORKER_CI",
+    "API_CI",
+    "MOBILE_CI",
+    "MVP_BETA_GATES",
+    "GLOBAL_READINESS"
+  ],
+  "required_behavior_evidence": [
+    "MEMORY_LIFECYCLE_AND_MAKER_CHECKER",
+    "POSTGRES_MIGRATION_IDEMPOTENCY_AND_CONCURRENCY",
+    "API_VERSION_ISOLATION",
+    "ZERO_STARTUP_ACTIVATION",
+    "NO_LIVE_NETWORK_APPROVED_TO_FEED_ITEM_VERTICAL",
+    "EXACT_REPLAY_AND_PARTIAL_RETRY",
+    "NO_AUTOMATIC_EDITORIAL_ACTION"
+  ],
+  "claims_not_proven": [
+    "REAL_PROVIDER_ADOPTION",
+    "PROVIDER_TERMS_COMPLIANCE",
+    "DEPLOYED_EGRESS_OR_STORAGE",
+    "PRODUCTION_SCHEDULER_OPERATION",
+    "EDITORIAL_CQB_ACCEPTANCE",
+    "HUMAN_USABILITY",
+    "DEPLOYED_SLO_OR_ROLLBACK",
+    "STORE_READINESS"
+  ]
+}
