@@ -86,6 +86,10 @@ def main() -> None:
         "knowledge.public_feed_activation",
         "knowledge.public_feed_audit",
         "FOR UPDATE",
+        "existing = self.get_definition(",
+        "existing = self.get_activation_for_definition(",
+        "if existing == definition:",
+        "if existing == activation:",
     ):
         require(marker in postgres_source, f"PostgreSQL repository missing {marker}")
 
