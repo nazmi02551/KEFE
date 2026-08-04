@@ -83,6 +83,26 @@ Activation state is separate from catalog state:
 
 Pause/resume delegates to the existing scheduler/provider lifecycle rather than creating a parallel scheduler state machine. Definition retirement does not silently delete runtime or evidence history.
 
+### Restart rehydration
+
+Restart rehydration is not activation. When persisted `ACTIVE` or `PAUSED` projections already exist, application composition may deterministically restore only:
+
+- the provider adoption profile;
+- the public capture adapter;
+- the runtime profile lookup.
+
+It must verify the exact APPROVED definition, configuration hash and adapter identity. `RETIRED` projections are skipped. Identity drift fails closed.
+
+Rehydration must not:
+
+- create or transition a provider capability;
+- create or transition a schedule;
+- append audit history;
+- perform network I/O;
+- execute a worker.
+
+This allows a restarted process to resolve already-approved adapters without silently replaying the activation command or duplicating durable runtime rows.
+
 ### Production composition
 
 Production composition contains:
@@ -90,6 +110,7 @@ Production composition contains:
 - the catalog repository and secured Admin service;
 - zero seeded definitions;
 - zero startup activation;
+- deterministic rehydration only for persisted non-retired projections;
 - no automatic network operation.
 
 A real source requires separate externally evidenced provider/legal/egress/storage approval and an explicit catalog registration/approval/activation sequence.
@@ -103,6 +124,8 @@ The canonical migration revision is `20260804_0026`, based on canonical head `20
 The existing PR #290 flow remains authoritative:
 
 `capture → immutable evidence → SourceArtifact → FEED_ITEM Proposal → human review → explicit Source Brief build → human review`.
+
+The no-live-network vertical proof uses deterministic fake DNS and HTTP responses. It verifies that an approved and explicitly activated definition reaches an immutable evidence object, SourceArtifact, ingestion run and review-required FEED_ITEM Proposal. It also verifies that no review decision or materialization is created automatically.
 
 Catalog approval or activation never reviews, normalizes, creates a Candidate Case, projects to Content Authoring, approves or publishes content.
 
@@ -118,9 +141,10 @@ After exact integrated evidence:
 
 Completion requires one exact SHA to pass:
 
-- canonical public-feed architecture and behavior CI;
+- canonical public-feed architecture, rehydration and behavior CI;
 - memory and PostgreSQL lifecycle/idempotency/concurrency/migration tests;
 - Admin authorization, CSRF, step-up and maker-checker tests;
+- PostgreSQL application restart with no provider/schedule row duplication;
 - no-live-network approved-version → capability → schedule → review-required FEED_ITEM vertical proof;
 - provider admission/secret/HTTP/pinned/capture/evidence/RSS/extraction/worker parent gates;
 - API CI, Mobile CI, MVP Beta Gates and Global Readiness.
