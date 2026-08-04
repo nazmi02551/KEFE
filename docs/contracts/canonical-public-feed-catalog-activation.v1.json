@@ -1,5 +1,5 @@
 {
-  "contract_version": "1.0.0",
+  "contract_version": "1.0.1",
   "status": "accepted_for_execution",
   "date": "2026-08-04",
   "source_issue": 291,
@@ -49,9 +49,21 @@
       "jurisdiction_code"
     ],
     "configuration_hash_covers_all_fields": true,
+    "pins_ingestion_definition_hash": true,
     "lifecycle": ["DRAFT", "APPROVED", "RETIRED"],
     "in_place_mutation_forbidden": true,
     "new_version_required_for_definition_change": true
+  },
+  "persistence": {
+    "migration_revision": "20260804_0026",
+    "tables": [
+      "knowledge.public_feed_definition",
+      "knowledge.public_feed_activation",
+      "knowledge.public_feed_audit"
+    ],
+    "definition_and_activation_identity_guarded_by_database": true,
+    "audit_append_only_guarded_by_database": true,
+    "memory_and_postgres_repository_contract_equal": true
   },
   "preflight": {
     "read_only": true,
@@ -71,7 +83,7 @@
     "requires": [
       "AUTHENTICATED_ADMIN_WRITE_PRINCIPAL",
       "VALID_CSRF",
-      "SOURCE_MANAGE_CAPABILITY",
+      "SOURCE_APPROVE_CAPABILITY",
       "RECENT_STEP_UP",
       "MAKER_CHECKER_DIFFERENT_ACTOR",
       "EXACT_EXPECTED_CONFIGURATION_HASH",
@@ -80,8 +92,13 @@
     "does_not_activate": true
   },
   "activation_projection": {
+    "requires": [
+      "AUTHENTICATED_ADMIN_WRITE_PRINCIPAL",
+      "VALID_CSRF",
+      "SOURCE_ACTIVATE_CAPABILITY",
+      "RECENT_STEP_UP"
+    ],
     "requires_exact_approved_version": true,
-    "requires_recent_step_up": true,
     "order": [
       "REGISTER_OR_VERIFY_PUBLIC_PROVIDER_CAPABILITY",
       "REGISTER_OR_VERIFY_RUNTIME_PROFILE",
