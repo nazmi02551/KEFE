@@ -245,3 +245,39 @@ export interface AuthoringAuditEntry {
 export interface AuthoringAuditTrail {
   items: AuthoringAuditEntry[];
 }
+
+export interface EditorialReviewQueueItem {
+  version_id: string;
+  case_id: string;
+  version_no: number;
+  title: string;
+  content_risk: string;
+  primary_domain_code: string;
+  content_locale: string;
+  required_review_modes: string[];
+  created_at: string;
+}
+
+export interface EditorialReviewQueuePage {
+  items: EditorialReviewQueueItem[];
+  next_offset: number | null;
+}
+
+export interface EditorialReviewFilters {
+  limit?: number;
+  offset?: number;
+  content_risk?: string;
+  primary_domain_code?: string;
+}
+
+export interface EditorialReviewDetail {
+  version: CaseBuilderVersion;
+  submitter_actor_ref: string;
+  submitted_at: string;
+}
+
+export interface EditorialReviewDecisionRequest {
+  decision: "APPROVE" | "REJECT";
+  completed_review_modes: string[];
+  rationale?: string | null;
+}
