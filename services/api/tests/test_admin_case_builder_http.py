@@ -133,7 +133,7 @@ def test_case_builder_requires_editor_and_never_needs_csrf_for_read() -> None:
 
     denied = reviewer.get(f"/internal/admin/v1/case-builder/case-versions/{version_id}")
     assert denied.status_code == 403
-    assert denied.json()["code"] == "ADMIN_CAPABILITY_REQUIRED"
+    assert denied.json()["code"] == "ADMIN_FORBIDDEN"
 
     loaded = editor.get(f"/internal/admin/v1/case-builder/case-versions/{version_id}")
     assert loaded.status_code == 200
