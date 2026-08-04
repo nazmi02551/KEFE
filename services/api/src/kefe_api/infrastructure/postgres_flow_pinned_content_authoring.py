@@ -11,6 +11,7 @@ from kefe_api.infrastructure.postgres_content_authoring import PostgresContentAu
 from kefe_api.modules.content_authoring.models import (
     AuthoringCaseLocalization,
     AuthoringCaseVersion,
+    ContentLifecycle,
     MarketScope,
     ResolvedFlowDefinition,
     ResolvedFlowStep,
@@ -159,6 +160,42 @@ class PostgresFlowPinnedContentAuthoringRepository(
                 for item in document.get("localizations", [])
             ),
         )
+
+    def list_by_state(
+        self,
+        state: ContentLifecycle,
+        *,
+        limit: int,
+        offset: int,
+        content_risk: str | None = None,
+        primary_domain_code: str | None = None,
+    ) -> tuple[AuthoringCaseVersion, ...]:
+        with self._engine.connect() as connection:
+            rows = connection.execute(
+                text(
+                    """
+                    SELECT id, case_id, version_no, lifecycle_state, aggregate,
+                           created_at, published_at
+                    FROM editorial.case_version
+                    WHERE lifecycle_state = :state
+                      AND (:content_risk IS NULL OR aggregate->>'content_risk' = :content_risk)
+                      AND (
+                        :primary_domain_code IS NULL
+                        OR aggregate->>'primary_domain_code' = :primary_domain_code
+                      )
+                    ORDER BY created_at DESC, id DESC
+                    LIMIT :limit OFFSET :offset
+                    """
+                ),
+                {
+                    "state": state.value,
+                    "content_risk": content_risk,
+                    "primary_domain_code": primary_domain_code,
+                    "limit": limit,
+                    "offset": offset,
+                },
+            ).mappings().all()
+        return tuple(self._version_from_row(row) for row in rows)
 
     def _materialize_consumer(
         self,
