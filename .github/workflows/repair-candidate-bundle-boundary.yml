@@ -1,0 +1,134 @@
+name: Repair Candidate Bundle Boundary
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/repair-candidate-bundle-boundary.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Remove authoring dependency and refresh session fixture
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          domain_path = Path(
+              'services/api/src/kefe_api/modules/ingestion_orchestration/'
+              'candidate_case_bundle.py'
+          )
+          source = domain_path.read_text(encoding='utf-8')
+          replacements = (
+              (
+                  'from kefe_api.modules.content_authoring.models import MarketScope\n',
+                  '',
+              ),
+              (
+                  'MAX_REVIEW_MODES = 16\n',
+                  'MAX_REVIEW_MODES = 16\n'
+                  '_MARKET_SCOPES = frozenset({"GLOBAL", "COUNTRY_SET"})\n',
+              ),
+              ('    market_scope: MarketScope\n', '    market_scope: str\n'),
+              (
+                  '        if type(self.market_scope) is not MarketScope:\n'
+                  '            raise ValueError("market_scope must be exact MarketScope")\n',
+                  '        if (\n'
+                  '            not isinstance(self.market_scope, str)\n'
+                  '            or str(self.market_scope) not in _MARKET_SCOPES\n'
+                  '        ):\n'
+                  '            raise ValueError("market_scope must be GLOBAL or COUNTRY_SET")\n',
+              ),
+              (
+                  '        if self.market_scope is MarketScope.GLOBAL and self.country_codes:\n',
+                  '        if str(self.market_scope) == "GLOBAL" and self.country_codes:\n',
+              ),
+              (
+                  '        if self.market_scope is MarketScope.COUNTRY_SET and not self.country_codes:\n',
+                  '        if str(self.market_scope) == "COUNTRY_SET" and not self.country_codes:\n',
+              ),
+              ('            "market_scope": self.market_scope.value,\n',
+               '            "market_scope": str(self.market_scope),\n'),
+              ('                market_scope=MarketScope(value["market_scope"]),\n',
+               '                market_scope=value["market_scope"],\n'),
+          )
+          for old, new in replacements:
+              count = source.count(old)
+              if count != 1:
+                  raise SystemExit(f'unexpected candidate bundle replacement count {count}: {old!r}')
+              source = source.replace(old, new, 1)
+          if 'content_authoring' in source or 'MarketScope' in source:
+              raise SystemExit('content-authoring dependency remains in ingestion domain')
+          domain_path.write_text(source, encoding='utf-8')
+
+          test_path = Path('services/api/tests/test_canonical_public_feed_vertical.py')
+          test_source = test_path.read_text(encoding='utf-8')
+          old = '''def _principal(role: AdminRole) -> AdminPrincipal:
+              return AdminPrincipal(
+                  admin_subject_id=uuid4(),
+                  session_id=uuid4(),
+                  roles=frozenset({role}),
+                  direct_capabilities=frozenset(),
+                  authenticated_at=NOW - timedelta(minutes=5),
+                  mfa_satisfied_at=NOW - timedelta(minutes=5),
+                  step_up_at=NOW - timedelta(minutes=1),
+                  expires_at=NOW + timedelta(hours=2),
+                  last_seen_at=NOW - timedelta(minutes=1),
+              )
+          '''
+          new = '''def _principal(role: AdminRole) -> AdminPrincipal:
+              session_now = datetime.now(UTC)
+              return AdminPrincipal(
+                  admin_subject_id=uuid4(),
+                  session_id=uuid4(),
+                  roles=frozenset({role}),
+                  direct_capabilities=frozenset(),
+                  authenticated_at=session_now - timedelta(minutes=5),
+                  mfa_satisfied_at=session_now - timedelta(minutes=5),
+                  step_up_at=session_now - timedelta(minutes=1),
+                  expires_at=session_now + timedelta(hours=2),
+                  last_seen_at=session_now - timedelta(minutes=1),
+              )
+          '''
+          if test_source.count(old) != 1:
+              raise SystemExit('unexpected public-feed principal fixture')
+          test_path.write_text(test_source.replace(old, new, 1), encoding='utf-8')
+          PY
+      - name: Normalize and verify targeted behavior
+        working-directory: services/api
+        run: |
+          python -m pip install -q -U pip
+          pip install -q -e '.[dev]'
+          ruff format \
+            src/kefe_api/modules/ingestion_orchestration/candidate_case_bundle.py \
+            tests/test_canonical_public_feed_vertical.py
+          ruff check \
+            src/kefe_api/modules/ingestion_orchestration/candidate_case_bundle.py \
+            tests/test_canonical_public_feed_vertical.py
+          python -m py_compile \
+            src/kefe_api/modules/ingestion_orchestration/candidate_case_bundle.py \
+            tests/test_canonical_public_feed_vertical.py
+          pytest -q \
+            tests/test_canonical_public_feed_vertical.py \
+            tests/test_canonical_candidate_bundle_projection_http.py
+      - name: Remove workflow and commit
+        run: |
+          git rm -f .github/workflows/repair-candidate-bundle-boundary.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            services/api/src/kefe_api/modules/ingestion_orchestration/candidate_case_bundle.py \
+            services/api/tests/test_canonical_public_feed_vertical.py
+          git commit -m 'fix: preserve candidate bundle layer boundary'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
