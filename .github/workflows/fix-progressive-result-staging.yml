@@ -1,0 +1,133 @@
+name: Fix Progressive Result Staging
+
+on:
+  push:
+    branches:
+      - feature/progressive-result-context-history
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/progressive-result-context-history
+      - name: Isolate post-Commit capabilities by stage
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          perspective = Path('apps/mobile/lib/features/decision/presentation/perspective_section.dart')
+          text = perspective.read_text()
+          text = text.replace(
+              "    required this.onRetry,\n    super.key,\n  });",
+              "    required this.onRetry,\n    this.includePostCommitCapabilities = true,\n    super.key,\n  });",
+              1,
+          )
+          text = text.replace(
+              "  final VoidCallback onRetry;\n",
+              "  final VoidCallback onRetry;\n  final bool includePostCommitCapabilities;\n",
+              1,
+          )
+          text = text.replace(
+              "    final consensus = hasCommittedContext\n",
+              "    final consensus = includePostCommitCapabilities && hasCommittedContext\n",
+              1,
+          )
+          text = text.replace(
+              "    final community = hasCommittedContext\n",
+              "    final community = includePostCommitCapabilities && hasCommittedContext\n",
+              1,
+          )
+          text = text.replace(
+              "    final share = hasCommittedContext\n",
+              "    final share = includePostCommitCapabilities && hasCommittedContext\n",
+              1,
+          )
+          text = text.replace(
+              "        const SizedBox(height: 20),\n        const ProgressSection(),\n",
+              "        if (includePostCommitCapabilities) ...[\n          const SizedBox(height: 20),\n          const ProgressSection(),\n        ],\n",
+              1,
+          )
+          perspective.write_text(text)
+
+          journey = Path('apps/mobile/lib/features/decision/presentation/post_commit_journey.dart')
+          text = journey.read_text()
+          text = text.replace(
+              "        onRetry: controller.retryPerspective,\n      ),",
+              "        onRetry: controller.retryPerspective,\n        includePostCommitCapabilities: false,\n      ),",
+              1,
+          )
+          journey.write_text(text)
+
+          test = Path('apps/mobile/test/progressive_result_disclosure_test.dart')
+          text = test.read_text()
+          start = text.index("      expect(repository.commitCalls, 1);", text.index("testWidgets("))
+          end = text.index("    },\n  );", start)
+          replacement = '''      expect(repository.commitCalls, 1);
+      expect(repository.perspectiveCalls, 1);
+      expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
+      expect(find.byKey(const ValueKey('perspective-section')), findsNothing);
+      expect(find.byKey(const ValueKey('consensus-section')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('community-reason-section')),
+        findsNothing,
+      );
+      expect(find.byKey(const ValueKey('my-kefe-progress')), findsNothing);
+      expect(find.byKey(const ValueKey('share-section')), findsNothing);
+
+      await tapVisible(
+        tester,
+        find.byKey(const ValueKey('post-commit-next')),
+      );
+      expect(find.byKey(const ValueKey('perspective-section')), findsOneWidget);
+      expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
+      expect(repository.commitCalls, 1);
+      expect(repository.perspectiveCalls, 1);
+
+      await tapVisible(
+        tester,
+        find.byKey(const ValueKey('post-commit-next')),
+      );
+      await expectReachable(tester, const ValueKey('consensus-section'));
+      await expectReachable(tester, const ValueKey('community-reason-section'));
+      expect(find.byKey(const ValueKey('my-kefe-progress')), findsNothing);
+      expect(find.byKey(const ValueKey('share-section')), findsNothing);
+
+      await tapVisible(
+        tester,
+        find.byKey(const ValueKey('post-commit-next')),
+      );
+      await expectReachable(tester, const ValueKey('my-kefe-progress'));
+      await expectReachable(tester, const ValueKey('share-section'));
+      expect(find.byKey(const ValueKey('consensus-section')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('community-reason-section')),
+        findsNothing,
+      );
+
+      await tapVisible(
+        tester,
+        find.byKey(const ValueKey('post-commit-back')),
+      );
+      expect(find.byKey(const ValueKey('consensus-section')), findsOneWidget);
+      expect(repository.commitCalls, 1);
+      expect(repository.perspectiveCalls, 1);
+'''
+          test.write_text(text[:start] + replacement + text[end:])
+          PY
+      - name: Format and commit
+        run: |
+          dart format \
+            apps/mobile/lib/features/decision/presentation/perspective_section.dart \
+            apps/mobile/lib/features/decision/presentation/post_commit_journey.dart \
+            apps/mobile/test/progressive_result_disclosure_test.dart
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add apps/mobile/lib apps/mobile/test
+          git commit -m "fix: isolate post-Commit capabilities by result stage"
+          git push origin HEAD:feature/progressive-result-context-history
