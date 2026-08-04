@@ -27,20 +27,24 @@ Implement a bounded Admin Studio **Case Builder DRAFT workspace** over the exist
 
 ### API boundary
 
-1. Add a read-only `GET /internal/admin/v1/case-versions/{version_id}` operation.
-2. Reuse the existing `PUT /internal/admin/v1/case-versions/{version_id}` DRAFT save command.
+1. Add an additive Case Builder adapter with:
+   - `GET /internal/admin/v1/case-builder/case-versions/{version_id}`;
+   - `PUT /internal/admin/v1/case-builder/case-versions/{version_id}`.
+2. The adapter delegates reads and saves to the existing `SecuredContentAuthoringService`; it owns no repository, lifecycle or publication authority.
 3. Reuse the existing `POST /internal/admin/v1/case-versions/{version_id}/submit` command.
 4. Reuse the existing `GET /internal/admin/v1/cases/{case_id}/audit` operation.
 5. Reads require an authenticated Admin principal with `CONTENT_EDIT`; writes continue to require same-session CSRF and the existing capability checks.
-6. The authoring response exposes complete operator-safe canonical fields needed to round-trip a DRAFT, including locale/market/context notes and read-only Flow template identity.
-7. Newly exposed optional fields use preservation semantics: omission during a legacy save must preserve the current stored value rather than synthesize, reset or discard it.
-8. Raw evidence bytes, credentials, secrets, storage references and backend object keys are never part of the Case Builder response.
+6. The Case Builder adapter exposes complete operator-safe canonical fields needed to round-trip a DRAFT, including locale/market/context notes, localizations and read-only Flow template identity.
+7. The existing legacy create/save authoring routes remain unchanged. This avoids silently changing their request contract while allowing the richer editor to preserve every canonical field explicitly.
+8. Flow template identity is response-only in the Case Builder adapter and therefore cannot be rewritten by the Case Builder.
+9. Raw evidence bytes, credentials, secrets, storage references and backend object keys are never part of the Case Builder response.
 
 ### Admin Studio boundary
 
 The workspace:
 
-- loads only after an explicit operator command or an explicit `version` query parameter action;
+- loads only after an explicit operator command;
+- may prefill the exact version ID from a `version` query parameter but never fetches on mount;
 - edits core metadata, issues/questions, context blocks, source references, risk/fact flags, review modes and market/locale notes;
 - shows Flow template code/version as read-only because CAP-064 Flow Composer remains a separate authority;
 - saves only after an explicit operator command;
@@ -65,21 +69,26 @@ The Case Builder does not expose approve, reject, publish or withdraw controls. 
 
 - The verified Candidate Case projection becomes human-operable without a second CMS.
 - Existing aggregate, authorization, audit and lifecycle rules remain authoritative.
-- Hidden or advanced canonical fields are not lost by older clients.
+- The legacy authoring HTTP contract is not broadened or silently reinterpreted.
+- The rich adapter can round-trip canonical locale/market/localization fields without loss.
 - Flow composition remains independently governed.
 - The operator can inspect exactly what will enter review before submitting.
 
 ### Costs
 
 - The first Case Builder is intentionally a structured form rather than a visual Flow composer.
+- The Admin API gains one additive operator-oriented adapter surface.
 - Human editorial usability and CQB acceptance still require external review.
-- Existing API response models become broader and require exact OpenAPI/regression evidence.
 
 ## Rejected alternatives
 
 ### A second Admin-only Case model
 
 Rejected because it would create parallel content truth, migration and publication semantics.
+
+### Broadening the legacy `PUT /case-versions/{id}` request
+
+Rejected because existing clients use a strict full-body contract that does not contain all current canonical fields. Adding defaults could silently overwrite projected locale/market values, while making fields newly required would break existing clients.
 
 ### Combined save-and-submit
 
