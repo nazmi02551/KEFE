@@ -155,8 +155,8 @@ def main() -> None:
         "ReadPrincipalDep",
         'router = APIRouter(prefix="/internal/admin/v1"',
         '"/public-feeds"',
-        '"/activate"',
-        '"/audit"',
+        "/activate",
+        "/audit",
     ):
         require(marker in router_source, f"Admin router missing {marker}")
     for forbidden in (
