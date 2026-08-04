@@ -1,0 +1,458 @@
+.shell {
+  width: min(1320px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 5rem;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.5rem;
+  align-items: end;
+  margin-bottom: 1.25rem;
+}
+
+.hero h1,
+.queuePanel h2,
+.detailPanel h2,
+.actionCard h3,
+.auditSection h3,
+.auditContext h3 {
+  margin: 0;
+}
+
+.hero p:not(.eyebrow),
+.detailHeader p,
+.emptyDetail p,
+.boundary {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--gold);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.backLink {
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+.boundary,
+.connection,
+.queueControls,
+.queuePanel,
+.detailPanel,
+.actionCard,
+.auditSection {
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+  box-shadow: 0 18px 60px rgb(0 0 0 / 12%);
+}
+
+.boundary {
+  margin-bottom: 1rem;
+  padding: 1rem 1.15rem;
+}
+
+.boundary strong {
+  color: var(--foreground);
+}
+
+.connection,
+.queueControls {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.4fr) minmax(220px, 1fr) auto;
+  gap: 0.9rem;
+  align-items: end;
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.queueControls {
+  grid-template-columns: repeat(4, minmax(150px, 1fr)) auto;
+}
+
+.connection > div,
+.queueControls > div,
+.exactLoader,
+.actionCard {
+  min-width: 0;
+}
+
+.connection label,
+.queueControls label,
+.exactLoader label,
+.actionCard label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.connection input,
+.queueControls input,
+.queueControls select,
+.exactLoader input,
+.actionCard textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 0.72rem;
+  background: var(--surface-raised);
+  color: var(--foreground);
+  padding: 0.72rem 0.8rem;
+  font: inherit;
+}
+
+button {
+  border: 1px solid var(--border);
+  border-radius: 0.72rem;
+  background: var(--surface-raised);
+  color: var(--foreground);
+  padding: 0.72rem 0.9rem;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+.sessionSummary {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(270px, 0.72fr) minmax(0, 2fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.queuePanel,
+.detailPanel {
+  overflow: hidden;
+}
+
+.queuePanel {
+  position: sticky;
+  top: 1rem;
+}
+
+.panelHeader,
+.actionHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.panelHeader {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.panelHeader span {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.queueList {
+  display: grid;
+  gap: 0.55rem;
+  max-height: 62vh;
+  overflow: auto;
+  padding: 0.8rem;
+}
+
+.queueItem,
+.queueItemSelected {
+  display: grid;
+  gap: 0.32rem;
+  width: 100%;
+  text-align: left;
+}
+
+.queueItemSelected {
+  border-color: var(--gold);
+  box-shadow: inset 0 0 0 1px var(--gold);
+}
+
+.queueItem span,
+.queueItemSelected span,
+.queueItem small,
+.queueItemSelected small {
+  color: var(--muted);
+}
+
+.pagination {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  padding: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+
+.empty {
+  margin: 0;
+  padding: 1rem 0.4rem;
+  color: var(--muted);
+}
+
+.detailPanel {
+  padding: 1rem;
+}
+
+.exactLoader > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.65rem;
+}
+
+.detailHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 0.7fr);
+  gap: 1rem;
+  margin-top: 1.2rem;
+  padding: 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  background: var(--surface-raised);
+}
+
+.detailHeader dl {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.detailHeader dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.4rem;
+}
+
+.detailHeader dt {
+  color: var(--muted);
+}
+
+.detailHeader dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 700;
+}
+
+.auditContext {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+}
+
+.auditContext article {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  padding: 0.9rem;
+  background: var(--surface-raised);
+}
+
+.auditContext p,
+.auditContext small {
+  color: var(--muted);
+}
+
+pre {
+  max-width: 100%;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.rawDetail {
+  margin-top: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  padding: 0.9rem;
+}
+
+.rawDetail summary {
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.actionCard,
+.auditSection {
+  margin-top: 0.8rem;
+  padding: 1rem;
+}
+
+.preflightOk,
+.preflightBlocked {
+  margin-top: 0.8rem;
+  border-radius: 0.8rem;
+  padding: 0.85rem;
+}
+
+.preflightOk {
+  border: 1px solid color-mix(in srgb, var(--cyan) 70%, var(--border));
+  background: color-mix(in srgb, var(--cyan) 9%, var(--surface-raised));
+}
+
+.preflightBlocked {
+  border: 1px solid color-mix(in srgb, var(--danger) 70%, var(--border));
+  background: color-mix(in srgb, var(--danger) 9%, var(--surface-raised));
+}
+
+.preflightOk p,
+.preflightBlocked p {
+  color: var(--muted);
+}
+
+.confirmation {
+  display: flex !important;
+  gap: 0.65rem;
+  align-items: flex-start;
+  margin-top: 0.9rem;
+  line-height: 1.5;
+}
+
+.confirmation input {
+  width: auto;
+  margin-top: 0.25rem;
+}
+
+.publishButton,
+.withdrawButton {
+  width: 100%;
+  margin-top: 0.8rem;
+}
+
+.publishButton {
+  border-color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 18%, var(--surface-raised));
+}
+
+.withdrawButton {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 14%, var(--surface-raised));
+}
+
+.auditSection article {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.7fr) minmax(170px, 1fr) minmax(150px, 0.8fr) auto;
+  gap: 0.6rem;
+  align-items: baseline;
+  margin-top: 0.65rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.65rem;
+}
+
+.auditSection article span,
+.auditSection article small,
+.auditSection article p {
+  color: var(--muted);
+}
+
+.auditSection article p {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.emptyDetail {
+  margin-top: 1rem;
+  border: 1px dashed var(--border);
+  border-radius: 0.9rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.feedback {
+  position: sticky;
+  bottom: 1rem;
+  margin: 1rem 0 0;
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--surface) 93%, transparent);
+  backdrop-filter: blur(12px);
+  padding: 0.8rem 1rem;
+  color: var(--foreground);
+}
+
+@media (max-width: 980px) {
+  .connection,
+  .queueControls,
+  .workspace,
+  .detailHeader,
+  .auditContext {
+    grid-template-columns: 1fr;
+  }
+
+  .queuePanel {
+    position: static;
+  }
+
+  .queueList {
+    max-height: none;
+  }
+
+  .auditSection article {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .shell {
+    width: min(100% - 1rem, 1320px);
+    padding-top: 1rem;
+  }
+
+  .hero,
+  .exactLoader > div,
+  .panelHeader,
+  .actionHeader {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .auditSection article {
+    grid-template-columns: 1fr;
+  }
+
+  .auditSection article p {
+    grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
