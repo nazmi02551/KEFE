@@ -68,7 +68,7 @@ REQUIRED_SETTINGS_FRAGMENTS = (
     "provider_http_ca_bundle_path: str | None = None",
 )
 REQUIRED_COMPOSITION_FRAGMENTS = (
-    "InMemoryProviderAdoptionRegistry()",
+    "MutableProviderAdoptionRegistry()",
     "provider_http_runtime = build_provider_http_runtime(settings)",
     "dns_resolver=provider_http_runtime.dns_resolver",
     "backend=provider_http_runtime.backend",

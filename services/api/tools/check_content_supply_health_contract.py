@@ -5,21 +5,8 @@ import json
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-CONTRACT = (
-    REPO_ROOT
-    / "docs"
-    / "contracts"
-    / "content-supply-health-snapshot-slice42.v1.json"
-)
-MODULE = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "modules"
-    / "content_supply_health"
-)
+CONTRACT = REPO_ROOT / "docs" / "contracts" / "content-supply-health-snapshot-slice42.v1.json"
+MODULE = REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "content_supply_health"
 MODELS = MODULE / "models.py"
 PORTS = MODULE / "ports.py"
 MEMORY = MODULE / "in_memory.py"
@@ -43,32 +30,12 @@ CLI = (
     / "run_content_supply_health_snapshot.py"
 )
 PIPELINE = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "infrastructure"
-    / "editorial_pipeline.py"
+    REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "infrastructure" / "editorial_pipeline.py"
 )
 MAIN = REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "main.py"
-MEMORY_TEST = (
-    REPO_ROOT / "services" / "api" / "tests" / "test_content_supply_health.py"
-)
-CLI_TEST = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "tests"
-    / "test_content_supply_health_cli.py"
-)
-POSTGRES_TEST = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "tests"
-    / "test_content_supply_health_postgres.py"
-)
+MEMORY_TEST = REPO_ROOT / "services" / "api" / "tests" / "test_content_supply_health.py"
+CLI_TEST = REPO_ROOT / "services" / "api" / "tests" / "test_content_supply_health_cli.py"
+POSTGRES_TEST = REPO_ROOT / "services" / "api" / "tests" / "test_content_supply_health_postgres.py"
 
 
 def _require(
@@ -86,11 +53,7 @@ def _class_methods(source: str, class_name: str) -> tuple[str, ...]:
     module = ast.parse(source)
     for node in module.body:
         if isinstance(node, ast.ClassDef) and node.name == class_name:
-            return tuple(
-                child.name
-                for child in node.body
-                if isinstance(child, ast.FunctionDef)
-            )
+            return tuple(child.name for child in node.body if isinstance(child, ast.FunctionDef))
     return ()
 
 
@@ -101,8 +64,7 @@ def _dataclass_fields(source: str, class_name: str) -> tuple[str, ...]:
             return tuple(
                 child.target.id
                 for child in node.body
-                if isinstance(child, ast.AnnAssign)
-                and isinstance(child.target, ast.Name)
+                if isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name)
             )
     return ()
 
@@ -162,16 +124,14 @@ def main() -> int:
     )
     if port_methods != ("read_facts",):
         problems.append(
-            "health repository port must expose read_facts only: "
-            + ", ".join(port_methods)
+            "health repository port must expose read_facts only: " + ", ".join(port_methods)
         )
 
     snapshot_fields = _dataclass_fields(models, "ContentSupplyHealthSnapshot")
     expected_fields = tuple(contract.get("snapshot", {}).get("allowed_fields", ()))
     if snapshot_fields != expected_fields:
         problems.append(
-            "ContentSupplyHealthSnapshot allowlist drifted: "
-            + ", ".join(snapshot_fields)
+            "ContentSupplyHealthSnapshot allowlist drifted: " + ", ".join(snapshot_fields)
         )
 
     _require(

@@ -7,15 +7,7 @@ from export_openapi import load_expected_contract
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACTS = REPO_ROOT / "docs" / "contracts"
-ADMIN_DIR = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "modules"
-    / "admin_security"
-)
+ADMIN_DIR = REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "admin_security"
 CONTRACT = CONTRACTS / "admin-editorial-operations-slice34.v1.json"
 POLICY = CONTRACTS / "admin-http-surface.v1.yaml"
 OPENAPI = CONTRACTS / "openapi.v1.json"
@@ -24,9 +16,7 @@ REVIEW = ADMIN_DIR / "proposal_review.py"
 PROJECTION = ADMIN_DIR / "editorial_projection.py"
 MAIN = REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "main.py"
 REVIEW_PATH = "/internal/admin/v1/proposals/{proposal_id}/review"
-PROJECTION_PATH = (
-    "/internal/admin/v1/candidate-proposals/{candidate_proposal_id}/projection"
-)
+PROJECTION_PATH = "/internal/admin/v1/candidate-proposals/{candidate_proposal_id}/projection"
 FORBIDDEN_FIELDS = {
     "actor_ref",
     "reviewer_ref",
@@ -54,19 +44,13 @@ def _request_fields(openapi: dict, operation: dict) -> set[str]:
         .get("$ref", "")
         .rsplit("/", 1)[-1]
     )
-    properties = (
-        openapi.get("components", {})
-        .get("schemas", {})
-        .get(ref, {})
-        .get("properties", {})
-    )
+    properties = openapi.get("components", {}).get("schemas", {}).get(ref, {}).get("properties", {})
     return set(properties)
 
 
 def _has_csrf(operation: dict) -> bool:
     return any(
-        parameter.get("in") == "header"
-        and parameter.get("name", "").lower() == "x-kefe-csrf"
+        parameter.get("in") == "header" and parameter.get("name", "").lower() == "x-kefe-csrf"
         for parameter in operation.get("parameters", [])
     )
 

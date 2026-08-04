@@ -112,14 +112,9 @@ def main() -> int:
         "from meta",
     )
     knowledge_source = "\n".join(
-        path.read_text(encoding="utf-8")
-        for path in MODELS.parent.glob("*.py")
+        path.read_text(encoding="utf-8") for path in MODELS.parent.glob("*.py")
     )
-    leaked = [
-        fragment
-        for fragment in forbidden_provider_fragments
-        if fragment in knowledge_source
-    ]
+    leaked = [fragment for fragment in forbidden_provider_fragments if fragment in knowledge_source]
     if leaked:
         message = "provider-specific dependency leaked into knowledge domain: "
         errors.append(message + ", ".join(leaked))

@@ -7,31 +7,20 @@ ROOT = Path(__file__).resolve().parents[3]
 CONTRACT = ROOT / "docs/contracts/canonical-public-feed-catalog-activation.v1.json"
 DOMAIN = ROOT / "services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py"
 RUNTIME = ROOT / "services/api/src/kefe_api/modules/knowledge/public_feed_runtime.py"
-LIVE_RUNTIME = (
-    ROOT / "services/api/src/kefe_api/infrastructure/canonical_public_feed_runtime.py"
-)
-COMPOSITION = (
-    ROOT / "services/api/src/kefe_api/infrastructure/canonical_public_feed_composition.py"
-)
+LIVE_RUNTIME = ROOT / "services/api/src/kefe_api/infrastructure/canonical_public_feed_runtime.py"
+COMPOSITION = ROOT / "services/api/src/kefe_api/infrastructure/canonical_public_feed_composition.py"
 PIPELINE = ROOT / "services/api/src/kefe_api/infrastructure/editorial_pipeline.py"
 MAIN = ROOT / "services/api/src/kefe_api/main.py"
-ROUTER = (
-    ROOT
-    / "services/api/src/kefe_api/modules/admin_security/canonical_public_feed_router.py"
-)
+ROUTER = ROOT / "services/api/src/kefe_api/modules/admin_security/canonical_public_feed_router.py"
 POSTGRES = (
-    ROOT
-    / "services/api/src/kefe_api/infrastructure/postgres_canonical_public_feed_catalog.py"
+    ROOT / "services/api/src/kefe_api/infrastructure/postgres_canonical_public_feed_catalog.py"
 )
 CANONICAL_MIGRATION = (
-    ROOT
-    / "services/api/migrations/versions/20260804_0026_canonical_public_feed_catalog.py"
+    ROOT / "services/api/migrations/versions/20260804_0026_canonical_public_feed_catalog.py"
 )
 HTTP_TEST = ROOT / "services/api/tests/test_canonical_public_feed_http.py"
 VERTICAL_TEST = ROOT / "services/api/tests/test_canonical_public_feed_vertical.py"
-POSTGRES_HTTP_TEST = (
-    ROOT / "services/api/tests/test_canonical_public_feed_http_postgres.py"
-)
+POSTGRES_HTTP_TEST = ROOT / "services/api/tests/test_canonical_public_feed_http_postgres.py"
 MIGRATIONS = ROOT / "services/api/migrations/versions"
 
 
@@ -48,8 +37,7 @@ def main() -> None:
         "alternative branches must not be merged wholesale",
     )
     require(
-        contract["conflict_resolution"]["canonical_migration_revision"]
-        == "20260804_0026",
+        contract["conflict_resolution"]["canonical_migration_revision"] == "20260804_0026",
         "canonical migration revision drifted",
     )
     for path, label in (
@@ -220,8 +208,7 @@ def main() -> None:
 
     postgres_http_test_source = POSTGRES_HTTP_TEST.read_text(encoding="utf-8")
     require(
-        'approver_id = _seed_subject(database_url, "ACCESS_ADMIN")'
-        in postgres_http_test_source,
+        'approver_id = _seed_subject(database_url, "ACCESS_ADMIN")' in postgres_http_test_source,
         "PostgreSQL restart approver must carry SOURCE_APPROVE through policy",
     )
 

@@ -5,12 +5,7 @@ import json
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-CONTRACT = (
-    REPO_ROOT
-    / "docs"
-    / "contracts"
-    / "source-acquisition-admission-slice39.v1.json"
-)
+CONTRACT = REPO_ROOT / "docs" / "contracts" / "source-acquisition-admission-slice39.v1.json"
 SOURCE = (
     REPO_ROOT
     / "services"
@@ -22,23 +17,11 @@ SOURCE = (
     / "source_acquisition.py"
 )
 PIPELINE = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "infrastructure"
-    / "editorial_pipeline.py"
+    REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "infrastructure" / "editorial_pipeline.py"
 )
 MAIN = REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "main.py"
 MEMORY_TEST = REPO_ROOT / "services" / "api" / "tests" / "test_source_acquisition.py"
-POSTGRES_TEST = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "tests"
-    / "test_source_acquisition_postgres.py"
-)
+POSTGRES_TEST = REPO_ROOT / "services" / "api" / "tests" / "test_source_acquisition_postgres.py"
 
 
 def _require(
@@ -59,8 +42,7 @@ def _dataclass_fields(source: str, class_name: str) -> tuple[str, ...]:
             return tuple(
                 statement.target.id
                 for statement in node.body
-                if isinstance(statement, ast.AnnAssign)
-                and isinstance(statement.target, ast.Name)
+                if isinstance(statement, ast.AnnAssign) and isinstance(statement.target, ast.Name)
             )
     return ()
 
@@ -109,9 +91,7 @@ def main() -> int:
         "raw_storage_ref",
     )
     if captured_fields != expected_captured:
-        problems.append(
-            "CapturedSource field allowlist drifted: " + ", ".join(captured_fields)
-        )
+        problems.append("CapturedSource field allowlist drifted: " + ", ".join(captured_fields))
 
     result_fields = _dataclass_fields(source, "SourceAcquisitionResult")
     expected_result = (
@@ -127,8 +107,7 @@ def main() -> int:
     )
     if result_fields != expected_result:
         problems.append(
-            "SourceAcquisitionResult field allowlist drifted: "
-            + ", ".join(result_fields)
+            "SourceAcquisitionResult field allowlist drifted: " + ", ".join(result_fields)
         )
 
     _require(
@@ -237,14 +216,10 @@ def main() -> int:
                 f"excluded behavior leaked into source acquisition: {forbidden_behavior}"
             )
 
-    forbidden_capture_fields = set(
-        contract.get("capture_envelope", {}).get("forbidden_fields", ())
-    )
+    forbidden_capture_fields = set(contract.get("capture_envelope", {}).get("forbidden_fields", ()))
     if forbidden_capture_fields.intersection(captured_fields):
         problems.append("forbidden raw/provider fields entered CapturedSource")
-    forbidden_result_fields = set(
-        contract.get("observer", {}).get("forbidden_fields", ())
-    )
+    forbidden_result_fields = set(contract.get("observer", {}).get("forbidden_fields", ()))
     if forbidden_result_fields.intersection(result_fields):
         problems.append("forbidden sensitive fields entered acquisition result")
 

@@ -5,12 +5,7 @@ import json
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-CONTRACT = (
-    REPO_ROOT
-    / "docs"
-    / "contracts"
-    / "provider-admission-control-slice43.v1.json"
-)
+CONTRACT = REPO_ROOT / "docs" / "contracts" / "provider-admission-control-slice43.v1.json"
 MIGRATION = (
     REPO_ROOT
     / "services"
@@ -27,9 +22,7 @@ PUBLIC_MIGRATION = (
     / "versions"
     / "20260803_0025_public_provider_credential_mode.py"
 )
-KNOWLEDGE = (
-    REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "knowledge"
-)
+KNOWLEDGE = REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "knowledge"
 IDENTITY = KNOWLEDGE / "source_identity.py"
 DOMAIN = KNOWLEDGE / "provider_control.py"
 PORT = KNOWLEDGE / "provider_control_ports.py"
@@ -47,27 +40,11 @@ POSTGRES = (
     / "postgres_source_provider_admission.py"
 )
 PIPELINE = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "infrastructure"
-    / "editorial_pipeline.py"
+    REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "infrastructure" / "editorial_pipeline.py"
 )
-MEMORY_TEST = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "tests"
-    / "test_provider_admission_control.py"
-)
+MEMORY_TEST = REPO_ROOT / "services" / "api" / "tests" / "test_provider_admission_control.py"
 POSTGRES_TEST = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "tests"
-    / "test_provider_admission_control_postgres.py"
+    REPO_ROOT / "services" / "api" / "tests" / "test_provider_admission_control_postgres.py"
 )
 
 
@@ -89,8 +66,7 @@ def _dataclass_fields(source: str, class_name: str) -> tuple[str, ...]:
             return tuple(
                 child.target.id
                 for child in node.body
-                if isinstance(child, ast.AnnAssign)
-                and isinstance(child.target, ast.Name)
+                if isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name)
             )
     return ()
 
@@ -162,13 +138,9 @@ def main() -> int:
         problems.append("permit completion uncertainty must fail closed")
 
     result_fields = _dataclass_fields(domain, "ProviderAdmissionResult")
-    expected_fields = tuple(
-        contract.get("operational_result", {}).get("allowed_fields", ())
-    )
+    expected_fields = tuple(contract.get("operational_result", {}).get("allowed_fields", ()))
     if result_fields != expected_fields:
-        problems.append(
-            "ProviderAdmissionResult allowlist drifted: " + ", ".join(result_fields)
-        )
+        problems.append("ProviderAdmissionResult allowlist drifted: " + ", ".join(result_fields))
 
     _require(
         problems,
@@ -280,7 +252,7 @@ def main() -> int:
         postgres,
         (
             "credential_mode",
-            "ProviderCredentialMode(row[\"credential_mode\"])",
+            'ProviderCredentialMode(row["credential_mode"])',
             "FOR UPDATE",
             "FOR UPDATE SKIP LOCKED",
             "source_provider_capture_permit",
@@ -341,12 +313,8 @@ def main() -> int:
     )
     admit_position = acquisition.find("self._admission.admit_capture(")
     capture_position = acquisition.find("self._capture_executor.capture(")
-    completion_position = acquisition.find(
-        "self._admission.complete_capture_success("
-    )
-    artifact_position = acquisition.find(
-        "self._knowledge_repository.add_source_artifact("
-    )
+    completion_position = acquisition.find("self._admission.complete_capture_success(")
+    artifact_position = acquisition.find("self._knowledge_repository.add_source_artifact(")
     if not 0 <= admit_position < capture_position < completion_position < artifact_position:
         problems.append("provider admission/capture/persistence order drifted")
 
@@ -358,7 +326,7 @@ def main() -> int:
             "InMemorySourceProviderAdmissionRepository()",
             "PostgresSourceProviderAdmissionRepository(engine)",
             "SourceProviderAdmissionService(",
-            "InMemoryPublicSourceCaptureRegistry()",
+            "MutablePublicSourceCaptureRegistry()",
             "CredentialModeRoutingProviderCaptureExecutor(",
             "admission=provider_admission_service",
             "capture_executor=provider_capture_executor",
@@ -392,9 +360,7 @@ def main() -> int:
         ),
     )
 
-    forbidden_runtime = (
-        domain + port + memory + service + acquisition + public_execution
-    )
+    forbidden_runtime = domain + port + memory + service + acquisition + public_execution
     for fragment in (
         "import requests",
         "import httpx",
@@ -415,9 +381,7 @@ def main() -> int:
                 f"provider/network/editorial behavior leaked into control plane: {fragment}"
             )
 
-    forbidden_fields = set(
-        contract.get("operational_result", {}).get("forbidden_fields", ())
-    )
+    forbidden_fields = set(contract.get("operational_result", {}).get("forbidden_fields", ()))
     if forbidden_fields.intersection(result_fields):
         problems.append("sensitive field entered provider operational result")
 

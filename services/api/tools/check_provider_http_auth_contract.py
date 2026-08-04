@@ -54,8 +54,8 @@ REQUIRED_AUTH_FRAGMENTS = (
     "memoryview(value).toreadonly()",
     "for index in range(len(value))",
     "value[index] = 0",
-    "raise TypeError(\"sensitive HTTP header comparison is forbidden\")",
-    "raise TypeError(\"sensitive HTTP header serialization is forbidden\")",
+    'raise TypeError("sensitive HTTP header comparison is forbidden")',
+    'raise TypeError("sensitive HTTP header serialization is forbidden")',
     "secret.use_bytes(use_secret, at=at)",
     "envelope.close()",
     "except ProviderHttpError:",
@@ -127,8 +127,7 @@ def class_annotations(source: str, class_name: str) -> set[str]:
             return {
                 child.target.id
                 for child in node.body
-                if isinstance(child, ast.AnnAssign)
-                and isinstance(child.target, ast.Name)
+                if isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name)
             }
     fail(f"class annotations not found: {class_name}")
     return set()

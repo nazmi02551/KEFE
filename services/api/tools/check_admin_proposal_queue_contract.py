@@ -10,15 +10,7 @@ CONTRACTS = REPO_ROOT / "docs" / "contracts"
 CONTRACT = CONTRACTS / "admin-proposal-review-queue-slice36.v1.json"
 POLICY = CONTRACTS / "admin-http-surface.v1.yaml"
 OPENAPI = CONTRACTS / "openapi.v1.json"
-ADMIN = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "modules"
-    / "admin_security"
-)
+ADMIN = REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "admin_security"
 ROUTER = ADMIN / "proposal_queue_router.py"
 SERVICE = ADMIN / "proposal_queue.py"
 MEMORY = (
@@ -41,19 +33,9 @@ POSTGRES = (
     / "postgres_proposal_review_queue.py"
 )
 MAIN = REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "main.py"
-MEMORY_TEST = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "tests"
-    / "test_admin_proposal_queue_http.py"
-)
+MEMORY_TEST = REPO_ROOT / "services" / "api" / "tests" / "test_admin_proposal_queue_http.py"
 POSTGRES_TEST = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "tests"
-    / "test_admin_proposal_queue_http_postgres.py"
+    REPO_ROOT / "services" / "api" / "tests" / "test_admin_proposal_queue_http_postgres.py"
 )
 LIST_PATH = "/internal/admin/v1/proposals"
 DETAIL_PATH = "/internal/admin/v1/proposals/{proposal_id}"
@@ -154,9 +136,12 @@ def main() -> int:
             "class ProposalDetailResponse(ProposalQueueItemResponse):",
         ),
     )
-    if "payload:" in router.split("class ProposalQueueItemResponse", 1)[1].split(
-        "class ProposalQueueResponse", 1
-    )[0]:
+    if (
+        "payload:"
+        in router.split("class ProposalQueueItemResponse", 1)[1].split(
+            "class ProposalQueueResponse", 1
+        )[0]
+    ):
         problems.append("Proposal queue list response contains payload")
 
     _require(
@@ -241,10 +226,7 @@ def main() -> int:
     if detail_operation is None:
         problems.append(f"OpenAPI missing GET {DETAIL_PATH}")
     if list_operation is not None:
-        names = {
-            parameter.get("name")
-            for parameter in list_operation.get("parameters", [])
-        }
+        names = {parameter.get("name") for parameter in list_operation.get("parameters", [])}
         if "offset" in names:
             problems.append("OpenAPI exposes forbidden offset parameter")
         for expected in (
@@ -280,10 +262,7 @@ def main() -> int:
             .rsplit("/", 1)[-1]
         )
         item_properties = (
-            openapi.get("components", {})
-            .get("schemas", {})
-            .get(item_ref, {})
-            .get("properties", {})
+            openapi.get("components", {}).get("schemas", {}).get(item_ref, {}).get("properties", {})
         )
         if "payload" in item_properties:
             problems.append("OpenAPI Proposal queue item leaks payload")

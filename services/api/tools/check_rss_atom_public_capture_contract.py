@@ -6,20 +6,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 API = ROOT / "services/api"
-PUBLIC_HTTP = (
-    API / "src/kefe_api/modules/knowledge/provider_public_http_capture.py"
-)
+PUBLIC_HTTP = API / "src/kefe_api/modules/knowledge/provider_public_http_capture.py"
 RSS_ATOM = API / "src/kefe_api/modules/knowledge/rss_atom_capture.py"
-PUBLIC_EXECUTION = (
-    API / "src/kefe_api/modules/knowledge/provider_public_execution.py"
-)
+PUBLIC_EXECUTION = API / "src/kefe_api/modules/knowledge/provider_public_execution.py"
 PIPELINE = API / "src/kefe_api/infrastructure/editorial_pipeline.py"
 MAIN = API / "src/kefe_api/main.py"
 TEST = API / "tests/test_rss_atom_public_capture.py"
-ADR = (
-    ROOT
-    / "docs/adr/0088-strict-rss-atom-parsing-and-evidence-backed-public-http-capture.md"
-)
+ADR = ROOT / "docs/adr/0088-strict-rss-atom-parsing-and-evidence-backed-public-http-capture.md"
 CONTRACT = ROOT / "docs/contracts/rss-atom-public-capture-slice52.v1.json"
 WORKFLOW = ROOT / ".github/workflows/rss-atom-public-capture-ci.yml"
 
@@ -42,11 +35,7 @@ def fail(message: str) -> None:
 
 def class_map(source: str) -> dict[str, ast.ClassDef]:
     tree = ast.parse(source)
-    return {
-        node.name: node
-        for node in tree.body
-        if isinstance(node, ast.ClassDef)
-    }
+    return {node.name: node for node in tree.body if isinstance(node, ast.ClassDef)}
 
 
 def method(node: ast.ClassDef, name: str) -> ast.FunctionDef:
@@ -166,7 +155,7 @@ def main() -> None:
         'XINCLUDE_NAMESPACE = "http://www.w3.org/2001/XInclude"',
         'if b"<!doctype" in lowered or b"<!entity" in lowered:',
         'if b"<?" in remaining:',
-        "body.decode(\"utf-8-sig\")",
+        'body.decode("utf-8-sig")',
         "ElementTree.fromstring(response.body)",
         "SOURCE_PUBLIC_HTTP_PARSE_PROFILE_EXCEEDED",
         "SOURCE_PUBLIC_HTTP_PARSE_TIMESTAMP_INVALID",
@@ -189,16 +178,14 @@ def main() -> None:
         if forbidden in rss_atom:
             fail(f"excluded dependency/behavior leaked into RSS/Atom parser: {forbidden}")
 
-    if "InMemoryPublicSourceCaptureRegistry()" not in pipeline:
+    if "MutablePublicSourceCaptureRegistry()" not in pipeline:
         fail("production public adapter registry must remain empty")
     if (
         "StrictRssAtomCaptureDefinition(" in pipeline
         or "StrictRssAtomCaptureDefinition(" in main_source
     ):
         fail("production composition must not register an RSS/Atom adapter")
-    if contract.get("composition", {}).get(
-        "production_rss_atom_adapters_registered"
-    ) != 0:
+    if contract.get("composition", {}).get("production_rss_atom_adapters_registered") != 0:
         fail("contract must keep production RSS/Atom adapter registry empty")
 
     for test_name in (

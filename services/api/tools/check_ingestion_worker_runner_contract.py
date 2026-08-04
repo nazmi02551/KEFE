@@ -6,13 +6,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACT = REPO_ROOT / "docs" / "contracts" / "ingestion-worker-runner-slice38.v1.json"
 PACKAGE = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "modules"
-    / "ingestion_orchestration"
+    REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "ingestion_orchestration"
 )
 RUNTIME = PACKAGE / "worker_runtime.py"
 RUNNER = PACKAGE / "worker_service.py"
@@ -30,22 +24,12 @@ POSTGRES_LEASES = (
     / "postgres_ingestion_run_leases.py"
 )
 PIPELINE = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "infrastructure"
-    / "editorial_pipeline.py"
+    REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "infrastructure" / "editorial_pipeline.py"
 )
 MAIN = REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "main.py"
 MEMORY_TEST = REPO_ROOT / "services" / "api" / "tests" / "test_ingestion_worker_runner.py"
 POSTGRES_TEST = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "tests"
-    / "test_ingestion_worker_runner_postgres.py"
+    REPO_ROOT / "services" / "api" / "tests" / "test_ingestion_worker_runner_postgres.py"
 )
 
 
@@ -168,7 +152,7 @@ def main() -> int:
         "composition",
         pipeline,
         (
-            "InMemoryIngestionWorkerRuntimeRegistry()",
+            "build_feed_item_extraction_runtime(",
             "NoOpIngestionWorkerObserver()",
             "IngestionWorkerRunner(",
             "ingestion_worker_runner=ingestion_worker_runner",
@@ -219,16 +203,15 @@ def main() -> int:
             "import tweepy",
             "APIRouter",
             "provider_response",
-            "proposal_payload\":",
-            "private_reason\":",
-            "exception_text\":",
+            'proposal_payload":',
+            'private_reason":',
+            'exception_text":',
         )
         if fragment in domain_source
     )
     if forbidden:
         problems.append(
-            "provider/HTTP/sensitive payload leaked into worker domain: "
-            + ", ".join(forbidden)
+            "provider/HTTP/sensitive payload leaked into worker domain: " + ", ".join(forbidden)
         )
     for forbidden_runtime_fragment in (
         "while True",

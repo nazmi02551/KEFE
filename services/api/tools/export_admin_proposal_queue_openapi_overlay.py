@@ -81,9 +81,7 @@ def build_overlay() -> dict[str, object]:
     new_path_names = sorted(generated_paths.keys() - before_paths.keys())
     return {
         "target_version": "0.19.0",
-        "components": {
-            "schemas": {name: generated_schemas[name] for name in new_schema_names}
-        },
+        "components": {"schemas": {name: generated_schemas[name] for name in new_schema_names}},
         "paths": {path: generated_paths[path] for path in new_path_names},
     }
 
@@ -97,12 +95,15 @@ def main() -> None:
     args = parser.parse_args()
 
     overlay = build_overlay()
-    rendered = json.dumps(
-        overlay,
-        ensure_ascii=False,
-        indent=2,
-        sort_keys=True,
-    ) + "\n"
+    rendered = (
+        json.dumps(
+            overlay,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
     if args.check:
         if not args.output.exists():
             raise SystemExit("Checked-in Admin Proposal queue OpenAPI overlay is missing")

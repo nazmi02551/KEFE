@@ -6,14 +6,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACTS = REPO_ROOT / "docs" / "contracts"
 ROUTER = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "modules"
-    / "admin_security"
-    / "router.py"
+    REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "admin_security" / "router.py"
 )
 CONFIG_ROUTER = (
     REPO_ROOT
@@ -43,9 +36,7 @@ EXPECTED_PATHS = {
     "/internal/admin/v1/content-configuration/audit": {"get"},
     "/internal/admin/v1/content-configuration/drafts": {"post"},
     "/internal/admin/v1/content-configuration/versions/{version_id}/publish": {"post"},
-    "/internal/admin/v1/content-configuration/versions/{version_id}/rollback-drafts": {
-        "post"
-    },
+    "/internal/admin/v1/content-configuration/versions/{version_id}/rollback-drafts": {"post"},
 }
 WRITE_METHODS = {"post", "put", "patch", "delete"}
 COMMON_FORBIDDEN_IDENTITY_FIELDS = {
@@ -55,9 +46,7 @@ COMMON_FORBIDDEN_IDENTITY_FIELDS = {
     "audit_identity",
     "created_by",
 }
-AUTHORING_FORBIDDEN_IDENTITY_FIELDS = COMMON_FORBIDDEN_IDENTITY_FIELDS | {
-    "capabilities"
-}
+AUTHORING_FORBIDDEN_IDENTITY_FIELDS = COMMON_FORBIDDEN_IDENTITY_FIELDS | {"capabilities"}
 CONFIGURATION_FORBIDDEN_METADATA_FIELDS = COMMON_FORBIDDEN_IDENTITY_FIELDS | {
     "capabilities_grant",
     "version_no",
@@ -176,8 +165,7 @@ def main() -> None:
                 ]
                 if not csrf:
                     problems.append(
-                        "Admin write missing CSRF header contract: "
-                        f"{method.upper()} {path}"
+                        f"Admin write missing CSRF header contract: {method.upper()} {path}"
                     )
 
             schema_name = _request_schema_name(operation)
@@ -205,9 +193,7 @@ def main() -> None:
         properties = schema.get("properties", {})
         leaked = sorted(FORBIDDEN_SECRET_FIELDS & properties.keys())
         if leaked:
-            problems.append(
-                f"{schema_name} exposes forbidden Admin secrets: {', '.join(leaked)}"
-            )
+            problems.append(f"{schema_name} exposes forbidden Admin secrets: {', '.join(leaked)}")
 
     if problems:
         raise SystemExit("\n".join(problems))

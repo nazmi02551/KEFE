@@ -4,12 +4,7 @@ import json
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-CONTRACT = (
-    REPO_ROOT
-    / "docs"
-    / "contracts"
-    / "ingestion-worker-lease-slice37.v1.json"
-)
+CONTRACT = REPO_ROOT / "docs" / "contracts" / "ingestion-worker-lease-slice37.v1.json"
 MIGRATION = (
     REPO_ROOT
     / "services"
@@ -19,13 +14,7 @@ MIGRATION = (
     / "20260802_0021_ingestion_run_lease.py"
 )
 PACKAGE = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "modules"
-    / "ingestion_orchestration"
+    REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "ingestion_orchestration"
 )
 MODELS = PACKAGE / "models.py"
 LEASES = PACKAGE / "leases.py"
@@ -42,23 +31,11 @@ POSTGRES = (
     / "postgres_ingestion_run_leases.py"
 )
 PIPELINE = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "infrastructure"
-    / "editorial_pipeline.py"
+    REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "infrastructure" / "editorial_pipeline.py"
 )
 MAIN = REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "main.py"
 MEMORY_TEST = REPO_ROOT / "services" / "api" / "tests" / "test_ingestion_run_leases.py"
-POSTGRES_TEST = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "tests"
-    / "test_ingestion_run_leases_postgres.py"
-)
+POSTGRES_TEST = REPO_ROOT / "services" / "api" / "tests" / "test_ingestion_run_leases_postgres.py"
 
 
 def _require(
@@ -136,7 +113,7 @@ def main() -> int:
             "run_lease_one_active_per_run_idx",
             "WHERE state = 'ACTIVE'",
             "run_lease_active_expiry_idx",
-            'DROP TABLE IF EXISTS ingestion.run_lease',
+            "DROP TABLE IF EXISTS ingestion.run_lease",
         ),
     )
     _require(
@@ -261,9 +238,7 @@ def main() -> int:
         ),
     )
 
-    package_source = "\n".join(
-        path.read_text(encoding="utf-8") for path in PACKAGE.glob("*.py")
-    )
+    package_source = "\n".join(path.read_text(encoding="utf-8") for path in PACKAGE.glob("*.py"))
     leaks = tuple(
         fragment
         for fragment in (
@@ -279,8 +254,7 @@ def main() -> int:
     )
     if leaks:
         problems.append(
-            "provider dependency leaked into ingestion lease domain: "
-            + ", ".join(leaks)
+            "provider dependency leaked into ingestion lease domain: " + ", ".join(leaks)
         )
     if "APIRouter" in leases + port + service + memory:
         problems.append("Admin/HTTP concerns leaked into lease domain")

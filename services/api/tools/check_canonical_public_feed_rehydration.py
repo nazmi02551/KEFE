@@ -4,9 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 DOMAIN = ROOT / "services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py"
-COMPOSITION = (
-    ROOT / "services/api/src/kefe_api/infrastructure/canonical_public_feed_composition.py"
-)
+COMPOSITION = ROOT / "services/api/src/kefe_api/infrastructure/canonical_public_feed_composition.py"
 
 
 def require(condition: bool, message: str) -> None:

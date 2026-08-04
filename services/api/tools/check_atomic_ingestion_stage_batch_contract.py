@@ -4,20 +4,9 @@ import json
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-CONTRACT = (
-    REPO_ROOT
-    / "docs"
-    / "contracts"
-    / "atomic-ingestion-stage-batch-slice35.v1.json"
-)
+CONTRACT = REPO_ROOT / "docs" / "contracts" / "atomic-ingestion-stage-batch-slice35.v1.json"
 PACKAGE = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "modules"
-    / "ingestion_orchestration"
+    REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "ingestion_orchestration"
 )
 PORTS = PACKAGE / "ports.py"
 SERVICE = PACKAGE / "service.py"
@@ -34,11 +23,7 @@ POSTGRES = (
 )
 MEMORY_TEST = REPO_ROOT / "services" / "api" / "tests" / "test_ingestion_stage_batch.py"
 POSTGRES_TEST = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "tests"
-    / "test_ingestion_orchestration_postgres.py"
+    REPO_ROOT / "services" / "api" / "tests" / "test_ingestion_orchestration_postgres.py"
 )
 
 
@@ -161,9 +146,7 @@ def main() -> int:
         "add_proposal(",
     ):
         if forbidden in success_section:
-            problems.append(
-                "successful service path persists output one-by-one: " + forbidden
-            )
+            problems.append("successful service path persists output one-by-one: " + forbidden)
 
     memory_method = _method(memory, "complete_successful_stage", "list_stage_executions")
     _require(
@@ -207,8 +190,7 @@ def main() -> int:
     ):
         if forbidden in postgres_method:
             problems.append(
-                "PostgreSQL atomic method delegates to separate transactions: "
-                + forbidden
+                "PostgreSQL atomic method delegates to separate transactions: " + forbidden
             )
 
     _require(
@@ -234,9 +216,7 @@ def main() -> int:
         ),
     )
 
-    package_source = "\n".join(
-        path.read_text(encoding="utf-8") for path in PACKAGE.glob("*.py")
-    )
+    package_source = "\n".join(path.read_text(encoding="utf-8") for path in PACKAGE.glob("*.py"))
     provider_leaks = tuple(
         fragment
         for fragment in (
@@ -252,8 +232,7 @@ def main() -> int:
     )
     if provider_leaks:
         problems.append(
-            "provider dependency leaked into ingestion domain: "
-            + ", ".join(provider_leaks)
+            "provider dependency leaked into ingestion domain: " + ", ".join(provider_leaks)
         )
 
     if problems:

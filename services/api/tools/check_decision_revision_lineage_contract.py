@@ -8,14 +8,12 @@ ADRS = REPO_ROOT / "docs" / "adr"
 
 
 def main() -> None:
-    contract = (CONTRACTS / "decision-revision-lineage.v1.yaml").read_text(
-        encoding="utf-8"
-    )
+    contract = (CONTRACTS / "decision-revision-lineage.v1.yaml").read_text(encoding="utf-8")
     manifest = (CONTRACTS / "manifest.v1.yaml").read_text(encoding="utf-8")
     erd = (CONTRACTS / "core-erd.v2.mmd").read_text(encoding="utf-8")
-    adr = (
-        ADRS / "0025-decision-revision-exposure-intervention-delta.md"
-    ).read_text(encoding="utf-8")
+    adr = (ADRS / "0025-decision-revision-exposure-intervention-delta.md").read_text(
+        encoding="utf-8"
+    )
 
     problems: list[str] = []
 

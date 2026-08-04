@@ -12,15 +12,13 @@ def main() -> None:
     contract = (CONTRACTS / "reflection-runtime.v1.yaml").read_text(encoding="utf-8")
     adr = (ADRS / "0026-generic-reflection-runtime.md").read_text(encoding="utf-8")
     manifest = (CONTRACTS / "manifest.v1.yaml").read_text(encoding="utf-8")
-    flow_runtime = (API_SRC / "modules" / "flow_runtime" / "service.py").read_text(
+    flow_runtime = (API_SRC / "modules" / "flow_runtime" / "service.py").read_text(encoding="utf-8")
+    reflection_service = (API_SRC / "modules" / "decision" / "reflection_service.py").read_text(
         encoding="utf-8"
     )
-    reflection_service = (
-        API_SRC / "modules" / "decision" / "reflection_service.py"
-    ).read_text(encoding="utf-8")
-    reflection_router = (
-        API_SRC / "modules" / "decision" / "reflection_router.py"
-    ).read_text(encoding="utf-8")
+    reflection_router = (API_SRC / "modules" / "decision" / "reflection_router.py").read_text(
+        encoding="utf-8"
+    )
 
     problems: list[str] = []
 
