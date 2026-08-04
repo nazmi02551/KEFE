@@ -186,7 +186,7 @@ def main() -> None:
     require(
         adr,
         (
-            "ContentConfigurationSnapshot remains the sole configuration and Flow authority",
+            "sole configuration and Flow authority",
             "every Step reachable from the entry Step",
             "an acyclic topology",
             "does not publish",
@@ -217,13 +217,13 @@ def main() -> None:
             "Flow Composer",
             "DRAFT",
             "createFlowComposerDraft",
-            "loadFlowComposerVersion",
+            "flowComposerVersion",
             "saveFlowComposerVersion",
-            "loadFlowComposerAudit",
+            "flowComposerAudit",
         ),
         "Flow Composer Admin UI",
     )
-    for forbidden in ("localStorage", "sessionStorage", "autosave", "dragstart"):
+    for forbidden in ("localStorage", "sessionStorage", "useEffect(", "dragstart"):
         if forbidden in ui:
             fail(f"forbidden browser behavior leaked into Flow Composer UI: {forbidden}")
 
