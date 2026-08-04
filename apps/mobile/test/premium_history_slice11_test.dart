@@ -100,10 +100,21 @@ void main() {
           );
           expect(find.byType(KefeSurface), findsWidgets);
 
+          final journeyList = find.byKey(
+            const ValueKey('my-kefe-journey'),
+          );
           final recentJourneys = find.byKey(
             const ValueKey('my-kefe-recent-journeys'),
           );
-          await tester.ensureVisible(recentJourneys);
+          for (
+            var attempt = 0;
+            attempt < 6 && recentJourneys.evaluate().isEmpty;
+            attempt++
+          ) {
+            await tester.drag(journeyList, const Offset(0, -500));
+            await tester.pumpAndSettle();
+          }
+          expect(recentJourneys, findsOneWidget);
           final firstJourney = find
               .descendant(
                 of: recentJourneys,
