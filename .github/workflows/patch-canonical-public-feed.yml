@@ -30,76 +30,115 @@ jobs:
               'services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py'
           )
           catalog = catalog_path.read_text(encoding='utf-8')
-          catalog_pattern = re.compile(
-              r"    def list_definitions\(\n"
-              r"        self,\n"
-              r"        principal: AdminPrincipal,\n"
-              r"    \) -> tuple\[CanonicalPublicFeedDefinition, \.\.\.\]:\n"
-              r".*?"
-              r"        return self\._repository\.list_definitions\(\)\n\n"
-              r"    def audit",
-              re.DOTALL,
-          )
-          catalog_replacement = '''    def list_definitions(
-              self,
-              principal: AdminPrincipal,
-          ) -> tuple[CanonicalPublicFeedDefinition, ...]:
-              self._security.authorize_any(
-                  principal,
-                  frozenset(
-                      {
-                          AdminCapability.SOURCE_MANAGE,
-                          AdminCapability.SOURCE_APPROVE,
-                          AdminCapability.SOURCE_ACTIVATE,
-                      }
-                  ),
-              )
-              return self._repository.list_definitions()
 
-          def audit'''
-          catalog, count = catalog_pattern.subn(
-              catalog_replacement,
-              catalog,
-              count=1,
+          catalog = catalog.replace(
+              'from kefe_api.modules.knowledge.rss_atom_public_capture import (\n'
+              '    StrictRssAtomCaptureDefinition,\n'
+              ')',
+              'from kefe_api.modules.knowledge.rss_atom_capture import (\n'
+              '    StrictRssAtomCaptureDefinition,\n'
+              ')',
           )
-          if count != 1:
-              raise SystemExit(f'catalog authorization replacement count={count}')
+          catalog = catalog.replace(
+              '            parser_profile=public.parser_profile,',
+              '            profile=public.parser_profile,',
+          )
+
+          parser_start = catalog.index('                "parser_profile": {\n')
+          parser_end = catalog.index(
+              '                "connect_timeout_ms":',
+              parser_start,
+          )
+          catalog = (
+              catalog[:parser_start]
+              + '                "parser_profile": '
+              + 'definition.parser_profile.immutable_configuration,\n'
+              + catalog[parser_end:]
+          )
+
+          list_start = catalog.index('    def list_definitions(\n')
+          list_end = catalog.index('    def audit(\n', list_start)
+          list_method = (
+              '    def list_definitions(\n'
+              '        self,\n'
+              '        principal: AdminPrincipal,\n'
+              '    ) -> tuple[CanonicalPublicFeedDefinition, ...]:\n'
+              '        self._security.authorize_any(\n'
+              '            principal,\n'
+              '            frozenset(\n'
+              '                {\n'
+              '                    AdminCapability.SOURCE_MANAGE,\n'
+              '                    AdminCapability.SOURCE_APPROVE,\n'
+              '                    AdminCapability.SOURCE_ACTIVATE,\n'
+              '                }\n'
+              '            ),\n'
+              '        )\n'
+              '        return self._repository.list_definitions()\n\n'
+          )
+          catalog = catalog[:list_start] + list_method + catalog[list_end:]
+
+          catalog = catalog.replace(
+              '            if current.id != definition.id or '
+              'current.configuration_hash != definition.configuration_hash:\n',
+              '            if (\n'
+              '                current.id != definition.id\n'
+              '                or current.configuration_hash\n'
+              '                != definition.configuration_hash\n'
+              '            ):\n',
+          )
+          catalog = catalog.replace(
+              '            if current.id != activation.id or '
+              'current.configuration_hash != activation.configuration_hash:\n',
+              '            if (\n'
+              '                current.id != activation.id\n'
+              '                or current.configuration_hash\n'
+              '                != activation.configuration_hash\n'
+              '            ):\n',
+          )
           catalog_path.write_text(catalog, encoding='utf-8')
 
           test_path = Path('services/api/tests/test_canonical_public_feed_catalog.py')
           tests = test_path.read_text(encoding='utf-8')
           tests = tests.replace(
-              '''from kefe_api.modules.knowledge.provider_control import (
-              InMemoryProviderControlRepository,
-              ProviderLifecycle,
-          )''',
-              '''from kefe_api.modules.knowledge.provider_control import (
-              ProviderCapabilityLifecycle,
-          )
-          from kefe_api.modules.knowledge.provider_control_memory import (
-              InMemorySourceProviderAdmissionRepository,
-          )''',
+              'from kefe_api.modules.knowledge.rss_atom_public_capture import (\n'
+              '    StrictRssAtomParseProfile,\n'
+              ')',
+              'from kefe_api.modules.knowledge.rss_atom_capture import (\n'
+              '    StrictRssAtomParseProfile,\n'
+              ')',
           )
           tests = tests.replace(
-              '''from kefe_api.modules.knowledge.source_scheduler import (
-              InMemorySourceAcquisitionScheduleRepository,
-              SourceAcquisitionScheduleState,
-          )''',
-              '''from kefe_api.modules.knowledge.source_scheduler import (
-              SourceAcquisitionScheduleState,
-          )
-          from kefe_api.modules.knowledge.source_scheduler_memory import (
-              InMemorySourceAcquisitionSchedulerRepository,
-          )''',
+              'from kefe_api.modules.knowledge.provider_control import (\n'
+              '    InMemoryProviderControlRepository,\n'
+              '    ProviderLifecycle,\n'
+              ')',
+              'from kefe_api.modules.knowledge.provider_control import (\n'
+              '    ProviderCapabilityLifecycle,\n'
+              ')\n'
+              'from kefe_api.modules.knowledge.provider_control_memory import (\n'
+              '    InMemorySourceProviderAdmissionRepository,\n'
+              ')',
           )
           tests = tests.replace(
-              '''from kefe_api.modules.knowledge.source_scheduler_service import (
-              SourceAcquisitionSchedulerService,
-          )''',
-              '''from kefe_api.modules.knowledge.source_scheduler_service import (
-              NoOpSourceDispatchObserver,
-              SourceAcquisitionSchedulerService,
-          )''',
+              'from kefe_api.modules.knowledge.source_scheduler import (\n'
+              '    InMemorySourceAcquisitionScheduleRepository,\n'
+              '    SourceAcquisitionScheduleState,\n'
+              ')',
+              'from kefe_api.modules.knowledge.source_scheduler import (\n'
+              '    SourceAcquisitionScheduleState,\n'
+              ')\n'
+              'from kefe_api.modules.knowledge.source_scheduler_memory import (\n'
+              '    InMemorySourceAcquisitionSchedulerRepository,\n'
+              ')',
+          )
+          tests = tests.replace(
+              'from kefe_api.modules.knowledge.source_scheduler_service import (\n'
+              '    SourceAcquisitionSchedulerService,\n'
+              ')',
+              'from kefe_api.modules.knowledge.source_scheduler_service import (\n'
+              '    NoOpSourceDispatchObserver,\n'
+              '    SourceAcquisitionSchedulerService,\n'
+              ')',
           )
           tests = tests.replace(
               'InMemoryProviderControlRepository()',
@@ -109,27 +148,23 @@ jobs:
               'InMemorySourceAcquisitionScheduleRepository()',
               'InMemorySourceAcquisitionSchedulerRepository()',
           )
-          scheduler_pattern = re.compile(
-              r"scheduler=SourceAcquisitionSchedulerService\(\n"
-              r"\s+schedule_repository,\n"
-              r"\s+max_interval_seconds=31_536_000,\n"
-              r"\s+max_dispatch_attempts=20,\n"
-              r"\s+\),"
+          scheduler_start = tests.index(
+              '        scheduler=SourceAcquisitionSchedulerService(\n'
           )
-          tests, scheduler_count = scheduler_pattern.subn(
-              '''scheduler=SourceAcquisitionSchedulerService(
-                  repository=schedule_repository,
-                  acquisition=object(),
-                  observer=NoOpSourceDispatchObserver(),
-                  clock=lambda: NOW,
-              ),''',
-              tests,
-              count=1,
+          scheduler_end = tests.index(
+              '        ),\n'
+              '        scheduler=SourceAcquisitionSchedulerService(\n'.__len__()
+              + scheduler_start,
+          ) + len('        ),\n')
+          scheduler_block = (
+              '        scheduler=SourceAcquisitionSchedulerService(\n'
+              '            repository=schedule_repository,\n'
+              '            acquisition=object(),\n'
+              '            observer=NoOpSourceDispatchObserver(),\n'
+              '            clock=lambda: NOW,\n'
+              '        ),\n'
           )
-          if scheduler_count != 1:
-              raise SystemExit(
-                  f'scheduler constructor replacement count={scheduler_count}'
-              )
+          tests = tests[:scheduler_start] + scheduler_block + tests[scheduler_end:]
           tests = tests.replace('providers.get_capability(', 'providers.get(')
           tests = tests.replace(
               '.lifecycle is ProviderLifecycle.',
@@ -141,18 +176,44 @@ jobs:
           )
           tests = tests.replace(
               'assert len(schedules.list_schedules()) == 1',
-              'assert schedules.list_dispatches(first.schedule_id) == ()',
+              'assert schedules.get_schedule(first.schedule_id) == schedule',
+          )
+          tests = tests.replace(
+              'assert preflight.allowed_origin == "https://feeds.example.test:443"',
+              'assert preflight.allowed_origin == "https://feeds.example.test"',
           )
           test_path.write_text(tests, encoding='utf-8')
+
+          checker_path = Path(
+              'services/api/tools/check_canonical_public_feed_catalog.py'
+          )
+          checker = checker_path.read_text(encoding='utf-8')
+          checker = checker.replace(
+              '    require("requests." not in source and "httpx." not in source, '
+              '"domain must not perform network I/O")\n',
+              '    require(\n'
+              '        "requests." not in source and "httpx." not in source,\n'
+              '        "domain must not perform network I/O",\n'
+              '    )\n',
+          )
+          checker_path.write_text(checker, encoding='utf-8')
           PY
-      - name: Normalize changed Python
+      - name: Normalize and verify changed Python
         run: |
           python -m pip install -q ruff==0.11.10
-          ruff check --fix \
+          ruff check --fix --exit-zero \
             services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py \
             services/api/tests/test_canonical_public_feed_catalog.py \
             services/api/tools/check_canonical_public_feed_catalog.py
           ruff format \
+            services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py \
+            services/api/tests/test_canonical_public_feed_catalog.py \
+            services/api/tools/check_canonical_public_feed_catalog.py
+          ruff check \
+            services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py \
+            services/api/tests/test_canonical_public_feed_catalog.py \
+            services/api/tools/check_canonical_public_feed_catalog.py
+          python -m py_compile \
             services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py \
             services/api/tests/test_canonical_public_feed_catalog.py \
             services/api/tools/check_canonical_public_feed_catalog.py
