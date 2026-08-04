@@ -129,8 +129,8 @@ export function validateFlowComposerVersion(
   for (const flow of version.flow_templates) {
     const flowLabel = `${flow.code || "(kodsuz Flow)"} v${flow.version_no}`;
     if (!flow.code.trim()) problems.push(`${flowLabel}: Flow kodu zorunludur.`);
-    if (flow.version_no <= 0) {
-      problems.push(`${flowLabel}: sürüm numarası pozitif olmalıdır.`);
+    if (!Number.isInteger(flow.version_no) || flow.version_no <= 0) {
+      problems.push(`${flowLabel}: sürüm numarası pozitif tam sayı olmalıdır.`);
     }
     if (!flow.label_key.trim()) {
       problems.push(`${flowLabel}: label_key zorunludur.`);
@@ -253,7 +253,9 @@ export function moveItem<T>(items: T[], from: number, to: number): T[] {
     return [...items];
   }
   const copy = [...items];
-  const [item] = copy.splice(from, 1);
+  const removed = copy.splice(from, 1);
+  const item = removed[0];
+  if (item === undefined) return copy;
   copy.splice(to, 0, item);
   return copy;
 }
