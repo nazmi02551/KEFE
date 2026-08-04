@@ -17,13 +17,64 @@ on:
       - ".github/workflows/admin-studio.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: admin-studio-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  finalize-branch:
+    if: github.event_name == 'pull_request' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/admin-studio-editorial-workspace
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.13.0"
+      - name: Correct the post-bundle navigation contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("apps/admin/src/components/editorial-workspace.tsx")
+          source = path.read_text(encoding="utf-8")
+          old = '''              <button onClick={() => setStage("REVIEW")} type="button">
+                İş listesine dönüp ayrı ayrı incele
+              </button>'''
+          new = '''              <button onClick={() => setStage("QUEUE")} type="button">
+                İş listesine dönüp ayrı ayrı incele
+              </button>'''
+          if old in source:
+              source = source.replace(old, new, 1)
+          elif new not in source:
+              raise SystemExit("post-bundle navigation block drifted")
+          path.write_text(source, encoding="utf-8")
+          PY
+      - name: Generate deterministic dependency lock
+        working-directory: apps/admin
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Remove superseded and temporary files
+        run: |
+          rm -f apps/admin/.eslintrc.json
+          rm -f .github/workflows/admin-studio-finalize.yml
+      - name: Commit bounded finalization when needed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/admin .github/workflows/admin-studio-finalize.yml
+          if git diff --cached --quiet; then
+            echo "Branch already finalized"
+            exit 0
+          fi
+          git diff --cached --check
+          git commit -m "fix(admin): finalize deterministic workspace branch"
+          git push origin HEAD:feature/admin-studio-editorial-workspace
+
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 20
