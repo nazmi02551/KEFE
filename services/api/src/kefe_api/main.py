@@ -39,6 +39,9 @@ from kefe_api.modules.admin_security.content_configuration import (
 from kefe_api.modules.admin_security.editorial_projection_router import (
     router as admin_editorial_projection_router,
 )
+from kefe_api.modules.admin_security.editorial_quality_review_router import (
+    router as admin_editorial_quality_review_router,
+)
 from kefe_api.modules.admin_security.feed_item_review_router import (
     router as admin_feed_item_review_router,
 )
@@ -298,6 +301,7 @@ def create_app() -> FastAPI:
     app.include_router(progress_router)
     app.include_router(admin_router)
     app.include_router(admin_case_builder_router)
+    app.include_router(admin_editorial_quality_review_router)
     app.include_router(admin_proposal_queue_router)
     if _api_at_least(settings.api_version, 0, 21):
         app.include_router(admin_feed_item_review_router)
