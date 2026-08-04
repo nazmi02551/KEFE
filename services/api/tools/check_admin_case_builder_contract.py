@@ -173,19 +173,14 @@ def main() -> None:
             if not csrf:
                 problems.append("Case Builder PUT is missing same-session CSRF header")
             request_schema_name = _request_schema_name(put)
-            request_properties = set(
-                _schema(openapi, request_schema_name).get("properties", {})
-            )
+            request_properties = set(_schema(openapi, request_schema_name).get("properties", {}))
             leaked = sorted(FORBIDDEN_INPUT_FIELDS & request_properties)
             if leaked:
                 problems.append(
-                    "Case Builder request accepts server/Flow-owned fields: "
-                    + ", ".join(leaked)
+                    "Case Builder request accepts server/Flow-owned fields: " + ", ".join(leaked)
                 )
             response_schema_name = _response_schema_name(put, "200")
-            response_properties = set(
-                _schema(openapi, response_schema_name).get("properties", {})
-            )
+            response_properties = set(_schema(openapi, response_schema_name).get("properties", {}))
             missing = sorted(REQUIRED_RESPONSE_FIELDS - response_properties)
             leaked_response = sorted(FORBIDDEN_RESPONSE_FIELDS & response_properties)
             if missing:
@@ -194,13 +189,14 @@ def main() -> None:
                 )
             if leaked_response:
                 problems.append(
-                    "Case Builder response leaks forbidden fields: "
-                    + ", ".join(leaked_response)
+                    "Case Builder response leaks forbidden fields: " + ", ".join(leaked_response)
                 )
 
     for required_path, method in ((SUBMIT_PATH, "post"), (AUDIT_PATH, "get")):
         if method not in paths.get(required_path, {}):
-            problems.append(f"Required existing lifecycle operation missing: {method.upper()} {required_path}")
+            problems.append(
+                f"Required existing lifecycle operation missing: {method.upper()} {required_path}"
+            )
 
     for command in ("approve", "reject", "publish", "withdraw"):
         forbidden_path = f"{READ_PATH}/{command}"

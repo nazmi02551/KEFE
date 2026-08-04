@@ -171,9 +171,7 @@ def test_postgres_case_builder_round_trip_survives_restart(
 
         second_app = create_app()
         second_editor, second_csrf = _admin_client(second_app, subject_id)
-        loaded = second_editor.get(
-            f"/internal/admin/v1/case-builder/case-versions/{version_id}"
-        )
+        loaded = second_editor.get(f"/internal/admin/v1/case-builder/case-versions/{version_id}")
         assert loaded.status_code == 200
         loaded_body = loaded.json()
         assert loaded_body["flow_template_code"] == "STANDARD_WEIGH"
@@ -198,9 +196,7 @@ def test_postgres_case_builder_round_trip_survives_restart(
 
         third_app = create_app()
         third_editor, third_csrf = _admin_client(third_app, subject_id)
-        reloaded = third_editor.get(
-            f"/internal/admin/v1/case-builder/case-versions/{version_id}"
-        )
+        reloaded = third_editor.get(f"/internal/admin/v1/case-builder/case-versions/{version_id}")
         assert reloaded.status_code == 200
         assert reloaded.json()["title"] == update["title"]
         assert reloaded.json()["country_codes"] == ["TR", "DE"]

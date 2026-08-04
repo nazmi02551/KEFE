@@ -73,9 +73,7 @@ def build_overlay() -> dict[str, object]:
         )
 
     new_path_names = sorted(generated_paths.keys() - before_paths.keys())
-    expected_paths = [
-        "/internal/admin/v1/case-builder/case-versions/{version_id}"
-    ]
+    expected_paths = ["/internal/admin/v1/case-builder/case-versions/{version_id}"]
     if new_path_names != expected_paths:
         raise SystemExit(f"Case Builder overlay path set drifted: {new_path_names}")
 
@@ -100,9 +98,7 @@ def build_overlay() -> dict[str, object]:
         for name in pending:
             schema = generated_schemas.get(name)
             if schema is None:
-                raise SystemExit(
-                    f"Case Builder overlay references missing schema: {name}"
-                )
+                raise SystemExit(f"Case Builder overlay references missing schema: {name}")
             processed.add(name)
             collect(schema)
 
@@ -114,9 +110,7 @@ def build_overlay() -> dict[str, object]:
     return {
         "target_version": "0.19.0",
         "components": {
-            "schemas": {
-                name: generated_schemas[name] for name in sorted(referenced_schema_names)
-            }
+            "schemas": {name: generated_schemas[name] for name in sorted(referenced_schema_names)}
         },
         "paths": {path: generated_paths[path] for path in new_path_names},
     }

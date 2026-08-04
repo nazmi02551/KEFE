@@ -54,9 +54,7 @@ def _create_case(editor: TestClient, csrf: str) -> dict[str, object]:
                                 "stable_code": "primary-question",
                                 "prompt": "Bu durumda en adil karar hangisidir?",
                                 "response_type": "SINGLE_CHOICE",
-                                "response_schema": {
-                                    "options": ["Katılıyorum", "Katılmıyorum"]
-                                },
+                                "response_schema": {"options": ["Katılıyorum", "Katılmıyorum"]},
                             }
                         ],
                     }
@@ -87,9 +85,7 @@ def _enrich_projected_draft(app, version_id: UUID) -> None:
                 locale="en",
                 title="Case Builder fixture",
                 summary="English editorial summary.",
-                question_prompts={
-                    "primary-question": "What is the fairest decision here?"
-                },
+                question_prompts={"primary-question": "What is the fairest decision here?"},
                 option_labels={
                     "primary-question": {
                         "Katılıyorum": "Agree",
@@ -132,20 +128,14 @@ def test_case_builder_requires_editor_and_never_needs_csrf_for_read() -> None:
     created = _create_case(editor, editor_csrf)
     version_id = created["id"]
 
-    missing = TestClient(app).get(
-        f"/internal/admin/v1/case-builder/case-versions/{version_id}"
-    )
+    missing = TestClient(app).get(f"/internal/admin/v1/case-builder/case-versions/{version_id}")
     assert missing.status_code == 401
 
-    denied = reviewer.get(
-        f"/internal/admin/v1/case-builder/case-versions/{version_id}"
-    )
+    denied = reviewer.get(f"/internal/admin/v1/case-builder/case-versions/{version_id}")
     assert denied.status_code == 403
     assert denied.json()["code"] == "ADMIN_CAPABILITY_REQUIRED"
 
-    loaded = editor.get(
-        f"/internal/admin/v1/case-builder/case-versions/{version_id}"
-    )
+    loaded = editor.get(f"/internal/admin/v1/case-builder/case-versions/{version_id}")
     assert loaded.status_code == 200
     assert loaded.json()["state"] == "DRAFT"
 
@@ -158,9 +148,7 @@ def test_case_builder_round_trip_preserves_flow_and_server_owned_review_state() 
     case_id = created["case_id"]
     _enrich_projected_draft(app, version_id)
 
-    loaded = editor.get(
-        f"/internal/admin/v1/case-builder/case-versions/{version_id}"
-    )
+    loaded = editor.get(f"/internal/admin/v1/case-builder/case-versions/{version_id}")
     assert loaded.status_code == 200
     body = loaded.json()
     assert body["flow_template_code"] == "STANDARD_WEIGH"
@@ -221,9 +209,7 @@ def test_case_builder_round_trip_preserves_flow_and_server_owned_review_state() 
 
     audit_before_submit = editor.get(f"/internal/admin/v1/cases/{case_id}/audit")
     assert audit_before_submit.status_code == 200
-    assert [item["command"] for item in audit_before_submit.json()["items"]] == [
-        "create_case"
-    ]
+    assert [item["command"] for item in audit_before_submit.json()["items"]] == ["create_case"]
 
     submitted = editor.post(
         f"/internal/admin/v1/case-versions/{version_id}/submit",
@@ -254,9 +240,7 @@ def test_case_builder_has_no_review_or_publication_mutations() -> None:
         )
         assert response.status_code == 404
 
-    loaded = editor.get(
-        f"/internal/admin/v1/case-builder/case-versions/{version_id}"
-    )
+    loaded = editor.get(f"/internal/admin/v1/case-builder/case-versions/{version_id}")
     rendered = str(loaded.json()).lower()
     for forbidden in (
         "raw_evidence_body",
