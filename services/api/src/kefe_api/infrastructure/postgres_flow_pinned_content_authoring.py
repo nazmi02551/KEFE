@@ -178,10 +178,14 @@ class PostgresFlowPinnedContentAuthoringRepository(
                            created_at, published_at
                     FROM editorial.case_version
                     WHERE lifecycle_state = :state
-                      AND (:content_risk IS NULL OR aggregate->>'content_risk' = :content_risk)
                       AND (
-                        :primary_domain_code IS NULL
-                        OR aggregate->>'primary_domain_code' = :primary_domain_code
+                        CAST(:content_risk AS text) IS NULL
+                        OR aggregate->>'content_risk' = CAST(:content_risk AS text)
+                      )
+                      AND (
+                        CAST(:primary_domain_code AS text) IS NULL
+                        OR aggregate->>'primary_domain_code' =
+                           CAST(:primary_domain_code AS text)
                       )
                     ORDER BY created_at DESC, id DESC
                     LIMIT :limit OFFSET :offset
