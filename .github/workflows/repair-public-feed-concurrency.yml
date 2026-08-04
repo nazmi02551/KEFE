@@ -24,17 +24,21 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
           path = Path(
               'services/api/src/kefe_api/infrastructure/'
               'postgres_canonical_public_feed_catalog.py'
           )
           source = path.read_text(encoding='utf-8')
-          old_definition = '''        except IntegrityError as exc:
-              raise ValueError("public feed definition identity conflict") from exc
-          return definition
-          '''
-          new_definition = '''        except IntegrityError as exc:
+
+          definition_pattern = re.compile(
+              r'(?m)^        except IntegrityError as exc:\n'
+              r'            raise ValueError\('
+              r'"public feed definition identity conflict"\) from exc\n'
+              r'        return definition$'
+          )
+          definition_replacement = '''        except IntegrityError as exc:
               existing = self.get_definition(
                   definition.feed_code,
                   definition.definition_version,
@@ -42,28 +46,41 @@ jobs:
               if existing == definition:
                   return existing
               raise ValueError("public feed definition identity conflict") from exc
-          return definition
-          '''
-          if source.count(old_definition) != 1:
-              raise SystemExit('unexpected definition IntegrityError shape')
-          source = source.replace(old_definition, new_definition, 1)
+          return definition'''
+          source, definition_count = definition_pattern.subn(
+              definition_replacement,
+              source,
+              count=1,
+          )
+          if definition_count != 1:
+              raise SystemExit(
+                  f'unexpected definition IntegrityError shape: {definition_count}'
+              )
 
-          old_activation = '''        except IntegrityError as exc:
-              raise ValueError("public feed activation identity conflict") from exc
-          return activation
-          '''
-          new_activation = '''        except IntegrityError as exc:
+          activation_pattern = re.compile(
+              r'(?m)^        except IntegrityError as exc:\n'
+              r'            raise ValueError\('
+              r'"public feed activation identity conflict"\) from exc\n'
+              r'        return activation$'
+          )
+          activation_replacement = '''        except IntegrityError as exc:
               existing = self.get_activation_for_definition(
                   activation.feed_definition_id
               )
               if existing == activation:
                   return existing
               raise ValueError("public feed activation identity conflict") from exc
-          return activation
-          '''
-          if source.count(old_activation) != 1:
-              raise SystemExit('unexpected activation IntegrityError shape')
-          source = source.replace(old_activation, new_activation, 1)
+          return activation'''
+          source, activation_count = activation_pattern.subn(
+              activation_replacement,
+              source,
+              count=1,
+          )
+          if activation_count != 1:
+              raise SystemExit(
+                  f'unexpected activation IntegrityError shape: {activation_count}'
+              )
+
           path.write_text(source, encoding='utf-8')
           PY
       - name: Normalize and verify
