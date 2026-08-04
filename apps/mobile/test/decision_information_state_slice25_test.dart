@@ -56,9 +56,9 @@ void main() {
     final contextSource = _readPresentationLibrary(
       'lib/features/context/presentation/context_section.dart',
     );
-    final perspectiveSource = File(
+    final perspectiveSource = _readPresentationLibrary(
       'lib/features/decision/presentation/perspective_section.dart',
-    ).readAsStringSync();
+    );
 
     expect(contextSource, isNot(contains('CircularProgressIndicator')));
     expect(perspectiveSource, isNot(contains('CircularProgressIndicator')));
