@@ -23,7 +23,8 @@ def main() -> None:
         "alternative branches must not be merged wholesale",
     )
     require(
-        contract["conflict_resolution"]["canonical_migration_revision"] == "20260804_0026",
+        contract["conflict_resolution"]["canonical_migration_revision"]
+        == "20260804_0026",
         "canonical migration revision drifted",
     )
     require(DOMAIN.is_file(), "canonical catalog domain is missing")
@@ -39,13 +40,13 @@ def main() -> None:
         "SOURCE_MANAGE",
         "SOURCE_APPROVE",
         "SOURCE_ACTIVATE",
-        "capability-first",
         "register_or_get",
         "create_schedule",
-        "NO_AUTOMATIC",
+        "capability_template.instantiate",
+        "definition.configuration_hash",
+        "command.locale",
+        "command.jurisdiction_code",
     ):
-        if marker == "capability-first" or marker == "NO_AUTOMATIC":
-            continue
         require(marker in source, f"domain missing marker {marker}")
     require(
         source.index("self._provider_admission.register")
@@ -53,9 +54,20 @@ def main() -> None:
         "activation must remain capability-first and schedule-second",
     )
     require(
-        "requests." not in source and "httpx." not in source, "domain must not perform network I/O"
+        "requests." not in source and "httpx." not in source,
+        "domain must not perform network I/O",
     )
     require("publish" not in source.lower(), "catalog domain must not publish content")
+
+    for forbidden in (
+        "definition.ingestion_configuration_hash",
+        ".to_public_capability(",
+        "command.context",
+    ):
+        require(
+            forbidden not in source,
+            f"legacy candidate API entered canonical domain: {forbidden}",
+        )
 
     migration_names = {path.name for path in MIGRATIONS.glob("*.py")}
     require(
