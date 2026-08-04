@@ -18,6 +18,10 @@ BEFORE_QUEUE_OVERLAYS = (
     CONTRACTS / "openapi-mvp.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-projection.v0.19.overlay.json",
 )
+QUEUE_PATHS = (
+    "/internal/admin/v1/proposals",
+    "/internal/admin/v1/proposals/{proposal_id}",
+)
 
 
 def _load_before_queue_contract() -> dict[str, object]:
@@ -77,12 +81,49 @@ def build_overlay() -> dict[str, object]:
             f"changed={changed_paths}, removed={removed_paths}"
         )
 
-    new_schema_names = sorted(generated_schemas.keys() - before_schemas.keys())
-    new_path_names = sorted(generated_paths.keys() - before_paths.keys())
+    missing_queue_paths = sorted(path for path in QUEUE_PATHS if path not in generated_paths)
+    if missing_queue_paths:
+        raise SystemExit(f"Admin Proposal queue paths missing: {missing_queue_paths}")
+    if any(path in before_paths for path in QUEUE_PATHS):
+        raise SystemExit("Admin Proposal queue paths already collide with the pre-queue contract")
+
+    referenced_schema_names: set[str] = set()
+
+    def collect(value: object) -> None:
+        if isinstance(value, dict):
+            ref = value.get("$ref")
+            if isinstance(ref, str) and ref.startswith("#/components/schemas/"):
+                referenced_schema_names.add(ref.rsplit("/", 1)[-1])
+            for item in value.values():
+                collect(item)
+        elif isinstance(value, list):
+            for item in value:
+                collect(item)
+
+    for path in QUEUE_PATHS:
+        collect(generated_paths[path])
+
+    processed: set[str] = set()
+    while pending := sorted(referenced_schema_names - processed):
+        for name in pending:
+            schema = generated_schemas.get(name)
+            if schema is None:
+                raise SystemExit(
+                    f"Admin Proposal queue overlay references missing schema: {name}"
+                )
+            processed.add(name)
+            collect(schema)
+
+    new_schema_names = set(generated_schemas.keys()) - set(before_schemas.keys())
+    additive_schema_names = sorted(referenced_schema_names & new_schema_names)
     return {
         "target_version": "0.19.0",
-        "components": {"schemas": {name: generated_schemas[name] for name in new_schema_names}},
-        "paths": {path: generated_paths[path] for path in new_path_names},
+        "components": {
+            "schemas": {
+                name: generated_schemas[name] for name in additive_schema_names
+            }
+        },
+        "paths": {path: generated_paths[path] for path in QUEUE_PATHS},
     }
 
 
