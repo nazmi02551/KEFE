@@ -224,10 +224,7 @@ void main() {
       expect(find.byKey(const ValueKey('my-kefe-progress')), findsNothing);
       expect(find.byKey(const ValueKey('share-section')), findsNothing);
 
-      await tapVisible(
-        tester,
-        find.byKey(const ValueKey('post-commit-next')),
-      );
+      await tapVisible(tester, find.byKey(const ValueKey('post-commit-next')));
       expect(find.byKey(const ValueKey('perspective-section')), findsOneWidget);
       expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
       expect(find.byKey(const ValueKey('consensus-section')), findsNothing);
@@ -235,20 +232,14 @@ void main() {
       expect(repository.commitCalls, 1);
       expect(repository.perspectiveCalls, 1);
 
-      await tapVisible(
-        tester,
-        find.byKey(const ValueKey('post-commit-next')),
-      );
+      await tapVisible(tester, find.byKey(const ValueKey('post-commit-next')));
       await expectReachable(tester, const ValueKey('consensus-section'));
       await expectReachable(tester, const ValueKey('community-reason-section'));
       expect(find.byKey(const ValueKey('perspective-section')), findsNothing);
       expect(find.byKey(const ValueKey('my-kefe-progress')), findsNothing);
       expect(find.byKey(const ValueKey('share-section')), findsNothing);
 
-      await tapVisible(
-        tester,
-        find.byKey(const ValueKey('post-commit-next')),
-      );
+      await tapVisible(tester, find.byKey(const ValueKey('post-commit-next')));
       await expectReachable(tester, const ValueKey('my-kefe-progress'));
       await expectReachable(tester, const ValueKey('share-section'));
       expect(find.byKey(const ValueKey('consensus-section')), findsNothing);
@@ -257,10 +248,7 @@ void main() {
         findsNothing,
       );
 
-      await tapVisible(
-        tester,
-        find.byKey(const ValueKey('post-commit-back')),
-      );
+      await tapVisible(tester, find.byKey(const ValueKey('post-commit-back')));
       expect(find.byKey(const ValueKey('consensus-section')), findsOneWidget);
       expect(repository.commitCalls, 1);
       expect(repository.perspectiveCalls, 1);

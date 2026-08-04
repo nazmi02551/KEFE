@@ -144,9 +144,7 @@ class _ActiveFlowStep extends ConsumerWidget {
       sessionId: state.sessionId!,
       caseVersionId: state.caseData!.versionId,
       completionAction: firstUse
-          ? _JourneyFirstUseCompletion(
-              onContinue: () => context.go('/explore'),
-            )
+          ? _JourneyFirstUseCompletion(onContinue: () => context.go('/explore'))
           : null,
     );
   }

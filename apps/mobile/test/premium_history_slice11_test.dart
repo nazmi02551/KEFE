@@ -104,10 +104,12 @@ void main() {
             const ValueKey('my-kefe-recent-journeys'),
           );
           await tester.ensureVisible(recentJourneys);
-          final firstJourney = find.descendant(
-            of: recentJourneys,
-            matching: find.byType(ExpansionTile),
-          ).first;
+          final firstJourney = find
+              .descendant(
+                of: recentJourneys,
+                matching: find.byType(ExpansionTile),
+              )
+              .first;
           await tester.tap(firstJourney);
           await tester.pumpAndSettle();
           expect(

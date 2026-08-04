@@ -49,11 +49,10 @@ extension ContextJourneyStrings on KefeStrings {
     placeholders: placeholders,
   );
 
-  String contextJourneyProgress(int current, int total) =>
-      _contextJourneyText(
-        'progress',
-        placeholders: {'current': current, 'total': total},
-      );
+  String contextJourneyProgress(int current, int total) => _contextJourneyText(
+    'progress',
+    placeholders: {'current': current, 'total': total},
+  );
 
   String contextJourneyTitle(ContextJourneyLayer layer) =>
       _contextJourneyText('${layer.name}.title');

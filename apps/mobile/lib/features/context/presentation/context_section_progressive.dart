@@ -160,11 +160,7 @@ class _ProgressiveContextContentState
     final content = ref.watch(kefeContentLocalizerProvider);
     final counts = <String, int>{};
     for (final block in widget.snapshot.blocks) {
-      counts.update(
-        block.claimStatus,
-        (value) => value + 1,
-        ifAbsent: () => 1,
-      );
+      counts.update(block.claimStatus, (value) => value + 1, ifAbsent: () => 1);
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
