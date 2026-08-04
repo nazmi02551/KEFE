@@ -1,5 +1,5 @@
 {
-  "contract_version": "1.0.0",
+  "contract_version": "1.0.1",
   "status": "accepted_for_execution",
   "date": "2026-08-04",
   "source_issue": 287,
@@ -95,15 +95,25 @@
       "REAL_PROVIDER_ACTIVATION",
       "SIGNAL_IMPACT",
       "STORE_RELEASE"
+    ],
+    "required_exact_head_workflows": [
+      "API_CI",
+      "MOBILE_CI",
+      "MVP_BETA_GATES",
+      "GLOBAL_READINESS"
     ]
   },
-  "required_evidence": [
+  "governance_checkpoint_required_evidence": [
     "CONVERGENCE_VALIDATOR_PASS",
     "CAPABILITY_PORTFOLIO_VALIDATOR_PASS",
+    "FOUNDATION_COMPLETION_VALIDATOR_PASS",
     "API_CI_EXACT_SHA_PASS",
-    "MOBILE_CI_EXACT_SHA_PASS",
-    "MVP_BETA_GATES_EXACT_SHA_PASS",
-    "GLOBAL_READINESS_EXACT_SHA_PASS"
+    "MVP_BETA_GATES_EXACT_SHA_PASS_WITH_MOBILE_REGRESSION_AND_POSTGRES_CONTINUITY"
+  ],
+  "governance_checkpoint_non_requirements": [
+    "SEPARATE_MOBILE_CI_WHEN_NO_MOBILE_PATH_CHANGED",
+    "SEPARATE_GLOBAL_READINESS_WHEN_NO_GLOBAL_RUNTIME_PATH_CHANGED",
+    "NEW_APK_WHEN_NO_PHONE_RUNTIME_CHANGED"
   ],
   "claims_not_proven_by_automation": [
     "HUMAN_USABILITY",
