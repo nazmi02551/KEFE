@@ -24,11 +24,11 @@ router = APIRouter(
 )
 
 
-class StrictModel(BaseModel):
+class FlowComposerStrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class FlowStepInput(StrictModel):
+class FlowComposerStepInput(FlowComposerStrictModel):
     code: str = Field(min_length=1, max_length=120)
     primitive_code: str = Field(min_length=1, max_length=120)
     capability_codes: list[str] = Field(default_factory=list, max_length=100)
@@ -45,12 +45,12 @@ class FlowStepInput(StrictModel):
         )
 
 
-class FlowTemplateInput(StrictModel):
+class FlowComposerTemplateInput(FlowComposerStrictModel):
     code: str = Field(min_length=1, max_length=120)
     version_no: int = Field(gt=0, le=1_000_000)
     label_key: str = Field(min_length=1, max_length=240)
     entry_step_code: str = Field(min_length=1, max_length=120)
-    steps: list[FlowStepInput] = Field(min_length=1, max_length=200)
+    steps: list[FlowComposerStepInput] = Field(min_length=1, max_length=200)
     enabled: bool = True
 
     def to_domain(self) -> FlowTemplateDefinition:
@@ -64,18 +64,18 @@ class FlowTemplateInput(StrictModel):
         )
 
 
-class FlowTemplatesInput(StrictModel):
-    flow_templates: list[FlowTemplateInput] = Field(max_length=200)
+class FlowComposerTemplatesInput(FlowComposerStrictModel):
+    flow_templates: list[FlowComposerTemplateInput] = Field(max_length=200)
 
 
-class PrimitiveResponse(StrictModel):
+class FlowComposerPrimitiveResponse(FlowComposerStrictModel):
     code: str
     label_key: str
     payload_schema_ref: str | None
     enabled: bool
 
 
-class CapabilityResponse(StrictModel):
+class FlowComposerCapabilityResponse(FlowComposerStrictModel):
     code: str
     label_key: str
     compatible_primitive_codes: list[str]
@@ -83,7 +83,7 @@ class CapabilityResponse(StrictModel):
     enabled: bool
 
 
-class FlowStepResponse(StrictModel):
+class FlowComposerStepResponse(FlowComposerStrictModel):
     code: str
     primitive_code: str
     capability_codes: list[str]
@@ -91,28 +91,28 @@ class FlowStepResponse(StrictModel):
     payload_schema_ref: str | None
 
 
-class FlowTemplateResponse(StrictModel):
+class FlowComposerTemplateResponse(FlowComposerStrictModel):
     code: str
     version_no: int
     label_key: str
     entry_step_code: str
-    steps: list[FlowStepResponse]
+    steps: list[FlowComposerStepResponse]
     enabled: bool
 
 
-class FlowComposerVersionResponse(StrictModel):
+class FlowComposerVersionResponse(FlowComposerStrictModel):
     id: UUID
     version_no: int
     state: str
-    primitives: list[PrimitiveResponse]
-    capabilities: list[CapabilityResponse]
-    flow_templates: list[FlowTemplateResponse]
+    primitives: list[FlowComposerPrimitiveResponse]
+    capabilities: list[FlowComposerCapabilityResponse]
+    flow_templates: list[FlowComposerTemplateResponse]
     created_at: datetime
     published_at: datetime | None
     cloned_from_version_id: UUID | None
 
 
-class ConfigurationAuditEntryResponse(StrictModel):
+class FlowComposerAuditEntryResponse(FlowComposerStrictModel):
     audit_id: UUID
     config_version_id: UUID
     actor_ref: str
@@ -123,8 +123,8 @@ class ConfigurationAuditEntryResponse(StrictModel):
     occurred_at: datetime
 
 
-class ConfigurationAuditTrailResponse(StrictModel):
-    items: list[ConfigurationAuditEntryResponse]
+class FlowComposerAuditTrailResponse(FlowComposerStrictModel):
+    items: list[FlowComposerAuditEntryResponse]
 
 
 def get_configuration(request: Request) -> SecuredContentConfigurationService:
@@ -167,7 +167,7 @@ def get_version(
 )
 def save_flow_templates(
     version_id: UUID,
-    body: FlowTemplatesInput,
+    body: FlowComposerTemplatesInput,
     principal: WritePrincipalDep,
     configuration: ConfigurationDep,
 ) -> FlowComposerVersionResponse:
@@ -182,14 +182,14 @@ def save_flow_templates(
 
 @router.get(
     "/configuration-versions/{version_id}/audit",
-    response_model=ConfigurationAuditTrailResponse,
+    response_model=FlowComposerAuditTrailResponse,
 )
 def audit(
     version_id: UUID,
     principal: ReadPrincipalDep,
     configuration: ConfigurationDep,
-) -> ConfigurationAuditTrailResponse:
-    return ConfigurationAuditTrailResponse(
+) -> FlowComposerAuditTrailResponse:
+    return FlowComposerAuditTrailResponse(
         items=[
             _audit_response(item)
             for item in configuration.audit_for_version(principal, version_id)
@@ -205,7 +205,7 @@ def _version_response(
         version_no=snapshot.version_no,
         state=snapshot.state.value,
         primitives=[
-            PrimitiveResponse(
+            FlowComposerPrimitiveResponse(
                 code=item.code,
                 label_key=item.label_key,
                 payload_schema_ref=item.payload_schema_ref,
@@ -214,7 +214,7 @@ def _version_response(
             for item in snapshot.primitives
         ],
         capabilities=[
-            CapabilityResponse(
+            FlowComposerCapabilityResponse(
                 code=item.code,
                 label_key=item.label_key,
                 compatible_primitive_codes=sorted(item.compatible_primitive_codes),
@@ -224,13 +224,13 @@ def _version_response(
             for item in snapshot.capabilities
         ],
         flow_templates=[
-            FlowTemplateResponse(
+            FlowComposerTemplateResponse(
                 code=flow.code,
                 version_no=flow.version_no,
                 label_key=flow.label_key,
                 entry_step_code=flow.entry_step_code,
                 steps=[
-                    FlowStepResponse(
+                    FlowComposerStepResponse(
                         code=step.code,
                         primitive_code=step.primitive_code,
                         capability_codes=list(step.capability_codes),
@@ -251,8 +251,8 @@ def _version_response(
 
 def _audit_response(
     entry: ContentConfigurationAuditEntry,
-) -> ConfigurationAuditEntryResponse:
-    return ConfigurationAuditEntryResponse(
+) -> FlowComposerAuditEntryResponse:
+    return FlowComposerAuditEntryResponse(
         audit_id=entry.audit_id,
         config_version_id=entry.config_version_id,
         actor_ref=entry.actor_ref,
