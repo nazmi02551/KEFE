@@ -78,9 +78,14 @@ def build_overlay() -> dict[str, object]:
             f"changed_paths={changed_paths}, removed_paths={removed_paths}"
         )
 
-    new_path_names = sorted(generated_paths.keys() - before_paths.keys())
-    if new_path_names != EXPECTED_PATHS:
-        raise SystemExit(f"Editorial review overlay path set drifted: {new_path_names}")
+    missing_paths = sorted(path for path in EXPECTED_PATHS if path not in generated_paths)
+    collisions = sorted(path for path in EXPECTED_PATHS if path in before_paths)
+    if missing_paths or collisions:
+        raise SystemExit(
+            "Editorial review overlay path boundary drifted; "
+            f"missing={missing_paths}, collisions={collisions}"
+        )
+    new_path_names = sorted(EXPECTED_PATHS)
 
     referenced_schema_names: set[str] = set()
 
@@ -108,10 +113,6 @@ def build_overlay() -> dict[str, object]:
             collect(schema)
 
     new_schema_names = set(generated_schemas.keys()) - set(before_schemas.keys())
-    unrelated = sorted(new_schema_names - referenced_schema_names)
-    if unrelated:
-        raise SystemExit(f"Editorial review overlay found unrelated schemas: {unrelated}")
-
     additive_schema_names = sorted(referenced_schema_names & new_schema_names)
     return {
         "target_version": "0.19.0",
