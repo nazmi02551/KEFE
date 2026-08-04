@@ -50,7 +50,7 @@
 .detailPanel,
 .actionCard,
 .auditSection {
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   border-radius: 1rem;
   background: var(--surface);
   box-shadow: 0 18px 60px rgb(0 0 0 / 12%);
@@ -62,7 +62,7 @@
 }
 
 .boundary strong {
-  color: var(--foreground);
+  color: var(--text);
 }
 
 .connection,
@@ -102,36 +102,36 @@
 .exactLoader input,
 .actionCard textarea {
   width: 100%;
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   border-radius: 0.72rem;
-  background: var(--surface-raised);
-  color: var(--foreground);
+  background: var(--surface-strong);
+  color: var(--text);
   padding: 0.72rem 0.8rem;
   font: inherit;
 }
 
-button {
-  border: 1px solid var(--border);
+.shell button {
+  border: 1px solid var(--line);
   border-radius: 0.72rem;
-  background: var(--surface-raised);
-  color: var(--foreground);
+  background: var(--surface-strong);
+  color: var(--text);
   padding: 0.72rem 0.9rem;
   font: inherit;
   font-weight: 750;
   cursor: pointer;
 }
 
-button:disabled {
+.shell button:disabled {
   cursor: not-allowed;
   opacity: 0.48;
 }
 
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible,
-summary:focus-visible,
-a:focus-visible {
+.shell button:focus-visible,
+.shell input:focus-visible,
+.shell select:focus-visible,
+.shell textarea:focus-visible,
+.shell summary:focus-visible,
+.shell a:focus-visible {
   outline: 3px solid var(--cyan);
   outline-offset: 2px;
 }
@@ -170,7 +170,7 @@ a:focus-visible {
 
 .panelHeader {
   padding: 1rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--line);
 }
 
 .panelHeader span {
@@ -211,7 +211,7 @@ a:focus-visible {
   grid-template-columns: 1fr 1fr;
   gap: 0.6rem;
   padding: 0.8rem;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--line);
 }
 
 .empty {
@@ -236,9 +236,9 @@ a:focus-visible {
   gap: 1rem;
   margin-top: 1.2rem;
   padding: 1.1rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   border-radius: 0.9rem;
-  background: var(--surface-raised);
+  background: var(--surface-strong);
 }
 
 .detailHeader dl {
@@ -251,7 +251,7 @@ a:focus-visible {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--line);
   padding-bottom: 0.4rem;
 }
 
@@ -274,10 +274,10 @@ a:focus-visible {
 
 .auditContext article {
   min-width: 0;
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   border-radius: 0.85rem;
   padding: 0.9rem;
-  background: var(--surface-raised);
+  background: var(--surface-strong);
 }
 
 .auditContext p,
@@ -285,7 +285,7 @@ a:focus-visible {
   color: var(--muted);
 }
 
-pre {
+.shell pre {
   max-width: 100%;
   overflow: auto;
   white-space: pre-wrap;
@@ -297,7 +297,7 @@ pre {
 
 .rawDetail {
   margin-top: 0.8rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   border-radius: 0.85rem;
   padding: 0.9rem;
 }
@@ -321,13 +321,13 @@ pre {
 }
 
 .preflightOk {
-  border: 1px solid color-mix(in srgb, var(--cyan) 70%, var(--border));
-  background: color-mix(in srgb, var(--cyan) 9%, var(--surface-raised));
+  border: 1px solid color-mix(in srgb, var(--cyan) 70%, var(--line));
+  background: color-mix(in srgb, var(--cyan) 9%, var(--surface-strong));
 }
 
 .preflightBlocked {
-  border: 1px solid color-mix(in srgb, var(--danger) 70%, var(--border));
-  background: color-mix(in srgb, var(--danger) 9%, var(--surface-raised));
+  border: 1px solid color-mix(in srgb, var(--danger) 70%, var(--line));
+  background: color-mix(in srgb, var(--danger) 9%, var(--surface-strong));
 }
 
 .preflightOk p,
@@ -356,12 +356,12 @@ pre {
 
 .publishButton {
   border-color: var(--gold);
-  background: color-mix(in srgb, var(--gold) 18%, var(--surface-raised));
+  background: color-mix(in srgb, var(--gold) 18%, var(--surface-strong));
 }
 
 .withdrawButton {
   border-color: var(--danger);
-  background: color-mix(in srgb, var(--danger) 14%, var(--surface-raised));
+  background: color-mix(in srgb, var(--danger) 14%, var(--surface-strong));
 }
 
 .auditSection article {
@@ -370,7 +370,7 @@ pre {
   gap: 0.6rem;
   align-items: baseline;
   margin-top: 0.65rem;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--line);
   padding-top: 0.65rem;
 }
 
@@ -387,7 +387,7 @@ pre {
 
 .emptyDetail {
   margin-top: 1rem;
-  border: 1px dashed var(--border);
+  border: 1px dashed var(--line);
   border-radius: 0.9rem;
   padding: 2rem;
   text-align: center;
@@ -397,12 +397,12 @@ pre {
   position: sticky;
   bottom: 1rem;
   margin: 1rem 0 0;
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   border-radius: 0.8rem;
   background: color-mix(in srgb, var(--surface) 93%, transparent);
   backdrop-filter: blur(12px);
   padding: 0.8rem 1rem;
-  color: var(--foreground);
+  color: var(--text);
 }
 
 @media (max-width: 980px) {
@@ -451,7 +451,7 @@ pre {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
+  .shell * {
     scroll-behavior: auto !important;
     transition: none !important;
   }
