@@ -65,7 +65,6 @@ def _definition(feed_code: str, version: int) -> CanonicalPublicFeedDefinition:
 def test_postgres_catalog_is_durable_idempotent_and_append_only() -> None:
     database_url = os.environ["KEFE_DATABASE_URL"]
     engine = create_engine(database_url)
-    repository = PostgresCanonicalPublicFeedCatalogRepository(engine)
     feed_code = f"postgres-{uuid4().hex[:12]}"
     draft = _definition(feed_code, 1)
 
@@ -89,7 +88,10 @@ def test_postgres_catalog_is_durable_idempotent_and_append_only() -> None:
     assert restarted.replace_definition(preflighted) == preflighted
     approved = preflighted.approve(actor_ref="admin:approver", at=NOW)
     assert restarted.replace_definition(approved) == approved
-    assert restarted.get_definition(feed_code, 1).state is PublicFeedCatalogState.APPROVED
+    assert (
+        restarted.get_definition(feed_code, 1).state
+        is PublicFeedCatalogState.APPROVED
+    )
 
     activation = PublicFeedActivationProjection.create(
         definition=approved,
