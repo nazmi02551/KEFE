@@ -16,6 +16,10 @@ POLICY = ROOT / "services/api/src/kefe_api/modules/admin_security/policy.py"
 MAIN = ROOT / "services/api/src/kefe_api/main.py"
 ERRORS = ROOT / "docs/contracts/error-codes.canonical-candidate-bundle.v1.yaml"
 MEMORY_TEST = ROOT / "services/api/tests/test_canonical_candidate_bundle_projection_http.py"
+POSTGRES_TEST = (
+    ROOT
+    / "services/api/tests/test_canonical_candidate_bundle_projection_http_postgres.py"
+)
 
 
 def require(condition: bool, message: str) -> None:
@@ -53,6 +57,7 @@ def main() -> None:
         (MAIN, "application composition"),
         (ERRORS, "candidate bundle error registry"),
         (MEMORY_TEST, "candidate bundle memory test"),
+        (POSTGRES_TEST, "candidate bundle PostgreSQL restart test"),
     ):
         require(path.is_file(), f"{label} is missing")
 
@@ -157,6 +162,18 @@ def main() -> None:
         'assert replay.json()["replayed"] is True',
     ):
         require(marker in test_source, f"memory evidence missing {marker}")
+
+    postgres_test_source = POSTGRES_TEST.read_text(encoding="utf-8")
+    for marker in (
+        "test_postgres_candidate_bundle_and_projection_survive_restarts",
+        "second_app = create_app()",
+        "third_app = create_app()",
+        "IngestionRunState.SUCCEEDED",
+        "EDITORIAL_PROJECTION_DEPENDENCY_NOT_READY",
+        "ContentLifecycle.DRAFT",
+        "persisted_projection.id == projection_id",
+    ):
+        require(marker in postgres_test_source, f"PostgreSQL evidence missing {marker}")
 
     print("canonical candidate bundle architecture PASS")
 
