@@ -38,6 +38,17 @@ class SourceBriefPage(StrictModel):
     next_cursor: str | None
 
 
+class SourceBriefReviewDecision(StrictModel):
+    proposal_review_decision_id: UUID
+    decision: str
+    reviewer_ref: str
+    decided_at: datetime
+    rationale: str | None
+    reason_code: str | None
+    policy_version: str | None
+    risk_policy_version: str | None
+
+
 class SourceBriefDetail(SourceBriefSummary):
     parent_feed_item_proposal_id: UUID
     parent_feed_item_review_decision_id: UUID
@@ -52,6 +63,7 @@ class SourceBriefDetail(SourceBriefSummary):
     pipeline_code: str
     pipeline_version: str
     configuration_version: str
+    review: SourceBriefReviewDecision | None
 
 
 def get_source_brief_review(request: Request) -> SecuredSourceBriefReviewService:
@@ -102,7 +114,20 @@ def source_brief_detail(
     record = service.detail(principal, proposal_id)
     proposal = record.queue_record.proposal
     run = record.queue_record.run
+    decision = record.queue_record.review
     assert proposal.configuration_version is not None
+    review_response = None
+    if decision is not None:
+        review_response = SourceBriefReviewDecision(
+            proposal_review_decision_id=decision.id,
+            decision=decision.decision.value,
+            reviewer_ref=decision.reviewer_ref,
+            decided_at=decision.decided_at,
+            rationale=decision.rationale,
+            reason_code=decision.reason_code,
+            policy_version=decision.policy_version,
+            risk_policy_version=decision.risk_policy_version,
+        )
     return SourceBriefDetail(
         **_summary(record).model_dump(),
         parent_feed_item_proposal_id=record.payload.parent_feed_item_proposal_id,
@@ -118,6 +143,7 @@ def source_brief_detail(
         pipeline_code=run.pipeline_code,
         pipeline_version=run.pipeline_version,
         configuration_version=proposal.configuration_version,
+        review=review_response,
     )
 
 
