@@ -46,6 +46,7 @@ jobs:
           ruff check
           src/kefe_api/modules/admin_security/editorial_quality_review_router.py
           src/kefe_api/modules/admin_security/content_authoring.py
+          src/kefe_api/modules/content_authoring/service.py
           src/kefe_api/modules/content_authoring/ports.py
           src/kefe_api/modules/content_authoring/in_memory.py
           src/kefe_api/infrastructure/postgres_flow_pinned_content_authoring.py
