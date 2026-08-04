@@ -23,30 +23,38 @@ jobs:
       - name: Add API 0.25 router composition
         run: |
           python - <<'PY'
+          import re
           from pathlib import Path
 
           path = Path('services/api/src/kefe_api/main.py')
           source = path.read_text(encoding='utf-8')
-          import_marker = '''from kefe_api.modules.admin_security.canonical_public_feed_router import (
-              router as admin_canonical_public_feed_router,
+          import_marker = (
+              'from kefe_api.modules.admin_security.canonical_public_feed_router import (\n'
+              '    router as admin_canonical_public_feed_router,\n'
+              ')\n'
           )
-          '''
-          import_block = import_marker + '''from kefe_api.modules.admin_security.candidate_bundle_router import (
-              router as admin_candidate_bundle_router,
+          import_block = import_marker + (
+              'from kefe_api.modules.admin_security.candidate_bundle_router import (\n'
+              '    router as admin_candidate_bundle_router,\n'
+              ')\n'
           )
-          '''
           if source.count(import_marker) != 1:
               raise SystemExit('unexpected Admin router import marker')
           source = source.replace(import_marker, import_block, 1)
-          route_marker = '''    if _api_at_least(settings.api_version, 0, 24):
-              app.include_router(admin_canonical_public_feed_router)
-          '''
-          route_block = route_marker + '''    if _api_at_least(settings.api_version, 0, 25):
-              app.include_router(admin_candidate_bundle_router)
-          '''
-          if source.count(route_marker) != 1:
+          pattern = re.compile(
+              r'    if _api_at_least\(settings\.api_version, 0, 24\):\n'
+              r'        app\.include_router\(admin_canonical_public_feed_router\)\n'
+          )
+          replacement = (
+              '    if _api_at_least(settings.api_version, 0, 24):\n'
+              '        app.include_router(admin_canonical_public_feed_router)\n'
+              '    if _api_at_least(settings.api_version, 0, 25):\n'
+              '        app.include_router(admin_candidate_bundle_router)\n'
+          )
+          source, count = pattern.subn(replacement, source, count=1)
+          if count != 1:
               raise SystemExit('unexpected API 0.24 route marker')
-          path.write_text(source.replace(route_marker, route_block, 1), encoding='utf-8')
+          path.write_text(source, encoding='utf-8')
           PY
       - name: Normalize and verify
         working-directory: services/api
