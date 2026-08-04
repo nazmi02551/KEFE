@@ -1,0 +1,83 @@
+name: Repair Public Feed Concurrency
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/repair-public-feed-concurrency.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Re-read exact identities after unique races
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path(
+              'services/api/src/kefe_api/infrastructure/'
+              'postgres_canonical_public_feed_catalog.py'
+          )
+          source = path.read_text(encoding='utf-8')
+          old_definition = '''        except IntegrityError as exc:
+              raise ValueError("public feed definition identity conflict") from exc
+          return definition
+          '''
+          new_definition = '''        except IntegrityError as exc:
+              existing = self.get_definition(
+                  definition.feed_code,
+                  definition.definition_version,
+              )
+              if existing == definition:
+                  return existing
+              raise ValueError("public feed definition identity conflict") from exc
+          return definition
+          '''
+          if source.count(old_definition) != 1:
+              raise SystemExit('unexpected definition IntegrityError shape')
+          source = source.replace(old_definition, new_definition, 1)
+
+          old_activation = '''        except IntegrityError as exc:
+              raise ValueError("public feed activation identity conflict") from exc
+          return activation
+          '''
+          new_activation = '''        except IntegrityError as exc:
+              existing = self.get_activation_for_definition(
+                  activation.feed_definition_id
+              )
+              if existing == activation:
+                  return existing
+              raise ValueError("public feed activation identity conflict") from exc
+          return activation
+          '''
+          if source.count(old_activation) != 1:
+              raise SystemExit('unexpected activation IntegrityError shape')
+          source = source.replace(old_activation, new_activation, 1)
+          path.write_text(source, encoding='utf-8')
+          PY
+      - name: Normalize and verify
+        working-directory: services/api
+        run: |
+          python -m pip install -q ruff==0.11.10
+          ruff format src/kefe_api/infrastructure/postgres_canonical_public_feed_catalog.py
+          ruff check src/kefe_api/infrastructure/postgres_canonical_public_feed_catalog.py
+          python -m py_compile src/kefe_api/infrastructure/postgres_canonical_public_feed_catalog.py
+      - name: Remove repair workflow and commit
+        run: |
+          git rm -f .github/workflows/repair-public-feed-concurrency.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add services/api/src/kefe_api/infrastructure/postgres_canonical_public_feed_catalog.py
+          git commit -m 'fix: make canonical public-feed concurrent replay idempotent'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
