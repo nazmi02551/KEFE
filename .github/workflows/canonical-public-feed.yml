@@ -1,0 +1,56 @@
+name: Canonical Public Feed
+
+on:
+  pull_request:
+    paths:
+      - 'services/api/src/kefe_api/modules/admin_security/models.py'
+      - 'services/api/src/kefe_api/modules/admin_security/policy.py'
+      - 'services/api/src/kefe_api/modules/admin_security/service.py'
+      - 'services/api/src/kefe_api/modules/knowledge/public_feed_runtime.py'
+      - 'services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py'
+      - 'services/api/tests/test_canonical_public_feed_catalog.py'
+      - 'services/api/tools/check_canonical_public_feed_catalog.py'
+      - 'docs/adr/0098-canonical-public-feed-catalog-activation.md'
+      - 'docs/contracts/canonical-public-feed-catalog-activation.v1.json'
+      - 'docs/contracts/error-codes.canonical-public-feed.v1.yaml'
+      - '.github/workflows/canonical-public-feed.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/api/src/kefe_api/modules/admin_security/**'
+      - 'services/api/src/kefe_api/modules/knowledge/public_feed_runtime.py'
+      - 'services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py'
+      - 'services/api/tests/test_canonical_public_feed_catalog.py'
+      - 'services/api/tools/check_canonical_public_feed_catalog.py'
+      - 'docs/adr/0098-canonical-public-feed-catalog-activation.md'
+      - 'docs/contracts/canonical-public-feed-catalog-activation.v1.json'
+      - '.github/workflows/canonical-public-feed.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  memory-domain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Ruff
+        working-directory: services/api
+        run: ruff check .
+      - name: Architecture contract
+        working-directory: services/api
+        run: python tools/check_canonical_public_feed_catalog.py
+      - name: Canonical public-feed lifecycle
+        working-directory: services/api
+        run: pytest -q tests/test_canonical_public_feed_catalog.py
