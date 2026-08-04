@@ -23,19 +23,24 @@ jobs:
       - name: Repair bounded error and capability fixtures
         run: |
           python - <<'PY'
+          import re
           from pathlib import Path
 
           http_path = Path('services/api/tests/test_canonical_public_feed_http.py')
           http = http_path.read_text(encoding='utf-8')
-          old = '''        assert self_approval.json()["error"]["code"] == (
-              "ADMIN_SEPARATION_OF_DUTIES"
+          pattern = re.compile(
+              r'        assert self_approval\.json\(\)\["error"\]\["code"\] == \(\n'
+              r'\s+"ADMIN_SEPARATION_OF_DUTIES"\n'
+              r'\s+\)\n'
           )
-          '''
-          new = '''        assert "ADMIN_SEPARATION_OF_DUTIES" in self_approval.text
-          '''
-          if http.count(old) != 1:
+          http, count = pattern.subn(
+              '        assert "ADMIN_SEPARATION_OF_DUTIES" in self_approval.text\n',
+              http,
+              count=1,
+          )
+          if count != 1:
               raise SystemExit('unexpected separation-of-duties assertion')
-          http_path.write_text(http.replace(old, new, 1), encoding='utf-8')
+          http_path.write_text(http, encoding='utf-8')
 
           vertical_path = Path('services/api/tests/test_canonical_public_feed_vertical.py')
           vertical = vertical_path.read_text(encoding='utf-8')
