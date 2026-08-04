@@ -2,8 +2,7 @@
 """Validate KEFE's canonical delivery-line convergence records.
 
 The validator is deliberately network-free. It verifies repository-owned facts and
-cross-file consistency; it does not claim that a recorded remote PR or workflow is
-still open or green. Live GitHub state must still be read before merge.
+cross-file consistency; live GitHub state must still be read before merge.
 """
 
 from __future__ import annotations
@@ -101,6 +100,10 @@ def main() -> int:
     if allowed_states != required_states:
         errors.append(f"unexpected allowed line states: {sorted(allowed_states)}")
 
+    allowed_modes = set(contract.get("allowed_next_integration_modes") or [])
+    if allowed_modes != {"RUNTIME_ADOPTION", "CONFLICT_RESOLUTION"}:
+        errors.append(f"unexpected next integration modes: {sorted(allowed_modes)}")
+
     contract_caps = contract.get("capabilities") or []
     if not isinstance(contract_caps, list) or not contract_caps:
         errors.append("convergence contract must list capabilities")
@@ -165,8 +168,11 @@ def main() -> int:
         evidence = raw_line.get("evidence_state")
         if not isinstance(evidence, str) or not evidence:
             errors.append(f"{line_id}: evidence_state must be non-empty")
-        if state in {"CANDIDATE", "ALTERNATIVE"} and "CANDIDATE" not in evidence and "ALTERNATIVE" not in evidence:
-            errors.append(f"{line_id}: candidate/alternative evidence must remain explicitly bounded")
+        if state in {"CANDIDATE", "ALTERNATIVE"}:
+            if "CANDIDATE" not in evidence and "ALTERNATIVE" not in evidence:
+                errors.append(f"{line_id}: candidate/alternative evidence must remain bounded")
+        if state == "SUPERSEDED" and not raw_line.get("superseded_by"):
+            errors.append(f"{line_id}: superseded line must identify its replacement")
 
     duplicates = sorted(value for value, count in Counter(ids).items() if count > 1)
     if duplicates:
@@ -179,11 +185,22 @@ def main() -> int:
     if duplicate_canonical_caps:
         errors.append(f"capability boundaries have multiple canonical owners: {duplicate_canonical_caps}")
 
+    canonical = canonical_lines[0] if len(canonical_lines) == 1 else {}
+    initial = contract.get("initial_decisions")
+    if not isinstance(initial, dict):
+        errors.append("contract initial_decisions must be an object")
+    else:
+        if initial.get("canonical_runtime_sha") != canonical.get("sha"):
+            errors.append("contract and registry canonical runtime SHAs differ")
+        if initial.get("canonical_runtime_pr") != canonical.get("pr"):
+            errors.append("contract and registry canonical runtime PRs differ")
+
     conflict_groups = registry.get("conflict_groups")
     if not isinstance(conflict_groups, list):
         errors.append("registry conflict_groups must be a list")
         conflict_groups = []
     conflict_ids: set[str] = set()
+    conflicts_by_id: dict[str, dict[str, Any]] = {}
     for index, raw_group in enumerate(conflict_groups):
         label = f"registry.conflict_groups[{index}]"
         if not isinstance(raw_group, dict):
@@ -196,6 +213,7 @@ def main() -> int:
         if group_id in conflict_ids:
             errors.append(f"duplicate conflict group: {group_id}")
         conflict_ids.add(group_id)
+        conflicts_by_id[group_id] = raw_group
         members = raw_group.get("members")
         if not isinstance(members, list) or len(members) < 2:
             errors.append(f"{group_id}: conflict group needs at least two members")
@@ -203,34 +221,61 @@ def main() -> int:
         unknown_members = sorted(set(members) - set(by_id))
         if unknown_members:
             errors.append(f"{group_id}: unknown members {unknown_members}")
-        if raw_group.get("resolution") == "PENDING_SEPARATE_ADR":
-            canonical_members = [
-                member for member in members
-                if by_id.get(member, {}).get("state") == "CANONICAL_INTEGRATION_TARGET"
-            ]
-            if canonical_members:
-                errors.append(f"{group_id}: unresolved conflict contains canonical members {canonical_members}")
         if raw_group.get("forbid_wholesale_merge") is not True:
             errors.append(f"{group_id}: unresolved overlap must forbid wholesale merge")
+        canonical_members = [
+            member
+            for member in members
+            if by_id.get(member, {}).get("state") == "CANONICAL_INTEGRATION_TARGET"
+        ]
+        if canonical_members:
+            errors.append(f"{group_id}: unresolved conflict contains canonical members {canonical_members}")
 
     next_integration = registry.get("next_integration")
     if not isinstance(next_integration, dict):
         errors.append("registry next_integration must be an object")
     else:
+        mode = next_integration.get("mode")
+        if mode not in allowed_modes:
+            errors.append(f"invalid next integration mode {mode!r}")
         base_line = next_integration.get("base_line")
-        source_line = next_integration.get("source_line")
         if base_line not in by_id:
             errors.append(f"next integration references unknown base line {base_line!r}")
         elif by_id[base_line].get("state") != "CANONICAL_INTEGRATION_TARGET":
             errors.append("next integration base must be the canonical integration target")
-        if source_line not in by_id:
-            errors.append(f"next integration references unknown source line {source_line!r}")
-        elif by_id[source_line].get("state") != "CANDIDATE":
-            errors.append("next integration source must remain a candidate until exact integration evidence")
-        blocked = set(next_integration.get("must_not_include_conflict_groups") or [])
-        unknown_blocked = sorted(blocked - conflict_ids)
-        if unknown_blocked:
-            errors.append(f"next integration blocks unknown conflict groups {unknown_blocked}")
+
+        if mode == "RUNTIME_ADOPTION":
+            source_line = next_integration.get("source_line")
+            if source_line not in by_id:
+                errors.append(f"next integration references unknown source line {source_line!r}")
+            elif by_id[source_line].get("state") != "CANDIDATE":
+                errors.append("runtime adoption source must remain CANDIDATE until verified")
+        elif mode == "CONFLICT_RESOLUTION":
+            issue = next_integration.get("issue")
+            if not isinstance(issue, int) or issue <= 0:
+                errors.append("conflict resolution must reference a positive issue number")
+            conflict_group = next_integration.get("conflict_group")
+            if conflict_group not in conflicts_by_id:
+                errors.append(f"unknown next conflict group {conflict_group!r}")
+            source_lines = next_integration.get("source_lines")
+            if not isinstance(source_lines, list) or len(source_lines) < 2:
+                errors.append("conflict resolution requires at least two source lines")
+            else:
+                unknown_sources = sorted(set(source_lines) - set(by_id))
+                if unknown_sources:
+                    errors.append(f"conflict resolution has unknown source lines {unknown_sources}")
+                invalid_states = sorted(
+                    line_id
+                    for line_id in source_lines
+                    if by_id.get(line_id, {}).get("state") not in {"ALTERNATIVE", "CANDIDATE"}
+                )
+                if invalid_states:
+                    errors.append(f"conflict sources have invalid states {invalid_states}")
+                members = set(conflicts_by_id.get(conflict_group, {}).get("members") or [])
+                if not set(source_lines).issubset(members):
+                    errors.append("conflict resolution sources must belong to the selected group")
+            if not next_integration.get("strategy"):
+                errors.append("conflict resolution strategy must be explicit")
 
     foundation_waves = foundation.get("waves")
     if not isinstance(foundation_waves, list):
@@ -245,10 +290,10 @@ def main() -> int:
         required_current_markers = [
             "active-delivery-registry.v1.json",
             "Registry version:",
-            "`1.0.0`",
+            f"`{registry.get('registry_version')}`",
             "Issue #287",
-            "ad825906388371eb9bb36b325abf36a2dd813c5c",
-            "80fbc887f16651949ec36819c440154bcfc278a8",
+            "Issue #291",
+            str(canonical.get("sha", "")),
             "00e1fd5ad8e4818d9a5738b6fdc9cd99bb3124fc",
             "e3c8a445ace3a9c4fbc734fa7ebf91e97b7c039e",
         ]
