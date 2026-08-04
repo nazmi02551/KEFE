@@ -1,0 +1,107 @@
+name: Apply Card-by-Card Decision Subjourney
+
+on:
+  push:
+    branches:
+      - feature/card-by-card-decision-subjourney
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/card-by-card-decision-subjourney
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.4'
+          channel: stable
+          cache: true
+      - name: Patch progressive Decision composition
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('apps/mobile/lib/features/decision/presentation/decision_experience_screen.dart')
+          text = path.read_text()
+          if "import 'decision_subjourney.dart';" not in text:
+              text = text.replace(
+                  "import 'decision_journey_strings.dart';\n",
+                  "import 'decision_journey_strings.dart';\nimport 'decision_subjourney.dart';\n",
+              )
+          text = text.replace("import 'question_input.dart';\n", "")
+          text = text.replace("import 'reason_input.dart';\n", "")
+
+          replacement = r'''  Widget _decisionStep(BuildContext context, WidgetRef ref) {
+            if (step.state == FlowStepRuntimeState.unsupported) {
+              return _JourneyMessageSurface(
+                message: KefeStrings.of(
+                  context,
+                ).flowCapabilityPendingBody(step.reasonCode),
+              );
+            }
+            if (step.state != FlowStepRuntimeState.ready) {
+              return _JourneyMessageSurface(
+                message: KefeStrings.of(context).activeJourneyUnavailable,
+              );
+            }
+
+            final caseData = state.caseData!;
+            final controller = ref.read(decisionControllerProvider.notifier);
+            final inputsEnabled = !state.recoveryPending && !state.submitting;
+            final action = !state.hasRequiredResponses || state.submitting
+                ? null
+                : state.recoveryPending
+                ? controller.retryPending
+                : controller.commit;
+
+            return DecisionSubjourney(
+              key: ValueKey('decision-subjourney-${step.code}'),
+              caseData: caseData,
+              flowStepCode: step.code,
+              responses: state.responses,
+              selectedReasonTags: state.reasonTags,
+              reasonText: state.reasonText,
+              enabled: inputsEnabled,
+              onResponseChanged: controller.setResponse,
+              onReasonTagToggled: controller.toggleReasonTag,
+              onReasonTextChanged: controller.setReasonText,
+              reviewAction: _JourneyCommitPanel(
+                onPressed: action,
+                submitting: state.submitting,
+                recoveryPending: state.recoveryPending,
+                hasRequiredResponses: state.hasRequiredResponses,
+              ),
+            );
+          }
+
+          Widget _reflectionStep() {'''
+
+          text, count = re.subn(
+              r"  Widget _decisionStep\(BuildContext context, WidgetRef ref\) \{.*?\n  Widget _reflectionStep\(\) \{",
+              replacement,
+              text,
+              flags=re.S,
+          )
+          if count != 1:
+              raise SystemExit(f'expected one Decision method replacement, got {count}')
+          path.write_text(text)
+          PY
+      - name: Format changed Dart sources
+        working-directory: apps/mobile
+        run: dart format lib/features/decision/presentation/decision_experience_screen.dart lib/features/decision/presentation/decision_subjourney.dart lib/features/decision/presentation/decision_journey_strings.dart
+      - name: Commit implementation patch
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add apps/mobile/lib/features/decision/presentation/decision_experience_screen.dart apps/mobile/lib/features/decision/presentation/decision_subjourney.dart apps/mobile/lib/features/decision/presentation/decision_journey_strings.dart
+          git commit -m "feat: wire card-by-card Decision subjourney"
+          git push origin HEAD:feature/card-by-card-decision-subjourney
