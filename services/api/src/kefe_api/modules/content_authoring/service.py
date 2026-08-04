@@ -168,13 +168,71 @@ class ContentAuthoringService:
             target=ContentLifecycle.IN_REVIEW,
         )
 
-    def approve(self, version_id: UUID, *, actor_ref: str) -> AuthoringCaseVersion:
-        return self._transition(
-            version_id,
+    def approve(
+        self,
+        version_id: UUID,
+        *,
+        actor_ref: str,
+        completed_review_modes: tuple[str, ...] | None = None,
+    ) -> AuthoringCaseVersion:
+        version = self._require_version(version_id)
+        self._assert_state(version, {ContentLifecycle.IN_REVIEW}, "approve")
+        required = self._normalize_review_modes(
+            version.required_review_modes,
+            invalid_code="CONTENT_REQUIRED_REVIEW_MODES_INVALID",
+            invalid_message="CaseVersion required review modes are invalid",
+            invalid_status=409,
+        )
+        if completed_review_modes is None:
+            if required:
+                raise DomainError(
+                    "CONTENT_REVIEW_ATTESTATION_REQUIRED",
+                    "Required review modes must be explicitly attested by the reviewer",
+                    422,
+                )
+            completed: tuple[str, ...] = ()
+        else:
+            completed = self._normalize_review_modes(
+                completed_review_modes,
+                invalid_code="CONTENT_REVIEW_MODES_INVALID",
+                invalid_message=(
+                    "Completed review modes must be unique non-empty values"
+                ),
+                invalid_status=422,
+            )
+
+        missing = sorted(set(required) - set(completed))
+        unexpected = sorted(set(completed) - set(required))
+        if missing or unexpected:
+            raise DomainError(
+                "CONTENT_REVIEW_MODES_INCOMPLETE",
+                "Completed review modes must exactly match required review modes",
+                422,
+                meta={"missing": missing, "unexpected": unexpected},
+            )
+
+        approved = replace(
+            version,
+            state=ContentLifecycle.APPROVED,
+            completed_review_modes=required,
+        )
+        rationale = (
+            "Completed review modes: " + ", ".join(required)
+            if required
+            else "No required review modes"
+        )
+        audit = LifecycleAuditEntry.create(
+            version=version,
             actor_ref=actor_ref,
             command="approve",
-            allowed_from={ContentLifecycle.IN_REVIEW},
-            target=ContentLifecycle.APPROVED,
+            previous_state=ContentLifecycle.IN_REVIEW,
+            new_state=ContentLifecycle.APPROVED,
+            rationale=rationale,
+        )
+        return self._persist_transition(
+            approved,
+            expected_state=ContentLifecycle.IN_REVIEW,
+            audit=audit,
         )
 
     def reject(
@@ -184,19 +242,36 @@ class ContentAuthoringService:
         actor_ref: str,
         rationale: str,
     ) -> AuthoringCaseVersion:
-        if not rationale.strip():
+        normalized_rationale = rationale.strip()
+        if not normalized_rationale:
             raise DomainError(
                 "CONTENT_REJECTION_RATIONALE_REQUIRED",
                 "Rejection rationale is required",
                 422,
             )
-        return self._transition(
-            version_id,
+        version = self._require_version(version_id)
+        self._assert_state(
+            version,
+            {ContentLifecycle.IN_REVIEW, ContentLifecycle.APPROVED},
+            "reject",
+        )
+        rejected = replace(
+            version,
+            state=ContentLifecycle.DRAFT,
+            completed_review_modes=(),
+        )
+        audit = LifecycleAuditEntry.create(
+            version=version,
             actor_ref=actor_ref,
             command="reject",
-            allowed_from={ContentLifecycle.IN_REVIEW, ContentLifecycle.APPROVED},
-            target=ContentLifecycle.DRAFT,
-            rationale=rationale.strip(),
+            previous_state=version.state,
+            new_state=ContentLifecycle.DRAFT,
+            rationale=normalized_rationale,
+        )
+        return self._persist_transition(
+            rejected,
+            expected_state=version.state,
+            audit=audit,
         )
 
     def publish(self, version_id: UUID, *, actor_ref: str) -> AuthoringCaseVersion:
@@ -299,10 +374,23 @@ class ContentAuthoringService:
             new_state=target,
             rationale=rationale,
         )
+        return self._persist_transition(
+            transitioned,
+            expected_state=version.state,
+            audit=audit,
+        )
+
+    def _persist_transition(
+        self,
+        version: AuthoringCaseVersion,
+        *,
+        expected_state: ContentLifecycle,
+        audit: LifecycleAuditEntry,
+    ) -> AuthoringCaseVersion:
         try:
             return self._repository.transition(
-                version=transitioned,
-                expected_state=version.state,
+                version=version,
+                expected_state=expected_state,
                 audit=audit,
             )
         except ValueError as exc:
@@ -313,6 +401,25 @@ class ContentAuthoringService:
         if version is None:
             raise DomainError("CONTENT_VERSION_NOT_FOUND", "CaseVersion not found", 404)
         return version
+
+    @staticmethod
+    def _normalize_review_modes(
+        values: tuple[str, ...],
+        *,
+        invalid_code: str,
+        invalid_message: str,
+        invalid_status: int,
+    ) -> tuple[str, ...]:
+        normalized = tuple(value.strip() for value in values)
+        if any(not value for value in normalized) or len(set(normalized)) != len(
+            normalized
+        ):
+            raise DomainError(
+                invalid_code,
+                invalid_message,
+                invalid_status,
+            )
+        return normalized
 
     @staticmethod
     def _assert_draft_has_no_publication_pin(version: AuthoringCaseVersion) -> None:

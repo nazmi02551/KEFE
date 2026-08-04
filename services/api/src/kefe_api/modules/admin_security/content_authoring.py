@@ -9,6 +9,7 @@ from kefe_api.modules.admin_security.service import AdminSecurityService
 from kefe_api.modules.content_authoring.models import (
     AuthoringCaseVersion,
     CaseIdentity,
+    ContentLifecycle,
     LifecycleAuditEntry,
 )
 from kefe_api.modules.content_authoring.ports import ContentAuthoringRepository
@@ -94,7 +95,26 @@ class SecuredContentAuthoringService:
             actor_ref=principal.audit_actor_ref,
         )
 
-    def approve(
+    def review_queue(
+        self,
+        principal: AdminPrincipal,
+        *,
+        limit: int,
+        offset: int,
+        content_risk: str | None = None,
+        primary_domain_code: str | None = None,
+        now: datetime | None = None,
+    ) -> tuple[AuthoringCaseVersion, ...]:
+        self._security.authorize(principal, AdminCapability.CONTENT_REVIEW, now=now)
+        return self._repository.list_by_state(
+            ContentLifecycle.IN_REVIEW,
+            limit=limit,
+            offset=offset,
+            content_risk=content_risk,
+            primary_domain_code=primary_domain_code,
+        )
+
+    def review_for_inspection(
         self,
         principal: AdminPrincipal,
         version_id: UUID,
@@ -103,13 +123,59 @@ class SecuredContentAuthoringService:
     ) -> AuthoringCaseVersion:
         self._security.authorize(principal, AdminCapability.CONTENT_REVIEW, now=now)
         version = self._require_version(version_id)
-        self._security.enforce_reviewer_separation(
-            principal=principal,
-            submitter_actor_ref=self._latest_submitter(version),
-        )
+        if version.state is not ContentLifecycle.IN_REVIEW:
+            raise DomainError(
+                "CONTENT_REVIEW_STATE_REQUIRED",
+                "CaseVersion is not awaiting editorial review",
+                409,
+            )
+        return version
+
+    def review_submission(
+        self,
+        principal: AdminPrincipal,
+        version_id: UUID,
+        *,
+        now: datetime | None = None,
+    ) -> LifecycleAuditEntry:
+        version = self.review_for_inspection(principal, version_id, now=now)
+        submission = self._latest_submission(version)
+        if submission is None:
+            raise DomainError(
+                "CONTENT_REVIEW_SUBMISSION_MISSING",
+                "Review submission audit entry is missing",
+                409,
+            )
+        return submission
+
+    def approve(
+        self,
+        principal: AdminPrincipal,
+        version_id: UUID,
+        *,
+        now: datetime | None = None,
+    ) -> AuthoringCaseVersion:
+        version = self.review_for_inspection(principal, version_id, now=now)
+        self._enforce_reviewer_separation(principal, version)
         return self._authoring.approve(
             version_id,
             actor_ref=principal.audit_actor_ref,
+        )
+
+    def approve_with_review_modes(
+        self,
+        principal: AdminPrincipal,
+        version_id: UUID,
+        *,
+        completed_review_modes: tuple[str, ...],
+        now: datetime | None = None,
+    ) -> AuthoringCaseVersion:
+        version = self.review_for_inspection(principal, version_id, now=now)
+        self._enforce_reviewer_separation(principal, version)
+        return self._authoring.approve(
+            version_id,
+            actor_ref=principal.audit_actor_ref,
+            completed_review_modes=completed_review_modes,
         )
 
     def reject(
@@ -165,13 +231,26 @@ class SecuredContentAuthoringService:
         self._security.authorize(principal, AdminCapability.AUDIT_READ, now=now)
         return self._authoring.audit_trail(case_id)
 
+    def _enforce_reviewer_separation(
+        self,
+        principal: AdminPrincipal,
+        version: AuthoringCaseVersion,
+    ) -> None:
+        self._security.enforce_reviewer_separation(
+            principal=principal,
+            submitter_actor_ref=self._latest_submitter(version),
+        )
+
     def _require_version(self, version_id: UUID) -> AuthoringCaseVersion:
         version = self._repository.get_version(version_id)
         if version is None:
             raise DomainError("CONTENT_VERSION_NOT_FOUND", "CaseVersion not found", 404)
         return version
 
-    def _latest_submitter(self, version: AuthoringCaseVersion) -> str | None:
+    def _latest_submission(
+        self,
+        version: AuthoringCaseVersion,
+    ) -> LifecycleAuditEntry | None:
         submissions = [
             entry
             for entry in self._repository.list_audit(version.case_id)
@@ -179,4 +258,8 @@ class SecuredContentAuthoringService:
         ]
         if not submissions:
             return None
-        return max(submissions, key=lambda entry: entry.occurred_at).actor_ref
+        return max(submissions, key=lambda entry: entry.occurred_at)
+
+    def _latest_submitter(self, version: AuthoringCaseVersion) -> str | None:
+        submission = self._latest_submission(version)
+        return submission.actor_ref if submission is not None else None

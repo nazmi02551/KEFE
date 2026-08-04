@@ -154,7 +154,7 @@ def test_fact_bearing_content_requires_source_claim_state() -> None:
     }
 
 
-def test_required_review_modes_block_publication_until_completed() -> None:
+def test_required_review_modes_block_approval_until_explicitly_completed() -> None:
     service, _ = _service()
     identity = CaseIdentity(id=uuid4(), slug="reviewed-case")
     version = _case_version(
@@ -164,13 +164,18 @@ def test_required_review_modes_block_publication_until_completed() -> None:
     )
     service.create_case(identity=identity, initial_version=version, actor_ref="editor:1")
     service.submit_for_review(version.id, actor_ref="editor:1")
-    service.approve(version.id, actor_ref="reviewer:1")
 
     with pytest.raises(DomainError) as raised:
-        service.publish(version.id, actor_ref="publisher:1")
+        service.approve(version.id, actor_ref="reviewer:1")
+    assert raised.value.code == "CONTENT_REVIEW_ATTESTATION_REQUIRED"
 
-    assert raised.value.code == "CONTENT_PUBLICATION_INVALID"
-    assert raised.value.meta["failures"][0]["code"] == "CONTENT_REVIEW_REQUIRED"
+    approved = service.approve(
+        version.id,
+        actor_ref="reviewer:1",
+        completed_review_modes=("CIVIC_INTEGRITY",),
+    )
+    assert approved.state is ContentLifecycle.APPROVED
+    assert approved.completed_review_modes == ("CIVIC_INTEGRITY",)
 
 
 def test_published_version_is_immutable_and_revision_supersedes_atomically() -> None:

@@ -42,6 +42,16 @@ class ContentAuthoringRepository(Protocol):
 
     def list_versions(self, case_id: UUID) -> tuple[AuthoringCaseVersion, ...]: ...
 
+    def list_by_state(
+        self,
+        state: ContentLifecycle,
+        *,
+        limit: int,
+        offset: int,
+        content_risk: str | None = None,
+        primary_domain_code: str | None = None,
+    ) -> tuple[AuthoringCaseVersion, ...]: ...
+
     def next_version_no(self, case_id: UUID) -> int: ...
 
     def save_draft(
