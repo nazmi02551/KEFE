@@ -1,5 +1,5 @@
 {
-  "contract_version": "1.0.1",
+  "contract_version": "1.0.2",
   "status": "accepted_for_execution",
   "date": "2026-08-04",
   "source_issue": 291,
@@ -111,10 +111,31 @@
     "delegates_scheduler_lifecycle": true,
     "parallel_scheduler_state_machine_forbidden": true
   },
+  "restart_rehydration": {
+    "allowed_states": ["ACTIVE", "PAUSED"],
+    "retired_projection_skipped": true,
+    "requires_approved_definition": true,
+    "requires_exact_configuration_hash": true,
+    "requires_exact_adapter_identity": true,
+    "restores": [
+      "PROVIDER_ADOPTION_PROFILE",
+      "PUBLIC_CAPTURE_ADAPTER",
+      "RUNTIME_PROFILE_LOOKUP"
+    ],
+    "forbidden_side_effects": [
+      "PROVIDER_CAPABILITY_CREATE_OR_TRANSITION",
+      "SCHEDULE_CREATE_OR_TRANSITION",
+      "AUDIT_APPEND",
+      "NETWORK_REQUEST",
+      "WORKER_EXECUTION"
+    ],
+    "fails_closed_on_identity_drift": true
+  },
   "production_composition": {
     "catalog_service_present": true,
     "seeded_definitions": 0,
     "startup_activation": false,
+    "persisted_runtime_profile_rehydration": true,
     "automatic_network_operation": false,
     "preview_fallback_to_production": false
   },
@@ -151,6 +172,7 @@
     "POSTGRES_MIGRATION_IDEMPOTENCY_AND_CONCURRENCY",
     "API_VERSION_ISOLATION",
     "ZERO_STARTUP_ACTIVATION",
+    "SIDE_EFFECT_FREE_RUNTIME_PROFILE_REHYDRATION",
     "NO_LIVE_NETWORK_APPROVED_TO_FEED_ITEM_VERTICAL",
     "EXACT_REPLAY_AND_PARTIAL_RETRY",
     "NO_AUTOMATIC_EDITORIAL_ACTION"
