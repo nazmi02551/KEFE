@@ -1,5 +1,7 @@
 name: Canonical Public Feed
 
+# This dedicated gate verifies the canonical catalog domain independently before
+# PostgreSQL and Admin HTTP layers are added to the same delivery line.
 on:
   pull_request:
     paths:
