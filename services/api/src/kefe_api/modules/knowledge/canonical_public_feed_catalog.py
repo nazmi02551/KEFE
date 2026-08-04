@@ -736,7 +736,7 @@ class CanonicalPublicFeedCatalogService:
             return existing
 
         at = self._clock()
-        capability = definition.definition.to_public_capability(created_at=at)
+        capability = definition.definition.capability_template.instantiate(created_at=at)
         self._provider_admission.register(
             adapter_code=capability.adapter_code,
             credential_mode=ProviderCredentialMode.PUBLIC,
