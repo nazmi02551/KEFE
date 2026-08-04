@@ -761,8 +761,8 @@ class CanonicalPublicFeedCatalogService:
             first_due_at=first_due_at,
             interval_seconds=definition.interval_seconds,
             max_dispatch_attempts=definition.max_dispatch_attempts,
-            locale=command.context.locale,
-            jurisdiction_code=command.context.jurisdiction_code,
+            locale=command.locale,
+            jurisdiction_code=command.jurisdiction_code,
             now=at,
         )
         projection = PublicFeedActivationProjection.create(
