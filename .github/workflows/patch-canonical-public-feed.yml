@@ -28,7 +28,7 @@ jobs:
           def replace_required(text: str, old: str, new: str) -> str:
               if old not in text:
                   raise SystemExit(f'missing expected fragment: {old[:100]!r}')
-              return text.replace(old, new, 1)
+              return text.replace(old, new)
 
           catalog_path = Path(
               'services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py'
@@ -133,10 +133,8 @@ jobs:
                   'InMemorySourceAcquisitionSchedulerRepository()',
               ),
               ('providers.get_capability(', 'providers.get('),
-              (
-                  '.lifecycle is ProviderLifecycle.',
-                  '.lifecycle_state is ProviderCapabilityLifecycle.',
-              ),
+              ('.lifecycle', '.lifecycle_state'),
+              ('ProviderLifecycle.', 'ProviderCapabilityLifecycle.'),
               (
                   'assert schedules.list_schedules() == ()',
                   'assert schedules.plan_due_once(at=NOW + timedelta(days=1)) is None',
