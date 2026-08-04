@@ -6,10 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 CONTRACT = ROOT / "docs/contracts/canonical-candidate-bundle-projection.v1.json"
 ADR = ROOT / "docs/adr/0099-canonical-source-brief-candidate-bundle-and-explicit-projection.md"
-DOMAIN = (
-    ROOT
-    / "services/api/src/kefe_api/modules/ingestion_orchestration/candidate_case_bundle.py"
-)
+DOMAIN = ROOT / "services/api/src/kefe_api/modules/ingestion_orchestration/candidate_case_bundle.py"
 SERVICE = ROOT / "services/api/src/kefe_api/modules/admin_security/candidate_bundle.py"
 ROUTER = ROOT / "services/api/src/kefe_api/modules/admin_security/candidate_bundle_router.py"
 PROJECTION_ROUTER = (
@@ -30,8 +27,7 @@ def main() -> None:
     contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
     require(contract["source_issue"] == 294, "contract must reference Issue #294")
     require(
-        contract["parent_sha"]
-        == "f6076229db05a27367726f4c48e5fc8212f7e96e",
+        contract["parent_sha"] == "f6076229db05a27367726f4c48e5fc8212f7e96e",
         "parent exact SHA drifted",
     )
     require(
@@ -93,7 +89,7 @@ def main() -> None:
         "self._knowledge.add_normalized_artifact(",
         "self._ingestion.start_run(",
         "self._repository.complete_successful_stage(",
-        "proposal_review_state",
+        "CandidateBundleResult",
     ):
         require(marker in service, f"secured service missing {marker}")
     for forbidden in (
@@ -131,8 +127,7 @@ def main() -> None:
 
     projection_router = PROJECTION_ROUTER.read_text(encoding="utf-8")
     require(
-        '"/candidate-proposals/{candidate_proposal_id}/projection"'
-        in projection_router,
+        '"/candidate-proposals/{candidate_proposal_id}/projection"' in projection_router,
         "existing explicit projection route is missing",
     )
     require(
@@ -156,7 +151,8 @@ def main() -> None:
     for marker in (
         "test_candidate_bundle_is_025_only_secured_explicit_and_idempotent",
         "test_candidate_bundle_projection_requires_separate_reviews_and_creates_one_draft",
-        'assert blocked.status_code == 409',
+        "assert blocked.status_code == 422",
+        "EDITORIAL_PROJECTION_DEPENDENCY_NOT_READY",
         'assert first.json()["lifecycle_state"] == "DRAFT"',
         'assert replay.json()["replayed"] is True',
     ):

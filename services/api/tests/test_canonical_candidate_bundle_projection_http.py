@@ -117,14 +117,8 @@ def test_candidate_bundle_is_025_only_secured_explicit_and_idempotent(
             "QUESTION_DRAFT",
             "CANDIDATE_CASE",
         )
-        assert all(
-            repository.get_review_decision(proposal_id) is None
-            for proposal_id in ids
-        )
-        assert all(
-            repository.find_materialization(proposal_id) is None
-            for proposal_id in ids
-        )
+        assert all(repository.get_review_decision(proposal_id) is None for proposal_id in ids)
+        assert all(repository.find_materialization(proposal_id) is None for proposal_id in ids)
         candidate = proposals[2]
         assert candidate is not None
         assert candidate.payload["dependency_ids"] == [str(ids[0]), str(ids[1])]
@@ -160,20 +154,14 @@ def test_candidate_bundle_projection_requires_separate_reviews_and_creates_one_d
 
         candidate_review = _review(reviewer, reviewer_csrf, candidate_id)
         assert candidate_review.status_code == 201
-        candidate_review_id = UUID(
-            candidate_review.json()["proposal_review_decision_id"]
-        )
+        candidate_review_id = UUID(candidate_review.json()["proposal_review_decision_id"])
         assert (
-            app.state.ingestion_orchestration_repository.get_review_decision(
-                candidate_id
-            ).decision
+            app.state.ingestion_orchestration_repository.get_review_decision(candidate_id).decision
             is ProposalReviewDecisionKind.ACCEPTED
         )
 
         editor, editor_csrf, _editor_id = _editorial_client(app, AdminRole.EDITOR)
-        projection_path = (
-            f"/internal/admin/v1/candidate-proposals/{candidate_id}/projection"
-        )
+        projection_path = f"/internal/admin/v1/candidate-proposals/{candidate_id}/projection"
         projection_payload = _projection_payload(
             candidate_review_id,
             "canonical-candidate-bundle-projection-1",
@@ -183,10 +171,9 @@ def test_candidate_bundle_projection_requires_separate_reviews_and_creates_one_d
             headers={ADMIN_CSRF_HEADER: editor_csrf},
             json=projection_payload,
         )
-        assert blocked.status_code == 409
-        assert app.state.editorial_projection_repository.get_by_candidate(
-            candidate_id
-        ) is None
+        assert blocked.status_code == 422
+        assert "EDITORIAL_PROJECTION_DEPENDENCY_NOT_READY" in blocked.text
+        assert app.state.editorial_projection_repository.get_by_candidate(candidate_id) is None
 
         for dependency_id in dependency_ids:
             accepted = _review(reviewer, reviewer_csrf, dependency_id)
@@ -207,16 +194,12 @@ def test_candidate_bundle_projection_requires_separate_reviews_and_creates_one_d
         assert first.json()["lifecycle_state"] == "DRAFT"
         assert first.json()["replayed"] is False
         assert replay.json()["replayed"] is True
-        assert replay.json()["projection_record_id"] == first.json()[
-            "projection_record_id"
-        ]
+        assert replay.json()["projection_record_id"] == first.json()["projection_record_id"]
         version = app.state.content_authoring_repository.get_version(
             UUID(first.json()["authoring_case_version_id"])
         )
         assert version is not None
         assert version.state.value == "DRAFT"
-        assert len(
-            app.state.content_authoring_repository.list_audit(version.case_id)
-        ) == 1
+        assert len(app.state.content_authoring_repository.list_audit(version.case_id)) == 1
     finally:
         get_settings.cache_clear()
