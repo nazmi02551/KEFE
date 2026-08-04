@@ -1,0 +1,65 @@
+name: Converge Registry Contract Markers
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/converge-registry-contract-markers.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  converge:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Replace obsolete composition-only literals
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          replacements = {
+              'InMemoryIngestionWorkerRuntimeRegistry()': 'build_feed_item_extraction_runtime(',
+              'InMemoryPublicSourceCaptureRegistry()': 'MutablePublicSourceCaptureRegistry()',
+              'InMemoryProviderAdoptionRegistry()': 'MutableProviderAdoptionRegistry()',
+          }
+          changed = []
+          for path in sorted(Path('services/api/tools').glob('check_*.py')):
+              source = path.read_text(encoding='utf-8')
+              updated = source
+              for old, new in replacements.items():
+                  updated = updated.replace(old, new)
+              if updated != source:
+                  path.write_text(updated, encoding='utf-8')
+                  changed.append(str(path))
+          if not changed:
+              raise SystemExit('no obsolete registry contract markers found')
+          Path('/tmp/changed-checkers.txt').write_text(
+              '\n'.join(changed) + '\n', encoding='utf-8'
+          )
+          print('\n'.join(changed))
+          PY
+      - name: Verify affected architecture contracts
+        working-directory: services/api
+        run: |
+          python -m pip install -q -U pip
+          pip install -q -e '.[dev]'
+          ruff check tools
+          while IFS= read -r path; do
+            python "${path#services/api/}"
+          done < /tmp/changed-checkers.txt
+      - name: Remove workflow and commit
+        run: |
+          git rm -f .github/workflows/converge-registry-contract-markers.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add services/api/tools
+          git commit -m 'test: accept canonical mutable runtime registries'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
