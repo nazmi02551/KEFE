@@ -797,9 +797,9 @@ export function EditorialWorkspace() {
               <p>DECISION_PROBLEM: {bundleResult.decision_problem_proposal_id}</p>
               <p>QUESTION_DRAFT: {bundleResult.question_draft_proposal_id}</p>
               <p>CANDIDATE_CASE: {bundleResult.candidate_case_proposal_id}</p>
-              <button onClick={() => setStage("REVIEW")} type="button">
-                İş listesine dönüp ayrı ayrı incele
-              </button>
+              <button onClick={() => setStage("QUEUE")} type="button">
+      İş listesine dönüp ayrı ayrı incele
+    </button>
             </div>
           ) : null}
         </section>
