@@ -28,7 +28,10 @@ from kefe_api.modules.ingestion_orchestration.models import (
     stable_payload_hash,
 )
 from kefe_api.modules.knowledge.models import SourceArtifact
-from kefe_api.modules.knowledge.source_evidence import canonical_content_hash, canonical_storage_ref
+from kefe_api.modules.knowledge.source_evidence import (
+    canonical_content_hash,
+    canonical_storage_ref,
+)
 
 NOW = datetime(2026, 8, 3, 10, 0, tzinfo=UTC)
 BODY = b"<rss><channel><title>Fixture</title></channel></rss>"
@@ -43,7 +46,10 @@ def _app(monkeypatch: pytest.MonkeyPatch, *, version: str = "0.21.0"):
 
 def _admin(app, role: AdminRole) -> tuple[TestClient, str]:
     subject_id = uuid4()
-    app.state.admin_session_store.upsert_subject(subject_id, roles=frozenset({role}))
+    app.state.admin_session_store.upsert_subject(
+        subject_id,
+        roles=frozenset({role}),
+    )
     issued_at = datetime.now(UTC)
     issued = app.state.admin_session_store.issue(
         admin_subject_id=subject_id,
@@ -137,7 +143,9 @@ def _seed_feed_items(app) -> tuple[UUID, tuple[UUID, ...], SourceArtifact]:
     return run.id, tuple(item.id for item in proposals), source
 
 
-def test_surface_is_additive_at_021_and_authorized(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_surface_is_additive_at_021_and_authorized(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     old_app = _app(monkeypatch, version="0.20.0")
     old_reviewer, _ = _admin(old_app, AdminRole.REVIEWER)
     assert old_reviewer.get("/internal/admin/v1/feed-items").status_code == 404
@@ -158,7 +166,9 @@ def test_surface_is_additive_at_021_and_authorized(monkeypatch: pytest.MonkeyPat
         )
         assert first.status_code == 200
         body = first.json()
-        assert [item["proposal_id"] for item in body["items"]] == [str(proposal_ids[0])]
+        assert [item["proposal_id"] for item in body["items"]] == [
+            str(proposal_ids[0])
+        ]
         assert body["items"][0]["item_title"] == "First feed item"
         assert "summary_text" not in body["items"][0]
         assert "evidence_ref" not in body["items"][0]
@@ -166,11 +176,19 @@ def test_surface_is_additive_at_021_and_authorized(monkeypatch: pytest.MonkeyPat
 
         second = reviewer.get(
             "/internal/admin/v1/feed-items",
-            params={"limit": 1, "run_id": str(run_id), "cursor": body["next_cursor"]},
+            params={
+                "limit": 1,
+                "run_id": str(run_id),
+                "cursor": body["next_cursor"],
+            },
         )
-        assert [item["proposal_id"] for item in second.json()["items"]] == [str(proposal_ids[1])]
+        assert [item["proposal_id"] for item in second.json()["items"]] == [
+            str(proposal_ids[1])
+        ]
 
-        detail = reviewer.get(f"/internal/admin/v1/feed-items/{proposal_ids[0]}")
+        detail = reviewer.get(
+            f"/internal/admin/v1/feed-items/{proposal_ids[0]}"
+        )
         assert detail.status_code == 200
         detail_body = detail.json()
         assert detail_body["summary_text"] == "Summary for First feed item."
@@ -181,19 +199,26 @@ def test_surface_is_additive_at_021_and_authorized(monkeypatch: pytest.MonkeyPat
         reviewed = reviewer.post(
             f"/internal/admin/v1/proposals/{proposal_ids[0]}/review",
             headers={ADMIN_CSRF_HEADER: csrf},
-            json={"decision": "ACCEPTED", "policy_version": "feed-review-v1"},
+            json={
+                "decision": "ACCEPTED",
+                "policy_version": "feed-review-v1",
+            },
         )
         assert reviewed.status_code == 201
         accepted = reviewer.get(
             "/internal/admin/v1/feed-items",
             params={"review_state": "ACCEPTED", "run_id": str(run_id)},
         )
-        assert [item["proposal_id"] for item in accepted.json()["items"]] == [str(proposal_ids[0])]
+        assert [item["proposal_id"] for item in accepted.json()["items"]] == [
+            str(proposal_ids[0])
+        ]
     finally:
         get_settings.cache_clear()
 
 
-def test_detail_hides_other_kinds_and_rejects_contract_drift(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_detail_hides_other_kinds_and_rejects_contract_drift(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     app = _app(monkeypatch)
     try:
         run_id, proposal_ids, source = _seed_feed_items(app)

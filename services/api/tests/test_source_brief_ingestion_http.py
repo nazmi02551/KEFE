@@ -14,10 +14,18 @@ from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
     PAYLOAD_SCHEMA_REF,
     PAYLOAD_SCHEMA_VERSION,
 )
-from kefe_api.modules.ingestion_orchestration.feed_item_extraction import PIPELINE_CODE as FEED_PIPELINE_CODE
-from kefe_api.modules.ingestion_orchestration.feed_item_extraction import PIPELINE_VERSION as FEED_PIPELINE_VERSION
-from kefe_api.modules.ingestion_orchestration.feed_item_extraction import PROPOSAL_KIND as FEED_ITEM_KIND
-from kefe_api.modules.ingestion_orchestration.feed_item_extraction import RISK_CODE as FEED_ITEM_RISK
+from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
+    PIPELINE_CODE as FEED_PIPELINE_CODE,
+)
+from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
+    PIPELINE_VERSION as FEED_PIPELINE_VERSION,
+)
+from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
+    PROPOSAL_KIND as FEED_ITEM_KIND,
+)
+from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
+    RISK_CODE as FEED_ITEM_RISK,
+)
 from kefe_api.modules.ingestion_orchestration.models import (
     ExecutorKind,
     IngestionRunState,
@@ -39,7 +47,10 @@ from kefe_api.modules.ingestion_orchestration.source_brief_ingestion import (
     require_source_brief_normalized_artifact,
 )
 from kefe_api.modules.knowledge.models import SourceArtifact
-from kefe_api.modules.knowledge.source_evidence import canonical_content_hash, canonical_storage_ref
+from kefe_api.modules.knowledge.source_evidence import (
+    canonical_content_hash,
+    canonical_storage_ref,
+)
 
 SOURCE_AT = datetime(2026, 8, 3, 10, 0, tzinfo=UTC)
 
@@ -53,7 +64,10 @@ def _app(monkeypatch: pytest.MonkeyPatch, *, version: str = "0.22.0"):
 
 def _admin(app, role: AdminRole) -> tuple[TestClient, str]:
     subject_id = uuid4()
-    app.state.admin_session_store.upsert_subject(subject_id, roles=frozenset({role}))
+    app.state.admin_session_store.upsert_subject(
+        subject_id,
+        roles=frozenset({role}),
+    )
     issued_at = datetime.now(UTC)
     issued = app.state.admin_session_store.issue(
         admin_subject_id=subject_id,
@@ -151,7 +165,9 @@ def _accept(client: TestClient, csrf: str, proposal_id: UUID) -> None:
     assert response.status_code == 201
 
 
-def test_source_brief_command_is_022_only_authorized_and_idempotent(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_source_brief_command_is_022_only_authorized_and_idempotent(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     old_app = _app(monkeypatch, version="0.21.0")
     old_reviewer, old_csrf = _admin(old_app, AdminRole.REVIEWER)
     assert old_reviewer.post(
@@ -165,7 +181,9 @@ def test_source_brief_command_is_022_only_authorized_and_idempotent(monkeypatch:
         reviewer, csrf = _admin(app, AdminRole.REVIEWER)
         editor, editor_csrf = _admin(app, AdminRole.EDITOR)
 
-        csrf_missing = reviewer.post(f"/internal/admin/v1/feed-items/{proposal_id}/source-brief")
+        csrf_missing = reviewer.post(
+            f"/internal/admin/v1/feed-items/{proposal_id}/source-brief"
+        )
         assert csrf_missing.status_code == 403
         assert csrf_missing.json()["code"] == "ADMIN_CSRF_REQUIRED"
 
@@ -203,7 +221,9 @@ def test_source_brief_command_is_022_only_authorized_and_idempotent(monkeypatch:
         normalized_id = UUID(first_body["normalized_artifact_id"])
         run_id = UUID(first_body["run_id"])
         brief_id = UUID(first_body["source_brief_proposal_id"])
-        normalized = app.state.knowledge_repository.get_normalized_artifact(normalized_id)
+        normalized = app.state.knowledge_repository.get_normalized_artifact(
+            normalized_id
+        )
         assert normalized is not None
         metadata = require_source_brief_normalized_artifact(normalized)
         assert metadata.parent_feed_item_proposal_id == proposal_id
@@ -240,5 +260,6 @@ def test_source_brief_command_is_022_only_authorized_and_idempotent(monkeypatch:
         assert brief.payload["evidence_ref"] == source.raw_storage_ref
         assert repository.get_review_decision(brief.id) is None
         assert repository.find_materialization(brief.id) is None
+        assert len(repository.list_proposals(run_id)) == 1
     finally:
         get_settings.cache_clear()

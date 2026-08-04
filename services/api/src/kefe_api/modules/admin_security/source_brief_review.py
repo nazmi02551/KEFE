@@ -152,24 +152,34 @@ class SourceBriefReviewPayload:
     def from_mapping(cls, payload: dict[str, Any]) -> SourceBriefReviewPayload:
         if type(payload) is not dict or frozenset(payload) != _PAYLOAD_KEYS:
             raise _contract_invalid()
+        content_hash = _required_text(payload["source_content_hash"], max_chars=71)
+        evidence_ref = _required_text(payload["evidence_ref"], max_chars=82)
         feed_format = _required_text(payload["feed_format"], max_chars=16)
         if feed_format not in {"RSS_2_0", "ATOM_1_0"}:
             raise _contract_invalid()
         return cls(
             normalized_artifact_id=_uuid(payload["normalized_artifact_id"]),
-            parent_feed_item_proposal_id=_uuid(payload["parent_feed_item_proposal_id"]),
+            parent_feed_item_proposal_id=_uuid(
+                payload["parent_feed_item_proposal_id"]
+            ),
             review_decision_id=_uuid(payload["review_decision_id"]),
             source_artifact_id=_uuid(payload["source_artifact_id"]),
-            source_content_hash=_required_text(payload["source_content_hash"], max_chars=71),
-            evidence_ref=_required_text(payload["evidence_ref"], max_chars=82),
+            source_content_hash=content_hash,
+            evidence_ref=evidence_ref,
             feed_format=feed_format,
-            publisher_or_issuer=_optional_text(payload["publisher_or_issuer"], max_chars=MAX_PUBLISHER_CHARS),
+            publisher_or_issuer=_optional_text(
+                payload["publisher_or_issuer"],
+                max_chars=MAX_PUBLISHER_CHARS,
+            ),
             headline=_required_text(payload["headline"], max_chars=MAX_TITLE_CHARS),
             source_url=_http_url(payload["source_url"]),
             published_at=_utc_timestamp(payload["published_at"]),
             synopsis=_optional_text(payload["synopsis"], max_chars=MAX_SUMMARY_CHARS),
             language_code=_optional_text(payload["language_code"], max_chars=35),
-            jurisdiction_code=_optional_text(payload["jurisdiction_code"], max_chars=35),
+            jurisdiction_code=_optional_text(
+                payload["jurisdiction_code"],
+                max_chars=35,
+            ),
         )
 
 
@@ -221,7 +231,10 @@ class SecuredSourceBriefReviewService:
             now=now,
         )
         return SourceBriefReviewPage(
-            items=tuple(self._adapt(principal, record, now=now) for record in page.items),
+            items=tuple(
+                self._adapt(principal, record, now=now)
+                for record in page.items
+            ),
             next_cursor=page.next_cursor,
         )
 
@@ -234,7 +247,11 @@ class SecuredSourceBriefReviewService:
     ) -> SourceBriefReviewRecord:
         record = self._queue.detail(principal, proposal_id, now=now)
         if record.proposal.proposal_kind != SOURCE_BRIEF_KIND:
-            raise DomainError("ADMIN_SOURCE_BRIEF_NOT_FOUND", "Source Brief proposal not found", 404)
+            raise DomainError(
+                "ADMIN_SOURCE_BRIEF_NOT_FOUND",
+                "Source Brief proposal not found",
+                404,
+            )
         return self._adapt(principal, record, now=now)
 
     def _adapt(
@@ -260,10 +277,15 @@ class SecuredSourceBriefReviewService:
             raise _contract_invalid()
 
         payload = SourceBriefReviewPayload.from_mapping(proposal.payload)
-        if payload.normalized_artifact_id != run.input_artifact_id or proposal.provenance_ref != payload.evidence_ref:
+        if (
+            payload.normalized_artifact_id != run.input_artifact_id
+            or proposal.provenance_ref != payload.evidence_ref
+        ):
             raise _contract_invalid()
 
-        normalized = self._knowledge.get_normalized_artifact(payload.normalized_artifact_id)
+        normalized = self._knowledge.get_normalized_artifact(
+            payload.normalized_artifact_id
+        )
         if normalized is None or normalized.content_hash != run.input_content_hash:
             raise _contract_invalid()
         try:
@@ -271,13 +293,18 @@ class SecuredSourceBriefReviewService:
         except FinalStageError as exc:
             raise _contract_invalid() from exc
 
-        parent = self._feed_items.detail(principal, payload.parent_feed_item_proposal_id, now=now)
+        parent = self._feed_items.detail(
+            principal,
+            payload.parent_feed_item_proposal_id,
+            now=now,
+        )
         parent_review = parent.queue_record.review
         if (
             parent_review is None
             or parent_review.id != payload.review_decision_id
             or parent_review.decision is not ProposalReviewDecisionKind.ACCEPTED
-            or metadata.parent_feed_item_proposal_id != payload.parent_feed_item_proposal_id
+            or metadata.parent_feed_item_proposal_id
+            != payload.parent_feed_item_proposal_id
             or metadata.review_decision_id != payload.review_decision_id
             or metadata.source_artifact_id != payload.source_artifact_id
             or metadata.feed_content_hash != payload.source_content_hash

@@ -119,7 +119,8 @@ class AcceptedFeedItemNormalizer(ProposalTargetMaterializer):
             text=payload.summary_text or payload.item_title,
             language_code=source.language_code,
             jurisdiction_code=(
-                source.jurisdiction_code or expected.run.jurisdiction_code
+                source.jurisdiction_code
+                or expected.run.jurisdiction_code
             ),
             media_metadata=mapping,
         )
@@ -204,7 +205,9 @@ class SecuredSourceBriefIngestionService:
                 "Accepted feed item normalization target is invalid",
             )
 
-        artifact = self._knowledge.get_normalized_artifact(materialization.target_id)
+        artifact = self._knowledge.get_normalized_artifact(
+            materialization.target_id
+        )
         if artifact is None:
             raise _domain_error(
                 "ADMIN_SOURCE_BRIEF_NORMALIZATION_INVALID",
@@ -235,7 +238,8 @@ class SecuredSourceBriefIngestionService:
             configuration_hash=CONFIGURATION_HASH,
             locale=artifact.language_code or record.queue_record.run.locale,
             jurisdiction_code=(
-                artifact.jurisdiction_code or record.queue_record.run.jurisdiction_code
+                artifact.jurisdiction_code
+                or record.queue_record.run.jurisdiction_code
             ),
         )
         completed, proposal = self._execute(run)

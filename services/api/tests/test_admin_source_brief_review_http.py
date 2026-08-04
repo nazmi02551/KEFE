@@ -14,10 +14,18 @@ from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
     PAYLOAD_SCHEMA_REF,
     PAYLOAD_SCHEMA_VERSION,
 )
-from kefe_api.modules.ingestion_orchestration.feed_item_extraction import PIPELINE_CODE as FEED_PIPELINE_CODE
-from kefe_api.modules.ingestion_orchestration.feed_item_extraction import PIPELINE_VERSION as FEED_PIPELINE_VERSION
-from kefe_api.modules.ingestion_orchestration.feed_item_extraction import PROPOSAL_KIND as FEED_ITEM_KIND
-from kefe_api.modules.ingestion_orchestration.feed_item_extraction import RISK_CODE as FEED_ITEM_RISK
+from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
+    PIPELINE_CODE as FEED_PIPELINE_CODE,
+)
+from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
+    PIPELINE_VERSION as FEED_PIPELINE_VERSION,
+)
+from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
+    PROPOSAL_KIND as FEED_ITEM_KIND,
+)
+from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
+    RISK_CODE as FEED_ITEM_RISK,
+)
 from kefe_api.modules.ingestion_orchestration.models import (
     ExecutorKind,
     IngestionRunState,
@@ -35,7 +43,10 @@ from kefe_api.modules.ingestion_orchestration.source_brief_ingestion import (
     SOURCE_BRIEF_SCHEMA_VERSION,
 )
 from kefe_api.modules.knowledge.models import SourceArtifact
-from kefe_api.modules.knowledge.source_evidence import canonical_content_hash, canonical_storage_ref
+from kefe_api.modules.knowledge.source_evidence import (
+    canonical_content_hash,
+    canonical_storage_ref,
+)
 
 SOURCE_AT = datetime(2026, 8, 3, 10, 0, tzinfo=UTC)
 
@@ -49,7 +60,10 @@ def _app(monkeypatch: pytest.MonkeyPatch, *, version: str = "0.23.0"):
 
 def _admin(app, role: AdminRole) -> tuple[TestClient, str]:
     subject_id = uuid4()
-    app.state.admin_session_store.upsert_subject(subject_id, roles=frozenset({role}))
+    app.state.admin_session_store.upsert_subject(
+        subject_id,
+        roles=frozenset({role}),
+    )
     issued_at = datetime.now(UTC)
     issued = app.state.admin_session_store.issue(
         admin_subject_id=subject_id,
@@ -62,7 +76,11 @@ def _admin(app, role: AdminRole) -> tuple[TestClient, str]:
     return client, issued.csrf_token
 
 
-def _seed_feed_item(app, *, index: int) -> tuple[UUID, SourceArtifact]:
+def _seed_feed_item(
+    app,
+    *,
+    index: int,
+) -> tuple[UUID, SourceArtifact]:
     body = f"source-brief-review-evidence-{index}".encode()
     content_hash = canonical_content_hash(body)
     source = app.state.knowledge_repository.add_source_artifact(
@@ -138,7 +156,11 @@ def _seed_feed_item(app, *, index: int) -> tuple[UUID, SourceArtifact]:
     return proposal.id, source
 
 
-def _accept_and_build(client: TestClient, csrf: str, proposal_id: UUID) -> UUID:
+def _accept_and_build(
+    client: TestClient,
+    csrf: str,
+    proposal_id: UUID,
+) -> UUID:
     accepted = client.post(
         f"/internal/admin/v1/proposals/{proposal_id}/review",
         headers={ADMIN_CSRF_HEADER: csrf},
@@ -153,7 +175,9 @@ def _accept_and_build(client: TestClient, csrf: str, proposal_id: UUID) -> UUID:
     return UUID(built.json()["source_brief_proposal_id"])
 
 
-def test_source_brief_review_surface_is_023_typed_and_refreshes_review(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_source_brief_review_surface_is_023_typed_and_refreshes_review(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     old_app = _app(monkeypatch, version="0.22.0")
     old_reviewer, _ = _admin(old_app, AdminRole.REVIEWER)
     assert old_reviewer.get("/internal/admin/v1/source-briefs").status_code == 404
@@ -171,7 +195,10 @@ def test_source_brief_review_surface_is_023_typed_and_refreshes_review(monkeypat
         assert forbidden.status_code == 403
         assert forbidden.json()["code"] == "ADMIN_FORBIDDEN"
 
-        first = reviewer.get("/internal/admin/v1/source-briefs", params={"limit": 1})
+        first = reviewer.get(
+            "/internal/admin/v1/source-briefs",
+            params={"limit": 1},
+        )
         assert first.status_code == 200
         first_body = first.json()
         assert len(first_body["items"]) == 1
@@ -207,16 +234,25 @@ def test_source_brief_review_surface_is_023_typed_and_refreshes_review(monkeypat
             json={"decision": "ACCEPTED", "policy_version": "brief-accept-v1"},
         )
         assert reviewed.status_code == 201
-        accepted = reviewer.get("/internal/admin/v1/source-briefs", params={"review_state": "ACCEPTED"})
-        assert [item["proposal_id"] for item in accepted.json()["items"]] == [str(brief_one)]
-        accepted_detail = reviewer.get(f"/internal/admin/v1/source-briefs/{brief_one}")
+        accepted = reviewer.get(
+            "/internal/admin/v1/source-briefs",
+            params={"review_state": "ACCEPTED"},
+        )
+        assert [item["proposal_id"] for item in accepted.json()["items"]] == [
+            str(brief_one)
+        ]
+        accepted_detail = reviewer.get(
+            f"/internal/admin/v1/source-briefs/{brief_one}"
+        )
         assert accepted_detail.json()["review_state"] == "ACCEPTED"
         assert accepted_detail.json()["review"] is not None
     finally:
         get_settings.cache_clear()
 
 
-def test_source_brief_detail_hides_other_kind_and_rejects_payload_drift(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_source_brief_detail_hides_other_kind_and_rejects_payload_drift(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     app = _app(monkeypatch)
     try:
         parent_id, _source = _seed_feed_item(app, index=1)
@@ -251,6 +287,9 @@ def test_source_brief_detail_hides_other_kind_and_rejects_payload_drift(monkeypa
         assert invalid.status_code == 409
         assert invalid.json()["code"] == "ADMIN_SOURCE_BRIEF_CONTRACT_INVALID"
         assert "must-never-cross" not in invalid.text
-        assert reviewer.get(f"/internal/admin/v1/source-briefs/{brief_id}").status_code == 200
+
+        assert reviewer.get(
+            f"/internal/admin/v1/source-briefs/{brief_id}"
+        ).status_code == 200
     finally:
         get_settings.cache_clear()

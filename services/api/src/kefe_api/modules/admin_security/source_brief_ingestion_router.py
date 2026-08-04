@@ -5,7 +5,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Request
 
-from kefe_api.modules.admin_security.feed_item_review_router import get_service
+from kefe_api.modules.admin_security.feed_item_review_router import (
+    get_feed_item_review,
+)
 from kefe_api.modules.admin_security.router import StrictModel, WritePrincipalDep
 from kefe_api.modules.admin_security.source_brief_ingestion import (
     SecuredSourceBriefIngestionService,
@@ -25,10 +27,12 @@ class SourceBriefIngestionResponse(StrictModel):
     proposal_review_state: str
 
 
-def get_source_brief_ingestion(request: Request) -> SecuredSourceBriefIngestionService:
+def get_source_brief_ingestion(
+    request: Request,
+) -> SecuredSourceBriefIngestionService:
     knowledge = request.app.state.knowledge_repository
     return SecuredSourceBriefIngestionService(
-        feed_items=get_service(request),
+        feed_items=get_feed_item_review(request),
         ingestion=request.app.state.ingestion_orchestration_service,
         repository=request.app.state.ingestion_orchestration_repository,
         knowledge=knowledge,
@@ -36,7 +40,7 @@ def get_source_brief_ingestion(request: Request) -> SecuredSourceBriefIngestionS
     )
 
 
-ServiceDep = Annotated[
+SourceBriefIngestionDep = Annotated[
     SecuredSourceBriefIngestionService,
     Depends(get_source_brief_ingestion),
 ]
@@ -49,9 +53,9 @@ ServiceDep = Annotated[
 def build_source_brief(
     proposal_id: UUID,
     principal: WritePrincipalDep,
-    service: ServiceDep,
+    source_brief: SourceBriefIngestionDep,
 ) -> SourceBriefIngestionResponse:
-    result = service.build(principal, proposal_id)
+    result = source_brief.build(principal, proposal_id)
     return SourceBriefIngestionResponse(
         normalized_artifact_id=result.normalized_artifact_id,
         run_id=result.run_id,

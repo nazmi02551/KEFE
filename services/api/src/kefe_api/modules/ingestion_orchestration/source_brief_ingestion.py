@@ -170,7 +170,9 @@ class NormalizedFeedItemMetadata:
         if feed_format not in {"RSS_2_0", "ATOM_1_0"}:
             _fail("SOURCE_BRIEF_NORMALIZED_ARTIFACT_INVALID")
         return cls(
-            parent_feed_item_proposal_id=_uuid(value["parent_feed_item_proposal_id"]),
+            parent_feed_item_proposal_id=_uuid(
+                value["parent_feed_item_proposal_id"]
+            ),
             review_decision_id=_uuid(value["review_decision_id"]),
             source_artifact_id=_uuid(value["source_artifact_id"]),
             feed_content_hash=content_hash,
@@ -185,7 +187,10 @@ class NormalizedFeedItemMetadata:
             item_title=_required_text(value["item_title"], max_chars=MAX_TITLE_CHARS),
             item_url=_http_url(value["item_url"]),
             published_at=_utc_timestamp(value["published_at"]),
-            summary_text=_optional_text(value["summary_text"], max_chars=MAX_SUMMARY_CHARS),
+            summary_text=_optional_text(
+                value["summary_text"],
+                max_chars=MAX_SUMMARY_CHARS,
+            ),
         )
 
     def as_mapping(self) -> dict[str, Any]:
@@ -203,7 +208,11 @@ class NormalizedFeedItemMetadata:
             "item_id": self.item_id,
             "item_title": self.item_title,
             "item_url": self.item_url,
-            "published_at": self.published_at.isoformat() if self.published_at is not None else None,
+            "published_at": (
+                self.published_at.isoformat()
+                if self.published_at is not None
+                else None
+            ),
             "summary_text": self.summary_text,
         }
 
@@ -247,12 +256,17 @@ class SourceBriefStageProcessor:
         source = self._knowledge.get_source_artifact(metadata.source_artifact_id)
         if source is None:
             _fail("SOURCE_BRIEF_SOURCE_ARTIFACT_NOT_FOUND")
-        if source.content_hash != metadata.feed_content_hash or source.raw_storage_ref != metadata.feed_storage_ref:
+        if (
+            source.content_hash != metadata.feed_content_hash
+            or source.raw_storage_ref != metadata.feed_storage_ref
+        ):
             _fail("SOURCE_BRIEF_SOURCE_ARTIFACT_MISMATCH")
 
         payload = {
             "normalized_artifact_id": str(artifact.id),
-            "parent_feed_item_proposal_id": str(metadata.parent_feed_item_proposal_id),
+            "parent_feed_item_proposal_id": str(
+                metadata.parent_feed_item_proposal_id
+            ),
             "review_decision_id": str(metadata.review_decision_id),
             "source_artifact_id": str(metadata.source_artifact_id),
             "source_content_hash": metadata.feed_content_hash,
@@ -261,7 +275,11 @@ class SourceBriefStageProcessor:
             "publisher_or_issuer": metadata.publisher_or_issuer,
             "headline": metadata.item_title,
             "source_url": metadata.item_url,
-            "published_at": metadata.published_at.isoformat() if metadata.published_at is not None else None,
+            "published_at": (
+                metadata.published_at.isoformat()
+                if metadata.published_at is not None
+                else None
+            ),
             "synopsis": metadata.summary_text,
             "language_code": artifact.language_code,
             "jurisdiction_code": artifact.jurisdiction_code,
@@ -280,7 +298,9 @@ class SourceBriefStageProcessor:
             ),
             output_metadata={
                 "normalized_artifact_id": str(artifact.id),
-                "parent_feed_item_proposal_id": str(metadata.parent_feed_item_proposal_id),
+                "parent_feed_item_proposal_id": str(
+                    metadata.parent_feed_item_proposal_id
+                ),
                 "source_artifact_id": str(metadata.source_artifact_id),
                 "proposal_kind": SOURCE_BRIEF_KIND,
             },

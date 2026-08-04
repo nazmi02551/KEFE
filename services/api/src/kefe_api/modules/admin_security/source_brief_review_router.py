@@ -6,19 +6,24 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request
 
-from kefe_api.modules.admin_security.feed_item_review_router import get_service
+from kefe_api.modules.admin_security.feed_item_review_router import (
+    get_feed_item_review,
+)
 from kefe_api.modules.admin_security.proposal_queue import SecuredProposalQueueService
 from kefe_api.modules.admin_security.router import ReadPrincipalDep, StrictModel
 from kefe_api.modules.admin_security.source_brief_review import (
     SecuredSourceBriefReviewService,
+    SourceBriefReviewPage,
     SourceBriefReviewRecord,
 )
-from kefe_api.modules.ingestion_orchestration.review_queue import ProposalQueueReviewState
+from kefe_api.modules.ingestion_orchestration.review_queue import (
+    ProposalQueueReviewState,
+)
 
 router = APIRouter(prefix="/internal/admin/v1", tags=["Internal Admin"])
 
 
-class SourceBriefSummary(StrictModel):
+class SourceBriefReviewSummaryResponse(StrictModel):
     proposal_id: UUID
     normalized_artifact_id: UUID
     source_artifact_id: UUID
@@ -33,12 +38,12 @@ class SourceBriefSummary(StrictModel):
     jurisdiction_code: str | None
 
 
-class SourceBriefPage(StrictModel):
-    items: list[SourceBriefSummary]
+class SourceBriefReviewPageResponse(StrictModel):
+    items: list[SourceBriefReviewSummaryResponse]
     next_cursor: str | None
 
 
-class SourceBriefReviewDecision(StrictModel):
+class SourceBriefReviewDecisionResponse(StrictModel):
     proposal_review_decision_id: UUID
     decision: str
     reviewer_ref: str
@@ -49,7 +54,7 @@ class SourceBriefReviewDecision(StrictModel):
     risk_policy_version: str | None
 
 
-class SourceBriefDetail(SourceBriefSummary):
+class SourceBriefReviewDetailResponse(SourceBriefReviewSummaryResponse):
     parent_feed_item_proposal_id: UUID
     parent_feed_item_review_decision_id: UUID
     source_content_hash: str
@@ -63,62 +68,67 @@ class SourceBriefDetail(SourceBriefSummary):
     pipeline_code: str
     pipeline_version: str
     configuration_version: str
-    review: SourceBriefReviewDecision | None
+    review: SourceBriefReviewDecisionResponse | None
 
 
 def get_source_brief_review(request: Request) -> SecuredSourceBriefReviewService:
+    queue = SecuredProposalQueueService(
+        repository=request.app.state.proposal_review_queue_repository,
+        security=request.app.state.admin_security_service,
+    )
     return SecuredSourceBriefReviewService(
-        queue=SecuredProposalQueueService(
-            repository=request.app.state.proposal_review_queue_repository,
-            security=request.app.state.admin_security_service,
-        ),
-        feed_items=get_service(request),
+        queue=queue,
+        feed_items=get_feed_item_review(request),
         knowledge=request.app.state.knowledge_repository,
     )
 
 
-ServiceDep = Annotated[
+SourceBriefReviewDep = Annotated[
     SecuredSourceBriefReviewService,
     Depends(get_source_brief_review),
 ]
 
 
-@router.get("/source-briefs", response_model=SourceBriefPage)
+@router.get("/source-briefs", response_model=SourceBriefReviewPageResponse)
 def list_source_briefs(
     principal: ReadPrincipalDep,
-    service: ServiceDep,
+    review: SourceBriefReviewDep,
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     cursor: Annotated[str | None, Query(min_length=1, max_length=1000)] = None,
     review_state: ProposalQueueReviewState | None = None,
     run_id: UUID | None = None,
-) -> SourceBriefPage:
-    page = service.list_source_briefs(
+) -> SourceBriefReviewPageResponse:
+    page: SourceBriefReviewPage = review.list_source_briefs(
         principal,
         limit=limit,
         cursor=cursor,
         review_state=review_state,
         run_id=run_id,
     )
-    return SourceBriefPage(
-        items=[_summary(record) for record in page.items],
+    return SourceBriefReviewPageResponse(
+        items=[_summary(item) for item in page.items],
         next_cursor=page.next_cursor,
     )
 
 
-@router.get("/source-briefs/{proposal_id}", response_model=SourceBriefDetail)
+@router.get(
+    "/source-briefs/{proposal_id}",
+    response_model=SourceBriefReviewDetailResponse,
+)
 def source_brief_detail(
     proposal_id: UUID,
     principal: ReadPrincipalDep,
-    service: ServiceDep,
-) -> SourceBriefDetail:
-    record = service.detail(principal, proposal_id)
-    proposal = record.queue_record.proposal
-    run = record.queue_record.run
-    decision = record.queue_record.review
+    review: SourceBriefReviewDep,
+) -> SourceBriefReviewDetailResponse:
+    record = review.detail(principal, proposal_id)
+    queue_record = record.queue_record
+    proposal = queue_record.proposal
+    run = queue_record.run
+    decision = queue_record.review
     assert proposal.configuration_version is not None
     review_response = None
     if decision is not None:
-        review_response = SourceBriefReviewDecision(
+        review_response = SourceBriefReviewDecisionResponse(
             proposal_review_decision_id=decision.id,
             decision=decision.decision.value,
             reviewer_ref=decision.reviewer_ref,
@@ -128,9 +138,11 @@ def source_brief_detail(
             policy_version=decision.policy_version,
             risk_policy_version=decision.risk_policy_version,
         )
-    return SourceBriefDetail(
+    return SourceBriefReviewDetailResponse(
         **_summary(record).model_dump(),
-        parent_feed_item_proposal_id=record.payload.parent_feed_item_proposal_id,
+        parent_feed_item_proposal_id=(
+            record.payload.parent_feed_item_proposal_id
+        ),
         parent_feed_item_review_decision_id=record.payload.review_decision_id,
         source_content_hash=record.payload.source_content_hash,
         evidence_ref=record.payload.evidence_ref,
@@ -147,12 +159,13 @@ def source_brief_detail(
     )
 
 
-def _summary(record: SourceBriefReviewRecord) -> SourceBriefSummary:
-    proposal = record.queue_record.proposal
-    run = record.queue_record.run
+def _summary(record: SourceBriefReviewRecord) -> SourceBriefReviewSummaryResponse:
+    queue_record = record.queue_record
+    proposal = queue_record.proposal
+    run = queue_record.run
     payload = record.payload
     assert proposal.risk_code is not None
-    return SourceBriefSummary(
+    return SourceBriefReviewSummaryResponse(
         proposal_id=proposal.id,
         normalized_artifact_id=payload.normalized_artifact_id,
         source_artifact_id=payload.source_artifact_id,
@@ -161,7 +174,7 @@ def _summary(record: SourceBriefReviewRecord) -> SourceBriefSummary:
         publisher_or_issuer=payload.publisher_or_issuer,
         published_at=payload.published_at,
         created_at=proposal.created_at,
-        review_state=record.queue_record.review_state.value,
+        review_state=queue_record.review_state.value,
         risk_code=proposal.risk_code,
         locale=run.locale,
         jurisdiction_code=run.jurisdiction_code,
