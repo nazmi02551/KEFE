@@ -1,11 +1,12 @@
 # ADR-0089 — Immutable feed evidence reading and bounded item extraction
 
-Status: Accepted
+Status: Accepted, composition rule amended by ADR-0098
 Date: 2026-08-03
+Amended: 2026-08-04
 
 ## Context
 
-Slice 52 captures one strict RSS/Atom feed snapshot as an immutable `SourceArtifact` and seals the exact response bytes before metadata parsing. Individual feed items are intentionally not projected during capture. The ingestion runtime can execute deterministic stage processors and persist reviewable proposals, but it currently has no provider-neutral evidence-read contract and no bounded feed-item extraction stage.
+Slice 52 captures one strict RSS/Atom feed snapshot as an immutable `SourceArtifact` and seals the exact response bytes before metadata parsing. Individual feed items are intentionally not projected during capture. The ingestion runtime can execute deterministic stage processors and persist reviewable proposals, but it initially had no provider-neutral evidence-read contract and no bounded feed-item extraction stage.
 
 A worker must not derive content from an external URL again, trust an opaque storage reference without integrity verification or bypass the existing strict RSS/Atom validator. It must also avoid turning unreviewed feed entries directly into Claims, Cases or published content.
 
@@ -25,14 +26,18 @@ A worker must not derive content from an external URL again, trust an opaque sto
 12. Proposal payloads may contain only bounded item id, title, optional canonical HTTP(S) URL, optional UTC timestamp, optional bounded summary text and source snapshot references. No HTML execution, AI summarization, semantic classification or truth inference occurs.
 13. Proposal order is deterministic by exact item identity. Payload hashes and the immutable run key provide cross-run idempotency.
 14. The stage emits proposals only. Human review remains mandatory before any later materialization. No automatic Claim, Argument, Case, Flow or publication action is added.
-15. Production ingestion runtime registry remains empty by default. The processor and plan factory are exposed for a later explicit pipeline activation decision, but no live provider or scheduled feed pipeline is registered.
+15. ADR-0098 supersedes the earlier requirement that the production ingestion worker registry itself remain empty. The exact deterministic FEED_ITEM plan and processor are now installed as an inert generic runtime capability.
+16. Installing the deterministic worker plan is not source activation. Production still starts with zero seeded feed definitions, zero provider profiles, zero public adapters and zero schedules.
+17. A source can reach this worker only after explicit Public Feed Catalog registration, maker-checker approval and a separate activation command. Startup performs no network operation and no automatic review, materialization or publication.
+18. Restart rehydration may restore only previously approved non-retired adapter profiles. It must not create another provider capability or schedule.
 
 ## Consequences
 
 - Feed snapshots can become bounded review-queue inputs without re-fetching the internet.
 - Evidence integrity is revalidated at read time, including durable backend reads.
 - Item extraction is deterministic, case-agnostic and independent of provider SDKs.
-- A later activation slice can register the exact plan after editorial schema and operational ownership are approved.
+- The worker plan can be continuously verified in production composition without authorizing any source or network operation.
+- Public Feed Catalog activation remains the only path from an approved source definition to provider/adoption/capture/schedule runtime state.
 
 ## Rejected alternatives
 
@@ -41,8 +46,9 @@ A worker must not derive content from an external URL again, trust an opaque sto
 - Trusting storage references without recomputing the body digest.
 - Adding a separate permissive RSS library/parser path.
 - Creating Claims or Cases directly from feed entries.
-- Registering the pipeline in production by default.
+- Treating deterministic worker-plan installation as provider or source activation.
+- Seeding concrete feeds, adapters or schedules in production composition.
 
 ## Non-claims
 
-This ADR does not introduce a concrete provider, scheduled live feed capture, provider compliance approval, deployed object-storage capability proof, semantic classification, claim extraction, AI summarization, automatic review/materialization/publication, Admin UI, Case Builder, Flow Composer or phone-facing feed behavior.
+This ADR does not prove a concrete provider, provider compliance approval, deployed object-storage capability, production scheduler operation, semantic classification, claim extraction, AI summarization, automatic review/materialization/publication, Admin UI, Case Builder, Flow Composer or phone-facing feed behavior.
