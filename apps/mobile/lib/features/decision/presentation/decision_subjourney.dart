@@ -22,7 +22,7 @@ class DecisionSubjourneyStage {
 
   factory DecisionSubjourneyStage.question(DecisionQuestion question) =>
       DecisionSubjourneyStage._(
-        id: 'question:${question.id}',
+        id: question.id,
         kind: DecisionSubjourneyStageKind.question,
         question: question,
       );
