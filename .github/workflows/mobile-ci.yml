@@ -4,11 +4,29 @@ on:
   pull_request:
     paths:
       - 'apps/mobile/**'
+      - 'services/api/src/kefe_api/main.py'
+      - 'services/api/src/kefe_api/modules/admin_security/feed_item_review.py'
+      - 'services/api/src/kefe_api/modules/admin_security/feed_item_review_router.py'
+      - 'services/api/src/kefe_api/modules/admin_security/source_brief_ingestion.py'
+      - 'services/api/src/kefe_api/modules/admin_security/source_brief_ingestion_router.py'
+      - 'services/api/src/kefe_api/modules/admin_security/source_brief_review.py'
+      - 'services/api/src/kefe_api/modules/admin_security/source_brief_review_router.py'
+      - 'services/api/src/kefe_api/modules/ingestion_orchestration/source_brief_ingestion.py'
+      - 'docs/contracts/canonical-admin-feed-source-brief-review.v1.json'
       - '.github/workflows/mobile-ci.yml'
   push:
     branches: [main]
     paths:
       - 'apps/mobile/**'
+      - 'services/api/src/kefe_api/main.py'
+      - 'services/api/src/kefe_api/modules/admin_security/feed_item_review.py'
+      - 'services/api/src/kefe_api/modules/admin_security/feed_item_review_router.py'
+      - 'services/api/src/kefe_api/modules/admin_security/source_brief_ingestion.py'
+      - 'services/api/src/kefe_api/modules/admin_security/source_brief_ingestion_router.py'
+      - 'services/api/src/kefe_api/modules/admin_security/source_brief_review.py'
+      - 'services/api/src/kefe_api/modules/admin_security/source_brief_review_router.py'
+      - 'services/api/src/kefe_api/modules/ingestion_orchestration/source_brief_ingestion.py'
+      - 'docs/contracts/canonical-admin-feed-source-brief-review.v1.json'
       - '.github/workflows/mobile-ci.yml'
 
 permissions:
