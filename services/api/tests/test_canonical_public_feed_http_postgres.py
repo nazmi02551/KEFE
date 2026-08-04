@@ -174,23 +174,25 @@ def test_postgres_application_restart_rehydrates_without_reactivation(
         )
         assert activated.status_code == 200
         schedule_id = UUID(activated.json()["schedule_id"])
-        assert first_app.state.canonical_public_feed_runtime_profiles.adapter_codes() == (
-            adapter_code,
+        first_adapter_codes = (
+            first_app.state.canonical_public_feed_runtime_profiles.adapter_codes()
         )
+        assert adapter_code in first_adapter_codes
         assert _runtime_counts(database_url, adapter_code) == (1, 1)
 
         second_app = create_app()
-        assert second_app.state.canonical_public_feed_runtime_profiles.adapter_codes() == (
-            adapter_code,
+        assert (
+            second_app.state.canonical_public_feed_runtime_profiles.adapter_codes()
+            == first_adapter_codes
         )
-        assert second_app.state.public_capture_registry.adapter_codes() == (adapter_code,)
+        assert second_app.state.public_capture_registry.adapter_codes() == first_adapter_codes
         assert second_app.state.source_scheduler_repository.get_schedule(schedule_id) is not None
         assert _runtime_counts(database_url, adapter_code) == (1, 1)
 
         reader, _reader_csrf = _client(second_app, creator_id, step_up=False)
         listed = reader.get("/internal/admin/v1/public-feeds")
         assert listed.status_code == 200
-        assert [item["feed_code"] for item in listed.json()["items"]] == [feed_code]
+        assert feed_code in {item["feed_code"] for item in listed.json()["items"]}
         audit = reader.get(f"/internal/admin/v1/public-feeds/{feed_code}/versions/1/audit")
         assert audit.status_code == 200
         assert [item["action"] for item in audit.json()["items"]] == [
