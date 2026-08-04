@@ -211,3 +211,11 @@ class PublicationValidationFailure:
     code: str
     detail: str
     path: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class PublicationPreflightResult:
+    version_id: UUID
+    eligible: bool
+    validation_failures: tuple[PublicationValidationFailure, ...]
+    resolution: PublicationConfigurationResolution | None
