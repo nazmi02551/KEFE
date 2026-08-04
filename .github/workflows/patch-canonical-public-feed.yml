@@ -1,4 +1,4 @@
-name: Patch Canonical Public Feed
+name: Repair Canonical Public Feed
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  patch:
+  repair:
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
@@ -20,63 +20,123 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Apply deterministic source corrections
+      - name: Apply deterministic corrections
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
-          catalog = Path('services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py')
-          text = catalog.read_text()
-          old = '''        granted = (
-              self._security._policy.capabilities_for_roles(principal.roles)
-              | principal.direct_capabilities
+          catalog_path = Path(
+              'services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py'
           )
-          if not granted.intersection(
-              {
-                  AdminCapability.SOURCE_MANAGE,
-                  AdminCapability.SOURCE_APPROVE,
-                  AdminCapability.SOURCE_ACTIVATE,
-              }
-          ):
-              self._security.authorize(principal, AdminCapability.SOURCE_MANAGE)
-          else:
-              self._security.touch(principal)
-          return self._repository.list_definitions()
-          '''
-          new = '''        self._security.authorize_any(
-              principal,
-              frozenset(
-                  {
-                      AdminCapability.SOURCE_MANAGE,
-                      AdminCapability.SOURCE_APPROVE,
-                      AdminCapability.SOURCE_ACTIVATE,
-                  }
+          catalog = catalog_path.read_text(encoding='utf-8')
+          pattern = re.compile(
+              r"    def list_definitions\(\n"
+              r"        self,\n"
+              r"        principal: AdminPrincipal,\n"
+              r"    \) -> tuple\[CanonicalPublicFeedDefinition, \.\.\.\]:\n"
+              r".*?"
+              r"        return self\._repository\.list_definitions\(\)\n\n"
+              r"    def audit",
+              re.DOTALL,
+          )
+          replacement = '''    def list_definitions(
+              self,
+              principal: AdminPrincipal,
+          ) -> tuple[CanonicalPublicFeedDefinition, ...]:
+              self._security.authorize_any(
+                  principal,
+                  frozenset(
+                      {
+                          AdminCapability.SOURCE_MANAGE,
+                          AdminCapability.SOURCE_APPROVE,
+                          AdminCapability.SOURCE_ACTIVATE,
+                      }
+                  ),
+              )
+              return self._repository.list_definitions()
+
+          def audit'''
+          catalog, count = pattern.subn(replacement, catalog, count=1)
+          if count != 1:
+              raise SystemExit(f'catalog authorization replacement count={count}')
+          catalog_path.write_text(catalog, encoding='utf-8')
+
+          test_path = Path('services/api/tests/test_canonical_public_feed_catalog.py')
+          tests = test_path.read_text(encoding='utf-8')
+          replacements = {
+              '''from kefe_api.modules.knowledge.provider_control import (
+              InMemoryProviderControlRepository,
+              ProviderLifecycle,
+          )''': '''from kefe_api.modules.knowledge.provider_control import (
+              ProviderCapabilityLifecycle,
+          )
+          from kefe_api.modules.knowledge.provider_control_memory import (
+              InMemorySourceProviderAdmissionRepository,
+          )''',
+              '''from kefe_api.modules.knowledge.source_scheduler import (
+              InMemorySourceAcquisitionScheduleRepository,
+              SourceAcquisitionScheduleState,
+          )''': '''from kefe_api.modules.knowledge.source_scheduler import (
+              SourceAcquisitionScheduleState,
+          )
+          from kefe_api.modules.knowledge.source_scheduler_memory import (
+              InMemorySourceAcquisitionSchedulerRepository,
+          )''',
+              '''from kefe_api.modules.knowledge.source_scheduler_service import (
+              SourceAcquisitionSchedulerService,
+          )''': '''from kefe_api.modules.knowledge.source_scheduler_service import (
+              NoOpSourceDispatchObserver,
+              SourceAcquisitionSchedulerService,
+          )''',
+              'InMemoryProviderControlRepository()': 'InMemorySourceProviderAdmissionRepository()',
+              'InMemorySourceAcquisitionScheduleRepository()': 'InMemorySourceAcquisitionSchedulerRepository()',
+              '''SourceAcquisitionSchedulerService(
+                  schedule_repository,
+                  max_interval_seconds=31_536_000,
+                  max_dispatch_attempts=20,
+              )''': '''SourceAcquisitionSchedulerService(
+                  repository=schedule_repository,
+                  acquisition=object(),
+                  observer=NoOpSourceDispatchObserver(),
+                  clock=lambda: NOW,
+              )''',
+              'providers.get_capability(': 'providers.get(',
+              '.lifecycle is ProviderLifecycle.': '.lifecycle_state is ProviderCapabilityLifecycle.',
+              'assert schedules.list_schedules() == ()': (
+                  'assert schedules.plan_due_once(at=NOW + timedelta(days=1)) is None'
               ),
-          )
-          return self._repository.list_definitions()
-          '''
-          if old not in text:
-              raise SystemExit('expected catalog authorization block not found')
-          catalog.write_text(text.replace(old, new))
-
-          tests = Path('services/api/tests/test_canonical_public_feed_catalog.py')
-          test_text = tests.read_text()
-          test_text = test_text.replace('schedules.list_schedules()', 'schedules.list_all()')
-          test_text = test_text.replace('schedules.get_schedule(', 'schedules.get(')
-          tests.write_text(test_text)
+              'assert len(schedules.list_schedules()) == 1': (
+                  'assert schedules.list_dispatches(first.schedule_id) == ()'
+              ),
+          }
+          for old, new in replacements.items():
+              if old not in tests:
+                  raise SystemExit(f'missing expected test fragment: {old[:80]!r}')
+              tests = tests.replace(old, new)
+          test_path.write_text(tests, encoding='utf-8')
           PY
-      - name: Normalize
+      - name: Normalize changed Python
         run: |
           python -m pip install -q ruff==0.11.10
-          ruff check --fix services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py services/api/tests/test_canonical_public_feed_catalog.py
-          ruff format services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py services/api/tests/test_canonical_public_feed_catalog.py
-      - name: Commit corrections
+          ruff check --fix \
+            services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py \
+            services/api/tests/test_canonical_public_feed_catalog.py \
+            services/api/tools/check_canonical_public_feed_catalog.py
+          ruff format \
+            services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py \
+            services/api/tests/test_canonical_public_feed_catalog.py \
+            services/api/tools/check_canonical_public_feed_catalog.py
+      - name: Remove temporary workflows and commit
         run: |
-          if git diff --quiet; then
-            exit 0
-          fi
+          git rm -f \
+            .github/workflows/format-canonical-public-feed.yml \
+            .github/workflows/patch-canonical-public-feed.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py services/api/tests/test_canonical_public_feed_catalog.py
-          git commit -m 'fix: align canonical public-feed repository and security APIs'
+          git add \
+            services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py \
+            services/api/tests/test_canonical_public_feed_catalog.py \
+            services/api/tools/check_canonical_public_feed_catalog.py
+          git commit -m 'fix: align canonical public-feed domain with active runtime APIs'
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
