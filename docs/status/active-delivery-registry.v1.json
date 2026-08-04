@@ -1,0 +1,171 @@
+{
+  "registry_version": "1.0.0",
+  "updated_at": "2026-08-04T13:45:00+03:00",
+  "source_issue": 287,
+  "source_adr": "docs/adr/0096-full-vision-delivery-convergence.md",
+  "common_divergence_base": {
+    "pr": 232,
+    "sha": "2bb18cd3cc34c2dc6bcb84559948b1231e8e2308",
+    "evidence": "exact-head API, Mobile, MVP and Global gates recorded on PR #232"
+  },
+  "lines": [
+    {
+      "id": "consumer-mobile-review",
+      "state": "CANONICAL_INTEGRATION_TARGET",
+      "pr": 286,
+      "branch": "feature/progressive-result-context-history",
+      "sha": "ad825906388371eb9bb36b325abf36a2dd813c5c",
+      "common_base_sha": "2bb18cd3cc34c2dc6bcb84559948b1231e8e2308",
+      "capability_boundaries": [
+        "CAP-001",
+        "CAP-008",
+        "CAP-009",
+        "CAP-031",
+        "CAP-035",
+        "CAP-080",
+        "CAP-095"
+      ],
+      "evidence_state": "EXACT_HEAD_AUTOMATION_PASS",
+      "required_workflows": {
+        "api_ci": "PASS",
+        "mobile_ci": "PASS",
+        "mvp_beta_gates": "PASS",
+        "global_readiness": "PASS"
+      },
+      "artifact": {
+        "kind": "INTERNAL_PRODUCT_PREVIEW_APK",
+        "artifact_id": 8885967054,
+        "sha256": "8d5178398b8326d6efa19f13140c75223467ca06be2307f939bf0296d885fa92"
+      },
+      "human_and_external_gates": [
+        "HUMAN_VISUAL_USABILITY",
+        "PRODUCTION_NETWORKING",
+        "STORE_RELEASE",
+        "OPERATOR_ROLLBACK"
+      ]
+    },
+    {
+      "id": "admin-feed-source-brief-review",
+      "state": "CANDIDATE",
+      "pr": 264,
+      "branch": "feature/admin-source-brief-review-slice56",
+      "sha": "80fbc887f16651949ec36819c440154bcfc278a8",
+      "common_base_sha": "2bb18cd3cc34c2dc6bcb84559948b1231e8e2308",
+      "capability_boundaries": [
+        "CAP-061",
+        "CAP-065",
+        "CAP-095"
+      ],
+      "evidence_state": "EXACT_HEAD_AUTOMATION_PASS_CANDIDATE_ONLY",
+      "integration_order": 1,
+      "overlap_groups": [],
+      "must_not_claim": [
+        "ADMIN_WEB_UI",
+        "AUTOMATIC_REVIEW",
+        "AUTOMATIC_MATERIALIZATION",
+        "CASE_CREATION",
+        "PUBLICATION"
+      ]
+    },
+    {
+      "id": "public-feed-catalog-runtime",
+      "state": "ALTERNATIVE",
+      "pr": 273,
+      "branch": "feature/public-feed-catalog-slice55",
+      "sha": "00e1fd5ad8e4818d9a5738b6fdc9cd99bb3124fc",
+      "common_base_sha": "2bb18cd3cc34c2dc6bcb84559948b1231e8e2308",
+      "capability_boundaries": [
+        "CAP-055",
+        "CAP-056",
+        "CAP-061",
+        "CAP-065"
+      ],
+      "evidence_state": "EXACT_HEAD_AUTOMATION_PASS_ALTERNATIVE_ONLY",
+      "integration_order": null,
+      "overlap_groups": [
+        "PUBLIC_FEED_MODEL",
+        "MIGRATION_20260803_0026",
+        "APPLICATION_COMPOSITION"
+      ],
+      "selection_gate": "SEPARATE_ADR_REQUIRED"
+    },
+    {
+      "id": "rss-atom-subscription-activation",
+      "state": "ALTERNATIVE",
+      "pr": 267,
+      "branch": "feature/rss-atom-subscription-activation-slice54",
+      "sha": "e3c8a445ace3a9c4fbc734fa7ebf91e97b7c039e",
+      "common_base_sha": "2bb18cd3cc34c2dc6bcb84559948b1231e8e2308",
+      "capability_boundaries": [
+        "CAP-055",
+        "CAP-056",
+        "CAP-061",
+        "CAP-065"
+      ],
+      "evidence_state": "EXACT_HEAD_AUTOMATION_PASS_ALTERNATIVE_ONLY",
+      "integration_order": null,
+      "overlap_groups": [
+        "PUBLIC_FEED_MODEL",
+        "MIGRATION_20260803_0026",
+        "APPLICATION_COMPOSITION"
+      ],
+      "selection_gate": "SEPARATE_ADR_REQUIRED"
+    },
+    {
+      "id": "production-and-external-operation",
+      "state": "EXTERNAL_GATE",
+      "pr": null,
+      "branch": null,
+      "sha": "0000000000000000000000000000000000000000",
+      "common_base_sha": "2bb18cd3cc34c2dc6bcb84559948b1231e8e2308",
+      "capability_boundaries": [
+        "CAP-073",
+        "CAP-084",
+        "CAP-085",
+        "CAP-092",
+        "CAP-094",
+        "CAP-095",
+        "CAP-114",
+        "CAP-115",
+        "CAP-116",
+        "CAP-117",
+        "CAP-123",
+        "CAP-124"
+      ],
+      "evidence_state": "NOT_IMPLEMENTED_OR_NOT_DEPLOYED",
+      "required_external_evidence": [
+        "REAL_AUTH_OTP_PROVIDER",
+        "REAL_OBJECT_STORAGE_AND_MEDIA_PIPELINE",
+        "DEPLOYED_OBSERVABILITY_AND_SLO",
+        "OPERATOR_ROLLBACK_DRILL",
+        "STORE_COMPLIANCE_AND_SIGNING"
+      ]
+    }
+  ],
+  "conflict_groups": [
+    {
+      "id": "PUBLIC_FEED_MODEL",
+      "members": [
+        "public-feed-catalog-runtime",
+        "rss-atom-subscription-activation"
+      ],
+      "resolution": "PENDING_SEPARATE_ADR",
+      "forbid_wholesale_merge": true,
+      "reason": "Both lines model public feed identity, activation and application composition after the same base and contain overlapping migration/composition surfaces."
+    }
+  ],
+  "next_integration": {
+    "base_line": "consumer-mobile-review",
+    "source_line": "admin-feed-source-brief-review",
+    "strategy": "SELECTIVE_ADOPTION_OR_REIMPLEMENTATION_BY_CONTRACT",
+    "must_not_include_conflict_groups": [
+      "PUBLIC_FEED_MODEL"
+    ],
+    "required_exact_head_workflows": [
+      "API_CI",
+      "MOBILE_CI",
+      "MVP_BETA_GATES",
+      "GLOBAL_READINESS"
+    ]
+  }
+}
