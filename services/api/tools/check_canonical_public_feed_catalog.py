@@ -27,6 +27,11 @@ CANONICAL_MIGRATION = (
     ROOT
     / "services/api/migrations/versions/20260804_0026_canonical_public_feed_catalog.py"
 )
+HTTP_TEST = ROOT / "services/api/tests/test_canonical_public_feed_http.py"
+VERTICAL_TEST = ROOT / "services/api/tests/test_canonical_public_feed_vertical.py"
+POSTGRES_HTTP_TEST = (
+    ROOT / "services/api/tests/test_canonical_public_feed_http_postgres.py"
+)
 MIGRATIONS = ROOT / "services/api/migrations/versions"
 
 
@@ -57,6 +62,9 @@ def main() -> None:
         (ROUTER, "Admin public-feed router"),
         (POSTGRES, "canonical PostgreSQL repository"),
         (CANONICAL_MIGRATION, "canonical migration"),
+        (HTTP_TEST, "canonical Admin HTTP test"),
+        (VERTICAL_TEST, "canonical vertical test"),
+        (POSTGRES_HTTP_TEST, "canonical PostgreSQL HTTP test"),
     ):
         require(path.is_file(), f"{label} is missing")
 
@@ -193,6 +201,29 @@ def main() -> None:
         "reject_public_feed_audit_mutation",
     ):
         require(marker in migration_source, f"canonical migration missing {marker}")
+
+    http_test_source = HTTP_TEST.read_text(encoding="utf-8")
+    require(
+        '"ADMIN_SEPARATION_OF_DUTIES" in self_approval.text' in http_test_source,
+        "Admin HTTP test must assert the bounded separation-of-duties code",
+    )
+    require(
+        '["error"]["code"]' not in http_test_source,
+        "Admin HTTP test must not depend on a private error envelope",
+    )
+
+    vertical_test_source = VERTICAL_TEST.read_text(encoding="utf-8")
+    require(
+        "approver = _principal(AdminRole.ACCESS_ADMIN)" in vertical_test_source,
+        "vertical approver must carry SOURCE_APPROVE through policy",
+    )
+
+    postgres_http_test_source = POSTGRES_HTTP_TEST.read_text(encoding="utf-8")
+    require(
+        'approver_id = _seed_subject(database_url, "ACCESS_ADMIN")'
+        in postgres_http_test_source,
+        "PostgreSQL restart approver must carry SOURCE_APPROVE through policy",
+    )
 
     migration_names = {path.name for path in MIGRATIONS.glob("*.py")}
     require(
