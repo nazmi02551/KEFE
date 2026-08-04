@@ -9,6 +9,7 @@ export default function AdminStudioPage() {
       <nav aria-label="Admin Studio yüzeyleri" className={styles.navigation}>
         <Link href="/case-builder">Case Builder DRAFT çalışma alanını aç</Link>
         <Link href="/content-review">Editorial Quality Review alanını aç</Link>
+        <Link href="/flow-composer">Flow Composer DRAFT alanını aç</Link>
       </nav>
       <EditorialWorkspace />
     </>
