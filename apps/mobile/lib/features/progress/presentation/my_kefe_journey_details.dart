@@ -45,12 +45,13 @@ class _ExpandableJourneyCard extends ConsumerWidget {
     );
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-      child: Container(
-        decoration: BoxDecoration(
-          color: visual.surfaceSunken,
+      child: Material(
+        color: visual.surfaceSunken,
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(17),
-          border: Border.all(color: visual.border),
+          side: BorderSide(color: visual.border),
         ),
+        clipBehavior: Clip.antiAlias,
         child: ExpansionTile(
           key: ValueKey('my-kefe-journey-detail-${item.caseId}'),
           tilePadding: const EdgeInsets.symmetric(horizontal: 13, vertical: 4),
