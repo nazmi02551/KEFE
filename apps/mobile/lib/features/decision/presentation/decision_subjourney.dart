@@ -104,8 +104,7 @@ class DecisionSubjourney extends ConsumerStatefulWidget {
   final Widget reviewAction;
 
   @override
-  ConsumerState<DecisionSubjourney> createState() =>
-      _DecisionSubjourneyState();
+  ConsumerState<DecisionSubjourney> createState() => _DecisionSubjourneyState();
 }
 
 class _DecisionSubjourneyState extends ConsumerState<DecisionSubjourney> {
@@ -206,7 +205,8 @@ class _DecisionSubjourneyState extends ConsumerState<DecisionSubjourney> {
                       ? _nextQuestion
                       : null
                 : _next,
-            nextLabel: stage.kind == DecisionSubjourneyStageKind.question &&
+            nextLabel:
+                stage.kind == DecisionSubjourneyStageKind.question &&
                     !stage.question!.required &&
                     !widget.responses.containsKey(stage.question!.id)
                 ? strings.decisionJourneySkip
@@ -412,7 +412,11 @@ class _DecisionReviewStage extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 14),
-              for (var index = 0; index < caseData.questions.length; index++) ...[
+              for (
+                var index = 0;
+                index < caseData.questions.length;
+                index++
+              ) ...[
                 _ReviewAnswerRow(
                   prompt: content.text(
                     namespace: KefeContentNamespace.questionPrompt,
@@ -494,9 +498,9 @@ class _ReviewAnswerRow extends StatelessWidget {
                 prompt,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 3),
               Text(
@@ -504,9 +508,9 @@ class _ReviewAnswerRow extends StatelessWidget {
                     (optional
                         ? strings.decisionJourneySkipped
                         : strings.completeRequired),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: visual.mutedForeground,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: visual.mutedForeground),
               ),
             ],
           ),

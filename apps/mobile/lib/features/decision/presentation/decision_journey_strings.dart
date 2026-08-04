@@ -111,8 +111,10 @@ extension DecisionJourneyStrings on KefeStrings {
     'decision.question_title',
     placeholders: {'current': current, 'total': total},
   );
-  String get decisionJourneyReasonTitle => _journeyText('decision.reason_title');
-  String get decisionJourneyReviewTitle => _journeyText('decision.review_title');
+  String get decisionJourneyReasonTitle =>
+      _journeyText('decision.reason_title');
+  String get decisionJourneyReviewTitle =>
+      _journeyText('decision.review_title');
   String decisionJourneyProgress(int current, int total) => _journeyText(
     'decision.progress',
     placeholders: {'current': current, 'total': total},

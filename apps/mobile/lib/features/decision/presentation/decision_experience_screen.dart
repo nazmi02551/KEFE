@@ -20,9 +20,8 @@ import 'case_hero_header.dart';
 import 'decision_flow_screen.dart';
 import 'decision_journey_stage_resolver.dart';
 import 'decision_journey_strings.dart';
+import 'decision_subjourney.dart';
 import 'perspective_section.dart';
-import 'question_input.dart';
-import 'reason_input.dart';
 import 'reflection_step.dart';
 import 'reveal_result_card.dart';
 
@@ -313,37 +312,23 @@ class _ActiveFlowStep extends ConsumerWidget {
         ? controller.retryPending
         : controller.commit;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (final question in caseData.questions) ...[
-          QuestionInputCard(
-            question: question,
-            value: state.responseFor(question.id),
-            enabled: inputsEnabled,
-            onChanged: (value) => controller.setResponse(question.id, value),
-          ),
-          const SizedBox(height: 12),
-        ],
-        if (caseData.reasonPolicy != null) ...[
-          ReasonInputCard(
-            policy: caseData.reasonPolicy!,
-            selectedTags: state.reasonTags,
-            text: state.reasonText,
-            enabled: inputsEnabled,
-            onTagToggled: controller.toggleReasonTag,
-            onTextChanged: controller.setReasonText,
-          ),
-          const SizedBox(height: 12),
-        ],
-        const SizedBox(height: 8),
-        _JourneyCommitPanel(
-          onPressed: action,
-          submitting: state.submitting,
-          recoveryPending: state.recoveryPending,
-          hasRequiredResponses: state.hasRequiredResponses,
-        ),
-      ],
+    return DecisionSubjourney(
+      key: ValueKey('decision-subjourney-${step.code}'),
+      caseData: caseData,
+      flowStepCode: step.code,
+      responses: state.responses,
+      selectedReasonTags: state.reasonTags,
+      reasonText: state.reasonText,
+      enabled: inputsEnabled,
+      onResponseChanged: controller.setResponse,
+      onReasonTagToggled: controller.toggleReasonTag,
+      onReasonTextChanged: controller.setReasonText,
+      reviewAction: _JourneyCommitPanel(
+        onPressed: action,
+        submitting: state.submitting,
+        recoveryPending: state.recoveryPending,
+        hasRequiredResponses: state.hasRequiredResponses,
+      ),
     );
   }
 
