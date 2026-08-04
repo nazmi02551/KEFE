@@ -153,7 +153,9 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
 }
 
 Future<void> expectReachable(WidgetTester tester, Key key) async {
-  final finder = find.byKey(key);
+  final matches = find.byKey(key);
+  expect(matches, findsWidgets);
+  final finder = matches.last;
   await tester.scrollUntilVisible(
     finder,
     400,
