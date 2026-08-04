@@ -140,16 +140,17 @@ class _FakeBackend:
 
 
 def _principal(role: AdminRole) -> AdminPrincipal:
+    session_now = datetime.now(UTC)
     return AdminPrincipal(
         admin_subject_id=uuid4(),
         session_id=uuid4(),
         roles=frozenset({role}),
         direct_capabilities=frozenset(),
-        authenticated_at=NOW - timedelta(minutes=5),
-        mfa_satisfied_at=NOW - timedelta(minutes=5),
-        step_up_at=NOW - timedelta(minutes=1),
-        expires_at=NOW + timedelta(hours=2),
-        last_seen_at=NOW - timedelta(minutes=1),
+        authenticated_at=session_now - timedelta(minutes=5),
+        mfa_satisfied_at=session_now - timedelta(minutes=5),
+        step_up_at=session_now - timedelta(minutes=1),
+        expires_at=session_now + timedelta(hours=2),
+        last_seen_at=session_now - timedelta(minutes=1),
     )
 
 
