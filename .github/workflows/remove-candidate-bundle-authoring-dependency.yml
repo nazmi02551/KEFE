@@ -1,0 +1,101 @@
+name: Remove Candidate Bundle Authoring Dependency
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/remove-candidate-bundle-authoring-dependency.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Keep market scope bounded inside ingestion
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          domain_path = Path(
+              'services/api/src/kefe_api/modules/ingestion_orchestration/'
+              'candidate_case_bundle.py'
+          )
+          domain = domain_path.read_text(encoding='utf-8')
+          replacements = {
+              'from kefe_api.modules.content_authoring.models import MarketScope\n': '',
+              '    market_scope: MarketScope\n': '    market_scope: str\n',
+              '        if type(self.market_scope) is not MarketScope:\n'
+              '            raise ValueError("market_scope must be exact MarketScope")\n':
+              '        if type(self.market_scope) is not str or self.market_scope not in {\n'
+              '            "GLOBAL",\n'
+              '            "COUNTRY_SET",\n'
+              '        }:\n'
+              '            raise ValueError("market_scope is invalid")\n',
+              '        if self.market_scope is MarketScope.GLOBAL and self.country_codes:\n':
+              '        if self.market_scope == "GLOBAL" and self.country_codes:\n',
+              '        if self.market_scope is MarketScope.COUNTRY_SET and not self.country_codes:\n':
+              '        if self.market_scope == "COUNTRY_SET" and not self.country_codes:\n',
+              '            "market_scope": self.market_scope.value,\n':
+              '            "market_scope": self.market_scope,\n',
+              '                market_scope=MarketScope(value["market_scope"]),\n':
+              '                market_scope=value["market_scope"],\n',
+          }
+          for old, new in replacements.items():
+              if domain.count(old) != 1:
+                  raise SystemExit(f'unexpected candidate domain marker: {old!r}')
+              domain = domain.replace(old, new, 1)
+          domain_path.write_text(domain, encoding='utf-8')
+
+          router_path = Path(
+              'services/api/src/kefe_api/modules/admin_security/'
+              'candidate_bundle_router.py'
+          )
+          router = router_path.read_text(encoding='utf-8')
+          router_replacements = {
+              'from kefe_api.modules.content_authoring.models import MarketScope\n': '',
+              '            market_scope=MarketScope(payload.market_scope),\n':
+              '            market_scope=payload.market_scope,\n',
+          }
+          for old, new in router_replacements.items():
+              if router.count(old) != 1:
+                  raise SystemExit(f'unexpected candidate router marker: {old!r}')
+              router = router.replace(old, new, 1)
+          router_path.write_text(router, encoding='utf-8')
+          PY
+      - name: Normalize and verify boundaries
+        working-directory: services/api
+        run: |
+          python -m pip install -q -U pip
+          pip install -q -e '.[dev]'
+          ruff check --fix \
+            src/kefe_api/modules/ingestion_orchestration/candidate_case_bundle.py \
+            src/kefe_api/modules/admin_security/candidate_bundle_router.py
+          ruff format \
+            src/kefe_api/modules/ingestion_orchestration/candidate_case_bundle.py \
+            src/kefe_api/modules/admin_security/candidate_bundle_router.py
+          ruff check .
+          python tools/check_ingestion_orchestration_contract.py
+          python tools/check_canonical_candidate_bundle_projection.py
+          pytest -q \
+            tests/test_canonical_candidate_bundle_projection_http.py \
+            tests/test_admin_editorial_operations_http.py \
+            tests/test_admin_source_brief_review_http.py
+      - name: Remove workflow and commit
+        run: |
+          git rm -f .github/workflows/remove-candidate-bundle-authoring-dependency.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            services/api/src/kefe_api/modules/ingestion_orchestration/candidate_case_bundle.py \
+            services/api/src/kefe_api/modules/admin_security/candidate_bundle_router.py
+          git commit -m 'refactor: keep candidate bundle independent of authoring'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
