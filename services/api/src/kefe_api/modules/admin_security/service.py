@@ -87,11 +87,7 @@ class AdminSecurityService:
     ) -> None:
         current = now or datetime.now(UTC)
         self._assert_principal_assurance(principal, current=current)
-
-        granted = (
-            self._policy.capabilities_for_roles(principal.roles)
-            | principal.direct_capabilities
-        )
+        granted = self._granted_capabilities(principal)
         if capability not in granted:
             self._deny(principal, capability, "capability_not_granted")
             raise DomainError(
@@ -100,17 +96,40 @@ class AdminSecurityService:
                 403,
                 meta={"required_capability": capability.value},
             )
+        self._require_step_up(principal, capability, current=current)
 
-        if capability in self._policy.step_up_capabilities:
-            step_up_at = principal.step_up_at
-            if step_up_at is None or current - step_up_at > self._policy.step_up_freshness:
-                self._deny(principal, capability, "step_up_required")
-                raise DomainError(
-                    "ADMIN_STEP_UP_REQUIRED",
-                    "Recent Admin step-up authentication is required",
-                    403,
-                    meta={"required_capability": capability.value},
-                )
+    def authorize_any(
+        self,
+        principal: AdminPrincipal,
+        capabilities: frozenset[AdminCapability],
+        *,
+        now: datetime | None = None,
+    ) -> AdminCapability:
+        if not capabilities:
+            raise ValueError("at least one Admin capability is required")
+        current = now or datetime.now(UTC)
+        self._assert_principal_assurance(principal, current=current)
+        granted = self._granted_capabilities(principal)
+        matching = sorted(
+            granted.intersection(capabilities),
+            key=lambda capability: capability.value,
+        )
+        if not matching:
+            representative = sorted(capabilities, key=lambda capability: capability.value)[0]
+            self._deny(principal, representative, "capability_not_granted")
+            raise DomainError(
+                "ADMIN_FORBIDDEN",
+                "None of the required Admin capabilities is granted",
+                403,
+                meta={
+                    "required_any_capabilities": sorted(
+                        capability.value for capability in capabilities
+                    )
+                },
+            )
+        selected = matching[0]
+        self._require_step_up(principal, selected, current=current)
+        return selected
 
     def enforce_reviewer_separation(
         self,
@@ -126,6 +145,34 @@ class AdminSecurityService:
                 "ADMIN_SEPARATION_OF_DUTIES",
                 "The submitting Admin cannot approve the same CaseVersion",
                 403,
+            )
+
+    def _granted_capabilities(
+        self,
+        principal: AdminPrincipal,
+    ) -> frozenset[AdminCapability]:
+        return (
+            self._policy.capabilities_for_roles(principal.roles)
+            | principal.direct_capabilities
+        )
+
+    def _require_step_up(
+        self,
+        principal: AdminPrincipal,
+        capability: AdminCapability,
+        *,
+        current: datetime,
+    ) -> None:
+        if capability not in self._policy.step_up_capabilities:
+            return
+        step_up_at = principal.step_up_at
+        if step_up_at is None or current - step_up_at > self._policy.step_up_freshness:
+            self._deny(principal, capability, "step_up_required")
+            raise DomainError(
+                "ADMIN_STEP_UP_REQUIRED",
+                "Recent Admin step-up authentication is required",
+                403,
+                meta={"required_capability": capability.value},
             )
 
     def _assert_principal_assurance(
