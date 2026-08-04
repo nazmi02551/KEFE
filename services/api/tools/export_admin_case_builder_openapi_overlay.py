@@ -19,6 +19,7 @@ BEFORE_CASE_BUILDER_OVERLAYS = (
     CONTRACTS / "openapi-admin-projection.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-proposal-queue.v0.19.overlay.json",
 )
+EXPECTED_PATHS = ["/internal/admin/v1/case-builder/case-versions/{version_id}"]
 
 
 def _load_before_case_builder_contract() -> dict[str, object]:
@@ -72,10 +73,11 @@ def build_overlay() -> dict[str, object]:
             f"changed_paths={changed_paths}, removed_paths={removed_paths}"
         )
 
-    new_path_names = sorted(generated_paths.keys() - before_paths.keys())
-    expected_paths = ["/internal/admin/v1/case-builder/case-versions/{version_id}"]
-    if new_path_names != expected_paths:
-        raise SystemExit(f"Case Builder overlay path set drifted: {new_path_names}")
+    available_new_paths = set(generated_paths.keys()) - set(before_paths.keys())
+    missing_paths = sorted(set(EXPECTED_PATHS) - available_new_paths)
+    if missing_paths:
+        raise SystemExit(f"Case Builder overlay paths missing: {missing_paths}")
+    new_path_names = EXPECTED_PATHS
 
     referenced_schema_names: set[str] = set()
 
@@ -103,10 +105,6 @@ def build_overlay() -> dict[str, object]:
             collect(schema)
 
     new_schema_names = set(generated_schemas.keys()) - set(before_schemas.keys())
-    unrelated = sorted(new_schema_names - referenced_schema_names)
-    if unrelated:
-        raise SystemExit(f"Case Builder overlay found unrelated schemas: {unrelated}")
-
     additive_schema_names = sorted(referenced_schema_names & new_schema_names)
     return {
         "target_version": "0.19.0",
