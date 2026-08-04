@@ -9,7 +9,6 @@ import '../../consensus/presentation/consensus_section.dart';
 import '../../progress/presentation/progress_section.dart';
 import '../../sharing/presentation/share_section.dart';
 import '../application/decision_controller.dart';
-import '../domain/decision_models.dart';
 import 'decision_journey_strings.dart';
 import 'perspective_section.dart';
 import 'reveal_result_card.dart';
@@ -36,8 +35,7 @@ abstract final class PostCommitJourneyResolver {
     PostCommitJourneyStage(PostCommitJourneyStageKind.completion),
   ];
 
-  static int clampIndex(int index) =>
-      index.clamp(0, stages.length - 1).toInt();
+  static int clampIndex(int index) => index.clamp(0, stages.length - 1).toInt();
 }
 
 class PostCommitJourney extends ConsumerStatefulWidget {
@@ -124,7 +122,7 @@ class _PostCommitJourneyState extends ConsumerState<PostCommitJourney> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      strings.postCommitJourneyTitle(stage.kind),
+                      strings.postCommitJourneyTitle(stage.kind.name),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w900,
                         height: 1.18,
@@ -132,7 +130,7 @@ class _PostCommitJourneyState extends ConsumerState<PostCommitJourney> {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      strings.postCommitJourneyHelper(stage.kind),
+                      strings.postCommitJourneyHelper(stage.kind.name),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: visual.mutedForeground,
                         height: 1.4,
