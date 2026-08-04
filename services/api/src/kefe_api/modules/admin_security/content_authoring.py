@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import replace
-from datetime import UTC, datetime
+from datetime import datetime
 from uuid import UUID
 
 from kefe_api.core.errors import DomainError
@@ -157,12 +156,10 @@ class SecuredContentAuthoringService:
         now: datetime | None = None,
     ) -> AuthoringCaseVersion:
         version = self.review_for_inspection(principal, version_id, now=now)
-        return self._approve_review(
-            principal,
-            version,
-            completed_review_modes=version.completed_review_modes,
-            explicit_attestation=False,
-            occurred_at=now,
+        self._enforce_reviewer_separation(principal, version)
+        return self._authoring.approve(
+            version_id,
+            actor_ref=principal.audit_actor_ref,
         )
 
     def approve_with_review_modes(
@@ -174,12 +171,11 @@ class SecuredContentAuthoringService:
         now: datetime | None = None,
     ) -> AuthoringCaseVersion:
         version = self.review_for_inspection(principal, version_id, now=now)
-        return self._approve_review(
-            principal,
-            version,
+        self._enforce_reviewer_separation(principal, version)
+        return self._authoring.approve(
+            version_id,
+            actor_ref=principal.audit_actor_ref,
             completed_review_modes=completed_review_modes,
-            explicit_attestation=True,
-            occurred_at=now,
         )
 
     def reject(
@@ -190,30 +186,12 @@ class SecuredContentAuthoringService:
         rationale: str,
         now: datetime | None = None,
     ) -> AuthoringCaseVersion:
-        version = self.review_for_inspection(principal, version_id, now=now)
-        normalized_rationale = rationale.strip()
-        if not normalized_rationale:
-            raise DomainError(
-                "CONTENT_REJECTION_RATIONALE_REQUIRED",
-                "Rejection rationale is required",
-                422,
-            )
-        occurred_at = now or datetime.now(UTC)
-        rejected = replace(
-            version,
-            state=ContentLifecycle.DRAFT,
-            completed_review_modes=(),
-        )
-        audit = LifecycleAuditEntry.create(
-            version=version,
+        self._security.authorize(principal, AdminCapability.CONTENT_REVIEW, now=now)
+        return self._authoring.reject(
+            version_id,
             actor_ref=principal.audit_actor_ref,
-            command="reject",
-            previous_state=ContentLifecycle.IN_REVIEW,
-            new_state=ContentLifecycle.DRAFT,
-            rationale=normalized_rationale,
-            occurred_at=occurred_at,
+            rationale=rationale,
         )
-        return self._transition(rejected, ContentLifecycle.IN_REVIEW, audit)
 
     def publish(
         self,
@@ -253,90 +231,15 @@ class SecuredContentAuthoringService:
         self._security.authorize(principal, AdminCapability.AUDIT_READ, now=now)
         return self._authoring.audit_trail(case_id)
 
-    def _approve_review(
+    def _enforce_reviewer_separation(
         self,
         principal: AdminPrincipal,
         version: AuthoringCaseVersion,
-        *,
-        completed_review_modes: tuple[str, ...],
-        explicit_attestation: bool,
-        occurred_at: datetime | None,
-    ) -> AuthoringCaseVersion:
+    ) -> None:
         self._security.enforce_reviewer_separation(
             principal=principal,
             submitter_actor_ref=self._latest_submitter(version),
         )
-        required = tuple(item.strip() for item in version.required_review_modes)
-        if any(not item for item in required) or len(set(required)) != len(required):
-            raise DomainError(
-                "CONTENT_REQUIRED_REVIEW_MODES_INVALID",
-                "CaseVersion required review modes are invalid",
-                409,
-            )
-        if required and not explicit_attestation:
-            raise DomainError(
-                "CONTENT_REVIEW_ATTESTATION_REQUIRED",
-                "Required review modes must be explicitly attested by the reviewer",
-                422,
-            )
-
-        normalized = tuple(item.strip() for item in completed_review_modes)
-        if any(not item for item in normalized) or len(set(normalized)) != len(normalized):
-            raise DomainError(
-                "CONTENT_REVIEW_MODES_INVALID",
-                "Completed review modes must be unique non-empty values",
-                422,
-            )
-        missing = sorted(set(required) - set(normalized))
-        unexpected = sorted(set(normalized) - set(required))
-        if missing or unexpected:
-            raise DomainError(
-                "CONTENT_REVIEW_MODES_INCOMPLETE",
-                "Completed review modes must exactly match required review modes",
-                422,
-                meta={"missing": missing, "unexpected": unexpected},
-            )
-
-        decision_at = occurred_at or datetime.now(UTC)
-        approved = replace(
-            version,
-            state=ContentLifecycle.APPROVED,
-            completed_review_modes=required,
-        )
-        rationale = (
-            "Completed review modes: " + ", ".join(required)
-            if required
-            else "No required review modes"
-        )
-        audit = LifecycleAuditEntry.create(
-            version=version,
-            actor_ref=principal.audit_actor_ref,
-            command="approve",
-            previous_state=ContentLifecycle.IN_REVIEW,
-            new_state=ContentLifecycle.APPROVED,
-            rationale=rationale,
-            occurred_at=decision_at,
-        )
-        return self._transition(approved, ContentLifecycle.IN_REVIEW, audit)
-
-    def _transition(
-        self,
-        version: AuthoringCaseVersion,
-        expected_state: ContentLifecycle,
-        audit: LifecycleAuditEntry,
-    ) -> AuthoringCaseVersion:
-        try:
-            return self._repository.transition(
-                version=version,
-                expected_state=expected_state,
-                audit=audit,
-            )
-        except ValueError as exc:
-            raise DomainError(
-                "CONTENT_LIFECYCLE_CONFLICT",
-                "Content lifecycle changed concurrently",
-                409,
-            ) from exc
 
     def _require_version(self, version_id: UUID) -> AuthoringCaseVersion:
         version = self._repository.get_version(version_id)
