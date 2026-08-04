@@ -63,6 +63,23 @@ The workspace provides:
 
 Only `flow_templates` are submitted. The server reloads the canonical DRAFT and preserves taxonomies, risks, catalogs, modifier compatibility and every other non-Flow field. The workspace deliberately does not expose configuration publication, rollback, Case editing/review, autosave, automatic Flow generation or consumer-runtime mutation.
 
+## Publication Operations workspace
+
+`/publication-operations` exposes separate bounded queues for canonical `APPROVED` and `PUBLISHED` CaseVersions. A `?version=<uuid>` query parameter only prefills the exact ID. Route loading, queue selection, filter changes and confirmation changes never start a request.
+
+The workspace provides:
+
+- exact risk/domain filters and bounded deterministic pagination;
+- explicit read-only detail and append-only lifecycle audit loading;
+- an explicit advisory publication preflight that performs no persistence write or lifecycle transition;
+- prospective Content Configuration and Flow provenance inspection;
+- an explicit immutable-version acknowledgement before publish;
+- same-session CSRF and recent server-enforced step-up for publish and withdraw;
+- server-derived maker-checker separation between the latest approving reviewer and publisher;
+- rationale-bound `PUBLISHED → WITHDRAWN` with immutable publication provenance retained.
+
+Preflight never reserves lifecycle state or provenance. The final publish command repeats canonical validation and Flow/configuration resolution before atomically transitioning `APPROVED → PUBLISHED`. The workspace deliberately does not expose content editing, review decisions, Content Configuration publish/rollback, bulk publication, automatic actions, moderation or media operations.
+
 ## Local setup
 
 ```bash
@@ -81,6 +98,6 @@ The existing Admin session is supplied by the `kefe_admin_session` cookie. Every
 npm run verify
 ```
 
-This runs all four executable Admin architecture contracts, ESLint, strict TypeScript, API/client/helper tests and a production Next.js build.
+This runs all five executable Admin architecture contracts, ESLint, strict TypeScript, API/client/helper tests and a production Next.js build.
 
 Automated checks do not prove human editorial usability, CQB acceptance, production deployment, provider readiness, deployed SLO/load/observability, operator rollback, store compliance or production release.
