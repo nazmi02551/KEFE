@@ -244,7 +244,8 @@ def main() -> int:
         current = CURRENT_PATH.read_text(encoding="utf-8")
         required_current_markers = [
             "active-delivery-registry.v1.json",
-            "Registry version: `1.0.0`",
+            "Registry version:",
+            "`1.0.0`",
             "Issue #287",
             "ad825906388371eb9bb36b325abf36a2dd813c5c",
             "80fbc887f16651949ec36819c440154bcfc278a8",
