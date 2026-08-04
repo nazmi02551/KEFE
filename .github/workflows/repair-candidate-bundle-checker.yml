@@ -20,24 +20,49 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Correct service evidence marker
+      - name: Align architecture and dependency validation evidence
         run: |
           python - <<'PY'
           from pathlib import Path
 
-          path = Path('services/api/tools/check_canonical_candidate_bundle_projection.py')
-          source = path.read_text(encoding='utf-8')
+          checker_path = Path(
+              'services/api/tools/check_canonical_candidate_bundle_projection.py'
+          )
+          checker = checker_path.read_text(encoding='utf-8')
           old = '        "proposal_review_state",\n'
           new = '        "CandidateBundleResult",\n'
-          if source.count(old) != 1:
+          if checker.count(old) != 1:
               raise SystemExit('unexpected checker marker')
-          path.write_text(source.replace(old, new, 1), encoding='utf-8')
+          checker = checker.replace(old, new, 1)
+          checker = checker.replace(
+              "        'assert blocked.status_code == 409',\n",
+              "        'assert blocked.status_code == 422',\n"
+              "        'EDITORIAL_PROJECTION_DEPENDENCY_NOT_READY',\n",
+              1,
+          )
+          checker_path.write_text(checker, encoding='utf-8')
+
+          test_path = Path(
+              'services/api/tests/test_canonical_candidate_bundle_projection_http.py'
+          )
+          test = test_path.read_text(encoding='utf-8')
+          old = '        assert blocked.status_code == 409\n'
+          new = (
+              '        assert blocked.status_code == 422\n'
+              '        assert "EDITORIAL_PROJECTION_DEPENDENCY_NOT_READY" in blocked.text\n'
+          )
+          if test.count(old) != 1:
+              raise SystemExit('unexpected projection precondition assertion')
+          test_path.write_text(test.replace(old, new, 1), encoding='utf-8')
           PY
       - name: Run candidate bundle gate
         working-directory: services/api
         run: |
           python -m pip install -q -U pip
           pip install -q -e '.[dev]'
+          ruff format \
+            tools/check_canonical_candidate_bundle_projection.py \
+            tests/test_canonical_candidate_bundle_projection_http.py
           ruff check .
           python tools/check_canonical_candidate_bundle_projection.py
           pytest -q \
@@ -49,6 +74,8 @@ jobs:
           git rm -f .github/workflows/repair-candidate-bundle-checker.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add services/api/tools/check_canonical_candidate_bundle_projection.py
-          git commit -m 'test: align candidate bundle checker with service boundary'
+          git add \
+            services/api/tools/check_canonical_candidate_bundle_projection.py \
+            services/api/tests/test_canonical_candidate_bundle_projection_http.py
+          git commit -m 'test: align projection dependency precondition evidence'
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
