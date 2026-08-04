@@ -1,0 +1,58 @@
+name: Repair Public Feed Ingestion Hash
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/repair-public-feed-ingestion-hash.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bind catalog hash to immutable ingestion definition hash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path(
+              'services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py'
+          )
+          source = path.read_text(encoding='utf-8')
+          old = (
+              '                "ingestion_configuration_hash": '
+              'definition.ingestion_configuration_hash,\n'
+          )
+          new = (
+              '                "ingestion_configuration_hash": '
+              'definition.configuration_hash,\n'
+          )
+          if source.count(old) != 1:
+              raise SystemExit('unexpected ingestion hash binding shape')
+          path.write_text(source.replace(old, new, 1), encoding='utf-8')
+          PY
+      - name: Normalize and verify
+        working-directory: services/api
+        run: |
+          python -m pip install -q ruff==0.11.10
+          ruff format src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py
+          ruff check src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py
+          python -m py_compile src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py
+      - name: Remove repair workflow and commit
+        run: |
+          git rm -f .github/workflows/repair-public-feed-ingestion-hash.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py
+          git commit -m 'fix: bind catalog hash to public-feed definition hash'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
