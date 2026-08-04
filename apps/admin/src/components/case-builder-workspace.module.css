@@ -1,0 +1,343 @@
+.shell {
+  width: min(1280px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 5rem;
+}
+
+.hero {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 1.5rem 0 2rem;
+}
+
+.hero h1 {
+  margin-bottom: 0.7rem;
+}
+
+.hero p {
+  max-width: 70ch;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.eyebrow {
+  margin-bottom: 0.45rem;
+  color: var(--gold);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.backLink {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  padding: 0.7rem 1rem;
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+.backLink:hover,
+.backLink:focus-visible {
+  border-color: var(--cyan);
+}
+
+.connection,
+.card,
+.identityCard,
+.readOnlyCard,
+.actions,
+.warning,
+.emptyState,
+.jsonCard {
+  border: 1px solid var(--line);
+  border-radius: 1.15rem;
+  background: rgba(17, 21, 32, 0.94);
+  box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, 0.17);
+}
+
+.connection {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr auto;
+  gap: 1rem;
+  align-items: end;
+  padding: 1.25rem;
+}
+
+.connection p,
+.card p,
+.actions p,
+.jsonCard p,
+.emptyState p,
+.readOnlyCard p {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.versionField {
+  grid-column: 1 / span 3;
+}
+
+.sessionSummary {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--success) !important;
+  overflow-wrap: anywhere;
+}
+
+.feedback {
+  min-height: 3.2rem;
+  margin: 1rem 0;
+  border-left: 3px solid var(--cyan);
+  padding: 0.85rem 1rem;
+  color: var(--muted);
+}
+
+.identityCard,
+.readOnlyCard,
+.actions {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding: 1.4rem;
+}
+
+.statusStack {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: end;
+  text-align: right;
+}
+
+.statusStack strong {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.45rem 0.75rem;
+}
+
+.statusStack strong[data-state="DRAFT"] {
+  border-color: var(--gold);
+}
+
+.statusStack strong[data-state="IN_REVIEW"] {
+  border-color: var(--cyan);
+}
+
+.statusStack span {
+  max-width: 48ch;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+.warning {
+  margin-bottom: 1rem;
+  border-left: 4px solid var(--danger);
+  padding: 1.2rem 1.4rem;
+}
+
+.warning ul {
+  margin-bottom: 0;
+}
+
+.card {
+  min-width: 0;
+  margin: 0 0 1rem;
+  padding: 1.4rem;
+}
+
+.card legend {
+  padding: 0 0.55rem;
+  color: var(--gold);
+  font-weight: 800;
+}
+
+.twoColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.checkboxLabel {
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+  gap: 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  padding: 0.75rem;
+}
+
+.checkboxLabel input,
+.submitAcknowledge input {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.readOnlyField {
+  display: grid;
+  gap: 0.5rem;
+  border: 1px dashed var(--line);
+  border-radius: 0.8rem;
+  padding: 0.75rem;
+}
+
+.readOnlyField span {
+  color: var(--muted);
+  font-size: 0.91rem;
+}
+
+.readOnlyCard {
+  border-left: 4px solid var(--cyan);
+}
+
+.readOnlyCard strong {
+  max-width: 40ch;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.collectionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.jsonCard {
+  min-width: 0;
+  padding: 1.3rem;
+}
+
+.jsonCard textarea {
+  min-height: 22rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  tab-size: 2;
+}
+
+.actions {
+  flex-wrap: wrap;
+  border-left: 4px solid var(--gold);
+}
+
+.actions > div {
+  flex: 1 1 24rem;
+}
+
+.submitAcknowledge {
+  display: flex;
+  max-width: 28rem;
+  align-items: center;
+  gap: 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  padding: 0.75rem;
+  color: var(--muted);
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.tableWrap table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableWrap th,
+.tableWrap td {
+  border-bottom: 1px solid var(--line);
+  padding: 0.8rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.emptyState {
+  padding: clamp(1.5rem, 5vw, 4rem);
+  text-align: center;
+}
+
+.emptyState p {
+  max-width: 60ch;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  .connection {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .connection > div,
+  .versionField,
+  .sessionSummary {
+    grid-column: 1 / -1;
+  }
+
+  .collectionGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .shell {
+    width: min(100% - 1rem, 1280px);
+    padding-top: 0.5rem;
+  }
+
+  .hero,
+  .identityCard,
+  .readOnlyCard,
+  .actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .statusStack {
+    justify-items: start;
+    text-align: left;
+  }
+
+  .readOnlyCard strong {
+    text-align: left;
+  }
+
+  .connection,
+  .twoColumns {
+    grid-template-columns: 1fr;
+  }
+
+  .connection > *,
+  .fullWidth,
+  .versionField {
+    grid-column: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
