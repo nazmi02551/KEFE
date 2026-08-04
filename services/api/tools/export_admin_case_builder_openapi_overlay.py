@@ -19,7 +19,6 @@ BEFORE_CASE_BUILDER_OVERLAYS = (
     CONTRACTS / "openapi-admin-projection.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-proposal-queue.v0.19.overlay.json",
 )
-CASE_BUILDER_PREFIX = "/internal/admin/v1/case-builder/"
 
 
 def _load_before_case_builder_contract() -> dict[str, object]:
@@ -74,9 +73,10 @@ def build_overlay() -> dict[str, object]:
         )
 
     new_path_names = sorted(generated_paths.keys() - before_paths.keys())
-    if new_path_names != [
+    expected_paths = [
         "/internal/admin/v1/case-builder/case-versions/{version_id}"
-    ]:
+    ]
+    if new_path_names != expected_paths:
         raise SystemExit(f"Case Builder overlay path set drifted: {new_path_names}")
 
     referenced_schema_names: set[str] = set()
@@ -95,16 +95,16 @@ def build_overlay() -> dict[str, object]:
     for path in new_path_names:
         collect(generated_paths[path])
 
-    pending = list(referenced_schema_names)
-    while pending:
-        name = pending.pop()
-        schema = generated_schemas.get(name)
-        if schema is None:
-            raise SystemExit(f"Case Builder overlay references missing schema: {name}")
-        before_count = len(referenced_schema_names)
-        collect(schema)
-        if len(referenced_schema_names) > before_count:
-            pending.extend(referenced_schema_names - set(pending))
+    processed: set[str] = set()
+    while pending := sorted(referenced_schema_names - processed):
+        for name in pending:
+            schema = generated_schemas.get(name)
+            if schema is None:
+                raise SystemExit(
+                    f"Case Builder overlay references missing schema: {name}"
+                )
+            processed.add(name)
+            collect(schema)
 
     new_schema_names = sorted(generated_schemas.keys() - before_schemas.keys())
     unrelated = sorted(set(new_schema_names) - referenced_schema_names)
