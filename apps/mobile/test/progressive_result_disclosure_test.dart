@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kefe_mobile/app/kefe_app.dart';
 import 'package:kefe_mobile/core/config/experience_presentation_config.dart';
 import 'package:kefe_mobile/features/community_reason/application/community_reason_controller.dart';
+import 'package:kefe_mobile/features/community_reason/data/preview_community_reason_repository.dart';
 import 'package:kefe_mobile/features/consensus/application/consensus_controller.dart';
+import 'package:kefe_mobile/features/consensus/data/preview_consensus_repository.dart';
 import 'package:kefe_mobile/features/decision/application/decision_controller.dart';
 import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/decision_repository.dart';
@@ -12,6 +14,7 @@ import 'package:kefe_mobile/features/decision/domain/decision_models.dart';
 import 'package:kefe_mobile/features/progress/application/progress_controller.dart';
 import 'package:kefe_mobile/features/progress/data/preview_progress_repository.dart';
 import 'package:kefe_mobile/features/sharing/application/share_controller.dart';
+import 'package:kefe_mobile/features/sharing/data/preview_share_repository.dart';
 
 import 'support/flow_runtime_fixture.dart';
 
@@ -149,60 +152,93 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
   await tester.pumpAndSettle();
 }
 
+Future<void> expectReachable(WidgetTester tester, Key key) async {
+  final finder = find.byKey(key);
+  await tester.scrollUntilVisible(
+    finder,
+    400,
+    scrollable: find.byType(Scrollable).first,
+  );
+  await tester.pumpAndSettle();
+  expect(finder, findsOneWidget);
+}
+
 void main() {
-  testWidgets('Reveal is visible before Perspective disclosure', (
-    tester,
-  ) async {
-    tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
-    addTearDown(tester.platformDispatcher.clearLocaleTestValue);
-    final repository = DisclosureRepository();
+  testWidgets(
+    'Reveal precedes Perspective and post-Commit capabilities remain reachable',
+    (tester) async {
+      tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
+      addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+      final repository = DisclosureRepository();
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          decisionRepositoryProvider.overrideWithValue(repository),
-          decisionDraftStoreProvider.overrideWithValue(
-            MemoryDecisionDraftStore(),
-          ),
-          experiencePresentationConfigProvider.overrideWithValue(
-            const ExperiencePresentationConfig.progressive(),
-          ),
-          consensusExperienceEnabledProvider.overrideWithValue(false),
-          communityReasonExperienceEnabledProvider.overrideWithValue(false),
-          shareExperienceEnabledProvider.overrideWithValue(false),
-          progressRepositoryProvider.overrideWithValue(
-            PreviewProgressRepository(),
-          ),
-        ],
-        child: const KefeApp(initialLocation: '/case/$disclosureCaseId'),
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            decisionRepositoryProvider.overrideWithValue(repository),
+            decisionDraftStoreProvider.overrideWithValue(
+              MemoryDecisionDraftStore(),
+            ),
+            experiencePresentationConfigProvider.overrideWithValue(
+              const ExperiencePresentationConfig.progressive(),
+            ),
+            consensusExperienceEnabledProvider.overrideWithValue(true),
+            consensusRepositoryProvider.overrideWithValue(
+              PreviewConsensusRepository(),
+            ),
+            communityReasonExperienceEnabledProvider.overrideWithValue(true),
+            communityReasonRepositoryProvider.overrideWithValue(
+              PreviewCommunityReasonRepository(),
+            ),
+            shareExperienceEnabledProvider.overrideWithValue(true),
+            shareRepositoryProvider.overrideWithValue(PreviewShareRepository()),
+            progressRepositoryProvider.overrideWithValue(
+              PreviewProgressRepository(),
+            ),
+          ],
+          child: const KefeApp(initialLocation: '/case/$disclosureCaseId'),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
-    expect(find.byKey(const ValueKey('perspective-section')), findsNothing);
+      expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
+      expect(find.byKey(const ValueKey('perspective-section')), findsNothing);
 
-    await tapVisible(tester, find.byKey(const ValueKey('option-A')));
-    await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
+      await tapVisible(tester, find.byKey(const ValueKey('option-A')));
+      await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
 
-    expect(repository.commitCalls, 1);
-    expect(repository.perspectiveCalls, 1);
-    expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey('perspective-disclosure-prompt')),
-      findsOneWidget,
-    );
-    expect(find.byKey(const ValueKey('perspective-section')), findsNothing);
+      expect(repository.commitCalls, 1);
+      expect(repository.perspectiveCalls, 1);
+      expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('perspective-disclosure-prompt')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('perspective-section')), findsNothing);
 
-    await tapVisible(
-      tester,
-      find.byKey(const ValueKey('show-perspectives-button')),
-    );
+      await expectReachable(tester, const ValueKey('consensus-section'));
+      await expectReachable(tester, const ValueKey('community-reason-section'));
+      await expectReachable(tester, const ValueKey('my-kefe-progress'));
+      await expectReachable(tester, const ValueKey('share-section'));
 
-    expect(find.byKey(const ValueKey('perspective-section')), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey('perspective-disclosure-prompt')),
-      findsNothing,
-    );
-  });
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('show-perspectives-button')),
+        -400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('show-perspectives-button')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('perspective-section')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('perspective-disclosure-prompt')),
+        findsNothing,
+      );
+
+      await expectReachable(tester, const ValueKey('consensus-section'));
+      await expectReachable(tester, const ValueKey('community-reason-section'));
+      await expectReachable(tester, const ValueKey('my-kefe-progress'));
+      await expectReachable(tester, const ValueKey('share-section'));
+    },
+  );
 }
