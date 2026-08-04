@@ -70,37 +70,40 @@ Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
 }
 
 void main() {
-  test('resolver composes questions, optional reason and review generically', () {
-    final stages = DecisionSubjourneyResolver.stages(_multiQuestionCase);
-    expect(stages.map((stage) => stage.kind), [
-      DecisionSubjourneyStageKind.question,
-      DecisionSubjourneyStageKind.question,
-      DecisionSubjourneyStageKind.reason,
-      DecisionSubjourneyStageKind.review,
-    ]);
-    expect(
-      DecisionSubjourneyResolver.initialIndex(
-        caseData: _multiQuestionCase,
-        responses: const {},
-      ),
-      0,
-    );
-    expect(
-      DecisionSubjourneyResolver.initialIndex(
-        caseData: _multiQuestionCase,
-        responses: const {'q1': 'A'},
-      ),
-      1,
-    );
-    expect(
-      DecisionSubjourneyResolver.initialIndex(
-        caseData: _multiQuestionCase,
-        responses: const {'q1': 'A'},
-        skippedQuestionIds: const {'q2'},
-      ),
-      2,
-    );
-  });
+  test(
+    'resolver composes questions, optional reason and review generically',
+    () {
+      final stages = DecisionSubjourneyResolver.stages(_multiQuestionCase);
+      expect(stages.map((stage) => stage.kind), [
+        DecisionSubjourneyStageKind.question,
+        DecisionSubjourneyStageKind.question,
+        DecisionSubjourneyStageKind.reason,
+        DecisionSubjourneyStageKind.review,
+      ]);
+      expect(
+        DecisionSubjourneyResolver.initialIndex(
+          caseData: _multiQuestionCase,
+          responses: const {},
+        ),
+        0,
+      );
+      expect(
+        DecisionSubjourneyResolver.initialIndex(
+          caseData: _multiQuestionCase,
+          responses: const {'q1': 'A'},
+        ),
+        1,
+      );
+      expect(
+        DecisionSubjourneyResolver.initialIndex(
+          caseData: _multiQuestionCase,
+          responses: const {'q1': 'A'},
+          skippedQuestionIds: const {'q2'},
+        ),
+        2,
+      );
+    },
+  );
 
   test('resolver omits reason stage when CaseVersion has no ReasonPolicy', () {
     final stages = DecisionSubjourneyResolver.stages(_oneQuestionCase);
@@ -124,7 +127,10 @@ void main() {
       expect(find.byKey(const ValueKey('question-q1')), findsOneWidget);
       expect(find.byKey(const ValueKey('question-q2')), findsNothing);
       expect(find.byKey(const ValueKey('reason-card')), findsNothing);
-      expect(find.byKey(const ValueKey('subjourney-commit-proof')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('subjourney-commit-proof')),
+        findsNothing,
+      );
 
       await _tapVisible(tester, find.byKey(const ValueKey('option-A')));
       await _tapVisible(
