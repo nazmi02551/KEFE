@@ -1,4 +1,4 @@
-registry_version: 1.15.0
+registry_version: 1.16.0
 errors:
 - code: AUTH_REQUIRED
   http_status: 401
@@ -163,6 +163,12 @@ errors:
   http_status: 422
   retryable: false
 - code: CONTENT_CONFIG_FLOW_INVALID
+  http_status: 422
+  retryable: false
+- code: CONTENT_CONFIG_FLOW_UNREACHABLE
+  http_status: 422
+  retryable: false
+- code: CONTENT_CONFIG_FLOW_CYCLIC
   http_status: 422
   retryable: false
 - code: FLOW_RUNTIME_UNAVAILABLE
