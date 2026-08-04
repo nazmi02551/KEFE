@@ -1,0 +1,45 @@
+name: Admin Studio CI
+
+on:
+  pull_request:
+    paths:
+      - "apps/admin/**"
+      - "docs/adr/0100-secured-admin-studio-editorial-workspace.md"
+      - "docs/contracts/admin-studio-editorial-workspace.v1.json"
+      - ".github/workflows/admin-studio.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/admin/**"
+      - "docs/adr/0100-secured-admin-studio-editorial-workspace.md"
+      - "docs/contracts/admin-studio-editorial-workspace.v1.json"
+      - ".github/workflows/admin-studio.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: admin-studio-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/admin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.13.0"
+          cache: npm
+          cache-dependency-path: apps/admin/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify executable contract, lint, types, tests and production build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: npm run verify
