@@ -1,0 +1,82 @@
+name: Patch Canonical Public Feed
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/patch-canonical-public-feed.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply deterministic source corrections
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          catalog = Path('services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py')
+          text = catalog.read_text()
+          old = '''        granted = (
+              self._security._policy.capabilities_for_roles(principal.roles)
+              | principal.direct_capabilities
+          )
+          if not granted.intersection(
+              {
+                  AdminCapability.SOURCE_MANAGE,
+                  AdminCapability.SOURCE_APPROVE,
+                  AdminCapability.SOURCE_ACTIVATE,
+              }
+          ):
+              self._security.authorize(principal, AdminCapability.SOURCE_MANAGE)
+          else:
+              self._security.touch(principal)
+          return self._repository.list_definitions()
+          '''
+          new = '''        self._security.authorize_any(
+              principal,
+              frozenset(
+                  {
+                      AdminCapability.SOURCE_MANAGE,
+                      AdminCapability.SOURCE_APPROVE,
+                      AdminCapability.SOURCE_ACTIVATE,
+                  }
+              ),
+          )
+          return self._repository.list_definitions()
+          '''
+          if old not in text:
+              raise SystemExit('expected catalog authorization block not found')
+          catalog.write_text(text.replace(old, new))
+
+          tests = Path('services/api/tests/test_canonical_public_feed_catalog.py')
+          test_text = tests.read_text()
+          test_text = test_text.replace('schedules.list_schedules()', 'schedules.list_all()')
+          test_text = test_text.replace('schedules.get_schedule(', 'schedules.get(')
+          tests.write_text(test_text)
+          PY
+      - name: Normalize
+        run: |
+          python -m pip install -q ruff==0.11.10
+          ruff check --fix services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py services/api/tests/test_canonical_public_feed_catalog.py
+          ruff format services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py services/api/tests/test_canonical_public_feed_catalog.py
+      - name: Commit corrections
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py services/api/tests/test_canonical_public_feed_catalog.py
+          git commit -m 'fix: align canonical public-feed repository and security APIs'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
