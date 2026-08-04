@@ -1,0 +1,35 @@
+name: Capability Portfolio
+
+on:
+  pull_request:
+    paths:
+      - AGENTS.md
+      - docs/roadmap/**
+      - docs/status/CURRENT.md
+      - docs/status/CAPABILITY_PORTFOLIO_V35_WORKING_2026-08-01.md
+      - scripts/validate_capability_portfolio.py
+      - .github/workflows/capability-portfolio.yml
+  push:
+    branches: [main]
+    paths:
+      - AGENTS.md
+      - docs/roadmap/**
+      - docs/status/CURRENT.md
+      - docs/status/CAPABILITY_PORTFOLIO_V35_WORKING_2026-08-01.md
+      - scripts/validate_capability_portfolio.py
+      - .github/workflows/capability-portfolio.yml
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate capability portfolio
+        run: python scripts/validate_capability_portfolio.py
