@@ -408,9 +408,7 @@ class _ActiveFlowStep extends ConsumerWidget {
         ShareSection(sessionId: sessionId),
         if (firstUse && showPerspectives) ...[
           const SizedBox(height: 20),
-          _JourneyFirstUseCompletion(
-            onContinue: () => context.go('/explore'),
-          ),
+          _JourneyFirstUseCompletion(onContinue: () => context.go('/explore')),
         ],
       ],
     );
