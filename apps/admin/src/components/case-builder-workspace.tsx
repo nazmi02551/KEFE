@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 
 import styles from "@/src/components/case-builder-workspace.module.css";
 import { AdminApiClient, AdminApiError } from "@/src/lib/admin-api";
@@ -214,9 +215,9 @@ export function CaseBuilderWorkspace({
             gönderme birbirinden ayrı insan komutlarıdır.
           </p>
         </div>
-        <a className={styles.backLink} href="/">
+        <Link className={styles.backLink} href="/">
           Editoryal operasyonlara dön
-        </a>
+        </Link>
       </header>
 
       <section className={styles.connection} aria-labelledby="builder-connection-title">

@@ -111,9 +111,7 @@ def build_overlay() -> dict[str, object]:
     return {
         "target_version": "0.19.0",
         "components": {
-            "schemas": {
-                name: generated_schemas[name] for name in additive_schema_names
-            }
+            "schemas": {name: generated_schemas[name] for name in additive_schema_names}
         },
         "paths": {path: generated_paths[path] for path in new_path_names},
     }
