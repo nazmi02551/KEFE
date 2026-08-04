@@ -386,32 +386,31 @@ class _ActiveFlowStep extends ConsumerWidget {
           selectedOption: state.selectedOption,
         ),
         const SizedBox(height: 18),
-        if (!showPerspectives) ...[
-          _PerspectiveDisclosurePanel(onPressed: onShowPerspectives),
-          const SizedBox(height: 20),
-          ConsensusSection(sessionId: sessionId, caseVersionId: caseVersionId),
-          const SizedBox(height: 20),
-          CommunityReasonSection(
-            sessionId: sessionId,
-            caseVersionId: caseVersionId,
-          ),
-          const SizedBox(height: 20),
-          const ProgressSection(),
-          const SizedBox(height: 20),
-          ShareSection(sessionId: sessionId),
-        ] else ...[
+        if (!showPerspectives)
+          _PerspectiveDisclosurePanel(onPressed: onShowPerspectives)
+        else
           PerspectiveSection(
             state: state.perspectiveState,
             result: state.perspective,
             reasonPendingModeration: state.reasonPendingModeration,
             onRetry: controller.retryPerspective,
           ),
-          if (firstUse) ...[
-            const SizedBox(height: 20),
-            _JourneyFirstUseCompletion(
-              onContinue: () => context.go('/explore'),
-            ),
-          ],
+        const SizedBox(height: 20),
+        ConsensusSection(sessionId: sessionId, caseVersionId: caseVersionId),
+        const SizedBox(height: 20),
+        CommunityReasonSection(
+          sessionId: sessionId,
+          caseVersionId: caseVersionId,
+        ),
+        const SizedBox(height: 20),
+        const ProgressSection(),
+        const SizedBox(height: 20),
+        ShareSection(sessionId: sessionId),
+        if (firstUse && showPerspectives) ...[
+          const SizedBox(height: 20),
+          _JourneyFirstUseCompletion(
+            onContinue: () => context.go('/explore'),
+          ),
         ],
       ],
     );
