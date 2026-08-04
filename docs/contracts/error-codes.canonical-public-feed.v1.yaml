@@ -1,0 +1,20 @@
+registry_version: 1.0.0
+errors:
+- code: ADMIN_PUBLIC_FEED_NOT_FOUND
+  http_status: 404
+  retryable: false
+- code: ADMIN_PUBLIC_FEED_VERSION_CONFLICT
+  http_status: 409
+  retryable: false
+- code: ADMIN_PUBLIC_FEED_STATE_CONFLICT
+  http_status: 409
+  retryable: false
+- code: ADMIN_PUBLIC_FEED_HASH_CONFLICT
+  http_status: 409
+  retryable: false
+- code: ADMIN_PUBLIC_FEED_ACTIVATION_NOT_FOUND
+  http_status: 404
+  retryable: false
+- code: ADMIN_PUBLIC_FEED_ACTIVATION_CONFLICT
+  http_status: 409
+  retryable: false
