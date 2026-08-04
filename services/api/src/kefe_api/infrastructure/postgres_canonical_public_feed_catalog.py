@@ -29,9 +29,10 @@ class PostgresCanonicalPublicFeedCatalogRepository:
     ) -> CanonicalPublicFeedDefinition:
         try:
             with self._engine.begin() as connection:
-                row = connection.execute(
-                    text(
-                        """
+                row = (
+                    connection.execute(
+                        text(
+                            """
                         SELECT *
                         FROM knowledge.public_feed_definition
                         WHERE (feed_code = :feed_code
@@ -39,13 +40,16 @@ class PostgresCanonicalPublicFeedCatalogRepository:
                            OR adapter_code = :adapter_code
                         FOR UPDATE
                         """
-                    ),
-                    {
-                        "feed_code": definition.feed_code,
-                        "definition_version": definition.definition_version,
-                        "adapter_code": definition.definition.adapter_code,
-                    },
-                ).mappings().one_or_none()
+                        ),
+                        {
+                            "feed_code": definition.feed_code,
+                            "definition_version": definition.definition_version,
+                            "adapter_code": definition.definition.adapter_code,
+                        },
+                    )
+                    .mappings()
+                    .one_or_none()
+                )
                 if row is not None:
                     existing = _definition_from_row(row)
                     if existing == definition:
@@ -53,6 +57,12 @@ class PostgresCanonicalPublicFeedCatalogRepository:
                     raise ValueError("public feed definition identity conflict")
                 _insert_definition(connection, definition)
         except IntegrityError as exc:
+            existing = self.get_definition(
+                definition.feed_code,
+                definition.definition_version,
+            )
+            if existing == definition:
+                return existing
             raise ValueError("public feed definition identity conflict") from exc
         return definition
 
@@ -62,17 +72,21 @@ class PostgresCanonicalPublicFeedCatalogRepository:
     ) -> CanonicalPublicFeedDefinition:
         try:
             with self._engine.begin() as connection:
-                row = connection.execute(
-                    text(
-                        """
+                row = (
+                    connection.execute(
+                        text(
+                            """
                         SELECT *
                         FROM knowledge.public_feed_definition
                         WHERE id = :definition_id
                         FOR UPDATE
                         """
-                    ),
-                    {"definition_id": definition.id},
-                ).mappings().one_or_none()
+                        ),
+                        {"definition_id": definition.id},
+                    )
+                    .mappings()
+                    .one_or_none()
+                )
                 if row is None:
                     raise KeyError(definition.id)
                 current = _definition_from_row(row)
@@ -84,12 +98,10 @@ class PostgresCanonicalPublicFeedCatalogRepository:
                     or current.definition_version != definition.definition_version
                     or current.definition != definition.definition
                     or current.interval_seconds != definition.interval_seconds
-                    or current.max_dispatch_attempts
-                    != definition.max_dispatch_attempts
+                    or current.max_dispatch_attempts != definition.max_dispatch_attempts
                     or current.configuration_hash != definition.configuration_hash
                     or current.created_at != definition.created_at
-                    or current.created_by_actor_ref
-                    != definition.created_by_actor_ref
+                    or current.created_by_actor_ref != definition.created_by_actor_ref
                 ):
                     raise ValueError("immutable public feed definition drift")
                 connection.execute(
@@ -110,9 +122,7 @@ class PostgresCanonicalPublicFeedCatalogRepository:
                         "definition_id": definition.id,
                         "state": definition.state.value,
                         "preflighted_at": definition.preflighted_at,
-                        "preflighted_by_actor_ref": (
-                            definition.preflighted_by_actor_ref
-                        ),
+                        "preflighted_by_actor_ref": (definition.preflighted_by_actor_ref),
                         "approved_at": definition.approved_at,
                         "approved_by_actor_ref": definition.approved_by_actor_ref,
                         "retired_at": definition.retired_at,
@@ -129,49 +139,61 @@ class PostgresCanonicalPublicFeedCatalogRepository:
         definition_version: int,
     ) -> CanonicalPublicFeedDefinition | None:
         with self._engine.connect() as connection:
-            row = connection.execute(
-                text(
-                    """
+            row = (
+                connection.execute(
+                    text(
+                        """
                     SELECT *
                     FROM knowledge.public_feed_definition
                     WHERE feed_code = :feed_code
                       AND definition_version = :definition_version
                     """
-                ),
-                {
-                    "feed_code": feed_code,
-                    "definition_version": definition_version,
-                },
-            ).mappings().one_or_none()
+                    ),
+                    {
+                        "feed_code": feed_code,
+                        "definition_version": definition_version,
+                    },
+                )
+                .mappings()
+                .one_or_none()
+            )
         return _definition_from_row(row) if row is not None else None
 
     def get_latest(self, feed_code: str) -> CanonicalPublicFeedDefinition | None:
         with self._engine.connect() as connection:
-            row = connection.execute(
-                text(
-                    """
+            row = (
+                connection.execute(
+                    text(
+                        """
                     SELECT *
                     FROM knowledge.public_feed_definition
                     WHERE feed_code = :feed_code
                     ORDER BY definition_version DESC
                     LIMIT 1
                     """
-                ),
-                {"feed_code": feed_code},
-            ).mappings().one_or_none()
+                    ),
+                    {"feed_code": feed_code},
+                )
+                .mappings()
+                .one_or_none()
+            )
         return _definition_from_row(row) if row is not None else None
 
     def list_definitions(self) -> tuple[CanonicalPublicFeedDefinition, ...]:
         with self._engine.connect() as connection:
-            rows = connection.execute(
-                text(
-                    """
+            rows = (
+                connection.execute(
+                    text(
+                        """
                     SELECT *
                     FROM knowledge.public_feed_definition
                     ORDER BY feed_code, definition_version
                     """
+                    )
                 )
-            ).mappings().all()
+                .mappings()
+                .all()
+            )
         return tuple(_definition_from_row(row) for row in rows)
 
     def add_activation(
@@ -180,9 +202,10 @@ class PostgresCanonicalPublicFeedCatalogRepository:
     ) -> PublicFeedActivationProjection:
         try:
             with self._engine.begin() as connection:
-                row = connection.execute(
-                    text(
-                        """
+                row = (
+                    connection.execute(
+                        text(
+                            """
                         SELECT *
                         FROM knowledge.public_feed_activation
                         WHERE feed_definition_id = :definition_id
@@ -190,13 +213,16 @@ class PostgresCanonicalPublicFeedCatalogRepository:
                            OR schedule_id = :schedule_id
                         FOR UPDATE
                         """
-                    ),
-                    {
-                        "definition_id": activation.feed_definition_id,
-                        "adapter_code": activation.adapter_code,
-                        "schedule_id": activation.schedule_id,
-                    },
-                ).mappings().one_or_none()
+                        ),
+                        {
+                            "definition_id": activation.feed_definition_id,
+                            "adapter_code": activation.adapter_code,
+                            "schedule_id": activation.schedule_id,
+                        },
+                    )
+                    .mappings()
+                    .one_or_none()
+                )
                 if row is not None:
                     existing = _activation_from_row(row)
                     if existing == activation:
@@ -223,6 +249,9 @@ class PostgresCanonicalPublicFeedCatalogRepository:
                     _activation_parameters(activation),
                 )
         except IntegrityError as exc:
+            existing = self.get_activation_for_definition(activation.feed_definition_id)
+            if existing == activation:
+                return existing
             raise ValueError("public feed activation identity conflict") from exc
         return activation
 
@@ -232,17 +261,21 @@ class PostgresCanonicalPublicFeedCatalogRepository:
     ) -> PublicFeedActivationProjection:
         try:
             with self._engine.begin() as connection:
-                row = connection.execute(
-                    text(
-                        """
+                row = (
+                    connection.execute(
+                        text(
+                            """
                         SELECT *
                         FROM knowledge.public_feed_activation
                         WHERE feed_definition_id = :definition_id
                         FOR UPDATE
                         """
-                    ),
-                    {"definition_id": activation.feed_definition_id},
-                ).mappings().one_or_none()
+                        ),
+                        {"definition_id": activation.feed_definition_id},
+                    )
+                    .mappings()
+                    .one_or_none()
+                )
                 if row is None:
                     raise KeyError(activation.feed_definition_id)
                 current = _activation_from_row(row)
@@ -250,18 +283,14 @@ class PostgresCanonicalPublicFeedCatalogRepository:
                     return current
                 if (
                     current.id != activation.id
-                    or current.feed_definition_id
-                    != activation.feed_definition_id
+                    or current.feed_definition_id != activation.feed_definition_id
                     or current.feed_code != activation.feed_code
-                    or current.definition_version
-                    != activation.definition_version
-                    or current.configuration_hash
-                    != activation.configuration_hash
+                    or current.definition_version != activation.definition_version
+                    or current.configuration_hash != activation.configuration_hash
                     or current.adapter_code != activation.adapter_code
                     or current.schedule_id != activation.schedule_id
                     or current.activated_at != activation.activated_at
-                    or current.activated_by_actor_ref
-                    != activation.activated_by_actor_ref
+                    or current.activated_by_actor_ref != activation.activated_by_actor_ref
                 ):
                     raise ValueError("immutable activation projection drift")
                 connection.execute(
@@ -290,16 +319,20 @@ class PostgresCanonicalPublicFeedCatalogRepository:
         definition_id: UUID,
     ) -> PublicFeedActivationProjection | None:
         with self._engine.connect() as connection:
-            row = connection.execute(
-                text(
-                    """
+            row = (
+                connection.execute(
+                    text(
+                        """
                     SELECT *
                     FROM knowledge.public_feed_activation
                     WHERE feed_definition_id = :definition_id
                     """
-                ),
-                {"definition_id": definition_id},
-            ).mappings().one_or_none()
+                    ),
+                    {"definition_id": definition_id},
+                )
+                .mappings()
+                .one_or_none()
+            )
         return _activation_from_row(row) if row is not None else None
 
     def append_audit(
@@ -313,9 +346,10 @@ class PostgresCanonicalPublicFeedCatalogRepository:
         configuration_hash: str,
     ) -> PublicFeedAuditEvent:
         with self._engine.begin() as connection:
-            row = connection.execute(
-                text(
-                    """
+            row = (
+                connection.execute(
+                    text(
+                        """
                     INSERT INTO knowledge.public_feed_audit (
                         definition_id, activation_id, action, actor_ref,
                         occurred_at, configuration_hash
@@ -325,16 +359,19 @@ class PostgresCanonicalPublicFeedCatalogRepository:
                     )
                     RETURNING sequence
                     """
-                ),
-                {
-                    "definition_id": definition_id,
-                    "activation_id": activation_id,
-                    "action": action.value,
-                    "actor_ref": actor_ref,
-                    "occurred_at": occurred_at,
-                    "configuration_hash": configuration_hash,
-                },
-            ).mappings().one()
+                    ),
+                    {
+                        "definition_id": definition_id,
+                        "activation_id": activation_id,
+                        "action": action.value,
+                        "actor_ref": actor_ref,
+                        "occurred_at": occurred_at,
+                        "configuration_hash": configuration_hash,
+                    },
+                )
+                .mappings()
+                .one()
+            )
         return PublicFeedAuditEvent(
             sequence=int(row["sequence"]),
             definition_id=definition_id,
@@ -347,18 +384,22 @@ class PostgresCanonicalPublicFeedCatalogRepository:
 
     def list_audit(self, definition_id: UUID) -> tuple[PublicFeedAuditEvent, ...]:
         with self._engine.connect() as connection:
-            rows = connection.execute(
-                text(
-                    """
+            rows = (
+                connection.execute(
+                    text(
+                        """
                     SELECT sequence, definition_id, activation_id, action,
                            actor_ref, occurred_at, configuration_hash
                     FROM knowledge.public_feed_audit
                     WHERE definition_id = :definition_id
                     ORDER BY sequence
                     """
-                ),
-                {"definition_id": definition_id},
-            ).mappings().all()
+                    ),
+                    {"definition_id": definition_id},
+                )
+                .mappings()
+                .all()
+            )
         return tuple(
             PublicFeedAuditEvent(
                 sequence=int(row["sequence"]),
