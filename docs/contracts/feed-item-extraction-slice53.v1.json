@@ -1,7 +1,9 @@
 {
   "contract": "feed-item-extraction-slice53",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "status": "accepted",
+  "superseded_composition_rule": "EMPTY_WORKER_REGISTRY",
+  "superseding_adr": "ADR-0098",
   "parent_contracts": [
     "rss-atom-public-capture-slice52.v1",
     "raw-source-evidence-slice49.v1",
@@ -73,8 +75,15 @@
   },
   "composition": {
     "processor_factory_exposed": true,
-    "production_runtime_plans_registered": 0,
-    "production_processors_registered": 0,
+    "production_runtime_plans_registered": 1,
+    "production_processors_registered": 1,
+    "plan_registration_is_source_activation": false,
+    "seeded_feed_definitions": 0,
+    "seeded_provider_profiles": 0,
+    "seeded_public_adapters": 0,
+    "seeded_schedules": 0,
+    "explicit_catalog_activation_required": true,
+    "startup_network": false,
     "concrete_providers_registered": 0,
     "live_network_in_tests": false
   },
@@ -98,6 +107,7 @@
       "Raw Source Evidence CI",
       "Durable Raw Evidence Backend CI",
       "Ingestion Worker CI",
+      "Canonical Public Feed",
       "API CI",
       "MVP Beta Gates",
       "Global Readiness"
@@ -111,12 +121,13 @@
       "duplicate_identity_rejected",
       "evidence_retryable_mapping",
       "full_ingestion_worker_success",
-      "production_registry_empty"
+      "inert_plan_registered_without_source_activation",
+      "no_live_network_catalog_to_feed_item_vertical"
     ]
   },
   "excluded": [
-    "CONCRETE_PROVIDER",
-    "SCHEDULED_LIVE_CAPTURE",
+    "CONCRETE_PROVIDER_ADOPTION",
+    "DEPLOYED_LIVE_CAPTURE",
     "DEPLOYED_STORAGE_CAPABILITY_PROOF",
     "SEMANTIC_CLASSIFICATION",
     "CLAIM_EXTRACTION",

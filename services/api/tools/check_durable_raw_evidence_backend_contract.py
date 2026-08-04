@@ -72,19 +72,11 @@ def fail(message: str) -> None:
 
 
 def _class_map(tree: ast.Module) -> dict[str, ast.ClassDef]:
-    return {
-        node.name: node
-        for node in tree.body
-        if isinstance(node, ast.ClassDef)
-    }
+    return {node.name: node for node in tree.body if isinstance(node, ast.ClassDef)}
 
 
 def _method_names(node: ast.ClassDef) -> set[str]:
-    return {
-        item.name
-        for item in node.body
-        if isinstance(item, ast.FunctionDef)
-    }
+    return {item.name for item in node.body if isinstance(item, ast.FunctionDef)}
 
 
 def _field_names(node: ast.ClassDef) -> tuple[str, ...]:
@@ -137,10 +129,7 @@ def main() -> None:
             fail(f"durable raw evidence runtime contains vendor name: {vendor_name}")
     for forbidden_module in FORBIDDEN_NETWORK_MODULES:
         if forbidden_module in lowered:
-            fail(
-                "durable raw evidence runtime imports or names network SDK: "
-                f"{forbidden_module}"
-            )
+            fail(f"durable raw evidence runtime imports or names network SDK: {forbidden_module}")
     if "InMemoryRawSourceEvidenceStore" in runtime_source:
         fail("runtime composition must never import the in-memory raw evidence store")
     if "while " in backend_source:
@@ -164,11 +153,7 @@ def main() -> None:
     if store is None:
         fail("DurableRawSourceEvidenceStore is missing")
     seal = next(
-        (
-            item
-            for item in store.body
-            if isinstance(item, ast.FunctionDef) and item.name == "seal"
-        ),
+        (item for item in store.body if isinstance(item, ast.FunctionDef) and item.name == "seal"),
         None,
     )
     if seal is None:

@@ -5,12 +5,7 @@ import json
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-CONTRACT = (
-    REPO_ROOT
-    / "docs"
-    / "contracts"
-    / "source-acquisition-scheduler-slice40.v1.json"
-)
+CONTRACT = REPO_ROOT / "docs" / "contracts" / "source-acquisition-scheduler-slice40.v1.json"
 MIGRATION = (
     REPO_ROOT
     / "services"
@@ -19,9 +14,7 @@ MIGRATION = (
     / "versions"
     / "20260802_0022_source_acquisition_scheduler.py"
 )
-KNOWLEDGE = (
-    REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "knowledge"
-)
+KNOWLEDGE = REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "knowledge"
 DOMAIN = KNOWLEDGE / "source_scheduler.py"
 PORT = KNOWLEDGE / "source_scheduler_ports.py"
 MEMORY = KNOWLEDGE / "source_scheduler_memory.py"
@@ -37,24 +30,12 @@ POSTGRES = (
     / "postgres_source_acquisition_scheduler.py"
 )
 PIPELINE = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "infrastructure"
-    / "editorial_pipeline.py"
+    REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "infrastructure" / "editorial_pipeline.py"
 )
 MAIN = REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "main.py"
-MEMORY_TEST = (
-    REPO_ROOT / "services" / "api" / "tests" / "test_source_acquisition_scheduler.py"
-)
+MEMORY_TEST = REPO_ROOT / "services" / "api" / "tests" / "test_source_acquisition_scheduler.py"
 POSTGRES_TEST = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "tests"
-    / "test_source_acquisition_scheduler_postgres.py"
+    REPO_ROOT / "services" / "api" / "tests" / "test_source_acquisition_scheduler_postgres.py"
 )
 
 
@@ -76,8 +57,7 @@ def _dataclass_fields(source: str, class_name: str) -> tuple[str, ...]:
             return tuple(
                 statement.target.id
                 for statement in node.body
-                if isinstance(statement, ast.AnnAssign)
-                and isinstance(statement.target, ast.Name)
+                if isinstance(statement, ast.AnnAssign) and isinstance(statement.target, ast.Name)
             )
     return ()
 
@@ -152,8 +132,7 @@ def main() -> int:
     )
     if result_fields != expected_result_fields:
         problems.append(
-            "SourceDispatchExecutionResult allowlist drifted: "
-            + ", ".join(result_fields)
+            "SourceDispatchExecutionResult allowlist drifted: " + ", ".join(result_fields)
         )
 
     _require(
@@ -342,13 +321,9 @@ def main() -> int:
         "materialize_accepted_proposal(",
     ):
         if forbidden_behavior in combined_domain:
-            problems.append(
-                f"excluded behavior leaked into scheduler domain: {forbidden_behavior}"
-            )
+            problems.append(f"excluded behavior leaked into scheduler domain: {forbidden_behavior}")
 
-    forbidden_result_fields = set(
-        contract.get("observer", {}).get("forbidden_fields", ())
-    )
+    forbidden_result_fields = set(contract.get("observer", {}).get("forbidden_fields", ()))
     if forbidden_result_fields.intersection(result_fields):
         problems.append("forbidden sensitive fields entered dispatch result")
 

@@ -11,13 +11,7 @@ ADR = (
     / "0028-provider-neutral-ingestion-orchestration-reviewed-proposals.md"
 )
 PACKAGE = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "modules"
-    / "ingestion_orchestration"
+    REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "ingestion_orchestration"
 )
 MODELS = PACKAGE / "models.py"
 PORTS = PACKAGE / "ports.py"
@@ -34,13 +28,7 @@ BRIDGE = (
     / "ingestion_source.py"
 )
 PERSISTENCE = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "infrastructure"
-    / "persistence.py"
+    REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "infrastructure" / "persistence.py"
 )
 MIGRATION = (
     REPO_ROOT
@@ -51,14 +39,7 @@ MIGRATION = (
     / "20260802_0020_ingestion_orchestration.py"
 )
 CONTEXT_MODELS = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "modules"
-    / "context"
-    / "models.py"
+    REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "context" / "models.py"
 )
 
 
@@ -217,9 +198,7 @@ def main() -> int:
         )
     )
 
-    package_source = "\n".join(
-        path.read_text(encoding="utf-8") for path in PACKAGE.glob("*.py")
-    )
+    package_source = "\n".join(path.read_text(encoding="utf-8") for path in PACKAGE.glob("*.py"))
     forbidden_fragments = (
         "from fastapi",
         "import requests",
@@ -264,9 +243,7 @@ def main() -> int:
         'DISPUTED = "DISPUTED"',
         'UNKNOWN = "UNKNOWN"',
     )
-    errors.extend(
-        _require(context_models, expected_context_states, label="Context compatibility")
-    )
+    errors.extend(_require(context_models, expected_context_states, label="Context compatibility"))
     if 'SUPPORTED = "SUPPORTED"' in context_models or 'FALSE = "FALSE"' in context_models:
         errors.append("canonical ClaimAssessment states leaked into Context presentation enum")
 

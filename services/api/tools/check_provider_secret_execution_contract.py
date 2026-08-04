@@ -6,34 +6,16 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACT = REPO_ROOT / "docs/contracts/provider-secret-execution-slice44.v1.json"
-ADR = (
-    REPO_ROOT
-    / "docs/adr/0080-ephemeral-secret-resolution-and-secure-provider-invocation.md"
-)
-EXECUTION = (
-    REPO_ROOT
-    / "services/api/src/kefe_api/modules/knowledge/provider_secret_execution.py"
-)
-CONTEXT = (
-    REPO_ROOT
-    / "services/api/src/kefe_api/modules/knowledge/provider_execution_context.py"
-)
+ADR = REPO_ROOT / "docs/adr/0080-ephemeral-secret-resolution-and-secure-provider-invocation.md"
+EXECUTION = REPO_ROOT / "services/api/src/kefe_api/modules/knowledge/provider_secret_execution.py"
+CONTEXT = REPO_ROOT / "services/api/src/kefe_api/modules/knowledge/provider_execution_context.py"
 POSTGRES_CONTEXT = (
-    REPO_ROOT
-    / "services/api/src/kefe_api/infrastructure/postgres_provider_execution_context.py"
+    REPO_ROOT / "services/api/src/kefe_api/infrastructure/postgres_provider_execution_context.py"
 )
-SOURCE = (
-    REPO_ROOT
-    / "services/api/src/kefe_api/modules/knowledge/source_acquisition.py"
-)
-PIPELINE = (
-    REPO_ROOT
-    / "services/api/src/kefe_api/infrastructure/editorial_pipeline.py"
-)
+SOURCE = REPO_ROOT / "services/api/src/kefe_api/modules/knowledge/source_acquisition.py"
+PIPELINE = REPO_ROOT / "services/api/src/kefe_api/infrastructure/editorial_pipeline.py"
 MEMORY_TEST = REPO_ROOT / "services/api/tests/test_provider_secret_execution.py"
-POSTGRES_TEST = (
-    REPO_ROOT / "services/api/tests/test_provider_secret_execution_postgres.py"
-)
+POSTGRES_TEST = REPO_ROOT / "services/api/tests/test_provider_secret_execution_postgres.py"
 PUBLIC_TEST = REPO_ROOT / "services/api/tests/test_public_provider_capture.py"
 
 
@@ -55,8 +37,7 @@ def _dataclass_fields(source: str, class_name: str) -> tuple[str, ...]:
             return tuple(
                 statement.target.id
                 for statement in node.body
-                if isinstance(statement, ast.AnnAssign)
-                and isinstance(statement.target, ast.Name)
+                if isinstance(statement, ast.AnnAssign) and isinstance(statement.target, ast.Name)
             )
     return ()
 
@@ -130,9 +111,7 @@ def main() -> int:
         "credential_mode",
     )
     if context_fields != expected_context_fields:
-        problems.append(
-            "permit context field allowlist drifted: " + ", ".join(context_fields)
-        )
+        problems.append("permit context field allowlist drifted: " + ", ".join(context_fields))
 
     _require(
         problems,
@@ -141,7 +120,7 @@ def main() -> int:
         (
             "class SecretAccess(Protocol):",
             "class SecretLease:",
-            "__slots__ = (\"_material\", \"_expires_at\", \"_closed\")",
+            '__slots__ = ("_material", "_expires_at", "_closed")',
             "__hash__ = None",
             "def use_bytes(",
             "memoryview(self._material).toreadonly()",
@@ -195,7 +174,7 @@ def main() -> int:
             'isolation_level="REPEATABLE READ"',
             "SET TRANSACTION READ ONLY",
             "capability.credential_mode",
-            "ProviderCredentialMode(row[\"credential_mode\"])",
+            'ProviderCredentialMode(row["credential_mode"])',
             "permit.id = :permit_id",
             "permit.adapter_code = :adapter_code",
             "permit.state = 'ACTIVE'",
@@ -221,9 +200,7 @@ def main() -> int:
     completion_index = source.find("self._admission.complete_capture_success(")
     persistence_index = source.find("self._knowledge_repository.add_source_artifact(")
     if not 0 <= capture_index < completion_index < persistence_index:
-        problems.append(
-            "secure capture, permit completion and artifact persistence order drifted"
-        )
+        problems.append("secure capture, permit completion and artifact persistence order drifted")
 
     _require(
         problems,
@@ -233,7 +210,9 @@ def main() -> int:
             "InMemorySecretResolverRegistry()",
             "InMemoryCredentialAwareSourceCaptureRegistry()",
             "SecureProviderCaptureExecutor(",
-            "PostgresProviderPermitExecutionContextRepository(engine)",
+            "PostgresProviderPermitExecutionContextRepository(",
+            "provider_execution_context_repository =",
+            "engine",
             "contexts=provider_execution_context_repository",
             "CredentialModeRoutingProviderCaptureExecutor(",
             "credentialed_executor=secure_provider_capture_executor",
@@ -293,9 +272,7 @@ def main() -> int:
             problems.append(f"excluded dependency/behavior leaked: {forbidden}")
 
     result_fields = _dataclass_fields(source, "SourceAcquisitionResult")
-    forbidden_result_fields = set(
-        contract.get("privacy_allowlist", {}).get("forbidden_fields", ())
-    )
+    forbidden_result_fields = set(contract.get("privacy_allowlist", {}).get("forbidden_fields", ()))
     if forbidden_result_fields.intersection(result_fields):
         problems.append("secret/provider fields entered SourceAcquisitionResult")
 

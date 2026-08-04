@@ -3,6 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from kefe_api.core.settings import Settings
+from kefe_api.infrastructure.canonical_public_feed_runtime import (
+    MutableProviderAdoptionRegistry,
+    MutablePublicSourceCaptureRegistry,
+)
 from kefe_api.infrastructure.db import build_engine
 from kefe_api.infrastructure.postgres_content_supply_cycle import (
     PostgresContentSupplyCycleRepository,
@@ -67,6 +71,10 @@ from kefe_api.modules.editorial_projection.ingestion_source import (
 from kefe_api.modules.editorial_projection.models import EditorialProjectionProfile
 from kefe_api.modules.editorial_projection.ports import EditorialProjectionRepository
 from kefe_api.modules.editorial_projection.service import EditorialProjectionService
+from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
+    FeedItemExtractionStageProcessor,
+    build_feed_item_extraction_runtime,
+)
 from kefe_api.modules.ingestion_orchestration.in_memory import (
     InMemoryIngestionOrchestrationRepository,
 )
@@ -89,7 +97,6 @@ from kefe_api.modules.ingestion_orchestration.service import (
 from kefe_api.modules.ingestion_orchestration.worker_runtime import (
     IngestionWorkerObserver,
     IngestionWorkerRuntimeRegistry,
-    InMemoryIngestionWorkerRuntimeRegistry,
     NoOpIngestionWorkerObserver,
 )
 from kefe_api.modules.ingestion_orchestration.worker_service import (
@@ -113,14 +120,12 @@ from kefe_api.modules.knowledge.provider_http_auth import (
 )
 from kefe_api.modules.knowledge.provider_http_transport import (
     ControlledProviderHttpTransport,
-    InMemoryProviderAdoptionRegistry,
     NoOpProviderHttpObserver,
     ProviderAdoptionRegistry,
     ProviderHttpObserver,
 )
 from kefe_api.modules.knowledge.provider_public_execution import (
     CredentialModeRoutingProviderCaptureExecutor,
-    InMemoryPublicSourceCaptureRegistry,
     PermitBoundPublicCaptureExecutor,
     PublicSourceCaptureRegistry,
 )
@@ -210,21 +215,17 @@ def build_editorial_pipeline(
             content_authoring_repository,
             InMemoryContentAuthoringRepository,
         ):
-            raise RuntimeError(
-                "memory Editorial Projection requires in-memory Content Authoring"
-            )
+            raise RuntimeError("memory Editorial Projection requires in-memory Content Authoring")
         knowledge_repository: KnowledgeRepository = InMemoryKnowledgeRepository()
         memory_provider_admission = InMemorySourceProviderAdmissionRepository()
         source_provider_admission_repository: SourceProviderAdmissionRepository = (
             memory_provider_admission
         )
-        provider_execution_context_repository: (
-            ProviderPermitExecutionContextRepository
-        ) = memory_provider_admission
-        memory_scheduler = InMemorySourceAcquisitionSchedulerRepository()
-        source_scheduler_repository: SourceAcquisitionSchedulerRepository = (
-            memory_scheduler
+        provider_execution_context_repository: ProviderPermitExecutionContextRepository = (
+            memory_provider_admission
         )
+        memory_scheduler = InMemorySourceAcquisitionSchedulerRepository()
+        source_scheduler_repository: SourceAcquisitionSchedulerRepository = memory_scheduler
         memory_cycles = InMemoryContentSupplyCycleRepository()
         content_supply_cycle_repository: ContentSupplyCycleRepository = memory_cycles
         memory_ingestion = InMemoryIngestionOrchestrationRepository()
@@ -245,22 +246,16 @@ def build_editorial_pipeline(
         )
     else:
         if not settings.database_url:
-            raise RuntimeError(
-                "KEFE_DATABASE_URL is required when persistence_backend=postgres"
-            )
+            raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
         engine = build_engine(settings.database_url)
         knowledge_repository = PostgresKnowledgeRepository(engine)
-        source_provider_admission_repository = (
-            PostgresSourceProviderAdmissionRepository(engine)
-        )
-        provider_execution_context_repository = (
-            PostgresProviderPermitExecutionContextRepository(engine)
+        source_provider_admission_repository = PostgresSourceProviderAdmissionRepository(engine)
+        provider_execution_context_repository = PostgresProviderPermitExecutionContextRepository(
+            engine
         )
         source_scheduler_repository = PostgresSourceAcquisitionSchedulerRepository(engine)
         content_supply_cycle_repository = PostgresContentSupplyCycleRepository(engine)
-        content_supply_health_repository = (
-            PostgresContentSupplyOperationalFactsRepository(engine)
-        )
+        content_supply_health_repository = PostgresContentSupplyOperationalFactsRepository(engine)
         ingestion_repository = PostgresIngestionOrchestrationRepository(engine)
         ingestion_lease_repository = PostgresIngestionRunLeaseRepository(engine)
         proposal_queue_repository = PostgresProposalReviewQueueRepository(engine)
@@ -280,9 +275,7 @@ def build_editorial_pipeline(
         resolvers=secret_resolver_registry,
         adapters=credential_capture_registry,
     )
-    public_capture_registry: PublicSourceCaptureRegistry = (
-        InMemoryPublicSourceCaptureRegistry()
-    )
+    public_capture_registry: PublicSourceCaptureRegistry = MutablePublicSourceCaptureRegistry()
     public_provider_capture_executor = PermitBoundPublicCaptureExecutor(
         contexts=provider_execution_context_repository,
         adapters=public_capture_registry,
@@ -292,12 +285,8 @@ def build_editorial_pipeline(
         public_executor=public_provider_capture_executor,
         credentialed_executor=secure_provider_capture_executor,
     )
-    provider_adoption_registry: ProviderAdoptionRegistry = (
-        InMemoryProviderAdoptionRegistry()
-    )
-    provider_http_auth_registry: ProviderHttpAuthRegistry = (
-        InMemoryProviderHttpAuthRegistry()
-    )
+    provider_adoption_registry: ProviderAdoptionRegistry = MutableProviderAdoptionRegistry()
+    provider_http_auth_registry: ProviderHttpAuthRegistry = InMemoryProviderHttpAuthRegistry()
     provider_http_observer: ProviderHttpObserver = NoOpProviderHttpObserver()
     provider_http_runtime = build_provider_http_runtime(settings)
     provider_http_transport = ControlledProviderHttpTransport(
@@ -310,15 +299,11 @@ def build_editorial_pipeline(
         auth_registry=provider_http_auth_registry,
         transport=provider_http_transport,
     )
-    public_http_capture_adapter_factory = (
-        EvidenceBackedPublicHttpCaptureAdapterFactory(
-            transport=provider_http_transport,
-            evidence_store=raw_source_evidence_store,
-        )
+    public_http_capture_adapter_factory = EvidenceBackedPublicHttpCaptureAdapterFactory(
+        transport=provider_http_transport,
+        evidence_store=raw_source_evidence_store,
     )
-    source_acquisition_observer: SourceAcquisitionObserver = (
-        NoOpSourceAcquisitionObserver()
-    )
+    source_acquisition_observer: SourceAcquisitionObserver = NoOpSourceAcquisitionObserver()
     source_acquisition_service = SourceAcquisitionService(
         knowledge_repository=knowledge_repository,
         ingestion_service=ingestion_service,
@@ -334,8 +319,11 @@ def build_editorial_pipeline(
         observer=source_dispatch_observer,
     )
     ingestion_lease_service = IngestionRunLeaseService(ingestion_lease_repository)
-    ingestion_worker_registry: IngestionWorkerRuntimeRegistry = (
-        InMemoryIngestionWorkerRuntimeRegistry()
+    ingestion_worker_registry: IngestionWorkerRuntimeRegistry = build_feed_item_extraction_runtime(
+        FeedItemExtractionStageProcessor(
+            knowledge=knowledge_repository,
+            evidence=raw_source_evidence_store,
+        )
     )
     ingestion_worker_observer: IngestionWorkerObserver = NoOpIngestionWorkerObserver()
     ingestion_worker_runner = IngestionWorkerRunner(
@@ -345,18 +333,14 @@ def build_editorial_pipeline(
         registry=ingestion_worker_registry,
         observer=ingestion_worker_observer,
     )
-    content_supply_cycle_observer: ContentSupplyCycleObserver = (
-        NoOpContentSupplyCycleObserver()
-    )
+    content_supply_cycle_observer: ContentSupplyCycleObserver = NoOpContentSupplyCycleObserver()
     content_supply_cycle_service = ContentSupplyCycleService(
         repository=content_supply_cycle_repository,
         scheduler=source_scheduler_service,
         ingestion_worker=ingestion_worker_runner,
         observer=content_supply_cycle_observer,
     )
-    content_supply_health_service = ContentSupplyHealthService(
-        content_supply_health_repository
-    )
+    content_supply_health_service = ContentSupplyHealthService(content_supply_health_repository)
 
     profiles = InMemoryEditorialProjectionProfileRegistry(
         (
@@ -365,9 +349,7 @@ def build_editorial_pipeline(
                 profile_version=1,
                 candidate_schema_ref="kefe.candidate-case",
                 candidate_schema_version="1.0.0",
-                required_dependency_kinds=frozenset(
-                    {"DECISION_PROBLEM", "QUESTION_DRAFT"}
-                ),
+                required_dependency_kinds=frozenset({"DECISION_PROBLEM", "QUESTION_DRAFT"}),
             ),
         )
     )

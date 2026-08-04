@@ -2,6 +2,9 @@ from fastapi import FastAPI
 
 from kefe_api.core.exception_handlers import install_exception_handlers
 from kefe_api.core.settings import get_settings
+from kefe_api.infrastructure.canonical_public_feed_composition import (
+    build_canonical_public_feed_composition,
+)
 from kefe_api.infrastructure.editorial_pipeline import build_editorial_pipeline
 from kefe_api.infrastructure.persistence import (
     build_account_continuity_repository,
@@ -19,6 +22,9 @@ from kefe_api.infrastructure.persistence import (
 )
 from kefe_api.infrastructure.raw_evidence_runtime import (
     build_raw_source_evidence_store,
+)
+from kefe_api.modules.admin_security.canonical_public_feed_router import (
+    router as admin_canonical_public_feed_router,
 )
 from kefe_api.modules.admin_security.content_authoring import SecuredContentAuthoringService
 from kefe_api.modules.admin_security.content_configuration import (
@@ -141,6 +147,11 @@ def create_app() -> FastAPI:
         admin_security_service=admin_security_service,
         raw_source_evidence_store=raw_source_evidence_store,
     )
+    canonical_public_feed = build_canonical_public_feed_composition(
+        settings,
+        admin_security_service=admin_security_service,
+        editorial_pipeline=editorial_pipeline,
+    )
     content_configuration_service = ContentConfigurationService(
         repository=content_configuration_repository,
         security=admin_security_service,
@@ -216,17 +227,17 @@ def create_app() -> FastAPI:
     )
     app.state.secret_resolver_registry = editorial_pipeline.secret_resolver_registry
     app.state.credential_capture_registry = editorial_pipeline.credential_capture_registry
-    app.state.secure_provider_capture_executor = (
-        editorial_pipeline.secure_provider_capture_executor
-    )
+    app.state.secure_provider_capture_executor = editorial_pipeline.secure_provider_capture_executor
     app.state.public_capture_registry = editorial_pipeline.public_capture_registry
-    app.state.public_provider_capture_executor = (
-        editorial_pipeline.public_provider_capture_executor
-    )
+    app.state.public_provider_capture_executor = editorial_pipeline.public_provider_capture_executor
     app.state.provider_capture_executor = editorial_pipeline.provider_capture_executor
     app.state.public_http_capture_adapter_factory = (
         editorial_pipeline.public_http_capture_adapter_factory
     )
+    app.state.provider_adoption_registry = editorial_pipeline.provider_adoption_registry
+    app.state.canonical_public_feed_repository = canonical_public_feed.repository
+    app.state.canonical_public_feed_runtime_profiles = canonical_public_feed.runtime_profiles
+    app.state.canonical_public_feed_service = canonical_public_feed.service
     app.state.source_acquisition_observer = editorial_pipeline.source_acquisition_observer
     app.state.source_acquisition_service = editorial_pipeline.source_acquisition_service
     app.state.source_scheduler_repository = editorial_pipeline.source_scheduler_repository
@@ -287,6 +298,8 @@ def create_app() -> FastAPI:
         app.include_router(admin_source_brief_ingestion_router)
     if _api_at_least(settings.api_version, 0, 23):
         app.include_router(admin_source_brief_review_router)
+    if _api_at_least(settings.api_version, 0, 24):
+        app.include_router(admin_canonical_public_feed_router)
     app.include_router(admin_editorial_projection_router)
     app.include_router(admin_content_configuration_router)
     app.include_router(community_reason_admin_router)

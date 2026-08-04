@@ -5,12 +5,7 @@ import json
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-CONTRACT = (
-    REPO_ROOT
-    / "docs"
-    / "contracts"
-    / "content-supply-process-cycle-slice41.v1.json"
-)
+CONTRACT = REPO_ROOT / "docs" / "contracts" / "content-supply-process-cycle-slice41.v1.json"
 MIGRATION = (
     REPO_ROOT
     / "services"
@@ -19,15 +14,7 @@ MIGRATION = (
     / "versions"
     / "20260802_0023_content_supply_cycle.py"
 )
-MODULE = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "modules"
-    / "content_supply_cycle"
-)
+MODULE = REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "content_supply_cycle"
 MODELS = MODULE / "models.py"
 PORTS = MODULE / "ports.py"
 MEMORY = MODULE / "in_memory.py"
@@ -51,28 +38,12 @@ CLI = (
     / "run_content_supply_cycle.py"
 )
 PIPELINE = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "infrastructure"
-    / "editorial_pipeline.py"
+    REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "infrastructure" / "editorial_pipeline.py"
 )
 MAIN = REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "main.py"
-MEMORY_TEST = (
-    REPO_ROOT / "services" / "api" / "tests" / "test_content_supply_cycle.py"
-)
-CLI_TEST = (
-    REPO_ROOT / "services" / "api" / "tests" / "test_content_supply_cycle_cli.py"
-)
-POSTGRES_TEST = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "tests"
-    / "test_content_supply_cycle_postgres.py"
-)
+MEMORY_TEST = REPO_ROOT / "services" / "api" / "tests" / "test_content_supply_cycle.py"
+CLI_TEST = REPO_ROOT / "services" / "api" / "tests" / "test_content_supply_cycle_cli.py"
+POSTGRES_TEST = REPO_ROOT / "services" / "api" / "tests" / "test_content_supply_cycle_postgres.py"
 
 
 def _require(
@@ -93,8 +64,7 @@ def _dataclass_fields(source: str, class_name: str) -> tuple[str, ...]:
             return tuple(
                 statement.target.id
                 for statement in node.body
-                if isinstance(statement, ast.AnnAssign)
-                and isinstance(statement.target, ast.Name)
+                if isinstance(statement, ast.AnnAssign) and isinstance(statement.target, ast.Name)
             )
     return ()
 
@@ -159,14 +129,9 @@ def main() -> int:
         problems.append("CLI daemon mode must remain excluded")
 
     result_fields = _dataclass_fields(service, "ContentSupplyCycleResult")
-    expected_result_fields = tuple(
-        contract.get("observer", {}).get("allowed_fields", ())
-    )
+    expected_result_fields = tuple(contract.get("observer", {}).get("allowed_fields", ()))
     if result_fields != expected_result_fields:
-        problems.append(
-            "ContentSupplyCycleResult allowlist drifted: "
-            + ", ".join(result_fields)
-        )
+        problems.append("ContentSupplyCycleResult allowlist drifted: " + ", ".join(result_fields))
 
     _require(
         problems,
@@ -260,9 +225,7 @@ def main() -> int:
         ),
     )
     plan_position = service.find("for _ in range(command.plan_budget):")
-    dispatch_position = service.find(
-        "for dispatch_index in range(command.dispatch_budget):"
-    )
+    dispatch_position = service.find("for dispatch_index in range(command.dispatch_budget):")
     ingestion_position = service.find("for target in command.pipeline_targets:")
     if not 0 <= plan_position < dispatch_position < ingestion_position:
         problems.append("content-supply phase order drifted")

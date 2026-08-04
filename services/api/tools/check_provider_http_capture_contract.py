@@ -53,19 +53,11 @@ def fail(message: str) -> None:
 
 
 def _class_map(tree: ast.Module) -> dict[str, ast.ClassDef]:
-    return {
-        node.name: node
-        for node in tree.body
-        if isinstance(node, ast.ClassDef)
-    }
+    return {node.name: node for node in tree.body if isinstance(node, ast.ClassDef)}
 
 
 def _method_map(node: ast.ClassDef) -> dict[str, ast.FunctionDef]:
-    return {
-        item.name: item
-        for item in node.body
-        if isinstance(item, ast.FunctionDef)
-    }
+    return {item.name: item for item in node.body if isinstance(item, ast.FunctionDef)}
 
 
 def _argument_names(method: ast.FunctionDef) -> tuple[str, ...]:
@@ -171,15 +163,11 @@ def main() -> None:
     ):
         fail("ProviderHttpCaptureDefinition.parse_response signature drifted")
     definition_annotations = " ".join(
-        _annotation_text(definition_methods[name])
-        for name in ("build_plan", "parse_response")
+        _annotation_text(definition_methods[name]) for name in ("build_plan", "parse_response")
     )
     for forbidden_type in FORBIDDEN_DEFINITION_TYPES:
         if forbidden_type in definition_annotations:
-            fail(
-                "ProviderHttpCaptureDefinition exposes forbidden type: "
-                f"{forbidden_type}"
-            )
+            fail(f"ProviderHttpCaptureDefinition exposes forbidden type: {forbidden_type}")
 
     adapter = classes.get("ProviderHttpCaptureAdapter")
     if adapter is None:
@@ -259,7 +247,7 @@ def main() -> None:
 
     for fragment in (
         "InMemoryCredentialAwareSourceCaptureRegistry()",
-        "InMemoryProviderAdoptionRegistry()",
+        "MutableProviderAdoptionRegistry()",
         "InMemoryProviderHttpAuthRegistry()",
     ):
         if fragment not in composition_source:

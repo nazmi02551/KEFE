@@ -5,21 +5,11 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACTS = REPO_ROOT / "docs" / "contracts"
-FLOW_SRC = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "modules"
-    / "flow_runtime"
-)
+FLOW_SRC = REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "flow_runtime"
 
 
 def main() -> None:
-    contract = (CONTRACTS / "generic-flow-runtime.v1.yaml").read_text(
-        encoding="utf-8"
-    )
+    contract = (CONTRACTS / "generic-flow-runtime.v1.yaml").read_text(encoding="utf-8")
     service = (FLOW_SRC / "service.py").read_text(encoding="utf-8")
     router = (FLOW_SRC / "router.py").read_text(encoding="utf-8")
     openapi = json.loads((CONTRACTS / "openapi.v1.json").read_text(encoding="utf-8"))
@@ -81,10 +71,14 @@ def main() -> None:
         if fragment not in router:
             problems.append(f"Generic Flow runtime router missing: {fragment}")
 
-    operation = openapi.get("paths", {}).get(
-        "/v1/weigh-sessions/{session_id}/flow",
-        {},
-    ).get("get", {})
+    operation = (
+        openapi.get("paths", {})
+        .get(
+            "/v1/weigh-sessions/{session_id}/flow",
+            {},
+        )
+        .get("get", {})
+    )
     if not operation:
         problems.append("OpenAPI missing generic Flow runtime endpoint")
     if {"HTTPBearer": []} not in operation.get("security", []):

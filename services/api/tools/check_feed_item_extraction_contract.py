@@ -8,18 +8,12 @@ ROOT = Path(__file__).resolve().parents[3]
 API = ROOT / "services/api"
 EVIDENCE = API / "src/kefe_api/modules/knowledge/source_evidence.py"
 DURABLE = API / "src/kefe_api/modules/knowledge/source_evidence_backend.py"
-EXTRACTION = (
-    API
-    / "src/kefe_api/modules/ingestion_orchestration/feed_item_extraction.py"
-)
+EXTRACTION = API / "src/kefe_api/modules/ingestion_orchestration/feed_item_extraction.py"
 PIPELINE = API / "src/kefe_api/infrastructure/editorial_pipeline.py"
 MAIN = API / "src/kefe_api/main.py"
 READ_TEST = API / "tests/test_source_evidence_reading.py"
 STAGE_TEST = API / "tests/test_feed_item_extraction.py"
-ADR = (
-    ROOT
-    / "docs/adr/0089-immutable-feed-evidence-reading-and-bounded-item-extraction.md"
-)
+ADR = ROOT / "docs/adr/0089-immutable-feed-evidence-reading-and-bounded-item-extraction.md"
 CONTRACT = ROOT / "docs/contracts/feed-item-extraction-slice53.v1.json"
 WORKFLOW = ROOT / ".github/workflows/feed-item-extraction-ci.yml"
 INGESTION_WORKFLOW = ROOT / ".github/workflows/ingestion-worker-ci.yml"
@@ -45,19 +39,14 @@ def fail(message: str) -> None:
 
 def class_map(source: str) -> dict[str, ast.ClassDef]:
     tree = ast.parse(source)
-    return {
-        node.name: node
-        for node in tree.body
-        if isinstance(node, ast.ClassDef)
-    }
+    return {node.name: node for node in tree.body if isinstance(node, ast.ClassDef)}
 
 
 def fields(node: ast.ClassDef) -> tuple[str, ...]:
     return tuple(
         child.target.id
         for child in node.body
-        if isinstance(child, ast.AnnAssign)
-        and isinstance(child.target, ast.Name)
+        if isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name)
     )
 
 
@@ -69,10 +58,7 @@ def method(node: ast.ClassDef, name: str) -> ast.FunctionDef:
 
 
 def arguments(node: ast.FunctionDef) -> tuple[str, ...]:
-    return tuple(
-        argument.arg
-        for argument in (*node.args.args, *node.args.kwonlyargs)
-    )
+    return tuple(argument.arg for argument in (*node.args.args, *node.args.kwonlyargs))
 
 
 def main() -> None:
@@ -85,9 +71,7 @@ def main() -> None:
     extraction = EXTRACTION.read_text(encoding="utf-8")
     pipeline = PIPELINE.read_text(encoding="utf-8")
     main_source = MAIN.read_text(encoding="utf-8")
-    tests = READ_TEST.read_text(encoding="utf-8") + STAGE_TEST.read_text(
-        encoding="utf-8"
-    )
+    tests = READ_TEST.read_text(encoding="utf-8") + STAGE_TEST.read_text(encoding="utf-8")
     adr = ADR.read_text(encoding="utf-8")
     contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
     workflow = WORKFLOW.read_text(encoding="utf-8")
@@ -120,9 +104,7 @@ def main() -> None:
     ):
         fail("RawSourceEvidenceRead fields drifted")
     reader = evidence_classes.get("RawSourceEvidenceReader")
-    if reader is None or "Protocol" not in {
-        ast.unparse(base) for base in reader.bases
-    }:
+    if reader is None or "Protocol" not in {ast.unparse(base) for base in reader.bases}:
         fail("RawSourceEvidenceReader must be a Protocol")
     read_method = method(reader, "read")
     if arguments(read_method) != (
@@ -145,9 +127,7 @@ def main() -> None:
     durable_classes = class_map(durable)
     durable_store = durable_classes.get("DurableRawSourceEvidenceStore")
     if durable_store is None or "read" not in {
-        child.name
-        for child in durable_store.body
-        if isinstance(child, ast.FunctionDef)
+        child.name for child in durable_store.body if isinstance(child, ast.FunctionDef)
     }:
         fail("durable raw evidence store must implement read")
     for forbidden in (
@@ -230,17 +210,32 @@ def main() -> None:
         if forbidden in extraction:
             fail(f"forbidden behavior leaked into extraction stage: {forbidden}")
 
-    if "InMemoryIngestionWorkerRuntimeRegistry()" not in pipeline:
-        fail("production ingestion runtime registry must remain empty")
-    if "build_feed_item_extraction_runtime(" in pipeline or (
-        "build_feed_item_extraction_runtime(" in main_source
-    ):
-        fail("production composition must not activate feed item extraction")
+    if "build_feed_item_extraction_runtime(" not in pipeline:
+        fail("production composition must install the inert feed item runtime plan")
+    if "return InMemoryIngestionWorkerRuntimeRegistry(" not in extraction:
+        fail("feed item runtime builder must return the authoritative worker registry")
+    if "build_feed_item_extraction_runtime(" in main_source:
+        fail("application entrypoint must not install a second feed item runtime plan")
     composition = contract.get("composition", {})
-    if composition.get("production_runtime_plans_registered") != 0:
-        fail("production feed item runtime plan registry must remain empty")
-    if composition.get("production_processors_registered") != 0:
-        fail("production feed item processor registry must remain empty")
+    if composition.get("production_runtime_plans_registered") != 1:
+        fail("exactly one inert feed item runtime plan must be registered")
+    if composition.get("production_processors_registered") != 1:
+        fail("exactly one deterministic feed item processor must be registered")
+    for zero_field in (
+        "seeded_feed_definitions",
+        "seeded_provider_profiles",
+        "seeded_public_adapters",
+        "seeded_schedules",
+        "concrete_providers_registered",
+    ):
+        if composition.get(zero_field) != 0:
+            fail(f"production composition must keep {zero_field} at zero")
+    if composition.get("plan_registration_is_source_activation") is not False:
+        fail("worker plan registration must not be treated as source activation")
+    if composition.get("explicit_catalog_activation_required") is not True:
+        fail("source runtime must require explicit catalog activation")
+    if composition.get("startup_network") is not False:
+        fail("feed item composition must perform no startup network operation")
 
     for test_name in (
         "test_in_memory_read_returns_owned_integrity_verified_record",
@@ -261,7 +256,7 @@ def main() -> None:
         "recompute SHA-256",
         "strict RSS/Atom validator",
         "Human review remains mandatory",
-        "runtime registry remains empty",
+        "inert generic runtime capability",
     ):
         if phrase not in adr:
             fail(f"ADR-0089 decision text missing: {phrase}")

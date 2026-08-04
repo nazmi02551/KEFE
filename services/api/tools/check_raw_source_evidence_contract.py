@@ -7,18 +7,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 API_ROOT = ROOT / "services" / "api"
 EVIDENCE = API_ROOT / "src/kefe_api/modules/knowledge/source_evidence.py"
-CAPTURE = (
-    API_ROOT
-    / "src/kefe_api/modules/knowledge/provider_http_evidence_capture.py"
-)
+CAPTURE = API_ROOT / "src/kefe_api/modules/knowledge/provider_http_evidence_capture.py"
 SLICE48 = API_ROOT / "src/kefe_api/modules/knowledge/provider_http_capture.py"
 STORE_TEST = API_ROOT / "tests/test_source_evidence.py"
 CAPTURE_TEST = API_ROOT / "tests/test_provider_http_evidence_capture.py"
 ARCH_TEST = API_ROOT / "tests/test_raw_source_evidence_architecture.py"
-ADR = (
-    ROOT
-    / "docs/adr/0085-immutable-raw-source-evidence-and-content-addressed-capture-assembly.md"
-)
+ADR = ROOT / "docs/adr/0085-immutable-raw-source-evidence-and-content-addressed-capture-assembly.md"
 CONTRACT = ROOT / "docs/contracts/raw-source-evidence-slice49.v1.json"
 WORKFLOW = ROOT / ".github/workflows/raw-source-evidence-ci.yml"
 
@@ -77,35 +71,23 @@ def fail(message: str) -> None:
 
 
 def _class_map(tree: ast.Module) -> dict[str, ast.ClassDef]:
-    return {
-        node.name: node
-        for node in tree.body
-        if isinstance(node, ast.ClassDef)
-    }
+    return {node.name: node for node in tree.body if isinstance(node, ast.ClassDef)}
 
 
 def _method_map(node: ast.ClassDef) -> dict[str, ast.FunctionDef]:
-    return {
-        item.name: item
-        for item in node.body
-        if isinstance(item, ast.FunctionDef)
-    }
+    return {item.name: item for item in node.body if isinstance(item, ast.FunctionDef)}
 
 
 def _fields(node: ast.ClassDef) -> tuple[str, ...]:
     return tuple(
         item.target.id
         for item in node.body
-        if isinstance(item, ast.AnnAssign)
-        and isinstance(item.target, ast.Name)
+        if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name)
     )
 
 
 def _arguments(method: ast.FunctionDef) -> tuple[str, ...]:
-    return tuple(
-        item.arg
-        for item in (*method.args.args, *method.args.kwonlyargs)
-    )
+    return tuple(item.arg for item in (*method.args.args, *method.args.kwonlyargs))
 
 
 def _annotation_text(method: ast.FunctionDef) -> str:
@@ -127,18 +109,13 @@ def _dataclass_keywords(node: ast.ClassDef) -> dict[str, object]:
         return {
             keyword.arg: keyword.value.value
             for keyword in decorator.keywords
-            if keyword.arg is not None
-            and isinstance(keyword.value, ast.Constant)
+            if keyword.arg is not None and isinstance(keyword.value, ast.Constant)
         }
     return {}
 
 
 def main() -> None:
-    missing = [
-        str(path.relative_to(ROOT))
-        for path in REQUIRED_FILES
-        if not path.exists()
-    ]
+    missing = [str(path.relative_to(ROOT)) for path in REQUIRED_FILES if not path.exists()]
     if missing:
         fail(f"missing raw source evidence files: {missing}")
 
@@ -163,24 +140,16 @@ def main() -> None:
         lowered = source.lower()
         for provider_name in FORBIDDEN_PROVIDER_NAMES:
             if provider_name in lowered:
-                fail(
-                    f"{source_name} contains provider-specific name: "
-                    f"{provider_name}"
-                )
+                fail(f"{source_name} contains provider-specific name: {provider_name}")
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     if alias.name in FORBIDDEN_NETWORK_MODULES:
-                        fail(
-                            f"{source_name} imports network module: "
-                            f"{alias.name}"
-                        )
+                        fail(f"{source_name} imports network module: {alias.name}")
             if isinstance(node, ast.ImportFrom):
                 module = node.module or ""
                 if module in FORBIDDEN_NETWORK_MODULES:
-                    fail(
-                        f"{source_name} imports network module: {module}"
-                    )
+                    fail(f"{source_name} imports network module: {module}")
             if isinstance(node, ast.While):
                 fail(f"{source_name} cannot implement autonomous retry")
             if (
@@ -201,9 +170,7 @@ def main() -> None:
         fail("RawSourceEvidenceSeal must be frozen, slotted and repr-redacted")
 
     store = evidence_classes.get("RawSourceEvidenceStore")
-    if store is None or "Protocol" not in {
-        ast.unparse(base) for base in store.bases
-    }:
+    if store is None or "Protocol" not in {ast.unparse(base) for base in store.bases}:
         fail("RawSourceEvidenceStore must be a Protocol")
     seal_method = _method_map(store).get("seal")
     if seal_method is None or _arguments(seal_method) != (
@@ -227,21 +194,23 @@ def main() -> None:
     parsed = capture_classes.get("ProviderHttpParsedSource")
     if parsed is None or _fields(parsed) != PARSED_FIELDS:
         fail("ProviderHttpParsedSource fields drifted")
-    if "content_hash" in capture_source.split(
-        "class ProviderHttpParsedSource", 1
-    )[1].split("class EvidenceBackedProviderHttpCaptureDefinition", 1)[0]:
+    if (
+        "content_hash"
+        in capture_source.split("class ProviderHttpParsedSource", 1)[1].split(
+            "class EvidenceBackedProviderHttpCaptureDefinition", 1
+        )[0]
+    ):
         fail("ProviderHttpParsedSource cannot expose content_hash")
-    if "raw_storage_ref" in capture_source.split(
-        "class ProviderHttpParsedSource", 1
-    )[1].split("class EvidenceBackedProviderHttpCaptureDefinition", 1)[0]:
+    if (
+        "raw_storage_ref"
+        in capture_source.split("class ProviderHttpParsedSource", 1)[1].split(
+            "class EvidenceBackedProviderHttpCaptureDefinition", 1
+        )[0]
+    ):
         fail("ProviderHttpParsedSource cannot expose raw_storage_ref")
 
-    definition = capture_classes.get(
-        "EvidenceBackedProviderHttpCaptureDefinition"
-    )
-    if definition is None or "Protocol" not in {
-        ast.unparse(base) for base in definition.bases
-    }:
+    definition = capture_classes.get("EvidenceBackedProviderHttpCaptureDefinition")
+    if definition is None or "Protocol" not in {ast.unparse(base) for base in definition.bases}:
         fail("evidence-backed capture definition must be a Protocol")
     definition_methods = _method_map(definition)
     if set(definition_methods) != {
@@ -251,8 +220,7 @@ def main() -> None:
     }:
         fail("evidence-backed definition method set drifted")
     annotations = " ".join(
-        _annotation_text(definition_methods[name])
-        for name in ("build_plan", "parse_response")
+        _annotation_text(definition_methods[name]) for name in ("build_plan", "parse_response")
     )
     for forbidden in (
         "SecretAccess",
@@ -263,14 +231,9 @@ def main() -> None:
         "PinnedHttpBackend",
     ):
         if forbidden in annotations:
-            fail(
-                "evidence-backed definition exposes forbidden type: "
-                f"{forbidden}"
-            )
+            fail(f"evidence-backed definition exposes forbidden type: {forbidden}")
 
-    adapter = capture_classes.get(
-        "EvidenceBackedProviderHttpCaptureAdapter"
-    )
+    adapter = capture_classes.get("EvidenceBackedProviderHttpCaptureAdapter")
     if adapter is None:
         fail("EvidenceBackedProviderHttpCaptureAdapter is missing")
     capture = _method_map(adapter).get("capture")

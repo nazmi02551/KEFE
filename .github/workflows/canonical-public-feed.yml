@@ -1,0 +1,133 @@
+name: Canonical Public Feed
+
+# The canonical gate proves one catalog/activation model in memory and PostgreSQL,
+# secured Admin API isolation, explicit live-runtime registration, fail-closed
+# restart rehydration, and a no-live-network path to a review-required FEED_ITEM
+# Proposal. Production starts with zero definitions and activations.
+on:
+  pull_request:
+    paths:
+      - 'services/api/migrations/versions/20260804_0026_canonical_public_feed_catalog.py'
+      - 'services/api/src/kefe_api/main.py'
+      - 'services/api/src/kefe_api/infrastructure/canonical_public_feed_composition.py'
+      - 'services/api/src/kefe_api/infrastructure/canonical_public_feed_runtime.py'
+      - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
+      - 'services/api/src/kefe_api/infrastructure/postgres_canonical_public_feed_catalog.py'
+      - 'services/api/src/kefe_api/modules/admin_security/canonical_public_feed_router.py'
+      - 'services/api/src/kefe_api/modules/admin_security/models.py'
+      - 'services/api/src/kefe_api/modules/admin_security/policy.py'
+      - 'services/api/src/kefe_api/modules/admin_security/service.py'
+      - 'services/api/src/kefe_api/modules/knowledge/public_feed_runtime.py'
+      - 'services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py'
+      - 'services/api/tests/test_canonical_public_feed_catalog.py'
+      - 'services/api/tests/test_canonical_public_feed_catalog_postgres.py'
+      - 'services/api/tests/test_canonical_public_feed_http_postgres.py'
+      - 'services/api/tests/test_canonical_public_feed_runtime_registry.py'
+      - 'services/api/tests/test_canonical_public_feed_rehydration.py'
+      - 'services/api/tests/test_canonical_public_feed_http.py'
+      - 'services/api/tests/test_canonical_public_feed_vertical.py'
+      - 'services/api/tools/check_canonical_public_feed_catalog.py'
+      - 'services/api/tools/check_canonical_public_feed_rehydration.py'
+      - 'docs/adr/0098-canonical-public-feed-catalog-activation.md'
+      - 'docs/contracts/canonical-public-feed-catalog-activation.v1.json'
+      - 'docs/contracts/error-codes.canonical-public-feed.v1.yaml'
+      - '.github/workflows/canonical-public-feed.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/api/migrations/versions/20260804_0026_canonical_public_feed_catalog.py'
+      - 'services/api/src/kefe_api/main.py'
+      - 'services/api/src/kefe_api/infrastructure/canonical_public_feed_*'
+      - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
+      - 'services/api/src/kefe_api/infrastructure/postgres_canonical_public_feed_catalog.py'
+      - 'services/api/src/kefe_api/modules/admin_security/**'
+      - 'services/api/src/kefe_api/modules/knowledge/public_feed_runtime.py'
+      - 'services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py'
+      - 'services/api/tests/test_canonical_public_feed*'
+      - 'services/api/tools/check_canonical_public_feed_catalog.py'
+      - 'services/api/tools/check_canonical_public_feed_rehydration.py'
+      - 'docs/adr/0098-canonical-public-feed-catalog-activation.md'
+      - 'docs/contracts/canonical-public-feed-catalog-activation.v1.json'
+      - '.github/workflows/canonical-public-feed.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  memory-domain-http:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Ruff
+        working-directory: services/api
+        run: ruff check .
+      - name: Architecture contract
+        working-directory: services/api
+        run: python tools/check_canonical_public_feed_catalog.py
+      - name: Rehydration contract
+        working-directory: services/api
+        run: python tools/check_canonical_public_feed_rehydration.py
+      - name: Canonical public-feed lifecycle and vertical behavior
+        working-directory: services/api
+        run: >-
+          pytest -q
+          tests/test_canonical_public_feed_catalog.py
+          tests/test_canonical_public_feed_runtime_registry.py
+          tests/test_canonical_public_feed_rehydration.py
+          tests/test_canonical_public_feed_http.py
+          tests/test_canonical_public_feed_vertical.py
+
+  postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: kefe
+          POSTGRES_USER: kefe
+          POSTGRES_PASSWORD: kefe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kefe -d kefe"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Migrate PostgreSQL
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: alembic upgrade head
+      - name: Canonical public-feed PostgreSQL and restart behavior
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+          KEFE_RUN_POSTGRES_TESTS: '1'
+        run: >-
+          pytest -q
+          tests/test_canonical_public_feed_catalog_postgres.py
+          tests/test_canonical_public_feed_http_postgres.py

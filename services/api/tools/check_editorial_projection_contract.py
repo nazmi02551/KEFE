@@ -5,15 +5,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACT = REPO_ROOT / "docs" / "contracts" / "editorial-projection.v1.yaml"
 ADR = REPO_ROOT / "docs" / "adr" / "0029-reviewed-candidate-editorial-projection.md"
-MODULE = (
-    REPO_ROOT
-    / "services"
-    / "api"
-    / "src"
-    / "kefe_api"
-    / "modules"
-    / "editorial_projection"
-)
+MODULE = REPO_ROOT / "services" / "api" / "src" / "kefe_api" / "modules" / "editorial_projection"
 POSTGRES = (
     REPO_ROOT
     / "services"
@@ -140,9 +132,7 @@ def main() -> int:
     )
 
     required_files = (CONTRACT, ADR, POSTGRES, MIGRATION, *MODULE.glob("*.py"))
-    source = "\n".join(
-        path.read_text(encoding="utf-8") for path in required_files if path.exists()
-    )
+    source = "\n".join(path.read_text(encoding="utf-8") for path in required_files if path.exists())
     forbidden = (
         "import requests",
         "import httpx",

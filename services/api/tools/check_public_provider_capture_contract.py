@@ -47,11 +47,7 @@ def fail(message: str) -> None:
 
 def class_map(source: str) -> dict[str, ast.ClassDef]:
     tree = ast.parse(source)
-    return {
-        node.name: node
-        for node in tree.body
-        if isinstance(node, ast.ClassDef)
-    }
+    return {node.name: node for node in tree.body if isinstance(node, ast.ClassDef)}
 
 
 def dataclass_fields(node: ast.ClassDef) -> tuple[str, ...]:
@@ -171,9 +167,7 @@ def main() -> None:
         "trace_id",
         "at",
     ):
-        fail(
-            "public adapter capture arguments must be exact locator, trace_id and at"
-        )
+        fail("public adapter capture arguments must be exact locator, trace_id and at")
     for class_name in (
         "InMemoryPublicSourceCaptureRegistry",
         "PermitBoundPublicCaptureExecutor",
@@ -201,9 +195,7 @@ def main() -> None:
     public_position = secret_execution.find(
         "context.credential_mode is not ProviderCredentialMode.SECRET_REF"
     )
-    resolver_position = secret_execution.find(
-        "self._resolvers.get_for_reference(secret_ref)"
-    )
+    resolver_position = secret_execution.find("self._resolvers.get_for_reference(secret_ref)")
     if not 0 <= public_position < resolver_position:
         fail("credentialed executor must reject PUBLIC before resolver lookup")
 
@@ -215,7 +207,7 @@ def main() -> None:
             fail(f"memory permit context is missing: {fragment}")
     for fragment in (
         "credential_mode",
-        "ProviderCredentialMode(row[\"credential_mode\"])",
+        'ProviderCredentialMode(row["credential_mode"])',
     ):
         if fragment not in postgres_admission or fragment not in postgres_context:
             fail(f"PostgreSQL credential mode mapping is missing: {fragment}")
@@ -232,7 +224,7 @@ def main() -> None:
             fail(f"public provider migration invariant missing: {fragment}")
 
     for fragment in (
-        "InMemoryPublicSourceCaptureRegistry()",
+        "MutablePublicSourceCaptureRegistry()",
         "PermitBoundPublicCaptureExecutor(",
         "CredentialModeRoutingProviderCaptureExecutor(",
         "capture_executor=provider_capture_executor",
@@ -247,9 +239,7 @@ def main() -> None:
         if fragment not in main_source:
             fail(f"application public provider state missing: {fragment}")
 
-    if contract.get("composition", {}).get(
-        "production_public_adapters_registered"
-    ) != 0:
+    if contract.get("composition", {}).get("production_public_adapters_registered") != 0:
         fail("production public adapter registry must remain empty")
 
     for test_name in (
