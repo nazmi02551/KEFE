@@ -1,0 +1,44 @@
+name: Adopt Canonical Candidate Bundle Domain
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/adopt-canonical-candidate-bundle-domain.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  adopt:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - name: Select only the bounded historical domain file
+        run: |
+          mkdir -p services/api/src/kefe_api/modules/ingestion_orchestration
+          git show \
+            origin/feature/candidate-case-bundle-slice57:services/api/src/kefe_api/modules/ingestion_orchestration/candidate_case_bundle.py \
+            > services/api/src/kefe_api/modules/ingestion_orchestration/candidate_case_bundle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Normalize and verify domain imports
+        working-directory: services/api
+        run: |
+          python -m pip install -q -U pip
+          pip install -q -e '.[dev]'
+          ruff format src/kefe_api/modules/ingestion_orchestration/candidate_case_bundle.py
+          ruff check src/kefe_api/modules/ingestion_orchestration/candidate_case_bundle.py
+          python -m py_compile src/kefe_api/modules/ingestion_orchestration/candidate_case_bundle.py
+      - name: Remove workflow and commit
+        run: |
+          git rm -f .github/workflows/adopt-canonical-candidate-bundle-domain.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add services/api/src/kefe_api/modules/ingestion_orchestration/candidate_case_bundle.py
+          git commit -m 'feat: adopt bounded candidate bundle stage domain'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
