@@ -18,7 +18,6 @@ from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (
 )
 from kefe_api.modules.knowledge.provider_control import (
     ProviderCredentialMode,
-    SourceProviderCapability,
 )
 from kefe_api.modules.knowledge.provider_control_service import (
     SourceProviderAdmissionService,
@@ -28,11 +27,10 @@ from kefe_api.modules.knowledge.provider_http_capture import (
 )
 from kefe_api.modules.knowledge.provider_http_transport import ProviderAdoptionProfile
 from kefe_api.modules.knowledge.public_feed_runtime import PublicFeedDefinition
-from kefe_api.modules.knowledge.rss_atom_public_capture import (
+from kefe_api.modules.knowledge.rss_atom_capture import (
     StrictRssAtomCaptureDefinition,
 )
 from kefe_api.modules.knowledge.source_acquisition import SourceAcquisitionCommand
-from kefe_api.modules.knowledge.source_scheduler import SourceAcquisitionSchedule
 from kefe_api.modules.knowledge.source_scheduler_service import (
     SourceAcquisitionSchedulerService,
 )
@@ -201,16 +199,7 @@ class CanonicalPublicFeedDefinition:
                 "display_name": definition.display_name,
                 "adapter_code": definition.adapter_code,
                 "external_locator": definition.external_locator,
-                "parser_profile": {
-                    "max_document_bytes": definition.parser_profile.max_document_bytes,
-                    "max_depth": definition.parser_profile.max_depth,
-                    "max_elements": definition.parser_profile.max_elements,
-                    "max_items": definition.parser_profile.max_items,
-                    "max_node_text_chars": definition.parser_profile.max_node_text_chars,
-                    "max_total_text_chars": definition.parser_profile.max_total_text_chars,
-                    "max_attributes_per_element": definition.parser_profile.max_attributes_per_element,
-                    "max_attribute_text_chars": definition.parser_profile.max_attribute_text_chars,
-                },
+                "parser_profile": definition.parser_profile.immutable_configuration,
                 "connect_timeout_ms": definition.connect_timeout_ms,
                 "read_timeout_ms": definition.read_timeout_ms,
                 "total_timeout_ms": definition.total_timeout_ms,
@@ -480,7 +469,10 @@ class InMemoryPublicFeedCatalogRepository:
             current = self._definitions.get(key)
             if current is None:
                 raise KeyError("public feed definition not found")
-            if current.id != definition.id or current.configuration_hash != definition.configuration_hash:
+            if (
+                current.id != definition.id
+                or current.configuration_hash != definition.configuration_hash
+            ):
                 raise ValueError("immutable public feed definition drift")
             self._definitions[key] = definition
             return definition
@@ -496,9 +488,7 @@ class InMemoryPublicFeedCatalogRepository:
     def get_latest(self, feed_code: str) -> CanonicalPublicFeedDefinition | None:
         with self._lock:
             values = [
-                value
-                for (code, _version), value in self._definitions.items()
-                if code == feed_code
+                value for (code, _version), value in self._definitions.items() if code == feed_code
             ]
             return max(values, key=lambda item: item.definition_version) if values else None
 
@@ -532,7 +522,10 @@ class InMemoryPublicFeedCatalogRepository:
             current = self._activations.get(activation.feed_definition_id)
             if current is None:
                 raise KeyError("public feed activation not found")
-            if current.id != activation.id or current.configuration_hash != activation.configuration_hash:
+            if (
+                current.id != activation.id
+                or current.configuration_hash != activation.configuration_hash
+            ):
                 raise ValueError("immutable activation projection drift")
             self._activations[activation.feed_definition_id] = activation
             return activation
@@ -870,20 +863,16 @@ class CanonicalPublicFeedCatalogService:
         self,
         principal: AdminPrincipal,
     ) -> tuple[CanonicalPublicFeedDefinition, ...]:
-        granted = (
-            self._security._policy.capabilities_for_roles(principal.roles)
-            | principal.direct_capabilities
+        self._security.authorize_any(
+            principal,
+            frozenset(
+                {
+                    AdminCapability.SOURCE_MANAGE,
+                    AdminCapability.SOURCE_APPROVE,
+                    AdminCapability.SOURCE_ACTIVATE,
+                }
+            ),
         )
-        if not granted.intersection(
-            {
-                AdminCapability.SOURCE_MANAGE,
-                AdminCapability.SOURCE_APPROVE,
-                AdminCapability.SOURCE_ACTIVATE,
-            }
-        ):
-            self._security.authorize(principal, AdminCapability.SOURCE_MANAGE)
-        else:
-            self._security.touch(principal)
         return self._repository.list_definitions()
 
     def audit(
@@ -966,7 +955,7 @@ class CanonicalPublicFeedCatalogService:
         adoption = public.to_adoption_profile()
         capture = StrictRssAtomCaptureDefinition(
             adapter_code=public.adapter_code,
-            parser_profile=public.parser_profile,
+            profile=public.parser_profile,
         )
         command = public.acquisition_command()
         return PublicFeedRuntimeProfile(

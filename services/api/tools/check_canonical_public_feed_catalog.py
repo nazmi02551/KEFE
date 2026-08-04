@@ -23,8 +23,7 @@ def main() -> None:
         "alternative branches must not be merged wholesale",
     )
     require(
-        contract["conflict_resolution"]["canonical_migration_revision"]
-        == "20260804_0026",
+        contract["conflict_resolution"]["canonical_migration_revision"] == "20260804_0026",
         "canonical migration revision drifted",
     )
     require(DOMAIN.is_file(), "canonical catalog domain is missing")
@@ -53,7 +52,9 @@ def main() -> None:
         < source.index("self._scheduler.create_schedule"),
         "activation must remain capability-first and schedule-second",
     )
-    require("requests." not in source and "httpx." not in source, "domain must not perform network I/O")
+    require(
+        "requests." not in source and "httpx." not in source, "domain must not perform network I/O"
+    )
     require("publish" not in source.lower(), "catalog domain must not publish content")
 
     migration_names = {path.name for path in MIGRATIONS.glob("*.py")}

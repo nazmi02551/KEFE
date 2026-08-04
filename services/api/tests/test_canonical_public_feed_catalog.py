@@ -21,21 +21,26 @@ from kefe_api.modules.knowledge.canonical_public_feed_catalog import (
     PublicFeedCatalogState,
 )
 from kefe_api.modules.knowledge.provider_control import (
-    InMemoryProviderControlRepository,
-    ProviderLifecycle,
+    ProviderCapabilityLifecycle,
+)
+from kefe_api.modules.knowledge.provider_control_memory import (
+    InMemorySourceProviderAdmissionRepository,
 )
 from kefe_api.modules.knowledge.provider_control_service import (
     SourceProviderAdmissionService,
 )
 from kefe_api.modules.knowledge.public_feed_runtime import PublicFeedDefinition
-from kefe_api.modules.knowledge.rss_atom_public_capture import (
+from kefe_api.modules.knowledge.rss_atom_capture import (
     StrictRssAtomParseProfile,
 )
 from kefe_api.modules.knowledge.source_scheduler import (
-    InMemorySourceAcquisitionScheduleRepository,
     SourceAcquisitionScheduleState,
 )
+from kefe_api.modules.knowledge.source_scheduler_memory import (
+    InMemorySourceAcquisitionSchedulerRepository,
+)
 from kefe_api.modules.knowledge.source_scheduler_service import (
+    NoOpSourceDispatchObserver,
     SourceAcquisitionSchedulerService,
 )
 
@@ -95,8 +100,8 @@ def _definition(version: int, *, locator_suffix: str = "") -> PublicFeedDefiniti
 
 def _fixture():
     catalog = InMemoryPublicFeedCatalogRepository()
-    provider_repository = InMemoryProviderControlRepository()
-    schedule_repository = InMemorySourceAcquisitionScheduleRepository()
+    provider_repository = InMemorySourceProviderAdmissionRepository()
+    schedule_repository = InMemorySourceAcquisitionSchedulerRepository()
     runtime_profiles = InMemoryPublicFeedRuntimeProfileRegistry()
     security = AdminSecurityService(
         session_resolver=_UnusedSessionResolver(),
@@ -108,9 +113,10 @@ def _fixture():
         provider_admission=SourceProviderAdmissionService(provider_repository),
         runtime_profiles=runtime_profiles,
         scheduler=SourceAcquisitionSchedulerService(
-            schedule_repository,
-            max_interval_seconds=31_536_000,
-            max_dispatch_attempts=20,
+            repository=schedule_repository,
+            acquisition=object(),
+            observer=NoOpSourceDispatchObserver(),
+            clock=lambda: NOW,
         ),
         clock=lambda: NOW,
     )
@@ -130,8 +136,8 @@ def test_versioned_maker_checker_catalog_and_exact_activation_replay() -> None:
         max_dispatch_attempts=4,
     )
     assert draft.state is PublicFeedCatalogState.DRAFT
-    assert providers.get_capability(draft.definition.adapter_code) is None
-    assert schedules.list_schedules() == ()
+    assert providers.get(draft.definition.adapter_code) is None
+    assert schedules.plan_due_once(at=NOW + timedelta(days=1)) is None
     assert profiles.get(draft.definition.adapter_code) is None
 
     preflight = service.preflight(
@@ -140,9 +146,9 @@ def test_versioned_maker_checker_catalog_and_exact_activation_replay() -> None:
         definition_version=1,
     )
     assert preflight.configuration_hash == draft.configuration_hash
-    assert preflight.allowed_origin == "https://feeds.example.test:443"
-    assert providers.get_capability(draft.definition.adapter_code) is None
-    assert schedules.list_schedules() == ()
+    assert preflight.allowed_origin == "https://feeds.example.test"
+    assert providers.get(draft.definition.adapter_code) is None
+    assert schedules.plan_due_once(at=NOW + timedelta(days=1)) is None
 
     self_approver = _principal(
         AdminRole.REVIEWER,
@@ -184,9 +190,9 @@ def test_versioned_maker_checker_catalog_and_exact_activation_replay() -> None:
     assert second == first
     assert first.state is PublicFeedActivationState.ACTIVE
 
-    capability = providers.get_capability(draft.definition.adapter_code)
+    capability = providers.get(draft.definition.adapter_code)
     assert capability is not None
-    assert capability.lifecycle is ProviderLifecycle.ENABLED
+    assert capability.lifecycle_state is ProviderCapabilityLifecycle.ENABLED
     assert capability.secret_ref is None
     assert profiles.get(draft.definition.adapter_code) is not None
 
@@ -195,7 +201,7 @@ def test_versioned_maker_checker_catalog_and_exact_activation_replay() -> None:
     assert schedule.state is SourceAcquisitionScheduleState.ACTIVE
     assert schedule.interval_seconds == 900
     assert schedule.max_dispatch_attempts == 4
-    assert len(schedules.list_schedules()) == 1
+    assert schedules.get_schedule(first.schedule_id) == schedule
 
     audit = catalog.list_audit(draft.id)
     assert [event.action.value for event in audit] == [
@@ -235,12 +241,18 @@ def test_pause_resume_retire_and_new_version_only() -> None:
 
     paused = service.pause(approver, feed_code=draft.feed_code, definition_version=1)
     assert paused.state is PublicFeedActivationState.PAUSED
-    assert providers.get_capability(draft.definition.adapter_code).lifecycle is ProviderLifecycle.PAUSED
+    assert (
+        providers.get(draft.definition.adapter_code).lifecycle_state
+        is ProviderCapabilityLifecycle.PAUSED
+    )
     assert schedules.get_schedule(active.schedule_id).state is SourceAcquisitionScheduleState.PAUSED
 
     resumed = service.resume(approver, feed_code=draft.feed_code, definition_version=1)
     assert resumed.state is PublicFeedActivationState.ACTIVE
-    assert providers.get_capability(draft.definition.adapter_code).lifecycle is ProviderLifecycle.ENABLED
+    assert (
+        providers.get(draft.definition.adapter_code).lifecycle_state
+        is ProviderCapabilityLifecycle.ENABLED
+    )
 
     retired_activation = service.retire_activation(
         approver,
@@ -248,8 +260,13 @@ def test_pause_resume_retire_and_new_version_only() -> None:
         definition_version=1,
     )
     assert retired_activation.state is PublicFeedActivationState.RETIRED
-    assert providers.get_capability(draft.definition.adapter_code).lifecycle is ProviderLifecycle.RETIRED
-    assert schedules.get_schedule(active.schedule_id).state is SourceAcquisitionScheduleState.RETIRED
+    assert (
+        providers.get(draft.definition.adapter_code).lifecycle_state
+        is ProviderCapabilityLifecycle.RETIRED
+    )
+    assert (
+        schedules.get_schedule(active.schedule_id).state is SourceAcquisitionScheduleState.RETIRED
+    )
 
     retired_definition = service.retire_definition(
         approver,
