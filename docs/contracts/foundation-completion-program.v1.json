@@ -1,6 +1,6 @@
 {
-  "contract_version": "1.0.0",
-  "updated_at": "2026-08-02",
+  "contract_version": "1.1.0",
+  "updated_at": "2026-08-04",
   "status": "working_execution_contract",
   "source_issue": 180,
   "purpose": "Define measurable infrastructure-completion waves that support the full KEFE capability portfolio without parallel product runtimes or silent roadmap loss.",
@@ -8,6 +8,7 @@
     "published_documentation": "KEFE Documentation Ecosystem v3.4 CURRENT",
     "working_documentation": "KEFE Documentation Ecosystem v3.5 WORKING",
     "capability_portfolio": "docs/roadmap/capability-portfolio.v1.tsv",
+    "delivery_registry": "docs/status/active-delivery-registry.v1.json",
     "does_not_promote_working_to_current": true,
     "does_not_promote_proposals_or_tests": true
   },
@@ -44,7 +45,24 @@
         "NEXT_RUNTIME_SLICE_HAS_DETERMINISTIC_SCOPE",
         "CAPABILITY_PORTFOLIO_AND_FOUNDATION_CONTRACT_VALIDATE"
       ],
-      "status": "IN_PROGRESS"
+      "status": "COMPLETE_VERIFIED",
+      "evidence": {
+        "governance_pr": 288,
+        "governance_sha": "ad9cf30adbff323c9f7372127314ad00d425b9c9",
+        "canonical_runtime_pr": 290,
+        "canonical_runtime_sha": "140960ac80881faec5841008eac9444ab67d9b7a",
+        "validators": [
+          "CAPABILITY_PORTFOLIO_PASS",
+          "FOUNDATION_COMPLETION_PASS",
+          "FULL_VISION_DELIVERY_CONVERGENCE_PASS"
+        ],
+        "runtime_workflows": [
+          "API_CI_PASS",
+          "MOBILE_CI_PASS",
+          "MVP_BETA_GATES_PASS",
+          "GLOBAL_READINESS_PASS"
+        ]
+      }
     },
     {
       "id": "F1",
@@ -57,10 +75,26 @@
         "PROPOSALS_IMMUTABLE_AND_REPLAY_SAFE",
         "TERMINAL_HUMAN_REVIEW_DURABLE",
         "NO_AUTONOMOUS_CANONICAL_MUTATION",
+        "ONE_CANONICAL_PUBLIC_FEED_MODEL",
         "MEMORY_AND_POSTGRES_EVIDENCE",
         "API_CI_EXACT_SHA_PASS"
       ],
-      "status": "PENDING"
+      "status": "IN_PROGRESS",
+      "verified_progress": [
+        "CANONICAL_TYPED_FEED_ITEM_READS",
+        "CANONICAL_EXPLICIT_SOURCE_BRIEF_BUILD",
+        "CANONICAL_TYPED_SOURCE_BRIEF_READS",
+        "MEMORY_AND_POSTGRES_LINEAGE_EVIDENCE",
+        "API_020_TO_023_ADDITIVE_ISOLATION"
+      ],
+      "remaining": [
+        "RESOLVE_PUBLIC_FEED_MODEL_CONFLICT",
+        "ONE_VERSIONED_CATALOG_AGGREGATE",
+        "ONE_EXPLICIT_ACTIVATION_PROJECTION",
+        "MIGRATION_COLLISION_RESOLVED",
+        "ZERO_STARTUP_ACTIVATION_PRESERVED",
+        "REAL_PROVIDER_AND_DEPLOYED_OPERATION_REMAIN_EXTERNAL_GATES"
+      ]
     },
     {
       "id": "F2",
@@ -94,7 +128,11 @@
         "MEDIA_PROVIDER_NEUTRAL_AND_PREVIEW_ISOLATED",
         "ADMIN_OPERATIONAL_REPORTS_AVAILABLE"
       ],
-      "status": "PENDING"
+      "status": "PENDING",
+      "verified_progress": [
+        "TYPED_FEED_ITEM_REVIEW_API",
+        "TYPED_SOURCE_BRIEF_REVIEW_API"
+      ]
     },
     {
       "id": "F4",
@@ -160,12 +198,18 @@
     }
   ],
   "next_runtime_slice": {
-    "capability": "CAP-062",
-    "name": "Editorial Projection runtime — first executable ADR-0029 slice",
-    "base": "feature/app-preferences-reliability-slice30",
+    "issue": 291,
+    "primary_capability": "CAP-055",
+    "capabilities": ["CAP-055", "CAP-056", "CAP-061", "CAP-065", "CAP-094", "CAP-095", "CAP-123", "CAP-126"],
+    "name": "Canonical Public Feed Catalog and explicit activation projection",
+    "base_pr": 290,
+    "base_sha": "140960ac80881faec5841008eac9444ab67d9b7a",
     "requires": ["F0"],
-    "must_not_require_external_provider_or_ai_calls": true,
+    "resolves_conflict_group": "PUBLIC_FEED_MODEL",
+    "must_not_require_live_external_provider": true,
     "must_not_create_second_cms": true,
-    "must_not_create_new_case_runtime_classes": true
+    "must_not_create_new_case_runtime_classes": true,
+    "must_not_automatically_review_approve_or_publish": true,
+    "must_preserve_zero_startup_activation": true
   }
 }
