@@ -45,6 +45,24 @@ The workspace provides:
 
 It deliberately does not expose content editing, autosave, publish, withdraw, Flow topology changes, automated review or automated approval. Session and CSRF values remain in page memory and are never persisted by the application.
 
+## Flow Composer DRAFT workspace
+
+`/flow-composer` manages versioned generic Flow templates inside one exact canonical `ContentConfigurationSnapshot`. A `?version=<uuid>` query parameter only prefills the version ID; it never starts a request.
+
+The workspace provides:
+
+- an explicit clone-current command that creates a new configuration `DRAFT`;
+- exact-ID loading for DRAFT or immutable historical versions;
+- read-only Primitive and Capability catalogs with compatibility metadata;
+- structured Flow Template and Step editing;
+- accessible add, remove, move-up and move-down controls without a drag-and-drop dependency;
+- deterministic text topology previews;
+- client checks for identities, references, compatibility, reachability and cycles;
+- explicit DRAFT save and exact-version audit loading;
+- a dirty-state guard and explicit discard command.
+
+Only `flow_templates` are submitted. The server reloads the canonical DRAFT and preserves taxonomies, risks, catalogs, modifier compatibility and every other non-Flow field. The workspace deliberately does not expose configuration publication, rollback, Case editing/review, autosave, automatic Flow generation or consumer-runtime mutation.
+
 ## Local setup
 
 ```bash
@@ -63,6 +81,6 @@ The existing Admin session is supplied by the `kefe_admin_session` cookie. Every
 npm run verify
 ```
 
-This runs all three executable Admin architecture contracts, ESLint, strict TypeScript, API/client/helper tests and a production Next.js build.
+This runs all four executable Admin architecture contracts, ESLint, strict TypeScript, API/client/helper tests and a production Next.js build.
 
 Automated checks do not prove human editorial usability, CQB acceptance, production deployment, provider readiness, deployed SLO/load/observability, operator rollback, store compliance or production release.
