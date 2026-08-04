@@ -1,13 +1,18 @@
 name: Canonical Public Feed
 
-# The canonical gate proves one catalog/activation model in memory and PostgreSQL.
-# Feed codes are stable business identities; adapter codes remain immutable .vN
-# identities. Catalog hash, ingestion hash and schedule policy remain distinct.
+# The canonical gate proves one catalog/activation model in memory and PostgreSQL,
+# secured Admin API isolation, and explicit live-runtime registration. Production
+# composition starts with zero definitions, adapters, schedules and activations.
 on:
   pull_request:
     paths:
       - 'services/api/migrations/versions/20260804_0026_canonical_public_feed_catalog.py'
+      - 'services/api/src/kefe_api/main.py'
+      - 'services/api/src/kefe_api/infrastructure/canonical_public_feed_composition.py'
+      - 'services/api/src/kefe_api/infrastructure/canonical_public_feed_runtime.py'
+      - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
       - 'services/api/src/kefe_api/infrastructure/postgres_canonical_public_feed_catalog.py'
+      - 'services/api/src/kefe_api/modules/admin_security/canonical_public_feed_router.py'
       - 'services/api/src/kefe_api/modules/admin_security/models.py'
       - 'services/api/src/kefe_api/modules/admin_security/policy.py'
       - 'services/api/src/kefe_api/modules/admin_security/service.py'
@@ -15,6 +20,8 @@ on:
       - 'services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py'
       - 'services/api/tests/test_canonical_public_feed_catalog.py'
       - 'services/api/tests/test_canonical_public_feed_catalog_postgres.py'
+      - 'services/api/tests/test_canonical_public_feed_runtime_registry.py'
+      - 'services/api/tests/test_canonical_public_feed_http.py'
       - 'services/api/tools/check_canonical_public_feed_catalog.py'
       - 'docs/adr/0098-canonical-public-feed-catalog-activation.md'
       - 'docs/contracts/canonical-public-feed-catalog-activation.v1.json'
@@ -24,11 +31,14 @@ on:
     branches: [main]
     paths:
       - 'services/api/migrations/versions/20260804_0026_canonical_public_feed_catalog.py'
+      - 'services/api/src/kefe_api/main.py'
+      - 'services/api/src/kefe_api/infrastructure/canonical_public_feed_*'
+      - 'services/api/src/kefe_api/infrastructure/editorial_pipeline.py'
       - 'services/api/src/kefe_api/infrastructure/postgres_canonical_public_feed_catalog.py'
       - 'services/api/src/kefe_api/modules/admin_security/**'
       - 'services/api/src/kefe_api/modules/knowledge/public_feed_runtime.py'
       - 'services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py'
-      - 'services/api/tests/test_canonical_public_feed_catalog*'
+      - 'services/api/tests/test_canonical_public_feed*'
       - 'services/api/tools/check_canonical_public_feed_catalog.py'
       - 'docs/adr/0098-canonical-public-feed-catalog-activation.md'
       - 'docs/contracts/canonical-public-feed-catalog-activation.v1.json'
@@ -38,9 +48,9 @@ permissions:
   contents: read
 
 jobs:
-  memory-domain:
+  memory-domain-http:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -59,9 +69,13 @@ jobs:
       - name: Architecture contract
         working-directory: services/api
         run: python tools/check_canonical_public_feed_catalog.py
-      - name: Canonical public-feed lifecycle
+      - name: Canonical public-feed memory, runtime and HTTP behavior
         working-directory: services/api
-        run: pytest -q tests/test_canonical_public_feed_catalog.py
+        run: >-
+          pytest -q
+          tests/test_canonical_public_feed_catalog.py
+          tests/test_canonical_public_feed_runtime_registry.py
+          tests/test_canonical_public_feed_http.py
 
   postgres:
     runs-on: ubuntu-latest
