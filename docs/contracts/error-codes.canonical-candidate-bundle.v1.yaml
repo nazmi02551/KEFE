@@ -1,0 +1,17 @@
+registry_version: 1.0.0
+errors:
+- code: ADMIN_CANDIDATE_BUNDLE_CONFIGURATION_INVALID
+  http_status: 422
+  retryable: false
+- code: ADMIN_CANDIDATE_BUNDLE_SOURCE_BRIEF_REVIEW_REQUIRED
+  http_status: 409
+  retryable: false
+- code: ADMIN_CANDIDATE_BUNDLE_SEED_CONFLICT
+  http_status: 409
+  retryable: false
+- code: ADMIN_CANDIDATE_BUNDLE_RUN_INVALID
+  http_status: 409
+  retryable: false
+- code: ADMIN_CANDIDATE_BUNDLE_BUILD_INVALID
+  http_status: 409
+  retryable: false
