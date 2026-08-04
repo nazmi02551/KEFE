@@ -27,12 +27,21 @@ from kefe_api.modules.admin_security.content_configuration import (
 from kefe_api.modules.admin_security.editorial_projection_router import (
     router as admin_editorial_projection_router,
 )
+from kefe_api.modules.admin_security.feed_item_review_router import (
+    router as admin_feed_item_review_router,
+)
 from kefe_api.modules.admin_security.policy import default_admin_security_policy
 from kefe_api.modules.admin_security.proposal_queue_router import (
     router as admin_proposal_queue_router,
 )
 from kefe_api.modules.admin_security.router import router as admin_router
 from kefe_api.modules.admin_security.service import AdminSecurityService
+from kefe_api.modules.admin_security.source_brief_ingestion_router import (
+    router as admin_source_brief_ingestion_router,
+)
+from kefe_api.modules.admin_security.source_brief_review_router import (
+    router as admin_source_brief_review_router,
+)
 from kefe_api.modules.community_reason.admin_router import router as community_reason_admin_router
 from kefe_api.modules.community_reason.router import router as community_reason_router
 from kefe_api.modules.community_reason.service import CommunityReasonService
@@ -206,9 +215,7 @@ def create_app() -> FastAPI:
         editorial_pipeline.provider_execution_context_repository
     )
     app.state.secret_resolver_registry = editorial_pipeline.secret_resolver_registry
-    app.state.credential_capture_registry = (
-        editorial_pipeline.credential_capture_registry
-    )
+    app.state.credential_capture_registry = editorial_pipeline.credential_capture_registry
     app.state.secure_provider_capture_executor = (
         editorial_pipeline.secure_provider_capture_executor
     )
@@ -220,53 +227,27 @@ def create_app() -> FastAPI:
     app.state.public_http_capture_adapter_factory = (
         editorial_pipeline.public_http_capture_adapter_factory
     )
-    app.state.source_acquisition_observer = (
-        editorial_pipeline.source_acquisition_observer
-    )
+    app.state.source_acquisition_observer = editorial_pipeline.source_acquisition_observer
     app.state.source_acquisition_service = editorial_pipeline.source_acquisition_service
-    app.state.source_scheduler_repository = (
-        editorial_pipeline.source_scheduler_repository
-    )
+    app.state.source_scheduler_repository = editorial_pipeline.source_scheduler_repository
     app.state.source_dispatch_observer = editorial_pipeline.source_dispatch_observer
     app.state.source_scheduler_service = editorial_pipeline.source_scheduler_service
-    app.state.ingestion_orchestration_repository = (
-        editorial_pipeline.ingestion_repository
-    )
+    app.state.ingestion_orchestration_repository = editorial_pipeline.ingestion_repository
     app.state.ingestion_orchestration_service = editorial_pipeline.ingestion_service
-    app.state.ingestion_run_lease_repository = (
-        editorial_pipeline.ingestion_lease_repository
-    )
+    app.state.ingestion_run_lease_repository = editorial_pipeline.ingestion_lease_repository
     app.state.ingestion_run_lease_service = editorial_pipeline.ingestion_lease_service
-    app.state.ingestion_worker_runtime_registry = (
-        editorial_pipeline.ingestion_worker_registry
-    )
+    app.state.ingestion_worker_runtime_registry = editorial_pipeline.ingestion_worker_registry
     app.state.ingestion_worker_observer = editorial_pipeline.ingestion_worker_observer
     app.state.ingestion_worker_runner = editorial_pipeline.ingestion_worker_runner
-    app.state.content_supply_cycle_repository = (
-        editorial_pipeline.content_supply_cycle_repository
-    )
-    app.state.content_supply_cycle_observer = (
-        editorial_pipeline.content_supply_cycle_observer
-    )
-    app.state.content_supply_cycle_service = (
-        editorial_pipeline.content_supply_cycle_service
-    )
-    app.state.content_supply_health_repository = (
-        editorial_pipeline.content_supply_health_repository
-    )
-    app.state.content_supply_health_service = (
-        editorial_pipeline.content_supply_health_service
-    )
-    app.state.proposal_review_queue_repository = (
-        editorial_pipeline.proposal_queue_repository
-    )
-    app.state.editorial_projection_repository = (
-        editorial_pipeline.projection_repository
-    )
+    app.state.content_supply_cycle_repository = editorial_pipeline.content_supply_cycle_repository
+    app.state.content_supply_cycle_observer = editorial_pipeline.content_supply_cycle_observer
+    app.state.content_supply_cycle_service = editorial_pipeline.content_supply_cycle_service
+    app.state.content_supply_health_repository = editorial_pipeline.content_supply_health_repository
+    app.state.content_supply_health_service = editorial_pipeline.content_supply_health_service
+    app.state.proposal_review_queue_repository = editorial_pipeline.proposal_queue_repository
+    app.state.editorial_projection_repository = editorial_pipeline.projection_repository
     app.state.editorial_projection_service = editorial_pipeline.projection_service
-    app.state.secured_editorial_projection_service = (
-        editorial_pipeline.secured_projection_service
-    )
+    app.state.secured_editorial_projection_service = editorial_pipeline.secured_projection_service
     app.state.content_configuration_repository = content_configuration_repository
     app.state.content_configuration_service = content_configuration_service
     app.state.admin_session_store = admin_session_store
@@ -300,6 +281,12 @@ def create_app() -> FastAPI:
     app.include_router(progress_router)
     app.include_router(admin_router)
     app.include_router(admin_proposal_queue_router)
+    if _api_at_least(settings.api_version, 0, 21):
+        app.include_router(admin_feed_item_review_router)
+    if _api_at_least(settings.api_version, 0, 22):
+        app.include_router(admin_source_brief_ingestion_router)
+    if _api_at_least(settings.api_version, 0, 23):
+        app.include_router(admin_source_brief_review_router)
     app.include_router(admin_editorial_projection_router)
     app.include_router(admin_content_configuration_router)
     app.include_router(community_reason_admin_router)
