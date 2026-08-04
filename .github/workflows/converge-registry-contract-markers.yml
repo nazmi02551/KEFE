@@ -56,33 +56,37 @@ jobs:
               r'    if composition\.get\("production_processors_registered"\) != 0:\n'
               r'        fail\("production feed item processor registry must remain empty"\)\n'
           )
-          replacement = '''    if "build_feed_item_extraction_runtime(" not in pipeline:
-              fail("production composition must install the inert feed item runtime plan")
-          if "return InMemoryIngestionWorkerRuntimeRegistry(" not in extraction:
-              fail("feed item runtime builder must return the authoritative worker registry")
-          if "build_feed_item_extraction_runtime(" in main_source:
-              fail("application entrypoint must not install a second feed item runtime plan")
-          composition = contract.get("composition", {})
-          if composition.get("production_runtime_plans_registered") != 1:
-              fail("exactly one inert feed item runtime plan must be registered")
-          if composition.get("production_processors_registered") != 1:
-              fail("exactly one deterministic feed item processor must be registered")
-          for zero_field in (
-              "seeded_feed_definitions",
-              "seeded_provider_profiles",
-              "seeded_public_adapters",
-              "seeded_schedules",
-              "concrete_providers_registered",
-          ):
-              if composition.get(zero_field) != 0:
-                  fail(f"production composition must keep {zero_field} at zero")
-          if composition.get("plan_registration_is_source_activation") is not False:
-              fail("worker plan registration must not be treated as source activation")
-          if composition.get("explicit_catalog_activation_required") is not True:
-              fail("source runtime must require explicit catalog activation")
-          if composition.get("startup_network") is not False:
-              fail("feed item composition must perform no startup network operation")
-          '''
+          replacement = '\n'.join(
+              (
+                  '    if "build_feed_item_extraction_runtime(" not in pipeline:',
+                  '        fail("production composition must install the inert feed item runtime plan")',
+                  '    if "return InMemoryIngestionWorkerRuntimeRegistry(" not in extraction:',
+                  '        fail("feed item runtime builder must return the authoritative worker registry")',
+                  '    if "build_feed_item_extraction_runtime(" in main_source:',
+                  '        fail("application entrypoint must not install a second feed item runtime plan")',
+                  '    composition = contract.get("composition", {})',
+                  '    if composition.get("production_runtime_plans_registered") != 1:',
+                  '        fail("exactly one inert feed item runtime plan must be registered")',
+                  '    if composition.get("production_processors_registered") != 1:',
+                  '        fail("exactly one deterministic feed item processor must be registered")',
+                  '    for zero_field in (',
+                  '        "seeded_feed_definitions",',
+                  '        "seeded_provider_profiles",',
+                  '        "seeded_public_adapters",',
+                  '        "seeded_schedules",',
+                  '        "concrete_providers_registered",',
+                  '    ):',
+                  '        if composition.get(zero_field) != 0:',
+                  '            fail(f"production composition must keep {zero_field} at zero")',
+                  '    if composition.get("plan_registration_is_source_activation") is not False:',
+                  '        fail("worker plan registration must not be treated as source activation")',
+                  '    if composition.get("explicit_catalog_activation_required") is not True:',
+                  '        fail("source runtime must require explicit catalog activation")',
+                  '    if composition.get("startup_network") is not False:',
+                  '        fail("feed item composition must perform no startup network operation")',
+                  '',
+              )
+          )
           feed, count = pattern.subn(replacement, feed, count=1)
           if count != 1:
               raise SystemExit('unexpected feed item composition contract block')
