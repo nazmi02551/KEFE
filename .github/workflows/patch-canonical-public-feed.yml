@@ -30,7 +30,7 @@ jobs:
               'services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py'
           )
           catalog = catalog_path.read_text(encoding='utf-8')
-          pattern = re.compile(
+          catalog_pattern = re.compile(
               r"    def list_definitions\(\n"
               r"        self,\n"
               r"        principal: AdminPrincipal,\n"
@@ -40,7 +40,7 @@ jobs:
               r"    def audit",
               re.DOTALL,
           )
-          replacement = '''    def list_definitions(
+          catalog_replacement = '''    def list_definitions(
               self,
               principal: AdminPrincipal,
           ) -> tuple[CanonicalPublicFeedDefinition, ...]:
@@ -57,63 +57,92 @@ jobs:
               return self._repository.list_definitions()
 
           def audit'''
-          catalog, count = pattern.subn(replacement, catalog, count=1)
+          catalog, count = catalog_pattern.subn(
+              catalog_replacement,
+              catalog,
+              count=1,
+          )
           if count != 1:
               raise SystemExit(f'catalog authorization replacement count={count}')
           catalog_path.write_text(catalog, encoding='utf-8')
 
           test_path = Path('services/api/tests/test_canonical_public_feed_catalog.py')
           tests = test_path.read_text(encoding='utf-8')
-          replacements = {
+          tests = tests.replace(
               '''from kefe_api.modules.knowledge.provider_control import (
               InMemoryProviderControlRepository,
               ProviderLifecycle,
-          )''': '''from kefe_api.modules.knowledge.provider_control import (
+          )''',
+              '''from kefe_api.modules.knowledge.provider_control import (
               ProviderCapabilityLifecycle,
           )
           from kefe_api.modules.knowledge.provider_control_memory import (
               InMemorySourceProviderAdmissionRepository,
           )''',
+          )
+          tests = tests.replace(
               '''from kefe_api.modules.knowledge.source_scheduler import (
               InMemorySourceAcquisitionScheduleRepository,
               SourceAcquisitionScheduleState,
-          )''': '''from kefe_api.modules.knowledge.source_scheduler import (
+          )''',
+              '''from kefe_api.modules.knowledge.source_scheduler import (
               SourceAcquisitionScheduleState,
           )
           from kefe_api.modules.knowledge.source_scheduler_memory import (
               InMemorySourceAcquisitionSchedulerRepository,
           )''',
+          )
+          tests = tests.replace(
               '''from kefe_api.modules.knowledge.source_scheduler_service import (
               SourceAcquisitionSchedulerService,
-          )''': '''from kefe_api.modules.knowledge.source_scheduler_service import (
+          )''',
+              '''from kefe_api.modules.knowledge.source_scheduler_service import (
               NoOpSourceDispatchObserver,
               SourceAcquisitionSchedulerService,
           )''',
-              'InMemoryProviderControlRepository()': 'InMemorySourceProviderAdmissionRepository()',
-              'InMemorySourceAcquisitionScheduleRepository()': 'InMemorySourceAcquisitionSchedulerRepository()',
-              '''SourceAcquisitionSchedulerService(
-                  schedule_repository,
-                  max_interval_seconds=31_536_000,
-                  max_dispatch_attempts=20,
-              )''': '''SourceAcquisitionSchedulerService(
+          )
+          tests = tests.replace(
+              'InMemoryProviderControlRepository()',
+              'InMemorySourceProviderAdmissionRepository()',
+          )
+          tests = tests.replace(
+              'InMemorySourceAcquisitionScheduleRepository()',
+              'InMemorySourceAcquisitionSchedulerRepository()',
+          )
+          scheduler_pattern = re.compile(
+              r"scheduler=SourceAcquisitionSchedulerService\(\n"
+              r"\s+schedule_repository,\n"
+              r"\s+max_interval_seconds=31_536_000,\n"
+              r"\s+max_dispatch_attempts=20,\n"
+              r"\s+\),"
+          )
+          tests, scheduler_count = scheduler_pattern.subn(
+              '''scheduler=SourceAcquisitionSchedulerService(
                   repository=schedule_repository,
                   acquisition=object(),
                   observer=NoOpSourceDispatchObserver(),
                   clock=lambda: NOW,
-              )''',
-              'providers.get_capability(': 'providers.get(',
-              '.lifecycle is ProviderLifecycle.': '.lifecycle_state is ProviderCapabilityLifecycle.',
-              'assert schedules.list_schedules() == ()': (
-                  'assert schedules.plan_due_once(at=NOW + timedelta(days=1)) is None'
-              ),
-              'assert len(schedules.list_schedules()) == 1': (
-                  'assert schedules.list_dispatches(first.schedule_id) == ()'
-              ),
-          }
-          for old, new in replacements.items():
-              if old not in tests:
-                  raise SystemExit(f'missing expected test fragment: {old[:80]!r}')
-              tests = tests.replace(old, new)
+              ),''',
+              tests,
+              count=1,
+          )
+          if scheduler_count != 1:
+              raise SystemExit(
+                  f'scheduler constructor replacement count={scheduler_count}'
+              )
+          tests = tests.replace('providers.get_capability(', 'providers.get(')
+          tests = tests.replace(
+              '.lifecycle is ProviderLifecycle.',
+              '.lifecycle_state is ProviderCapabilityLifecycle.',
+          )
+          tests = tests.replace(
+              'assert schedules.list_schedules() == ()',
+              'assert schedules.plan_due_once(at=NOW + timedelta(days=1)) is None',
+          )
+          tests = tests.replace(
+              'assert len(schedules.list_schedules()) == 1',
+              'assert schedules.list_dispatches(first.schedule_id) == ()',
+          )
           test_path.write_text(tests, encoding='utf-8')
           PY
       - name: Normalize changed Python
