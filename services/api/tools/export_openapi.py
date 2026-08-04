@@ -15,6 +15,7 @@ OPENAPI_OVERLAYS = (
     "openapi-admin-case-builder.v0.19.overlay.json",
     "openapi-admin-editorial-quality-review.v0.19.overlay.json",
     "openapi-admin-flow-composer.v0.19.overlay.json",
+    "openapi-admin-publication-operations.v0.19.overlay.json",
 )
 
 

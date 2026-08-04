@@ -1,0 +1,203 @@
+{
+  "contract_id": "admin-publication-operations-workspace.v1",
+  "version": "1.0.0",
+  "status": "accepted_for_implementation",
+  "updated_at": "2026-08-04",
+  "source_issue": 304,
+  "parent_runtime": {
+    "pr": 303,
+    "sha": "62dd27dfa2000d818cecf16af9627c54f98a245a"
+  },
+  "capabilities": {
+    "primary": ["CAP-065"],
+    "supporting": ["CAP-063", "CAP-126"],
+    "lifecycle_promotion": false
+  },
+  "authority": {
+    "content_authoring_service": "sole_case_lifecycle_authority",
+    "content_authoring_repository": "sole_case_and_lifecycle_audit_store",
+    "publication_registry": "sole_structural_publication_validator",
+    "publication_configuration_resolver": "sole_configuration_and_flow_pin_resolver",
+    "admin_security": "sole_session_capability_step_up_and_csrf_authority",
+    "second_cms_allowed": false,
+    "alternate_publication_path_allowed": false
+  },
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/internal/admin/v1/publication-operations",
+      "purpose": "bounded lifecycle queue"
+    },
+    {
+      "method": "GET",
+      "path": "/internal/admin/v1/publication-operations/{version_id}",
+      "purpose": "exact read-only detail"
+    },
+    {
+      "method": "GET",
+      "path": "/internal/admin/v1/publication-operations/{version_id}/preflight",
+      "purpose": "explicit non-mutating publication preflight"
+    },
+    {
+      "method": "POST",
+      "path": "/internal/admin/v1/publication-operations/{version_id}/decision",
+      "purpose": "explicit publish or withdraw command"
+    }
+  ],
+  "queue": {
+    "allowed_states": ["APPROVED", "PUBLISHED"],
+    "default_state": "APPROVED",
+    "limit": {
+      "default": 25,
+      "minimum": 1,
+      "maximum": 100
+    },
+    "offset": {
+      "default": 0,
+      "minimum": 0,
+      "maximum": 10000
+    },
+    "filters": ["content_risk", "primary_domain_code"],
+    "filter_matching": "exact",
+    "ordering": ["created_at DESC", "id DESC"],
+    "next_offset_only_when_page_full": true,
+    "read_capability": "AUDIT_READ"
+  },
+  "detail": {
+    "exact_version_id": true,
+    "read_only": true,
+    "allowed_states": ["APPROVED", "PUBLISHED", "WITHDRAWN"],
+    "includes_latest_approval_audit": true,
+    "includes_latest_publication_audit_when_present": true,
+    "includes_raw_provider_secret": false,
+    "includes_backend_object_key": false,
+    "read_capability": "AUDIT_READ"
+  },
+  "preflight": {
+    "allowed_state": "APPROVED",
+    "explicit_operator_command": true,
+    "mutates_lifecycle": false,
+    "writes_persistence": false,
+    "appends_audit": false,
+    "mutates_configuration": false,
+    "mutates_consumer_runtime": false,
+    "runs_canonical_registry_validation": true,
+    "resolves_prospective_configuration_and_flow_when_valid": true,
+    "response": {
+      "eligible": "boolean",
+      "validation_failures": "bounded_array",
+      "prospective_content_configuration_id": "nullable_uuid",
+      "prospective_content_configuration_version_no": "nullable_positive_integer",
+      "prospective_flow_template_code": "nullable_string",
+      "prospective_flow_template_version_no": "nullable_positive_integer",
+      "advisory_only": true
+    },
+    "final_publish_revalidates": true,
+    "reserves_state_or_provenance": false,
+    "read_capability": "AUDIT_READ"
+  },
+  "publish": {
+    "decision": "PUBLISH",
+    "allowed_from": ["APPROVED"],
+    "target": "PUBLISHED",
+    "required_capability": "CONTENT_PUBLISH",
+    "same_session_csrf_required": true,
+    "recent_step_up_required": true,
+    "acknowledge_immutable_must_equal": true,
+    "latest_approval_audit_required": true,
+    "publisher_must_differ_from_latest_approver": true,
+    "canonical_validation_repeated_at_command_time": true,
+    "canonical_resolution_repeated_at_command_time": true,
+    "atomic_lifecycle_and_audit": true,
+    "pins_content_configuration_and_flow": true,
+    "publication_side_effect_only": true,
+    "automatic_revision": false
+  },
+  "withdraw": {
+    "decision": "WITHDRAW",
+    "allowed_from": ["PUBLISHED"],
+    "target": "WITHDRAWN",
+    "required_capability": "CONTENT_WITHDRAW",
+    "same_session_csrf_required": true,
+    "recent_step_up_required": true,
+    "rationale_required": true,
+    "rationale_max_length": 5000,
+    "immutable_published_version_deleted": false,
+    "automatic_revision": false
+  },
+  "security": {
+    "publisher_must_differ_from_approver_default": true,
+    "identity_source": "server_derived_admin_principal",
+    "client_actor_identity_accepted": false,
+    "write_extra_fields_forbidden": true,
+    "read_requests_require_csrf": false,
+    "write_requests_require_csrf": true,
+    "session_or_csrf_browser_persistence": false
+  },
+  "ui": {
+    "route": "/publication-operations",
+    "request_on_mount": false,
+    "query_param_may_prefill_id_only": true,
+    "automatic_detail_load": false,
+    "automatic_preflight": false,
+    "automatic_decision": false,
+    "approved_and_published_queues_separate": true,
+    "content_read_only": true,
+    "publish_requires_explicit_confirmation": true,
+    "withdraw_requires_rationale": true,
+    "preflight_marked_advisory": true,
+    "local_storage": false,
+    "session_storage": false,
+    "autosave": false,
+    "bulk_mutation": false,
+    "content_edit": false,
+    "review_decision": false,
+    "configuration_publish_or_rollback": false
+  },
+  "persistence": {
+    "new_lifecycle_store": false,
+    "new_case_store": false,
+    "existing_repository_reused": true,
+    "append_only_audit_reused": true,
+    "postgres_restart_round_trip_required": true
+  },
+  "openapi": {
+    "target_version": "0.19.0",
+    "overlay": "docs/contracts/openapi-admin-publication-operations.v0.19.overlay.json",
+    "ordered_after": "docs/contracts/openapi-admin-flow-composer.v0.19.overlay.json",
+    "predecessor_overlay_must_remain_exact": true,
+    "mvp_non_mvp_additive_overlay": true,
+    "global_pre_020_baseline": true,
+    "model_namespace": "PublicationOperations"
+  },
+  "required_evidence": [
+    "EXECUTABLE_BACKEND_CONTRACT",
+    "EXACT_PUBLICATION_OPERATIONS_OPENAPI_OVERLAY",
+    "EXACT_PREDECESSOR_FLOW_COMPOSER_OVERLAY",
+    "COMPOSED_OPENAPI_DRIFT_GATE",
+    "MEMORY_HTTP_SECURITY_QUEUE_PREFLIGHT_AND_DECISION_TESTS",
+    "POSTGRES_DURABLE_PUBLISH_WITHDRAW_AND_RESTART_TEST",
+    "ADMIN_CONTRACT_LINT_TYPE_TEST_AND_PRODUCTION_BUILD",
+    "API_CI_EXACT_HEAD_PASS",
+    "MOBILE_CI_EXACT_HEAD_PASS",
+    "MVP_BETA_GATES_EXACT_HEAD_PASS",
+    "GLOBAL_READINESS_EXACT_HEAD_PASS"
+  ],
+  "explicit_exclusions": [
+    "AUTOMATIC_PUBLICATION",
+    "AUTOMATIC_WITHDRAWAL",
+    "BULK_PUBLICATION",
+    "CONTENT_EDITING",
+    "EDITORIAL_APPROVAL",
+    "CONTENT_CONFIGURATION_PUBLISH_OR_ROLLBACK",
+    "MODERATION_OPERATIONS",
+    "MEDIA_PIPELINE",
+    "PROVIDER_ACTIVATION",
+    "PRODUCTION_DEPLOYMENT",
+    "RELEASE_APK",
+    "HUMAN_CQB_OR_USABILITY_ACCEPTANCE",
+    "DEPLOYED_SLO_LOAD_OR_OBSERVABILITY_PROOF",
+    "OPERATOR_ROLLBACK_PROOF",
+    "STORE_COMPLIANCE"
+  ]
+}

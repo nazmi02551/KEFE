@@ -147,6 +147,22 @@ class AdminSecurityService:
                 403,
             )
 
+    def enforce_publisher_separation(
+        self,
+        *,
+        principal: AdminPrincipal,
+        approver_actor_ref: str,
+    ) -> None:
+        if not self._policy.publisher_must_differ_from_approver:
+            return
+        if approver_actor_ref == principal.audit_actor_ref:
+            self._deny(principal, AdminCapability.CONTENT_PUBLISH, "self_publish")
+            raise DomainError(
+                "ADMIN_SEPARATION_OF_DUTIES",
+                "The approving Admin cannot publish the same CaseVersion",
+                403,
+            )
+
     def _granted_capabilities(
         self,
         principal: AdminPrincipal,

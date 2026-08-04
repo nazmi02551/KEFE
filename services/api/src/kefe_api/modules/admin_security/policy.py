@@ -14,6 +14,7 @@ class AdminSecurityPolicy:
     idle_timeout: timedelta
     step_up_freshness: timedelta
     reviewer_must_differ_from_submitter: bool = True
+    publisher_must_differ_from_approver: bool = True
 
     def capabilities_for_roles(
         self,
@@ -80,4 +81,5 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
         idle_timeout=timedelta(minutes=30),
         step_up_freshness=timedelta(minutes=15),
         reviewer_must_differ_from_submitter=True,
+        publisher_must_differ_from_approver=True,
     )

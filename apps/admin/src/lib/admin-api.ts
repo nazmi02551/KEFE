@@ -22,6 +22,14 @@ import type {
   FlowComposerSaveInput,
   FlowComposerVersion
 } from "@/src/lib/flow-composer";
+import type {
+  PublicationDecisionRequest,
+  PublicationDecisionResponse,
+  PublicationDetail,
+  PublicationFilters,
+  PublicationPreflight,
+  PublicationQueuePage
+} from "@/src/lib/publication-operations";
 
 const WRITE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
@@ -296,6 +304,40 @@ export class AdminApiClient {
     return this.request(
       "GET",
       `/internal/admin/v1/flow-composer/configuration-versions/${encodeURIComponent(versionId)}/audit`
+    );
+  }
+
+  publicationOperations(
+    filters: PublicationFilters = {}
+  ): Promise<PublicationQueuePage> {
+    return this.request(
+      "GET",
+      `/internal/admin/v1/publication-operations${queryString(filters)}`
+    );
+  }
+
+  publicationOperation(versionId: string): Promise<PublicationDetail> {
+    return this.request(
+      "GET",
+      `/internal/admin/v1/publication-operations/${encodeURIComponent(versionId)}`
+    );
+  }
+
+  publicationPreflight(versionId: string): Promise<PublicationPreflight> {
+    return this.request(
+      "GET",
+      `/internal/admin/v1/publication-operations/${encodeURIComponent(versionId)}/preflight`
+    );
+  }
+
+  decidePublication(
+    versionId: string,
+    request: PublicationDecisionRequest
+  ): Promise<PublicationDecisionResponse> {
+    return this.request(
+      "POST",
+      `/internal/admin/v1/publication-operations/${encodeURIComponent(versionId)}/decision`,
+      request
     );
   }
 }

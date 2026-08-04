@@ -11,6 +11,7 @@ from kefe_api.modules.content_authoring.models import (
     CaseIdentity,
     ContentLifecycle,
     LifecycleAuditEntry,
+    PublicationPreflightResult,
 )
 from kefe_api.modules.content_authoring.ports import ContentAuthoringRepository
 from kefe_api.modules.content_authoring.service import ContentAuthoringService
@@ -193,6 +194,79 @@ class SecuredContentAuthoringService:
             rationale=rationale,
         )
 
+    def publication_queue(
+        self,
+        principal: AdminPrincipal,
+        *,
+        state: ContentLifecycle,
+        limit: int,
+        offset: int,
+        content_risk: str | None = None,
+        primary_domain_code: str | None = None,
+        now: datetime | None = None,
+    ) -> tuple[AuthoringCaseVersion, ...]:
+        self._security.authorize(principal, AdminCapability.AUDIT_READ, now=now)
+        if state not in {ContentLifecycle.APPROVED, ContentLifecycle.PUBLISHED}:
+            raise DomainError(
+                "CONTENT_PUBLICATION_QUEUE_STATE_INVALID",
+                "Publication queue state must be APPROVED or PUBLISHED",
+                422,
+            )
+        return self._repository.list_by_state(
+            state,
+            limit=limit,
+            offset=offset,
+            content_risk=content_risk,
+            primary_domain_code=primary_domain_code,
+        )
+
+    def publication_for_inspection(
+        self,
+        principal: AdminPrincipal,
+        version_id: UUID,
+        *,
+        now: datetime | None = None,
+    ) -> AuthoringCaseVersion:
+        self._security.authorize(principal, AdminCapability.AUDIT_READ, now=now)
+        version = self._require_version(version_id)
+        if version.state not in {
+            ContentLifecycle.APPROVED,
+            ContentLifecycle.PUBLISHED,
+            ContentLifecycle.WITHDRAWN,
+        }:
+            raise DomainError(
+                "CONTENT_PUBLICATION_STATE_REQUIRED",
+                "CaseVersion is not in a publication operations state",
+                409,
+            )
+        return version
+
+    def publication_preflight(
+        self,
+        principal: AdminPrincipal,
+        version_id: UUID,
+        *,
+        now: datetime | None = None,
+    ) -> PublicationPreflightResult:
+        version = self.publication_for_inspection(principal, version_id, now=now)
+        if version.state is not ContentLifecycle.APPROVED:
+            raise DomainError(
+                "CONTENT_PUBLICATION_STATE_REQUIRED",
+                "Only APPROVED CaseVersions can run publication preflight",
+                409,
+            )
+        return self._authoring.publication_preflight(version_id)
+
+    def publication_audit_context(
+        self,
+        principal: AdminPrincipal,
+        version_id: UUID,
+        *,
+        now: datetime | None = None,
+    ) -> tuple[LifecycleAuditEntry | None, LifecycleAuditEntry | None]:
+        version = self.publication_for_inspection(principal, version_id, now=now)
+        return self._latest_approval(version), self._latest_publication(version)
+
     def publish(
         self,
         principal: AdminPrincipal,
@@ -201,6 +275,24 @@ class SecuredContentAuthoringService:
         now: datetime | None = None,
     ) -> AuthoringCaseVersion:
         self._security.authorize(principal, AdminCapability.CONTENT_PUBLISH, now=now)
+        version = self._require_version(version_id)
+        if version.state is not ContentLifecycle.APPROVED:
+            raise DomainError(
+                "CONTENT_PUBLICATION_STATE_REQUIRED",
+                "Only APPROVED CaseVersions can be published",
+                409,
+            )
+        approval = self._latest_approval(version)
+        if approval is None:
+            raise DomainError(
+                "CONTENT_PUBLICATION_APPROVAL_MISSING",
+                "Publication requires a canonical approval audit entry",
+                409,
+            )
+        self._security.enforce_publisher_separation(
+            principal=principal,
+            approver_actor_ref=approval.actor_ref,
+        )
         return self._authoring.publish(
             version_id,
             actor_ref=principal.audit_actor_ref,
@@ -251,14 +343,33 @@ class SecuredContentAuthoringService:
         self,
         version: AuthoringCaseVersion,
     ) -> LifecycleAuditEntry | None:
-        submissions = [
+        return self._latest_audit_command(version, "submit_for_review")
+
+    def _latest_approval(
+        self,
+        version: AuthoringCaseVersion,
+    ) -> LifecycleAuditEntry | None:
+        return self._latest_audit_command(version, "approve")
+
+    def _latest_publication(
+        self,
+        version: AuthoringCaseVersion,
+    ) -> LifecycleAuditEntry | None:
+        return self._latest_audit_command(version, "publish")
+
+    def _latest_audit_command(
+        self,
+        version: AuthoringCaseVersion,
+        command: str,
+    ) -> LifecycleAuditEntry | None:
+        entries = [
             entry
             for entry in self._repository.list_audit(version.case_id)
-            if entry.case_version_id == version.id and entry.command == "submit_for_review"
+            if entry.case_version_id == version.id and entry.command == command
         ]
-        if not submissions:
+        if not entries:
             return None
-        return max(submissions, key=lambda entry: entry.occurred_at)
+        return max(entries, key=lambda entry: entry.occurred_at)
 
     def _latest_submitter(self, version: AuthoringCaseVersion) -> str | None:
         submission = self._latest_submission(version)
