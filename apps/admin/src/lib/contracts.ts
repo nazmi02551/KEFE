@@ -145,3 +145,103 @@ export interface EditorialProjectionResponse {
   replayed: boolean;
   created_at: string;
 }
+
+export interface CaseBuilderQuestion {
+  id: string;
+  stable_code: string;
+  prompt: string;
+  response_type: string;
+  response_schema: Record<string, unknown>;
+  is_active: boolean;
+  is_required: boolean;
+  sort_order: number;
+}
+
+export interface CaseBuilderIssue {
+  id: string;
+  code: string;
+  title: string;
+  questions: CaseBuilderQuestion[];
+  sort_order: number;
+}
+
+export interface CaseBuilderContextBlock {
+  id: string;
+  title: string;
+  body: string;
+  disclosure_level: string;
+  claim_status: string;
+  source_ids: string[];
+  sort_order: number;
+  block_type: string;
+}
+
+export interface CaseBuilderSource {
+  id: string;
+  source_kind: string;
+  locator: string;
+  title: string;
+  publisher: string;
+  published_at: string | null;
+  claim_status: string | null;
+  verified: boolean;
+}
+
+export interface CaseBuilderLocalization {
+  locale: string;
+  title: string;
+  summary: string;
+  question_prompts: Record<string, string>;
+  option_labels: Record<string, Record<string, string>>;
+  cultural_context_note: string | null;
+  legal_context_note: string | null;
+}
+
+export interface CaseBuilderDraftInput {
+  title: string;
+  summary: string;
+  base_format_code: string;
+  primary_domain_code: string;
+  content_risk: string;
+  issues: CaseBuilderIssue[];
+  context_blocks: CaseBuilderContextBlock[];
+  sources: CaseBuilderSource[];
+  modifiers: string[];
+  is_fact_bearing: boolean;
+  is_real_event: boolean;
+  required_review_modes: string[];
+  content_locale: string;
+  market_scope: "GLOBAL" | "COUNTRY_SET";
+  country_codes: string[];
+  cultural_context_note: string | null;
+  legal_context_note: string | null;
+  localizations: CaseBuilderLocalization[];
+}
+
+export interface CaseBuilderVersion extends CaseBuilderDraftInput {
+  id: string;
+  case_id: string;
+  version_no: number;
+  state: string;
+  completed_review_modes: string[];
+  flow_template_code: string;
+  flow_template_version_no: number;
+  created_at: string;
+  published_at: string | null;
+}
+
+export interface AuthoringAuditEntry {
+  audit_id: string;
+  case_id: string;
+  case_version_id: string;
+  actor_ref: string;
+  command: string;
+  previous_state: string | null;
+  new_state: string;
+  rationale: string | null;
+  occurred_at: string;
+}
+
+export interface AuthoringAuditTrail {
+  items: AuthoringAuditEntry[];
+}
