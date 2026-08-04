@@ -38,15 +38,19 @@ jobs:
               r'"public feed definition identity conflict"\) from exc\n'
               r'        return definition$'
           )
-          definition_replacement = '''        except IntegrityError as exc:
-              existing = self.get_definition(
-                  definition.feed_code,
-                  definition.definition_version,
-              )
-              if existing == definition:
-                  return existing
-              raise ValueError("public feed definition identity conflict") from exc
-          return definition'''
+          definition_replacement = (
+              '        except IntegrityError as exc:\n'
+              '            existing = self.get_definition(\n'
+              '                definition.feed_code,\n'
+              '                definition.definition_version,\n'
+              '            )\n'
+              '            if existing == definition:\n'
+              '                return existing\n'
+              '            raise ValueError(\n'
+              '                "public feed definition identity conflict"\n'
+              '            ) from exc\n'
+              '        return definition'
+          )
           source, definition_count = definition_pattern.subn(
               definition_replacement,
               source,
@@ -63,14 +67,18 @@ jobs:
               r'"public feed activation identity conflict"\) from exc\n'
               r'        return activation$'
           )
-          activation_replacement = '''        except IntegrityError as exc:
-              existing = self.get_activation_for_definition(
-                  activation.feed_definition_id
-              )
-              if existing == activation:
-                  return existing
-              raise ValueError("public feed activation identity conflict") from exc
-          return activation'''
+          activation_replacement = (
+              '        except IntegrityError as exc:\n'
+              '            existing = self.get_activation_for_definition(\n'
+              '                activation.feed_definition_id\n'
+              '            )\n'
+              '            if existing == activation:\n'
+              '                return existing\n'
+              '            raise ValueError(\n'
+              '                "public feed activation identity conflict"\n'
+              '            ) from exc\n'
+              '        return activation'
+          )
           source, activation_count = activation_pattern.subn(
               activation_replacement,
               source,
