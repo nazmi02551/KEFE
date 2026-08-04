@@ -21,6 +21,7 @@ on:
       - 'services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py'
       - 'services/api/tests/test_canonical_public_feed_catalog.py'
       - 'services/api/tests/test_canonical_public_feed_catalog_postgres.py'
+      - 'services/api/tests/test_canonical_public_feed_http_postgres.py'
       - 'services/api/tests/test_canonical_public_feed_runtime_registry.py'
       - 'services/api/tests/test_canonical_public_feed_rehydration.py'
       - 'services/api/tests/test_canonical_public_feed_http.py'
@@ -87,7 +88,7 @@ jobs:
 
   postgres:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     services:
       postgres:
         image: postgres:17-alpine
@@ -119,9 +120,12 @@ jobs:
         env:
           KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
         run: alembic upgrade head
-      - name: Canonical public-feed PostgreSQL behavior
+      - name: Canonical public-feed PostgreSQL and restart behavior
         working-directory: services/api
         env:
           KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
           KEFE_RUN_POSTGRES_TESTS: '1'
-        run: pytest -q tests/test_canonical_public_feed_catalog_postgres.py
+        run: >-
+          pytest -q
+          tests/test_canonical_public_feed_catalog_postgres.py
+          tests/test_canonical_public_feed_http_postgres.py
