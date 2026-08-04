@@ -7,6 +7,10 @@ import type {
   CaseBuilderVersion,
   EditorialProjectionRequest,
   EditorialProjectionResponse,
+  EditorialReviewDecisionRequest,
+  EditorialReviewDetail,
+  EditorialReviewFilters,
+  EditorialReviewQueuePage,
   ProposalDetail,
   ProposalFilters,
   ProposalQueuePage,
@@ -65,7 +69,7 @@ function normalizeBaseUrl(value: string): string {
   return trimmed;
 }
 
-function queryString(filters: ProposalFilters): string {
+function queryString<T extends object>(filters: T): string {
   const params = new URLSearchParams();
   for (const [key, rawValue] of Object.entries(filters)) {
     if (rawValue === undefined || rawValue === "") continue;
@@ -231,6 +235,33 @@ export class AdminApiClient {
     return this.request(
       "GET",
       `/internal/admin/v1/cases/${encodeURIComponent(caseId)}/audit`
+    );
+  }
+
+  contentReviews(
+    filters: EditorialReviewFilters = {}
+  ): Promise<EditorialReviewQueuePage> {
+    return this.request(
+      "GET",
+      `/internal/admin/v1/content-reviews${queryString(filters)}`
+    );
+  }
+
+  contentReview(versionId: string): Promise<EditorialReviewDetail> {
+    return this.request(
+      "GET",
+      `/internal/admin/v1/content-reviews/${encodeURIComponent(versionId)}`
+    );
+  }
+
+  decideContentReview(
+    versionId: string,
+    request: EditorialReviewDecisionRequest
+  ): Promise<EditorialReviewDetail> {
+    return this.request(
+      "POST",
+      `/internal/admin/v1/content-reviews/${encodeURIComponent(versionId)}/decision`,
+      request
     );
   }
 }
