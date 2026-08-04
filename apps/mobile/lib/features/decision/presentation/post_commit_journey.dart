@@ -177,6 +177,7 @@ class _PostCommitJourneyState extends ConsumerState<PostCommitJourney> {
         result: state.perspective,
         reasonPendingModeration: state.reasonPendingModeration,
         onRetry: controller.retryPerspective,
+        includePostCommitCapabilities: false,
       ),
       PostCommitJourneyStageKind.participation => Column(
         key: const ValueKey('post-commit-participation'),
