@@ -1,6 +1,6 @@
 {
   "contract": "admin-case-builder-draft-workspace",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "accepted_for_implementation",
   "issue": 298,
   "parent_runtime_sha": "59f70896c8d9df91727c158da936630bd6bddd6c",
@@ -14,16 +14,18 @@
     "flow": "existing_versioned_flow_template_and_publication_resolver"
   },
   "api": {
+    "adapter": "additive_case_builder_http_adapter",
+    "legacy_authoring_routes_unchanged": true,
     "required_routes": [
       {
         "method": "GET",
-        "path": "/internal/admin/v1/case-versions/{version_id}",
+        "path": "/internal/admin/v1/case-builder/case-versions/{version_id}",
         "capability": "CONTENT_EDIT",
         "mutation": false
       },
       {
         "method": "PUT",
-        "path": "/internal/admin/v1/case-versions/{version_id}",
+        "path": "/internal/admin/v1/case-builder/case-versions/{version_id}",
         "capability": "CONTENT_EDIT",
         "csrf_required": true,
         "allowed_transition": "DRAFT_TO_DRAFT"
@@ -82,21 +84,16 @@
       "csrf_token"
     ],
     "preservation_semantics": {
-      "optional_extended_fields": [
-        "content_locale",
-        "market_scope",
-        "country_codes",
-        "cultural_context_note",
-        "legal_context_note",
-        "localizations"
-      ],
-      "rule": "omission_preserves_current_stored_value",
-      "flow_fields": "read_only_and_preserved"
+      "rich_adapter_request_is_complete": true,
+      "flow_fields": "response_only_and_preserved",
+      "publication_pins": "never_client_supplied",
+      "legacy_route_defaults": "not_reused_by_case_builder"
     }
   },
   "workspace": {
     "route": "/case-builder",
     "load": "explicit_only",
+    "query_parameter": "version_may_prefill_but_must_not_auto_fetch",
     "save": "explicit_only",
     "submit": "separate_explicit_command",
     "audit": "explicit_only",
@@ -107,7 +104,8 @@
       "source_references",
       "risk_and_fact_flags",
       "review_modes",
-      "market_and_locale_notes"
+      "market_and_locale_notes",
+      "localizations"
     ],
     "read_only_sections": ["flow_template_identity", "lifecycle_identity"],
     "forbidden_controls": [
