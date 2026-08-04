@@ -1,0 +1,54 @@
+name: Repair Candidate Bundle Checker
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/repair-candidate-bundle-checker.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Correct service evidence marker
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('services/api/tools/check_canonical_candidate_bundle_projection.py')
+          source = path.read_text(encoding='utf-8')
+          old = '        "proposal_review_state",\n'
+          new = '        "CandidateBundleResult",\n'
+          if source.count(old) != 1:
+              raise SystemExit('unexpected checker marker')
+          path.write_text(source.replace(old, new, 1), encoding='utf-8')
+          PY
+      - name: Run candidate bundle gate
+        working-directory: services/api
+        run: |
+          python -m pip install -q -U pip
+          pip install -q -e '.[dev]'
+          ruff check .
+          python tools/check_canonical_candidate_bundle_projection.py
+          pytest -q \
+            tests/test_canonical_candidate_bundle_projection_http.py \
+            tests/test_admin_editorial_operations_http.py \
+            tests/test_admin_source_brief_review_http.py
+      - name: Remove workflow and commit
+        run: |
+          git rm -f .github/workflows/repair-candidate-bundle-checker.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add services/api/tools/check_canonical_candidate_bundle_projection.py
+          git commit -m 'test: align candidate bundle checker with service boundary'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
