@@ -102,15 +102,18 @@ def build_overlay() -> dict[str, object]:
             processed.add(name)
             collect(schema)
 
-    new_schema_names = sorted(generated_schemas.keys() - before_schemas.keys())
-    unrelated = sorted(set(new_schema_names) - referenced_schema_names)
+    new_schema_names = set(generated_schemas.keys()) - set(before_schemas.keys())
+    unrelated = sorted(new_schema_names - referenced_schema_names)
     if unrelated:
         raise SystemExit(f"Case Builder overlay found unrelated schemas: {unrelated}")
 
+    additive_schema_names = sorted(referenced_schema_names & new_schema_names)
     return {
         "target_version": "0.19.0",
         "components": {
-            "schemas": {name: generated_schemas[name] for name in sorted(referenced_schema_names)}
+            "schemas": {
+                name: generated_schemas[name] for name in additive_schema_names
+            }
         },
         "paths": {path: generated_paths[path] for path in new_path_names},
     }
