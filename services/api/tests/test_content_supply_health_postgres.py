@@ -306,7 +306,7 @@ def _seed_cycle_facts(
 
 def test_postgres_snapshot_reads_repeatable_aggregate_deltas_without_mutation() -> None:
     engine = create_engine(os.environ["KEFE_DATABASE_URL"])
-    as_of = datetime.now(UTC).replace(microsecond=0) + timedelta(seconds=5)
+    as_of = datetime.now(UTC) + timedelta(seconds=5)
     suffix = uuid4().hex[:10]
     pipeline_code = f"HEALTH_POSTGRES_PIPELINE_{suffix}"
     facts_repository = PostgresContentSupplyOperationalFactsRepository(engine)
