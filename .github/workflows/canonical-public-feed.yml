@@ -1,8 +1,9 @@
 name: Canonical Public Feed
 
 # The canonical gate proves one catalog/activation model in memory and PostgreSQL,
-# secured Admin API isolation, and explicit live-runtime registration. Production
-# composition starts with zero definitions, adapters, schedules and activations.
+# secured Admin API isolation, explicit live-runtime registration and fail-closed
+# restart rehydration. Production starts with zero definitions and activations;
+# persisted non-retired projections restore only runtime profiles, never schedules.
 on:
   pull_request:
     paths:
@@ -21,6 +22,7 @@ on:
       - 'services/api/tests/test_canonical_public_feed_catalog.py'
       - 'services/api/tests/test_canonical_public_feed_catalog_postgres.py'
       - 'services/api/tests/test_canonical_public_feed_runtime_registry.py'
+      - 'services/api/tests/test_canonical_public_feed_rehydration.py'
       - 'services/api/tests/test_canonical_public_feed_http.py'
       - 'services/api/tools/check_canonical_public_feed_catalog.py'
       - 'docs/adr/0098-canonical-public-feed-catalog-activation.md'
@@ -69,12 +71,13 @@ jobs:
       - name: Architecture contract
         working-directory: services/api
         run: python tools/check_canonical_public_feed_catalog.py
-      - name: Canonical public-feed memory, runtime and HTTP behavior
+      - name: Canonical public-feed memory, runtime, rehydration and HTTP behavior
         working-directory: services/api
         run: >-
           pytest -q
           tests/test_canonical_public_feed_catalog.py
           tests/test_canonical_public_feed_runtime_registry.py
+          tests/test_canonical_public_feed_rehydration.py
           tests/test_canonical_public_feed_http.py
 
   postgres:
