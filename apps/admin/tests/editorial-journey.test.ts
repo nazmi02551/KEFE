@@ -205,7 +205,7 @@ test("mocked canonical journey keeps every mutation explicit and separate", asyn
   });
 
   assert.equal(projection.lifecycle_state, "DRAFT");
-  assert.equal(calls.filter((call) => call.method === "POST").length, 5);
+  assert.equal(calls.filter((call) => call.method === "POST").length, 6);
   assert.equal(
     calls.filter((call) => call.method === "POST").every(
       (call) => call.csrf === "same-session-token"
