@@ -1,6 +1,6 @@
 {
-  "registry_version": "1.0.0",
-  "updated_at": "2026-08-04T13:45:00+03:00",
+  "registry_version": "1.1.0",
+  "updated_at": "2026-08-04T14:43:00+03:00",
   "source_issue": 287,
   "source_adr": "docs/adr/0096-full-vision-delivery-convergence.md",
   "common_divergence_base": {
@@ -10,11 +10,11 @@
   },
   "lines": [
     {
-      "id": "consumer-mobile-review",
+      "id": "canonical-consumer-admin-runtime",
       "state": "CANONICAL_INTEGRATION_TARGET",
-      "pr": 286,
-      "branch": "feature/progressive-result-context-history",
-      "sha": "ad825906388371eb9bb36b325abf36a2dd813c5c",
+      "pr": 290,
+      "branch": "feature/admin-review-canonical-convergence",
+      "sha": "140960ac80881faec5841008eac9444ab67d9b7a",
       "common_base_sha": "2bb18cd3cc34c2dc6bcb84559948b1231e8e2308",
       "capability_boundaries": [
         "CAP-001",
@@ -22,31 +22,46 @@
         "CAP-009",
         "CAP-031",
         "CAP-035",
+        "CAP-061",
+        "CAP-065",
         "CAP-080",
-        "CAP-095"
+        "CAP-095",
+        "CAP-126"
       ],
       "evidence_state": "EXACT_HEAD_AUTOMATION_PASS",
       "required_workflows": {
+        "canonical_admin_review_convergence": "PASS",
         "api_ci": "PASS",
         "mobile_ci": "PASS",
         "mvp_beta_gates": "PASS",
         "global_readiness": "PASS"
       },
+      "workflow_runs": {
+        "canonical_admin_review_convergence": 30905261956,
+        "api_ci": 30905261989,
+        "mobile_ci": 30905261982,
+        "mvp_beta_gates": 30905261957,
+        "global_readiness": 30905262029
+      },
       "artifact": {
-        "kind": "INTERNAL_PRODUCT_PREVIEW_APK",
-        "artifact_id": 8885967054,
-        "sha256": "8d5178398b8326d6efa19f13140c75223467ca06be2307f939bf0296d885fa92"
+        "kind": "EXACT_SHA_MOBILE_REGRESSION_ARTIFACT",
+        "artifact_id": 8890927737,
+        "archive_digest": "sha256:7648cee5689e70cf0e20e78a9e6a06e98a8f4bde3b21a78a86f99b1715c81b80",
+        "user_handoff_required": false,
+        "reason": "No phone runtime behavior changed in PR #290."
       },
       "human_and_external_gates": [
         "HUMAN_VISUAL_USABILITY",
-        "PRODUCTION_NETWORKING",
+        "HUMAN_EDITORIAL_CQB_ACCEPTANCE",
+        "REAL_PROVIDER_AND_FEED_OPERATION",
+        "PRODUCTION_NETWORKING_AND_STORAGE",
         "STORE_RELEASE",
-        "OPERATOR_ROLLBACK"
+        "DEPLOYED_SLO_AND_OPERATOR_ROLLBACK"
       ]
     },
     {
-      "id": "admin-feed-source-brief-review",
-      "state": "CANDIDATE",
+      "id": "admin-feed-source-brief-review-source",
+      "state": "SUPERSEDED",
       "pr": 264,
       "branch": "feature/admin-source-brief-review-slice56",
       "sha": "80fbc887f16651949ec36819c440154bcfc278a8",
@@ -56,16 +71,9 @@
         "CAP-065",
         "CAP-095"
       ],
-      "evidence_state": "EXACT_HEAD_AUTOMATION_PASS_CANDIDATE_ONLY",
-      "integration_order": 1,
-      "overlap_groups": [],
-      "must_not_claim": [
-        "ADMIN_WEB_UI",
-        "AUTOMATIC_REVIEW",
-        "AUTOMATIC_MATERIALIZATION",
-        "CASE_CREATION",
-        "PUBLICATION"
-      ]
+      "evidence_state": "SELECTIVELY_ADOPTED_AND_REVERIFIED",
+      "superseded_by": "canonical-consumer-admin-runtime",
+      "superseded_reason": "Typed Feed Item and Source Brief review behavior was selectively adopted and reverified on PR #290; the divergent branch is no longer an integration target."
     },
     {
       "id": "public-feed-catalog-runtime",
@@ -87,7 +95,7 @@
         "MIGRATION_20260803_0026",
         "APPLICATION_COMPOSITION"
       ],
-      "selection_gate": "SEPARATE_ADR_REQUIRED"
+      "selection_gate": "ISSUE_291_AND_SEPARATE_ADR_REQUIRED"
     },
     {
       "id": "rss-atom-subscription-activation",
@@ -109,7 +117,7 @@
         "MIGRATION_20260803_0026",
         "APPLICATION_COMPOSITION"
       ],
-      "selection_gate": "SEPARATE_ADR_REQUIRED"
+      "selection_gate": "ISSUE_291_AND_SEPARATE_ADR_REQUIRED"
     },
     {
       "id": "production-and-external-operation",
@@ -149,19 +157,24 @@
         "public-feed-catalog-runtime",
         "rss-atom-subscription-activation"
       ],
-      "resolution": "PENDING_SEPARATE_ADR",
+      "resolution": "IN_PROGRESS_ISSUE_291",
+      "decision_direction": "ONE_AUTHORITATIVE_CATALOG_AND_ONE_EXPLICIT_ACTIVATION_PROJECTION",
       "forbid_wholesale_merge": true,
       "reason": "Both lines model public feed identity, activation and application composition after the same base and contain overlapping migration/composition surfaces."
     }
   ],
   "next_integration": {
-    "base_line": "consumer-mobile-review",
-    "source_line": "admin-feed-source-brief-review",
-    "strategy": "SELECTIVE_ADOPTION_OR_REIMPLEMENTATION_BY_CONTRACT",
-    "must_not_include_conflict_groups": [
-      "PUBLIC_FEED_MODEL"
+    "mode": "CONFLICT_RESOLUTION",
+    "base_line": "canonical-consumer-admin-runtime",
+    "issue": 291,
+    "conflict_group": "PUBLIC_FEED_MODEL",
+    "source_lines": [
+      "public-feed-catalog-runtime",
+      "rss-atom-subscription-activation"
     ],
-    "required_exact_head_workflows": [
+    "strategy": "ONE_CATALOG_ONE_EXPLICIT_ACTIVATION_PROJECTION",
+    "required_exact_head_workflows_after_runtime": [
+      "PROVIDER_SECURITY_CHAIN",
       "API_CI",
       "MOBILE_CI",
       "MVP_BETA_GATES",
