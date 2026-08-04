@@ -1,0 +1,131 @@
+name: Integrate Public Feed Pipeline Composition
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/repair-public-feed-pipeline-composition.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Wire mutable provider and feed-item runtime
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_required(text: str, old: str, new: str) -> str:
+              if old not in text:
+                  raise SystemExit(f'missing expected pipeline fragment: {old[:120]!r}')
+              return text.replace(old, new, 1)
+
+          path = Path('services/api/src/kefe_api/infrastructure/editorial_pipeline.py')
+          source = path.read_text(encoding='utf-8')
+          source = replace_required(
+              source,
+              'from kefe_api.core.settings import Settings\n'
+              'from kefe_api.infrastructure.db import build_engine\n',
+              'from kefe_api.core.settings import Settings\n'
+              'from kefe_api.infrastructure.canonical_public_feed_runtime import (\n'
+              '    MutableProviderAdoptionRegistry,\n'
+              '    MutablePublicSourceCaptureRegistry,\n'
+              ')\n'
+              'from kefe_api.infrastructure.db import build_engine\n',
+          )
+          source = replace_required(
+              source,
+              'from kefe_api.modules.ingestion_orchestration.in_memory import (\n'
+              '    InMemoryIngestionOrchestrationRepository,\n'
+              ')\n',
+              'from kefe_api.modules.ingestion_orchestration.feed_item_extraction import (\n'
+              '    FeedItemExtractionStageProcessor,\n'
+              '    build_feed_item_extraction_runtime,\n'
+              ')\n'
+              'from kefe_api.modules.ingestion_orchestration.in_memory import (\n'
+              '    InMemoryIngestionOrchestrationRepository,\n'
+              ')\n',
+          )
+          source = replace_required(
+              source,
+              '    IngestionWorkerRuntimeRegistry,\n'
+              '    InMemoryIngestionWorkerRuntimeRegistry,\n'
+              '    NoOpIngestionWorkerObserver,\n',
+              '    IngestionWorkerRuntimeRegistry,\n'
+              '    NoOpIngestionWorkerObserver,\n',
+          )
+          source = replace_required(
+              source,
+              '    ControlledProviderHttpTransport,\n'
+              '    InMemoryProviderAdoptionRegistry,\n'
+              '    NoOpProviderHttpObserver,\n',
+              '    ControlledProviderHttpTransport,\n'
+              '    NoOpProviderHttpObserver,\n',
+          )
+          source = replace_required(
+              source,
+              '    CredentialModeRoutingProviderCaptureExecutor,\n'
+              '    InMemoryPublicSourceCaptureRegistry,\n'
+              '    PermitBoundPublicCaptureExecutor,\n',
+              '    CredentialModeRoutingProviderCaptureExecutor,\n'
+              '    PermitBoundPublicCaptureExecutor,\n',
+          )
+          source = replace_required(
+              source,
+              '    public_capture_registry: PublicSourceCaptureRegistry = (\n'
+              '        InMemoryPublicSourceCaptureRegistry()\n'
+              '    )\n',
+              '    public_capture_registry: PublicSourceCaptureRegistry = (\n'
+              '        MutablePublicSourceCaptureRegistry()\n'
+              '    )\n',
+          )
+          source = replace_required(
+              source,
+              '    provider_adoption_registry: ProviderAdoptionRegistry = (\n'
+              '        InMemoryProviderAdoptionRegistry()\n'
+              '    )\n',
+              '    provider_adoption_registry: ProviderAdoptionRegistry = (\n'
+              '        MutableProviderAdoptionRegistry()\n'
+              '    )\n',
+          )
+          source = replace_required(
+              source,
+              '    ingestion_worker_registry: IngestionWorkerRuntimeRegistry = (\n'
+              '        InMemoryIngestionWorkerRuntimeRegistry()\n'
+              '    )\n',
+              '    ingestion_worker_registry: IngestionWorkerRuntimeRegistry = (\n'
+              '        build_feed_item_extraction_runtime(\n'
+              '            FeedItemExtractionStageProcessor(\n'
+              '                knowledge=knowledge_repository,\n'
+              '                evidence=raw_source_evidence_store,\n'
+              '            )\n'
+              '        )\n'
+              '    )\n',
+          )
+          path.write_text(source, encoding='utf-8')
+          PY
+      - name: Normalize and verify
+        working-directory: services/api
+        run: |
+          python -m pip install -q ruff==0.11.10
+          ruff format src/kefe_api/infrastructure/editorial_pipeline.py
+          ruff check src/kefe_api/infrastructure/editorial_pipeline.py
+          python -m py_compile src/kefe_api/infrastructure/editorial_pipeline.py
+      - name: Remove workflow and commit
+        run: |
+          git rm -f .github/workflows/repair-public-feed-pipeline-composition.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add services/api/src/kefe_api/infrastructure/editorial_pipeline.py
+          git commit -m 'feat: wire canonical public-feed runtime into editorial pipeline'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
