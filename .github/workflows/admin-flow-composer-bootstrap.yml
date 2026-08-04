@@ -1,0 +1,71 @@
+name: Admin Flow Composer Bootstrap
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/admin-flow-composer-bootstrap.yml"
+      - "services/api/**"
+      - "apps/admin/**"
+      - "docs/contracts/**"
+      - "docs/adr/0103-admin-flow-composer-draft-workspace.md"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: admin-flow-composer-bootstrap-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate-overlay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Generate isolated Flow Composer overlay
+        working-directory: services/api
+        run: >-
+          python tools/export_admin_flow_composer_openapi_overlay.py
+          --output openapi-admin-flow-composer.generated.json
+      - name: Upload generated overlay
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-flow-composer-openapi-overlay
+          path: services/api/openapi-admin-flow-composer.generated.json
+          if-no-files-found: error
+      - name: Run early backend behavior checks
+        working-directory: services/api
+        run: >-
+          pytest -q
+          tests/test_admin_flow_composer_http.py
+          tests/test_content_configuration.py
+
+  admin-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/admin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.13.0"
+          cache: npm
+          cache-dependency-path: apps/admin/package-lock.json
+      - name: Install locked Admin dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Run early Admin verification
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: npm run verify
