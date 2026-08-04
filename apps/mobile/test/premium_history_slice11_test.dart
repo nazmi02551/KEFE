@@ -100,9 +100,7 @@ void main() {
           );
           expect(find.byType(KefeSurface), findsWidgets);
 
-          final journeyList = find.byKey(
-            const ValueKey('my-kefe-journey'),
-          );
+          final journeyList = find.byKey(const ValueKey('my-kefe-journey'));
           final recentJourneys = find.byKey(
             const ValueKey('my-kefe-recent-journeys'),
           );
