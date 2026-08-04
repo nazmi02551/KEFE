@@ -218,7 +218,7 @@ class CanonicalPublicFeedDefinition:
                 "jurisdiction_code": definition.jurisdiction_code,
                 "pipeline_code": PIPELINE_CODE,
                 "pipeline_version": PIPELINE_VERSION,
-                "ingestion_configuration_hash": definition.ingestion_configuration_hash,
+                "ingestion_configuration_hash": definition.configuration_hash,
             }
         )
 
