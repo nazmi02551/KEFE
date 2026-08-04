@@ -1,0 +1,112 @@
+{
+  "contract_version": "1.0.0",
+  "status": "accepted_for_execution",
+  "date": "2026-08-04",
+  "source_issue": 289,
+  "source_adr": "docs/adr/0097-canonical-admin-feed-source-brief-review.md",
+  "parent_convergence": "docs/contracts/full-vision-delivery-convergence.v1.json",
+  "capabilities": ["CAP-061", "CAP-065", "CAP-095", "CAP-126"],
+  "source_candidates": [
+    {"pr": 260, "boundary": "TYPED_FEED_ITEM_REVIEW"},
+    {"pr": 262, "boundary": "EXPLICIT_SOURCE_BRIEF_BUILD"},
+    {"pr": 264, "boundary": "TYPED_SOURCE_BRIEF_REVIEW"}
+  ],
+  "api_versions": {
+    "feed_item_reads": "0.21",
+    "source_brief_build": "0.22",
+    "source_brief_reads": "0.23",
+    "older_versions_unchanged": true
+  },
+  "operations": [
+    {
+      "id": "FEED_ITEM_LIST_DETAIL",
+      "mode": "READ_ONLY",
+      "requires": [
+        "AUTHENTICATED_ADMIN_READ_PRINCIPAL",
+        "CONTENT_REVIEW_CAPABILITY",
+        "EXACT_FEED_ITEM_KIND_SCHEMA_RISK_PIPELINE",
+        "EXACT_SOURCE_ARTIFACT_HASH_EVIDENCE_LINEAGE"
+      ],
+      "forbids": [
+        "RAW_EVIDENCE_BODY",
+        "CREDENTIAL_OR_SECRET",
+        "BACKEND_OBJECT_KEY",
+        "AUTOMATIC_REVIEW"
+      ]
+    },
+    {
+      "id": "SOURCE_BRIEF_BUILD",
+      "mode": "EXPLICIT_MUTATION",
+      "requires": [
+        "AUTHENTICATED_ADMIN_WRITE_PRINCIPAL",
+        "VALID_CSRF",
+        "CONTENT_REVIEW_CAPABILITY",
+        "TERMINAL_ACCEPTED_FEED_ITEM_REVIEW",
+        "DETERMINISTIC_NORMALIZED_ARTIFACT",
+        "SEPARATE_SOURCE_BRIEF_INGESTION_RUN",
+        "EXACTLY_ONE_REVIEW_REQUIRED_SOURCE_BRIEF_PROPOSAL",
+        "IDEMPOTENT_ATOMIC_RECOVERY"
+      ],
+      "forbids": [
+        "AUTOMATIC_REVIEW",
+        "AUTOMATIC_SOURCE_BRIEF_ACCEPTANCE",
+        "CANDIDATE_CASE_GENERATION",
+        "EDITORIAL_PROJECTION",
+        "APPROVAL_OR_PUBLICATION"
+      ]
+    },
+    {
+      "id": "SOURCE_BRIEF_LIST_DETAIL",
+      "mode": "READ_ONLY",
+      "requires": [
+        "AUTHENTICATED_ADMIN_READ_PRINCIPAL",
+        "CONTENT_REVIEW_CAPABILITY",
+        "EXACT_SOURCE_BRIEF_KIND_SCHEMA_RISK_PIPELINE",
+        "NORMALIZED_ARTIFACT_SCHEMA_AND_HASH_REVALIDATION",
+        "ACCEPTED_PARENT_FEED_ITEM_REVIEW_REVALIDATION",
+        "COMPLETE_SOURCE_AND_EVIDENCE_LINEAGE"
+      ],
+      "forbids": [
+        "ARBITRARY_PROPOSAL_PAYLOAD_IN_LIST",
+        "SYNOPSIS_OR_EVIDENCE_REFERENCE_IN_LIST",
+        "RAW_EVIDENCE_BODY",
+        "BACKEND_OBJECT_KEY",
+        "AUTOMATIC_REVIEW"
+      ]
+    }
+  ],
+  "global_invariants": [
+    "ONE_CANONICAL_DELIVERY_LINE",
+    "COMMIT_FIRST_CONSUMER_RUNTIME_UNCHANGED",
+    "PREVIEW_PRODUCTION_ISOLATION",
+    "ONE_CONTENT_AUTHORING_AGGREGATE",
+    "REVIEW_MATERIALIZATION_PROJECTION_APPROVAL_PUBLICATION_DISTINCT",
+    "NO_AUTOMATIC_REVIEW_APPROVAL_OR_PUBLICATION",
+    "MOBILE_RUNTIME_BEHAVIOR_UNCHANGED",
+    "PUBLIC_FEED_MODEL_CONFLICT_EXCLUDED"
+  ],
+  "excluded_conflict_groups": ["PUBLIC_FEED_MODEL"],
+  "no_schema_migration": true,
+  "required_exact_head_workflows": [
+    "CANONICAL_ADMIN_REVIEW_CONVERGENCE_CI",
+    "API_CI",
+    "MOBILE_CI",
+    "MVP_BETA_GATES",
+    "GLOBAL_READINESS"
+  ],
+  "required_behavior_evidence": [
+    "MEMORY_HTTP_AUTHORIZATION_VERSIONING_AND_LINEAGE",
+    "POSTGRES_HTTP_RESTART_AND_LINEAGE",
+    "SOURCE_BRIEF_BUILD_IDEMPOTENCY",
+    "NO_PARTIAL_WRITES_ON_FAILURE",
+    "OPENAPI_ADDITIVE_VERSION_ISOLATION",
+    "CURRENT_PROGRESSIVE_PHONE_REGRESSIONS_PASS"
+  ],
+  "claims_not_proven": [
+    "ADMIN_WEB_UI",
+    "HUMAN_EDITORIAL_ACCEPTANCE",
+    "REAL_PROVIDER_OR_LIVE_FEED",
+    "PRODUCTION_DEPLOYMENT_SLO_OR_ROLLBACK",
+    "STORE_READINESS"
+  ]
+}
