@@ -3,6 +3,7 @@ name: Canonical Public Feed
 # This dedicated gate verifies the canonical catalog domain independently before
 # PostgreSQL and Admin HTTP layers are added to the same delivery line. Feed codes
 # are stable business identities; adapter codes remain immutable .vN identities.
+# Admin assurance tests keep idle and step-up windows relative to execution time.
 on:
   pull_request:
     paths:
