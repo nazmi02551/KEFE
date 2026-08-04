@@ -32,7 +32,7 @@ A catalog definition is immutable and versioned by `(feed_code, definition_versi
 - opaque terms and rate-limit evidence references;
 - optional locale and jurisdiction.
 
-Its canonical configuration hash covers every immutable field plus the exact Feed Item pipeline/stage identities.
+Its canonical configuration hash covers every immutable field plus the exact Feed Item pipeline/stage identities. The catalog hash pins the existing immutable `PublicFeedDefinition.configuration_hash`; no parallel ingestion hash field is introduced.
 
 Catalog lifecycle:
 
@@ -57,7 +57,7 @@ Preflight is read-only and performs no network, provider registration, schedule 
 Approval requires:
 
 - authenticated Admin session;
-- `SOURCE_MANAGE` capability;
+- `SOURCE_APPROVE` capability;
 - recent step-up;
 - an actor different from the creator;
 - exact expected configuration hash;
@@ -67,13 +67,13 @@ Approval does not activate a feed.
 
 ### Activation projection
 
-Activation is a separate, explicit, step-up-protected command over one exact APPROVED version. It projects in this order:
+Activation is a separate, explicit, `SOURCE_ACTIVATE` and step-up-protected command over one exact APPROVED version. It projects in this order:
 
-1. exact PUBLIC provider capability registration;
+1. exact PUBLIC provider capability registration through the existing `PublicProviderCapabilityTemplate` and provider admission service;
 2. exact adoption/capture/worker runtime profile registration or verified equality;
 3. exact generic source schedule creation.
 
-Capability-first and schedule-second ordering is mandatory. Exact replay returns the existing projection. Partial projection may be retried only when every already-existing identity equals the approved version.
+Capability-first and schedule-second ordering is mandatory. Exact replay returns the existing projection. Partial projection may be retried only when every already-existing identity equals the approved version. The canonical line does not introduce another provider capability factory or scheduler lifecycle.
 
 Activation state is separate from catalog state:
 
