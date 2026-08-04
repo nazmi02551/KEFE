@@ -365,8 +365,7 @@ class SecuredCandidateBundleService:
             stage_version=STAGE_VERSION,
         )
         proposals = tuple(
-            self._repository.get_proposal(proposal_id)
-            for proposal_id in proposal_ids
+            self._repository.get_proposal(proposal_id) for proposal_id in proposal_ids
         )
         if not history and all(proposal is None for proposal in proposals):
             return None
