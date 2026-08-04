@@ -190,7 +190,9 @@ void main() {
               PreviewCommunityReasonRepository(),
             ),
             shareExperienceEnabledProvider.overrideWithValue(true),
-            shareRepositoryProvider.overrideWithValue(PreviewShareRepository()),
+            shareRepositoryProvider.overrideWithValue(
+              PreviewShareRepository(),
+            ),
             progressRepositoryProvider.overrideWithValue(
               PreviewProgressRepository(),
             ),
