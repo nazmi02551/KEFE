@@ -1,0 +1,57 @@
+name: Finalize Admin Studio branch
+
+on:
+  push:
+    branches:
+      - feature/admin-studio-editorial-workspace
+    paths:
+      - ".github/workflows/admin-studio-finalize.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/admin-studio-editorial-workspace
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.13.0"
+      - name: Correct the post-bundle navigation contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("apps/admin/src/components/editorial-workspace.tsx")
+          source = path.read_text(encoding="utf-8")
+          old = '''              <button onClick={() => setStage("REVIEW")} type="button">
+                İş listesine dönüp ayrı ayrı incele
+              </button>'''
+          new = '''              <button onClick={() => setStage("QUEUE")} type="button">
+                İş listesine dönüp ayrı ayrı incele
+              </button>'''
+          if source.count(old) != 1:
+              raise SystemExit("expected exactly one post-bundle navigation block")
+          path.write_text(source.replace(old, new), encoding="utf-8")
+          PY
+      - name: Generate deterministic dependency lock
+        working-directory: apps/admin
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Remove superseded configuration and temporary workflow
+        run: |
+          rm -f apps/admin/.eslintrc.json
+          rm -f .github/workflows/admin-studio-finalize.yml
+      - name: Commit the bounded finalization
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/admin .github/workflows/admin-studio-finalize.yml
+          git diff --cached --check
+          git commit -m "fix(admin): finalize deterministic workspace branch"
+          git push origin HEAD:feature/admin-studio-editorial-workspace
