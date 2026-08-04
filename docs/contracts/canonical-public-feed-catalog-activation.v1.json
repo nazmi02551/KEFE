@@ -2,6 +2,8 @@
   "contract_version": "1.0.2",
   "status": "accepted_for_execution",
   "date": "2026-08-04",
+  "validation_generation": "2026-08-04-canonical-public-feed-1",
+  "validation_must_use_current_exact_head": true,
   "source_issue": 291,
   "source_adr": "docs/adr/0098-canonical-public-feed-catalog-activation.md",
   "base_pr": 290,
