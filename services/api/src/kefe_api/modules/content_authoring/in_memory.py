@@ -52,6 +52,29 @@ class InMemoryContentAuthoringRepository:
             versions.sort(key=lambda version: version.version_no)
             return tuple(versions)
 
+    def list_by_state(
+        self,
+        state: ContentLifecycle,
+        *,
+        limit: int,
+        offset: int,
+        content_risk: str | None = None,
+        primary_domain_code: str | None = None,
+    ) -> tuple[AuthoringCaseVersion, ...]:
+        with self._lock:
+            versions = [
+                version
+                for version in self._versions.values()
+                if version.state is state
+                and (content_risk is None or version.content_risk == content_risk)
+                and (
+                    primary_domain_code is None
+                    or version.primary_domain_code == primary_domain_code
+                )
+            ]
+            versions.sort(key=lambda version: (version.created_at, str(version.id)), reverse=True)
+            return tuple(versions[offset : offset + limit])
+
     def next_version_no(self, case_id: UUID) -> int:
         with self._lock:
             versions = self.list_versions(case_id)
