@@ -40,9 +40,9 @@ void main() {
   });
 
   test('governed Perspective presentation uses semantic visual boundaries', () {
-    final source = File(
+    final source = _readPresentationLibrary(
       'lib/features/decision/presentation/perspective_section.dart',
-    ).readAsStringSync();
+    );
 
     expect(source, contains('KefeSurface('));
     expect(source, contains('context.kefeVisual'));
@@ -125,4 +125,15 @@ void main() {
       );
     },
   );
+}
+
+String _readPresentationLibrary(String mainPath) {
+  final mainFile = File(mainPath);
+  final mainSource = mainFile.readAsStringSync();
+  final parts = RegExp(r"part '([^']+)';")
+      .allMatches(mainSource)
+      .map((match) => File('${mainFile.parent.path}/${match.group(1)}'))
+      .where((file) => file.existsSync())
+      .map((file) => file.readAsStringSync());
+  return ([mainSource, ...parts]).join('\n');
 }
