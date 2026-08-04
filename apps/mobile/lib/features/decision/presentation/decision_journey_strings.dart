@@ -21,6 +21,20 @@ abstract final class DecisionJourneyStringCatalog {
       'perspective_disclosure.body':
           'Inspect different perspectives without changing or resending the decision you committed.',
       'perspective_disclosure.action': 'See different perspectives',
+      'decision.question_title': 'Question {current} of {total}',
+      'decision.reason_title': 'What shaped your decision?',
+      'decision.review_title': 'Review and commit your decision',
+      'decision.progress': '{current}/{total}',
+      'decision.next': 'Continue',
+      'decision.skip': 'Skip for now',
+      'decision.back': 'Back',
+      'decision.edit': 'Review previous steps',
+      'decision.review_helper':
+          'Check the choices below. You can go back and edit them until you commit.',
+      'decision.no_reason': 'No optional reason was added.',
+      'decision.reason_summary':
+          '{count} reason tag(s) selected. Short text added: {hasText}.',
+      'decision.skipped': 'Skipped',
       'unavailable': 'This journey step is not available right now.',
     },
     'tr': {
@@ -41,6 +55,20 @@ abstract final class DecisionJourneyStringCatalog {
       'perspective_disclosure.body':
           'Sabitlediğin kararı değiştirmeden veya yeniden göndermeden farklı bakış açılarını incele.',
       'perspective_disclosure.action': 'Farklı bakışları gör',
+      'decision.question_title': 'Soru {current}/{total}',
+      'decision.reason_title': 'Kararında neler etkili oldu?',
+      'decision.review_title': 'Kararını gözden geçir ve sabitle',
+      'decision.progress': '{current}/{total}',
+      'decision.next': 'Devam et',
+      'decision.skip': 'Şimdilik atla',
+      'decision.back': 'Geri',
+      'decision.edit': 'Önceki adımları düzenle',
+      'decision.review_helper':
+          'Aşağıdaki seçimlerini kontrol et. Kararını sabitleyene kadar geri dönüp değiştirebilirsin.',
+      'decision.no_reason': 'İsteğe bağlı gerekçe eklenmedi.',
+      'decision.reason_summary':
+          '{count} gerekçe etiketi seçildi. Kısa metin eklendi: {hasText}.',
+      'decision.skipped': 'Atlandı',
       'unavailable': 'Bu karar yolculuğu adımı şu anda kullanılamıyor.',
     },
   };
@@ -79,5 +107,27 @@ extension DecisionJourneyStrings on KefeStrings {
       _journeyText('perspective_disclosure.body');
   String get perspectiveDisclosureAction =>
       _journeyText('perspective_disclosure.action');
+  String decisionJourneyQuestionTitle(int current, int total) => _journeyText(
+    'decision.question_title',
+    placeholders: {'current': current, 'total': total},
+  );
+  String get decisionJourneyReasonTitle => _journeyText('decision.reason_title');
+  String get decisionJourneyReviewTitle => _journeyText('decision.review_title');
+  String decisionJourneyProgress(int current, int total) => _journeyText(
+    'decision.progress',
+    placeholders: {'current': current, 'total': total},
+  );
+  String get decisionJourneyNext => _journeyText('decision.next');
+  String get decisionJourneySkip => _journeyText('decision.skip');
+  String get decisionJourneyBack => _journeyText('decision.back');
+  String get decisionJourneyEdit => _journeyText('decision.edit');
+  String get decisionJourneyReviewHelper =>
+      _journeyText('decision.review_helper');
+  String get decisionJourneyNoReason => _journeyText('decision.no_reason');
+  String decisionJourneyReasonSummary(int count, bool hasText) => _journeyText(
+    'decision.reason_summary',
+    placeholders: {'count': count, 'hasText': hasText ? 'yes' : 'no'},
+  );
+  String get decisionJourneySkipped => _journeyText('decision.skipped');
   String get activeJourneyUnavailable => _journeyText('unavailable');
 }
