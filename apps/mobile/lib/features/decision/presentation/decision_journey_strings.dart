@@ -10,12 +10,13 @@ abstract final class DecisionJourneyStringCatalog {
       'active.progress': '{current}/{total}',
       'active.context': 'Review the case before you continue',
       'active.decision': 'Now weigh your own decision',
+      'active.redecision': 'Now weigh the decision again',
       'active.result': 'Compare your decision with the community',
-      'active.reflection': 'Look back at your decision journey',
+      'active.reflection': 'Complete your decision journey',
       'active.default': 'Continue the decision journey',
       'context_advance.action': 'I reviewed it — continue',
       'context_advance.helper':
-          'The next step opens only after you choose to continue.',
+          'Optional details and sources remain available, but they do not block the next decision step.',
       'perspective_disclosure.title':
           'Your result is clear. Now widen the view.',
       'perspective_disclosure.body':
@@ -35,6 +36,20 @@ abstract final class DecisionJourneyStringCatalog {
       'decision.reason_summary':
           '{count} reason tag(s) selected. Short text added: {hasText}.',
       'decision.skipped': 'Skipped',
+      'post_commit.progress': 'RESULT JOURNEY {current}/{total}',
+      'post_commit.result.title': 'See your decision in the distribution',
+      'post_commit.result.helper':
+          'Your committed decision and the current collective distribution are shown together.',
+      'post_commit.perspectives.title': 'Inspect different perspectives',
+      'post_commit.perspectives.helper':
+          'Widen the view without changing or resending your committed decision.',
+      'post_commit.participation.title': 'Join the post-decision conversation',
+      'post_commit.participation.helper':
+          'Participate in available consensus cards and community reasons.',
+      'post_commit.completion.title': 'Complete this decision journey',
+      'post_commit.completion.helper':
+          'Review your descriptive history, share the case, or continue exploring.',
+      'post_commit.next': 'Continue the result journey',
       'unavailable': 'This journey step is not available right now.',
     },
     'tr': {
@@ -44,12 +59,13 @@ abstract final class DecisionJourneyStringCatalog {
       'active.progress': '{current}/{total}',
       'active.context': 'Devam etmeden önce olayı incele',
       'active.decision': 'Şimdi kendi kararını tart',
+      'active.redecision': 'Şimdi kararını yeniden tart',
       'active.result': 'Kararını toplumla karşılaştır',
-      'active.reflection': 'Karar yolculuğuna yeniden bak',
+      'active.reflection': 'Karar yolculuğunu tamamla',
       'active.default': 'Karar yolculuğuna devam et',
       'context_advance.action': 'İnceledim — devam et',
       'context_advance.helper':
-          'Sıradaki adım ancak sen devam etmeyi seçtiğinde açılır.',
+          'İsteğe bağlı ayrıntılar ve kaynaklar erişilebilir kalır; sıradaki karar adımını engellemez.',
       'perspective_disclosure.title':
           'Sonucun netleşti. Şimdi bakışını genişlet.',
       'perspective_disclosure.body':
@@ -69,6 +85,20 @@ abstract final class DecisionJourneyStringCatalog {
       'decision.reason_summary':
           '{count} gerekçe etiketi seçildi. Kısa metin eklendi: {hasText}.',
       'decision.skipped': 'Atlandı',
+      'post_commit.progress': 'SONUÇ YOLCULUĞU {current}/{total}',
+      'post_commit.result.title': 'Kararının dağılımdaki yerini gör',
+      'post_commit.result.helper':
+          'Sabitlediğin karar ve mevcut topluluk dağılımı birlikte gösterilir.',
+      'post_commit.perspectives.title': 'Farklı bakışları incele',
+      'post_commit.perspectives.helper':
+          'Sabitlediğin kararı değiştirmeden veya yeniden göndermeden bakışını genişlet.',
+      'post_commit.participation.title': 'Karar sonrası sohbete katıl',
+      'post_commit.participation.helper':
+          'Mevcut konsensüs kartlarına ve topluluk gerekçelerine katıl.',
+      'post_commit.completion.title': 'Bu karar yolculuğunu tamamla',
+      'post_commit.completion.helper':
+          'Betimleyici geçmişini gör, vakayı paylaş veya keşfetmeye devam et.',
+      'post_commit.next': 'Sonuç yolculuğuna devam et',
       'unavailable': 'Bu karar yolculuğu adımı şu anda kullanılamıyor.',
     },
   };
@@ -91,8 +121,12 @@ extension DecisionJourneyStrings on KefeStrings {
     'active.progress',
     placeholders: {'current': current, 'total': total},
   );
-  String activeJourneyTitle(String primitiveCode) => switch (primitiveCode) {
+  String activeJourneyTitle(
+    String primitiveCode, {
+    bool repeatedDecision = false,
+  }) => switch (primitiveCode) {
     'CONTEXT' => _journeyText('active.context'),
+    'DECISION' when repeatedDecision => _journeyText('active.redecision'),
     'DECISION' => _journeyText('active.decision'),
     'COLLECTIVE_RESULT' => _journeyText('active.result'),
     'REFLECTION' => _journeyText('active.reflection'),
@@ -131,5 +165,14 @@ extension DecisionJourneyStrings on KefeStrings {
     placeholders: {'count': count, 'hasText': hasText ? 'yes' : 'no'},
   );
   String get decisionJourneySkipped => _journeyText('decision.skipped');
+  String postCommitJourneyProgress(int current, int total) => _journeyText(
+    'post_commit.progress',
+    placeholders: {'current': current, 'total': total},
+  );
+  String postCommitJourneyTitle(String stage) =>
+      _journeyText('post_commit.$stage.title');
+  String postCommitJourneyHelper(String stage) =>
+      _journeyText('post_commit.$stage.helper');
+  String get postCommitJourneyNext => _journeyText('post_commit.next');
   String get activeJourneyUnavailable => _journeyText('unavailable');
 }
