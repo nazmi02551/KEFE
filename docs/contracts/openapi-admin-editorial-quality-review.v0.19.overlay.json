@@ -1,0 +1,365 @@
+{
+  "components": {
+    "schemas": {
+      "EditorialReviewDecisionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "completed_review_modes": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Completed Review Modes",
+            "type": "array"
+          },
+          "decision": {
+            "enum": [
+              "APPROVE",
+              "REJECT"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "rationale": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rationale"
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "title": "EditorialReviewDecisionRequest",
+        "type": "object"
+      },
+      "EditorialReviewDetailResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "submitted_at": {
+            "format": "date-time",
+            "title": "Submitted At",
+            "type": "string"
+          },
+          "submitter_actor_ref": {
+            "title": "Submitter Actor Ref",
+            "type": "string"
+          },
+          "version": {
+            "$ref": "#/components/schemas/CaseBuilderVersionResponse"
+          }
+        },
+        "required": [
+          "version",
+          "submitter_actor_ref",
+          "submitted_at"
+        ],
+        "title": "EditorialReviewDetailResponse",
+        "type": "object"
+      },
+      "EditorialReviewQueueItem": {
+        "additionalProperties": false,
+        "properties": {
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "content_locale": {
+            "title": "Content Locale",
+            "type": "string"
+          },
+          "content_risk": {
+            "title": "Content Risk",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "primary_domain_code": {
+            "title": "Primary Domain Code",
+            "type": "string"
+          },
+          "required_review_modes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Review Modes",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "version_id": {
+            "format": "uuid",
+            "title": "Version Id",
+            "type": "string"
+          },
+          "version_no": {
+            "title": "Version No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version_id",
+          "case_id",
+          "version_no",
+          "title",
+          "content_risk",
+          "primary_domain_code",
+          "content_locale",
+          "required_review_modes",
+          "created_at"
+        ],
+        "title": "EditorialReviewQueueItem",
+        "type": "object"
+      },
+      "EditorialReviewQueueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EditorialReviewQueueItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Offset"
+          }
+        },
+        "required": [
+          "items",
+          "next_offset"
+        ],
+        "title": "EditorialReviewQueueResponse",
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/internal/admin/v1/content-reviews": {
+      "get": {
+        "operationId": "list_editorial_reviews_internal_admin_v1_content_reviews_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 10000,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "content_risk",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 20,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Content Risk"
+            }
+          },
+          {
+            "in": "query",
+            "name": "primary_domain_code",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 120,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Primary Domain Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EditorialReviewQueueResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Editorial Reviews",
+        "tags": [
+          "Internal Admin Editorial Quality Review"
+        ]
+      }
+    },
+    "/internal/admin/v1/content-reviews/{version_id}": {
+      "get": {
+        "operationId": "editorial_review_detail_internal_admin_v1_content_reviews__version_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EditorialReviewDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Editorial Review Detail",
+        "tags": [
+          "Internal Admin Editorial Quality Review"
+        ]
+      }
+    },
+    "/internal/admin/v1/content-reviews/{version_id}/decision": {
+      "post": {
+        "operationId": "decide_editorial_review_internal_admin_v1_content_reviews__version_id__decision_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-KEFE-CSRF",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Csrf"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditorialReviewDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EditorialReviewDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decide Editorial Review",
+        "tags": [
+          "Internal Admin Editorial Quality Review"
+        ]
+      }
+    }
+  },
+  "target_version": "0.19.0"
+}
