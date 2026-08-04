@@ -7,6 +7,14 @@ ROOT = Path(__file__).resolve().parents[3]
 CONTRACT = ROOT / "docs/contracts/canonical-public-feed-catalog-activation.v1.json"
 DOMAIN = ROOT / "services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py"
 RUNTIME = ROOT / "services/api/src/kefe_api/modules/knowledge/public_feed_runtime.py"
+POSTGRES = (
+    ROOT
+    / "services/api/src/kefe_api/infrastructure/postgres_canonical_public_feed_catalog.py"
+)
+CANONICAL_MIGRATION = (
+    ROOT
+    / "services/api/migrations/versions/20260804_0026_canonical_public_feed_catalog.py"
+)
 MIGRATIONS = ROOT / "services/api/migrations/versions"
 
 
@@ -29,6 +37,8 @@ def main() -> None:
     )
     require(DOMAIN.is_file(), "canonical catalog domain is missing")
     require(RUNTIME.is_file(), "public-feed runtime primitive is missing")
+    require(POSTGRES.is_file(), "canonical PostgreSQL repository is missing")
+    require(CANONICAL_MIGRATION.is_file(), "canonical migration is missing")
 
     source = DOMAIN.read_text(encoding="utf-8")
     for marker in (
@@ -68,6 +78,26 @@ def main() -> None:
             forbidden not in source,
             f"legacy candidate API entered canonical domain: {forbidden}",
         )
+
+    postgres_source = POSTGRES.read_text(encoding="utf-8")
+    for marker in (
+        "PostgresCanonicalPublicFeedCatalogRepository",
+        "knowledge.public_feed_definition",
+        "knowledge.public_feed_activation",
+        "knowledge.public_feed_audit",
+        "FOR UPDATE",
+    ):
+        require(marker in postgres_source, f"PostgreSQL repository missing {marker}")
+
+    migration_source = CANONICAL_MIGRATION.read_text(encoding="utf-8")
+    for marker in (
+        'revision = "20260804_0026"',
+        'down_revision = "20260803_0025"',
+        "guard_public_feed_definition_update",
+        "guard_public_feed_activation_update",
+        "reject_public_feed_audit_mutation",
+    ):
+        require(marker in migration_source, f"canonical migration missing {marker}")
 
     migration_names = {path.name for path in MIGRATIONS.glob("*.py")}
     require(
