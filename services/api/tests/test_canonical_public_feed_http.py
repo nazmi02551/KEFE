@@ -135,7 +135,7 @@ def test_canonical_public_feed_secured_http_lifecycle(
             json=payload,
         )
         assert missing_csrf.status_code == 403
-        assert missing_csrf.json()["error"]["code"] == "ADMIN_CSRF_REQUIRED"
+        assert missing_csrf.json()["detail"]["code"] == "ADMIN_CSRF_REQUIRED"
 
         created = manager.post(
             "/internal/admin/v1/public-feeds",
