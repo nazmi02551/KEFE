@@ -1,0 +1,51 @@
+name: Full Vision Delivery Convergence
+
+on:
+  pull_request:
+    paths:
+      - AGENTS.md
+      - docs/adr/0096-full-vision-delivery-convergence.md
+      - docs/contracts/full-vision-delivery-convergence.v1.json
+      - docs/contracts/foundation-completion-program.v1.json
+      - docs/roadmap/CAPABILITY_PORTFOLIO.md
+      - docs/roadmap/capability-portfolio.v1.tsv
+      - docs/status/CURRENT.md
+      - docs/status/active-delivery-registry.v1.json
+      - scripts/validate_capability_portfolio.py
+      - scripts/validate_foundation_completion.py
+      - scripts/validate_full_vision_delivery_convergence.py
+      - .github/workflows/full-vision-delivery-convergence.yml
+  push:
+    branches: [main]
+    paths:
+      - AGENTS.md
+      - docs/adr/0096-full-vision-delivery-convergence.md
+      - docs/contracts/full-vision-delivery-convergence.v1.json
+      - docs/contracts/foundation-completion-program.v1.json
+      - docs/roadmap/CAPABILITY_PORTFOLIO.md
+      - docs/roadmap/capability-portfolio.v1.tsv
+      - docs/status/CURRENT.md
+      - docs/status/active-delivery-registry.v1.json
+      - scripts/validate_capability_portfolio.py
+      - scripts/validate_foundation_completion.py
+      - scripts/validate_full_vision_delivery_convergence.py
+      - .github/workflows/full-vision-delivery-convergence.yml
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate capability portfolio
+        run: python scripts/validate_capability_portfolio.py
+      - name: Validate foundation completion program
+        run: python scripts/validate_foundation_completion.py
+      - name: Validate canonical delivery convergence
+        run: python scripts/validate_full_vision_delivery_convergence.py
