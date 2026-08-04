@@ -1,9 +1,9 @@
 name: Canonical Public Feed
 
 # The canonical gate proves one catalog/activation model in memory and PostgreSQL,
-# secured Admin API isolation, explicit live-runtime registration and fail-closed
-# restart rehydration. Production starts with zero definitions and activations;
-# persisted non-retired projections restore only runtime profiles, never schedules.
+# secured Admin API isolation, explicit live-runtime registration, fail-closed
+# restart rehydration, and a no-live-network path to a review-required FEED_ITEM
+# Proposal. Production starts with zero definitions and activations.
 on:
   pull_request:
     paths:
@@ -25,6 +25,7 @@ on:
       - 'services/api/tests/test_canonical_public_feed_runtime_registry.py'
       - 'services/api/tests/test_canonical_public_feed_rehydration.py'
       - 'services/api/tests/test_canonical_public_feed_http.py'
+      - 'services/api/tests/test_canonical_public_feed_vertical.py'
       - 'services/api/tools/check_canonical_public_feed_catalog.py'
       - 'services/api/tools/check_canonical_public_feed_rehydration.py'
       - 'docs/adr/0098-canonical-public-feed-catalog-activation.md'
@@ -55,7 +56,7 @@ permissions:
 jobs:
   memory-domain-http:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -77,7 +78,7 @@ jobs:
       - name: Rehydration contract
         working-directory: services/api
         run: python tools/check_canonical_public_feed_rehydration.py
-      - name: Canonical public-feed memory, runtime, rehydration and HTTP behavior
+      - name: Canonical public-feed lifecycle and vertical behavior
         working-directory: services/api
         run: >-
           pytest -q
@@ -85,6 +86,7 @@ jobs:
           tests/test_canonical_public_feed_runtime_registry.py
           tests/test_canonical_public_feed_rehydration.py
           tests/test_canonical_public_feed_http.py
+          tests/test_canonical_public_feed_vertical.py
 
   postgres:
     runs-on: ubuntu-latest
