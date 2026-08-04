@@ -18,6 +18,7 @@ PRE_GLOBAL_OVERLAYS = (
     CONTRACTS / "openapi-mvp.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-projection.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-proposal-queue.v0.19.overlay.json",
+    CONTRACTS / "openapi-admin-case-builder.v0.19.overlay.json",
 )
 
 
