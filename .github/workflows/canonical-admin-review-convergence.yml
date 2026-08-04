@@ -17,6 +17,7 @@ on:
       - 'services/api/tests/test_source_brief_ingestion_http_postgres.py'
       - 'services/api/tests/test_admin_source_brief_review_http.py'
       - 'services/api/tests/test_admin_source_brief_review_http_postgres.py'
+      - 'services/api/tests/test_canonical_admin_review_openapi_versions.py'
       - 'services/api/tools/check_canonical_admin_review_convergence.py'
       - 'docs/adr/0097-canonical-admin-feed-source-brief-review.md'
       - 'docs/contracts/canonical-admin-feed-source-brief-review.v1.json'
@@ -32,6 +33,7 @@ on:
       - 'services/api/src/kefe_api/modules/ingestion_orchestration/source_brief_ingestion.py'
       - 'services/api/tests/test_*source_brief*'
       - 'services/api/tests/test_admin_feed_item_review_http*'
+      - 'services/api/tests/test_canonical_admin_review_openapi_versions.py'
       - 'services/api/tools/check_canonical_admin_review_convergence.py'
       - 'docs/adr/0097-canonical-admin-feed-source-brief-review.md'
       - 'docs/contracts/canonical-admin-feed-source-brief-review.v1.json'
@@ -62,13 +64,14 @@ jobs:
       - name: Architecture contract
         working-directory: services/api
         run: python tools/check_canonical_admin_review_convergence.py
-      - name: Typed Admin review memory behavior
+      - name: Typed Admin review and OpenAPI behavior
         working-directory: services/api
         run: >-
           pytest -q
           tests/test_admin_feed_item_review_http.py
           tests/test_source_brief_ingestion_http.py
           tests/test_admin_source_brief_review_http.py
+          tests/test_canonical_admin_review_openapi_versions.py
 
   postgres:
     runs-on: ubuntu-latest
