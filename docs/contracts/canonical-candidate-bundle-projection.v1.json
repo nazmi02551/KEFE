@@ -1,0 +1,161 @@
+{
+  "contract_version": "1.0.0",
+  "status": "accepted_for_execution",
+  "date": "2026-08-04",
+  "source_issue": 294,
+  "source_adr": "docs/adr/0099-canonical-source-brief-candidate-bundle-and-explicit-projection.md",
+  "parent_pr": 293,
+  "parent_sha": "f6076229db05a27367726f4c48e5fc8212f7e96e",
+  "capabilities": ["CAP-055", "CAP-061", "CAP-062", "CAP-065", "CAP-126"],
+  "historical_source": {
+    "branch": "feature/candidate-case-bundle-slice57",
+    "wholesale_merge_forbidden": true,
+    "selective_domain_adoption_only": true
+  },
+  "api": {
+    "minimum_version": "0.25.0",
+    "earlier_versions_unchanged": true,
+    "candidate_bundle_command": "POST /internal/admin/v1/source-briefs/{proposal_id}/candidate-bundle",
+    "projection_command_remains_separate": true
+  },
+  "authorization": {
+    "candidate_bundle_requires": [
+      "AUTHENTICATED_ADMIN_WRITE_PRINCIPAL",
+      "VALID_CSRF",
+      "SOURCE_VERIFY_CAPABILITY"
+    ],
+    "projection_requires": [
+      "AUTHENTICATED_ADMIN_WRITE_PRINCIPAL",
+      "VALID_CSRF",
+      "CONTENT_PROJECT_CAPABILITY"
+    ],
+    "review_mutation_reused": true,
+    "combined_review_and_bundle_command_forbidden": true,
+    "combined_review_and_projection_command_forbidden": true
+  },
+  "source_brief_preconditions": {
+    "proposal_kind": "SOURCE_BRIEF",
+    "schema_ref": "kefe.source-brief",
+    "schema_version": "1.0.0",
+    "terminal_review": "ACCEPTED",
+    "exact_review_decision_id_required": true,
+    "full_lineage_revalidation": [
+      "SOURCE_BRIEF_PROPOSAL",
+      "SOURCE_BRIEF_NORMALIZED_ARTIFACT",
+      "PARENT_FEED_ITEM_PROPOSAL",
+      "PARENT_FEED_ITEM_ACCEPTED_REVIEW",
+      "SOURCE_ARTIFACT",
+      "SOURCE_CONTENT_HASH",
+      "IMMUTABLE_EVIDENCE_REFERENCE"
+    ]
+  },
+  "editorial_configuration": {
+    "explicit_admin_input": true,
+    "immutable": true,
+    "configuration_hash_covers_all_fields": true,
+    "required_fields": [
+      "slug",
+      "title",
+      "summary",
+      "base_format_code",
+      "primary_domain_code",
+      "content_risk",
+      "issue_code",
+      "issue_title",
+      "question_stable_code",
+      "question_prompt",
+      "response_options",
+      "flow_template_code",
+      "flow_template_version_no",
+      "content_locale",
+      "market_scope",
+      "country_codes",
+      "required_review_modes",
+      "is_fact_bearing",
+      "is_real_event",
+      "context_title",
+      "cultural_context_note",
+      "legal_context_note"
+    ],
+    "editorial_review_mode_required": true,
+    "provider_text_inference_forbidden": true,
+    "source_brief_text_inference_forbidden": true,
+    "ai_execution_forbidden": true
+  },
+  "candidate_seed": {
+    "artifact_kind": "EXTERNAL_EVIDENCE",
+    "schema_ref": "kefe.accepted-source-brief-candidate-seed",
+    "schema_version": "1.0.0",
+    "deterministic_identity": true,
+    "exact_replay_idempotent": true,
+    "conflicting_existing_artifact_fails_closed": true,
+    "raw_evidence_body_copied": false,
+    "backend_object_key_copied": false,
+    "credential_copied": false
+  },
+  "ingestion": {
+    "pipeline_code": "SOURCE_BRIEF_CANDIDATE_BUNDLE",
+    "pipeline_version": "1.0.0",
+    "stage_code": "BUILD_CANDIDATE_BUNDLE",
+    "stage_version": "1.0.0",
+    "input_artifact_kind": "NORMALIZED_ARTIFACT",
+    "deterministic": true,
+    "atomic_successful_stage_batch_required": true,
+    "exact_replay_idempotent": true,
+    "partial_state_conflict_fails_closed": true
+  },
+  "proposals": {
+    "exact_count": 3,
+    "risk_code": "UNREVIEWED_CANDIDATE_BUNDLE",
+    "all_initial_review_state": "PENDING",
+    "ordered_kinds": ["DECISION_PROBLEM", "QUESTION_DRAFT", "CANDIDATE_CASE"],
+    "candidate_dependency_kinds": ["DECISION_PROBLEM", "QUESTION_DRAFT"],
+    "automatic_review": false,
+    "automatic_materialization": false,
+    "automatic_projection": false
+  },
+  "projection": {
+    "existing_runtime_reused": true,
+    "requires_candidate_case_accepted": true,
+    "requires_all_dependencies_accepted": true,
+    "requires_exact_versioned_flow": true,
+    "output_lifecycle": "DRAFT",
+    "one_candidate_one_logical_draft": true,
+    "exact_replay_idempotent": true,
+    "submit_for_review": false,
+    "authoring_review": false,
+    "approval": false,
+    "publication": false,
+    "consumer_materialization": false
+  },
+  "required_evidence": [
+    "MEMORY_AUTHORIZATION_AND_LINEAGE",
+    "MEMORY_EXACT_REPLAY_AND_CONFLICT",
+    "POSTGRES_DURABILITY_AND_RESTART",
+    "THREE_PENDING_PROPOSALS",
+    "PROJECTION_BLOCKED_BEFORE_ALL_ACCEPTED",
+    "EXPLICIT_PROJECTION_CREATES_ONE_DRAFT",
+    "API_VERSION_ISOLATION",
+    "NO_AUTOMATIC_EDITORIAL_ACTION"
+  ],
+  "required_exact_head_workflows": [
+    "CANONICAL_CANDIDATE_BUNDLE_PROJECTION_CI",
+    "CANONICAL_ADMIN_REVIEW_CONVERGENCE",
+    "EDITORIAL_PROJECTION_CONTRACT",
+    "API_CI",
+    "MOBILE_CI",
+    "MVP_BETA_GATES",
+    "GLOBAL_READINESS"
+  ],
+  "claims_not_proven": [
+    "ADMIN_WEB_UI",
+    "CASE_BUILDER_UI",
+    "FLOW_COMPOSER_UI",
+    "EDITORIAL_CQB_ACCEPTANCE",
+    "AI_ASSISTED_AUTHORING",
+    "REAL_PROVIDER_COMPLIANCE",
+    "DEPLOYED_SLO_OR_ROLLBACK",
+    "STORE_READINESS",
+    "PHONE_BEHAVIOR"
+  ]
+}
