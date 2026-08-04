@@ -1,7 +1,8 @@
 name: Canonical Public Feed
 
 # This dedicated gate verifies the canonical catalog domain independently before
-# PostgreSQL and Admin HTTP layers are added to the same delivery line.
+# PostgreSQL and Admin HTTP layers are added to the same delivery line. Feed codes
+# are stable business identities; adapter codes remain immutable .vN identities.
 on:
   pull_request:
     paths:
