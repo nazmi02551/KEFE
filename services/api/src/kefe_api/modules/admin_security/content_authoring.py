@@ -161,6 +161,7 @@ class SecuredContentAuthoringService:
             principal,
             version,
             completed_review_modes=version.completed_review_modes,
+            explicit_attestation=False,
             occurred_at=now,
         )
 
@@ -177,6 +178,7 @@ class SecuredContentAuthoringService:
             principal,
             version,
             completed_review_modes=completed_review_modes,
+            explicit_attestation=True,
             occurred_at=now,
         )
 
@@ -257,25 +259,33 @@ class SecuredContentAuthoringService:
         version: AuthoringCaseVersion,
         *,
         completed_review_modes: tuple[str, ...],
+        explicit_attestation: bool,
         occurred_at: datetime | None,
     ) -> AuthoringCaseVersion:
         self._security.enforce_reviewer_separation(
             principal=principal,
             submitter_actor_ref=self._latest_submitter(version),
         )
-        normalized = tuple(item.strip() for item in completed_review_modes)
-        if any(not item for item in normalized) or len(set(normalized)) != len(normalized):
-            raise DomainError(
-                "CONTENT_REVIEW_MODES_INVALID",
-                "Completed review modes must be unique non-empty values",
-                422,
-            )
         required = tuple(item.strip() for item in version.required_review_modes)
         if any(not item for item in required) or len(set(required)) != len(required):
             raise DomainError(
                 "CONTENT_REQUIRED_REVIEW_MODES_INVALID",
                 "CaseVersion required review modes are invalid",
                 409,
+            )
+        if required and not explicit_attestation:
+            raise DomainError(
+                "CONTENT_REVIEW_ATTESTATION_REQUIRED",
+                "Required review modes must be explicitly attested by the reviewer",
+                422,
+            )
+
+        normalized = tuple(item.strip() for item in completed_review_modes)
+        if any(not item for item in normalized) or len(set(normalized)) != len(normalized):
+            raise DomainError(
+                "CONTENT_REVIEW_MODES_INVALID",
+                "Completed review modes must be unique non-empty values",
+                422,
             )
         missing = sorted(set(required) - set(normalized))
         unexpected = sorted(set(normalized) - set(required))
