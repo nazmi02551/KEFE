@@ -1,3 +1,5 @@
+import React from "react";
+
 import type { ProposalReviewState } from "@/src/lib/contracts";
 
 export type WorkspaceStage = "QUEUE" | "REVIEW" | "BUNDLE" | "PROJECTION";
