@@ -61,6 +61,10 @@ jobs:
         run: |
           python -m pip install -q -U pip
           pip install -q -e '.[dev]'
+          ruff check --fix \
+            src/kefe_api/main.py \
+            src/kefe_api/modules/admin_security/candidate_bundle.py \
+            src/kefe_api/modules/admin_security/candidate_bundle_router.py
           ruff format \
             src/kefe_api/main.py \
             src/kefe_api/modules/admin_security/candidate_bundle.py \
