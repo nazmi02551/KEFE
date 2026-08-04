@@ -29,6 +29,22 @@ The Case Builder provides:
 
 It deliberately does not expose autosave, approve, reject, publish, withdraw, bulk mutation or Flow topology editing. Session and CSRF values remain in page memory and are never persisted by the application.
 
+## Editorial Quality Review workspace
+
+`/content-review` exposes a bounded queue of canonical `IN_REVIEW` CaseVersions. Loading the route, choosing a queue item or changing filters never starts a request automatically; session, queue, detail and audit reads each require an explicit operator command.
+
+The workspace provides:
+
+- reviewer-authorized queue filtering by content risk and primary domain;
+- deterministic bounded pagination;
+- salt-read-only CaseVersion inspection without edit authority;
+- exact required review-mode attestation;
+- maker-checker separated APPROVE to `APPROVED` without publication;
+- rationale-bound REJECT to `DRAFT` with stale review attestations cleared;
+- explicit append-only lifecycle audit loading.
+
+It deliberately does not expose content editing, autosave, publish, withdraw, Flow topology changes, automated review or automated approval. Session and CSRF values remain in page memory and are never persisted by the application.
+
 ## Local setup
 
 ```bash
@@ -47,6 +63,6 @@ The existing Admin session is supplied by the `kefe_admin_session` cookie. Every
 npm run verify
 ```
 
-This runs both executable architecture contracts, ESLint, strict TypeScript, API/client/helper tests and a production Next.js build.
+This runs all three executable Admin architecture contracts, ESLint, strict TypeScript, API/client/helper tests and a production Next.js build.
 
 Automated checks do not prove human editorial usability, CQB acceptance, production deployment, provider readiness, deployed SLO/load/observability, operator rollback, store compliance or production release.
