@@ -230,7 +230,10 @@ def main() -> None:
         "backend_object_key",
     ):
         if forbidden in router:
-            problems.append(f"Editorial review router contains forbidden authority/data: {forbidden}")
+            problems.append(
+                "Editorial review router contains forbidden authority/data: "
+                f"{forbidden}"
+            )
 
     if problems:
         raise SystemExit("\n".join(problems))
