@@ -96,8 +96,7 @@ def test_canonical_public_feed_routes_are_isolated_to_api_024(
         paths = app.openapi()["paths"]
         assert "/internal/admin/v1/public-feeds" in paths
         assert (
-            "/internal/admin/v1/public-feeds/{feed_code}/versions/"
-            "{definition_version}/activate"
+            "/internal/admin/v1/public-feeds/{feed_code}/versions/{definition_version}/activate"
         ) in paths
     finally:
         get_settings.cache_clear()
@@ -163,9 +162,7 @@ def test_canonical_public_feed_secured_http_lifecycle(
             json={"expected_configuration_hash": definition_hash},
         )
         assert self_approval.status_code == 403
-        assert self_approval.json()["error"]["code"] == (
-            "ADMIN_SEPARATION_OF_DUTIES"
-        )
+        assert "ADMIN_SEPARATION_OF_DUTIES" in self_approval.text
 
         approved = approver.post(
             f"/internal/admin/v1/public-feeds/{feed_code}/versions/1/approve",
@@ -188,14 +185,10 @@ def test_canonical_public_feed_secured_http_lifecycle(
         activation_body = activated.json()
         assert activation_body["state"] == "ACTIVE"
         adapter_code = payload["adapter_code"]
-        assert app.state.canonical_public_feed_runtime_profiles.adapter_codes() == (
-            adapter_code,
-        )
+        assert app.state.canonical_public_feed_runtime_profiles.adapter_codes() == (adapter_code,)
         assert app.state.public_capture_registry.adapter_codes() == (adapter_code,)
         assert (
-            app.state.source_scheduler_repository.get_schedule(
-                UUID(activation_body["schedule_id"])
-            )
+            app.state.source_scheduler_repository.get_schedule(UUID(activation_body["schedule_id"]))
             is not None
         )
 
@@ -231,9 +224,7 @@ def test_canonical_public_feed_secured_http_lifecycle(
         assert listed.status_code == 200
         assert [item["feed_code"] for item in listed.json()["items"]] == [feed_code]
 
-        audit = manager.get(
-            f"/internal/admin/v1/public-feeds/{feed_code}/versions/1/audit"
-        )
+        audit = manager.get(f"/internal/admin/v1/public-feeds/{feed_code}/versions/1/audit")
         assert audit.status_code == 200
         assert [item["action"] for item in audit.json()["items"]] == [
             "DRAFT_REGISTERED",

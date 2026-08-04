@@ -264,7 +264,7 @@ def test_approved_catalog_version_reaches_review_required_feed_item_proposal() -
     )
 
     creator = _principal(AdminRole.REVIEWER)
-    approver = _principal(AdminRole.REVIEWER)
+    approver = _principal(AdminRole.ACCESS_ADMIN)
     activator = _principal(AdminRole.ACCESS_ADMIN)
     draft = catalog.register_draft(
         creator,
@@ -327,9 +327,7 @@ def test_approved_catalog_version_reaches_review_required_feed_item_proposal() -
     worker = IngestionWorkerRunner(
         repository=ingestion_repository,
         orchestration=ingestion_service,
-        leases=IngestionRunLeaseService(
-            InMemoryIngestionRunLeaseRepository(ingestion_repository)
-        ),
+        leases=IngestionRunLeaseService(InMemoryIngestionRunLeaseRepository(ingestion_repository)),
         registry=worker_registry,
         observer=NoOpIngestionWorkerObserver(),
         clock=lambda: NOW,

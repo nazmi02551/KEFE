@@ -131,7 +131,7 @@ def test_postgres_application_restart_rehydrates_without_reactivation(
     get_settings.cache_clear()
 
     creator_id = _seed_subject(database_url, "REVIEWER")
-    approver_id = _seed_subject(database_url, "REVIEWER")
+    approver_id = _seed_subject(database_url, "ACCESS_ADMIN")
     activator_id = _seed_subject(database_url, "ACCESS_ADMIN")
     feed_code = f"restart-{uuid4().hex[:10]}"
     payload = _payload(feed_code)
@@ -169,9 +169,7 @@ def test_postgres_application_restart_rehydrates_without_reactivation(
             headers={ADMIN_CSRF_HEADER: activator_csrf},
             json={
                 "expected_configuration_hash": configuration_hash,
-                "first_due_at": (
-                    datetime.now(UTC) + timedelta(minutes=5)
-                ).isoformat(),
+                "first_due_at": (datetime.now(UTC) + timedelta(minutes=5)).isoformat(),
             },
         )
         assert activated.status_code == 200
@@ -186,19 +184,14 @@ def test_postgres_application_restart_rehydrates_without_reactivation(
             adapter_code,
         )
         assert second_app.state.public_capture_registry.adapter_codes() == (adapter_code,)
-        assert (
-            second_app.state.source_scheduler_repository.get_schedule(schedule_id)
-            is not None
-        )
+        assert second_app.state.source_scheduler_repository.get_schedule(schedule_id) is not None
         assert _runtime_counts(database_url, adapter_code) == (1, 1)
 
         reader, _reader_csrf = _client(second_app, creator_id, step_up=False)
         listed = reader.get("/internal/admin/v1/public-feeds")
         assert listed.status_code == 200
         assert [item["feed_code"] for item in listed.json()["items"]] == [feed_code]
-        audit = reader.get(
-            f"/internal/admin/v1/public-feeds/{feed_code}/versions/1/audit"
-        )
+        audit = reader.get(f"/internal/admin/v1/public-feeds/{feed_code}/versions/1/audit")
         assert audit.status_code == 200
         assert [item["action"] for item in audit.json()["items"]] == [
             "DRAFT_REGISTERED",
