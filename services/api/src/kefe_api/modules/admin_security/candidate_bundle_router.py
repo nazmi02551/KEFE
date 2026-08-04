@@ -13,7 +13,6 @@ from kefe_api.modules.admin_security.router import StrictModel, WritePrincipalDe
 from kefe_api.modules.admin_security.source_brief_review_router import (
     get_source_brief_review,
 )
-from kefe_api.modules.content_authoring.models import MarketScope
 from kefe_api.modules.ingestion_orchestration.candidate_case_bundle import (
     CandidateCaseBundleStageProcessor,
     CandidateCaseEditorialConfiguration,
@@ -97,7 +96,7 @@ def _configuration(payload: CandidateBundleRequest) -> CandidateCaseEditorialCon
             flow_template_code=payload.flow_template_code,
             flow_template_version_no=payload.flow_template_version_no,
             content_locale=payload.content_locale,
-            market_scope=MarketScope(payload.market_scope),
+            market_scope=payload.market_scope,
             country_codes=tuple(payload.country_codes),
             required_review_modes=tuple(payload.required_review_modes),
             is_fact_bearing=payload.is_fact_bearing,

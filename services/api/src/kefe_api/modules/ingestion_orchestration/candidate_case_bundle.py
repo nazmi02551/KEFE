@@ -9,7 +9,6 @@ from typing import Any
 from urllib.parse import urlsplit
 from uuid import UUID, uuid5
 
-from kefe_api.modules.content_authoring.models import MarketScope
 from kefe_api.modules.ingestion_orchestration.models import (
     IngestionRun,
     InputArtifactKind,
@@ -180,7 +179,7 @@ class CandidateCaseEditorialConfiguration:
     flow_template_code: str
     flow_template_version_no: int
     content_locale: str
-    market_scope: MarketScope
+    market_scope: str
     country_codes: tuple[str, ...]
     required_review_modes: tuple[str, ...]
     is_fact_bearing: bool
@@ -215,8 +214,11 @@ class CandidateCaseEditorialConfiguration:
             raise ValueError("flow_template_version_no is outside the supported range")
         if _LOCALE.fullmatch(self.content_locale) is None:
             raise ValueError("content_locale is invalid")
-        if type(self.market_scope) is not MarketScope:
-            raise ValueError("market_scope must be exact MarketScope")
+        if type(self.market_scope) is not str or self.market_scope not in {
+            "GLOBAL",
+            "COUNTRY_SET",
+        }:
+            raise ValueError("market_scope is invalid")
         if type(self.is_fact_bearing) is not bool or type(self.is_real_event) is not bool:
             raise ValueError("fact and real-event flags must be exact booleans")
         if not 2 <= len(self.response_options) <= MAX_OPTIONS:
@@ -231,9 +233,9 @@ class CandidateCaseEditorialConfiguration:
             raise ValueError("country_codes must be sorted and unique")
         if any(_COUNTRY.fullmatch(item) is None for item in self.country_codes):
             raise ValueError("country_codes must be ISO alpha-2 codes")
-        if self.market_scope is MarketScope.GLOBAL and self.country_codes:
+        if self.market_scope == "GLOBAL" and self.country_codes:
             raise ValueError("GLOBAL market scope cannot contain country codes")
-        if self.market_scope is MarketScope.COUNTRY_SET and not self.country_codes:
+        if self.market_scope == "COUNTRY_SET" and not self.country_codes:
             raise ValueError("COUNTRY_SET market scope requires country codes")
         if not 1 <= len(self.required_review_modes) <= MAX_REVIEW_MODES:
             raise ValueError("required_review_modes are outside the supported range")
@@ -270,7 +272,7 @@ class CandidateCaseEditorialConfiguration:
             "flow_template_code": self.flow_template_code,
             "flow_template_version_no": self.flow_template_version_no,
             "content_locale": self.content_locale,
-            "market_scope": self.market_scope.value,
+            "market_scope": self.market_scope,
             "country_codes": list(self.country_codes),
             "required_review_modes": list(self.required_review_modes),
             "is_fact_bearing": self.is_fact_bearing,
@@ -304,7 +306,7 @@ class CandidateCaseEditorialConfiguration:
                 flow_template_code=value["flow_template_code"],
                 flow_template_version_no=value["flow_template_version_no"],
                 content_locale=value["content_locale"],
-                market_scope=MarketScope(value["market_scope"]),
+                market_scope=value["market_scope"],
                 country_codes=tuple(value["country_codes"]),
                 required_review_modes=tuple(value["required_review_modes"]),
                 is_fact_bearing=value["is_fact_bearing"],
@@ -550,7 +552,7 @@ class CandidateCaseBundleStageProcessor:
             "primary_domain_code": config.primary_domain_code,
             "content_risk": config.content_risk,
             "content_locale": config.content_locale,
-            "market_scope": config.market_scope.value,
+            "market_scope": config.market_scope,
             "country_codes": list(config.country_codes),
             "is_fact_bearing": config.is_fact_bearing,
             "is_real_event": config.is_real_event,
