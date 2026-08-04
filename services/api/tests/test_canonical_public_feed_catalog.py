@@ -61,16 +61,17 @@ def _principal(
     direct: frozenset[AdminCapability] = frozenset(),
     subject_id=None,
 ) -> AdminPrincipal:
+    current = datetime.now(UTC)
     return AdminPrincipal(
         admin_subject_id=subject_id or uuid4(),
         session_id=uuid4(),
         roles=frozenset({role}),
         direct_capabilities=direct,
-        authenticated_at=NOW - timedelta(minutes=5),
-        mfa_satisfied_at=NOW - timedelta(minutes=5),
-        step_up_at=NOW - timedelta(minutes=2),
-        expires_at=NOW + timedelta(hours=2),
-        last_seen_at=NOW - timedelta(minutes=1),
+        authenticated_at=current - timedelta(minutes=5),
+        mfa_satisfied_at=current - timedelta(minutes=5),
+        step_up_at=current - timedelta(minutes=2),
+        expires_at=current + timedelta(hours=2),
+        last_seen_at=current - timedelta(minutes=1),
     )
 
 
