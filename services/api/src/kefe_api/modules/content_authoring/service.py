@@ -10,6 +10,7 @@ from kefe_api.modules.content_authoring.models import (
     CaseIdentity,
     ContentLifecycle,
     LifecycleAuditEntry,
+    PublicationPreflightResult,
 )
 from kefe_api.modules.content_authoring.ports import (
     ContentAuthoringRegistry,
@@ -274,12 +275,17 @@ class ContentAuthoringService:
             audit=audit,
         )
 
+    def publication_preflight(self, version_id: UUID) -> PublicationPreflightResult:
+        version = self._require_version(version_id)
+        self._assert_state(version, {ContentLifecycle.APPROVED}, "preflight publication")
+        return self._publication_preflight_for(version)
+
     def publish(self, version_id: UUID, *, actor_ref: str) -> AuthoringCaseVersion:
         version = self._require_version(version_id)
         self._assert_state(version, {ContentLifecycle.APPROVED}, "publish")
 
-        failures = self._registry.validate(version)
-        if failures:
+        preflight = self._publication_preflight_for(version)
+        if not preflight.eligible:
             raise DomainError(
                 "CONTENT_PUBLICATION_INVALID",
                 "CaseVersion failed publication validation",
@@ -287,12 +293,18 @@ class ContentAuthoringService:
                 meta={
                     "failures": [
                         {"code": item.code, "detail": item.detail, "path": item.path}
-                        for item in failures
+                        for item in preflight.validation_failures
                     ]
                 },
             )
+        resolution = preflight.resolution
+        if resolution is None:
+            raise DomainError(
+                "CONTENT_PUBLICATION_RESOLUTION_MISSING",
+                "Publication configuration resolution is missing",
+                409,
+            )
 
-        resolution = self._publication_configuration_resolver.resolve(version)
         published_at = datetime.now(UTC)
         published = replace(
             version,
@@ -352,6 +364,25 @@ class ContentAuthoringService:
         if self._repository.get_case(case_id) is None:
             raise DomainError("CONTENT_CASE_NOT_FOUND", "Case not found", 404)
         return self._repository.list_audit(case_id)
+
+    def _publication_preflight_for(
+        self,
+        version: AuthoringCaseVersion,
+    ) -> PublicationPreflightResult:
+        failures = self._registry.validate(version)
+        if failures:
+            return PublicationPreflightResult(
+                version_id=version.id,
+                eligible=False,
+                validation_failures=failures,
+                resolution=None,
+            )
+        return PublicationPreflightResult(
+            version_id=version.id,
+            eligible=True,
+            validation_failures=(),
+            resolution=self._publication_configuration_resolver.resolve(version),
+        )
 
     def _transition(
         self,
