@@ -167,7 +167,7 @@ Future<void> expectReachable(WidgetTester tester, Key key) async {
 
 void main() {
   testWidgets(
-    'Reveal precedes Perspective and post-Commit capabilities remain reachable',
+    'Result Perspective Participation and Completion remain staged and reachable',
     (tester) async {
       tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
       addTearDown(tester.platformDispatcher.clearLocaleTestValue);
@@ -215,36 +215,44 @@ void main() {
       expect(repository.commitCalls, 1);
       expect(repository.perspectiveCalls, 1);
       expect(find.byKey(const ValueKey('reveal-card')), findsOneWidget);
-      expect(
-        find.byKey(const ValueKey('perspective-disclosure-prompt')),
-        findsOneWidget,
-      );
       expect(find.byKey(const ValueKey('perspective-section')), findsNothing);
+      expect(find.byKey(const ValueKey('consensus-section')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('community-reason-section')),
+        findsNothing,
+      );
+      expect(find.byKey(const ValueKey('my-kefe-progress')), findsNothing);
+      expect(find.byKey(const ValueKey('share-section')), findsNothing);
 
+      await tapVisible(tester, find.byKey(const ValueKey('post-commit-next')));
+      expect(find.byKey(const ValueKey('perspective-section')), findsOneWidget);
+      expect(find.byKey(const ValueKey('reveal-card')), findsNothing);
+      expect(find.byKey(const ValueKey('consensus-section')), findsNothing);
+      expect(find.byKey(const ValueKey('my-kefe-progress')), findsNothing);
+      expect(repository.commitCalls, 1);
+      expect(repository.perspectiveCalls, 1);
+
+      await tapVisible(tester, find.byKey(const ValueKey('post-commit-next')));
       await expectReachable(tester, const ValueKey('consensus-section'));
       await expectReachable(tester, const ValueKey('community-reason-section'));
+      expect(find.byKey(const ValueKey('perspective-section')), findsNothing);
+      expect(find.byKey(const ValueKey('my-kefe-progress')), findsNothing);
+      expect(find.byKey(const ValueKey('share-section')), findsNothing);
+
+      await tapVisible(tester, find.byKey(const ValueKey('post-commit-next')));
       await expectReachable(tester, const ValueKey('my-kefe-progress'));
       await expectReachable(tester, const ValueKey('share-section'));
-
-      await tester.scrollUntilVisible(
-        find.byKey(const ValueKey('show-perspectives-button')),
-        -400,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('show-perspectives-button')));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const ValueKey('perspective-section')), findsOneWidget);
+      expect(find.byKey(const ValueKey('consensus-section')), findsNothing);
       expect(
-        find.byKey(const ValueKey('perspective-disclosure-prompt')),
+        find.byKey(const ValueKey('community-reason-section')),
         findsNothing,
       );
 
-      await expectReachable(tester, const ValueKey('consensus-section'));
-      await expectReachable(tester, const ValueKey('community-reason-section'));
-      await expectReachable(tester, const ValueKey('my-kefe-progress'));
-      await expectReachable(tester, const ValueKey('share-section'));
+      await tapVisible(tester, find.byKey(const ValueKey('post-commit-back')));
+      expect(find.byKey(const ValueKey('consensus-section')), findsOneWidget);
+      expect(repository.commitCalls, 1);
+      expect(repository.perspectiveCalls, 1);
+      expect(tester.takeException(), isNull);
     },
   );
 }

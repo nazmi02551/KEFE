@@ -53,12 +53,12 @@ void main() {
   });
 
   test('governed information-state sources have no indeterminate spinner', () {
-    final contextSource = File(
+    final contextSource = _readPresentationLibrary(
       'lib/features/context/presentation/context_section.dart',
-    ).readAsStringSync();
-    final perspectiveSource = File(
+    );
+    final perspectiveSource = _readPresentationLibrary(
       'lib/features/decision/presentation/perspective_section.dart',
-    ).readAsStringSync();
+    );
 
     expect(contextSource, isNot(contains('CircularProgressIndicator')));
     expect(perspectiveSource, isNot(contains('CircularProgressIndicator')));
@@ -433,4 +433,15 @@ class _InformationStateRepository
 
   @override
   Future<String> startSession(String caseId) async => 'slice-25-session';
+}
+
+String _readPresentationLibrary(String mainPath) {
+  final mainFile = File(mainPath);
+  final mainSource = mainFile.readAsStringSync();
+  final parts = RegExp(r"part '([^']+)';")
+      .allMatches(mainSource)
+      .map((match) => File('${mainFile.parent.path}/${match.group(1)}'))
+      .where((file) => file.existsSync())
+      .map((file) => file.readAsStringSync());
+  return ([mainSource, ...parts]).join('\n');
 }

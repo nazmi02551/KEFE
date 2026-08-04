@@ -137,4 +137,61 @@ void main() {
       );
     },
   );
+
+  testWidgets('Progressive Context shows one optional layer at a time', (
+    tester,
+  ) async {
+    tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
+    addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          decisionRepositoryProvider.overrideWithValue(ContextFakeRepository()),
+        ],
+        child: MaterialApp(
+          locale: const Locale('tr', 'TR'),
+          supportedLocales: KefeStrings.supportedLocales,
+          localizationsDelegates: const [
+            KefeStringsDelegate(),
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: const Scaffold(
+            body: SingleChildScrollView(
+              child: ContextSection(
+                caseVersionId: caseVersionId,
+                progressive: true,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('context-progressive-journey')),
+      findsOneWidget,
+    );
+    expect(find.text('Temel bağlam.'), findsOneWidget);
+    expect(find.text('Ek bağlam.'), findsNothing);
+    expect(find.text('Senaryo notu'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('context-journey-next')));
+    await tester.pumpAndSettle();
+    expect(find.text('Temel bağlam.'), findsNothing);
+    expect(find.text('Ek bağlam.'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('context-journey-next')));
+    await tester.pumpAndSettle();
+    expect(find.text('Ek bağlam.'), findsNothing);
+    expect(find.text('Senaryo notu'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('context-journey-back')));
+    await tester.pumpAndSettle();
+    expect(find.text('Ek bağlam.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

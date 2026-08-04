@@ -43,6 +43,13 @@ extension ProgressStrings on KefeStrings {
   String get journeyEmpty => _progressText('journey.empty');
   String get journeyNonInferenceNote =>
       _progressText('journey.non_inference_note');
+  String get journeyDetails => _progressText('journey.details');
+  String get journeyTimeline => _progressText('journey.timeline');
+  String get journeyInitialCommit => _progressText('journey.initial_commit');
+  String get journeyLatestDecision => _progressText('journey.latest_decision');
+  String get journeyNoUpdate => _progressText('journey.no_update');
+  String get journeyReflectionPending =>
+      _progressText('journey.reflection_pending');
 
   String journeyWeighCount(int count) =>
       _progressText('journey.weigh_count', placeholders: {'count': count});

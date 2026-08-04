@@ -18,9 +18,9 @@ void main() {
 
   test('Product Preview retains the generic Case route', () {
     final source = File('lib/app/product_preview_app.dart').readAsStringSync();
-    final experience = File(
+    final experience = _readPresentationLibrary(
       'lib/features/decision/presentation/decision_experience_screen.dart',
-    ).readAsStringSync();
+    );
 
     expect(source, contains("path: '/case/:caseId'"));
     expect(source, contains('DecisionExperienceScreen('));
@@ -32,4 +32,15 @@ void main() {
     );
     expect(experience, isNot(contains('caseId ==')));
   });
+}
+
+String _readPresentationLibrary(String mainPath) {
+  final mainFile = File(mainPath);
+  final mainSource = mainFile.readAsStringSync();
+  final parts = RegExp(r"part '([^']+)';")
+      .allMatches(mainSource)
+      .map((match) => File('${mainFile.parent.path}/${match.group(1)}'))
+      .where((file) => file.existsSync())
+      .map((file) => file.readAsStringSync());
+  return ([mainSource, ...parts]).join('\n');
 }

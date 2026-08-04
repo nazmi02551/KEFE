@@ -58,9 +58,9 @@ void main() {
     final progress = File(
       'lib/features/progress/presentation/progress_section.dart',
     ).readAsStringSync();
-    final myKefe = File(
+    final myKefe = _readPresentationLibrary(
       'lib/features/progress/presentation/my_kefe_journey_screen.dart',
-    ).readAsStringSync();
+    );
 
     expect(progress, contains('ProgressAsyncStateSurface.loading'));
     expect(progress, contains('ProgressAsyncStateSurface.error'));
@@ -359,4 +359,15 @@ class _ControllableProgressRepository implements ProgressRepository {
     }
     return envelope;
   }
+}
+
+String _readPresentationLibrary(String mainPath) {
+  final mainFile = File(mainPath);
+  final mainSource = mainFile.readAsStringSync();
+  final parts = RegExp(r"part '([^']+)';")
+      .allMatches(mainSource)
+      .map((match) => File('${mainFile.parent.path}/${match.group(1)}'))
+      .where((file) => file.existsSync())
+      .map((file) => file.readAsStringSync());
+  return ([mainSource, ...parts]).join('\n');
 }

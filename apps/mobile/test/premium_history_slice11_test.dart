@@ -100,6 +100,32 @@ void main() {
           );
           expect(find.byType(KefeSurface), findsWidgets);
 
+          final journeyList = find.byKey(const ValueKey('my-kefe-journey'));
+          final recentJourneys = find.byKey(
+            const ValueKey('my-kefe-recent-journeys'),
+          );
+          for (
+            var attempt = 0;
+            attempt < 6 && recentJourneys.evaluate().isEmpty;
+            attempt++
+          ) {
+            await tester.drag(journeyList, const Offset(0, -500));
+            await tester.pumpAndSettle();
+          }
+          expect(recentJourneys, findsOneWidget);
+          final firstJourney = find
+              .descendant(
+                of: recentJourneys,
+                matching: find.byType(ExpansionTile),
+              )
+              .first;
+          await tester.tap(firstJourney);
+          await tester.pumpAndSettle();
+          expect(
+            find.byKey(const ValueKey('my-kefe-journey-timeline')),
+            findsOneWidget,
+          );
+
           final footnote = find.byKey(
             const ValueKey('my-kefe-no-inference-note'),
           );
@@ -131,7 +157,7 @@ void main() {
     ];
 
     for (final path in paths) {
-      final source = File(path).readAsStringSync();
+      final source = _readPresentationLibrary(path);
       expect(source, contains('KefeSurface'));
       expect(source, isNot(contains('KefeColorTokens.surfaceDark')));
       expect(source, isNot(contains('KefeColorTokens.borderDark')));
@@ -140,9 +166,9 @@ void main() {
   });
 
   test('history presentation uses display-time Case localization only', () {
-    final myKefe = File(
+    final myKefe = _readPresentationLibrary(
       'lib/features/progress/presentation/my_kefe_journey_screen.dart',
-    ).readAsStringSync();
+    );
     final progress = File(
       'lib/features/progress/presentation/progress_section.dart',
     ).readAsStringSync();
@@ -156,6 +182,17 @@ void main() {
     }
     expect(saved, contains('KefeContentNamespace.caseSummary'));
   });
+}
+
+String _readPresentationLibrary(String mainPath) {
+  final mainFile = File(mainPath);
+  final mainSource = mainFile.readAsStringSync();
+  final parts = RegExp(r"part '([^']+)';")
+      .allMatches(mainSource)
+      .map((match) => File('${mainFile.parent.path}/${match.group(1)}'))
+      .where((file) => file.existsSync())
+      .map((file) => file.readAsStringSync());
+  return ([mainSource, ...parts]).join('\n');
 }
 
 Future<void> _pumpHistorySurface(

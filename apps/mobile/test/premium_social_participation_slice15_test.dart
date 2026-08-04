@@ -209,21 +209,28 @@ void main() {
     expect(consensusSource, contains('value: normalized'));
   });
 
-  test(
-    'Perspective keeps Consensus and Community behind committed context',
-    () {
-      final source = File(
-        'lib/features/decision/presentation/perspective_section.dart',
-      ).readAsStringSync();
+  test('Perspective keeps Consensus and Community behind committed context', () {
+    final source = _readPresentationLibrary(
+      'lib/features/decision/presentation/perspective_section.dart',
+    );
 
-      expect(source, contains('final hasCommittedContext ='));
-      expect(source, contains('decision.reveal != null'));
-      expect(source, contains('ConsensusSection(sessionId: sessionId'));
-      expect(source, contains('CommunityReasonSection('));
-      expect(source, contains('final consensus = hasCommittedContext'));
-      expect(source, contains('final community = hasCommittedContext'));
-    },
-  );
+    expect(source, contains('final hasCommittedContext ='));
+    expect(source, contains('decision.reveal != null'));
+    expect(source, contains('ConsensusSection(sessionId: sessionId'));
+    expect(source, contains('CommunityReasonSection('));
+    expect(
+      source,
+      contains(
+        'final consensus = includePostCommitCapabilities && hasCommittedContext',
+      ),
+    );
+    expect(
+      source,
+      contains(
+        'final community = includePostCommitCapabilities && hasCommittedContext',
+      ),
+    );
+  });
 }
 
 Future<void> _pumpLocalized(
@@ -397,4 +404,15 @@ class _FakeCommunityReasonRepository implements CommunityReasonRepository {
 
   @override
   Future<void> report({required String reasonId, required String code}) async {}
+}
+
+String _readPresentationLibrary(String mainPath) {
+  final mainFile = File(mainPath);
+  final mainSource = mainFile.readAsStringSync();
+  final parts = RegExp(r"part '([^']+)';")
+      .allMatches(mainSource)
+      .map((match) => File('${mainFile.parent.path}/${match.group(1)}'))
+      .where((file) => file.existsSync())
+      .map((file) => file.readAsStringSync());
+  return ([mainSource, ...parts]).join('\n');
 }
