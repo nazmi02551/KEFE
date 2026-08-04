@@ -33,66 +33,54 @@ jobs:
           marker = '    def list_definitions(\n'
           if domain.count(marker) != 1:
               raise SystemExit('unexpected list_definitions insertion point')
-          method = '''    def rehydrate_runtime_profiles(self) -> tuple[str, ...]:
-              adapter_codes: list[str] = []
-              for definition in self._repository.list_definitions():
-                  activation = self._repository.get_activation_for_definition(
-                      definition.id
-                  )
-                  if (
-                      activation is None
-                      or activation.state is PublicFeedActivationState.RETIRED
-                  ):
-                      continue
-                  if definition.state is not PublicFeedCatalogState.APPROVED:
-                      raise RuntimeError(
-                          "active public-feed projection requires APPROVED definition"
-                      )
-                  profile = self._build_runtime_profile(definition)
-                  if (
-                      profile.configuration_hash != activation.configuration_hash
-                      or profile.adoption_profile.adapter_code
-                      != activation.adapter_code
-                  ):
-                      raise RuntimeError(
-                          "persisted public-feed activation identity drifted"
-                      )
-                  self._runtime_profiles.register_or_get(profile)
-                  adapter_codes.append(activation.adapter_code)
-              return tuple(sorted(adapter_codes))
-
-          '''
-          domain = domain.replace(marker, method + marker, 1)
-          domain_path.write_text(domain, encoding='utf-8')
+          method = (
+              '    def rehydrate_runtime_profiles(self) -> tuple[str, ...]:\n'
+              '        adapter_codes: list[str] = []\n'
+              '        for definition in self._repository.list_definitions():\n'
+              '            activation = self._repository.get_activation_for_definition(\n'
+              '                definition.id\n'
+              '            )\n'
+              '            if (\n'
+              '                activation is None\n'
+              '                or activation.state is PublicFeedActivationState.RETIRED\n'
+              '            ):\n'
+              '                continue\n'
+              '            if definition.state is not PublicFeedCatalogState.APPROVED:\n'
+              '                raise RuntimeError(\n'
+              '                    "active public-feed projection requires APPROVED definition"\n'
+              '                )\n'
+              '            profile = self._build_runtime_profile(definition)\n'
+              '            if (\n'
+              '                profile.configuration_hash != activation.configuration_hash\n'
+              '                or profile.adoption_profile.adapter_code\n'
+              '                != activation.adapter_code\n'
+              '            ):\n'
+              '                raise RuntimeError(\n'
+              '                    "persisted public-feed activation identity drifted"\n'
+              '                )\n'
+              '            self._runtime_profiles.register_or_get(profile)\n'
+              '            adapter_codes.append(activation.adapter_code)\n'
+              '        return tuple(sorted(adapter_codes))\n\n'
+          )
+          domain_path.write_text(
+              domain.replace(marker, method + marker, 1),
+              encoding='utf-8',
+          )
 
           composition_path = Path(
               'services/api/src/kefe_api/infrastructure/'
               'canonical_public_feed_composition.py'
           )
           composition = composition_path.read_text(encoding='utf-8')
-          old = '''    service = CanonicalPublicFeedCatalogService(
-              repository=repository,
-              security=admin_security_service,
-              provider_admission=editorial_pipeline.source_provider_admission_service,
-              runtime_profiles=runtime_profiles,
-              scheduler=editorial_pipeline.source_scheduler_service,
-          )
-              return CanonicalPublicFeedComposition(
-          '''
-          new = '''    service = CanonicalPublicFeedCatalogService(
-              repository=repository,
-              security=admin_security_service,
-              provider_admission=editorial_pipeline.source_provider_admission_service,
-              runtime_profiles=runtime_profiles,
-              scheduler=editorial_pipeline.source_scheduler_service,
-          )
-              service.rehydrate_runtime_profiles()
-              return CanonicalPublicFeedComposition(
-          '''
-          if composition.count(old) != 1:
-              raise SystemExit('unexpected composition service block')
+          return_marker = '    return CanonicalPublicFeedComposition(\n'
+          if composition.count(return_marker) != 1:
+              raise SystemExit('unexpected composition return point')
           composition_path.write_text(
-              composition.replace(old, new, 1),
+              composition.replace(
+                  return_marker,
+                  '    service.rehydrate_runtime_profiles()\n' + return_marker,
+                  1,
+              ),
               encoding='utf-8',
           )
           PY
