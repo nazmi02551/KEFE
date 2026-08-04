@@ -8,7 +8,14 @@ API = ROOT / "services" / "api"
 ADR = ROOT / "docs" / "adr" / "0104-admin-publication-operations-workspace.md"
 CONTRACT = ROOT / "docs" / "contracts" / "admin-publication-operations-workspace.v1.json"
 OVERLAY = ROOT / "docs" / "contracts" / "openapi-admin-publication-operations.v0.19.overlay.json"
-ROUTER = API / "src" / "kefe_api" / "modules" / "admin_security" / "publication_operations_router.py"
+ROUTER = (
+    API
+    / "src"
+    / "kefe_api"
+    / "modules"
+    / "admin_security"
+    / "publication_operations_router.py"
+)
 SECURED = API / "src" / "kefe_api" / "modules" / "admin_security" / "content_authoring.py"
 SECURITY = API / "src" / "kefe_api" / "modules" / "admin_security" / "service.py"
 POLICY = API / "src" / "kefe_api" / "modules" / "admin_security" / "policy.py"
@@ -23,7 +30,13 @@ WORKFLOW = ROOT / ".github" / "workflows" / "admin-publication-operations.yml"
 UI = ROOT / "apps" / "admin" / "src" / "components" / "publication-operations-workspace.tsx"
 UI_HELPER = ROOT / "apps" / "admin" / "src" / "lib" / "publication-operations.ts"
 UI_CONTRACT = ROOT / "apps" / "admin" / "tools" / "check_publication_operations_contract.mjs"
-CROSS_SURFACE = ROOT / "apps" / "mobile" / "docs" / "admin-publication-operations-cross-surface-boundary.md"
+CROSS_SURFACE = (
+    ROOT
+    / "apps"
+    / "mobile"
+    / "docs"
+    / "admin-publication-operations-cross-surface-boundary.md"
+)
 
 REQUIRED = (
     ADR,
@@ -225,7 +238,10 @@ def main() -> None:
         "Publication Operations OpenAPI generator",
     )
     flow_generator = FLOW_GENERATOR.read_text(encoding="utf-8")
-    if "missing_paths" not in flow_generator or "new_path_names = sorted(EXPECTED_PATHS)" not in flow_generator:
+    if (
+        "missing_paths" not in flow_generator
+        or "new_path_names = sorted(EXPECTED_PATHS)" not in flow_generator
+    ):
         fail("Predecessor Flow Composer overlay is not isolated from later same-version APIs")
 
     adr = ADR.read_text(encoding="utf-8")
