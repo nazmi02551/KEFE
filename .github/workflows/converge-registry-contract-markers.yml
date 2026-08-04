@@ -20,9 +20,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Replace obsolete composition-only literals
+      - name: Align composition contracts with canonical registries
         run: |
           python - <<'PY'
+          import re
           from pathlib import Path
 
           replacements = {
@@ -30,7 +31,7 @@ jobs:
               'InMemoryPublicSourceCaptureRegistry()': 'MutablePublicSourceCaptureRegistry()',
               'InMemoryProviderAdoptionRegistry()': 'MutableProviderAdoptionRegistry()',
           }
-          changed = []
+          changed: set[Path] = set()
           for path in sorted(Path('services/api/tools').glob('check_*.py')):
               source = path.read_text(encoding='utf-8')
               updated = source
@@ -38,19 +39,74 @@ jobs:
                   updated = updated.replace(old, new)
               if updated != source:
                   path.write_text(updated, encoding='utf-8')
-                  changed.append(str(path))
-          if not changed:
-              raise SystemExit('no obsolete registry contract markers found')
-          Path('/tmp/changed-checkers.txt').write_text(
-              '\n'.join(changed) + '\n', encoding='utf-8'
+                  changed.add(path)
+
+          feed_path = Path('services/api/tools/check_feed_item_extraction_contract.py')
+          feed = feed_path.read_text(encoding='utf-8')
+          pattern = re.compile(
+              r'    if "build_feed_item_extraction_runtime\(" not in pipeline:\n'
+              r'        fail\("production ingestion runtime registry must remain empty"\)\n'
+              r'    if "build_feed_item_extraction_runtime\(" in pipeline or \(\n'
+              r'        "build_feed_item_extraction_runtime\(" in main_source\n'
+              r'    \):\n'
+              r'        fail\("production composition must not activate feed item extraction"\)\n'
+              r'    composition = contract\.get\("composition", \{\}\)\n'
+              r'    if composition\.get\("production_runtime_plans_registered"\) != 0:\n'
+              r'        fail\("production feed item runtime plan registry must remain empty"\)\n'
+              r'    if composition\.get\("production_processors_registered"\) != 0:\n'
+              r'        fail\("production feed item processor registry must remain empty"\)\n'
           )
-          print('\n'.join(changed))
+          replacement = '''    if "build_feed_item_extraction_runtime(" not in pipeline:
+              fail("production composition must install the inert feed item runtime plan")
+          if "return InMemoryIngestionWorkerRuntimeRegistry(" not in extraction:
+              fail("feed item runtime builder must return the authoritative worker registry")
+          if "build_feed_item_extraction_runtime(" in main_source:
+              fail("application entrypoint must not install a second feed item runtime plan")
+          composition = contract.get("composition", {})
+          if composition.get("production_runtime_plans_registered") != 1:
+              fail("exactly one inert feed item runtime plan must be registered")
+          if composition.get("production_processors_registered") != 1:
+              fail("exactly one deterministic feed item processor must be registered")
+          for zero_field in (
+              "seeded_feed_definitions",
+              "seeded_provider_profiles",
+              "seeded_public_adapters",
+              "seeded_schedules",
+              "concrete_providers_registered",
+          ):
+              if composition.get(zero_field) != 0:
+                  fail(f"production composition must keep {zero_field} at zero")
+          if composition.get("plan_registration_is_source_activation") is not False:
+              fail("worker plan registration must not be treated as source activation")
+          if composition.get("explicit_catalog_activation_required") is not True:
+              fail("source runtime must require explicit catalog activation")
+          if composition.get("startup_network") is not False:
+              fail("feed item composition must perform no startup network operation")
+          '''
+          feed, count = pattern.subn(replacement, feed, count=1)
+          if count != 1:
+              raise SystemExit('unexpected feed item composition contract block')
+          feed = feed.replace(
+              '        "runtime registry remains empty",\n',
+              '        "inert generic runtime capability",\n',
+          )
+          feed_path.write_text(feed, encoding='utf-8')
+          changed.add(feed_path)
+
+          if not changed:
+              raise SystemExit('no registry contract changes produced')
+          Path('/tmp/changed-checkers.txt').write_text(
+              '\n'.join(str(path) for path in sorted(changed)) + '\n',
+              encoding='utf-8',
+          )
+          print('\n'.join(str(path) for path in sorted(changed)))
           PY
       - name: Verify affected architecture contracts
         working-directory: services/api
         run: |
           python -m pip install -q -U pip
           pip install -q -e '.[dev]'
+          ruff format tools
           ruff check tools
           while IFS= read -r path; do
             python "${path#services/api/}"
@@ -61,5 +117,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add services/api/tools
-          git commit -m 'test: accept canonical mutable runtime registries'
+          git commit -m 'test: converge canonical runtime registry contracts'
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
