@@ -172,7 +172,6 @@ class PublicFeedDefinition:
     jurisdiction_code: str | None = None
 
     def __post_init__(self) -> None:
-        require_versioned_adapter_code(self.feed_code)
         require_versioned_adapter_code(self.adapter_code)
         _require_exact_text(self.feed_code, "feed_code", MAX_FEED_CODE_CHARS)
         _require_exact_text(
@@ -190,9 +189,7 @@ class PublicFeedDefinition:
         _optional_code(self.language_code, "language_code")
         _optional_code(self.jurisdiction_code, "jurisdiction_code")
         self.to_adoption_profile()
-        self.capability_template.instantiate(
-            created_at=datetime(2026, 1, 1, tzinfo=UTC)
-        )
+        self.capability_template.instantiate(created_at=datetime(2026, 1, 1, tzinfo=UTC))
 
     @property
     def origin(self) -> str:
@@ -288,7 +285,7 @@ class InMemoryPublicFeedDefinitionRegistry:
         self._definitions = MappingProxyType(by_feed)
 
     def get(self, feed_code: str) -> PublicFeedDefinition:
-        require_versioned_adapter_code(feed_code)
+        _require_exact_text(feed_code, "feed_code", MAX_FEED_CODE_CHARS)
         try:
             return self._definitions[feed_code]
         except KeyError as exc:
@@ -336,9 +333,7 @@ class ManualPublicFeedCaptureService:
         try:
             definition = self._definitions.get(feed_code)
         except (KeyError, ValueError) as exc:
-            raise PublicFeedRuntimeError(
-                "PUBLIC_FEED_DEFINITION_NOT_FOUND"
-            ) from exc
+            raise PublicFeedRuntimeError("PUBLIC_FEED_DEFINITION_NOT_FOUND") from exc
         try:
             return self._acquisition.acquire(
                 definition.acquisition_command(),
@@ -347,9 +342,7 @@ class ManualPublicFeedCaptureService:
         except PublicFeedRuntimeError:
             raise
         except Exception as exc:
-            raise PublicFeedRuntimeError(
-                "PUBLIC_FEED_CAPTURE_UNEXPECTED"
-            ) from exc
+            raise PublicFeedRuntimeError("PUBLIC_FEED_CAPTURE_UNEXPECTED") from exc
 
 
 def build_public_feed_runtime_bundle(
@@ -391,9 +384,7 @@ def build_public_feed_runtime_bundle(
         adoption_registry=InMemoryProviderAdoptionRegistry(adoption_profiles),
         capture_registry=InMemoryPublicSourceCaptureRegistry(adapters),
         ingestion_registry=build_feed_item_extraction_runtime(extraction_processor),
-        capability_templates=tuple(
-            definition.capability_template for definition in definitions
-        ),
+        capability_templates=tuple(definition.capability_template for definition in definitions),
     )
 
 
