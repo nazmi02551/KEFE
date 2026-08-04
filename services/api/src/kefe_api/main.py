@@ -29,6 +29,9 @@ from kefe_api.modules.admin_security.candidate_bundle_router import (
 from kefe_api.modules.admin_security.canonical_public_feed_router import (
     router as admin_canonical_public_feed_router,
 )
+from kefe_api.modules.admin_security.case_builder_router import (
+    router as admin_case_builder_router,
+)
 from kefe_api.modules.admin_security.content_authoring import SecuredContentAuthoringService
 from kefe_api.modules.admin_security.content_configuration import (
     SecuredContentConfigurationService,
@@ -294,6 +297,7 @@ def create_app() -> FastAPI:
     app.include_router(flow_runtime_router)
     app.include_router(progress_router)
     app.include_router(admin_router)
+    app.include_router(admin_case_builder_router)
     app.include_router(admin_proposal_queue_router)
     if _api_at_least(settings.api_version, 0, 21):
         app.include_router(admin_feed_item_review_router)

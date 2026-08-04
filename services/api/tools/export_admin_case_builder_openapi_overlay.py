@@ -13,25 +13,22 @@ from kefe_api.core.settings import get_settings
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACTS = REPO_ROOT / "docs" / "contracts"
 BASE = CONTRACTS / "openapi.v1.json"
-BEFORE_QUEUE_OVERLAYS = (
+BEFORE_CASE_BUILDER_OVERLAYS = (
     CONTRACTS / "openapi-consensus.v0.18.overlay.json",
     CONTRACTS / "openapi-mvp.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-projection.v0.19.overlay.json",
-)
-QUEUE_PATHS = (
-    "/internal/admin/v1/proposals",
-    "/internal/admin/v1/proposals/{proposal_id}",
+    CONTRACTS / "openapi-admin-proposal-queue.v0.19.overlay.json",
 )
 
 
-def _load_before_queue_contract() -> dict[str, object]:
+def _load_before_case_builder_contract() -> dict[str, object]:
     expected = deepcopy(json.loads(BASE.read_text(encoding="utf-8")))
-    for path in BEFORE_QUEUE_OVERLAYS:
+    for path in BEFORE_CASE_BUILDER_OVERLAYS:
         _merge_overlay(expected, json.loads(path.read_text(encoding="utf-8")), path.name)
     return expected
 
 
-def _build_queue_runtime_openapi() -> dict[str, object]:
+def _build_case_builder_runtime_openapi() -> dict[str, object]:
     previous = os.environ.get("KEFE_API_VERSION")
     os.environ["KEFE_API_VERSION"] = "0.19.0"
     get_settings.cache_clear()
@@ -46,46 +43,39 @@ def _build_queue_runtime_openapi() -> dict[str, object]:
 
 
 def build_overlay() -> dict[str, object]:
-    before = _load_before_queue_contract()
-    generated = _build_queue_runtime_openapi()
+    before = _load_before_case_builder_contract()
+    generated = _build_case_builder_runtime_openapi()
     if generated.get("info", {}).get("version") != "0.19.0":
-        raise SystemExit(
-            "Admin Proposal queue overlay generator expects runtime API version 0.19.0"
-        )
+        raise SystemExit("Case Builder overlay expects runtime API version 0.19.0")
 
     before_schemas = before.get("components", {}).get("schemas", {})
     generated_schemas = generated.get("components", {}).get("schemas", {})
+    before_paths = before.get("paths", {})
+    generated_paths = generated.get("paths", {})
+
     changed_schemas = sorted(
         name
         for name in before_schemas.keys() & generated_schemas.keys()
         if before_schemas[name] != generated_schemas[name]
     )
     removed_schemas = sorted(before_schemas.keys() - generated_schemas.keys())
-    if changed_schemas or removed_schemas:
-        raise SystemExit(
-            "Admin Proposal queue API must remain additive; "
-            f"changed={changed_schemas}, removed={removed_schemas}"
-        )
-
-    before_paths = before.get("paths", {})
-    generated_paths = generated.get("paths", {})
     changed_paths = sorted(
         path
         for path in before_paths.keys() & generated_paths.keys()
         if before_paths[path] != generated_paths[path]
     )
     removed_paths = sorted(before_paths.keys() - generated_paths.keys())
-    if changed_paths or removed_paths:
+    if changed_schemas or removed_schemas or changed_paths or removed_paths:
         raise SystemExit(
-            "Admin Proposal queue API must remain additive; "
-            f"changed={changed_paths}, removed={removed_paths}"
+            "Case Builder API must remain additive; "
+            f"changed_schemas={changed_schemas}, removed_schemas={removed_schemas}, "
+            f"changed_paths={changed_paths}, removed_paths={removed_paths}"
         )
 
-    missing_queue_paths = sorted(path for path in QUEUE_PATHS if path not in generated_paths)
-    if missing_queue_paths:
-        raise SystemExit(f"Admin Proposal queue paths missing: {missing_queue_paths}")
-    if any(path in before_paths for path in QUEUE_PATHS):
-        raise SystemExit("Admin Proposal queue paths already collide with the pre-queue contract")
+    new_path_names = sorted(generated_paths.keys() - before_paths.keys())
+    expected_paths = ["/internal/admin/v1/case-builder/case-versions/{version_id}"]
+    if new_path_names != expected_paths:
+        raise SystemExit(f"Case Builder overlay path set drifted: {new_path_names}")
 
     referenced_schema_names: set[str] = set()
 
@@ -100,7 +90,7 @@ def build_overlay() -> dict[str, object]:
             for item in value:
                 collect(item)
 
-    for path in QUEUE_PATHS:
+    for path in new_path_names:
         collect(generated_paths[path])
 
     processed: set[str] = set()
@@ -108,59 +98,46 @@ def build_overlay() -> dict[str, object]:
         for name in pending:
             schema = generated_schemas.get(name)
             if schema is None:
-                raise SystemExit(
-                    f"Admin Proposal queue overlay references missing schema: {name}"
-                )
+                raise SystemExit(f"Case Builder overlay references missing schema: {name}")
             processed.add(name)
             collect(schema)
 
     new_schema_names = set(generated_schemas.keys()) - set(before_schemas.keys())
+    unrelated = sorted(new_schema_names - referenced_schema_names)
+    if unrelated:
+        raise SystemExit(f"Case Builder overlay found unrelated schemas: {unrelated}")
+
     additive_schema_names = sorted(referenced_schema_names & new_schema_names)
     return {
         "target_version": "0.19.0",
         "components": {
-            "schemas": {
-                name: generated_schemas[name] for name in additive_schema_names
-            }
+            "schemas": {name: generated_schemas[name] for name in additive_schema_names}
         },
-        "paths": {path: generated_paths[path] for path in QUEUE_PATHS},
+        "paths": {path: generated_paths[path] for path in new_path_names},
     }
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Generate additive Admin Proposal queue OpenAPI overlay"
+        description="Generate additive Admin Case Builder OpenAPI overlay"
     )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
 
     overlay = build_overlay()
-    rendered = (
-        json.dumps(
-            overlay,
-            ensure_ascii=False,
-            indent=2,
-            sort_keys=True,
-        )
-        + "\n"
-    )
+    rendered = json.dumps(overlay, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     if args.check:
         if not args.output.exists():
-            raise SystemExit("Checked-in Admin Proposal queue OpenAPI overlay is missing")
-        try:
-            checked = json.loads(args.output.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            raise SystemExit(
-                "Checked-in Admin Proposal queue OpenAPI overlay is invalid JSON"
-            ) from exc
+            raise SystemExit("Checked-in Case Builder OpenAPI overlay is missing")
+        checked = json.loads(args.output.read_text(encoding="utf-8"))
         if checked != overlay:
-            raise SystemExit("Checked-in Admin Proposal queue OpenAPI overlay is stale")
-        print(f"Admin Proposal queue OpenAPI overlay matches {args.output}")
+            raise SystemExit("Checked-in Case Builder OpenAPI overlay is stale")
+        print(f"Case Builder OpenAPI overlay matches {args.output}")
         return
 
     args.output.write_text(rendered, encoding="utf-8")
-    print(f"Admin Proposal queue OpenAPI overlay written to {args.output}")
+    print(f"Case Builder OpenAPI overlay written to {args.output}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,180 @@
+{
+  "contract": "admin-case-builder-draft-workspace",
+  "version": "1.0.1",
+  "status": "accepted_for_implementation",
+  "issue": 298,
+  "parent_runtime_sha": "59f70896c8d9df91727c158da936630bd6bddd6c",
+  "capabilities": ["CAP-062", "CAP-063", "CAP-065", "CAP-095", "CAP-126"],
+  "authorities": {
+    "case_model": "existing_content_authoring_aggregate",
+    "lifecycle": "existing_content_authoring_service",
+    "identity": "existing_admin_session",
+    "authorization": "existing_admin_capabilities",
+    "csrf": "same_session_X-KEFE-CSRF",
+    "flow": "existing_versioned_flow_template_and_publication_resolver"
+  },
+  "api": {
+    "adapter": "additive_case_builder_http_adapter",
+    "legacy_authoring_routes_unchanged": true,
+    "required_routes": [
+      {
+        "method": "GET",
+        "path": "/internal/admin/v1/case-builder/case-versions/{version_id}",
+        "capability": "CONTENT_EDIT",
+        "mutation": false
+      },
+      {
+        "method": "PUT",
+        "path": "/internal/admin/v1/case-builder/case-versions/{version_id}",
+        "capability": "CONTENT_EDIT",
+        "csrf_required": true,
+        "allowed_transition": "DRAFT_TO_DRAFT"
+      },
+      {
+        "method": "POST",
+        "path": "/internal/admin/v1/case-versions/{version_id}/submit",
+        "capability": "CONTENT_SUBMIT_REVIEW",
+        "csrf_required": true,
+        "allowed_transition": "DRAFT_TO_IN_REVIEW"
+      },
+      {
+        "method": "GET",
+        "path": "/internal/admin/v1/cases/{case_id}/audit",
+        "capability": "AUDIT_READ",
+        "mutation": false
+      }
+    ],
+    "operator_safe_fields": [
+      "id",
+      "case_id",
+      "version_no",
+      "state",
+      "title",
+      "summary",
+      "base_format_code",
+      "primary_domain_code",
+      "content_risk",
+      "issues",
+      "context_blocks",
+      "sources",
+      "modifiers",
+      "is_fact_bearing",
+      "is_real_event",
+      "required_review_modes",
+      "completed_review_modes",
+      "flow_template_code",
+      "flow_template_version_no",
+      "content_locale",
+      "market_scope",
+      "country_codes",
+      "cultural_context_note",
+      "legal_context_note",
+      "localizations",
+      "created_at",
+      "published_at"
+    ],
+    "forbidden_response_data": [
+      "raw_evidence_body",
+      "credential",
+      "secret",
+      "provider_secret_ref",
+      "storage_ref",
+      "backend_object_key",
+      "session_token",
+      "csrf_token"
+    ],
+    "preservation_semantics": {
+      "rich_adapter_request_is_complete": true,
+      "flow_fields": "response_only_and_preserved",
+      "publication_pins": "never_client_supplied",
+      "legacy_route_defaults": "not_reused_by_case_builder"
+    }
+  },
+  "workspace": {
+    "route": "/case-builder",
+    "load": "explicit_only",
+    "query_parameter": "version_may_prefill_but_must_not_auto_fetch",
+    "save": "explicit_only",
+    "submit": "separate_explicit_command",
+    "audit": "explicit_only",
+    "editable_sections": [
+      "core_metadata",
+      "issues_and_questions",
+      "context_blocks",
+      "source_references",
+      "risk_and_fact_flags",
+      "review_modes",
+      "market_and_locale_notes",
+      "localizations"
+    ],
+    "read_only_sections": ["flow_template_identity", "lifecycle_identity"],
+    "forbidden_controls": [
+      "approve",
+      "reject",
+      "publish",
+      "withdraw",
+      "bulk_mutation",
+      "autosave",
+      "automatic_submit",
+      "flow_topology_edit"
+    ],
+    "storage": {
+      "session": "never_persisted",
+      "csrf": "page_memory_only",
+      "draft": "server_authority_only"
+    },
+    "accessibility": {
+      "keyboard": true,
+      "visible_focus": true,
+      "semantic_status_text": true,
+      "aria_live_feedback": true,
+      "reduced_motion": true,
+      "narrow_screen": true,
+      "color_not_only_signal": true
+    }
+  },
+  "invariants": [
+    "single_content_authoring_aggregate",
+    "no_second_cms",
+    "immutable_published_case_version",
+    "flow_composer_remains_separate",
+    "save_does_not_submit",
+    "submit_does_not_approve",
+    "no_automatic_review_or_publication",
+    "preview_never_production_fallback",
+    "api_errors_rendered_as_text_only"
+  ],
+  "verification": {
+    "dedicated_workflow": "Admin Case Builder CI",
+    "required_exact_head_workflows": [
+      "Admin Case Builder CI",
+      "Admin Studio CI",
+      "API CI",
+      "Mobile CI",
+      "MVP Beta Gates",
+      "Global Readiness"
+    ],
+    "required_evidence": [
+      "architecture_checker",
+      "openapi_exact_gate",
+      "memory_http_behavior",
+      "postgres_round_trip_and_restart",
+      "client_csrf_and_no_request_on_construction",
+      "draft_round_trip",
+      "separate_submit",
+      "semantic_component_tests",
+      "strict_types",
+      "production_build"
+    ],
+    "not_proven_by_ci": [
+      "human_editorial_usability",
+      "cqb_acceptance",
+      "provider_readiness",
+      "production_deployment",
+      "deployed_slo_load_observability",
+      "operator_rollback",
+      "store_compliance",
+      "production_release"
+    ]
+  }
+}

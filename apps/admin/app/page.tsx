@@ -1,5 +1,15 @@
+import Link from "next/link";
+
+import styles from "@/app/home.module.css";
 import { EditorialWorkspace } from "@/src/components/editorial-workspace";
 
 export default function AdminStudioPage() {
-  return <EditorialWorkspace />;
+  return (
+    <>
+      <nav aria-label="Admin Studio yüzeyleri" className={styles.navigation}>
+        <Link href="/case-builder">Case Builder DRAFT çalışma alanını aç</Link>
+      </nav>
+      <EditorialWorkspace />
+    </>
+  );
 }

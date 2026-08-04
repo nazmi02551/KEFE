@@ -1,0 +1,1031 @@
+{
+  "components": {
+    "schemas": {
+      "CaseBuilderContextBlockInput": {
+        "additionalProperties": false,
+        "properties": {
+          "block_type": {
+            "default": "CONTEXT",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Block Type",
+            "type": "string"
+          },
+          "body": {
+            "maxLength": 20000,
+            "minLength": 1,
+            "title": "Body",
+            "type": "string"
+          },
+          "claim_status": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Claim Status",
+            "type": "string"
+          },
+          "disclosure_level": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Disclosure Level",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "sort_order": {
+            "default": 0,
+            "title": "Sort Order",
+            "type": "integer"
+          },
+          "source_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Source Ids",
+            "type": "array"
+          },
+          "title": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "body",
+          "disclosure_level",
+          "claim_status"
+        ],
+        "title": "CaseBuilderContextBlockInput",
+        "type": "object"
+      },
+      "CaseBuilderContextBlockResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "block_type": {
+            "title": "Block Type",
+            "type": "string"
+          },
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "claim_status": {
+            "title": "Claim Status",
+            "type": "string"
+          },
+          "disclosure_level": {
+            "title": "Disclosure Level",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "sort_order": {
+            "title": "Sort Order",
+            "type": "integer"
+          },
+          "source_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Source Ids",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "body",
+          "disclosure_level",
+          "claim_status",
+          "source_ids",
+          "sort_order",
+          "block_type"
+        ],
+        "title": "CaseBuilderContextBlockResponse",
+        "type": "object"
+      },
+      "CaseBuilderDraftInput": {
+        "additionalProperties": false,
+        "properties": {
+          "base_format_code": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Base Format Code",
+            "type": "string"
+          },
+          "content_locale": {
+            "maxLength": 35,
+            "minLength": 2,
+            "title": "Content Locale",
+            "type": "string"
+          },
+          "content_risk": {
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Content Risk",
+            "type": "string"
+          },
+          "context_blocks": {
+            "items": {
+              "$ref": "#/components/schemas/CaseBuilderContextBlockInput"
+            },
+            "title": "Context Blocks",
+            "type": "array"
+          },
+          "country_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Country Codes",
+            "type": "array"
+          },
+          "cultural_context_note": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cultural Context Note"
+          },
+          "is_fact_bearing": {
+            "default": false,
+            "title": "Is Fact Bearing",
+            "type": "boolean"
+          },
+          "is_real_event": {
+            "default": false,
+            "title": "Is Real Event",
+            "type": "boolean"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/CaseBuilderIssueInput"
+            },
+            "title": "Issues",
+            "type": "array"
+          },
+          "legal_context_note": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Legal Context Note"
+          },
+          "localizations": {
+            "items": {
+              "$ref": "#/components/schemas/CaseBuilderLocalizationInput"
+            },
+            "title": "Localizations",
+            "type": "array"
+          },
+          "market_scope": {
+            "$ref": "#/components/schemas/MarketScope"
+          },
+          "modifiers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Modifiers",
+            "type": "array"
+          },
+          "primary_domain_code": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Primary Domain Code",
+            "type": "string"
+          },
+          "required_review_modes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Review Modes",
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/CaseBuilderSourceInput"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "summary": {
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Summary",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "summary",
+          "base_format_code",
+          "primary_domain_code",
+          "content_risk",
+          "content_locale",
+          "market_scope"
+        ],
+        "title": "CaseBuilderDraftInput",
+        "type": "object"
+      },
+      "CaseBuilderIssueInput": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/CaseBuilderQuestionInput"
+            },
+            "title": "Questions",
+            "type": "array"
+          },
+          "sort_order": {
+            "default": 0,
+            "title": "Sort Order",
+            "type": "integer"
+          },
+          "title": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "title"
+        ],
+        "title": "CaseBuilderIssueInput",
+        "type": "object"
+      },
+      "CaseBuilderIssueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/CaseBuilderQuestionResponse"
+            },
+            "title": "Questions",
+            "type": "array"
+          },
+          "sort_order": {
+            "title": "Sort Order",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "title",
+          "questions",
+          "sort_order"
+        ],
+        "title": "CaseBuilderIssueResponse",
+        "type": "object"
+      },
+      "CaseBuilderLocalizationInput": {
+        "additionalProperties": false,
+        "properties": {
+          "cultural_context_note": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cultural Context Note"
+          },
+          "legal_context_note": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Legal Context Note"
+          },
+          "locale": {
+            "maxLength": 35,
+            "minLength": 2,
+            "title": "Locale",
+            "type": "string"
+          },
+          "option_labels": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Option Labels",
+            "type": "object"
+          },
+          "question_prompts": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Question Prompts",
+            "type": "object"
+          },
+          "summary": {
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Summary",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "locale",
+          "title",
+          "summary"
+        ],
+        "title": "CaseBuilderLocalizationInput",
+        "type": "object"
+      },
+      "CaseBuilderLocalizationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "cultural_context_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cultural Context Note"
+          },
+          "legal_context_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Legal Context Note"
+          },
+          "locale": {
+            "title": "Locale",
+            "type": "string"
+          },
+          "option_labels": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Option Labels",
+            "type": "object"
+          },
+          "question_prompts": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Question Prompts",
+            "type": "object"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "locale",
+          "title",
+          "summary",
+          "question_prompts",
+          "option_labels",
+          "cultural_context_note",
+          "legal_context_note"
+        ],
+        "title": "CaseBuilderLocalizationResponse",
+        "type": "object"
+      },
+      "CaseBuilderQuestionInput": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "default": true,
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "is_required": {
+            "default": true,
+            "title": "Is Required",
+            "type": "boolean"
+          },
+          "prompt": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Prompt",
+            "type": "string"
+          },
+          "response_schema": {
+            "additionalProperties": true,
+            "title": "Response Schema",
+            "type": "object"
+          },
+          "response_type": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Response Type",
+            "type": "string"
+          },
+          "sort_order": {
+            "default": 0,
+            "title": "Sort Order",
+            "type": "integer"
+          },
+          "stable_code": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Stable Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "stable_code",
+          "prompt",
+          "response_type"
+        ],
+        "title": "CaseBuilderQuestionInput",
+        "type": "object"
+      },
+      "CaseBuilderQuestionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "is_required": {
+            "title": "Is Required",
+            "type": "boolean"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string"
+          },
+          "response_schema": {
+            "additionalProperties": true,
+            "title": "Response Schema",
+            "type": "object"
+          },
+          "response_type": {
+            "title": "Response Type",
+            "type": "string"
+          },
+          "sort_order": {
+            "title": "Sort Order",
+            "type": "integer"
+          },
+          "stable_code": {
+            "title": "Stable Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "stable_code",
+          "prompt",
+          "response_type",
+          "response_schema",
+          "is_active",
+          "is_required",
+          "sort_order"
+        ],
+        "title": "CaseBuilderQuestionResponse",
+        "type": "object"
+      },
+      "CaseBuilderSourceInput": {
+        "additionalProperties": false,
+        "properties": {
+          "claim_status": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Claim Status"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "locator": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Locator",
+            "type": "string"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "publisher": {
+            "default": "",
+            "maxLength": 500,
+            "title": "Publisher",
+            "type": "string"
+          },
+          "source_kind": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          },
+          "verified": {
+            "default": false,
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "source_kind",
+          "locator",
+          "title"
+        ],
+        "title": "CaseBuilderSourceInput",
+        "type": "object"
+      },
+      "CaseBuilderSourceResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "claim_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Claim Status"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "locator": {
+            "title": "Locator",
+            "type": "string"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "publisher": {
+            "title": "Publisher",
+            "type": "string"
+          },
+          "source_kind": {
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "source_kind",
+          "locator",
+          "title",
+          "publisher",
+          "published_at",
+          "claim_status",
+          "verified"
+        ],
+        "title": "CaseBuilderSourceResponse",
+        "type": "object"
+      },
+      "CaseBuilderVersionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "base_format_code": {
+            "title": "Base Format Code",
+            "type": "string"
+          },
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "completed_review_modes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Completed Review Modes",
+            "type": "array"
+          },
+          "content_locale": {
+            "title": "Content Locale",
+            "type": "string"
+          },
+          "content_risk": {
+            "title": "Content Risk",
+            "type": "string"
+          },
+          "context_blocks": {
+            "items": {
+              "$ref": "#/components/schemas/CaseBuilderContextBlockResponse"
+            },
+            "title": "Context Blocks",
+            "type": "array"
+          },
+          "country_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Country Codes",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "cultural_context_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cultural Context Note"
+          },
+          "flow_template_code": {
+            "title": "Flow Template Code",
+            "type": "string"
+          },
+          "flow_template_version_no": {
+            "title": "Flow Template Version No",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_fact_bearing": {
+            "title": "Is Fact Bearing",
+            "type": "boolean"
+          },
+          "is_real_event": {
+            "title": "Is Real Event",
+            "type": "boolean"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/CaseBuilderIssueResponse"
+            },
+            "title": "Issues",
+            "type": "array"
+          },
+          "legal_context_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Legal Context Note"
+          },
+          "localizations": {
+            "items": {
+              "$ref": "#/components/schemas/CaseBuilderLocalizationResponse"
+            },
+            "title": "Localizations",
+            "type": "array"
+          },
+          "market_scope": {
+            "title": "Market Scope",
+            "type": "string"
+          },
+          "modifiers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Modifiers",
+            "type": "array"
+          },
+          "primary_domain_code": {
+            "title": "Primary Domain Code",
+            "type": "string"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "required_review_modes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Review Modes",
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/CaseBuilderSourceResponse"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "version_no": {
+            "title": "Version No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "case_id",
+          "version_no",
+          "state",
+          "title",
+          "summary",
+          "base_format_code",
+          "primary_domain_code",
+          "content_risk",
+          "issues",
+          "context_blocks",
+          "sources",
+          "modifiers",
+          "is_fact_bearing",
+          "is_real_event",
+          "required_review_modes",
+          "completed_review_modes",
+          "flow_template_code",
+          "flow_template_version_no",
+          "content_locale",
+          "market_scope",
+          "country_codes",
+          "cultural_context_note",
+          "legal_context_note",
+          "localizations",
+          "created_at",
+          "published_at"
+        ],
+        "title": "CaseBuilderVersionResponse",
+        "type": "object"
+      },
+      "MarketScope": {
+        "enum": [
+          "GLOBAL",
+          "COUNTRY_SET"
+        ],
+        "title": "MarketScope",
+        "type": "string"
+      }
+    }
+  },
+  "paths": {
+    "/internal/admin/v1/case-builder/case-versions/{version_id}": {
+      "get": {
+        "operationId": "get_case_builder_version_internal_admin_v1_case_builder_case_versions__version_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseBuilderVersionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Case Builder Version",
+        "tags": [
+          "Internal Admin Case Builder"
+        ]
+      },
+      "put": {
+        "operationId": "save_case_builder_draft_internal_admin_v1_case_builder_case_versions__version_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-KEFE-CSRF",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Csrf"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaseBuilderDraftInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseBuilderVersionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Save Case Builder Draft",
+        "tags": [
+          "Internal Admin Case Builder"
+        ]
+      }
+    }
+  },
+  "target_version": "0.19.0"
+}
