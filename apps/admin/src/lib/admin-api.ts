@@ -1,7 +1,10 @@
 import type {
   AdminSession,
+  AuthoringAuditTrail,
   CandidateBundleRequest,
   CandidateBundleResponse,
+  CaseBuilderDraftInput,
+  CaseBuilderVersion,
   EditorialProjectionRequest,
   EditorialProjectionResponse,
   ProposalDetail,
@@ -196,6 +199,38 @@ export class AdminApiClient {
       "POST",
       `/internal/admin/v1/candidate-proposals/${encodeURIComponent(candidateProposalId)}/projection`,
       request
+    );
+  }
+
+  caseBuilderVersion(versionId: string): Promise<CaseBuilderVersion> {
+    return this.request(
+      "GET",
+      `/internal/admin/v1/case-builder/case-versions/${encodeURIComponent(versionId)}`
+    );
+  }
+
+  saveCaseBuilderDraft(
+    versionId: string,
+    draft: CaseBuilderDraftInput
+  ): Promise<CaseBuilderVersion> {
+    return this.request(
+      "PUT",
+      `/internal/admin/v1/case-builder/case-versions/${encodeURIComponent(versionId)}`,
+      draft
+    );
+  }
+
+  submitCaseVersion(versionId: string): Promise<CaseBuilderVersion> {
+    return this.request(
+      "POST",
+      `/internal/admin/v1/case-versions/${encodeURIComponent(versionId)}/submit`
+    );
+  }
+
+  caseAudit(caseId: string): Promise<AuthoringAuditTrail> {
+    return this.request(
+      "GET",
+      `/internal/admin/v1/cases/${encodeURIComponent(caseId)}/audit`
     );
   }
 }
