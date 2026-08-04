@@ -1,0 +1,129 @@
+id	slug	title	category	status	phase	priority	owners	dependencies	evidence	source	next_gate
+CAP-001	commit-first	Commit First / pre-result isolation	ME	IMPLEMENTED_VERIFIED	Phase 1	P0	KEFE-MPD-001|KEFE-PB-001|KEFE-ENG-001		ADR-0019|active runtime	canonical	
+CAP-002	typed-question-primitives	Typed configurable question primitives	ME	IMPLEMENTED_VERIFIED	Phase 1	P0	KEFE-CQB-001|KEFE-ENG-001		ADR-0006|generic flow runtime	canonical	
+CAP-003	private-reason	Private-by-default reason capture	ME	IMPLEMENTED_VERIFIED	Phase 1	P0	KEFE-MPD-001|KEFE-SEC-001		ADR-0007|ADR-0008	canonical	
+CAP-004	confidence-capture	Decision confidence capture	ME	IMPLEMENTED_PARTIAL	Phase 1	P1	KEFE-PB-001|KEFE-AED-001			canonical	
+CAP-005	blind-first-variants	Actor/source/outcome blind variants	ME	ARCHITECTURE_ACCEPTED	Phase 2	P1	KEFE-MPD-001|KEFE-CQB-001		ADR-0019	canonical	
+CAP-006	principle-first	Principle-first decision flow	ME	ARCHITECTURE_ACCEPTED	Phase 2	P1	KEFE-CQB-001|KEFE-PB-001		ADR-0019	canonical	
+CAP-007	role-flip	Role Flip / stakeholder-position reweigh	ME	ROADMAP_ACCEPTED	Phase 4	P1	KEFE-PB-001|KEFE-CQB-001|KEFE-DGS-001		ADR-0019	canonical	
+CAP-008	decision-revision	Decision Revision and generic Decision Delta	ME	IMPLEMENTED_VERIFIED	Phase 2	P0	KEFE-MPD-001|KEFE-DGS-001|KEFE-ENG-001		ADR-0025|Product Preview	canonical	
+CAP-009	reflection	Non-causal post-decision Reflection	ME	IMPLEMENTED_VERIFIED	Phase 2	P0	KEFE-MPD-001|KEFE-DGS-001		ADR-0026|Slice 24	canonical	
+CAP-010	what-would-change-mind	What would change your mind?	ME	PROPOSAL_REVIEW	Phase 4	P1	KEFE-PB-001|KEFE-CQB-001|KEFE-RM-001			conversation_proposal	Product/methodology review and question contract.
+CAP-011	insufficient-information-response	Bilmiyorum / yeterli bilgim yok / seçenekler eksik response	ME	PROPOSAL_REVIEW	Phase 2	P0	KEFE-CQB-001|KEFE-TIM-001			conversation_proposal	Typed response semantics and result treatment decision.
+CAP-012	decision-receipt	Versioned Decision Receipt	ME	PROPOSAL_REVIEW	Phase 3	P1	KEFE-PB-001|KEFE-DGS-001|KEFE-SEC-001			conversation_proposal	
+CAP-013	temporal-retest	Blind temporal retest / Temporal Drift	ME	ROADMAP_HIGH	Phase 4	P1	KEFE-PB-001|KEFE-RM-001|KEFE-DGS-001			canonical	
+CAP-014	decision-fatigue-guard	Decision fatigue / healthy pacing guard	ME	ROADMAP_CANDIDATE	Phase 5	P2	KEFE-PB-001|KEFE-DS-001			conversation_proposal	
+CAP-015	challenge-card	Independent Challenge Card	CASE_COMPOSITION	IMPLEMENTED_VERIFIED	Phase 1	P0	KEFE-PB-001|KEFE-DS-001		ADR-0019 challenge-card semantics|Product Preview challenge flow|active runtime	canonical	
+CAP-016	signal-consensus-card	Signal / Consensus Card	CASE_COMPOSITION	ARCHITECTURE_ACCEPTED	Phase 4	P1	KEFE-MPD-001|KEFE-TIM-001|KEFE-DS-001		signal-impact-model.v1	canonical	
+CAP-017	policy-simulator	Policy Simulator	CASE_COMPOSITION	ROADMAP_ACCEPTED	Phase 6	P1	KEFE-PB-001|KEFE-CQB-001		ADR-0019	canonical	
+CAP-018	threshold-analysis	Threshold Analysis	CASE_COMPOSITION	ROADMAP_ACCEPTED	Phase 4	P1	KEFE-PB-001|KEFE-CQB-001		ADR-0019	canonical	
+CAP-019	fairness-model-comparison	Fairness / normative model comparison	CASE_COMPOSITION	ROADMAP_ACCEPTED	Phase 4	P1	KEFE-PB-001|KEFE-CQB-001		ADR-0019	canonical	
+CAP-020	responsibility-analysis	Responsibility Analysis	CASE_COMPOSITION	ROADMAP_ACCEPTED	Phase 4	P1	KEFE-PB-001|KEFE-CQB-001		ADR-0019	canonical	
+CAP-021	process-analysis	Process Analysis	CASE_COMPOSITION	ROADMAP_ACCEPTED	Phase 4	P1	KEFE-PB-001|KEFE-CQB-001		ADR-0019	canonical	
+CAP-022	incentive-map	Incentive Map	CASE_COMPOSITION	ROADMAP_ACCEPTED	Phase 4	P2	KEFE-PB-001|KEFE-CQB-001		ADR-0019	canonical	
+CAP-023	stakeholder-analysis	Stakeholder Analysis	CASE_COMPOSITION	ROADMAP_ACCEPTED	Phase 4	P1	KEFE-PB-001|KEFE-CQB-001		ADR-0019	canonical	
+CAP-024	sports-call	Sports CALL	CASE_COMPOSITION	IMPLEMENTED_PARTIAL	Phase 3	P1	KEFE-PB-001|KEFE-CSL-001|KEFE-ENG-001			canonical	
+CAP-025	atlas	KEFE Atlas	CASE_COMPOSITION	IMPLEMENTED_PARTIAL	Phase 3	P1	KEFE-PB-001|KEFE-TIM-001|KEFE-RM-001			canonical	
+CAP-026	kefe-today	KEFE Today / real-world current cases	CASE_COMPOSITION	ROADMAP_ACCEPTED	Phase 2	P1	KEFE-PB-001|KEFE-ETG-001			canonical	
+CAP-027	kefe-decide	KEFE Decide / resource allocation simulation	CASE_COMPOSITION	ROADMAP_ACCEPTED	Phase 6	P2	KEFE-PB-001|KEFE-CQB-001			canonical	
+CAP-028	kefe-retro	KEFE Retro / historical decision simulation	CASE_COMPOSITION	ROADMAP_ACCEPTED	Phase 6	P2	KEFE-PB-001|KEFE-CQB-001			canonical	
+CAP-029	observe-mode	Observe / Sadece Oku	CASE_COMPOSITION	ACCEPTED_CANDIDATE	Post-MVP	P2	KEFE-PB-001|KEFE-DS-001			canonical	
+CAP-030	ugc-personal-dilemmas	UGC Personal Dilemmas	CASE_COMPOSITION	ROADMAP_HIGH	Phase 5	P2	KEFE-PB-001|KEFE-ETG-001|KEFE-SEC-001			canonical	
+CAP-031	collective-result	Post-Commit Collective Result	WE	IMPLEMENTED_VERIFIED	Phase 1	P0	KEFE-MPD-001|KEFE-TIM-001		post-Commit Reveal runtime|Slice 23 / PR #149|active runtime	canonical	
+CAP-032	reason-distribution	Reason distribution	WE	IMPLEMENTED_PARTIAL	Phase 2	P1	KEFE-PB-001|KEFE-AED-001			canonical	
+CAP-033	argument-clustering	Argument pattern clustering	WE	ARCHITECTURE_ACCEPTED	Phase 4	P1	KEFE-PB-001|KEFE-AIA-001|KEFE-DGS-001		ADR-0027	canonical	
+CAP-034	bridge-arguments	Bridge arguments / Ortak Zemin	WE	PROPOSAL_REVIEW	Phase 4	P0	KEFE-PB-001|KEFE-AIA-001|KEFE-TIM-001			conversation_proposal	Neutrality, provenance and editorial review contract.
+CAP-035	perspective-landscape	Near/Opposing/Bridge/Alternative Context perspectives	WE	IMPLEMENTED_VERIFIED	Phase 2	P0	KEFE-PB-001|KEFE-DS-001		Slice 20	canonical	
+CAP-036	segment-distribution	Privacy-safe segment distribution	WE	ARCHITECTURE_ACCEPTED	Phase 3	P1	KEFE-TIM-001|KEFE-SEC-001			canonical	
+CAP-037	stakeholder-distribution	Stakeholder distribution	WE	ARCHITECTURE_ACCEPTED	Phase 4	P1	KEFE-TIM-001|KEFE-RM-001			canonical	
+CAP-038	stakeholder-gap	Stakeholder Gap disclosure	WE	ARCHITECTURE_ACCEPTED	Phase 4	P0	KEFE-TIM-001|KEFE-RM-001		signal-impact-model.v1	canonical	
+CAP-039	consensus-divergence	Consensus and divergence classification	WE	ARCHITECTURE_ACCEPTED	Phase 4	P1	KEFE-TIM-001|KEFE-AED-001			canonical	
+CAP-040	divergence-anatomy	Ayrışma Anatomisi	WE	PROPOSAL_REVIEW	Phase 4	P0	KEFE-PB-001|KEFE-RM-001|KEFE-AIA-001			conversation_proposal	
+CAP-041	expert-public-gap	Expert-Public Gap	WE	ROADMAP_ACCEPTED	Phase 8	P2	KEFE-PB-001|KEFE-RM-001|KEFE-CGD-001			canonical	
+CAP-042	signal-qualification	Methodology-qualified Signal	SIGNAL	ARCHITECTURE_LOCKED	Phase 4	P0	KEFE-MPD-001|KEFE-TIM-001|KEFE-RM-001		ADR-0019|signal-impact-model.v1	canonical	
+CAP-043	contribution-classes	CORE_PRE_RESULT / EXPOSED / ADVOCACY_SUPPORT separation	SIGNAL	ARCHITECTURE_LOCKED	Phase 4	P0	KEFE-TIM-001|KEFE-RM-001		signal-impact-model.v1	canonical	
+CAP-044	signal-health-card	Signal Health Card	SIGNAL	PROPOSAL_REVIEW	Phase 4	P0	KEFE-TIM-001|KEFE-DS-001|KEFE-AED-001			conversation_proposal	
+CAP-045	signal-half-life	Signal half-life / freshness lifecycle	SIGNAL	PROPOSAL_REVIEW	Phase 4	P1	KEFE-TIM-001|KEFE-RM-001			conversation_proposal	
+CAP-046	signal-scope-alignment	Signal scope alignment	SIGNAL	ARCHITECTURE_LOCKED	Phase 4	P0	KEFE-TIM-001|KEFE-RM-001		signal-impact-model.v1	canonical	
+CAP-047	signal-versioning	MethodologyVersion-pinned Signal history	SIGNAL	ARCHITECTURE_LOCKED	Phase 4	P0	KEFE-TIM-001|KEFE-DGS-001		signal-impact-model.v1	canonical	
+CAP-048	impact-target	Signal target registry	IMPACT	ARCHITECTURE_LOCKED	Phase 5	P1	KEFE-MPD-001|KEFE-ADM-001		signal-impact-model.v1	canonical	
+CAP-049	institution-response	Verified Institution Response	IMPACT	ARCHITECTURE_LOCKED	Phase 5	P0	KEFE-MPD-001|KEFE-ADM-001|KEFE-SEC-001			canonical	
+CAP-050	institution-response-room	Kurum Cevap Odası	IMPACT	PROPOSAL_REVIEW	Phase 5	P0	KEFE-PB-001|KEFE-ADM-001|KEFE-DS-001			conversation_proposal	
+CAP-051	response-reweigh	Reweigh after institutional response	IMPACT	ARCHITECTURE_ACCEPTED	Phase 5	P1	KEFE-DGS-001|KEFE-RM-001			canonical	
+CAP-052	impact-action-tracking	Institution action / promise tracking	IMPACT	ARCHITECTURE_LOCKED	Phase 5	P1	KEFE-ADM-001|KEFE-DGS-001			canonical	
+CAP-053	impact-evidence	Impact Evidence	IMPACT	ARCHITECTURE_LOCKED	Phase 5	P1	KEFE-ADM-001|KEFE-ETG-001			canonical	
+CAP-054	impact-verification	Impact Verification	IMPACT	ARCHITECTURE_LOCKED	Phase 5	P0	KEFE-TIM-001|KEFE-ADM-001			canonical	
+CAP-055	provider-neutral-ingestion	Provider-neutral ingestion orchestration	CONTENT_ADMIN	IMPLEMENTED_EXCLUDED_STACK	Phase 2	P1	KEFE-ENG-001|KEFE-ETG-001		ADR-0028|PR #68	canonical	
+CAP-056	original-source-resolution	Original source/content resolution	CONTENT_ADMIN	ROADMAP_ACCEPTED	Phase 2	P1	KEFE-ETG-001|KEFE-AIA-001			canonical	
+CAP-057	claim-extraction	First-class Claim extraction and taxonomy	CONTENT_ADMIN	IMPLEMENTED_PARTIAL	Phase 2	P1	KEFE-ETG-001|KEFE-DGS-001		ADR-0027	canonical	
+CAP-058	claim-assessment	Claim assessment and state lifecycle	CONTENT_ADMIN	IMPLEMENTED_PARTIAL	Phase 2	P1	KEFE-TIM-001|KEFE-ETG-001			canonical	
+CAP-059	claim-argument-graph	Claim/Argument graph	CONTENT_ADMIN	IMPLEMENTED_PARTIAL	Phase 4	P1	KEFE-DGS-001|KEFE-AIA-001			canonical	
+CAP-060	ai-editorial-assistance	AI-assisted extract/classify/normalize/suggest/compose/detect	CONTENT_ADMIN	ARCHITECTURE_ACCEPTED	Phase 2	P1	KEFE-AIA-001|KEFE-ETG-001			canonical	
+CAP-061	proposal-review-queue	Durable human Proposal review queue	CONTENT_ADMIN	IMPLEMENTED_PARTIAL	Phase 2	P1	KEFE-ADM-001|KEFE-ENG-001			canonical	
+CAP-062	editorial-projection	Accepted Candidate Case -> Content Authoring DRAFT projection	CONTENT_ADMIN	ARCHITECTURE_LOCKED_IMPLEMENTATION_PENDING	Phase 2	P0	KEFE-ADM-001|KEFE-ETG-001|KEFE-ENG-001		ADR-0029	canonical	
+CAP-063	case-builder	Admin Case Builder	CONTENT_ADMIN	ROADMAP_ACCEPTED	Phase 2	P0	KEFE-ADM-001|KEFE-CQB-001			canonical	
+CAP-064	flow-composer	Versioned Flow Composer	CONTENT_ADMIN	ROADMAP_ACCEPTED	Phase 3	P0	KEFE-ADM-001|KEFE-ENG-001		ADR-0019	canonical	
+CAP-065	editorial-quality-gate	Editorial quality and risk review	CONTENT_ADMIN	IMPLEMENTED_PARTIAL	Phase 2	P0	KEFE-ADM-001|KEFE-CQB-001|KEFE-ETG-001			canonical	
+CAP-066	moderation-ops	Reason/content moderation operations	CONTENT_ADMIN	ROADMAP_ACCEPTED	Phase 2	P0	KEFE-ADM-001|KEFE-SEC-001			canonical	
+CAP-067	verified-expert-contribution	Verified scoped expert contribution	CONTENT_ADMIN	ROADMAP_ACCEPTED	Phase 3	P1	KEFE-ADM-001|KEFE-TIM-001			canonical	
+CAP-068	case-objection	Vaka itiraz / challenge mechanism	CONTENT_ADMIN	PROPOSAL_REVIEW	Phase 3	P1	KEFE-ADM-001|KEFE-ETG-001|KEFE-TIM-001			conversation_proposal	
+CAP-069	source-micro-preview	Source micro-preview	TRUST	IMPLEMENTED_PARTIAL	Phase 2	P1	KEFE-ETG-001|KEFE-DS-001			canonical	
+CAP-070	consumer-information-status	Consumer information-status badges	TRUST	IMPLEMENTED_PARTIAL	Phase 2	P0	KEFE-TIM-001|KEFE-DS-001			canonical	
+CAP-071	source-diversity-indicator	Source Diversity Indicator	TRUST	PROPOSAL_REVIEW	Phase 3	P1	KEFE-TIM-001|KEFE-ETG-001			conversation_proposal	
+CAP-072	correction-history	Case/source correction and version history	TRUST	ROADMAP_ACCEPTED	Phase 2	P1	KEFE-ETG-001|KEFE-ADM-001			canonical	
+CAP-073	bot-anomaly-integrity	Bot, anomaly and coordinated manipulation detection	TRUST	IMPLEMENTED_PARTIAL	Phase 2	P0	KEFE-TIM-001|KEFE-SEC-001			canonical	
+CAP-074	open-methodology-page	Open methodology page per result/Signal	TRUST	PROPOSAL_REVIEW	Phase 3	P0	KEFE-TIM-001|KEFE-DS-001|KEFE-RM-001			conversation_proposal	
+CAP-075	case-quality-checklist	Case quality checklist instead of magic score	TRUST	PROPOSAL_REVIEW	Phase 2	P1	KEFE-CQB-001|KEFE-ADM-001			conversation_proposal	
+CAP-076	radar-live	Live Radar	CONSUMER_GROWTH	IMPLEMENTED_PARTIAL	Phase 3	P1	KEFE-PB-001|KEFE-AED-001			canonical	
+CAP-077	user-controlled-discovery	User-controlled discovery profile	CONSUMER_GROWTH	PROPOSAL_REVIEW	Phase 3	P1	KEFE-PB-001|KEFE-SEC-001			conversation_proposal	
+CAP-078	search-filter	Search and filtering	CONSUMER_GROWTH	ROADMAP_ACCEPTED	Phase 2	P1	KEFE-PB-001|KEFE-DS-001			canonical	
+CAP-079	saved-follow-notifications	Save/follow and case lifecycle notifications	CONSUMER_GROWTH	IMPLEMENTED_PARTIAL	Phase 2	P1	KEFE-PB-001|KEFE-CGD-001			canonical	
+CAP-080	my-kefe	My KEFE descriptive history	CONSUMER_GROWTH	IMPLEMENTED_VERIFIED	Phase 1	P0	KEFE-PB-001|KEFE-DGS-001		Slice 26 / PR #160|Slice 27 / PR #163|Slice 30 runtime e41cea5fc7bccb4bbe085b48cd15ea5a2fead082	canonical	
+CAP-081	kefe-chronicle	KEFE Chronicle	CONSUMER_GROWTH	ROADMAP_HIGH	Phase 4	P1	KEFE-PB-001|KEFE-DGS-001			canonical	
+CAP-082	kefe-wrapped	KEFE Wrapped	CONSUMER_GROWTH	ROADMAP_ACCEPTED	Phase 5	P1	KEFE-PB-001|KEFE-CGD-001			canonical	
+CAP-083	kefe-values	KEFE Values opt-in self profile	CONSUMER_GROWTH	VALIDATION_REQUIRED	Phase 9	P2	KEFE-PB-001|KEFE-RM-001|KEFE-SEC-001			canonical	
+CAP-084	guest-account-conversion	Guest-to-account conversion and data merge	CONSUMER_GROWTH	IMPLEMENTED_PARTIAL	Phase 1	P0	KEFE-PB-001|KEFE-SEC-001			canonical	
+CAP-085	data-export-delete	User data export and deletion	CONSUMER_GROWTH	ROADMAP_ACCEPTED	Phase 2	P0	KEFE-SEC-001|KEFE-ENG-001			canonical	
+CAP-086	kefe-circle	KEFE Circle / Birlikte Tart	CONSUMER_GROWTH	ROADMAP_HIGH	Phase 5	P2	KEFE-PB-001|KEFE-SEC-001			canonical	
+CAP-087	kefe-rooms	KEFE Rooms	CONSUMER_GROWTH	ROADMAP_ACCEPTED	Phase 5+	P2	KEFE-PB-001|KEFE-SEC-001			canonical	
+CAP-088	education-mode	KEFE Education / Classroom	CONSUMER_GROWTH	ROADMAP_ACCEPTED	Phase 7	P1	KEFE-PB-001|KEFE-RM-001			canonical_plus_conversation	
+CAP-089	live-event-mode	KEFE Live / live event micro-cases	CONSUMER_GROWTH	ROADMAP_ACCEPTED	Phase 6	P2	KEFE-PB-001|KEFE-TIM-001			canonical	
+CAP-090	local-kefe	Yerel KEFE	CONSUMER_GROWTH	PROPOSAL_REVIEW	Phase 6	P1	KEFE-PB-001|KEFE-TIM-001|KEFE-SEC-001			conversation_proposal	
+CAP-091	embeddable-kefe-card	Embeddable KEFE card	CONSUMER_GROWTH	PROPOSAL_REVIEW	Phase 8	P1	KEFE-CGD-001|KEFE-TIM-001			conversation_proposal	
+CAP-092	public-web-deeplink	Public Web / deep-link landing	CONSUMER_GROWTH	TARGET_RELEASE_DECISION_PENDING	Post-MVP	P1	KEFE-PB-001|KEFE-CGD-001			canonical	
+CAP-093	localization-expansion	Additional locales and markets	CONSUMER_GROWTH	ROADMAP_ACCEPTED	Phase 3+	P1	KEFE-PB-001|KEFE-DS-001			canonical	
+CAP-094	case-media-platform	Production media/object storage/CDN pipeline	CONSUMER_GROWTH	ARCHITECTURE_ACCEPTED_IMPLEMENTATION_PENDING	Phase 3	P1	KEFE-ENG-001|KEFE-ADM-001			canonical	
+CAP-095	accessibility-low-end	Accessibility, Reduce Motion and low-end Android	CONSUMER_GROWTH	ONGOING_MANDATORY	All phases	P0	KEFE-DS-001|KEFE-ENG-001			canonical	
+CAP-096	ethical-gamification	Ethical non-partisan gamification	CONSUMER_GROWTH	ROADMAP_CANDIDATE	Phase 5	P2	KEFE-PB-001|KEFE-CGD-001			canonical	
+CAP-097	context-lens	Context Lens	AI_EXPERIENCE	ROADMAP_HIGH	Phase 3	P1	KEFE-PB-001|KEFE-AIA-001			canonical	
+CAP-098	evidence-builder	Evidence Builder	AI_EXPERIENCE	ROADMAP_ACCEPTED	Phase 2/4	P1	KEFE-PB-001|KEFE-AIA-001			canonical	
+CAP-099	perspective-coach	Perspective Coach	AI_EXPERIENCE	TEST	Phase 4	P2	KEFE-PB-001|KEFE-AIA-001			canonical	
+CAP-100	ai-devils-advocate	AI Devil's Advocate	AI_EXPERIENCE	TEST	Phase 7	P2	KEFE-PB-001|KEFE-AIA-001			canonical	
+CAP-101	kefe-debate-sparring	KEFE Debate / Sparring	AI_EXPERIENCE	ROADMAP_ACCEPTED	Phase 7	P2	KEFE-PB-001|KEFE-AIA-001			canonical	
+CAP-102	outcome-triangle	Outcome Triangle	AI_EXPERIENCE	ROADMAP_ACCEPTED	Phase 4	P2	KEFE-PB-001|KEFE-DGS-001			canonical	
+CAP-103	kefe-plus	KEFE+ subscription	COMMERCIAL	ACCEPTED_POST_PMF_GATE	Post-PMF	P1	KEFE-CGD-001|KEFE-PB-001			canonical	
+CAP-104	entitlement-service	Provider-independent Entitlement Service	COMMERCIAL	ARCHITECTURE_ACCEPTED	Post-PMF	P0	KEFE-CGD-001|KEFE-ENG-001			canonical	
+CAP-105	native-store-billing	Apple/Google native billing + server verification	COMMERCIAL	ACCEPTED_POST_PMF_GATE	Post-PMF	P1	KEFE-CGD-001|KEFE-ENG-001			canonical	
+CAP-106	web-checkout	Web checkout/account linking	COMMERCIAL	ROADMAP_ACCEPTED	Post-native billing	P2	KEFE-CGD-001|KEFE-SEC-001			canonical	
+CAP-107	commercial-catalog	Regional product/price/catalog service	COMMERCIAL	ARCHITECTURE_ACCEPTED	Post-PMF	P1	KEFE-CGD-001|KEFE-ENG-001			canonical	
+CAP-108	kefe-insights	KEFE Insights aggregate B2B	COMMERCIAL	ROADMAP_ACCEPTED	Phase 8	P1	KEFE-CGD-001|KEFE-RM-001			canonical	
+CAP-109	kefe-research	KEFE Research	COMMERCIAL	ROADMAP_ACCEPTED	Phase 7	P1	KEFE-CGD-001|KEFE-RM-001			canonical	
+CAP-110	custom-studies	Custom Studies	COMMERCIAL	ROADMAP_ACCEPTED	Phase 7/8	P2	KEFE-CGD-001|KEFE-RM-001			canonical	
+CAP-111	kefe-pulse	KEFE Pulse aggregate embeds	COMMERCIAL	ROADMAP_ACCEPTED	Phase 8	P1	KEFE-CGD-001|KEFE-TIM-001			canonical	
+CAP-112	aggregate-api	Aggregate API	COMMERCIAL	ROADMAP_ACCEPTED	Phase 8	P1	KEFE-CGD-001|KEFE-SEC-001			canonical	
+CAP-113	ethical-sponsorship	Transparent sponsorship/partnership model	COMMERCIAL	ARCHITECTURE_ACCEPTED	Phase 8	P2	KEFE-CGD-001|KEFE-CIV-001			canonical	
+CAP-114	north-star-metric	Meaningful Weighs / WAU	ANALYTICS_REPORTING	ACCEPTED	Phase 1	P0	KEFE-AED-001|KEFE-PB-001			canonical	
+CAP-115	activation-funnel	Activation funnel	ANALYTICS_REPORTING	IMPLEMENTED_PARTIAL	Phase 1	P0	KEFE-AED-001			canonical	
+CAP-116	quality-metrics	Deep Weigh/source/perspective/revision quality metrics	ANALYTICS_REPORTING	ARCHITECTURE_ACCEPTED	Phase 2	P0	KEFE-AED-001|KEFE-RM-001			canonical	
+CAP-117	trust-safety-metrics	Trust, integrity and safety metrics	ANALYTICS_REPORTING	ARCHITECTURE_ACCEPTED	Phase 2	P0	KEFE-AED-001|KEFE-TIM-001			canonical	
+CAP-118	growth-attribution	Privacy-safe growth/referral attribution	ANALYTICS_REPORTING	ARCHITECTURE_ACCEPTED	Phase 5	P1	KEFE-AED-001|KEFE-CGD-001|KEFE-SEC-001			canonical	
+CAP-119	premium-funnel	Premium funnel and subscription metrics	ANALYTICS_REPORTING	ROADMAP_ACCEPTED	Post-PMF	P1	KEFE-AED-001|KEFE-CGD-001			canonical	
+CAP-120	user-personal-reports	My KEFE/Chronicle/Wrapped personal reports	ANALYTICS_REPORTING	ROADMAP_ACCEPTED	Phase 4/5	P1	KEFE-PB-001|KEFE-AED-001			canonical	
+CAP-121	institutional-reports	Aggregate institutional reports	ANALYTICS_REPORTING	ROADMAP_ACCEPTED	Phase 8	P1	KEFE-CGD-001|KEFE-RM-001			canonical	
+CAP-122	research-reports	Study and reproducibility reports	ANALYTICS_REPORTING	ROADMAP_ACCEPTED	Phase 7	P1	KEFE-RM-001|KEFE-AED-001			canonical	
+CAP-123	admin-operational-reports	Admin operational/trust/editorial reports	ANALYTICS_REPORTING	ROADMAP_ACCEPTED	Phase 2+	P1	KEFE-ADM-001|KEFE-AED-001			canonical	
+CAP-124	finops-reporting	FinOps unit economics and provider cost reporting	ANALYTICS_REPORTING	ARCHITECTURE_ACCEPTED	Phase 2+	P1	KEFE-CGD-001|KEFE-ENG-001			canonical	
+CAP-125	privacy-safe-research-export	Privacy-safe research/data portability package	ANALYTICS_REPORTING	PROPOSAL_REVIEW	Phase 7/8	P2	KEFE-RM-001|KEFE-SEC-001			conversation_proposal	
+CAP-126	capability-portfolio-register	Capability Portfolio Register and no-forgotten-feature gate	GOVERNANCE	IMPLEMENTED_THIS_CHANGE	All phases	P0	KEFE-GOV-001|KEFE-PB-001		v3.5 WORKING documentation package|Issue #175|Drive file 1xJnoSFQB963acChiAQCSBAbS5VOdOJAJ	current_change	
+CAP-127	standards-council	Independent Standards Council	GOVERNANCE	LONG_TERM	Phase 9+	P2	KEFE-PB-001|KEFE-GOV-001			canonical	
+CAP-128	global-indices	Global indices	GOVERNANCE	VALIDATION_ONLY	Phase 9	P3	KEFE-PB-001|KEFE-RM-001			canonical	
