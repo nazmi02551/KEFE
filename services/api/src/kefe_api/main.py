@@ -45,6 +45,9 @@ from kefe_api.modules.admin_security.editorial_quality_review_router import (
 from kefe_api.modules.admin_security.feed_item_review_router import (
     router as admin_feed_item_review_router,
 )
+from kefe_api.modules.admin_security.flow_composer_router import (
+    router as admin_flow_composer_router,
+)
 from kefe_api.modules.admin_security.policy import default_admin_security_policy
 from kefe_api.modules.admin_security.proposal_queue_router import (
     router as admin_proposal_queue_router,
@@ -302,6 +305,7 @@ def create_app() -> FastAPI:
     app.include_router(admin_router)
     app.include_router(admin_case_builder_router)
     app.include_router(admin_editorial_quality_review_router)
+    app.include_router(admin_flow_composer_router)
     app.include_router(admin_proposal_queue_router)
     if _api_at_least(settings.api_version, 0, 21):
         app.include_router(admin_feed_item_review_router)
