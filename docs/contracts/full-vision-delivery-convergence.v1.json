@@ -1,11 +1,12 @@
 {
-  "contract_version": "1.0.1",
+  "contract_version": "1.1.0",
   "status": "accepted_for_execution",
   "date": "2026-08-04",
   "source_issue": 287,
   "source_adr": "docs/adr/0096-full-vision-delivery-convergence.md",
   "capabilities": [
     "CAP-055",
+    "CAP-056",
     "CAP-061",
     "CAP-062",
     "CAP-063",
@@ -47,6 +48,10 @@
     "SUPERSEDED",
     "EXTERNAL_GATE"
   ],
+  "allowed_next_integration_modes": [
+    "RUNTIME_ADOPTION",
+    "CONFLICT_RESOLUTION"
+  ],
   "validation_rules": {
     "exactly_one_canonical_integration_target": true,
     "every_line_has_exact_sha": true,
@@ -59,62 +64,88 @@
     "candidate_ci_does_not_promote_line": true,
     "apk_does_not_promote_line": true
   },
+  "verified_checkpoints": [
+    {
+      "name": "DELIVERY_GOVERNANCE_CONVERGENCE",
+      "pr": 288,
+      "sha": "ad9cf30adbff323c9f7372127314ad00d425b9c9",
+      "evidence": [
+        "CAPABILITY_PORTFOLIO_PASS",
+        "FOUNDATION_COMPLETION_PASS",
+        "FULL_VISION_DELIVERY_CONVERGENCE_PASS",
+        "API_CI_PASS",
+        "MVP_BETA_GATES_PASS"
+      ]
+    },
+    {
+      "name": "CANONICAL_ADMIN_REVIEW_RUNTIME",
+      "pr": 290,
+      "sha": "140960ac80881faec5841008eac9444ab67d9b7a",
+      "evidence": [
+        "CANONICAL_ADMIN_REVIEW_CONVERGENCE_PASS",
+        "API_CI_PASS",
+        "MOBILE_CI_PASS",
+        "MVP_BETA_GATES_PASS",
+        "GLOBAL_READINESS_PASS"
+      ]
+    }
+  ],
   "initial_decisions": {
     "common_divergence_base": "2bb18cd3cc34c2dc6bcb84559948b1231e8e2308",
-    "consumer_review_head": "ad825906388371eb9bb36b325abf36a2dd813c5c",
-    "first_content_integration_candidate": "80fbc887f16651949ec36819c440154bcfc278a8",
-    "public_feed_model_selection": "PENDING_SEPARATE_ADR",
+    "canonical_runtime_pr": 290,
+    "canonical_runtime_sha": "140960ac80881faec5841008eac9444ab67d9b7a",
+    "admin_review_source_candidate": "80fbc887f16651949ec36819c440154bcfc278a8",
+    "admin_review_source_disposition": "SELECTIVELY_ADOPTED_AND_SUPERSEDED",
+    "public_feed_model_selection": "IN_PROGRESS_ISSUE_291",
     "public_feed_candidate_heads": [
       "00e1fd5ad8e4818d9a5738b6fdc9cd99bb3124fc",
       "e3c8a445ace3a9c4fbc734fa7ebf91e97b7c039e"
     ]
   },
   "next_runtime_slice": {
-    "name": "Admin review convergence onto current consumer runtime",
-    "base_pr": 286,
-    "base_sha": "ad825906388371eb9bb36b325abf36a2dd813c5c",
-    "source_candidate_pr": 264,
-    "source_candidate_sha": "80fbc887f16651949ec36819c440154bcfc278a8",
+    "mode": "CONFLICT_RESOLUTION",
+    "name": "Canonical Public Feed Catalog and explicit activation projection",
+    "issue": 291,
+    "base_pr": 290,
+    "base_sha": "140960ac80881faec5841008eac9444ab67d9b7a",
+    "conflict_group": "PUBLIC_FEED_MODEL",
+    "source_candidate_prs": [267, 273],
     "required_capabilities": [
+      "CAP-055",
+      "CAP-056",
       "CAP-061",
       "CAP-065",
+      "CAP-094",
       "CAP-095",
+      "CAP-123",
       "CAP-126"
     ],
+    "decision_direction": "ONE_AUTHORITATIVE_CATALOG_AND_ONE_EXPLICIT_ACTIVATION_PROJECTION",
     "must_preserve": [
-      "CURRENT_PROGRESSIVE_PHONE_EXPERIENCE",
-      "EXISTING_ADMIN_IDENTITY_CSRF_AND_CAPABILITY_BOUNDARY",
-      "TYPED_FEED_ITEM_AND_SOURCE_BRIEF_READS",
-      "HUMAN_REVIEW_REQUIRED",
-      "NO_RAW_EVIDENCE_OR_BACKEND_OBJECT_KEY_EXPOSURE",
-      "NO_AUTOMATIC_MATERIALIZATION_PROJECTION_OR_PUBLICATION"
+      "EXISTING_GENERIC_PROVIDER_ADMISSION_AND_SCHEDULER",
+      "EXISTING_EVIDENCE_SOURCE_ARTIFACT_INGESTION_PROPOSAL_CHAIN",
+      "CANONICAL_TYPED_FEED_ITEM_AND_SOURCE_BRIEF_REVIEW",
+      "MAKER_CHECKER_APPROVAL",
+      "VERSIONED_IMMUTABLE_DEFINITION",
+      "CAPABILITY_FIRST_SCHEDULE_SECOND_ACTIVATION",
+      "ZERO_STARTUP_ACTIVATION",
+      "NO_AUTOMATIC_REVIEW_APPROVAL_OR_PUBLICATION"
     ],
-    "excluded_from_same_slice": [
-      "PUBLIC_FEED_CATALOG_SELECTION",
-      "RSS_ATOM_SUBSCRIPTION_SELECTION",
-      "REAL_PROVIDER_ACTIVATION",
-      "SIGNAL_IMPACT",
-      "STORE_RELEASE"
+    "must_resolve": [
+      "DUPLICATE_PUBLIC_FEED_AGGREGATES",
+      "DUPLICATE_APPLICATION_COMPOSITION",
+      "MIGRATION_20260803_0026_COLLISION",
+      "PARALLEL_ACTIVATION_STATE_MACHINES"
     ],
     "required_exact_head_workflows": [
+      "PROVIDER_SECURITY_CHAIN",
+      "CANONICAL_PUBLIC_FEED_CI",
       "API_CI",
       "MOBILE_CI",
       "MVP_BETA_GATES",
       "GLOBAL_READINESS"
     ]
   },
-  "governance_checkpoint_required_evidence": [
-    "CONVERGENCE_VALIDATOR_PASS",
-    "CAPABILITY_PORTFOLIO_VALIDATOR_PASS",
-    "FOUNDATION_COMPLETION_VALIDATOR_PASS",
-    "API_CI_EXACT_SHA_PASS",
-    "MVP_BETA_GATES_EXACT_SHA_PASS_WITH_MOBILE_REGRESSION_AND_POSTGRES_CONTINUITY"
-  ],
-  "governance_checkpoint_non_requirements": [
-    "SEPARATE_MOBILE_CI_WHEN_NO_MOBILE_PATH_CHANGED",
-    "SEPARATE_GLOBAL_READINESS_WHEN_NO_GLOBAL_RUNTIME_PATH_CHANGED",
-    "NEW_APK_WHEN_NO_PHONE_RUNTIME_CHANGED"
-  ],
   "claims_not_proven_by_automation": [
     "HUMAN_USABILITY",
     "EDITORIAL_CQB_ACCEPTANCE",
