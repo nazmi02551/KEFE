@@ -72,10 +72,15 @@ def main() -> None:
         "CandidateCaseEditorialConfiguration",
         "AcceptedSourceBriefCandidateSeed",
         "CandidateCaseBundleStageProcessor",
+        "market_scope: str",
+        'self.market_scope == "GLOBAL"',
+        'self.market_scope == "COUNTRY_SET"',
         "dependency_ids",
     ):
         require(marker in domain, f"candidate bundle domain missing {marker}")
     for forbidden in (
+        "content_authoring",
+        "MarketScope",
         "import requests",
         "import httpx",
         "AIExecution",
@@ -111,10 +116,12 @@ def main() -> None:
         "WritePrincipalDep",
         '"/source-briefs/{proposal_id}/candidate-bundle"',
         "CandidateCaseEditorialConfiguration(",
+        "market_scope=payload.market_scope",
         'proposal_review_state="PENDING"',
     ):
         require(marker in router, f"candidate bundle router missing {marker}")
     for forbidden in (
+        "MarketScope(",
         "raw_body",
         "backend_object_key",
         "secret_ref",
