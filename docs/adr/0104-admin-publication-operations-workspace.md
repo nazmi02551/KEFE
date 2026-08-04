@@ -21,6 +21,8 @@ Create a bounded Admin Publication Operations workspace backed only by the exist
 
 ### Canonical authority
 
+ContentAuthoringService.publish remains the only publication command; the bounded surface is only a secured adapter around it.
+
 - `ContentAuthoringService.publish` remains the only publication command.
 - `ContentAuthoringService.withdraw` remains the only withdrawal command.
 - Published `CaseVersion` remains immutable.
