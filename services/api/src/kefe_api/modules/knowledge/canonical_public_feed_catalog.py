@@ -859,6 +859,24 @@ class CanonicalPublicFeedCatalogService:
         )
         return stored
 
+    def rehydrate_runtime_profiles(self) -> tuple[str, ...]:
+        adapter_codes: list[str] = []
+        for definition in self._repository.list_definitions():
+            activation = self._repository.get_activation_for_definition(definition.id)
+            if activation is None or activation.state is PublicFeedActivationState.RETIRED:
+                continue
+            if definition.state is not PublicFeedCatalogState.APPROVED:
+                raise RuntimeError("active public-feed projection requires APPROVED definition")
+            profile = self._build_runtime_profile(definition)
+            if (
+                profile.configuration_hash != activation.configuration_hash
+                or profile.adoption_profile.adapter_code != activation.adapter_code
+            ):
+                raise RuntimeError("persisted public-feed activation identity drifted")
+            self._runtime_profiles.register_or_get(profile)
+            adapter_codes.append(activation.adapter_code)
+        return tuple(sorted(adapter_codes))
+
     def list_definitions(
         self,
         principal: AdminPrincipal,

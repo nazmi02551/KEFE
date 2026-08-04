@@ -38,9 +38,7 @@ def build_canonical_public_feed_composition(
         repository: PublicFeedCatalogRepository = InMemoryPublicFeedCatalogRepository()
     else:
         if not settings.database_url:
-            raise RuntimeError(
-                "KEFE_DATABASE_URL is required when persistence_backend=postgres"
-            )
+            raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
         repository = PostgresCanonicalPublicFeedCatalogRepository(
             build_engine(settings.database_url)
         )
@@ -48,13 +46,9 @@ def build_canonical_public_feed_composition(
     adoption = editorial_pipeline.provider_adoption_registry
     capture = editorial_pipeline.public_capture_registry
     if not isinstance(adoption, MutableProviderAdoptionRegistry):
-        raise RuntimeError(
-            "canonical public-feed composition requires mutable adoption registry"
-        )
+        raise RuntimeError("canonical public-feed composition requires mutable adoption registry")
     if not isinstance(capture, MutablePublicSourceCaptureRegistry):
-        raise RuntimeError(
-            "canonical public-feed composition requires mutable capture registry"
-        )
+        raise RuntimeError("canonical public-feed composition requires mutable capture registry")
 
     runtime_profiles = CanonicalPublicFeedRuntimeProfileRegistry(
         adoption=adoption,
@@ -68,6 +62,7 @@ def build_canonical_public_feed_composition(
         runtime_profiles=runtime_profiles,
         scheduler=editorial_pipeline.source_scheduler_service,
     )
+    service.rehydrate_runtime_profiles()
     return CanonicalPublicFeedComposition(
         repository=repository,
         runtime_profiles=runtime_profiles,
