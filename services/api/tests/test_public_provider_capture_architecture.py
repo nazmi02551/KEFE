@@ -7,6 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "src/kefe_api/modules/knowledge/provider_public_execution.py"
 SECRET = ROOT / "src/kefe_api/modules/knowledge/provider_secret_execution.py"
 PIPELINE = ROOT / "src/kefe_api/infrastructure/editorial_pipeline.py"
+LIVE_RUNTIME = ROOT / "src/kefe_api/infrastructure/canonical_public_feed_runtime.py"
 
 
 def _class(source: str, name: str) -> ast.ClassDef:
@@ -55,11 +56,15 @@ def test_credentialed_executor_rejects_public_before_resolver_lookup() -> None:
     assert mode_check < resolver_lookup
 
 
-def test_production_composition_keeps_public_registry_empty_and_routes_by_mode() -> None:
-    source = PIPELINE.read_text()
-    assert "InMemoryPublicSourceCaptureRegistry()" in source
-    assert "CredentialModeRoutingProviderCaptureExecutor(" in source
-    assert "capture_executor=provider_capture_executor" in source
-    assert "PublicAdapter(" not in source
-    assert "RSS" not in source
-    assert "ATOM" not in source
+def test_production_composition_keeps_public_registry_inert_and_routes_by_mode() -> None:
+    pipeline = PIPELINE.read_text()
+    runtime = LIVE_RUNTIME.read_text()
+    assert "MutablePublicSourceCaptureRegistry()" in pipeline
+    assert "class MutablePublicSourceCaptureRegistry(PublicSourceCaptureRegistry):" in runtime
+    assert "self._adapters: dict[str, PublicSourceCaptureAdapter] = {}" in runtime
+    assert "def register_or_get(" in runtime
+    assert "CredentialModeRoutingProviderCaptureExecutor(" in pipeline
+    assert "capture_executor=provider_capture_executor" in pipeline
+    assert "PublicAdapter(" not in pipeline
+    assert "RSS" not in pipeline
+    assert "ATOM" not in pipeline
