@@ -23,6 +23,9 @@ from kefe_api.infrastructure.persistence import (
 from kefe_api.infrastructure.raw_evidence_runtime import (
     build_raw_source_evidence_store,
 )
+from kefe_api.modules.admin_security.candidate_bundle_router import (
+    router as admin_candidate_bundle_router,
+)
 from kefe_api.modules.admin_security.canonical_public_feed_router import (
     router as admin_canonical_public_feed_router,
 )
@@ -300,6 +303,8 @@ def create_app() -> FastAPI:
         app.include_router(admin_source_brief_review_router)
     if _api_at_least(settings.api_version, 0, 24):
         app.include_router(admin_canonical_public_feed_router)
+    if _api_at_least(settings.api_version, 0, 25):
+        app.include_router(admin_candidate_bundle_router)
     app.include_router(admin_editorial_projection_router)
     app.include_router(admin_content_configuration_router)
     app.include_router(community_reason_admin_router)
