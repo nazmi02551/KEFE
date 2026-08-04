@@ -92,9 +92,9 @@ void main() {
         );
       }
 
-      final decisionExperience = File(
+      final decisionExperience = _readPresentationLibrary(
         'lib/features/decision/presentation/decision_experience_screen.dart',
-      ).readAsStringSync();
+      );
       final onboardingExperience = File(
         'lib/features/onboarding/presentation/onboarding_experience_screen.dart',
       ).readAsStringSync();
@@ -147,4 +147,15 @@ void main() {
       },
     );
   });
+}
+
+String _readPresentationLibrary(String mainPath) {
+  final mainFile = File(mainPath);
+  final mainSource = mainFile.readAsStringSync();
+  final parts = RegExp(r"part '([^']+)';")
+      .allMatches(mainSource)
+      .map((match) => File('${mainFile.parent.path}/${match.group(1)}'))
+      .where((file) => file.existsSync())
+      .map((file) => file.readAsStringSync());
+  return ([mainSource, ...parts]).join('\n');
 }
