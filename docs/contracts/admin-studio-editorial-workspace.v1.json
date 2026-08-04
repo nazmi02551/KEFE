@@ -1,0 +1,178 @@
+{
+  "contract": "admin-studio-editorial-workspace",
+  "version": "1.0.0",
+  "status": "accepted-for-implementation",
+  "adr": "ADR-0100",
+  "issue": 296,
+  "parent_runtime_sha": "8166bcc72712e06e1b7705d3bf2e8b9dcbc1fa7b",
+  "capabilities": [
+    "CAP-061",
+    "CAP-062",
+    "CAP-063",
+    "CAP-065",
+    "CAP-095",
+    "CAP-126"
+  ],
+  "application": {
+    "path": "apps/admin",
+    "framework": "nextjs-app-router",
+    "language": "typescript",
+    "runtime_authority": "canonical-api",
+    "parallel_domain_model_forbidden": true,
+    "production_fixture_fallback_forbidden": true
+  },
+  "security": {
+    "session_cookie": "kefe_admin_session",
+    "credentials_mode": "include",
+    "csrf_header": "X-KEFE-CSRF",
+    "csrf_required_for_methods": ["POST", "PUT", "PATCH", "DELETE"],
+    "fail_closed_when_api_base_missing": true,
+    "fail_closed_when_csrf_missing_for_write": true,
+    "forbidden_client_storage": [
+      "session-cookie",
+      "credentials",
+      "provider-secrets",
+      "raw-evidence-body",
+      "backend-object-key"
+    ],
+    "html_from_api_must_not_be_injected": true
+  },
+  "api": {
+    "session": {
+      "method": "GET",
+      "path": "/internal/admin/v1/session"
+    },
+    "proposal_list": {
+      "method": "GET",
+      "path": "/internal/admin/v1/proposals",
+      "max_limit": 100,
+      "supported_filters": [
+        "review_state",
+        "proposal_kind",
+        "risk_code",
+        "run_id",
+        "pipeline_code",
+        "cursor"
+      ]
+    },
+    "proposal_detail": {
+      "method": "GET",
+      "path": "/internal/admin/v1/proposals/{proposal_id}"
+    },
+    "proposal_review": {
+      "method": "POST",
+      "path": "/internal/admin/v1/proposals/{proposal_id}/review",
+      "terminal_decisions": ["ACCEPTED", "REJECTED", "CHANGES_REQUESTED"]
+    },
+    "candidate_bundle": {
+      "method": "POST",
+      "path": "/internal/admin/v1/source-briefs/{proposal_id}/candidate-bundle",
+      "required_source_kind": "SOURCE_BRIEF",
+      "required_source_review_state": "ACCEPTED",
+      "outputs": ["DECISION_PROBLEM", "QUESTION_DRAFT", "CANDIDATE_CASE"],
+      "output_review_state": "PENDING"
+    },
+    "editorial_projection": {
+      "method": "POST",
+      "path": "/internal/admin/v1/candidate-proposals/{candidate_proposal_id}/projection",
+      "required_candidate_kind": "CANDIDATE_CASE",
+      "required_candidate_review_state": "ACCEPTED",
+      "output_lifecycle_state": "DRAFT",
+      "idempotency_key_required": true
+    }
+  },
+  "workspace": {
+    "stages": ["QUEUE", "REVIEW", "BUNDLE", "PROJECTION"],
+    "navigation_mutates": false,
+    "selection_mutates": false,
+    "mount_mutates": false,
+    "refresh_mutates": false,
+    "automatic_polling_mutation_forbidden": true,
+    "automatic_review_forbidden": true,
+    "automatic_bundle_forbidden": true,
+    "automatic_projection_forbidden": true,
+    "authoring_submit_forbidden": true,
+    "authoring_approve_forbidden": true,
+    "authoring_publish_forbidden": true,
+    "review_and_projection_must_be_separate_operator_actions": true,
+    "candidate_dependencies_must_be_independently_reviewed": true
+  },
+  "candidate_configuration": {
+    "immutable_retry": true,
+    "required_fields": [
+      "source_brief_review_decision_id",
+      "slug",
+      "title",
+      "summary",
+      "base_format_code",
+      "primary_domain_code",
+      "content_risk",
+      "issue_code",
+      "issue_title",
+      "question_stable_code",
+      "question_prompt",
+      "response_options",
+      "flow_template_code",
+      "flow_template_version_no",
+      "content_locale",
+      "market_scope",
+      "country_codes",
+      "required_review_modes",
+      "is_fact_bearing",
+      "is_real_event",
+      "context_title"
+    ],
+    "forbidden_inference_sources": [
+      "provider-text",
+      "source-title",
+      "source-summary",
+      "ai-output"
+    ]
+  },
+  "idempotency": {
+    "projection_key_stable_for_selected_lineage": true,
+    "projection_key_visible_before_submit": true,
+    "projection_key_may_be_edited_explicitly": true,
+    "silent_key_rotation_on_retry_forbidden": true
+  },
+  "accessibility": {
+    "semantic_headings": true,
+    "explicit_form_labels": true,
+    "visible_keyboard_focus": true,
+    "aria_live_for_mutations": true,
+    "reduced_motion_supported": true,
+    "narrow_viewport_supported": true,
+    "status_must_not_rely_on_color_only": true,
+    "webgl_forbidden": true,
+    "continuous_animation_forbidden": true
+  },
+  "evidence": {
+    "architecture_checker": "apps/admin/tools/check_admin_studio_contract.mjs",
+    "typed_api_tests": true,
+    "component_tests": true,
+    "mocked_vertical_journey": [
+      "queue",
+      "review-source-brief",
+      "build-candidate-bundle",
+      "review-dependencies",
+      "project-candidate-case-to-draft"
+    ],
+    "production_build": true,
+    "dedicated_workflow": ".github/workflows/admin-studio.yml",
+    "canonical_exact_head_workflows": [
+      "API CI",
+      "Mobile CI",
+      "MVP Beta Gates",
+      "Global Readiness"
+    ]
+  },
+  "external_gates_not_proven_by_ci": [
+    "human-editorial-usability",
+    "editorial-cqb-acceptance",
+    "provider-readiness",
+    "production-deployment",
+    "deployed-slo",
+    "operator-rollback",
+    "store-compliance"
+  ]
+}
