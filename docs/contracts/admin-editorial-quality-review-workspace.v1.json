@@ -1,0 +1,149 @@
+{
+  "contract_id": "admin-editorial-quality-review-workspace.v1",
+  "version": "1.0.0",
+  "status": "accepted_for_implementation",
+  "adr": "ADR-0102",
+  "capabilities": {
+    "primary": ["CAP-065"],
+    "supporting": ["CAP-063", "CAP-126"],
+    "lifecycle_promotion": false
+  },
+  "parent_runtime": {
+    "pr": 299,
+    "sha": "612c57fa2188c7f9c5fae8f64fcfebbca644cfbc"
+  },
+  "authorities": {
+    "case_and_lifecycle": "existing_content_authoring_aggregate",
+    "identity_authorization": "existing_admin_security_service",
+    "csrf": "same_session_X_KEFE_CSRF",
+    "audit": "append_only_content_authoring_lifecycle_audit",
+    "flow": "server_owned_not_editable",
+    "publication": "separate_existing_command_not_exposed"
+  },
+  "http": {
+    "prefix": "/internal/admin/v1/content-reviews",
+    "reads": [
+      {
+        "method": "GET",
+        "path": "/internal/admin/v1/content-reviews",
+        "capability": "CONTENT_REVIEW",
+        "request_on_mount": false,
+        "pagination": {
+          "limit": {"minimum": 1, "maximum": 100, "default": 25},
+          "offset": {"minimum": 0, "maximum": 10000, "default": 0}
+        },
+        "filters": ["content_risk", "primary_domain_code"],
+        "state": "IN_REVIEW",
+        "sort": ["created_at_desc", "id_desc"]
+      },
+      {
+        "method": "GET",
+        "path": "/internal/admin/v1/content-reviews/{version_id}",
+        "capability": "CONTENT_REVIEW",
+        "required_state": "IN_REVIEW",
+        "read_only": true
+      }
+    ],
+    "writes": [
+      {
+        "method": "POST",
+        "path": "/internal/admin/v1/content-reviews/{version_id}/decision",
+        "capability": "CONTENT_REVIEW",
+        "csrf_required": true,
+        "decisions": ["APPROVE", "REJECT"]
+      }
+    ]
+  },
+  "approval": {
+    "maker_checker": true,
+    "submitter_source": "latest_submit_for_review_audit_entry",
+    "completed_review_modes": {
+      "client_attested": true,
+      "server_normalized": true,
+      "duplicates_rejected": true,
+      "unknown_rejected": true,
+      "missing_rejected": true,
+      "extra_rejected": true,
+      "required_set_match": "exact",
+      "persisted_atomically_with_state": "APPROVED"
+    },
+    "publication_side_effect": false
+  },
+  "rejection": {
+    "rationale_required": true,
+    "rationale_max_length": 5000,
+    "target_state": "DRAFT",
+    "completed_review_modes_cleared": true,
+    "content_auto_edit": false
+  },
+  "repository_query": {
+    "cross_case_state_query": true,
+    "bounded": true,
+    "states_allowed": ["IN_REVIEW"],
+    "memory_and_postgres": true,
+    "restart_durability_required": true
+  },
+  "admin_ui": {
+    "route": "/content-review",
+    "explicit_session_load": true,
+    "explicit_queue_load": true,
+    "explicit_detail_load": true,
+    "request_on_mount": false,
+    "autosave": false,
+    "browser_token_persistence": false,
+    "read_only_content": true,
+    "required_mode_checklist": true,
+    "reject_rationale_required": true,
+    "approve_confirmation_required": true,
+    "publish_control": false,
+    "withdraw_control": false,
+    "flow_edit_control": false
+  },
+  "security": {
+    "https_outside_localhost": true,
+    "credentialed_reads": true,
+    "bounded_text_only_errors": true,
+    "forbidden_browser_persistence": [
+      "admin_session",
+      "csrf_token",
+      "raw_evidence_body",
+      "credentials",
+      "secrets",
+      "backend_object_keys"
+    ]
+  },
+  "verification": {
+    "executable_backend_contract": true,
+    "executable_ui_contract": true,
+    "isolated_additive_openapi_overlay": true,
+    "memory_http_behavior": true,
+    "postgres_restart_round_trip": true,
+    "typed_client_tests": true,
+    "admin_production_build": true,
+    "required_exact_head_workflows": [
+      "Admin Editorial Quality Review CI",
+      "Admin Case Builder CI",
+      "Admin Studio CI",
+      "API CI",
+      "Mobile CI",
+      "MVP Beta Gates",
+      "Global Readiness"
+    ]
+  },
+  "explicit_exclusions": [
+    "publish_ui",
+    "withdraw_ui",
+    "flow_composer",
+    "visual_drag_drop_authoring",
+    "automated_review",
+    "automated_approval",
+    "provider_activation",
+    "raw_evidence_viewer",
+    "production_deployment",
+    "release_apk",
+    "human_editorial_CQB_acceptance",
+    "deployed_SLO_load_observability",
+    "operator_rollback_validation",
+    "store_compliance"
+  ]
+}
