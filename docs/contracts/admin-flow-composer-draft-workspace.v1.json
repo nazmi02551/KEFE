@@ -1,0 +1,186 @@
+{
+  "contract_id": "admin-flow-composer-draft-workspace.v1",
+  "version": "1.0.0",
+  "status": "accepted_for_implementation",
+  "adr": "ADR-0103",
+  "capabilities": {
+    "primary": ["CAP-064"],
+    "supporting": ["CAP-063", "CAP-126"],
+    "lifecycle_promotion": false
+  },
+  "parent_runtime": {
+    "pr": 301,
+    "sha": "f4c11547c0373017c527cfcf0a2d03dd3d3a9d97"
+  },
+  "authorities": {
+    "configuration_and_flow": "existing_ContentConfigurationSnapshot",
+    "draft_commands": "existing_SecuredContentConfigurationService",
+    "identity_authorization": "existing_AdminSecurityService",
+    "csrf": "same_session_X_KEFE_CSRF",
+    "audit": "append_only_content_configuration_audit",
+    "consumer_runtime": "published_CaseVersion_pinned_resolved_flow",
+    "publication": "separate_existing_command_not_exposed"
+  },
+  "http": {
+    "prefix": "/internal/admin/v1/flow-composer",
+    "reads": [
+      {
+        "method": "GET",
+        "path": "/internal/admin/v1/flow-composer/configuration-versions/{version_id}",
+        "capability": "TAXONOMY_MANAGE",
+        "exact_id": true,
+        "request_on_mount": false,
+        "catalogs_read_only": ["primitives", "capabilities"],
+        "editable": ["flow_templates"]
+      },
+      {
+        "method": "GET",
+        "path": "/internal/admin/v1/flow-composer/configuration-versions/{version_id}/audit",
+        "capability": "AUDIT_READ",
+        "explicit_load": true,
+        "exact_version_filter": true
+      }
+    ],
+    "writes": [
+      {
+        "method": "POST",
+        "path": "/internal/admin/v1/flow-composer/drafts",
+        "capability": "TAXONOMY_MANAGE",
+        "csrf_required": true,
+        "delegates_to": "create_draft_from_current"
+      },
+      {
+        "method": "PUT",
+        "path": "/internal/admin/v1/flow-composer/configuration-versions/{version_id}",
+        "capability": "TAXONOMY_MANAGE",
+        "csrf_required": true,
+        "required_state": "DRAFT",
+        "client_editable_fields": ["flow_templates"],
+        "server_preserved_fields": [
+          "domains",
+          "topics",
+          "base_formats",
+          "modifiers",
+          "modifier_compatibility",
+          "primitives",
+          "capabilities",
+          "risks",
+          "claim_states",
+          "source_kinds",
+          "disclosure_levels",
+          "created_by",
+          "created_at",
+          "published_at",
+          "cloned_from_version_id"
+        ]
+      }
+    ],
+    "forbidden_commands": ["publish", "rollback", "supersede", "case_edit", "case_review"]
+  },
+  "flow_graph": {
+    "flow_identity": "code_plus_positive_version_no",
+    "step_identity": "stable_code_within_flow_version",
+    "minimum_steps": 1,
+    "entry_step_required": true,
+    "terminal_step_required": true,
+    "unique_flow_identity": true,
+    "unique_step_identity": true,
+    "known_primitive_required": true,
+    "known_capability_required": true,
+    "enabled_reference_required_when_flow_enabled": true,
+    "capability_primitive_compatibility_required": true,
+    "known_transition_targets_required": true,
+    "all_steps_reachable_from_entry": true,
+    "acyclic": true,
+    "self_loop_allowed": false,
+    "array_order_rewrites_identity": false
+  },
+  "save_semantics": {
+    "canonical_draft_reloaded_server_side": true,
+    "only_flow_templates_replaced": true,
+    "non_flow_fields_preserved_server_side": true,
+    "state_after_save": "DRAFT",
+    "publication_side_effect": false,
+    "consumer_runtime_side_effect": false,
+    "autosave": false,
+    "bulk_mutation": false
+  },
+  "admin_ui": {
+    "route": "/flow-composer",
+    "explicit_session_entry": true,
+    "explicit_create_draft": true,
+    "explicit_exact_id_load": true,
+    "query_prefill_without_request": true,
+    "request_on_mount": false,
+    "structured_template_editor": true,
+    "structured_step_editor": true,
+    "primitive_catalog_read_only": true,
+    "capability_catalog_read_only": true,
+    "add_remove_reorder_without_drag_dependency": true,
+    "deterministic_text_topology_preview": true,
+    "client_validation_before_save": true,
+    "server_validation_authoritative": true,
+    "explicit_save": true,
+    "explicit_audit_load": true,
+    "unsaved_change_guard": true,
+    "browser_token_persistence": false,
+    "publish_control": false,
+    "rollback_control": false,
+    "case_edit_control": false,
+    "review_control": false
+  },
+  "security": {
+    "https_outside_localhost": true,
+    "credentialed_reads": true,
+    "strict_unknown_request_fields": true,
+    "bounded_text_only_errors": true,
+    "forbidden_browser_persistence": [
+      "admin_session",
+      "csrf_token",
+      "credentials",
+      "secrets",
+      "raw_evidence_body",
+      "backend_object_keys"
+    ]
+  },
+  "verification": {
+    "executable_backend_contract": true,
+    "executable_ui_contract": true,
+    "isolated_additive_openapi_overlay": true,
+    "predecessor_overlays_exact": true,
+    "memory_http_behavior": true,
+    "postgres_restart_round_trip": true,
+    "graph_validation_tests": true,
+    "typed_client_tests": true,
+    "admin_production_build": true,
+    "required_exact_head_workflows": [
+      "Admin Flow Composer CI",
+      "Admin Editorial Quality Review CI",
+      "Admin Case Builder CI",
+      "Admin Studio CI",
+      "API CI",
+      "Mobile CI",
+      "MVP Beta Gates",
+      "Global Readiness"
+    ]
+  },
+  "explicit_exclusions": [
+    "configuration_publish_ui",
+    "configuration_rollback_ui",
+    "case_publication",
+    "case_review",
+    "visual_drag_drop_graph_editor",
+    "automatic_flow_generation",
+    "automated_authoring",
+    "automated_review",
+    "automated_approval",
+    "consumer_runtime_change",
+    "provider_activation",
+    "production_deployment",
+    "release_apk",
+    "human_usability_CQB_acceptance",
+    "deployed_SLO_load_observability",
+    "operator_rollback_validation",
+    "store_compliance"
+  ]
+}

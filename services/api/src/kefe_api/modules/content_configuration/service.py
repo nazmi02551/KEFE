@@ -12,6 +12,7 @@ from kefe_api.modules.content_configuration.models import (
     ContentConfigLifecycle,
     ContentConfigurationAuditEntry,
     ContentConfigurationSnapshot,
+    FlowTemplateDefinition,
 )
 from kefe_api.modules.content_configuration.policy import derive_required_review_modes
 from kefe_api.modules.content_configuration.ports import ContentConfigurationRepository
@@ -371,6 +372,28 @@ class ContentConfigurationService:
                         },
                     )
 
+            unreachable = sorted(
+                step_set - ContentConfigurationService._reachable_step_codes(flow)
+            )
+            if unreachable:
+                raise DomainError(
+                    "CONTENT_CONFIG_FLOW_UNREACHABLE",
+                    "Every Flow Step must be reachable from the entry Step",
+                    422,
+                    meta={
+                        "flow_code": flow.code,
+                        "version_no": flow.version_no,
+                        "step_codes": unreachable,
+                    },
+                )
+            if ContentConfigurationService._flow_has_cycle(flow):
+                raise DomainError(
+                    "CONTENT_CONFIG_FLOW_CYCLIC",
+                    "Flow Template topology must be acyclic",
+                    422,
+                    meta={"flow_code": flow.code, "version_no": flow.version_no},
+                )
+
         for required_set_name, values in (
             ("risks", snapshot.risks),
             ("claim_states", snapshot.claim_states),
@@ -383,3 +406,37 @@ class ContentConfigurationService:
                     f"{required_set_name} cannot be empty",
                     422,
                 )
+
+    @staticmethod
+    def _reachable_step_codes(flow: FlowTemplateDefinition) -> set[str]:
+        step_by_code = {step.code: step for step in flow.steps}
+        reachable: set[str] = set()
+        pending = [flow.entry_step_code]
+        while pending:
+            code = pending.pop()
+            if code in reachable:
+                continue
+            reachable.add(code)
+            pending.extend(step_by_code[code].next_step_codes)
+        return reachable
+
+    @staticmethod
+    def _flow_has_cycle(flow: FlowTemplateDefinition) -> bool:
+        step_by_code = {step.code: step for step in flow.steps}
+        visiting: set[str] = set()
+        visited: set[str] = set()
+
+        def visit(code: str) -> bool:
+            if code in visiting:
+                return True
+            if code in visited:
+                return False
+            visiting.add(code)
+            for next_code in step_by_code[code].next_step_codes:
+                if visit(next_code):
+                    return True
+            visiting.remove(code)
+            visited.add(code)
+            return False
+
+        return any(visit(code) for code in step_by_code)

@@ -17,6 +17,11 @@ import type {
   ProposalReviewRequest,
   ProposalReviewResponse
 } from "@/src/lib/contracts";
+import type {
+  ConfigurationAuditTrail,
+  FlowComposerSaveInput,
+  FlowComposerVersion
+} from "@/src/lib/flow-composer";
 
 const WRITE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
@@ -262,6 +267,35 @@ export class AdminApiClient {
       "POST",
       `/internal/admin/v1/content-reviews/${encodeURIComponent(versionId)}/decision`,
       request
+    );
+  }
+
+  createFlowComposerDraft(): Promise<FlowComposerVersion> {
+    return this.request("POST", "/internal/admin/v1/flow-composer/drafts");
+  }
+
+  flowComposerVersion(versionId: string): Promise<FlowComposerVersion> {
+    return this.request(
+      "GET",
+      `/internal/admin/v1/flow-composer/configuration-versions/${encodeURIComponent(versionId)}`
+    );
+  }
+
+  saveFlowComposerVersion(
+    versionId: string,
+    input: FlowComposerSaveInput
+  ): Promise<FlowComposerVersion> {
+    return this.request(
+      "PUT",
+      `/internal/admin/v1/flow-composer/configuration-versions/${encodeURIComponent(versionId)}`,
+      input
+    );
+  }
+
+  flowComposerAudit(versionId: string): Promise<ConfigurationAuditTrail> {
+    return this.request(
+      "GET",
+      `/internal/admin/v1/flow-composer/configuration-versions/${encodeURIComponent(versionId)}/audit`
     );
   }
 }

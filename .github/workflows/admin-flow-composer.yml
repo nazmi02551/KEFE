@@ -1,0 +1,177 @@
+name: Admin Flow Composer CI
+
+on:
+  pull_request:
+    paths:
+      - "apps/admin/**"
+      - "apps/mobile/docs/admin-flow-composer-cross-surface-boundary.md"
+      - "services/api/src/kefe_api/modules/admin_security/flow_composer_router.py"
+      - "services/api/src/kefe_api/modules/admin_security/content_configuration.py"
+      - "services/api/src/kefe_api/modules/content_configuration/service.py"
+      - "services/api/src/kefe_api/main.py"
+      - "services/api/tests/test_admin_flow_composer_http.py"
+      - "services/api/tests/test_admin_flow_composer_http_postgres.py"
+      - "services/api/tests/test_content_configuration.py"
+      - "services/api/tools/check_admin_flow_composer_contract.py"
+      - "services/api/tools/export_admin_flow_composer_openapi_overlay.py"
+      - "services/api/tools/export_admin_editorial_quality_review_openapi_overlay.py"
+      - "services/api/tools/export_openapi.py"
+      - "services/api/tools/export_mvp_openapi_overlay.py"
+      - "services/api/tools/export_global_openapi_overlay.py"
+      - "docs/adr/0103-admin-flow-composer-draft-workspace.md"
+      - "docs/contracts/admin-flow-composer-draft-workspace.v1.json"
+      - "docs/contracts/openapi-admin-flow-composer.v0.19.overlay.json"
+      - "docs/contracts/error-codes.v1.yaml"
+      - ".github/workflows/admin-flow-composer.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/admin/**"
+      - "apps/mobile/docs/admin-flow-composer-cross-surface-boundary.md"
+      - "services/api/src/kefe_api/modules/admin_security/flow_composer_router.py"
+      - "services/api/src/kefe_api/modules/admin_security/content_configuration.py"
+      - "services/api/src/kefe_api/modules/content_configuration/service.py"
+      - "services/api/src/kefe_api/main.py"
+      - "services/api/tests/test_admin_flow_composer_http.py"
+      - "services/api/tests/test_admin_flow_composer_http_postgres.py"
+      - "services/api/tests/test_content_configuration.py"
+      - "services/api/tools/check_admin_flow_composer_contract.py"
+      - "services/api/tools/export_admin_flow_composer_openapi_overlay.py"
+      - "services/api/tools/export_admin_editorial_quality_review_openapi_overlay.py"
+      - "services/api/tools/export_openapi.py"
+      - "services/api/tools/export_mvp_openapi_overlay.py"
+      - "services/api/tools/export_global_openapi_overlay.py"
+      - "docs/adr/0103-admin-flow-composer-draft-workspace.md"
+      - "docs/contracts/admin-flow-composer-draft-workspace.v1.json"
+      - "docs/contracts/openapi-admin-flow-composer.v0.19.overlay.json"
+      - "docs/contracts/error-codes.v1.yaml"
+      - ".github/workflows/admin-flow-composer.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: admin-flow-composer-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api-memory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Lint Flow Composer slice
+        working-directory: services/api
+        run: >-
+          ruff check
+          src/kefe_api/modules/admin_security/flow_composer_router.py
+          src/kefe_api/modules/admin_security/content_configuration.py
+          src/kefe_api/modules/content_configuration/service.py
+          src/kefe_api/main.py
+          tests/test_admin_flow_composer_http.py
+          tests/test_admin_flow_composer_http_postgres.py
+          tests/test_content_configuration.py
+          tools/check_admin_flow_composer_contract.py
+          tools/export_admin_flow_composer_openapi_overlay.py
+          tools/export_admin_editorial_quality_review_openapi_overlay.py
+          tools/export_openapi.py
+          tools/export_mvp_openapi_overlay.py
+          tools/export_global_openapi_overlay.py
+      - name: Executable backend architecture contract
+        working-directory: services/api
+        run: python tools/check_admin_flow_composer_contract.py
+      - name: Exact Flow Composer OpenAPI overlay
+        working-directory: services/api
+        run: >-
+          python tools/export_admin_flow_composer_openapi_overlay.py
+          --output ../../docs/contracts/openapi-admin-flow-composer.v0.19.overlay.json
+          --check
+      - name: Exact predecessor Editorial Review overlay
+        working-directory: services/api
+        run: >-
+          python tools/export_admin_editorial_quality_review_openapi_overlay.py
+          --output ../../docs/contracts/openapi-admin-editorial-quality-review.v0.19.overlay.json
+          --check
+      - name: Full composed OpenAPI drift gate
+        working-directory: services/api
+        run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
+      - name: Memory HTTP behavior and graph validation
+        working-directory: services/api
+        run: >-
+          pytest -q
+          tests/test_admin_flow_composer_http.py
+          tests/test_content_configuration.py
+
+  admin-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/admin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.13.0"
+          cache: npm
+          cache-dependency-path: apps/admin/package-lock.json
+      - name: Install locked Admin dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify Admin contracts, lint, types, tests and production build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: npm run verify
+
+  postgres:
+    needs: api-memory
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: kefe
+          POSTGRES_USER: kefe
+          POSTGRES_PASSWORD: kefe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kefe -d kefe"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Migrate PostgreSQL
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: alembic upgrade head
+      - name: Durable draft, topology and restart proof
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+          KEFE_PERSISTENCE_BACKEND: postgres
+          KEFE_RUN_POSTGRES_TESTS: "1"
+        run: pytest -q tests/test_admin_flow_composer_http_postgres.py

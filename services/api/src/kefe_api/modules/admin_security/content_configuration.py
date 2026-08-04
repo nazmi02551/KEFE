@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import datetime
 from uuid import UUID
 
@@ -10,6 +11,7 @@ from kefe_api.modules.content_configuration.models import (
     ContentConfigLifecycle,
     ContentConfigurationAuditEntry,
     ContentConfigurationSnapshot,
+    FlowTemplateDefinition,
 )
 from kefe_api.modules.content_configuration.ports import ContentConfigurationRepository
 from kefe_api.modules.content_configuration.service import ContentConfigurationService
@@ -93,6 +95,20 @@ class SecuredContentConfigurationService:
         self._security.authorize(principal, AdminCapability.TAXONOMY_MANAGE, now=now)
         return self._configuration.save_draft(principal, snapshot)
 
+    def save_flow_templates(
+        self,
+        principal: AdminPrincipal,
+        version_id: UUID,
+        flow_templates: tuple[FlowTemplateDefinition, ...],
+        *,
+        now: datetime | None = None,
+    ) -> ContentConfigurationSnapshot:
+        current = self.draft_for_edit(principal, version_id, now=now)
+        return self._configuration.save_draft(
+            principal,
+            replace(current, flow_templates=flow_templates),
+        )
+
     def publish(
         self,
         principal: AdminPrincipal,
@@ -126,6 +142,21 @@ class SecuredContentConfigurationService:
     ) -> tuple[ContentConfigurationAuditEntry, ...]:
         self._security.authorize(principal, AdminCapability.AUDIT_READ, now=now)
         return self._repository.list_audit()
+
+    def audit_for_version(
+        self,
+        principal: AdminPrincipal,
+        version_id: UUID,
+        *,
+        now: datetime | None = None,
+    ) -> tuple[ContentConfigurationAuditEntry, ...]:
+        self._security.authorize(principal, AdminCapability.AUDIT_READ, now=now)
+        self._require_version(version_id)
+        return tuple(
+            entry
+            for entry in self._repository.list_audit()
+            if entry.config_version_id == version_id
+        )
 
     def _require_version(self, version_id: UUID) -> ContentConfigurationSnapshot:
         version = self._repository.get(version_id)

@@ -13,28 +13,29 @@ from kefe_api.core.settings import get_settings
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACTS = REPO_ROOT / "docs" / "contracts"
 BASE = CONTRACTS / "openapi.v1.json"
-BEFORE_REVIEW_OVERLAYS = (
+BEFORE_FLOW_COMPOSER_OVERLAYS = (
     CONTRACTS / "openapi-consensus.v0.18.overlay.json",
     CONTRACTS / "openapi-mvp.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-projection.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-proposal-queue.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-case-builder.v0.19.overlay.json",
+    CONTRACTS / "openapi-admin-editorial-quality-review.v0.19.overlay.json",
 )
 EXPECTED_PATHS = [
-    "/internal/admin/v1/content-reviews",
-    "/internal/admin/v1/content-reviews/{version_id}",
-    "/internal/admin/v1/content-reviews/{version_id}/decision",
+    "/internal/admin/v1/flow-composer/configuration-versions/{version_id}",
+    "/internal/admin/v1/flow-composer/configuration-versions/{version_id}/audit",
+    "/internal/admin/v1/flow-composer/drafts",
 ]
 
 
-def _load_before_review_contract() -> dict[str, object]:
+def _load_before_flow_composer_contract() -> dict[str, object]:
     expected = deepcopy(json.loads(BASE.read_text(encoding="utf-8")))
-    for path in BEFORE_REVIEW_OVERLAYS:
+    for path in BEFORE_FLOW_COMPOSER_OVERLAYS:
         _merge_overlay(expected, json.loads(path.read_text(encoding="utf-8")), path.name)
     return expected
 
 
-def _build_review_runtime_openapi() -> dict[str, object]:
+def _build_flow_composer_runtime_openapi() -> dict[str, object]:
     previous = os.environ.get("KEFE_API_VERSION")
     os.environ["KEFE_API_VERSION"] = "0.19.0"
     get_settings.cache_clear()
@@ -49,10 +50,10 @@ def _build_review_runtime_openapi() -> dict[str, object]:
 
 
 def build_overlay() -> dict[str, object]:
-    before = _load_before_review_contract()
-    generated = _build_review_runtime_openapi()
+    before = _load_before_flow_composer_contract()
+    generated = _build_flow_composer_runtime_openapi()
     if generated.get("info", {}).get("version") != "0.19.0":
-        raise SystemExit("Editorial review overlay expects runtime API version 0.19.0")
+        raise SystemExit("Flow Composer overlay expects runtime API version 0.19.0")
 
     before_schemas = before.get("components", {}).get("schemas", {})
     generated_schemas = generated.get("components", {}).get("schemas", {})
@@ -73,19 +74,14 @@ def build_overlay() -> dict[str, object]:
     removed_paths = sorted(before_paths.keys() - generated_paths.keys())
     if changed_schemas or removed_schemas or changed_paths or removed_paths:
         raise SystemExit(
-            "Editorial review API must remain additive; "
+            "Flow Composer API must remain additive; "
             f"changed_schemas={changed_schemas}, removed_schemas={removed_schemas}, "
             f"changed_paths={changed_paths}, removed_paths={removed_paths}"
         )
 
-    missing_paths = sorted(path for path in EXPECTED_PATHS if path not in generated_paths)
-    collisions = sorted(path for path in EXPECTED_PATHS if path in before_paths)
-    if missing_paths or collisions:
-        raise SystemExit(
-            "Editorial review overlay path boundary drifted; "
-            f"missing={missing_paths}, collisions={collisions}"
-        )
-    new_path_names = sorted(EXPECTED_PATHS)
+    new_path_names = sorted(generated_paths.keys() - before_paths.keys())
+    if new_path_names != sorted(EXPECTED_PATHS):
+        raise SystemExit(f"Flow Composer overlay path set drifted: {new_path_names}")
 
     referenced_schema_names: set[str] = set()
 
@@ -108,11 +104,15 @@ def build_overlay() -> dict[str, object]:
         for name in pending:
             schema = generated_schemas.get(name)
             if schema is None:
-                raise SystemExit(f"Editorial review overlay references missing schema: {name}")
+                raise SystemExit(f"Flow Composer overlay references missing schema: {name}")
             processed.add(name)
             collect(schema)
 
     new_schema_names = set(generated_schemas.keys()) - set(before_schemas.keys())
+    unrelated = sorted(new_schema_names - referenced_schema_names)
+    if unrelated:
+        raise SystemExit(f"Flow Composer overlay found unrelated schemas: {unrelated}")
+
     additive_schema_names = sorted(referenced_schema_names & new_schema_names)
     return {
         "target_version": "0.19.0",
@@ -125,7 +125,7 @@ def build_overlay() -> dict[str, object]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Generate additive Admin Editorial Quality Review OpenAPI overlay"
+        description="Generate additive Admin Flow Composer OpenAPI overlay"
     )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--check", action="store_true")
@@ -135,15 +135,15 @@ def main() -> None:
     rendered = json.dumps(overlay, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     if args.check:
         if not args.output.exists():
-            raise SystemExit("Checked-in Editorial Quality Review OpenAPI overlay is missing")
+            raise SystemExit("Checked-in Flow Composer OpenAPI overlay is missing")
         checked = json.loads(args.output.read_text(encoding="utf-8"))
         if checked != overlay:
-            raise SystemExit("Checked-in Editorial Quality Review OpenAPI overlay is stale")
-        print(f"Editorial Quality Review OpenAPI overlay matches {args.output}")
+            raise SystemExit("Checked-in Flow Composer OpenAPI overlay is stale")
+        print(f"Flow Composer OpenAPI overlay matches {args.output}")
         return
 
     args.output.write_text(rendered, encoding="utf-8")
-    print(f"Editorial Quality Review OpenAPI overlay written to {args.output}")
+    print(f"Flow Composer OpenAPI overlay written to {args.output}")
 
 
 if __name__ == "__main__":
