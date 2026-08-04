@@ -48,6 +48,8 @@ jobs:
               '            "market_scope": self.market_scope,\n',
               '                market_scope=MarketScope(value["market_scope"]),\n':
               '                market_scope=value["market_scope"],\n',
+              '            "market_scope": config.market_scope.value,\n':
+              '            "market_scope": config.market_scope,\n',
           }
           for old, new in replacements.items():
               if domain.count(old) != 1:
