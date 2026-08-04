@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 CONTRACT = ROOT / "docs/contracts/canonical-public-feed-catalog-activation.v1.json"
+FEED_ITEM_CONTRACT = ROOT / "docs/contracts/feed-item-extraction-slice53.v1.json"
 DOMAIN = ROOT / "services/api/src/kefe_api/modules/knowledge/canonical_public_feed_catalog.py"
 RUNTIME = ROOT / "services/api/src/kefe_api/modules/knowledge/public_feed_runtime.py"
 LIVE_RUNTIME = ROOT / "services/api/src/kefe_api/infrastructure/canonical_public_feed_runtime.py"
@@ -22,6 +23,17 @@ HTTP_TEST = ROOT / "services/api/tests/test_canonical_public_feed_http.py"
 VERTICAL_TEST = ROOT / "services/api/tests/test_canonical_public_feed_vertical.py"
 POSTGRES_HTTP_TEST = ROOT / "services/api/tests/test_canonical_public_feed_http_postgres.py"
 MIGRATIONS = ROOT / "services/api/migrations/versions"
+TOOLS = ROOT / "services/api/tools"
+COMPATIBILITY_CHECKERS = (
+    TOOLS / "check_feed_item_extraction_contract.py",
+    TOOLS / "check_ingestion_worker_runner_contract.py",
+    TOOLS / "check_provider_admission_control_contract.py",
+    TOOLS / "check_provider_http_capture_contract.py",
+    TOOLS / "check_provider_http_transport_contract.py",
+    TOOLS / "check_provider_pinned_runtime_contract.py",
+    TOOLS / "check_public_provider_capture_contract.py",
+    TOOLS / "check_rss_atom_public_capture_contract.py",
+)
 
 
 def require(condition: bool, message: str) -> None:
@@ -31,15 +43,51 @@ def require(condition: bool, message: str) -> None:
 
 def main() -> None:
     contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
+    feed_item_contract = json.loads(FEED_ITEM_CONTRACT.read_text(encoding="utf-8"))
     require(contract["source_issue"] == 291, "contract must reference Issue #291")
     require(
         contract["conflict_resolution"]["wholesale_merge_forbidden"] is True,
         "alternative branches must not be merged wholesale",
     )
     require(
-        contract["conflict_resolution"]["canonical_migration_revision"] == "20260804_0026",
+        contract["conflict_resolution"]["canonical_migration_revision"]
+        == "20260804_0026",
         "canonical migration revision drifted",
     )
+    require(
+        feed_item_contract["version"] == "1.1.0",
+        "feed item composition contract must include inert runtime adoption",
+    )
+    feed_composition = feed_item_contract["composition"]
+    require(
+        feed_composition["production_runtime_plans_registered"] == 1,
+        "exactly one inert feed item plan must be installed",
+    )
+    require(
+        feed_composition["production_processors_registered"] == 1,
+        "exactly one deterministic feed item processor must be installed",
+    )
+    require(
+        feed_composition["plan_registration_is_source_activation"] is False,
+        "worker plan registration must remain distinct from source activation",
+    )
+    for field in (
+        "seeded_feed_definitions",
+        "seeded_provider_profiles",
+        "seeded_public_adapters",
+        "seeded_schedules",
+        "concrete_providers_registered",
+    ):
+        require(feed_composition[field] == 0, f"{field} must remain zero")
+    require(
+        feed_composition["explicit_catalog_activation_required"] is True,
+        "source runtime must require explicit catalog activation",
+    )
+    require(
+        feed_composition["startup_network"] is False,
+        "production startup must not perform feed network activity",
+    )
+
     for path, label in (
         (DOMAIN, "canonical catalog domain"),
         (RUNTIME, "public-feed runtime primitive"),
@@ -53,6 +101,7 @@ def main() -> None:
         (HTTP_TEST, "canonical Admin HTTP test"),
         (VERTICAL_TEST, "canonical vertical test"),
         (POSTGRES_HTTP_TEST, "canonical PostgreSQL HTTP test"),
+        *tuple((path, f"compatibility checker {path.name}") for path in COMPATIBILITY_CHECKERS),
     ):
         require(path.is_file(), f"{label} is missing")
 
@@ -134,6 +183,26 @@ def main() -> None:
     ):
         require(marker in pipeline_source, f"pipeline missing {marker}")
 
+    checker_sources = {
+        path.name: path.read_text(encoding="utf-8") for path in COMPATIBILITY_CHECKERS
+    }
+    combined_checkers = "\n".join(checker_sources.values())
+    for forbidden in (
+        "InMemoryProviderAdoptionRegistry()",
+        "InMemoryPublicSourceCaptureRegistry()",
+        "InMemoryIngestionWorkerRuntimeRegistry()",
+    ):
+        require(
+            forbidden not in combined_checkers,
+            f"legacy composition-only checker marker remains: {forbidden}",
+        )
+    for marker in (
+        "MutableProviderAdoptionRegistry()",
+        "MutablePublicSourceCaptureRegistry()",
+        "build_feed_item_extraction_runtime(",
+    ):
+        require(marker in combined_checkers, f"canonical checker marker missing: {marker}")
+
     main_source = MAIN.read_text(encoding="utf-8")
     for marker in (
         "build_canonical_public_feed_composition(",
@@ -208,7 +277,8 @@ def main() -> None:
 
     postgres_http_test_source = POSTGRES_HTTP_TEST.read_text(encoding="utf-8")
     require(
-        'approver_id = _seed_subject(database_url, "ACCESS_ADMIN")' in postgres_http_test_source,
+        'approver_id = _seed_subject(database_url, "ACCESS_ADMIN")'
+        in postgres_http_test_source,
         "PostgreSQL restart approver must carry SOURCE_APPROVE through policy",
     )
 
