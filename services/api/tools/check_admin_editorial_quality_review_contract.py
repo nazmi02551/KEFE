@@ -32,6 +32,16 @@ SECURED = (
     / "admin_security"
     / "content_authoring.py"
 )
+DOMAIN = (
+    REPO_ROOT
+    / "services"
+    / "api"
+    / "src"
+    / "kefe_api"
+    / "modules"
+    / "content_authoring"
+    / "service.py"
+)
 PORTS = (
     REPO_ROOT
     / "services"
@@ -127,6 +137,7 @@ def main() -> None:
     contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
     router = ROUTER.read_text(encoding="utf-8")
     secured = SECURED.read_text(encoding="utf-8")
+    domain = DOMAIN.read_text(encoding="utf-8")
     ports = PORTS.read_text(encoding="utf-8")
     memory = MEMORY.read_text(encoding="utf-8")
     postgres = POSTGRES.read_text(encoding="utf-8")
@@ -160,14 +171,23 @@ def main() -> None:
     for fragment in (
         "AdminCapability.CONTENT_REVIEW",
         "enforce_reviewer_separation",
-        "explicit_attestation",
+        "review_queue(",
+        "review_for_inspection(",
+        "approve_with_review_modes(",
+    ):
+        if fragment not in secured:
+            problems.append(f"Secured review facade missing: {fragment}")
+
+    for fragment in (
+        "completed_review_modes: tuple[str, ...] | None = None",
         "CONTENT_REVIEW_ATTESTATION_REQUIRED",
         "CONTENT_REVIEW_MODES_INCOMPLETE",
         "completed_review_modes=()",
         "expected_state=ContentLifecycle.IN_REVIEW",
+        "{ContentLifecycle.IN_REVIEW, ContentLifecycle.APPROVED}",
     ):
-        if fragment not in secured:
-            problems.append(f"Secured review service missing: {fragment}")
+        if fragment not in domain:
+            problems.append(f"Content Authoring review authority missing: {fragment}")
 
     for source_name, source in (
         ("ports", ports),
@@ -240,8 +260,9 @@ def main() -> None:
 
     print(
         "Admin Editorial Quality Review contract: PASS — bounded IN_REVIEW queue, "
-        "reviewer-only inspection, exact review-mode attestation, maker-checker approval, "
-        "rationale-bound rejection and no publication/Flow authority are enforced."
+        "reviewer-only inspection, domain-owned exact review-mode attestation, "
+        "maker-checker approval, rationale-bound rejection and no publication/Flow "
+        "authority are enforced."
     )
 
 
