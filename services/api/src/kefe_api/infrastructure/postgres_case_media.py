@@ -31,9 +31,10 @@ class PostgresCaseMediaRepository:
         if state is not None:
             params["state"] = state.value
         with self._engine.connect() as connection:
-            rows = connection.execute(
-                text(
-                    f"""
+            rows = (
+                connection.execute(
+                    text(
+                        f"""
                     SELECT media_asset_id, asset_key, kind, delivery_ref, content_hash,
                            byte_length, media_type, title, alt_text, caption,
                            credit_label, source_label, poster_asset_key, state,
@@ -43,9 +44,12 @@ class PostgresCaseMediaRepository:
                     ORDER BY registered_at DESC, media_asset_id DESC
                     LIMIT :limit OFFSET :offset
                     """
-                ),
-                params,
-            ).mappings().all()
+                    ),
+                    params,
+                )
+                .mappings()
+                .all()
+            )
         return tuple(self._asset(row) for row in rows)
 
     def get_asset(self, media_asset_id: UUID) -> MediaAsset | None:
@@ -56,9 +60,10 @@ class PostgresCaseMediaRepository:
 
     def _get_asset(self, predicate: str, value: object) -> MediaAsset | None:
         with self._engine.connect() as connection:
-            row = connection.execute(
-                text(
-                    f"""
+            row = (
+                connection.execute(
+                    text(
+                        f"""
                     SELECT media_asset_id, asset_key, kind, delivery_ref, content_hash,
                            byte_length, media_type, title, alt_text, caption,
                            credit_label, source_label, poster_asset_key, state,
@@ -66,9 +71,12 @@ class PostgresCaseMediaRepository:
                     FROM media.asset
                     WHERE {predicate}
                     """
-                ),
-                {"value": value},
-            ).mappings().one_or_none()
+                    ),
+                    {"value": value},
+                )
+                .mappings()
+                .one_or_none()
+            )
         return None if row is None else self._asset(row)
 
     def find_asset_conflict(
@@ -78,9 +86,10 @@ class PostgresCaseMediaRepository:
         content_hash: str,
     ) -> MediaAsset | None:
         with self._engine.connect() as connection:
-            row = connection.execute(
-                text(
-                    """
+            row = (
+                connection.execute(
+                    text(
+                        """
                     SELECT media_asset_id, asset_key, kind, delivery_ref, content_hash,
                            byte_length, media_type, title, alt_text, caption,
                            credit_label, source_label, poster_asset_key, state,
@@ -90,9 +99,12 @@ class PostgresCaseMediaRepository:
                     ORDER BY registered_at, media_asset_id
                     LIMIT 1
                     """
-                ),
-                {"delivery_ref": delivery_ref, "content_hash": content_hash},
-            ).mappings().one_or_none()
+                    ),
+                    {"delivery_ref": delivery_ref, "content_hash": content_hash},
+                )
+                .mappings()
+                .one_or_none()
+            )
         return None if row is None else self._asset(row)
 
     def insert_asset(
@@ -131,9 +143,10 @@ class PostgresCaseMediaRepository:
         audit: MediaAuditEntry,
     ) -> MediaAsset | None:
         with self._engine.begin() as connection:
-            row = connection.execute(
-                text(
-                    """
+            row = (
+                connection.execute(
+                    text(
+                        """
                     UPDATE media.asset
                     SET state = :new_state
                     WHERE media_asset_id = :media_asset_id
@@ -143,13 +156,16 @@ class PostgresCaseMediaRepository:
                               credit_label, source_label, poster_asset_key, state,
                               registered_by, registered_at
                     """
-                ),
-                {
-                    "media_asset_id": media_asset_id,
-                    "expected_state": expected_state.value,
-                    "new_state": new_state.value,
-                },
-            ).mappings().one_or_none()
+                    ),
+                    {
+                        "media_asset_id": media_asset_id,
+                        "expected_state": expected_state.value,
+                        "new_state": new_state.value,
+                    },
+                )
+                .mappings()
+                .one_or_none()
+            )
             if row is None:
                 return None
             self._insert_audit(connection, audit)
@@ -163,9 +179,10 @@ class PostgresCaseMediaRepository:
         media_asset_id: UUID,
     ) -> MediaBinding | None:
         with self._engine.connect() as connection:
-            row = connection.execute(
-                text(
-                    """
+            row = (
+                connection.execute(
+                    text(
+                        """
                     SELECT binding_id, case_version_id, media_asset_id, slot, priority,
                            autoplay, muted, looping, bound_by, bound_at
                     FROM media.case_version_binding
@@ -173,13 +190,16 @@ class PostgresCaseMediaRepository:
                       AND slot = :slot
                       AND media_asset_id = :media_asset_id
                     """
-                ),
-                {
-                    "case_version_id": case_version_id,
-                    "slot": slot.value,
-                    "media_asset_id": media_asset_id,
-                },
-            ).mappings().one_or_none()
+                    ),
+                    {
+                        "case_version_id": case_version_id,
+                        "slot": slot.value,
+                        "media_asset_id": media_asset_id,
+                    },
+                )
+                .mappings()
+                .one_or_none()
+            )
         return None if row is None else self._binding(row)
 
     def insert_binding(self, binding: MediaBinding) -> None:
@@ -212,34 +232,42 @@ class PostgresCaseMediaRepository:
 
     def list_bindings(self, case_version_id: UUID) -> tuple[MediaBinding, ...]:
         with self._engine.connect() as connection:
-            rows = connection.execute(
-                text(
-                    """
+            rows = (
+                connection.execute(
+                    text(
+                        """
                     SELECT binding_id, case_version_id, media_asset_id, slot, priority,
                            autoplay, muted, looping, bound_by, bound_at
                     FROM media.case_version_binding
                     WHERE case_version_id = :case_version_id
                     ORDER BY priority DESC, binding_id
                     """
-                ),
-                {"case_version_id": case_version_id},
-            ).mappings().all()
+                    ),
+                    {"case_version_id": case_version_id},
+                )
+                .mappings()
+                .all()
+            )
         return tuple(self._binding(row) for row in rows)
 
     def list_audit(self, media_asset_id: UUID) -> tuple[MediaAuditEntry, ...]:
         with self._engine.connect() as connection:
-            rows = connection.execute(
-                text(
-                    """
+            rows = (
+                connection.execute(
+                    text(
+                        """
                     SELECT audit_id, media_asset_id, actor_ref, command,
                            previous_state, new_state, occurred_at
                     FROM media.asset_audit
                     WHERE media_asset_id = :media_asset_id
                     ORDER BY occurred_at, audit_id
                     """
-                ),
-                {"media_asset_id": media_asset_id},
-            ).mappings().all()
+                    ),
+                    {"media_asset_id": media_asset_id},
+                )
+                .mappings()
+                .all()
+            )
         return tuple(self._audit(row) for row in rows)
 
     @staticmethod
@@ -336,9 +364,7 @@ class PostgresCaseMediaRepository:
             actor_ref=str(row["actor_ref"]),
             command=str(row["command"]),
             previous_state=(
-                None
-                if row["previous_state"] is None
-                else MediaState(str(row["previous_state"]))
+                None if row["previous_state"] is None else MediaState(str(row["previous_state"]))
             ),
             new_state=MediaState(str(row["new_state"])),
             occurred_at=row["occurred_at"],

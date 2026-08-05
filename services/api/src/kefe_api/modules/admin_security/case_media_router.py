@@ -194,10 +194,7 @@ def audit(
     media: MediaDep,
 ) -> MediaAuditTrailResponse:
     return MediaAuditTrailResponse(
-        items=[
-            _audit_response(item)
-            for item in media.list_audit(principal, media_asset_id)
-        ]
+        items=[_audit_response(item) for item in media.list_audit(principal, media_asset_id)]
     )
 
 
@@ -241,10 +238,7 @@ def projection(
     media: MediaDep,
 ) -> CaseMediaProjectionListResponse:
     return CaseMediaProjectionListResponse(
-        items=[
-            _projection_response(item)
-            for item in media.project(principal, case_version_id)
-        ]
+        items=[_projection_response(item) for item in media.project(principal, case_version_id)]
     )
 
 
@@ -306,9 +300,7 @@ def _audit_response(item: MediaAuditEntry) -> MediaAuditResponse:
         media_asset_id=item.media_asset_id,
         actor_ref=item.actor_ref,
         command=item.command,
-        previous_state=(
-            None if item.previous_state is None else item.previous_state.value
-        ),
+        previous_state=(None if item.previous_state is None else item.previous_state.value),
         new_state=item.new_state.value,
         occurred_at=item.occurred_at,
     )

@@ -203,8 +203,12 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute("DROP TRIGGER IF EXISTS media_case_version_binding_append_only_update_guard ON media.case_version_binding")
-    op.execute("DROP TRIGGER IF EXISTS media_asset_audit_append_only_update_guard ON media.asset_audit")
+    op.execute(
+        "DROP TRIGGER IF EXISTS media_case_version_binding_append_only_update_guard ON media.case_version_binding"
+    )
+    op.execute(
+        "DROP TRIGGER IF EXISTS media_asset_audit_append_only_update_guard ON media.asset_audit"
+    )
     op.execute("DROP TRIGGER IF EXISTS media_asset_immutable_update_guard ON media.asset")
     op.execute("DROP FUNCTION IF EXISTS media.reject_append_only_mutation()")
     op.execute("DROP FUNCTION IF EXISTS media.reject_asset_immutable_update()")

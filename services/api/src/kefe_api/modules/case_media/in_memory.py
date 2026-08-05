@@ -32,9 +32,7 @@ class InMemoryCaseMediaRepository:
     ) -> tuple[MediaAsset, ...]:
         with self._lock:
             items = [
-                asset
-                for asset in self._assets.values()
-                if state is None or asset.state is state
+                asset for asset in self._assets.values() if state is None or asset.state is state
             ]
             items.sort(
                 key=lambda item: (item.registered_at, item.media_asset_id),

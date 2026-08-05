@@ -4,6 +4,7 @@ from kefe_api.core.settings import Settings
 from kefe_api.infrastructure.db import build_engine
 from kefe_api.infrastructure.postgres_account_continuity import PostgresAccountContinuityRepository
 from kefe_api.infrastructure.postgres_admin_security import PostgresAdminSessionStore
+from kefe_api.infrastructure.postgres_case_media import PostgresCaseMediaRepository
 from kefe_api.infrastructure.postgres_community_reason import PostgresCommunityReasonRepository
 from kefe_api.infrastructure.postgres_consensus import PostgresConsensusRepository
 from kefe_api.infrastructure.postgres_content_configuration import (
@@ -26,6 +27,8 @@ from kefe_api.infrastructure.postgres_reflection_decision import (
 from kefe_api.infrastructure.postgres_sharing import PostgresShareRepository
 from kefe_api.modules.admin_security.in_memory import InMemoryAdminSessionStore
 from kefe_api.modules.admin_security.ports import AdminSessionStore
+from kefe_api.modules.case_media.in_memory import InMemoryCaseMediaRepository
+from kefe_api.modules.case_media.ports import CaseMediaRepository
 from kefe_api.modules.community_reason.in_memory import InMemoryCommunityReasonRepository
 from kefe_api.modules.community_reason.ports import CommunityReasonRepository
 from kefe_api.modules.consensus.in_memory import build_demo_consensus_repository
@@ -178,6 +181,16 @@ def build_content_authoring_repository(settings: Settings) -> ContentAuthoringRe
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
 
     return PostgresFlowPinnedContentAuthoringRepository(build_engine(settings.database_url))
+
+
+def build_case_media_repository(settings: Settings) -> CaseMediaRepository:
+    if settings.persistence_backend == "memory":
+        return InMemoryCaseMediaRepository()
+
+    if not settings.database_url:
+        raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
+
+    return PostgresCaseMediaRepository(build_engine(settings.database_url))
 
 
 def build_content_configuration_repository(
