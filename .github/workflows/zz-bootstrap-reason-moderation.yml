@@ -8,7 +8,7 @@ on:
       - ".github/workflows/zz-bootstrap-reason-moderation.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: bootstrap-reason-moderation-${{ github.ref }}
@@ -16,11 +16,13 @@ concurrency:
 
 jobs:
   generate:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.head_ref }}
           show-progress: false
       - uses: actions/setup-python@v5
         with:
@@ -40,6 +42,7 @@ jobs:
           src/kefe_api/modules/admin_security/policy.py
           tests/test_admin_community_reason_moderation_http.py
           tests/test_admin_community_reason_moderation_http_postgres.py
+          tools/check_admin_community_reason_moderation_contract.py
           tools/export_admin_community_reason_moderation_openapi_overlay.py
           tools/export_admin_publication_operations_openapi_overlay.py
           tools/export_openapi.py
@@ -55,6 +58,7 @@ jobs:
           src/kefe_api/modules/admin_security/policy.py
           tests/test_admin_community_reason_moderation_http.py
           tests/test_admin_community_reason_moderation_http_postgres.py
+          tools/check_admin_community_reason_moderation_contract.py
           tools/export_admin_community_reason_moderation_openapi_overlay.py
           tools/export_admin_publication_operations_openapi_overlay.py
           tools/export_openapi.py
@@ -67,11 +71,17 @@ jobs:
         working-directory: services/api
         run: >-
           python tools/export_admin_community_reason_moderation_openapi_overlay.py
-          --output /tmp/openapi-admin-community-reason-moderation.v0.19.overlay.json
-      - uses: actions/upload-artifact@v4
-        with:
-          name: reason-moderation-bootstrap
-          path: |
-            /tmp/openapi-admin-community-reason-moderation.v0.19.overlay.json
-            services/api/src/kefe_api/infrastructure/postgres_community_reason.py
-          if-no-files-found: error
+          --output ../../docs/contracts/openapi-admin-community-reason-moderation.v0.19.overlay.json
+      - name: Commit exact bootstrap outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            services/api/src/kefe_api/infrastructure/postgres_community_reason.py \
+            docs/contracts/openapi-admin-community-reason-moderation.v0.19.overlay.json
+          if git diff --cached --quiet; then
+            echo "Exact bootstrap outputs are already checked in."
+            exit 0
+          fi
+          git commit -m "chore: check in exact reason moderation contracts"
+          git push origin HEAD:${{ github.head_ref }}
