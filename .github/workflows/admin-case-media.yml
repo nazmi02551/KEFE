@@ -1,0 +1,190 @@
+name: Admin Case Media CI
+
+on:
+  pull_request:
+    paths:
+      - "apps/admin/**"
+      - "apps/mobile/docs/admin-case-media-cross-surface-boundary.md"
+      - "services/api/src/kefe_api/modules/case_media/**"
+      - "services/api/src/kefe_api/modules/admin_security/case_media.py"
+      - "services/api/src/kefe_api/modules/admin_security/case_media_router.py"
+      - "services/api/src/kefe_api/modules/admin_security/models.py"
+      - "services/api/src/kefe_api/modules/admin_security/policy.py"
+      - "services/api/src/kefe_api/infrastructure/postgres_case_media.py"
+      - "services/api/src/kefe_api/infrastructure/persistence.py"
+      - "services/api/src/kefe_api/main.py"
+      - "services/api/migrations/versions/20260805_0028_case_media_registry.py"
+      - "services/api/tests/test_admin_case_media_http.py"
+      - "services/api/tests/test_admin_case_media_http_postgres.py"
+      - "services/api/tools/check_admin_case_media_contract.py"
+      - "services/api/tools/export_admin_case_media_openapi_overlay.py"
+      - "services/api/tools/export_admin_operational_reports_openapi_overlay.py"
+      - "services/api/tools/export_openapi.py"
+      - "services/api/tools/export_mvp_openapi_overlay.py"
+      - "services/api/tools/export_global_openapi_overlay.py"
+      - "docs/adr/0107-provider-neutral-case-media-registry-and-admin-management.md"
+      - "docs/contracts/admin-case-media-asset-management.v1.json"
+      - "docs/contracts/openapi-admin-case-media.v0.19.overlay.json"
+      - "docs/contracts/error-codes.v1.yaml"
+      - ".github/workflows/admin-case-media.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/admin/**"
+      - "apps/mobile/docs/admin-case-media-cross-surface-boundary.md"
+      - "services/api/src/kefe_api/modules/case_media/**"
+      - "services/api/src/kefe_api/modules/admin_security/case_media.py"
+      - "services/api/src/kefe_api/modules/admin_security/case_media_router.py"
+      - "services/api/src/kefe_api/modules/admin_security/models.py"
+      - "services/api/src/kefe_api/modules/admin_security/policy.py"
+      - "services/api/src/kefe_api/infrastructure/postgres_case_media.py"
+      - "services/api/src/kefe_api/infrastructure/persistence.py"
+      - "services/api/src/kefe_api/main.py"
+      - "services/api/migrations/versions/20260805_0028_case_media_registry.py"
+      - "services/api/tests/test_admin_case_media_http.py"
+      - "services/api/tests/test_admin_case_media_http_postgres.py"
+      - "services/api/tools/check_admin_case_media_contract.py"
+      - "services/api/tools/export_admin_case_media_openapi_overlay.py"
+      - "services/api/tools/export_admin_operational_reports_openapi_overlay.py"
+      - "services/api/tools/export_openapi.py"
+      - "services/api/tools/export_mvp_openapi_overlay.py"
+      - "services/api/tools/export_global_openapi_overlay.py"
+      - "docs/adr/0107-provider-neutral-case-media-registry-and-admin-management.md"
+      - "docs/contracts/admin-case-media-asset-management.v1.json"
+      - "docs/contracts/openapi-admin-case-media.v0.19.overlay.json"
+      - "docs/contracts/error-codes.v1.yaml"
+      - ".github/workflows/admin-case-media.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: admin-case-media-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api-memory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Lint Case Media slice
+        working-directory: services/api
+        run: >-
+          ruff check
+          src/kefe_api/modules/case_media
+          src/kefe_api/modules/admin_security/case_media.py
+          src/kefe_api/modules/admin_security/case_media_router.py
+          src/kefe_api/modules/admin_security/models.py
+          src/kefe_api/modules/admin_security/policy.py
+          src/kefe_api/infrastructure/postgres_case_media.py
+          src/kefe_api/infrastructure/persistence.py
+          src/kefe_api/main.py
+          migrations/versions/20260805_0028_case_media_registry.py
+          tests/test_admin_case_media_http.py
+          tests/test_admin_case_media_http_postgres.py
+          tools/check_admin_case_media_contract.py
+          tools/export_admin_case_media_openapi_overlay.py
+          tools/export_admin_operational_reports_openapi_overlay.py
+          tools/export_openapi.py
+          tools/export_mvp_openapi_overlay.py
+          tools/export_global_openapi_overlay.py
+      - name: Executable backend architecture contract
+        working-directory: services/api
+        run: python tools/check_admin_case_media_contract.py
+      - name: Exact Case Media OpenAPI overlay
+        working-directory: services/api
+        run: >-
+          python tools/export_admin_case_media_openapi_overlay.py
+          --output ../../docs/contracts/openapi-admin-case-media.v0.19.overlay.json
+          --check
+      - name: Exact predecessor Operational Reports overlay
+        working-directory: services/api
+        run: >-
+          python tools/export_admin_operational_reports_openapi_overlay.py
+          --output ../../docs/contracts/openapi-admin-operational-reports.v0.19.overlay.json
+          --check
+      - name: Full composed OpenAPI drift gate
+        working-directory: services/api
+        run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
+      - name: Memory authorization and fail-closed projection behavior
+        working-directory: services/api
+        run: >-
+          pytest -q
+          tests/test_admin_case_media_http.py
+          tests/test_admin_operational_reports_http.py
+          tests/test_admin_community_reason_moderation_http.py
+          tests/test_mvp_completion.py
+
+  admin-ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/admin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.13.0"
+          cache: npm
+          cache-dependency-path: apps/admin/package-lock.json
+      - name: Install locked Admin dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify Admin contracts, lint, types, tests and production build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: npm run verify
+
+  postgres:
+    needs: api-memory
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: kefe
+          POSTGRES_USER: kefe
+          POSTGRES_PASSWORD: kefe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kefe -d kefe"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Migrate PostgreSQL
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: alembic upgrade head
+      - name: Durable restart, projection and immutability proof
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+          KEFE_PERSISTENCE_BACKEND: postgres
+          KEFE_RUN_POSTGRES_TESTS: "1"
+        run: pytest -q tests/test_admin_case_media_http_postgres.py
