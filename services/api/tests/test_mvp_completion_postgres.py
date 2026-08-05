@@ -162,27 +162,22 @@ def test_postgres_existing_account_merge_preserves_product_history_and_controls(
             text("SELECT actor_id FROM community.reason WHERE id = :id"),
             {"id": reason.json()["reason_id"]},
         ).scalar_one()
-        active_guest_sessions = connection.execute(
+        active_merged_guest_sessions = connection.execute(
             text(
                 """
                 SELECT count(*)
                 FROM identity.actor_session
-                WHERE actor_id IN (:first_guest_actor_id, :second_guest_actor_id)
+                WHERE actor_id = :guest_actor_id
                   AND revoked_at IS NULL
                 """
             ),
-            {
-                "first_guest_actor_id": account_guest_id,
-                "second_guest_actor_id": second_guest_id,
-            },
+            {"guest_actor_id": second_guest_id},
         ).scalar_one()
     assert str(merge_row["account_actor_id"]) == account_actor_id
     assert str(merge_row["guest_actor_id"]) == second_guest_id
     assert str(community_owner) == account_actor_id
     assert account_guest_id == account_actor_id
-    # The promoted actor also owns new account sessions, so inspect old credentials through
-    # the API and require the retired merged guest to have no active persisted sessions.
-    assert active_guest_sessions >= 1
+    assert active_merged_guest_sessions == 0
 
     deleted = client.delete(
         "/v1/me",
