@@ -172,7 +172,10 @@ def test_postgres_rotation_replays_old_result_after_restart_and_issues_new_key(
     assert "replay_secret" not in replay_columns
     assert "access_token" not in replay_columns
     assert hashlib.sha256(first.json()["access_token"].encode()).hexdigest() in persisted_hashes
-    assert hashlib.sha256(new_result.json()["access_token"].encode()).hexdigest() in persisted_hashes
+    assert (
+        hashlib.sha256(new_result.json()["access_token"].encode()).hexdigest()
+        in persisted_hashes
+    )
     get_settings.cache_clear()
 
 
