@@ -101,15 +101,6 @@ jobs:
       - name: Executable OTP alert candidate contract
         working-directory: services/api
         run: python tools/check_otp_delivery_alert_candidates_contract.py
-      - name: Exact Operational Reports OpenAPI overlay
-        working-directory: services/api
-        run: >-
-          python tools/export_admin_operational_reports_openapi_overlay.py
-          --output ../../docs/contracts/openapi-admin-operational-reports.v0.19.overlay.json
-          --check
-      - name: Full composed OpenAPI drift gate
-        working-directory: services/api
-        run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
       - name: Memory alert delivery health Admin and privacy proof
         working-directory: services/api
         run: >-
@@ -124,6 +115,15 @@ jobs:
           tests/test_guest_merge_key_rotation.py
           tests/test_guest_merge_replay.py
           tests/test_privacy_export_deletion_hardening.py
+      - name: Exact Operational Reports OpenAPI overlay
+        working-directory: services/api
+        run: >-
+          python tools/export_admin_operational_reports_openapi_overlay.py
+          --output ../../docs/contracts/openapi-admin-operational-reports.v0.19.overlay.json
+          --check
+      - name: Full composed OpenAPI drift gate
+        working-directory: services/api
+        run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
 
   postgres:
     needs: memory
