@@ -74,10 +74,14 @@ class PostgresIdentityRepository:
                 {"token_hash": token_hash},
             ).mappings().one_or_none()
 
-        if row is None or row["state"] != "ACTIVE":
+        if row is None:
             return TokenResolution(TokenStatus.INVALID)
+        # Session lifecycle is more specific than actor lifecycle. Preserve an explicit
+        # revoked classification even when a merge has retired the source guest actor.
         if row["revoked_at"] is not None:
             return TokenResolution(TokenStatus.REVOKED)
+        if row["state"] != "ACTIVE":
+            return TokenResolution(TokenStatus.INVALID)
         if row["expires_at"] <= now:
             return TokenResolution(TokenStatus.EXPIRED)
         return TokenResolution(
