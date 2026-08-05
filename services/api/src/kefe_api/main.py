@@ -114,7 +114,7 @@ from kefe_api.modules.identity.admission import (
     IntegrityMode,
     UnconfiguredDeviceIntegrityVerifier,
 )
-from kefe_api.modules.identity.otp_delivery import CapturingOtpDelivery, DisabledOtpDelivery
+from kefe_api.modules.identity.otp_delivery import build_otp_delivery
 from kefe_api.modules.identity.router import router as identity_router
 from kefe_api.modules.identity.service import IdentityService
 from kefe_api.modules.privacy.router import router as privacy_router
@@ -213,11 +213,7 @@ def create_app() -> FastAPI:
         security=admin_security_service,
     )
     flow_runtime_service = FlowRuntimeService(decision_repository)
-    otp_delivery = (
-        DisabledOtpDelivery()
-        if settings.environment.lower() == "production"
-        else CapturingOtpDelivery()
-    )
+    otp_delivery = build_otp_delivery(settings)
 
     app.state.context_repository = context_repository
     app.state.context_service = ContextService(context_repository)
