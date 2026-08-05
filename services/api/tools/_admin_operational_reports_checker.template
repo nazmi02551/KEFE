@@ -1,0 +1,253 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+
+
+def read_text(path: str) -> str:
+    return (ROOT / path).read_text(encoding="utf-8")
+
+
+def require(source: str, fragments: tuple[str, ...], label: str, problems: list[str]) -> None:
+    for fragment in fragments:
+        if fragment not in source:
+            problems.append(f"{label} missing required fragment: {fragment}")
+
+
+def main() -> None:
+    contract = json.loads(
+        read_text("docs/contracts/admin-operational-reports-snapshot.v1.json")
+    )
+    problems: list[str] = []
+
+    if contract.get("contract_id") != "admin-operational-reports-snapshot.v1":
+        problems.append("contract identity drifted")
+    if contract.get("parent_runtime", {}).get("sha") != (
+        "6d5bc52388b590706a3a07aef9b2be08bc501aae"
+    ):
+        problems.append("parent runtime drifted")
+    if contract.get("capabilities", {}).get("lifecycle_promotion") is not False:
+        problems.append("capability lifecycle promotion is forbidden")
+    if contract.get("authority", {}).get("second_analytics_store_allowed") is not False:
+        problems.append("second analytics authority is forbidden")
+    if contract.get("authority", {}).get("report_persistence_allowed") is not False:
+        problems.append("report persistence is forbidden")
+    if contract.get("privacy", {}).get("aggregate_only") is not True:
+        problems.append("aggregate-only boundary is not locked")
+    if contract.get("endpoint", {}).get("method") != "GET":
+        problems.append("operational report endpoint must remain GET-only")
+    if contract.get("security", {}).get("new_capability") != "OPERATIONAL_REPORT_READ":
+        problems.append("dedicated read capability drifted")
+
+    sources = {
+        "service": read_text(
+            "services/api/src/kefe_api/modules/admin_operational_reports/service.py"
+        ),
+        "models": read_text(
+            "services/api/src/kefe_api/modules/admin_operational_reports/models.py"
+        ),
+        "secured": read_text(
+            "services/api/src/kefe_api/modules/admin_security/operational_reports.py"
+        ),
+        "router": read_text(
+            "services/api/src/kefe_api/modules/admin_security/operational_reports_router.py"
+        ),
+        "main": read_text("services/api/src/kefe_api/main.py"),
+        "policy": read_text(
+            "services/api/src/kefe_api/modules/admin_security/policy.py"
+        ),
+        "authoring_port": read_text(
+            "services/api/src/kefe_api/modules/content_authoring/ports.py"
+        ),
+        "proposal_port": read_text(
+            "services/api/src/kefe_api/modules/ingestion_orchestration/ports.py"
+        ),
+        "reason_port": read_text(
+            "services/api/src/kefe_api/modules/community_reason/ports.py"
+        ),
+        "memory_test": read_text(
+            "services/api/tests/test_admin_operational_reports_http.py"
+        ),
+        "postgres_test": read_text(
+            "services/api/tests/test_admin_operational_reports_http_postgres.py"
+        ),
+        "workflow": read_text(".github/workflows/admin-operational-reports.yml"),
+        "mobile_boundary": read_text(
+            "apps/mobile/docs/admin-operational-reports-cross-surface-boundary.md"
+        ),
+    }
+
+    require(
+        sources["service"],
+        (
+            "AdminOperationalReportsService",
+            "self._content_supply.snapshot",
+            "count_by_state",
+            "count_proposal_queue",
+            "count_moderation_queue",
+            "CONTENT_SUPPLY_CRITICAL",
+            "EDITORIAL_IN_REVIEW_BACKLOG",
+            "PROPOSAL_REVIEW_BACKLOG",
+            "MODERATION_BACKLOG",
+        ),
+        "service",
+        problems,
+    )
+    require(
+        sources["models"],
+        (
+            "AdminOperationalSignal",
+            "AdminOperationalReason",
+            "reason_codes must be sorted and unique",
+            "content supply snapshot must share report as_of",
+            "operational report counts must be non-negative",
+        ),
+        "models",
+        problems,
+    )
+    require(
+        sources["secured"],
+        ("OPERATIONAL_REPORT_READ", "self._security.authorize"),
+        "secured service",
+        problems,
+    )
+    require(
+        sources["router"],
+        (
+            'prefix="/internal/admin/v1/operational-reports"',
+            '@router.get("/snapshot"',
+            "OperationalReportsSnapshotResponse",
+            "aggregate_only",
+            "content_supply_policy",
+            "thresholds",
+        ),
+        "router",
+        problems,
+    )
+    require(
+        sources["main"],
+        (
+            "AdminOperationalReportsService",
+            "SecuredAdminOperationalReportsService",
+            "secured_admin_operational_reports_service",
+            "admin_operational_reports_router",
+        ),
+        "main composition",
+        problems,
+    )
+    require(
+        sources["policy"],
+        (
+            "AdminCapability.OPERATIONAL_REPORT_READ",
+            "AdminRole.REVIEWER",
+            "AdminRole.PUBLISHER",
+            "AdminRole.ACCESS_ADMIN",
+        ),
+        "security policy",
+        problems,
+    )
+    require(sources["authoring_port"], ("count_by_state",), "authoring port", problems)
+    require(
+        sources["proposal_port"],
+        ("count_proposal_queue",),
+        "proposal queue port",
+        problems,
+    )
+    require(
+        sources["reason_port"],
+        ("count_moderation_queue",),
+        "community reason port",
+        problems,
+    )
+    require(
+        sources["memory_test"],
+        (
+            "test_snapshot_requires_dedicated_capability_and_no_csrf_or_step_up",
+            "test_snapshot_uses_authoritative_aggregate_counts_and_is_privacy_safe",
+            "test_signal_is_transparent_and_threshold_driven",
+            "status_code == 405",
+        ),
+        "memory tests",
+        problems,
+    )
+    require(
+        sources["postgres_test"],
+        (
+            "test_postgres_operational_report_aggregates_survive_restart",
+            "information_schema.tables",
+            "reason_moderation_audit",
+            "second_app = create_app()",
+        ),
+        "PostgreSQL tests",
+        problems,
+    )
+    require(
+        sources["workflow"],
+        (
+            "permissions:",
+            "contents: read",
+            "api-memory:",
+            "admin-ui:",
+            "postgres:",
+            "Exact predecessor Community Reason moderation overlay",
+            "Durable aggregate and restart proof",
+        ),
+        "permanent workflow",
+        problems,
+    )
+    require(
+        sources["mobile_boundary"],
+        (
+            "does not add or alter any consumer/mobile endpoint",
+            "compile/upload evidence only",
+        ),
+        "mobile boundary",
+        problems,
+    )
+
+    for forbidden in (
+        '@router.post("/snapshot"',
+        '@router.put("/snapshot"',
+        '@router.patch("/snapshot"',
+        '@router.delete("/snapshot"',
+        "reporter_actor_id",
+        "source_locator",
+        "backend_object_key",
+        "localStorage",
+        "sessionStorage",
+        "setInterval(",
+    ):
+        if forbidden in sources["router"]:
+            problems.append(f"router contains forbidden fragment: {forbidden}")
+
+    temporary_paths = (
+        ".github/workflows/_bootstrap-admin-operational-reports-surface.yml",
+        ".github/workflows/_bootstrap-admin-operational-reports-surface-v2.yml",
+        ".github/workflows/_bootstrap-admin-operational-reports-surface-v3.yml",
+        ".github/workflows/_bootstrap-admin-operational-reports-surface-v4.yml",
+        ".github/workflows/_bootstrap-admin-operational-reports-surface-v5.yml",
+        "services/api/tools/bootstrap_admin_operational_reports_surface.py",
+        "services/api/tools/fix_admin_operational_reports_surface_patcher.py",
+        "services/api/tools/strip_postgres_block_from_operational_reports_patcher.py",
+        "services/api/tools/fix_generated_operational_reports_python.py",
+        "services/api/tools/_admin_operational_reports_checker.template",
+        "services/api/tools/_admin_operational_reports_openapi.template",
+    )
+    for relative_path in temporary_paths:
+        if (ROOT / relative_path).exists():
+            problems.append(f"temporary bootstrap artifact remains: {relative_path}")
+
+    if problems:
+        raise SystemExit("\n".join(problems))
+
+    print(
+        "Admin Operational Reports backend contract: PASS — existing authorities, "
+        "single-as-of aggregate snapshot, dedicated read capability, transparent "
+        "thresholds and no persistence, identity payload or mutation path."
+    )
+
+
+if __name__ == "__main__":
+    main()
