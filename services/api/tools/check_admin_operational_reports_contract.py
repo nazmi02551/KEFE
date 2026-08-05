@@ -17,9 +17,7 @@ def require(source: str, fragments: tuple[str, ...], label: str, problems: list[
 
 
 def main() -> None:
-    contract = json.loads(
-        read_text("docs/contracts/admin-operational-reports-snapshot.v1.json")
-    )
+    contract = json.loads(read_text("docs/contracts/admin-operational-reports-snapshot.v1.json"))
     problems: list[str] = []
 
     if contract.get("contract_id") != "admin-operational-reports-snapshot.v1":
@@ -55,21 +53,13 @@ def main() -> None:
             "services/api/src/kefe_api/modules/admin_security/operational_reports_router.py"
         ),
         "main": read_text("services/api/src/kefe_api/main.py"),
-        "policy": read_text(
-            "services/api/src/kefe_api/modules/admin_security/policy.py"
-        ),
-        "authoring_port": read_text(
-            "services/api/src/kefe_api/modules/content_authoring/ports.py"
-        ),
+        "policy": read_text("services/api/src/kefe_api/modules/admin_security/policy.py"),
+        "authoring_port": read_text("services/api/src/kefe_api/modules/content_authoring/ports.py"),
         "proposal_port": read_text(
             "services/api/src/kefe_api/modules/ingestion_orchestration/ports.py"
         ),
-        "reason_port": read_text(
-            "services/api/src/kefe_api/modules/community_reason/ports.py"
-        ),
-        "memory_test": read_text(
-            "services/api/tests/test_admin_operational_reports_http.py"
-        ),
+        "reason_port": read_text("services/api/src/kefe_api/modules/community_reason/ports.py"),
+        "memory_test": read_text("services/api/tests/test_admin_operational_reports_http.py"),
         "postgres_test": read_text(
             "services/api/tests/test_admin_operational_reports_http_postgres.py"
         ),

@@ -115,25 +115,19 @@ def build_overlay() -> dict[str, object]:
         for name in pending:
             schema = generated_schemas.get(name)
             if schema is None:
-                raise SystemExit(
-                    f"Operational Reports overlay references missing schema: {name}"
-                )
+                raise SystemExit(f"Operational Reports overlay references missing schema: {name}")
             processed.add(name)
             _collect_schema_refs(schema, referenced)
 
     new_schema_names = set(generated_schemas) - set(before_schemas)
     unrelated = sorted(new_schema_names - referenced)
     if unrelated:
-        raise SystemExit(
-            f"Operational Reports overlay found unrelated schemas: {unrelated}"
-        )
+        raise SystemExit(f"Operational Reports overlay found unrelated schemas: {unrelated}")
     additive_schema_names = sorted(referenced & new_schema_names)
     return {
         "target_version": "0.19.0",
         "components": {
-            "schemas": {
-                name: generated_schemas[name] for name in additive_schema_names
-            }
+            "schemas": {name: generated_schemas[name] for name in additive_schema_names}
         },
         "paths": {path: generated_paths[path] for path in EXPECTED_PATHS},
     }

@@ -116,18 +116,44 @@ def _seed_editorial_states(database_url: str) -> None:
             )
 
 
-def _seed_proposal(app, decision: ProposalReviewDecisionKind | None) -> None:
+def _seed_proposal(
+    app,
+    database_url: str,
+    decision: ProposalReviewDecisionKind | None,
+) -> None:
     repository = app.state.ingestion_orchestration_repository
     now = datetime.now(UTC)
     run_id = uuid4()
     stage_id = uuid4()
     proposal_id = uuid4()
+    source_artifact_id = uuid4()
+    engine = create_engine(database_url)
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                """
+                INSERT INTO knowledge.source_artifact (
+                    id, adapter_code, external_locator, captured_at,
+                    content_hash, created_at
+                ) VALUES (
+                    :id, 'OPERATIONAL_REPORT_TEST', :locator, :captured_at,
+                    :content_hash, :captured_at
+                )
+                """
+            ),
+            {
+                "id": source_artifact_id,
+                "locator": f"urn:kefe:test:operational-report:{source_artifact_id}",
+                "captured_at": now,
+                "content_hash": source_artifact_id.hex.ljust(64, "0")[:64],
+            },
+        )
     repository.create_or_get_run(
         IngestionRun(
             id=run_id,
             run_key=f"operational-pg-{run_id}",
             input_artifact_kind=InputArtifactKind.SOURCE_ARTIFACT,
-            input_artifact_id=uuid4(),
+            input_artifact_id=source_artifact_id,
             input_content_hash="a" * 64,
             pipeline_code="OPERATIONAL_REPORT_PG",
             pipeline_version="1",
@@ -308,10 +334,14 @@ def test_postgres_operational_report_aggregates_survive_restart(
 
     try:
         first_app = create_app()
-        _seed_proposal(first_app, None)
-        _seed_proposal(first_app, ProposalReviewDecisionKind.ACCEPTED)
-        _seed_proposal(first_app, ProposalReviewDecisionKind.REJECTED)
-        _seed_proposal(first_app, ProposalReviewDecisionKind.CHANGES_REQUESTED)
+        _seed_proposal(first_app, database_url, None)
+        _seed_proposal(first_app, database_url, ProposalReviewDecisionKind.ACCEPTED)
+        _seed_proposal(first_app, database_url, ProposalReviewDecisionKind.REJECTED)
+        _seed_proposal(
+            first_app,
+            database_url,
+            ProposalReviewDecisionKind.CHANGES_REQUESTED,
+        )
         _seed_reason(database_url, "PENDING", reported=False)
         _seed_reason(database_url, "NOT_REQUIRED", reported=True)
         _seed_reason(database_url, "BLOCKED", reported=True)
