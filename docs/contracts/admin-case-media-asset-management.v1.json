@@ -1,0 +1,234 @@
+{
+  "contract_version": "1.0.0",
+  "updated_at": "2026-08-05",
+  "status": "accepted_implementation_contract",
+  "source_issue": 310,
+  "capabilities": ["CAP-094", "CAP-126"],
+  "foundation_wave": "F3",
+  "parent": {
+    "pr": 309,
+    "exact_head": "d2644bbcc2c7eb970c507f72e610ae35000c3798"
+  },
+  "authority": {
+    "adr": "docs/adr/0107-provider-neutral-case-media-registry-and-admin-management.md",
+    "presentation_adr": "docs/adr/0031-case-media-presentation-boundary.md",
+    "presentation_contract": "docs/contracts/case-media-presentation.v1.yaml"
+  },
+  "invariants": [
+    "ONE_EXISTING_CONTENT_AUTHORING_AUTHORITY",
+    "IMMUTABLE_PUBLISHED_CASE_VERSION",
+    "CASE_AGNOSTIC_MEDIA_COMPOSITION",
+    "PREVIEW_PRODUCTION_ISOLATION",
+    "PREVIEW_FIXTURE_NEVER_PRODUCTION_FALLBACK",
+    "NO_AUTOMATIC_CASE_REVIEW_APPROVAL_OR_PUBLICATION",
+    "NO_PROVIDER_OR_STORAGE_AUTHORITY_IN_ADMIN_BROWSER",
+    "NO_USER_OR_INFERENCE_DATA"
+  ],
+  "media_asset": {
+    "immutable_fields": [
+      "media_asset_id",
+      "asset_key",
+      "kind",
+      "delivery_ref",
+      "content_hash",
+      "byte_length",
+      "media_type",
+      "title",
+      "alt_text",
+      "caption",
+      "credit_label",
+      "source_label",
+      "poster_asset_key",
+      "registered_by",
+      "registered_at"
+    ],
+    "kind": ["IMAGE", "VIDEO"],
+    "lifecycle": ["REGISTERED", "READY", "RETIRED"],
+    "allowed_transitions": [
+      "REGISTERED_TO_READY",
+      "REGISTERED_TO_RETIRED",
+      "READY_TO_RETIRED"
+    ],
+    "terminal_states": ["RETIRED"],
+    "validation": {
+      "asset_key_pattern": "^[a-z0-9][a-z0-9._-]{2,127}$",
+      "delivery_ref_pattern": "^media-ref:[a-z0-9][a-z0-9._:/-]{2,509}$",
+      "content_hash_pattern": "^[a-f0-9]{64}$",
+      "byte_length_min": 1,
+      "byte_length_max": 1073741824,
+      "image_media_types": ["image/avif", "image/jpeg", "image/png", "image/webp"],
+      "video_media_types": ["video/mp4", "video/webm"],
+      "title_max": 200,
+      "alt_text_min": 1,
+      "alt_text_max": 500,
+      "caption_max": 1000,
+      "credit_label_min": 1,
+      "credit_label_max": 200,
+      "source_label_min": 1,
+      "source_label_max": 300
+    },
+    "idempotency": {
+      "exact_immutable_replay_returns_existing": true,
+      "asset_key_conflict_fails_closed": true,
+      "delivery_ref_conflict_fails_closed": true,
+      "content_hash_conflict_fails_closed": true
+    }
+  },
+  "case_version_binding": {
+    "slots": ["HERO", "CONTEXT", "REVEAL", "IMPACT"],
+    "only_ready_assets_may_bind": true,
+    "priority_min": 1,
+    "priority_max": 1000000,
+    "video_autoplay_forbidden": true,
+    "image_muted_or_looping_forbidden": true,
+    "identity": ["case_version_id", "slot", "asset_key"],
+    "immutable_history": true,
+    "exact_replay_returns_existing": true,
+    "conflicting_replay_fails_closed": true,
+    "does_not_mutate": [
+      "CASE_VERSION_BODY",
+      "CASE_VERSION_LIFECYCLE",
+      "FLOW",
+      "QUESTION",
+      "COMMIT",
+      "REVEAL",
+      "PUBLICATION_PROVENANCE"
+    ]
+  },
+  "production_projection": {
+    "eligibility": ["READY", "BOUND_TO_EXACT_CASE_VERSION"],
+    "ordering": ["PRIORITY_DESC", "ASSET_KEY_ASC"],
+    "fields": [
+      "asset_key",
+      "kind",
+      "slot",
+      "delivery_ref",
+      "title",
+      "alt_text",
+      "caption",
+      "credit_label",
+      "source_label",
+      "poster_asset_key",
+      "autoplay",
+      "muted",
+      "looping",
+      "priority"
+    ],
+    "delivery_ref_is_opaque": true,
+    "no_resolver_means_empty_media": true,
+    "preview_fallback_forbidden": true
+  },
+  "admin_security": {
+    "read_capability": "MEDIA_ASSET_READ",
+    "write_capability": "MEDIA_ASSET_MANAGE",
+    "reads_require_authenticated_admin": true,
+    "writes_require_authenticated_admin": true,
+    "writes_require_same_session_csrf": true,
+    "writes_require_recent_step_up": true,
+    "actor_is_server_derived": true,
+    "browser_forbidden_authority_fields": [
+      "actor_ref",
+      "role",
+      "capability",
+      "lifecycle_state",
+      "storage_credential",
+      "signed_url",
+      "public_url",
+      "case_publication_state"
+    ]
+  },
+  "admin_api": {
+    "prefix": "/internal/admin/v1/case-media",
+    "operations": [
+      "GET_INVENTORY",
+      "GET_DETAIL",
+      "GET_AUDIT",
+      "POST_REGISTER",
+      "POST_MARK_READY",
+      "POST_BIND",
+      "POST_RETIRE"
+    ],
+    "inventory_is_bounded": true,
+    "no_binary_request": true,
+    "no_upload_or_signed_url": true,
+    "no_bulk_or_automatic_action": true
+  },
+  "admin_ui": {
+    "route": "/case-media",
+    "no_request_on_mount": true,
+    "no_request_on_navigation_focus_selection_or_prefill": true,
+    "explicit_commands_only": true,
+    "no_polling": true,
+    "no_autosave": true,
+    "no_local_storage": true,
+    "no_session_storage": true,
+    "no_binary_file_input": true,
+    "no_upload": true,
+    "no_transformation": true,
+    "no_automatic_binding_or_publication": true
+  },
+  "persistence": {
+    "schema": "media",
+    "memory_and_postgres_parity": true,
+    "asset_metadata_immutable": true,
+    "binding_history_immutable": true,
+    "audit_append_only": true,
+    "restart_continuity_required": true,
+    "direct_mutation_guards_required": true
+  },
+  "privacy": {
+    "forbidden_response_data": [
+      "CREDENTIAL",
+      "SECRET",
+      "SIGNED_URL",
+      "PROVIDER_SDK_OBJECT",
+      "BACKEND_OBJECT_KEY",
+      "RAW_MEDIA_BYTES",
+      "USER_IDENTITY",
+      "AUTHOR_IDENTITY",
+      "REPORTER_IDENTITY",
+      "DECISION_SESSION_IDENTITY",
+      "DEVICE_IDENTITY",
+      "PERSONALITY_INFERENCE",
+      "IDEOLOGY_INFERENCE",
+      "PSYCHOMETRIC_INFERENCE",
+      "BIAS_INFERENCE",
+      "CAUSAL_INFERENCE",
+      "PREVIEW_FIXTURE_PATH"
+    ]
+  },
+  "explicit_exclusions": [
+    "BINARY_UPLOAD",
+    "MULTIPART_UPLOAD",
+    "OBJECT_STORAGE_PROVIDER",
+    "CDN_PROVIDER",
+    "SIGNED_URL_GENERATION",
+    "IMAGE_TRANSFORMATION",
+    "THUMBNAIL_GENERATION",
+    "VIDEO_TRANSCODING",
+    "DRM_OR_STREAMING",
+    "MALWARE_SCAN",
+    "EXIF_STRIPPING",
+    "ENCRYPTION_OR_KMS",
+    "RETENTION_DELETION_OR_LEGAL_HOLD",
+    "PROVIDER_ACTIVATION",
+    "LICENSING_APPROVAL",
+    "EXTERNAL_AVAILABILITY_CLAIM",
+    "AUTOMATIC_CASE_MUTATION",
+    "AUTOMATIC_REVIEW_APPROVAL_OR_PUBLICATION",
+    "PRODUCTION_DEPLOYMENT",
+    "DEPLOYED_SLO_OR_ROLLBACK",
+    "STORE_COMPLIANCE",
+    "HUMAN_CQB_OR_USABILITY_ACCEPTANCE",
+    "RELEASE_APK"
+  ],
+  "verification": {
+    "contract_checker": "services/api/tools/check_admin_case_media_contract.py",
+    "memory_http_tests": true,
+    "postgres_restart_tests": true,
+    "openapi_exact_overlay": true,
+    "admin_contract_lint_types_tests_build": true,
+    "exact_head_predecessor_api_mobile_mvp_global": true,
+    "no_pass_without_exact_head_ci": true
+  }
+}
