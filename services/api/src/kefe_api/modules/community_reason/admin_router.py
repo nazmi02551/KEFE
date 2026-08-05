@@ -9,6 +9,9 @@ from pydantic import BaseModel
 from kefe_api.modules.admin_security.models import AdminCapability, AdminPrincipal
 from kefe_api.modules.admin_security.router import write_principal
 from kefe_api.modules.community_reason.models import CommunityReasonModeration
+from kefe_api.modules.community_reason.moderation_operations_router import (
+    router as moderation_operations_router,
+)
 from kefe_api.modules.community_reason.service import CommunityReasonService
 
 router = APIRouter(prefix="/internal/admin/v1", tags=["Internal Admin"])
@@ -57,3 +60,6 @@ def moderate_reason(
         reason_id=decision.reason.id,
         moderation_state=decision.reason.moderation_state.value,
     )
+
+
+router.include_router(moderation_operations_router)
