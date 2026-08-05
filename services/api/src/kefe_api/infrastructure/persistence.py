@@ -19,6 +19,9 @@ from kefe_api.infrastructure.postgres_ingestion_orchestration import (
     PostgresIngestionOrchestrationRepository,
 )
 from kefe_api.infrastructure.postgres_knowledge import PostgresKnowledgeRepository
+from kefe_api.infrastructure.postgres_otp_delivery_health import (
+    PostgresOtpDeliveryHealthRepository,
+)
 from kefe_api.infrastructure.postgres_otp_request_guard import (
     GuardedPostgresAccountContinuityRepository,
 )
@@ -56,6 +59,10 @@ from kefe_api.modules.editorial_projection.ports import ReviewedProposalSource
 from kefe_api.modules.identity.account_in_memory import InMemoryAccountContinuityRepository
 from kefe_api.modules.identity.account_ports import AccountContinuityRepository
 from kefe_api.modules.identity.in_memory import InMemoryIdentityRepository
+from kefe_api.modules.identity.otp_delivery_health import (
+    InMemoryOtpDeliveryHealthRepository,
+    OtpDeliveryHealthRepository,
+)
 from kefe_api.modules.identity.otp_request_guard import (
     GuardedInMemoryAccountContinuityRepository,
     OtpRequestAbusePolicy,
@@ -130,6 +137,16 @@ def build_identity_repository(settings: Settings) -> IdentityRepository:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
 
     return PostgresIdentityRepository(build_engine(settings.database_url))
+
+
+def build_otp_delivery_health_repository(
+    settings: Settings,
+) -> OtpDeliveryHealthRepository:
+    if settings.persistence_backend == "memory":
+        return InMemoryOtpDeliveryHealthRepository()
+    if not settings.database_url:
+        raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
+    return PostgresOtpDeliveryHealthRepository(build_engine(settings.database_url))
 
 
 def _otp_request_abuse_policy(settings: Settings) -> OtpRequestAbusePolicy:
