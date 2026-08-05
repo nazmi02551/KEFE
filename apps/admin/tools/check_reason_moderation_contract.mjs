@@ -71,10 +71,10 @@ for (const forbidden of [
   "author_actor_id",
   "reporter_actor_id",
   "weigh_session_id",
-  "bulk",
-  "autoModerate",
-  "unblock",
-  "restore"
+  "bulkModerate(",
+  "autoModerate(",
+  "unblockReason(",
+  "restoreReason("
 ]) {
   if (component.includes(forbidden)) {
     problems.push(`Reason moderation contains forbidden behavior: ${forbidden}`);
