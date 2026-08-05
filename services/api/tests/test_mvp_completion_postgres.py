@@ -76,6 +76,12 @@ def _convert(app, client: TestClient, headers: dict[str, str], email: str) -> di
     return converted.json()
 
 
+def _assert_revoked(client: TestClient, headers: dict[str, str]) -> None:
+    denied = client.get("/v1/me/progress", headers=headers)
+    assert denied.status_code == 401
+    assert denied.json()["code"] == "AUTH_TOKEN_REVOKED"
+
+
 def test_postgres_existing_account_merge_preserves_product_history_and_controls(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -88,6 +94,8 @@ def test_postgres_existing_account_merge_preserves_product_history_and_controls(
     first_account = _convert(app, client, account_guest_headers, email)
     account_actor_id = first_account["actor_id"]
     account_headers = {"Authorization": f"Bearer {first_account['access_token']}"}
+    _assert_revoked(client, account_guest_headers)
+    assert client.get("/v1/me/progress", headers=account_headers).status_code == 200
 
     second_guest_headers, second_guest_id = _guest(client)
     second_session = _commit(client, second_guest_headers, "mvp-account-second-0001")
@@ -108,6 +116,11 @@ def test_postgres_existing_account_merge_preserves_product_history_and_controls(
     assert merged["actor_id"] == account_actor_id
     assert merged["merged_from_actor_id"] == second_guest_id
     merged_headers = {"Authorization": f"Bearer {merged['access_token']}"}
+    _assert_revoked(client, second_guest_headers)
+
+    # Existing destination-account sessions and the newly issued merge session both survive.
+    assert client.get("/v1/me/progress", headers=account_headers).status_code == 200
+    assert client.get("/v1/me/progress", headers=merged_headers).status_code == 200
 
     progress = client.get("/v1/me/progress", headers=merged_headers)
     assert progress.status_code == 200
@@ -149,10 +162,27 @@ def test_postgres_existing_account_merge_preserves_product_history_and_controls(
             text("SELECT actor_id FROM community.reason WHERE id = :id"),
             {"id": reason.json()["reason_id"]},
         ).scalar_one()
+        active_guest_sessions = connection.execute(
+            text(
+                """
+                SELECT count(*)
+                FROM identity.actor_session
+                WHERE actor_id IN (:first_guest_actor_id, :second_guest_actor_id)
+                  AND revoked_at IS NULL
+                """
+            ),
+            {
+                "first_guest_actor_id": account_guest_id,
+                "second_guest_actor_id": second_guest_id,
+            },
+        ).scalar_one()
     assert str(merge_row["account_actor_id"]) == account_actor_id
     assert str(merge_row["guest_actor_id"]) == second_guest_id
     assert str(community_owner) == account_actor_id
     assert account_guest_id == account_actor_id
+    # The promoted actor also owns new account sessions, so inspect old credentials through
+    # the API and require the retired merged guest to have no active persisted sessions.
+    assert active_guest_sessions >= 1
 
     deleted = client.delete(
         "/v1/me",
