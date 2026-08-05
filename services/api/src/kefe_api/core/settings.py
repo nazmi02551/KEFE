@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     otp_verification_ttl_minutes: int = 15
     otp_max_attempts: int = 5
     account_token_ttl_days: int = 30
+    account_merge_replay_secret: str = Field(
+        default="development-only-guest-merge-replay-secret-v1",
+        min_length=32,
+    )
     share_ttl_days: int = 30
 
     event_transport: Literal["logging"] = "logging"
