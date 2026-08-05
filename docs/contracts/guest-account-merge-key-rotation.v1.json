@@ -1,0 +1,79 @@
+{
+  "contract_id": "KEFE-GUEST-MERGE-KEY-ROTATION-001",
+  "version": "1.0.0",
+  "status": "ACCEPTED",
+  "capabilities": ["CAP-084"],
+  "foundation_phase": "F4",
+  "issue": 318,
+  "adr": "docs/adr/0111-versioned-guest-merge-replay-keyring.md",
+  "parent_contract": "docs/contracts/guest-account-merge-replay.v1.json",
+  "public_api": {
+    "verification_token_schema_changed": false,
+    "guest_merge_request_schema_changed": false,
+    "guest_merge_response_schema_changed": false,
+    "openapi_drift_allowed": false
+  },
+  "verification_token": {
+    "legacy_prefix": "kefe_v_",
+    "legacy_key_id": "primary-v1",
+    "versioned_format": "kefe_v2.<key-id>.<high-entropy-random-value>",
+    "key_id_pattern": "^[A-Za-z0-9][A-Za-z0-9-]{0,63}$",
+    "complete_token_hash_persisted": true,
+    "plaintext_token_persisted": false,
+    "key_id_persisted_separately": false
+  },
+  "keyring": {
+    "active_key_id_setting": "KEFE_ACCOUNT_MERGE_REPLAY_ACTIVE_KEY_ID",
+    "active_secret_setting": "KEFE_ACCOUNT_MERGE_REPLAY_SECRET",
+    "retained_keys_setting": "KEFE_ACCOUNT_MERGE_REPLAY_RETAINED_KEYS",
+    "active_key_selected_for_new_verifications": true,
+    "retained_keys_selected_for_new_verifications": false,
+    "minimum_secret_characters": 32,
+    "duplicate_key_ids_allowed": false,
+    "duplicate_secret_values_allowed": false,
+    "development_secret_allowed_in_production": false
+  },
+  "derivation": {
+    "algorithm": "HMAC-SHA-256",
+    "legacy_domain": "kefe:guest-account-merge:v1",
+    "versioned_domain": "kefe:guest-account-merge:v2",
+    "versioned_message_includes_key_id": true,
+    "plaintext_account_token_persisted": false
+  },
+  "replay": {
+    "actor_ownership_checked_before_key_lookup": true,
+    "expiry_checked_before_key_lookup": true,
+    "live_missing_key_error": "DEPENDENCY_TEMPORARILY_UNAVAILABLE",
+    "live_missing_key_retryable": true,
+    "expired_error": "AUTH_TOKEN_EXPIRED",
+    "malformed_verification_error": "AUTH_VERIFICATION_INVALID",
+    "wrong_key_fallback_allowed": false
+  },
+  "rotation": {
+    "procedure": [
+      "deploy_keyring_runtime_with_current_active_and_future_retained",
+      "switch_future_key_to_active_and_retain_previous_active",
+      "retain_previous_key_through_verification_plus_account_replay_window",
+      "remove_previous_key_after_window"
+    ],
+    "secret_manager_delivery_proven_by_repository_ci": false,
+    "operator_execution_proven_by_repository_ci": false
+  },
+  "persistence": {
+    "new_database_schema_required": false,
+    "secret_material_persisted": false,
+    "credential_key_id_column_required": false,
+    "existing_guest_merge_replay_table_reused": true
+  },
+  "required_evidence": [
+    "memory_legacy_v1_reconstruction",
+    "memory_v2_rotation_replay",
+    "memory_missing_live_key_fail_closed",
+    "memory_expired_replay_without_retired_key",
+    "production_keyring_validation",
+    "postgres_restart_rotation_replay",
+    "postgres_new_active_key_issuance",
+    "postgres_no_plaintext_secret_or_credential",
+    "exact_openapi_no_drift"
+  ]
+}
