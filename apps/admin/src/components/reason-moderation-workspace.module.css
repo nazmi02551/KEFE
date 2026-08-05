@@ -1,0 +1,361 @@
+.shell {
+  width: min(1320px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 5rem;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.5rem;
+  align-items: end;
+  margin-bottom: 1.25rem;
+}
+
+.hero h1,
+.securityPanel h2,
+.queuePanel h2,
+.detailPanel h2,
+.detailCard h3,
+.decisionCard h3,
+.auditCard h3 {
+  margin: 0;
+}
+
+.hero p:not(.eyebrow),
+.boundary,
+.empty,
+.reasonBody p,
+.reportBox p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--gold);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.backLink {
+  color: var(--foreground);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
+
+.securityPanel,
+.queuePanel,
+.detailPanel,
+.detailCard,
+.decisionCard,
+.auditCard {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--panel);
+  box-shadow: 0 16px 42px rgb(0 0 0 / 12%);
+}
+
+.securityPanel {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.8fr) repeat(2, minmax(180px, 1fr)) auto;
+  gap: 1rem;
+  align-items: end;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.securityPanel button {
+  min-height: 44px;
+}
+
+.sessionSummary {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.5fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.queuePanel,
+.detailPanel {
+  padding: 1.2rem;
+}
+
+.queuePanel {
+  position: sticky;
+  top: 1rem;
+}
+
+.sectionHeading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.sectionHeading > span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.securityPanel label,
+.filters label,
+.detailPanel > label,
+.decisionCard label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.shell input,
+.shell select,
+.shell textarea,
+.shell button {
+  font: inherit;
+}
+
+.shell input,
+.shell select,
+.shell textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--background);
+  color: var(--foreground);
+  padding: 0.68rem 0.75rem;
+}
+
+.shell textarea {
+  resize: vertical;
+}
+
+.shell button {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--foreground);
+  color: var(--background);
+  padding: 0.68rem 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.shell button:disabled {
+  cursor: not-allowed;
+  opacity: 0.46;
+}
+
+.commandRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0.9rem 0;
+}
+
+.queueList {
+  display: grid;
+  gap: 0.55rem;
+  max-height: 62vh;
+  overflow: auto;
+  padding-right: 0.2rem;
+}
+
+.queueItem,
+.selectedQueueItem {
+  display: grid;
+  gap: 0.3rem;
+  width: 100%;
+  text-align: left;
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+.selectedQueueItem {
+  border-color: var(--gold) !important;
+  outline: 2px solid color-mix(in srgb, var(--gold) 35%, transparent);
+}
+
+.queueItem span,
+.selectedQueueItem span {
+  color: var(--gold);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.queueItem small,
+.selectedQueueItem small,
+.reportBox small,
+.auditCard small {
+  color: var(--muted);
+}
+
+.detailPanel {
+  display: grid;
+  gap: 1rem;
+}
+
+.detailCard,
+.decisionCard,
+.auditCard {
+  padding: 1rem;
+  box-shadow: none;
+}
+
+.detailCard dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin: 0 0 1rem;
+}
+
+.detailCard dl div {
+  min-width: 0;
+  padding: 0.7rem;
+  border-radius: 10px;
+  background: var(--background);
+}
+
+.detailCard dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.detailCard dd {
+  margin: 0.25rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.reasonBody,
+.reportBox {
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--background);
+}
+
+.reasonBody {
+  margin-bottom: 0.75rem;
+}
+
+.reasonBody p,
+.reportBox p {
+  margin-bottom: 0;
+}
+
+.reportBox ul {
+  margin: 0.5rem 0;
+  padding-left: 1.2rem;
+}
+
+.decisionCard {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.confirmation {
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  align-items: start;
+}
+
+.confirmation input {
+  width: auto;
+  margin-top: 0.2rem;
+}
+
+.dangerButton {
+  background: #8f2525 !important;
+  color: #fff !important;
+}
+
+.auditCard ol {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.auditCard li {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border-radius: 10px;
+  background: var(--background);
+}
+
+.auditCard span {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.empty {
+  margin: 0;
+  padding: 0.8rem;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+}
+
+.boundary {
+  margin: 1rem 0 0;
+  padding: 0.9rem 1rem;
+  border-left: 3px solid var(--gold);
+  background: var(--panel);
+}
+
+.feedback {
+  min-height: 1.5rem;
+  margin-top: 0.75rem;
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+@media (max-width: 980px) {
+  .securityPanel,
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .queuePanel {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .shell {
+    width: min(100% - 1rem, 1320px);
+    padding-top: 1rem;
+  }
+
+  .hero,
+  .filters,
+  .detailCard dl {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    align-items: start;
+  }
+}
