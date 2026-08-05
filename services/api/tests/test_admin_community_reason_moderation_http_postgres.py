@@ -104,10 +104,12 @@ def _seed_reason(database_url: str) -> tuple[UUID, UUID, UUID]:
                 """
                 INSERT INTO content.case_version (
                     id, case_id, version_no, status, title, summary,
+                    base_format_code, primary_domain_code, content_risk,
                     accepts_weighs, published_at, created_at
                 ) VALUES (
                     :id, :case_id, 1, 'PUBLISHED', 'Moderation case',
-                    'Durable moderation fixture', true, :now, :now
+                    'Durable moderation fixture', 'DILEMMA', 'DAILY_LIFE', 'L0',
+                    true, :now, :now
                 )
                 """
             ),
