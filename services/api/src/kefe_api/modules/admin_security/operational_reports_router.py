@@ -1,18 +1,21 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Literal
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 from pydantic import BaseModel, ConfigDict
 
+from kefe_api.core.errors import DomainError
 from kefe_api.modules.admin_operational_reports.models import (
     AdminOperationalReportSnapshot,
 )
 from kefe_api.modules.admin_security.operational_reports import (
     SecuredAdminOperationalReportsService,
 )
-from kefe_api.modules.admin_security.router import ReadPrincipalDep
+from kefe_api.modules.admin_security.router import ReadPrincipalDep, WritePrincipalDep
+from kefe_api.modules.identity.otp_delivery_health import OtpDeliveryAlertRecord
 
 router = APIRouter(
     prefix="/internal/admin/v1/operational-reports",
@@ -76,6 +79,35 @@ class OperationalReportsSnapshotResponse(StrictModel):
     aggregate_only: bool = True
 
 
+class OtpDeliveryAlertCandidateResponse(StrictModel):
+    candidate_id: UUID
+    signal: str
+    reason_codes: list[str]
+    observed_at: datetime
+    window_started_at: datetime
+    total_count: int
+    accepted_count: int
+    unavailable_count: int
+    rejected_count: int
+    failure_ratio_bps: int | None
+    created_at: datetime
+    acknowledged: bool
+    acknowledged_at: datetime | None
+    acknowledged_by_actor_ref: str | None
+    acknowledgement_is_resolution: bool = False
+
+
+class OtpDeliveryAlertCandidateListResponse(StrictModel):
+    items: list[OtpDeliveryAlertCandidateResponse]
+    aggregate_only: bool = True
+    acknowledgement_is_resolution: bool = False
+
+
+class OtpDeliveryAlertAcknowledgementRequest(StrictModel):
+    expected_candidate_id: UUID
+    acknowledgement: Literal["ACKNOWLEDGE"]
+
+
 def get_reports(request: Request) -> SecuredAdminOperationalReportsService:
     return request.app.state.secured_admin_operational_reports_service
 
@@ -92,6 +124,52 @@ def operational_reports_snapshot(
     reports: ReportsDep,
 ) -> OperationalReportsSnapshotResponse:
     return _response(reports.snapshot(principal))
+
+
+@router.get(
+    "/otp-delivery-alerts",
+    response_model=OtpDeliveryAlertCandidateListResponse,
+)
+def otp_delivery_alert_candidates(
+    principal: ReadPrincipalDep,
+    reports: ReportsDep,
+    acknowledged: bool | None = None,
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0, le=10_000),
+) -> OtpDeliveryAlertCandidateListResponse:
+    records = reports.otp_delivery_alert_candidates(
+        principal,
+        acknowledged=acknowledged,
+        limit=limit,
+        offset=offset,
+    )
+    return OtpDeliveryAlertCandidateListResponse(
+        items=[_alert_response(record) for record in records]
+    )
+
+
+@router.post(
+    "/otp-delivery-alerts/{candidate_id}/acknowledgement",
+    response_model=OtpDeliveryAlertCandidateResponse,
+)
+def acknowledge_otp_delivery_alert(
+    candidate_id: UUID,
+    body: OtpDeliveryAlertAcknowledgementRequest,
+    principal: WritePrincipalDep,
+    reports: ReportsDep,
+) -> OtpDeliveryAlertCandidateResponse:
+    if body.expected_candidate_id != candidate_id:
+        raise DomainError(
+            "ADMIN_OPERATIONAL_ALERT_ACK_MISMATCH",
+            "OTP delivery alert acknowledgement does not match the selected candidate",
+            409,
+        )
+    return _alert_response(
+        reports.acknowledge_otp_delivery_alert(
+            principal,
+            candidate_id=candidate_id,
+        )
+    )
 
 
 def _response(
@@ -151,4 +229,29 @@ def _response(
         editorial_lifecycle=dict(snapshot.editorial_lifecycle),
         proposal_review=dict(snapshot.proposal_review),
         moderation=dict(snapshot.moderation),
+    )
+
+
+def _alert_response(record: OtpDeliveryAlertRecord) -> OtpDeliveryAlertCandidateResponse:
+    candidate = record.candidate
+    acknowledgement = record.acknowledgement
+    return OtpDeliveryAlertCandidateResponse(
+        candidate_id=candidate.id,
+        signal=candidate.signal.value,
+        reason_codes=list(candidate.reason_codes),
+        observed_at=candidate.observed_at,
+        window_started_at=candidate.window_started_at,
+        total_count=candidate.total_count,
+        accepted_count=candidate.accepted_count,
+        unavailable_count=candidate.unavailable_count,
+        rejected_count=candidate.rejected_count,
+        failure_ratio_bps=candidate.failure_ratio_bps,
+        created_at=candidate.created_at,
+        acknowledged=record.acknowledged,
+        acknowledged_at=(
+            acknowledgement.acknowledged_at if acknowledgement is not None else None
+        ),
+        acknowledged_by_actor_ref=(
+            acknowledgement.actor_ref if acknowledgement is not None else None
+        ),
     )
