@@ -7,6 +7,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
 
+from kefe_api.core.errors import DomainError
 from kefe_api.modules.admin_security.models import AdminCapability, AdminPrincipal
 from kefe_api.modules.admin_security.router import ReadPrincipalDep, WritePrincipalDep
 from kefe_api.modules.community_reason.models import (
@@ -19,7 +20,7 @@ from kefe_api.modules.community_reason.models import (
 from kefe_api.modules.community_reason.service import CommunityReasonService
 
 router = APIRouter(
-    prefix="/internal/admin/v1/community-reason-moderation",
+    prefix="/community-reason-moderation",
     tags=["Internal Admin Community Reason Moderation"],
 )
 
@@ -146,8 +147,6 @@ def moderation_decision(
 ) -> ReasonModerationDecisionResponse:
     _authorize(request, principal, AdminCapability.CONTENT_MODERATE)
     if body.confirm_reason_id != reason_id:
-        from kefe_api.core.errors import DomainError
-
         raise DomainError(
             "COMMUNITY_REASON_MODERATION_CONFIRMATION_INVALID",
             "Moderation confirmation must match the selected reason",
