@@ -43,6 +43,10 @@ def main() -> None:
         "normalization before hashing",
     )
     _require(
+        contract["admission_identity"]["plaintext_destination_persisted"] is False,
+        "plaintext destination policy",
+    )
+    _require(
         contract["policy"]["provider_failure_consumes_admission"] is True,
         "provider failure admission",
     )
@@ -55,10 +59,15 @@ def main() -> None:
         "rejected challenge rollback",
     )
     _require(
-        contract["privacy"]["plaintext_destination_persisted"]
-        if "plaintext_destination_persisted" in contract["privacy"]
-        else contract["admission_identity"]["plaintext_destination_persisted"],
-        "placeholder",
+        contract["privacy"][
+            "account_privacy_deletion_cascades_via_latest_challenge"
+        ]
+        is True,
+        "privacy deletion cascade",
+    )
+    _require(
+        contract["public_api"]["openapi_drift_allowed"] is False,
+        "OpenAPI drift policy",
     )
 
     settings = _text("services/api/src/kefe_api/core/settings.py")
@@ -173,29 +182,15 @@ def main() -> None:
     _require("CAPTCHA" in adr, "CAPTCHA decision boundary")
     _require("production threshold quality" in adr, "threshold non-claim")
 
-    forbidden_persistence_fragments = (
+    forbidden_migration_fragments = (
         "plaintext_destination",
         "identifier_hint",
         "otp_code",
         "provider_request",
         "provider_response",
     )
-    for fragment in forbidden_persistence_fragments:
+    for fragment in forbidden_migration_fragments:
         _require(fragment not in migration, f"forbidden migration field: {fragment}")
-
-    _require(
-        contract["admission_identity"]["plaintext_destination_persisted"] is False,
-        "plaintext destination policy",
-    )
-    _require(
-        contract["privacy"]["account_privacy_deletion_cascades_via_latest_challenge"]
-        is True,
-        "privacy deletion cascade",
-    )
-    _require(
-        contract["public_api"]["openapi_drift_allowed"] is False,
-        "OpenAPI drift policy",
-    )
 
     print(
         "OTP request abuse guard contract: PASS — normalized hash identity, "
