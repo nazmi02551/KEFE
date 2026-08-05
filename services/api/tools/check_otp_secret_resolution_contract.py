@@ -128,7 +128,8 @@ def main() -> None:
         "print(secret",
         "logger.info(secret",
         "logger.debug(secret",
-        "secret_ref=secret_ref",
+        "logger.info(secret_ref",
+        "logger.debug(secret_ref",
         "provider_response_body=",
     )
     combined_runtime = resolver + delivery
