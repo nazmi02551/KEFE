@@ -2,8 +2,11 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
 
+import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
+from kefe_api.core.settings import Settings
 from kefe_api.main import create_app
 from kefe_api.modules.identity.account_models import OtpChannel
 
@@ -29,6 +32,19 @@ def _verification(app, client: TestClient, email: str) -> str:
     )
     assert verified.status_code == 200
     return verified.json()["verification_token"]
+
+
+def test_production_rejects_development_replay_secret() -> None:
+    with pytest.raises(ValidationError, match="KEFE_ACCOUNT_MERGE_REPLAY_SECRET"):
+        Settings(environment="production")
+
+
+def test_production_accepts_managed_replay_secret() -> None:
+    settings = Settings(
+        environment="production",
+        account_merge_replay_secret="managed-production-replay-secret-0123456789",
+    )
+    assert settings.environment == "production"
 
 
 def test_exact_retry_with_revoked_guest_returns_identical_credential() -> None:
