@@ -49,6 +49,7 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
                     AdminCapability.RISK_REVIEW,
                     AdminCapability.AUDIT_READ,
                     AdminCapability.OPERATIONAL_REPORT_READ,
+                    AdminCapability.OPERATIONAL_ALERT_ACKNOWLEDGE,
                 }
             ),
             AdminRole.PUBLISHER: frozenset(
@@ -75,6 +76,7 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
                     AdminCapability.MEDIA_ASSET_MANAGE,
                     AdminCapability.AUDIT_READ,
                     AdminCapability.OPERATIONAL_REPORT_READ,
+                    AdminCapability.OPERATIONAL_ALERT_ACKNOWLEDGE,
                 }
             ),
         },
@@ -87,6 +89,7 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
                 AdminCapability.SOURCE_ACTIVATE,
                 AdminCapability.MEDIA_ASSET_MANAGE,
                 AdminCapability.ADMIN_ACCESS_MANAGE,
+                AdminCapability.OPERATIONAL_ALERT_ACKNOWLEDGE,
             }
         ),
         absolute_lifetime=timedelta(hours=12),
