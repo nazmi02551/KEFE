@@ -6,6 +6,7 @@ from uuid import UUID
 
 from kefe_api.modules.identity.account_models import (
     AccountIdentity,
+    GuestMergeReplay,
     OtpChallenge,
     OtpChannel,
     OtpVerification,
@@ -30,6 +31,21 @@ class AccountContinuityRepository(Protocol):
     def consume_verification(self, *, token_hash: str, now: datetime) -> OtpVerification | None: ...
 
     def get_account_by_identifier(self, identifier_hash: str) -> AccountIdentity | None: ...
+
+    def get_guest_merge_replay(
+        self,
+        verification_token_hash: str,
+    ) -> GuestMergeReplay | None: ...
+
+    def complete_guest_merge(
+        self,
+        *,
+        source_actor_id: UUID,
+        verification_token_hash: str,
+        account_token_hash: str,
+        account_session_expires_at: datetime,
+        completed_at: datetime,
+    ) -> GuestMergeReplay: ...
 
     def upgrade_or_merge_guest(
         self,
