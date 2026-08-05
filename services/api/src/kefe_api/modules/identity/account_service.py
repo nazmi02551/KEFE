@@ -102,7 +102,13 @@ class AccountContinuityService:
         )
         self._repo.create_challenge(challenge)
         try:
-            self._delivery.send(channel=channel, identifier=normalized, code=code)
+            self._delivery.send(
+                delivery_id=challenge.id,
+                channel=channel,
+                identifier=normalized,
+                code=code,
+                expires_at=challenge.expires_at,
+            )
         except Exception:
             # Persisted challenge is intentionally unusable without successful delivery;
             # callers receive the delivery failure and may request a new challenge later.
