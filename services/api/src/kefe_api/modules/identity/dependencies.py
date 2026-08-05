@@ -6,7 +6,7 @@ from fastapi import Depends, Request, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from kefe_api.modules.identity.admission import GuestAdmissionGuard
-from kefe_api.modules.identity.models import ActorPrincipal
+from kefe_api.modules.identity.models import ActorPrincipal, TokenResolution
 from kefe_api.modules.identity.service import IdentityService
 
 _bearer = HTTPBearer(auto_error=False)
@@ -44,4 +44,15 @@ def get_principal(
     return service.authenticate(authorization)
 
 
+def get_guest_merge_authorization(
+    authorization: AuthorizationDep,
+    service: IdentityServiceDep,
+) -> TokenResolution:
+    return service.authenticate_guest_merge(authorization)
+
+
 PrincipalDep = Annotated[ActorPrincipal, Depends(get_principal)]
+GuestMergeAuthorizationDep = Annotated[
+    TokenResolution,
+    Depends(get_guest_merge_authorization),
+]
