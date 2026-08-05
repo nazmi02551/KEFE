@@ -1,0 +1,113 @@
+{
+  "contract_id": "KEFE-OTP-REQUEST-ABUSE-GUARD-001",
+  "version": "1.0.0",
+  "status": "IMPLEMENTED_PARTIAL_CANDIDATE",
+  "capabilities": [
+    "CAP-084"
+  ],
+  "foundation_wave": "F4",
+  "public_api": {
+    "endpoint": "POST /v1/auth/otp/request",
+    "success_request_drift_allowed": false,
+    "success_response_drift_allowed": false,
+    "openapi_drift_allowed": false,
+    "limited_error": {
+      "code": "AUTH_RATE_LIMITED",
+      "http_status": 429,
+      "retryable": true,
+      "destination_or_account_existence_disclosed": false
+    }
+  },
+  "runtime_modes": {
+    "AUTO": {
+      "production": "ENFORCE",
+      "non_production": "OFF"
+    },
+    "OFF": {
+      "production_allowed": false
+    },
+    "ENFORCE": {
+      "production_allowed": true,
+      "non_production_allowed": true
+    }
+  },
+  "admission_identity": {
+    "normalization_precedes_hashing": true,
+    "key": [
+      "OtpChannel",
+      "sha256(channel + ':' + normalized_destination)"
+    ],
+    "plaintext_destination_persisted": false,
+    "account_existence_checked": false
+  },
+  "transaction_order": [
+    "normalize destination",
+    "construct challenge",
+    "atomically admit guard state and challenge persistence",
+    "invoke delivery provider"
+  ],
+  "policy": {
+    "cooldown_seconds_default": 60,
+    "rolling_window_seconds_default": 900,
+    "rolling_window_limit_default": 5,
+    "guard_retention_seconds_default": 86400,
+    "window_must_not_be_shorter_than_cooldown": true,
+    "retention_must_not_be_shorter_than_window": true,
+    "provider_failure_consumes_admission": true
+  },
+  "postgres": {
+    "table": "identity.otp_request_guard",
+    "primary_key": [
+      "channel",
+      "identifier_hash"
+    ],
+    "same_key_requests_serialized": true,
+    "guard_and_challenge_single_transaction": true,
+    "rejected_challenge_insert_rolled_back": true,
+    "restart_durable": true,
+    "latest_challenge_fk_delete_action": "CASCADE"
+  },
+  "privacy": {
+    "stored_fields": [
+      "channel",
+      "identifier_hash",
+      "latest_challenge_id",
+      "window_started_at",
+      "last_requested_at",
+      "request_count",
+      "retention_expires_at",
+      "updated_at"
+    ],
+    "forbidden_fields": [
+      "destination",
+      "identifier_hint",
+      "otp_code",
+      "otp_code_hash",
+      "provider_request",
+      "provider_response"
+    ],
+    "stale_rows_lazily_pruned": true,
+    "account_privacy_deletion_cascades_via_latest_challenge": true
+  },
+  "concurrency": {
+    "same_destination_same_channel": "at most one request admitted within cooldown",
+    "different_destination": "isolated",
+    "different_channel": "isolated",
+    "memory_lock_required": true,
+    "postgres_row_lock_required": true
+  },
+  "evidence": {
+    "memory_tests": "services/api/tests/test_otp_request_abuse_guard.py",
+    "postgres_tests": "services/api/tests/test_otp_request_abuse_guard_postgres.py",
+    "executable_checker": "services/api/tools/check_otp_request_abuse_guard_contract.py",
+    "workflow": ".github/workflows/otp-request-abuse-guard.yml"
+  },
+  "non_claims": [
+    "IP or device fingerprint abuse protection",
+    "CAPTCHA or proof-of-work",
+    "distributed edge rate limiting",
+    "real email or SMS deliverability",
+    "production threshold tuning",
+    "deployed anti-abuse SLO or alerting"
+  ]
+}
