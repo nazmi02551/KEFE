@@ -51,7 +51,7 @@ def main() -> None:
     )
     _require(
         contract["admin_integration"]["http_response_shape_changed"] is False,
-        "Admin response stability",
+        "Admin snapshot response stability",
     )
     _require(
         contract["admin_integration"]["openapi_drift_allowed"] is False,
@@ -113,7 +113,7 @@ def main() -> None:
         "class DurableOtpDeliveryObserver",
         "class FailOpenOtpDeliveryObserver",
         "class OtpDeliveryHealthService",
-        "facts.total_count >= resolved_policy.minimum_ratio_sample",
+        "facts.total_count >= policy.minimum_ratio_sample",
         'reason.endswith("_CRITICAL")',
     ):
         _require(fragment in domain, f"missing domain fragment: {fragment}")
@@ -182,9 +182,12 @@ def main() -> None:
         "AdminOperationalReason.OTP_DELIVERY_ATTENTION",
     ):
         _require(fragment in admin_service, f"missing Admin service fragment: {fragment}")
+    snapshot_model = admin_router.split(
+        "class OperationalReportsSnapshotResponse", 1
+    )[1].split("class OtpDeliveryAlertCandidateResponse", 1)[0]
     _require(
-        "otp_delivery" not in admin_router,
-        "detailed OTP snapshot must not be exposed by Admin HTTP response",
+        "otp_delivery" not in snapshot_model,
+        "detailed OTP snapshot must not be exposed by Admin snapshot response",
     )
 
     for fragment in (
@@ -213,7 +216,7 @@ def main() -> None:
         "OTP delivery health contract: PASS — final provider-neutral outcomes, "
         "fail-open observation, privacy-safe append-only events, bounded retention, "
         "minimum-sample signal policy, restart durability, aggregate secured Admin "
-        "reason codes and unchanged OpenAPI."
+        "reason codes and stable snapshot response."
     )
 
 

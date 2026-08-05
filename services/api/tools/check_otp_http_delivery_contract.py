@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -16,6 +17,13 @@ def _text(relative_path: str) -> str:
     path = ROOT / relative_path
     _require(path.is_file(), f"missing required file: {relative_path}")
     return path.read_text(encoding="utf-8")
+
+
+def _registry_version(source: str) -> tuple[int, int, int]:
+    match = re.search(r"^registry_version:\s*(\d+)\.(\d+)\.(\d+)\s*$", source, re.MULTILINE)
+    _require(match is not None, "error registry version")
+    assert match is not None
+    return tuple(int(part) for part in match.groups())
 
 
 def main() -> None:
@@ -97,7 +105,10 @@ def main() -> None:
     ):
         _require(fragment in tests, f"missing evidence: {fragment}")
 
-    _require("registry_version: 1.21.0" in error_codes, "error registry version")
+    _require(
+        _registry_version(error_codes) >= (1, 21, 0),
+        "error registry version must be at least 1.21.0",
+    )
     _require(
         "- code: AUTH_OTP_DELIVERY_UNAVAILABLE\n  http_status: 503\n  retryable: true"
         in error_codes,

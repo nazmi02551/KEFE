@@ -61,6 +61,8 @@ from kefe_api.modules.identity.account_ports import AccountContinuityRepository
 from kefe_api.modules.identity.in_memory import InMemoryIdentityRepository
 from kefe_api.modules.identity.otp_delivery_health import (
     InMemoryOtpDeliveryHealthRepository,
+    OtpDeliveryAlertPolicy,
+    OtpDeliveryHealthPolicy,
     OtpDeliveryHealthRepository,
 )
 from kefe_api.modules.identity.otp_request_guard import (
@@ -139,14 +141,44 @@ def build_identity_repository(settings: Settings) -> IdentityRepository:
     return PostgresIdentityRepository(build_engine(settings.database_url))
 
 
+def _otp_delivery_health_policy(settings: Settings) -> OtpDeliveryHealthPolicy:
+    return OtpDeliveryHealthPolicy.from_seconds(
+        window_seconds=settings.otp_delivery_health_window_seconds,
+        retention_seconds=settings.otp_delivery_health_retention_seconds,
+        minimum_ratio_sample=settings.otp_delivery_health_minimum_ratio_sample,
+        failure_count_attention=settings.otp_delivery_health_failure_attention,
+        failure_count_critical=settings.otp_delivery_health_failure_critical,
+        unavailable_count_attention=settings.otp_delivery_health_unavailable_attention,
+        unavailable_count_critical=settings.otp_delivery_health_unavailable_critical,
+        failure_ratio_attention_bps=settings.otp_delivery_health_ratio_attention_bps,
+        failure_ratio_critical_bps=settings.otp_delivery_health_ratio_critical_bps,
+    )
+
+
+def _otp_delivery_alert_policy(settings: Settings) -> OtpDeliveryAlertPolicy:
+    return OtpDeliveryAlertPolicy.from_seconds(
+        cooldown_seconds=settings.otp_delivery_alert_cooldown_seconds,
+        retention_seconds=settings.otp_delivery_alert_retention_seconds,
+    )
+
+
 def build_otp_delivery_health_repository(
     settings: Settings,
 ) -> OtpDeliveryHealthRepository:
+    health_policy = _otp_delivery_health_policy(settings)
+    alert_policy = _otp_delivery_alert_policy(settings)
     if settings.persistence_backend == "memory":
-        return InMemoryOtpDeliveryHealthRepository()
+        return InMemoryOtpDeliveryHealthRepository(
+            health_policy=health_policy,
+            alert_policy=alert_policy,
+        )
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
-    return PostgresOtpDeliveryHealthRepository(build_engine(settings.database_url))
+    return PostgresOtpDeliveryHealthRepository(
+        build_engine(settings.database_url),
+        health_policy=health_policy,
+        alert_policy=alert_policy,
+    )
 
 
 def _otp_request_abuse_policy(settings: Settings) -> OtpRequestAbusePolicy:

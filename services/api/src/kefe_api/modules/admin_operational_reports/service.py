@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from uuid import UUID
+
 from kefe_api.modules.admin_operational_reports.models import (
     AdminOperationalReason,
     AdminOperationalReportPolicy,
@@ -16,6 +18,7 @@ from kefe_api.modules.content_supply_health.models import ContentSupplyHealthSig
 from kefe_api.modules.content_supply_health.service import ContentSupplyHealthService
 from kefe_api.modules.identity.otp_delivery_health import (
     InMemoryOtpDeliveryHealthRepository,
+    OtpDeliveryAlertRecord,
     OtpDeliveryHealthService,
     OtpDeliveryHealthSignal,
 )
@@ -104,6 +107,32 @@ class AdminOperationalReportsService:
             editorial_lifecycle=AdminOperationalReportSnapshot.immutable_counts(editorial),
             proposal_review=AdminOperationalReportSnapshot.immutable_counts(proposals),
             moderation=AdminOperationalReportSnapshot.immutable_counts(moderation),
+        )
+
+    def otp_delivery_alert_candidates(
+        self,
+        *,
+        acknowledged: bool | None,
+        limit: int,
+        offset: int,
+    ) -> tuple[OtpDeliveryAlertRecord, ...]:
+        return self._otp_delivery_health.list_alert_candidates(
+            acknowledged=acknowledged,
+            limit=limit,
+            offset=offset,
+            as_of=self._clock(),
+        )
+
+    def acknowledge_otp_delivery_alert(
+        self,
+        *,
+        candidate_id: UUID,
+        actor_ref: str,
+    ) -> OtpDeliveryAlertRecord:
+        return self._otp_delivery_health.acknowledge_alert(
+            candidate_id=candidate_id,
+            actor_ref=actor_ref,
+            as_of=self._clock(),
         )
 
     @staticmethod
