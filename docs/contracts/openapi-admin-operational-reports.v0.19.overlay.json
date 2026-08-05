@@ -272,10 +272,313 @@
         ],
         "title": "OperationalThresholdsResponse",
         "type": "object"
+      },
+      "OtpDeliveryAlertAcknowledgementRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acknowledgement": {
+            "const": "ACKNOWLEDGE",
+            "title": "Acknowledgement",
+            "type": "string"
+          },
+          "expected_candidate_id": {
+            "format": "uuid",
+            "title": "Expected Candidate Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expected_candidate_id",
+          "acknowledgement"
+        ],
+        "title": "OtpDeliveryAlertAcknowledgementRequest",
+        "type": "object"
+      },
+      "OtpDeliveryAlertCandidateListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "acknowledgement_is_resolution": {
+            "default": false,
+            "title": "Acknowledgement Is Resolution",
+            "type": "boolean"
+          },
+          "aggregate_only": {
+            "default": true,
+            "title": "Aggregate Only",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OtpDeliveryAlertCandidateResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "OtpDeliveryAlertCandidateListResponse",
+        "type": "object"
+      },
+      "OtpDeliveryAlertCandidateResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "accepted_count": {
+            "title": "Accepted Count",
+            "type": "integer"
+          },
+          "acknowledged": {
+            "title": "Acknowledged",
+            "type": "boolean"
+          },
+          "acknowledged_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acknowledged At"
+          },
+          "acknowledged_by_actor_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acknowledged By Actor Ref"
+          },
+          "acknowledgement_is_resolution": {
+            "default": false,
+            "title": "Acknowledgement Is Resolution",
+            "type": "boolean"
+          },
+          "candidate_id": {
+            "format": "uuid",
+            "title": "Candidate Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "failure_ratio_bps": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Ratio Bps"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "reason_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reason Codes",
+            "type": "array"
+          },
+          "rejected_count": {
+            "title": "Rejected Count",
+            "type": "integer"
+          },
+          "signal": {
+            "title": "Signal",
+            "type": "string"
+          },
+          "total_count": {
+            "title": "Total Count",
+            "type": "integer"
+          },
+          "unavailable_count": {
+            "title": "Unavailable Count",
+            "type": "integer"
+          },
+          "window_started_at": {
+            "format": "date-time",
+            "title": "Window Started At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "candidate_id",
+          "signal",
+          "reason_codes",
+          "observed_at",
+          "window_started_at",
+          "total_count",
+          "accepted_count",
+          "unavailable_count",
+          "rejected_count",
+          "failure_ratio_bps",
+          "created_at",
+          "acknowledged",
+          "acknowledged_at",
+          "acknowledged_by_actor_ref"
+        ],
+        "title": "OtpDeliveryAlertCandidateResponse",
+        "type": "object"
       }
     }
   },
   "paths": {
+    "/internal/admin/v1/operational-reports/otp-delivery-alerts": {
+      "get": {
+        "operationId": "otp_delivery_alert_candidates_internal_admin_v1_operational_reports_otp_delivery_alerts_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "acknowledged",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Acknowledged"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 10000,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtpDeliveryAlertCandidateListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Otp Delivery Alert Candidates",
+        "tags": [
+          "Internal Admin Operational Reports"
+        ]
+      }
+    },
+    "/internal/admin/v1/operational-reports/otp-delivery-alerts/{candidate_id}/acknowledgement": {
+      "post": {
+        "operationId": "acknowledge_otp_delivery_alert_internal_admin_v1_operational_reports_otp_delivery_alerts__candidate_id__acknowledgement_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "candidate_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Candidate Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-KEFE-CSRF",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Csrf"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtpDeliveryAlertAcknowledgementRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtpDeliveryAlertCandidateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Acknowledge Otp Delivery Alert",
+        "tags": [
+          "Internal Admin Operational Reports"
+        ]
+      }
+    },
     "/internal/admin/v1/operational-reports/snapshot": {
       "get": {
         "operationId": "operational_reports_snapshot_internal_admin_v1_operational_reports_snapshot_get",
