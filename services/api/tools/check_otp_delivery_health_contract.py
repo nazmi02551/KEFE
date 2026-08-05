@@ -161,7 +161,7 @@ def main() -> None:
         "OtpDeliveryHealthPolicy.from_seconds",
         "DurableOtpDeliveryObserver",
         "FailOpenOtpDeliveryObserver",
-        "build_otp_delivery(settings,",
+        "otp_delivery = build_otp_delivery(",
         "observer=otp_delivery_health_observer",
         "otp_delivery_health=otp_delivery_health_service",
     ):
