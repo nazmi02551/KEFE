@@ -1,0 +1,126 @@
+{
+  "contract_id": "KEFE-OTP-DELIVERY-HEALTH-001",
+  "version": "1.0.0",
+  "status": "IMPLEMENTED_PARTIAL_CANDIDATE",
+  "capabilities": [
+    "CAP-084",
+    "CAP-123"
+  ],
+  "foundation_wave": "F4",
+  "source_boundary": {
+    "adapter": "HttpOtpDelivery",
+    "observation_point": "final provider-neutral delivery outcome",
+    "outcomes": [
+      "ACCEPTED",
+      "UNAVAILABLE",
+      "REJECTED"
+    ],
+    "provider_call_repeated_for_observation_failure": false,
+    "provider_result_replaced_by_observation_failure": false
+  },
+  "event": {
+    "table": "identity.otp_delivery_event",
+    "append_only": true,
+    "fields": [
+      "id",
+      "observed_at",
+      "channel",
+      "outcome",
+      "attempts",
+      "status_code",
+      "error_code",
+      "created_at"
+    ],
+    "forbidden_fields": [
+      "recipient",
+      "identifier",
+      "identifier_hash",
+      "identifier_hint",
+      "otp_code",
+      "otp_code_hash",
+      "challenge_id",
+      "delivery_id",
+      "request_body",
+      "response_body",
+      "bearer_token",
+      "provider_endpoint"
+    ],
+    "foreign_keys": false,
+    "default_retention_seconds": 604800,
+    "retention_enforced_on_write_and_snapshot": true
+  },
+  "snapshot": {
+    "signals": [
+      "QUIET",
+      "NOMINAL",
+      "ATTENTION",
+      "CRITICAL"
+    ],
+    "default_window_seconds": 900,
+    "default_minimum_ratio_sample": 5,
+    "default_thresholds": {
+      "failure_count_attention": 3,
+      "failure_count_critical": 10,
+      "unavailable_count_attention": 2,
+      "unavailable_count_critical": 5,
+      "failure_ratio_attention_bps": 2000,
+      "failure_ratio_critical_bps": 5000
+    },
+    "ratio_suppressed_below_minimum_sample": true,
+    "quiet_means_no_observed_delivery_in_window": true,
+    "quiet_claims_provider_health": false,
+    "facts": [
+      "total_count",
+      "accepted_count",
+      "unavailable_count",
+      "rejected_count",
+      "attempts_total",
+      "email_count",
+      "sms_count",
+      "latest_observed_at",
+      "latest_accepted_at"
+    ]
+  },
+  "admin_integration": {
+    "secured_endpoint": "GET /internal/admin/v1/operational-reports/snapshot",
+    "http_response_shape_changed": false,
+    "openapi_drift_allowed": false,
+    "new_aggregate_reason_codes": [
+      "OTP_DELIVERY_ATTENTION",
+      "OTP_DELIVERY_CRITICAL"
+    ],
+    "detailed_otp_snapshot_exposed_over_http": false,
+    "critical_otp_signal_sets_overall_critical": true,
+    "attention_otp_signal_sets_overall_attention": true
+  },
+  "failure_isolation": {
+    "observer_wrapper": "FailOpenOtpDeliveryObserver",
+    "catches_storage_exceptions": true,
+    "logs_without_delivery_payload": true,
+    "accepted_delivery_remains_accepted": true,
+    "provider_domain_error_remains_authoritative": true,
+    "duplicate_send_on_observation_failure": false
+  },
+  "persistence": {
+    "memory_repository": "InMemoryOtpDeliveryHealthRepository",
+    "postgres_repository": "PostgresOtpDeliveryHealthRepository",
+    "restart_durable": true,
+    "aggregate_read_prunes_expired_events": true
+  },
+  "evidence": {
+    "memory_tests": "services/api/tests/test_otp_delivery_health.py",
+    "postgres_tests": "services/api/tests/test_otp_delivery_health_postgres.py",
+    "executable_checker": "services/api/tools/check_otp_delivery_health_contract.py",
+    "workflow": ".github/workflows/otp-delivery-health.yml"
+  },
+  "non_claims": [
+    "real email or SMS deliverability",
+    "provider acceptance means user receipt",
+    "externally validated production SLO",
+    "paging or incident response",
+    "telemetry completeness during persistence failure",
+    "production threshold tuning",
+    "recipient-level diagnosis",
+    "provider endpoint health check"
+  ]
+}
