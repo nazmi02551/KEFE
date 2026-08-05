@@ -17,6 +17,7 @@ The current behavior is functional but not sufficiently executable as a stable p
 - the destructive confirmation value is the generic literal `DELETE` rather than being bound to the authenticated actor;
 - PostgreSQL permits more than one deletion receipt for the same actor;
 - concurrent repository calls do not have an explicit one-receipt replay contract;
+- guest/account merge linkage may remain after deletion;
 - no dedicated exact contract, OpenAPI check or PostgreSQL concurrency/restart proof exists for CAP-085.
 
 ## Decision
@@ -71,6 +72,7 @@ This confirmation hardening does not claim recent reauthentication, legal consen
 Deletion remains transactional and preserves the existing policy boundary:
 
 - actor-partitioned private product rows are removed;
+- guest/account merge linkage involving the deletion subject is removed;
 - retained audit/outbox records lose direct actor identifiers and carry only the bounded deletion marker;
 - actor sessions and verified account identifiers are removed;
 - the actor is marked `DELETED` rather than physically removed;
@@ -78,7 +80,7 @@ Deletion remains transactional and preserves the existing policy boundary:
 
 PostgreSQL must lock the actor row before destructive work. If a receipt already exists, the repository returns that same receipt without repeating deletion. A unique constraint on `actor_id` and an append-only update/delete guard provide database-level enforcement. Concurrent calls must converge on one receipt ID and one policy version.
 
-The in-memory adapter must provide equivalent behavior using one repository lock and an actor-keyed receipt store.
+The in-memory adapter must provide equivalent behavior using one repository lock and an actor-keyed receipt store. Its identity cleanup must remove merge aliases where the actor is either the source guest or destination account.
 
 Deletion receipts use `PRIVACY_SELF_SERVICE_V2`. Existing historic `MVP_PRIVACY_V1` receipts remain readable and are not rewritten.
 
@@ -90,7 +92,7 @@ The deletion response remains backward-compatible and additionally returns the s
 
 The canonical repository remains responsible for the existing actor-partitioned domains:
 
-- identity sessions and account identifiers;
+- identity sessions, account identifiers and guest/account merge linkage;
 - decision sessions and their cascading responses, private reasons, revisions, drafts, exposure, intervention, delta and reflection rows;
 - Community Reason authoring, reactions and reports;
 - sharing records;
@@ -114,7 +116,7 @@ The implementation must provide:
 
 - an executable architecture/contract checker;
 - memory HTTP tests for deterministic export, digest reproducibility, actor-bound confirmation and same-receipt replay;
-- PostgreSQL 17 migration, restart, concurrent deletion, receipt uniqueness and append-only mutation proof;
+- PostgreSQL 17 migration, restart, concurrent deletion, receipt uniqueness, merge-link cleanup and append-only mutation proof;
 - an exact focused OpenAPI contract for the two existing privacy operations plus composed 0.19 and 0.20 drift gates;
 - exact-head API, Mobile, MVP and Global regression evidence.
 
@@ -132,6 +134,7 @@ This ADR does not implement or prove:
 - email or external delivery of exports;
 - a retention scheduler or automated legal-hold engine;
 - export payload persistence or a privacy warehouse;
+- CAP-084 guest/account merge behavior changes;
 - production deployment;
 - deployed load, SLO, alerting or rollback behavior;
 - human legal/CQB/usability acceptance;
