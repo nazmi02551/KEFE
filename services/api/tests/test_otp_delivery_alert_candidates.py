@@ -34,7 +34,7 @@ def _health_policy() -> OtpDeliveryHealthPolicy:
 
 def _alert_policy() -> OtpDeliveryAlertPolicy:
     return OtpDeliveryAlertPolicy(
-        cooldown=timedelta(minutes=30),
+        cooldown=timedelta(minutes=5),
         retention=timedelta(days=30),
     )
 
@@ -110,11 +110,11 @@ def test_alert_candidates_deduplicate_equal_severity_and_allow_escalation() -> N
 
     _append(
         repository,
-        observed_at=now + timedelta(minutes=31),
+        observed_at=now + timedelta(minutes=6),
         outcome=OtpDeliveryOutcome.UNAVAILABLE,
     )
     after_cooldown = service.list_alert_candidates(
-        as_of=now + timedelta(minutes=31)
+        as_of=now + timedelta(minutes=6)
     )
     assert len(after_cooldown) == 3
     assert after_cooldown[0].candidate.signal is OtpDeliveryHealthSignal.CRITICAL
