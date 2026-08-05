@@ -14,17 +14,21 @@ class PostgresPrivacyRepository:
 
     def export_actor_data(self, actor_id: UUID) -> dict[str, object]:
         with self._engine.connect() as connection:
-            sessions = connection.execute(
-                text(
-                    """
+            sessions = (
+                connection.execute(
+                    text(
+                        """
                     SELECT id, case_id, case_version_id, state, started_at, committed_at
                     FROM decision.weigh_session
                     WHERE actor_id = :actor_id
                     ORDER BY started_at ASC, id ASC
                     """
-                ),
-                {"actor_id": actor_id},
-            ).mappings().all()
+                    ),
+                    {"actor_id": actor_id},
+                )
+                .mappings()
+                .all()
+            )
             session_ids = [row["id"] for row in sessions]
             responses = []
             reasons = []
@@ -48,51 +52,69 @@ class PostgresPrivacyRepository:
                     """
                 ).bindparams(bindparam("session_ids", expanding=True))
                 reasons = connection.execute(stmt, {"session_ids": session_ids}).mappings().all()
-                stmt = text(
-                    """
-                    SELECT id, session_id, revision_no, flow_step_code, contribution_class,
-                           committed_at
-                    FROM decision.decision_revision
-                    WHERE actor_id = :actor_id
-                    ORDER BY committed_at ASC, revision_no ASC
-                    """
+                revisions = (
+                    connection.execute(
+                        text(
+                            """
+                        SELECT id, session_id, revision_no, flow_step_code,
+                               contribution_class, committed_at
+                        FROM decision.decision_revision
+                        WHERE actor_id = :actor_id
+                        ORDER BY committed_at ASC, revision_no ASC, id ASC
+                        """
+                        ),
+                        {"actor_id": actor_id},
+                    )
+                    .mappings()
+                    .all()
                 )
-                revisions = connection.execute(stmt, {"actor_id": actor_id}).mappings().all()
-            community = connection.execute(
-                text(
-                    """
+            community = (
+                connection.execute(
+                    text(
+                        """
                     SELECT id, case_version_id, tags, body, moderation_state, created_at
                     FROM community.reason
                     WHERE actor_id = :actor_id
-                    ORDER BY created_at ASC
+                    ORDER BY created_at ASC, id ASC
                     """
-                ),
-                {"actor_id": actor_id},
-            ).mappings().all()
-            shares = connection.execute(
-                text(
-                    """
+                    ),
+                    {"actor_id": actor_id},
+                )
+                .mappings()
+                .all()
+            )
+            shares = (
+                connection.execute(
+                    text(
+                        """
                     SELECT id, case_id, case_version_id, include_decision, created_at,
                            expires_at, revoked_at
                     FROM sharing.share_record
                     WHERE actor_id = :actor_id
-                    ORDER BY created_at ASC
+                    ORDER BY created_at ASC, id ASC
                     """
-                ),
-                {"actor_id": actor_id},
-            ).mappings().all()
-            consensus = connection.execute(
-                text(
-                    """
+                    ),
+                    {"actor_id": actor_id},
+                )
+                .mappings()
+                .all()
+            )
+            consensus = (
+                connection.execute(
+                    text(
+                        """
                     SELECT card_version_id, case_version_id, stance_code, reason_tag_codes,
                            contribution_class, participated_at
                     FROM collective.consensus_participation
                     WHERE actor_id = :actor_id
-                    ORDER BY participated_at ASC
+                    ORDER BY participated_at ASC, card_version_id ASC
                     """
-                ),
-                {"actor_id": actor_id},
-            ).mappings().all()
+                    ),
+                    {"actor_id": actor_id},
+                )
+                .mappings()
+                .all()
+            )
 
         response_map: dict[UUID, list[dict[str, object]]] = {}
         for row in responses:
@@ -120,7 +142,9 @@ class PostgresPrivacyRepository:
                     "case_version_id": str(row["case_version_id"]),
                     "state": row["state"],
                     "started_at": row["started_at"].isoformat(),
-                    "committed_at": row["committed_at"].isoformat() if row["committed_at"] else None,
+                    "committed_at": (
+                        row["committed_at"].isoformat() if row["committed_at"] else None
+                    ),
                     "responses": response_map.get(row["id"], []),
                     "private_reason": reason_map.get(row["id"]),
                 }
@@ -166,7 +190,7 @@ class PostgresPrivacyRepository:
                     "include_decision": row["include_decision"],
                     "created_at": row["created_at"].isoformat(),
                     "expires_at": row["expires_at"].isoformat(),
-                    "revoked_at": row["revoked_at"].isoformat() if row["revoked_at"] else None,
+                    "revoked_at": (row["revoked_at"].isoformat() if row["revoked_at"] else None),
                 }
                 for row in shares
             ],
@@ -190,30 +214,96 @@ class PostgresPrivacyRepository:
         actor_kind: str,
         deleted_at: datetime,
     ) -> PrivacyDeletionReceipt:
-        receipt_id = uuid4()
         with self._engine.begin() as connection:
-            session_ids = connection.execute(
-                text("SELECT id FROM decision.weigh_session WHERE actor_id = :actor_id"),
-                {"actor_id": actor_id},
-            ).scalars().all()
-            identifier_hashes = connection.execute(
-                text(
-                    "SELECT identifier_hash FROM identity.account_identifier WHERE actor_id = :actor_id"
-                ),
-                {"actor_id": actor_id},
-            ).scalars().all()
+            actor = (
+                connection.execute(
+                    text(
+                        """
+                    SELECT actor_kind, state
+                    FROM identity.actor
+                    WHERE id = :actor_id
+                    FOR UPDATE
+                    """
+                    ),
+                    {"actor_id": actor_id},
+                )
+                .mappings()
+                .one_or_none()
+            )
+            existing = (
+                connection.execute(
+                    text(
+                        """
+                    SELECT id, actor_id, actor_kind, deleted_at,
+                           private_data_deleted, aggregate_contributions_anonymized,
+                           policy_version
+                    FROM privacy.actor_deletion_receipt
+                    WHERE actor_id = :actor_id
+                    """
+                    ),
+                    {"actor_id": actor_id},
+                )
+                .mappings()
+                .one_or_none()
+            )
+            if existing is not None:
+                return self._receipt(existing)
+            if actor is None:
+                raise ValueError("privacy deletion actor was not found")
+            if actor["actor_kind"] != actor_kind:
+                raise ValueError("privacy deletion actor kind conflict")
 
-            # Retained audit events lose the direct actor reference before product rows are deleted.
+            receipt_id = uuid4()
+            session_ids = (
+                connection.execute(
+                    text("SELECT id FROM decision.weigh_session WHERE actor_id = :actor_id"),
+                    {"actor_id": actor_id},
+                )
+                .scalars()
+                .all()
+            )
+            identifier_hashes = (
+                connection.execute(
+                    text(
+                        "SELECT identifier_hash FROM identity.account_identifier WHERE actor_id = :actor_id"
+                    ),
+                    {"actor_id": actor_id},
+                )
+                .scalars()
+                .all()
+            )
+
             if session_ids:
                 stmt = text(
                     """
                     UPDATE analytics.outbox_event
-                    SET payload = (payload - 'actor_id') || jsonb_build_object('actor_deleted', true)
+                    SET payload = (payload - 'actor_id')
+                        || jsonb_build_object('actor_deleted', true)
                     WHERE aggregate_id IN :session_ids
                     """
                 ).bindparams(bindparam("session_ids", expanding=True))
                 connection.execute(stmt, {"session_ids": session_ids})
 
+            connection.execute(
+                text(
+                    """
+                    UPDATE decision.weigh_session
+                    SET merged_from_actor_id = NULL
+                    WHERE merged_from_actor_id = :actor_id
+                      AND actor_id <> :actor_id
+                    """
+                ),
+                {"actor_id": actor_id},
+            )
+            connection.execute(
+                text(
+                    """
+                    DELETE FROM identity.actor_merge
+                    WHERE guest_actor_id = :actor_id OR account_actor_id = :actor_id
+                    """
+                ),
+                {"actor_id": actor_id},
+            )
             connection.execute(
                 text("DELETE FROM sharing.share_record WHERE actor_id = :actor_id"),
                 {"actor_id": actor_id},
@@ -247,14 +337,14 @@ class PostgresPrivacyRepository:
                 {"actor_id": actor_id},
             )
             if identifier_hashes:
-                stmt = text(
+                challenge_stmt = text(
                     "DELETE FROM identity.otp_challenge WHERE identifier_hash IN :hashes"
                 ).bindparams(bindparam("hashes", expanding=True))
-                connection.execute(stmt, {"hashes": identifier_hashes})
-                stmt = text(
+                connection.execute(challenge_stmt, {"hashes": identifier_hashes})
+                verification_stmt = text(
                     "DELETE FROM identity.otp_verification WHERE identifier_hash IN :hashes"
                 ).bindparams(bindparam("hashes", expanding=True))
-                connection.execute(stmt, {"hashes": identifier_hashes})
+                connection.execute(verification_stmt, {"hashes": identifier_hashes})
             connection.execute(
                 text("UPDATE identity.actor SET state = 'DELETED' WHERE id = :actor_id"),
                 {"actor_id": actor_id},
@@ -266,23 +356,36 @@ class PostgresPrivacyRepository:
                         id, actor_id, actor_kind, deleted_at, private_data_deleted,
                         aggregate_contributions_anonymized, policy_version
                     ) VALUES (
-                        :id, :actor_id, :actor_kind, :deleted_at, true, true, 'MVP_PRIVACY_V1'
+                        :id, :actor_id, :actor_kind, :deleted_at,
+                        true, true, 'PRIVACY_SELF_SERVICE_V2'
                     )
                     """
                 ),
                 {
                     "id": receipt_id,
                     "actor_id": actor_id,
-                    "actor_kind": actor_kind,
+                    "actor_kind": actor["actor_kind"],
                     "deleted_at": deleted_at,
                 },
             )
+            return PrivacyDeletionReceipt(
+                receipt_id=receipt_id,
+                actor_id=actor_id,
+                actor_kind=actor["actor_kind"],
+                deleted_at=deleted_at,
+                private_data_deleted=True,
+                aggregate_contributions_anonymized=True,
+                policy_version="PRIVACY_SELF_SERVICE_V2",
+            )
+
+    @staticmethod
+    def _receipt(row: object) -> PrivacyDeletionReceipt:
         return PrivacyDeletionReceipt(
-            receipt_id=receipt_id,
-            actor_id=actor_id,
-            actor_kind=actor_kind,
-            deleted_at=deleted_at,
-            private_data_deleted=True,
-            aggregate_contributions_anonymized=True,
-            policy_version="MVP_PRIVACY_V1",
+            receipt_id=row["id"],
+            actor_id=row["actor_id"],
+            actor_kind=row["actor_kind"],
+            deleted_at=row["deleted_at"],
+            private_data_deleted=row["private_data_deleted"],
+            aggregate_contributions_anonymized=row["aggregate_contributions_anonymized"],
+            policy_version=row["policy_version"],
         )

@@ -156,7 +156,7 @@ def test_postgres_existing_account_merge_preserves_product_history_and_controls(
 
     deleted = client.delete(
         "/v1/me",
-        headers={**account_headers, "X-KEFE-Delete-Confirm": "DELETE"},
+        headers={**account_headers, "X-KEFE-Delete-Confirm": f"DELETE:{account_actor_id}"},
     )
     assert deleted.status_code == 200
     assert client.get("/v1/me/progress", headers=merged_headers).status_code == 401

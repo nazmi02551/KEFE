@@ -2347,6 +2347,131 @@
         "title": "PrimitiveResponse",
         "type": "object"
       },
+      "PrivacyDeletionResponse": {
+        "properties": {
+          "actor_id": {
+            "format": "uuid",
+            "title": "Actor Id",
+            "type": "string"
+          },
+          "actor_kind": {
+            "title": "Actor Kind",
+            "type": "string"
+          },
+          "aggregate_contributions_anonymized": {
+            "title": "Aggregate Contributions Anonymized",
+            "type": "boolean"
+          },
+          "deleted_at": {
+            "title": "Deleted At",
+            "type": "string"
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "string"
+          },
+          "private_data_deleted": {
+            "title": "Private Data Deleted",
+            "type": "boolean"
+          },
+          "receipt_id": {
+            "format": "uuid",
+            "title": "Receipt Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "receipt_id",
+          "actor_id",
+          "actor_kind",
+          "deleted_at",
+          "policy_version",
+          "private_data_deleted",
+          "aggregate_contributions_anonymized"
+        ],
+        "title": "PrivacyDeletionResponse",
+        "type": "object"
+      },
+      "PrivacyExportManifestResponse": {
+        "properties": {
+          "dataset_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Dataset Counts",
+            "type": "object"
+          },
+          "empty_datasets": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Empty Datasets",
+            "type": "array"
+          },
+          "total_records": {
+            "title": "Total Records",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dataset_counts",
+          "total_records",
+          "empty_datasets"
+        ],
+        "title": "PrivacyExportManifestResponse",
+        "type": "object"
+      },
+      "PrivacyExportResponse": {
+        "properties": {
+          "actor_id": {
+            "format": "uuid",
+            "title": "Actor Id",
+            "type": "string"
+          },
+          "actor_kind": {
+            "title": "Actor Kind",
+            "type": "string"
+          },
+          "data_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Data Sha256",
+            "type": "string"
+          },
+          "generated_at": {
+            "title": "Generated At",
+            "type": "string"
+          },
+          "manifest": {
+            "$ref": "#/components/schemas/PrivacyExportManifestResponse"
+          },
+          "product_data": {
+            "additionalProperties": true,
+            "title": "Product Data",
+            "type": "object"
+          },
+          "retention": {
+            "additionalProperties": true,
+            "title": "Retention",
+            "type": "object"
+          },
+          "schema_version": {
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "actor_id",
+          "actor_kind",
+          "generated_at",
+          "retention",
+          "manifest",
+          "product_data",
+          "data_sha256"
+        ],
+        "title": "PrivacyExportResponse",
+        "type": "object"
+      },
       "PrivateReasonResponse": {
         "properties": {
           "moderation_state": {
@@ -4524,6 +4649,86 @@
         "summary": "Revoke Session",
         "tags": [
           "Identity"
+        ]
+      }
+    },
+    "/v1/me": {
+      "delete": {
+        "operationId": "delete_me_v1_me_delete",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-KEFE-Delete-Confirm",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Delete-Confirm"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyDeletionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Me",
+        "tags": [
+          "Privacy"
+        ]
+      }
+    },
+    "/v1/me/privacy-export": {
+      "get": {
+        "operationId": "export_privacy_v1_me_privacy_export_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyExportResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Export Privacy",
+        "tags": [
+          "Privacy"
         ]
       }
     },

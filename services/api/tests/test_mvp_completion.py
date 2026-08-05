@@ -239,7 +239,7 @@ def test_privacy_export_excludes_credentials_then_delete_revokes_identity() -> N
     assert unconfirmed.status_code == 422
     deleted = client.delete(
         "/v1/me",
-        headers={**headers, "X-KEFE-Delete-Confirm": "DELETE"},
+        headers={**headers, "X-KEFE-Delete-Confirm": f"DELETE:{body['actor_id']}"},
     )
     assert deleted.status_code == 200
     assert deleted.json()["private_data_deleted"] is True

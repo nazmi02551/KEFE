@@ -1,0 +1,204 @@
+{
+  "contract_version": "1.0.0",
+  "updated_at": "2026-08-05",
+  "status": "accepted_implementation_contract",
+  "source_issue": 312,
+  "capabilities": ["CAP-085", "CAP-126"],
+  "primary_capability": "CAP-085",
+  "foundation_wave": "F4",
+  "priority": "P0",
+  "lifecycle_promotion": false,
+  "parent": {
+    "pr": 311,
+    "exact_head": "4f31fb894c153b9bc5c90a5a0dc6fce534db04b8"
+  },
+  "authority": {
+    "adr": "docs/adr/0108-deterministic-privacy-export-and-deletion-hardening.md",
+    "service": "services/api/src/kefe_api/modules/privacy/service.py",
+    "router": "services/api/src/kefe_api/modules/privacy/router.py"
+  },
+  "invariants": [
+    "ONE_EXISTING_SELF_SERVICE_PRIVACY_AUTHORITY",
+    "ACTOR_IDENTITY_SERVER_DERIVED",
+    "NO_EXPORT_PAYLOAD_PERSISTENCE",
+    "NO_SECONDARY_USER_DATA_COPY",
+    "ONE_APPEND_ONLY_DELETION_RECEIPT_PER_ACTOR",
+    "NO_REUSABLE_PROFILE_DATA_IN_RETAINED_AUDIT",
+    "COMMIT_FIRST_AND_BLIND_FIRST_UNCHANGED",
+    "IMMUTABLE_CASE_VERSION_UNCHANGED",
+    "GENERIC_RUNTIME_UNCHANGED",
+    "PREVIEW_PRODUCTION_ISOLATION_UNCHANGED",
+    "NO_PSYCHOMETRIC_OR_NORMATIVE_INFERENCE"
+  ],
+  "export": {
+    "endpoint": "GET /v1/me/privacy-export",
+    "schema_version": "privacy-export.v2",
+    "backward_compatible_additive_fields": [
+      "schema_version",
+      "manifest",
+      "data_sha256"
+    ],
+    "existing_fields_preserved": [
+      "actor_id",
+      "actor_kind",
+      "generated_at",
+      "retention",
+      "product_data"
+    ],
+    "manifest": {
+      "fields": ["dataset_counts", "total_records", "empty_datasets"],
+      "dataset_keys_sorted": true,
+      "empty_datasets_sorted": true,
+      "array_count": "CARDINALITY",
+      "object_count": "CARDINALITY",
+      "null_count": 0,
+      "scalar_count": 1
+    },
+    "digest": {
+      "algorithm": "SHA-256",
+      "encoding": "LOWERCASE_HEX",
+      "canonical_json": {
+        "object_keys": "RECURSIVELY_SORTED",
+        "separators": "COMPACT",
+        "character_encoding": "UTF-8",
+        "ensure_ascii": false,
+        "arrays": "REPOSITORY_DEFINED_STABLE_ORDER"
+      },
+      "included_fields": [
+        "schema_version",
+        "actor_id",
+        "actor_kind",
+        "retention",
+        "manifest",
+        "product_data"
+      ],
+      "excluded_fields": ["generated_at", "data_sha256"]
+    },
+    "generated_on_demand": true,
+    "payload_persistence_forbidden": true,
+    "stable_repository_ordering_required": true
+  },
+  "deletion": {
+    "endpoint": "DELETE /v1/me",
+    "confirmation_header": "X-KEFE-Delete-Confirm",
+    "confirmation_format": "DELETE:<authenticated_actor_uuid>",
+    "generic_delete_literal_forbidden": true,
+    "other_actor_confirmation_forbidden": true,
+    "comparison": "CONSTANT_TIME_EXACT",
+    "subject_is_server_derived": true,
+    "policy_version": "PRIVACY_SELF_SERVICE_V2",
+    "actor_row_lock_required": true,
+    "one_receipt_per_actor": true,
+    "existing_receipt_returns_same_receipt": true,
+    "concurrent_calls_converge": true,
+    "historic_receipts_rewritten": false,
+    "response_additive_fields": ["actor_id", "actor_kind"]
+  },
+  "deletion_coverage": {
+    "identity": [
+      "identity.actor_session",
+      "identity.account_identifier",
+      "identity.actor_merge_as_guest_or_account",
+      "identity.in_memory_merge_alias_as_source_or_destination",
+      "identity.otp_challenge_by_identifier_hash",
+      "identity.otp_verification_by_identifier_hash",
+      "identity.actor_state_to_DELETED"
+    ],
+    "decision_root": "decision.weigh_session",
+    "decision_cascade": [
+      "decision.response",
+      "decision.private_reason",
+      "decision.decision_revision",
+      "decision.revision_draft",
+      "decision.exposure",
+      "decision.intervention",
+      "decision.decision_delta",
+      "decision.decision_delta_intervention",
+      "decision.reflection_completion"
+    ],
+    "community": [
+      "community.reason",
+      "community.reason_reaction",
+      "community.reason_report"
+    ],
+    "other_product_data": [
+      "sharing.share_record",
+      "collective.consensus_participation"
+    ],
+    "retained_audit_anonymization": [
+      "analytics.outbox_event.payload.actor_id_removed",
+      "analytics.outbox_event.payload.actor_deleted_true"
+    ],
+    "future_table_auto_claim_forbidden": true,
+    "catalog_drift_must_fail_contract": true
+  },
+  "persistence": {
+    "memory_and_postgres_parity": true,
+    "postgres_schema": "privacy",
+    "receipt_table": "privacy.actor_deletion_receipt",
+    "receipt_unique_actor_constraint": true,
+    "receipt_update_forbidden": true,
+    "receipt_delete_forbidden": true,
+    "restart_continuity_required": true,
+    "concurrency_proof_required": true,
+    "same_receipt_id_required": true
+  },
+  "openapi": {
+    "target_version": "0.19.0",
+    "focused_paths": ["/v1/me/privacy-export", "/v1/me"],
+    "exact_focused_contract_required": true,
+    "composed_0_19_gate_required": true,
+    "global_0_20_gate_required": true
+  },
+  "privacy": {
+    "receipt_forbidden_data": [
+      "PRIVATE_CONTENT",
+      "EXPORT_PAYLOAD",
+      "IDENTIFIER_HASH",
+      "SESSION_TOKEN",
+      "EMAIL",
+      "PHONE",
+      "DEVICE_IDENTIFIER",
+      "REUSABLE_PROFILE_DATA"
+    ],
+    "forbidden_inference": [
+      "PERSONALITY",
+      "IDEOLOGY",
+      "PSYCHOMETRIC",
+      "MORALITY",
+      "BIAS",
+      "CAUSAL",
+      "NORMATIVE",
+      "SOCIAL_WORTH"
+    ]
+  },
+  "explicit_exclusions": [
+    "LEGAL_OR_REGULATORY_CERTIFICATION",
+    "JURISDICTION_SPECIFIC_DEADLINE",
+    "RECENT_REAUTHENTICATION_OR_MFA",
+    "BACKGROUND_EXPORT_JOB",
+    "DOWNLOADABLE_ARCHIVE_STORAGE",
+    "EMAIL_OR_EXTERNAL_EXPORT_DELIVERY",
+    "RETENTION_SCHEDULER",
+    "AUTOMATED_LEGAL_HOLD_ENGINE",
+    "EXPORT_PAYLOAD_PERSISTENCE",
+    "PRIVACY_DATA_WAREHOUSE",
+    "CAP_084_MERGE_BEHAVIOR_CHANGE",
+    "PRODUCTION_DEPLOYMENT",
+    "DEPLOYED_LOAD_SLO_ALERTING_OR_ROLLBACK",
+    "HUMAN_LEGAL_CQB_OR_USABILITY_ACCEPTANCE",
+    "STORE_COMPLIANCE",
+    "RELEASED_MOBILE_ARTIFACT"
+  ],
+  "verification": {
+    "contract_checker": "services/api/tools/check_privacy_export_deletion_contract.py",
+    "memory_http_tests": true,
+    "postgres_restart_tests": true,
+    "postgres_concurrency_tests": true,
+    "receipt_direct_mutation_tests": true,
+    "merge_link_cleanup_tests": true,
+    "focused_openapi_exact_contract": true,
+    "exact_head_api_mobile_mvp_global": true,
+    "no_pass_without_exact_head_ci": true
+  }
+}

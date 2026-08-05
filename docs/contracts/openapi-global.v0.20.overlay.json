@@ -3,74 +3,305 @@
     "schemas": {
       "GlobalCaseDetailResponse": {
         "properties": {
-          "base_format": {"title": "Base Format", "type": "string"},
-          "case_id": {"format": "uuid", "title": "Case Id", "type": "string"},
-          "case_version_id": {"format": "uuid", "title": "Case Version Id", "type": "string"},
-          "content_risk": {"title": "Content Risk", "type": "string"},
-          "country_codes": {"items": {"type": "string"}, "title": "Country Codes", "type": "array"},
-          "cultural_context_note": {"anyOf": [{"type": "string"}, {"type": "null"}], "title": "Cultural Context Note"},
-          "display_locale": {"title": "Display Locale", "type": "string"},
-          "legal_context_note": {"anyOf": [{"type": "string"}, {"type": "null"}], "title": "Legal Context Note"},
-          "localized": {"title": "Localized", "type": "boolean"},
-          "market_scope": {"title": "Market Scope", "type": "string"},
-          "primary_domain": {"title": "Primary Domain", "type": "string"},
-          "questions": {"items": {"$ref": "#/components/schemas/LocalizedQuestionResponse"}, "title": "Questions", "type": "array"},
-          "requested_locale": {"title": "Requested Locale", "type": "string"},
-          "source_locale": {"title": "Source Locale", "type": "string"},
-          "summary": {"title": "Summary", "type": "string"},
-          "title": {"title": "Title", "type": "string"},
-          "version_no": {"title": "Version No", "type": "integer"}
+          "base_format": {
+            "title": "Base Format",
+            "type": "string"
+          },
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "case_version_id": {
+            "format": "uuid",
+            "title": "Case Version Id",
+            "type": "string"
+          },
+          "content_risk": {
+            "title": "Content Risk",
+            "type": "string"
+          },
+          "country_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Country Codes",
+            "type": "array"
+          },
+          "cultural_context_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cultural Context Note"
+          },
+          "display_locale": {
+            "title": "Display Locale",
+            "type": "string"
+          },
+          "legal_context_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Legal Context Note"
+          },
+          "localized": {
+            "title": "Localized",
+            "type": "boolean"
+          },
+          "market_scope": {
+            "title": "Market Scope",
+            "type": "string"
+          },
+          "primary_domain": {
+            "title": "Primary Domain",
+            "type": "string"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/LocalizedQuestionResponse"
+            },
+            "title": "Questions",
+            "type": "array"
+          },
+          "requested_locale": {
+            "title": "Requested Locale",
+            "type": "string"
+          },
+          "source_locale": {
+            "title": "Source Locale",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "version_no": {
+            "title": "Version No",
+            "type": "integer"
+          }
         },
-        "required": ["case_id", "case_version_id", "version_no", "title", "summary", "base_format", "primary_domain", "content_risk", "requested_locale", "display_locale", "source_locale", "localized", "market_scope", "country_codes", "cultural_context_note", "legal_context_note", "questions"],
+        "required": [
+          "case_id",
+          "case_version_id",
+          "version_no",
+          "title",
+          "summary",
+          "base_format",
+          "primary_domain",
+          "content_risk",
+          "requested_locale",
+          "display_locale",
+          "source_locale",
+          "localized",
+          "market_scope",
+          "country_codes",
+          "cultural_context_note",
+          "legal_context_note",
+          "questions"
+        ],
         "title": "GlobalCaseDetailResponse",
         "type": "object"
       },
       "GlobalCaseListResponse": {
-        "properties": {"items": {"items": {"$ref": "#/components/schemas/GlobalCaseSummaryResponse"}, "title": "Items", "type": "array"}},
-        "required": ["items"],
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalCaseSummaryResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
         "title": "GlobalCaseListResponse",
         "type": "object"
       },
       "GlobalCaseSummaryResponse": {
         "properties": {
-          "base_format": {"title": "Base Format", "type": "string"},
-          "case_id": {"format": "uuid", "title": "Case Id", "type": "string"},
-          "case_version_id": {"format": "uuid", "title": "Case Version Id", "type": "string"},
-          "content_risk": {"title": "Content Risk", "type": "string"},
-          "country_codes": {"items": {"type": "string"}, "title": "Country Codes", "type": "array"},
-          "cultural_context_note": {"anyOf": [{"type": "string"}, {"type": "null"}], "title": "Cultural Context Note"},
-          "display_locale": {"title": "Display Locale", "type": "string"},
-          "legal_context_note": {"anyOf": [{"type": "string"}, {"type": "null"}], "title": "Legal Context Note"},
-          "localized": {"title": "Localized", "type": "boolean"},
-          "market_scope": {"title": "Market Scope", "type": "string"},
-          "primary_domain": {"title": "Primary Domain", "type": "string"},
-          "requested_locale": {"title": "Requested Locale", "type": "string"},
-          "source_locale": {"title": "Source Locale", "type": "string"},
-          "summary": {"title": "Summary", "type": "string"},
-          "title": {"title": "Title", "type": "string"},
-          "version_no": {"title": "Version No", "type": "integer"}
+          "base_format": {
+            "title": "Base Format",
+            "type": "string"
+          },
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "case_version_id": {
+            "format": "uuid",
+            "title": "Case Version Id",
+            "type": "string"
+          },
+          "content_risk": {
+            "title": "Content Risk",
+            "type": "string"
+          },
+          "country_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Country Codes",
+            "type": "array"
+          },
+          "cultural_context_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cultural Context Note"
+          },
+          "display_locale": {
+            "title": "Display Locale",
+            "type": "string"
+          },
+          "legal_context_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Legal Context Note"
+          },
+          "localized": {
+            "title": "Localized",
+            "type": "boolean"
+          },
+          "market_scope": {
+            "title": "Market Scope",
+            "type": "string"
+          },
+          "primary_domain": {
+            "title": "Primary Domain",
+            "type": "string"
+          },
+          "requested_locale": {
+            "title": "Requested Locale",
+            "type": "string"
+          },
+          "source_locale": {
+            "title": "Source Locale",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "version_no": {
+            "title": "Version No",
+            "type": "integer"
+          }
         },
-        "required": ["case_id", "case_version_id", "version_no", "title", "summary", "base_format", "primary_domain", "content_risk", "requested_locale", "display_locale", "source_locale", "localized", "market_scope", "country_codes", "cultural_context_note", "legal_context_note"],
+        "required": [
+          "case_id",
+          "case_version_id",
+          "version_no",
+          "title",
+          "summary",
+          "base_format",
+          "primary_domain",
+          "content_risk",
+          "requested_locale",
+          "display_locale",
+          "source_locale",
+          "localized",
+          "market_scope",
+          "country_codes",
+          "cultural_context_note",
+          "legal_context_note"
+        ],
         "title": "GlobalCaseSummaryResponse",
         "type": "object"
       },
       "LocalizedOptionResponse": {
-        "properties": {"label": {"title": "Label", "type": "string"}, "value": {"title": "Value", "type": "string"}},
-        "required": ["value", "label"],
+        "properties": {
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value",
+          "label"
+        ],
         "title": "LocalizedOptionResponse",
         "type": "object"
       },
       "LocalizedQuestionResponse": {
         "properties": {
-          "options": {"items": {"$ref": "#/components/schemas/LocalizedOptionResponse"}, "title": "Options", "type": "array"},
-          "prompt": {"title": "Prompt", "type": "string"},
-          "question_id": {"format": "uuid", "title": "Question Id", "type": "string"},
-          "required": {"title": "Required", "type": "boolean"},
-          "response_schema": {"additionalProperties": true, "title": "Response Schema", "type": "object"},
-          "response_type": {"title": "Response Type", "type": "string"},
-          "stable_code": {"title": "Stable Code", "type": "string"}
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/LocalizedOptionResponse"
+            },
+            "title": "Options",
+            "type": "array"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string"
+          },
+          "question_id": {
+            "format": "uuid",
+            "title": "Question Id",
+            "type": "string"
+          },
+          "required": {
+            "title": "Required",
+            "type": "boolean"
+          },
+          "response_schema": {
+            "additionalProperties": true,
+            "title": "Response Schema",
+            "type": "object"
+          },
+          "response_type": {
+            "title": "Response Type",
+            "type": "string"
+          },
+          "stable_code": {
+            "title": "Stable Code",
+            "type": "string"
+          }
         },
-        "required": ["question_id", "stable_code", "prompt", "response_type", "required", "response_schema", "options"],
+        "required": [
+          "question_id",
+          "stable_code",
+          "prompt",
+          "response_type",
+          "required",
+          "response_schema",
+          "options"
+        ],
         "title": "LocalizedQuestionResponse",
         "type": "object"
       }
@@ -81,32 +312,148 @@
       "get": {
         "operationId": "list_global_cases_v1_discovery_cases_get",
         "parameters": [
-          {"in": "query", "name": "locale", "required": false, "schema": {"default": "tr-TR", "maxLength": 16, "minLength": 2, "title": "Locale", "type": "string"}},
-          {"in": "query", "name": "country", "required": false, "schema": {"anyOf": [{"maxLength": 2, "minLength": 2, "type": "string"}, {"type": "null"}], "title": "Country"}},
-          {"in": "query", "name": "limit", "required": false, "schema": {"default": 20, "maximum": 50, "minimum": 1, "title": "Limit", "type": "integer"}}
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "default": "tr-TR",
+              "maxLength": 16,
+              "minLength": 2,
+              "title": "Locale",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "country",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 2,
+                  "minLength": 2,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
         ],
         "responses": {
-          "200": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/GlobalCaseListResponse"}}}, "description": "Successful Response"},
-          "422": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/HTTPValidationError"}}}, "description": "Validation Error"}
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalCaseListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
         },
         "summary": "List Global Cases",
-        "tags": ["Global Discovery"]
+        "tags": [
+          "Global Discovery"
+        ]
       }
     },
     "/v1/discovery/cases/{case_id}": {
       "get": {
         "operationId": "get_global_case_v1_discovery_cases__case_id__get",
         "parameters": [
-          {"in": "path", "name": "case_id", "required": true, "schema": {"format": "uuid", "title": "Case Id", "type": "string"}},
-          {"in": "query", "name": "locale", "required": false, "schema": {"default": "tr-TR", "maxLength": 16, "minLength": 2, "title": "Locale", "type": "string"}},
-          {"in": "query", "name": "country", "required": false, "schema": {"anyOf": [{"maxLength": 2, "minLength": 2, "type": "string"}, {"type": "null"}], "title": "Country"}}
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "default": "tr-TR",
+              "maxLength": 16,
+              "minLength": 2,
+              "title": "Locale",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "country",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 2,
+                  "minLength": 2,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country"
+            }
+          }
         ],
         "responses": {
-          "200": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/GlobalCaseDetailResponse"}}}, "description": "Successful Response"},
-          "422": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/HTTPValidationError"}}}, "description": "Validation Error"}
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalCaseDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
         },
         "summary": "Get Global Case",
-        "tags": ["Global Discovery"]
+        "tags": [
+          "Global Discovery"
+        ]
       }
     }
   },
