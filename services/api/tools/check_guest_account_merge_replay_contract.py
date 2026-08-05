@@ -52,7 +52,7 @@ def main() -> None:
     _require("hmac.new" in service, "HMAC credential derivation")
     _require("kefe:guest-account-merge:v1" in service, "domain separation")
     _require("authenticate_guest_merge" in identity_service, "narrow replay authorization")
-    _require("authenticate_guest_merge" in router, "router uses narrow authorization")
+    _require("GuestMergeAuthorizationDep" in router, "router replay authorization dependency")
     _require("TokenStatus.REVOKED" in postgres_identity, "revoked principal resolution")
 
     forbidden_fragments = (
