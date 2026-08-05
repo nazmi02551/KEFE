@@ -71,6 +71,11 @@ class InMemoryIdentityRepository:
             for session in self._sessions.values():
                 if session.actor_id == actor_id:
                     session.revoked_at = session.revoked_at or now
+            self._merged_into = {
+                guest_actor_id: account_actor_id
+                for guest_actor_id, account_actor_id in self._merged_into.items()
+                if guest_actor_id != actor_id and account_actor_id != actor_id
+            }
             self._actor_kinds.pop(actor_id, None)
 
     def resolve_token(self, *, token_hash: str, now: datetime) -> TokenResolution:

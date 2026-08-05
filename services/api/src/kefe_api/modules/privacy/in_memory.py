@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from threading import RLock
 from uuid import UUID, uuid4
 
 from kefe_api.modules.decision.in_memory import InMemoryDecisionRepository
@@ -17,6 +18,8 @@ class InMemoryPrivacyRepository:
     ) -> None:
         self._decision = decision_repository
         self._identity = identity_repository
+        self._receipts: dict[UUID, PrivacyDeletionReceipt] = {}
+        self._lock = RLock()
 
     def export_actor_data(self, actor_id: UUID) -> dict[str, object]:
         sessions = [
@@ -30,10 +33,17 @@ class InMemoryPrivacyRepository:
                     session.committed_at.isoformat() if session.committed_at else None
                 ),
                 "responses": {
-                    str(key): value for key, value in session.responses.items()
+                    str(key): value
+                    for key, value in sorted(
+                        session.responses.items(),
+                        key=lambda item: str(item[0]),
+                    )
                 },
             }
-            for session in self._decision._sessions.values()
+            for session in sorted(
+                self._decision._sessions.values(),
+                key=lambda item: (item.started_at, str(item.id)),
+            )
             if session.actor_id == actor_id
         ]
         private_reasons = [
@@ -43,7 +53,10 @@ class InMemoryPrivacyRepository:
                 "text": reason.text,
                 "moderation_state": reason.moderation_state.value,
             }
-            for session_id, reason in self._decision._reasons.items()
+            for session_id, reason in sorted(
+                self._decision._reasons.items(),
+                key=lambda item: str(item[0]),
+            )
             if self._decision._sessions.get(session_id) is not None
             and self._decision._sessions[session_id].actor_id == actor_id
         ]
@@ -59,36 +72,45 @@ class InMemoryPrivacyRepository:
         actor_kind: str,
         deleted_at: datetime,
     ) -> PrivacyDeletionReceipt:
-        session_ids = {
-            session.id
-            for session in self._decision._sessions.values()
-            if session.actor_id == actor_id
-        }
-        for session_id in session_ids:
-            self._decision._sessions.pop(session_id, None)
-            self._decision._reasons.pop(session_id, None)
-            self._decision._revisions.pop(session_id, None)
-            self._decision._revision_drafts = {
-                key: value
-                for key, value in self._decision._revision_drafts.items()
-                if key[0] != session_id
+        with self._lock:
+            existing = self._receipts.get(actor_id)
+            if existing is not None:
+                if existing.actor_kind != actor_kind:
+                    raise ValueError("privacy deletion actor kind conflict")
+                return existing
+
+            session_ids = {
+                session.id
+                for session in self._decision._sessions.values()
+                if session.actor_id == actor_id
             }
-            self._decision._exposures.pop(session_id, None)
-            self._decision._interventions.pop(session_id, None)
-            self._decision._deltas.pop(session_id, None)
-        for event in self._decision.events:
-            if event.get("aggregate_id") in session_ids:
-                payload = event.get("payload")
-                if isinstance(payload, dict):
-                    payload.pop("actor_id", None)
-                    payload["actor_deleted"] = True
-        self._identity.delete_actor(actor_id, now=deleted_at)
-        return PrivacyDeletionReceipt(
-            receipt_id=uuid4(),
-            actor_id=actor_id,
-            actor_kind=actor_kind,
-            deleted_at=deleted_at,
-            private_data_deleted=True,
-            aggregate_contributions_anonymized=True,
-            policy_version="MVP_PRIVACY_V1",
-        )
+            for session_id in session_ids:
+                self._decision._sessions.pop(session_id, None)
+                self._decision._reasons.pop(session_id, None)
+                self._decision._revisions.pop(session_id, None)
+                self._decision._revision_drafts = {
+                    key: value
+                    for key, value in self._decision._revision_drafts.items()
+                    if key[0] != session_id
+                }
+                self._decision._exposures.pop(session_id, None)
+                self._decision._interventions.pop(session_id, None)
+                self._decision._deltas.pop(session_id, None)
+            for event in self._decision.events:
+                if event.get("aggregate_id") in session_ids:
+                    payload = event.get("payload")
+                    if isinstance(payload, dict):
+                        payload.pop("actor_id", None)
+                        payload["actor_deleted"] = True
+            self._identity.delete_actor(actor_id, now=deleted_at)
+            receipt = PrivacyDeletionReceipt(
+                receipt_id=uuid4(),
+                actor_id=actor_id,
+                actor_kind=actor_kind,
+                deleted_at=deleted_at,
+                private_data_deleted=True,
+                aggregate_contributions_anonymized=True,
+                policy_version="PRIVACY_SELF_SERVICE_V2",
+            )
+            self._receipts[actor_id] = receipt
+            return receipt

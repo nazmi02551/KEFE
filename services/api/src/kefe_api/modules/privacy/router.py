@@ -4,25 +4,35 @@ from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-from kefe_api.core.errors import DomainError
 from kefe_api.modules.identity.dependencies import PrincipalDep
 from kefe_api.modules.privacy.service import PrivacyService
 
 router = APIRouter(prefix="/v1/me", tags=["Privacy"])
 
 
+class PrivacyExportManifestResponse(BaseModel):
+    dataset_counts: dict[str, int]
+    total_records: int
+    empty_datasets: list[str]
+
+
 class PrivacyExportResponse(BaseModel):
+    schema_version: str
     actor_id: UUID
     actor_kind: str
     generated_at: str
     retention: dict[str, Any]
+    manifest: PrivacyExportManifestResponse
     product_data: dict[str, Any]
+    data_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
 
 
 class PrivacyDeletionResponse(BaseModel):
     receipt_id: UUID
+    actor_id: UUID
+    actor_kind: str
     deleted_at: str
     policy_version: str
     private_data_deleted: bool
@@ -44,11 +54,18 @@ def export_privacy(
 ) -> PrivacyExportResponse:
     bundle = service.export(principal)
     return PrivacyExportResponse(
+        schema_version=bundle.schema_version,
         actor_id=bundle.actor_id,
         actor_kind=bundle.actor_kind,
         generated_at=bundle.generated_at.isoformat(),
         retention=bundle.retention,
+        manifest=PrivacyExportManifestResponse(
+            dataset_counts=bundle.manifest.dataset_counts,
+            total_records=bundle.manifest.total_records,
+            empty_datasets=list(bundle.manifest.empty_datasets),
+        ),
         product_data=bundle.product_data,
+        data_sha256=bundle.data_sha256,
     )
 
 
@@ -58,15 +75,11 @@ def delete_me(
     service: PrivacyServiceDep,
     confirm: DeleteConfirm = None,
 ) -> PrivacyDeletionResponse:
-    if confirm != "DELETE":
-        raise DomainError(
-            "PRIVACY_DELETE_CONFIRMATION_REQUIRED",
-            "Explicit deletion confirmation is required",
-            422,
-        )
-    receipt = service.delete(principal)
+    receipt = service.delete(principal, confirmation=confirm)
     return PrivacyDeletionResponse(
         receipt_id=receipt.receipt_id,
+        actor_id=receipt.actor_id,
+        actor_kind=receipt.actor_kind,
         deleted_at=receipt.deleted_at.isoformat(),
         policy_version=receipt.policy_version,
         private_data_deleted=receipt.private_data_deleted,
