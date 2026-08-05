@@ -67,4 +67,12 @@ class AccountContinuityRepository(Protocol):
 
 
 class OtpDeliveryPort(Protocol):
-    def send(self, *, channel: OtpChannel, identifier: str, code: str) -> None: ...
+    def send(
+        self,
+        *,
+        delivery_id: UUID,
+        channel: OtpChannel,
+        identifier: str,
+        code: str,
+        expires_at: datetime,
+    ) -> None: ...

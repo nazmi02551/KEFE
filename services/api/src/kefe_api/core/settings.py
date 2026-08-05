@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, field_validator
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET = (
@@ -31,6 +31,13 @@ class Settings(BaseSettings):
     otp_challenge_ttl_minutes: int = 10
     otp_verification_ttl_minutes: int = 15
     otp_max_attempts: int = 5
+    otp_delivery_mode: Literal["CAPTURE", "DISABLED", "HTTP"] = "CAPTURE"
+    otp_http_endpoint: str | None = None
+    otp_http_bearer_token: SecretStr | None = None
+    otp_http_timeout_ms: int = Field(default=3_000, ge=100, le=10_000)
+    otp_http_max_response_bytes: int = Field(default=16_384, ge=1, le=65_536)
+    otp_http_max_attempts: int = Field(default=2, ge=1, le=3)
+
     account_token_ttl_days: int = 30
     account_merge_replay_active_key_id: str = DEFAULT_ACCOUNT_MERGE_REPLAY_KEY_ID
     account_merge_replay_secret: str = Field(

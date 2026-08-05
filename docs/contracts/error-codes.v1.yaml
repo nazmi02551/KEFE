@@ -1,4 +1,4 @@
-registry_version: 1.20.0
+registry_version: 1.21.0
 errors:
 - code: AUTH_REQUIRED
   http_status: 401
@@ -27,6 +27,12 @@ errors:
 - code: AUTH_OTP_INVALID
   http_status: 400
   retryable: true
+- code: AUTH_OTP_DELIVERY_UNAVAILABLE
+  http_status: 503
+  retryable: true
+- code: AUTH_OTP_DELIVERY_REJECTED
+  http_status: 502
+  retryable: false
 - code: AUTH_RATE_LIMITED
   http_status: 429
   retryable: true
