@@ -30,7 +30,22 @@ jobs:
       - name: Install API
         working-directory: services/api
         run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
-      - name: Lint moderation slice
+      - name: Normalize and lint moderation slice
+        working-directory: services/api
+        run: >-
+          ruff check --fix
+          src/kefe_api/modules/community_reason
+          src/kefe_api/infrastructure/postgres_community_reason.py
+          src/kefe_api/modules/admin_security/models.py
+          src/kefe_api/modules/admin_security/policy.py
+          tests/test_admin_community_reason_moderation_http.py
+          tests/test_admin_community_reason_moderation_http_postgres.py
+          tools/export_admin_community_reason_moderation_openapi_overlay.py
+          tools/export_admin_publication_operations_openapi_overlay.py
+          tools/export_openapi.py
+          tools/export_mvp_openapi_overlay.py
+          tools/export_global_openapi_overlay.py
+      - name: Verify normalized moderation slice
         working-directory: services/api
         run: >-
           ruff check
@@ -47,9 +62,7 @@ jobs:
           tools/export_global_openapi_overlay.py
       - name: Memory HTTP behavior
         working-directory: services/api
-        run: >-
-          pytest -q
-          tests/test_admin_community_reason_moderation_http.py
+        run: pytest -q tests/test_admin_community_reason_moderation_http.py
       - name: Generate exact moderation overlay
         working-directory: services/api
         run: >-
@@ -57,6 +70,8 @@ jobs:
           --output /tmp/openapi-admin-community-reason-moderation.v0.19.overlay.json
       - uses: actions/upload-artifact@v4
         with:
-          name: reason-moderation-openapi-overlay
-          path: /tmp/openapi-admin-community-reason-moderation.v0.19.overlay.json
+          name: reason-moderation-bootstrap
+          path: |
+            /tmp/openapi-admin-community-reason-moderation.v0.19.overlay.json
+            services/api/src/kefe_api/infrastructure/postgres_community_reason.py
           if-no-files-found: error
