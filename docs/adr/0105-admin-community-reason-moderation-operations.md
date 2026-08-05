@@ -16,7 +16,7 @@ F3 requires moderation and audit to be operable. Creating another moderation mod
 
 ### 1. One moderation authority
 
-`CommunityReasonService.moderate()` remains the only Community Reason moderation decision command. The new Admin router and Admin Studio page are bounded adapters. They do not implement a second moderation state machine, public-reason store, report store or consumer read path.
+CommunityReasonService.moderate() remains the only Community Reason moderation decision command. The new Admin router and Admin Studio page are bounded adapters. They do not implement a second moderation state machine, public-reason store, report store or consumer read path.
 
 The service delegates one atomic repository command that locks the current reason, validates the allowed source state, writes the resulting moderation state and appends the audit record in the same transaction.
 
@@ -52,7 +52,7 @@ Allowed source states are:
 - `NOT_REQUIRED → ALLOWED` or `NOT_REQUIRED → BLOCKED` for reported tag-only reasons;
 - `ALLOWED → ALLOWED` to uphold a newly reported public reason, or `ALLOWED → BLOCKED`.
 
-`BLOCKED` is terminal in this slice. Unblock, appeal and restore are excluded.
+BLOCKED is terminal in this slice. Unblock, appeal and restore are excluded.
 
 Every successful decision appends an immutable audit record containing a server-generated audit ID, reason ID, server-derived Admin actor reference, previous state, decided state, rationale and timestamp. An uphold decision may keep the state `ALLOWED`; the new audit timestamp resolves only reports that existed before that decision. A later report makes the reason a candidate again.
 
@@ -71,9 +71,9 @@ The browser never supplies actor IDs or authorization claims.
 
 ### 6. Admin Studio behavior
 
-`/reason-moderation` provides separate `PENDING` and `REPORTED` queues. Route load, query prefilling, filter changes and item selection start no request. Session submission, queue load, detail load, audit load and decision submission are separate explicit commands.
+`/reason-moderation` provides separate `PENDING` and `REPORTED` queues. Route loading starts no request. Query prefilling, filter changes and item selection also start no request. Session submission, queue load, detail load, audit load and decision submission are separate explicit commands.
 
-The workspace is read-only except for one explicit moderation decision. Changing the selected reason, detail, queue kind, rationale or decision clears confirmation. No autosave, local storage, session storage, polling, bulk action or automatic moderation is allowed.
+The workspace is read-only except for one explicit moderation decision. Changing the selected reason, detail, queue kind, rationale or decision clears confirmation. No autosave, local storage, session storage or polling is allowed. No automatic or bulk moderation is allowed.
 
 ### 7. OpenAPI composition
 
