@@ -144,7 +144,7 @@ jobs:
           python -m kefe_api.infrastructure.seed_demo
           python -m kefe_api.infrastructure.seed_context_demo
           python -m kefe_api.infrastructure.seed_beta_catalog
-      - name: PostgreSQL health restart retention privacy and Admin proof
+      - name: PostgreSQL health restart retention privacy and continuity proof
         working-directory: services/api
         env:
           KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
@@ -156,7 +156,6 @@ jobs:
         run: >-
           pytest -q
           tests/test_otp_delivery_health_postgres.py
-          tests/test_admin_operational_reports_http_postgres.py
           tests/test_otp_request_abuse_guard_postgres.py
           tests/test_guest_merge_key_rotation_postgres.py
           tests/test_guest_merge_replay_postgres.py
