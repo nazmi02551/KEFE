@@ -1,0 +1,163 @@
+name: OTP Delivery Health CI
+
+on:
+  pull_request:
+    paths:
+      - "services/api/src/kefe_api/core/settings.py"
+      - "services/api/src/kefe_api/main.py"
+      - "services/api/src/kefe_api/infrastructure/persistence.py"
+      - "services/api/src/kefe_api/infrastructure/postgres_otp_delivery_health.py"
+      - "services/api/src/kefe_api/modules/identity/otp_delivery.py"
+      - "services/api/src/kefe_api/modules/identity/otp_delivery_health.py"
+      - "services/api/src/kefe_api/modules/admin_operational_reports/models.py"
+      - "services/api/src/kefe_api/modules/admin_operational_reports/service.py"
+      - "services/api/src/kefe_api/modules/admin_security/operational_reports_router.py"
+      - "services/api/migrations/versions/20260805_0032_otp_delivery_health.py"
+      - "services/api/tests/test_otp_delivery_health.py"
+      - "services/api/tests/test_otp_delivery_health_postgres.py"
+      - "services/api/tests/test_admin_operational_reports_http.py"
+      - "services/api/tests/test_admin_operational_reports_http_postgres.py"
+      - "services/api/tools/check_otp_delivery_health_contract.py"
+      - "docs/adr/0114-durable-otp-delivery-health.md"
+      - "docs/contracts/otp-delivery-health.v1.json"
+      - "docs/status/F4_OTP_DELIVERY_HEALTH_2026-08-05.md"
+      - ".github/workflows/otp-delivery-health.yml"
+  push:
+    branches: [main]
+    paths:
+      - "services/api/src/kefe_api/core/settings.py"
+      - "services/api/src/kefe_api/main.py"
+      - "services/api/src/kefe_api/infrastructure/persistence.py"
+      - "services/api/src/kefe_api/infrastructure/postgres_otp_delivery_health.py"
+      - "services/api/src/kefe_api/modules/identity/otp_delivery.py"
+      - "services/api/src/kefe_api/modules/identity/otp_delivery_health.py"
+      - "services/api/src/kefe_api/modules/admin_operational_reports/models.py"
+      - "services/api/src/kefe_api/modules/admin_operational_reports/service.py"
+      - "services/api/src/kefe_api/modules/admin_security/operational_reports_router.py"
+      - "services/api/migrations/versions/20260805_0032_otp_delivery_health.py"
+      - "services/api/tests/test_otp_delivery_health.py"
+      - "services/api/tests/test_otp_delivery_health_postgres.py"
+      - "services/api/tests/test_admin_operational_reports_http.py"
+      - "services/api/tests/test_admin_operational_reports_http_postgres.py"
+      - "services/api/tools/check_otp_delivery_health_contract.py"
+      - "docs/adr/0114-durable-otp-delivery-health.md"
+      - "docs/contracts/otp-delivery-health.v1.json"
+      - "docs/status/F4_OTP_DELIVERY_HEALTH_2026-08-05.md"
+      - ".github/workflows/otp-delivery-health.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: otp-delivery-health-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  memory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Lint OTP delivery health slice
+        working-directory: services/api
+        run: >-
+          ruff check
+          src/kefe_api/core/settings.py
+          src/kefe_api/main.py
+          src/kefe_api/infrastructure/persistence.py
+          src/kefe_api/infrastructure/postgres_otp_delivery_health.py
+          src/kefe_api/modules/identity/otp_delivery_health.py
+          src/kefe_api/modules/admin_operational_reports/models.py
+          src/kefe_api/modules/admin_operational_reports/service.py
+          migrations/versions/20260805_0032_otp_delivery_health.py
+          tests/test_otp_delivery_health.py
+          tests/test_otp_delivery_health_postgres.py
+          tools/check_otp_delivery_health_contract.py
+      - name: Executable OTP delivery health contract
+        working-directory: services/api
+        run: python tools/check_otp_delivery_health_contract.py
+      - name: Exact OpenAPI remains unchanged
+        working-directory: services/api
+        run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
+      - name: Memory health delivery abuse Admin and privacy regression proof
+        working-directory: services/api
+        run: >-
+          pytest -q
+          tests/test_otp_delivery_health.py
+          tests/test_otp_http_delivery.py
+          tests/test_otp_request_abuse_guard.py
+          tests/test_admin_operational_reports_http.py
+          tests/test_guest_merge_key_rotation.py
+          tests/test_guest_merge_replay.py
+          tests/test_privacy_export_deletion_hardening.py
+
+  postgres:
+    needs: memory
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: kefe
+          POSTGRES_USER: kefe
+          POSTGRES_PASSWORD: kefe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kefe -d kefe"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Migrate PostgreSQL
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: alembic upgrade head
+      - name: Seed canonical fixtures
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: |
+          python -m kefe_api.infrastructure.seed_demo
+          python -m kefe_api.infrastructure.seed_context_demo
+          python -m kefe_api.infrastructure.seed_beta_catalog
+      - name: PostgreSQL health restart retention privacy and Admin proof
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+          KEFE_PERSISTENCE_BACKEND: postgres
+          KEFE_RUN_POSTGRES_TESTS: "1"
+          KEFE_ACCOUNT_MERGE_REPLAY_ACTIVE_KEY_ID: ci-primary-v1
+          KEFE_ACCOUNT_MERGE_REPLAY_SECRET: ci-guest-merge-replay-secret-0123456789012345
+          KEFE_ACCOUNT_MERGE_REPLAY_RETAINED_KEYS: '{}'
+        run: >-
+          pytest -q
+          tests/test_otp_delivery_health_postgres.py
+          tests/test_admin_operational_reports_http_postgres.py
+          tests/test_otp_request_abuse_guard_postgres.py
+          tests/test_guest_merge_key_rotation_postgres.py
+          tests/test_guest_merge_replay_postgres.py
+          tests/test_privacy_export_deletion_hardening_postgres.py
