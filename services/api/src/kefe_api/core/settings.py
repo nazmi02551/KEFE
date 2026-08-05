@@ -56,6 +56,12 @@ class Settings(BaseSettings):
     otp_delivery_health_unavailable_critical: int = Field(default=5, ge=1, le=100_000)
     otp_delivery_health_ratio_attention_bps: int = Field(default=2_000, ge=1, le=10_000)
     otp_delivery_health_ratio_critical_bps: int = Field(default=5_000, ge=1, le=10_000)
+    otp_delivery_alert_cooldown_seconds: int = Field(default=1_800, ge=60, le=86_400)
+    otp_delivery_alert_retention_seconds: int = Field(
+        default=2_592_000,
+        ge=3_600,
+        le=7_776_000,
+    )
     otp_request_guard_mode: Literal["AUTO", "OFF", "ENFORCE"] = "AUTO"
     otp_request_cooldown_seconds: int = Field(default=60, ge=1, le=3_600)
     otp_request_window_seconds: int = Field(default=900, ge=60, le=86_400)
