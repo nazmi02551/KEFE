@@ -58,11 +58,18 @@ def main() -> None:
         "explicit development replay secret marker",
     )
     _require(
-        "production requires KEFE_ACCOUNT_MERGE_REPLAY_SECRET" in service,
+        "production" in service
+        and "DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET" in service
+        and "secret management" in service,
         "identity startup fail-closed guard",
     )
+    _require(
+        "account_merge_replay_active_key_id" in settings
+        and "account_merge_replay_retained_keys" in settings,
+        "versioned replay keyring composition",
+    )
     _require("hmac.new" in service, "HMAC credential derivation")
-    _require("kefe:guest-account-merge:v1" in service, "domain separation")
+    _require("kefe:guest-account-merge:v1" in service, "legacy domain separation")
     _require("authenticate_guest_merge" in identity_service, "narrow replay authorization")
     _require("GuestMergeAuthorizationDep" in router, "router replay authorization dependency")
     _require("TokenStatus.REVOKED" in postgres_identity, "revoked principal resolution")
@@ -79,7 +86,7 @@ def main() -> None:
 
     print(
         "Guest account merge replay contract: PASS — natural verification replay key, "
-        "HMAC credential reconstruction, managed production secret, atomic persistence, "
+        "HMAC credential reconstruction, versioned managed keyring, atomic persistence, "
         "narrow revoked-token replay, privacy cascade, and unchanged public schema."
     )
 

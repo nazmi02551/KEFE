@@ -54,7 +54,7 @@ def _account_service(
 
 
 def test_production_identity_service_rejects_development_replay_secret() -> None:
-    with pytest.raises(ValueError, match="KEFE_ACCOUNT_MERGE_REPLAY_SECRET"):
+    with pytest.raises(ValueError, match="secret management"):
         _account_service(
             environment="production",
             replay_secret=DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET,
