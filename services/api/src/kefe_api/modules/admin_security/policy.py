@@ -35,6 +35,8 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
                     AdminCapability.CONTENT_PROJECT,
                     AdminCapability.CONTENT_EDIT,
                     AdminCapability.CONTENT_SUBMIT_REVIEW,
+                    AdminCapability.MEDIA_ASSET_READ,
+                    AdminCapability.MEDIA_ASSET_MANAGE,
                 }
             ),
             AdminRole.REVIEWER: frozenset(
@@ -43,6 +45,7 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
                     AdminCapability.CONTENT_MODERATE,
                     AdminCapability.SOURCE_VERIFY,
                     AdminCapability.SOURCE_MANAGE,
+                    AdminCapability.MEDIA_ASSET_READ,
                     AdminCapability.RISK_REVIEW,
                     AdminCapability.AUDIT_READ,
                     AdminCapability.OPERATIONAL_REPORT_READ,
@@ -52,6 +55,7 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
                 {
                     AdminCapability.CONTENT_PUBLISH,
                     AdminCapability.CONTENT_WITHDRAW,
+                    AdminCapability.MEDIA_ASSET_READ,
                     AdminCapability.AUDIT_READ,
                     AdminCapability.OPERATIONAL_REPORT_READ,
                 }
@@ -67,6 +71,8 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
                     AdminCapability.ADMIN_ACCESS_MANAGE,
                     AdminCapability.SOURCE_APPROVE,
                     AdminCapability.SOURCE_ACTIVATE,
+                    AdminCapability.MEDIA_ASSET_READ,
+                    AdminCapability.MEDIA_ASSET_MANAGE,
                     AdminCapability.AUDIT_READ,
                     AdminCapability.OPERATIONAL_REPORT_READ,
                 }
@@ -79,6 +85,7 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
                 AdminCapability.CONTENT_WITHDRAW,
                 AdminCapability.SOURCE_APPROVE,
                 AdminCapability.SOURCE_ACTIVATE,
+                AdminCapability.MEDIA_ASSET_MANAGE,
                 AdminCapability.ADMIN_ACCESS_MANAGE,
             }
         ),

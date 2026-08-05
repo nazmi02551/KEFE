@@ -1,4 +1,4 @@
-registry_version: 1.18.0
+registry_version: 1.19.0
 errors:
 - code: AUTH_REQUIRED
   http_status: 401
@@ -329,4 +329,38 @@ errors:
   retryable: true
 - code: DEPENDENCY_TEMPORARILY_UNAVAILABLE
   http_status: 503
+  retryable: true
+
+- code: CASE_MEDIA_ASSET_NOT_FOUND
+  http_status: 404
+  retryable: false
+- code: CASE_MEDIA_CASE_VERSION_NOT_FOUND
+  http_status: 404
+  retryable: false
+- code: CASE_MEDIA_ASSET_INVALID
+  http_status: 400
+  retryable: false
+- code: CASE_MEDIA_LIMIT_INVALID
+  http_status: 400
+  retryable: false
+- code: CASE_MEDIA_OFFSET_INVALID
+  http_status: 400
+  retryable: false
+- code: CASE_MEDIA_PRIORITY_INVALID
+  http_status: 400
+  retryable: false
+- code: CASE_MEDIA_PRESENTATION_INVALID
+  http_status: 400
+  retryable: false
+- code: CASE_MEDIA_ASSET_CONFLICT
+  http_status: 409
+  retryable: false
+- code: CASE_MEDIA_BINDING_CONFLICT
+  http_status: 409
+  retryable: false
+- code: CASE_MEDIA_STATE_INVALID
+  http_status: 409
+  retryable: false
+- code: CASE_MEDIA_STATE_CONFLICT
+  http_status: 409
   retryable: true

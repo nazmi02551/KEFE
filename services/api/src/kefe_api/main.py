@@ -9,6 +9,7 @@ from kefe_api.infrastructure.editorial_pipeline import build_editorial_pipeline
 from kefe_api.infrastructure.persistence import (
     build_account_continuity_repository,
     build_admin_session_store,
+    build_case_media_repository,
     build_community_reason_repository,
     build_consensus_repository,
     build_content_authoring_repository,
@@ -34,6 +35,10 @@ from kefe_api.modules.admin_security.canonical_public_feed_router import (
 )
 from kefe_api.modules.admin_security.case_builder_router import (
     router as admin_case_builder_router,
+)
+from kefe_api.modules.admin_security.case_media import SecuredCaseMediaService
+from kefe_api.modules.admin_security.case_media_router import (
+    router as admin_case_media_router,
 )
 from kefe_api.modules.admin_security.content_authoring import SecuredContentAuthoringService
 from kefe_api.modules.admin_security.content_configuration import (
@@ -72,6 +77,8 @@ from kefe_api.modules.admin_security.source_brief_ingestion_router import (
 from kefe_api.modules.admin_security.source_brief_review_router import (
     router as admin_source_brief_review_router,
 )
+from kefe_api.modules.case_media.delivery import UnavailableCaseMediaDeliveryGate
+from kefe_api.modules.case_media.service import CaseMediaService
 from kefe_api.modules.community_reason.admin_router import router as community_reason_admin_router
 from kefe_api.modules.community_reason.router import router as community_reason_router
 from kefe_api.modules.community_reason.service import CommunityReasonService
@@ -147,6 +154,7 @@ def create_app() -> FastAPI:
         identity_repository,
     )
     content_authoring_repository = build_content_authoring_repository(settings)
+    case_media_repository = build_case_media_repository(settings)
     content_configuration_repository = build_content_configuration_repository(settings)
     admin_session_store = build_admin_session_store(settings)
     raw_source_evidence_store = build_raw_source_evidence_store(settings)
@@ -154,6 +162,15 @@ def create_app() -> FastAPI:
     admin_security_service = AdminSecurityService(
         session_resolver=admin_session_store,
         policy=default_admin_security_policy(),
+    )
+    case_media_service = CaseMediaService(
+        repository=case_media_repository,
+        authoring=content_authoring_repository,
+        delivery_gate=UnavailableCaseMediaDeliveryGate(),
+    )
+    secured_case_media_service = SecuredCaseMediaService(
+        media=case_media_service,
+        security=admin_security_service,
     )
     content_authoring_service = ContentAuthoringService(
         content_authoring_repository,
@@ -252,6 +269,9 @@ def create_app() -> FastAPI:
     app.state.privacy_repository = privacy_repository
     app.state.privacy_service = PrivacyService(privacy_repository)
     app.state.content_authoring_repository = content_authoring_repository
+    app.state.case_media_repository = case_media_repository
+    app.state.case_media_service = case_media_service
+    app.state.secured_case_media_service = secured_case_media_service
     app.state.content_authoring_service = content_authoring_service
     app.state.raw_source_evidence_store = raw_source_evidence_store
     app.state.knowledge_repository = editorial_pipeline.knowledge_repository
@@ -327,6 +347,7 @@ def create_app() -> FastAPI:
     app.include_router(flow_runtime_router)
     app.include_router(progress_router)
     app.include_router(admin_router)
+    app.include_router(admin_case_media_router)
     app.include_router(admin_case_builder_router)
     app.include_router(admin_editorial_quality_review_router)
     app.include_router(admin_flow_composer_router)

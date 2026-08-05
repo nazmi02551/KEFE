@@ -1,0 +1,229 @@
+.shell {
+  min-height: 100vh;
+  padding: 32px;
+  background: #f4f6f8;
+  color: #17202a;
+}
+
+.hero,
+.panel,
+.boundary {
+  max-width: 1180px;
+  margin: 0 auto 20px;
+  border: 1px solid #d8dee5;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(20, 30, 40, 0.06);
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 28px;
+}
+
+.hero h1,
+.panel h2 {
+  margin: 4px 0 10px;
+}
+
+.hero p,
+.panel p,
+.boundary p {
+  max-width: 780px;
+  line-height: 1.55;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #526273;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 10px;
+}
+
+.links a {
+  padding: 9px 12px;
+  border: 1px solid #c9d1da;
+  border-radius: 999px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.panel,
+.boundary {
+  padding: 24px 28px;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  max-width: 1180px;
+  margin: 0 auto 20px;
+}
+
+.columns .panel {
+  margin: 0;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.panel label {
+  display: grid;
+  gap: 7px;
+  margin: 12px 0;
+  font-weight: 700;
+}
+
+.panel input,
+.panel select {
+  min-width: 0;
+  padding: 11px 13px;
+  border: 1px solid #bbc5cf;
+  border-radius: 10px;
+  background: #ffffff;
+  color: inherit;
+  font: inherit;
+}
+
+.checkLabel {
+  display: flex !important;
+  align-items: center;
+  gap: 9px !important;
+}
+
+.checkLabel input {
+  width: auto;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.actions button {
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: #17202a;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.status {
+  overflow-wrap: anywhere;
+  font-weight: 700;
+}
+
+.error {
+  color: #8d1b13;
+  font-weight: 750;
+}
+
+.details {
+  margin: 20px 0 0;
+}
+
+.details div {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.35fr) 1fr;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid #e5e9ee;
+}
+
+.details dt {
+  font-weight: 800;
+}
+
+.details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.auditList {
+  padding-left: 20px;
+  line-height: 1.7;
+}
+
+.auditList li {
+  margin-bottom: 10px;
+}
+
+.auditList span {
+  display: block;
+  color: #526273;
+  font-size: 0.9rem;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.tableWrap table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableWrap th,
+.tableWrap td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e9ee;
+  text-align: left;
+}
+
+.tableWrap th {
+  font-size: 0.84rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.boundary {
+  border-left: 6px solid #17202a;
+}
+
+@media (max-width: 880px) {
+  .shell {
+    padding: 16px;
+  }
+
+  .hero,
+  .columns {
+    display: block;
+  }
+
+  .links {
+    margin-top: 20px;
+  }
+
+  .columns .panel {
+    margin-bottom: 18px;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -13,7 +13,7 @@ from kefe_api.core.settings import get_settings
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACTS = REPO_ROOT / "docs" / "contracts"
 BASE = CONTRACTS / "openapi.v1.json"
-BEFORE_OPERATIONAL_REPORTS_OVERLAYS = (
+BEFORE_CASE_MEDIA_OVERLAYS = (
     CONTRACTS / "openapi-consensus.v0.18.overlay.json",
     CONTRACTS / "openapi-mvp.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-projection.v0.19.overlay.json",
@@ -23,13 +23,22 @@ BEFORE_OPERATIONAL_REPORTS_OVERLAYS = (
     CONTRACTS / "openapi-admin-flow-composer.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-publication-operations.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-community-reason-moderation.v0.19.overlay.json",
+    CONTRACTS / "openapi-admin-operational-reports.v0.19.overlay.json",
 )
-EXPECTED_PATHS = ("/internal/admin/v1/operational-reports/snapshot",)
+EXPECTED_PATHS = (
+    "/internal/admin/v1/case-media",
+    "/internal/admin/v1/case-media/{media_asset_id}",
+    "/internal/admin/v1/case-media/{media_asset_id}/audit",
+    "/internal/admin/v1/case-media/{media_asset_id}/ready",
+    "/internal/admin/v1/case-media/{media_asset_id}/bindings",
+    "/internal/admin/v1/case-media/{media_asset_id}/retire",
+    "/internal/admin/v1/case-media/case-versions/{case_version_id}/projection",
+)
 
 
 def _load_before_contract() -> dict[str, object]:
     expected = deepcopy(json.loads(BASE.read_text(encoding="utf-8")))
-    for overlay_path in BEFORE_OPERATIONAL_REPORTS_OVERLAYS:
+    for overlay_path in BEFORE_CASE_MEDIA_OVERLAYS:
         _merge_overlay(
             expected,
             json.loads(overlay_path.read_text(encoding="utf-8")),
@@ -68,7 +77,7 @@ def build_overlay() -> dict[str, object]:
     before = _load_before_contract()
     generated = _build_runtime_openapi()
     if generated.get("info", {}).get("version") != "0.19.0":
-        raise SystemExit("Operational Reports overlay expects API version 0.19.0")
+        raise SystemExit("Case Media overlay expects API version 0.19.0")
 
     before_paths = before.get("paths", {})
     generated_paths = generated.get("paths", {})
@@ -93,29 +102,28 @@ def build_overlay() -> dict[str, object]:
     removed_schemas = sorted(before_schemas.keys() - generated_schemas.keys())
     if changed_paths or removed_paths or changed_schemas or removed_schemas:
         raise SystemExit(
-            "Operational Reports API must remain additive; "
+            "Case Media API must remain additive; "
             f"changed_paths={changed_paths}, removed_paths={removed_paths}, "
             f"changed_schemas={changed_schemas}, removed_schemas={removed_schemas}"
         )
 
-    missing_paths = sorted(set(EXPECTED_PATHS) - set(generated_paths))
+    missing = sorted(set(EXPECTED_PATHS) - set(generated_paths))
     already_present = sorted(set(EXPECTED_PATHS) & set(before_paths))
-    if missing_paths or already_present:
+    if missing or already_present:
         raise SystemExit(
-            "Operational Reports overlay path boundary drifted; "
-            f"missing={missing_paths}, already_present={already_present}"
+            "Case Media path boundary drifted; "
+            f"missing={missing}, already_present={already_present}"
         )
 
     referenced: set[str] = set()
     for path in EXPECTED_PATHS:
         _collect_schema_refs(generated_paths[path], referenced)
-
     processed: set[str] = set()
     while pending := sorted(referenced - processed):
         for name in pending:
             schema = generated_schemas.get(name)
             if schema is None:
-                raise SystemExit(f"Operational Reports overlay references missing schema: {name}")
+                raise SystemExit(f"Case Media overlay references missing schema: {name}")
             processed.add(name)
             _collect_schema_refs(schema, referenced)
 
@@ -132,24 +140,22 @@ def build_overlay() -> dict[str, object]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Generate additive Admin Operational Reports OpenAPI overlay"
+        description="Generate additive Admin Case Media OpenAPI overlay"
     )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-
     overlay = build_overlay()
     rendered = json.dumps(overlay, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     if args.check:
         if not args.output.exists():
-            raise SystemExit("Checked-in Operational Reports overlay is missing")
+            raise SystemExit("Checked-in Case Media overlay is missing")
         if json.loads(args.output.read_text(encoding="utf-8")) != overlay:
-            raise SystemExit("Checked-in Operational Reports overlay is stale")
-        print(f"Operational Reports OpenAPI overlay matches {args.output}")
+            raise SystemExit("Checked-in Case Media overlay is stale")
+        print(f"Case Media OpenAPI overlay matches {args.output}")
         return
-
     args.output.write_text(rendered, encoding="utf-8")
-    print(f"Operational Reports OpenAPI overlay written to {args.output}")
+    print(f"Case Media OpenAPI overlay written to {args.output}")
 
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings=0",
     "test": "node --import tsx --test tests/*.test.ts",
-    "contract": "node tools/check_admin_studio_contract.mjs && node tools/check_case_builder_contract.mjs && node tools/check_editorial_quality_review_contract.mjs && node tools/check_flow_composer_contract.mjs && node tools/check_publication_operations_contract.mjs && node tools/check_reason_moderation_contract.mjs && node tools/check_operational_reports_contract.mjs",
+    "contract": "node tools/check_admin_studio_contract.mjs && node tools/check_case_builder_contract.mjs && node tools/check_editorial_quality_review_contract.mjs && node tools/check_flow_composer_contract.mjs && node tools/check_publication_operations_contract.mjs && node tools/check_reason_moderation_contract.mjs && node tools/check_operational_reports_contract.mjs && node tools/check_case_media_contract.mjs",
     "verify": "npm run contract && npm run lint && npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
