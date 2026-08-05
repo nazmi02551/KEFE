@@ -19,6 +19,9 @@ from kefe_api.infrastructure.postgres_ingestion_orchestration import (
     PostgresIngestionOrchestrationRepository,
 )
 from kefe_api.infrastructure.postgres_knowledge import PostgresKnowledgeRepository
+from kefe_api.infrastructure.postgres_otp_request_guard import (
+    GuardedPostgresAccountContinuityRepository,
+)
 from kefe_api.infrastructure.postgres_privacy import PostgresPrivacyRepository
 from kefe_api.infrastructure.postgres_progress import PostgresProgressRepository
 from kefe_api.infrastructure.postgres_reflection_decision import (
@@ -53,6 +56,10 @@ from kefe_api.modules.editorial_projection.ports import ReviewedProposalSource
 from kefe_api.modules.identity.account_in_memory import InMemoryAccountContinuityRepository
 from kefe_api.modules.identity.account_ports import AccountContinuityRepository
 from kefe_api.modules.identity.in_memory import InMemoryIdentityRepository
+from kefe_api.modules.identity.otp_request_guard import (
+    GuardedInMemoryAccountContinuityRepository,
+    OtpRequestAbusePolicy,
+)
 from kefe_api.modules.identity.ports import IdentityRepository
 from kefe_api.modules.ingestion_orchestration.in_memory import (
     InMemoryIngestionOrchestrationRepository,
@@ -125,17 +132,46 @@ def build_identity_repository(settings: Settings) -> IdentityRepository:
     return PostgresIdentityRepository(build_engine(settings.database_url))
 
 
+def _otp_request_abuse_policy(settings: Settings) -> OtpRequestAbusePolicy:
+    return OtpRequestAbusePolicy.from_seconds(
+        cooldown_seconds=settings.otp_request_cooldown_seconds,
+        window_seconds=settings.otp_request_window_seconds,
+        window_limit=settings.otp_request_window_limit,
+        retention_seconds=settings.otp_request_guard_retention_seconds,
+    )
+
+
+def _otp_request_guard_enabled(settings: Settings) -> bool:
+    mode = settings.otp_request_guard_mode
+    production = settings.environment.strip().lower() == "production"
+    if production and mode == "OFF":
+        raise RuntimeError(
+            "production forbids KEFE_OTP_REQUEST_GUARD_MODE=OFF"
+        )
+    return mode == "ENFORCE" or (mode == "AUTO" and production)
+
+
 def build_account_continuity_repository(
     settings: Settings,
     identity_repository: IdentityRepository,
 ) -> AccountContinuityRepository:
+    guard_enabled = _otp_request_guard_enabled(settings)
+    policy = _otp_request_abuse_policy(settings) if guard_enabled else None
     if settings.persistence_backend == "memory":
         if not isinstance(identity_repository, InMemoryIdentityRepository):
             raise RuntimeError("memory account continuity requires in-memory identity")
+        if policy is not None:
+            return GuardedInMemoryAccountContinuityRepository(
+                identity_repository,
+                policy,
+            )
         return InMemoryAccountContinuityRepository(identity_repository)
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
-    return PostgresAccountContinuityRepository(build_engine(settings.database_url))
+    engine = build_engine(settings.database_url)
+    if policy is not None:
+        return GuardedPostgresAccountContinuityRepository(engine, policy)
+    return PostgresAccountContinuityRepository(engine)
 
 
 def build_share_repository(settings: Settings) -> ShareRepository:
