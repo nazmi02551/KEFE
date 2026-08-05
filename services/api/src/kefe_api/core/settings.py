@@ -1,8 +1,14 @@
-from functools import lru_cache
-from typing import Literal
+from __future__ import annotations
 
-from pydantic import Field, field_validator
+from functools import lru_cache
+from typing import Literal, Self
+
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET = (
+    "development-only-guest-merge-replay-secret-v1"
+)
 
 
 class Settings(BaseSettings):
@@ -26,7 +32,7 @@ class Settings(BaseSettings):
     otp_max_attempts: int = 5
     account_token_ttl_days: int = 30
     account_merge_replay_secret: str = Field(
-        default="development-only-guest-merge-replay-secret-v1",
+        default=_DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET,
         min_length=32,
     )
     share_ttl_days: int = 30
@@ -67,6 +73,18 @@ class Settings(BaseSettings):
                 "raw evidence backend profile code must not be blank or padded"
             )
         return value
+
+    @model_validator(mode="after")
+    def validate_production_replay_secret(self) -> Self:
+        if (
+            self.environment.strip().lower() == "production"
+            and self.account_merge_replay_secret
+            == _DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET
+        ):
+            raise ValueError(
+                "production requires KEFE_ACCOUNT_MERGE_REPLAY_SECRET from secret management"
+            )
+        return self
 
 
 @lru_cache
