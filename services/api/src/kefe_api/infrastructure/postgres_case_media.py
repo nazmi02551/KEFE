@@ -4,6 +4,7 @@ from collections.abc import Mapping
 from uuid import UUID
 
 from sqlalchemy import Connection, Engine, text
+from sqlalchemy.exc import DBAPIError
 
 from kefe_api.modules.case_media.models import (
     MediaAsset,
@@ -203,32 +204,35 @@ class PostgresCaseMediaRepository:
         return None if row is None else self._binding(row)
 
     def insert_binding(self, binding: MediaBinding) -> None:
-        with self._engine.begin() as connection:
-            connection.execute(
-                text(
-                    """
-                    INSERT INTO media.case_version_binding (
-                        binding_id, case_version_id, media_asset_id, slot, priority,
-                        autoplay, muted, looping, bound_by, bound_at
-                    ) VALUES (
-                        :binding_id, :case_version_id, :media_asset_id, :slot, :priority,
-                        :autoplay, :muted, :looping, :bound_by, :bound_at
-                    )
-                    """
-                ),
-                {
-                    "binding_id": binding.binding_id,
-                    "case_version_id": binding.case_version_id,
-                    "media_asset_id": binding.media_asset_id,
-                    "slot": binding.slot.value,
-                    "priority": binding.priority,
-                    "autoplay": binding.autoplay,
-                    "muted": binding.muted,
-                    "looping": binding.looping,
-                    "bound_by": binding.bound_by,
-                    "bound_at": binding.bound_at,
-                },
-            )
+        try:
+            with self._engine.begin() as connection:
+                connection.execute(
+                    text(
+                        """
+                        INSERT INTO media.case_version_binding (
+                            binding_id, case_version_id, media_asset_id, slot, priority,
+                            autoplay, muted, looping, bound_by, bound_at
+                        ) VALUES (
+                            :binding_id, :case_version_id, :media_asset_id, :slot, :priority,
+                            :autoplay, :muted, :looping, :bound_by, :bound_at
+                        )
+                        """
+                    ),
+                    {
+                        "binding_id": binding.binding_id,
+                        "case_version_id": binding.case_version_id,
+                        "media_asset_id": binding.media_asset_id,
+                        "slot": binding.slot.value,
+                        "priority": binding.priority,
+                        "autoplay": binding.autoplay,
+                        "muted": binding.muted,
+                        "looping": binding.looping,
+                        "bound_by": binding.bound_by,
+                        "bound_at": binding.bound_at,
+                    },
+                )
+        except DBAPIError as exc:
+            raise ValueError("media binding conflict") from exc
 
     def list_bindings(self, case_version_id: UUID) -> tuple[MediaBinding, ...]:
         with self._engine.connect() as connection:

@@ -8,6 +8,7 @@ from kefe_api.modules.case_media.models import (
     MediaAsset,
     MediaAuditEntry,
     MediaBinding,
+    MediaKind,
     MediaSlot,
     MediaState,
 )
@@ -110,6 +111,13 @@ class InMemoryCaseMediaRepository:
 
     def insert_binding(self, binding: MediaBinding) -> None:
         with self._lock:
+            asset = self._assets.get(binding.media_asset_id)
+            if asset is None or asset.state is not MediaState.READY:
+                raise ValueError("media asset is not READY")
+            if binding.autoplay:
+                raise ValueError("media autoplay is forbidden")
+            if asset.kind is MediaKind.IMAGE and (binding.muted or binding.looping):
+                raise ValueError("image presentation flags are invalid")
             key = (binding.case_version_id, binding.slot, binding.media_asset_id)
             if key in self._bindings:
                 raise ValueError("media binding conflict")

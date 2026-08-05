@@ -12,6 +12,13 @@ from sqlalchemy.exc import DBAPIError
 from kefe_api.core.settings import get_settings
 from kefe_api.main import create_app
 from kefe_api.modules.admin_security.router import ADMIN_CSRF_HEADER, ADMIN_SESSION_COOKIE
+from kefe_api.modules.case_media.service import CaseMediaService
+
+
+class _AllowAllDeliveryGate:
+    def permits(self, delivery_ref: str) -> bool:
+        return delivery_ref.startswith("media-ref:")
+
 
 pytestmark = pytest.mark.skipif(
     os.getenv("KEFE_RUN_POSTGRES_TESTS") != "1",
@@ -159,7 +166,14 @@ def test_postgres_case_media_restart_projection_and_immutability(
         )
         assert projection.status_code == 200
         assert projection.json()["preview_fallback"] is False
-        assert [item["asset_key"] for item in projection.json()["items"]] == ["postgres-case-hero"]
+        assert projection.json()["items"] == []
+
+        eligible = CaseMediaService(
+            repository=second_app.state.case_media_repository,
+            authoring=second_app.state.content_authoring_repository,
+            delivery_gate=_AllowAllDeliveryGate(),
+        ).project(version_id)
+        assert [item.asset_key for item in eligible] == ["postgres-case-hero"]
 
         reviewer, _ = _admin_client(second_app, reviewer_subject, step_up=False)
         audit = reviewer.get(f"/internal/admin/v1/case-media/{asset_id}/audit")
@@ -171,6 +185,25 @@ def test_postgres_case_media_restart_projection_and_immutability(
         audit_id = UUID(audit.json()["items"][0]["audit_id"])
 
         engine = create_engine(database_url)
+        with pytest.raises(DBAPIError), engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO media.case_version_binding (
+                        binding_id, case_version_id, media_asset_id, slot, priority,
+                        autoplay, muted, looping, bound_by, bound_at
+                    ) VALUES (
+                        :binding_id, :case_version_id, :media_asset_id, 'CONTEXT', 800,
+                        false, true, false, 'test:direct', now()
+                    )
+                    """
+                ),
+                {
+                    "binding_id": uuid4(),
+                    "case_version_id": version_id,
+                    "media_asset_id": asset_id,
+                },
+            )
         with pytest.raises(DBAPIError), engine.begin() as connection:
             connection.execute(
                 text("UPDATE media.asset SET title = 'mutated' WHERE media_asset_id = :id"),
@@ -192,6 +225,25 @@ def test_postgres_case_media_restart_projection_and_immutability(
             headers={ADMIN_CSRF_HEADER: second_csrf},
         )
         assert retired.status_code == 200
+        with pytest.raises(DBAPIError), engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO media.case_version_binding (
+                        binding_id, case_version_id, media_asset_id, slot, priority,
+                        autoplay, muted, looping, bound_by, bound_at
+                    ) VALUES (
+                        :binding_id, :case_version_id, :media_asset_id, 'REVEAL', 700,
+                        false, false, false, 'test:direct', now()
+                    )
+                    """
+                ),
+                {
+                    "binding_id": uuid4(),
+                    "case_version_id": version_id,
+                    "media_asset_id": asset_id,
+                },
+            )
         with pytest.raises(DBAPIError), engine.begin() as connection:
             connection.execute(
                 text("UPDATE media.asset SET state = 'READY' WHERE media_asset_id = :id"),

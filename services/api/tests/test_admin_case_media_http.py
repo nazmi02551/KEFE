@@ -9,6 +9,12 @@ from kefe_api.main import create_app
 from kefe_api.modules.admin_security.in_memory import InMemoryAdminSessionStore
 from kefe_api.modules.admin_security.models import AdminRole
 from kefe_api.modules.admin_security.router import ADMIN_CSRF_HEADER, ADMIN_SESSION_COOKIE
+from kefe_api.modules.case_media.service import CaseMediaService
+
+
+class _AllowAllDeliveryGate:
+    def permits(self, delivery_ref: str) -> bool:
+        return delivery_ref.startswith("media-ref:")
 
 
 def _admin(app, role: AdminRole, *, step_up: bool) -> tuple[TestClient, str]:
@@ -158,7 +164,14 @@ def test_ready_binding_projection_and_retirement_are_explicit() -> None:
     projected = editor.get(f"/internal/admin/v1/case-media/case-versions/{version_id}/projection")
     assert projected.status_code == 200
     assert projected.json()["preview_fallback"] is False
-    assert projected.json()["items"][0]["asset_key"] == "case-hero-one"
+    assert projected.json()["items"] == []
+
+    eligible = CaseMediaService(
+        repository=app.state.case_media_repository,
+        authoring=app.state.content_authoring_repository,
+        delivery_gate=_AllowAllDeliveryGate(),
+    ).project(version_id)
+    assert [item.asset_key for item in eligible] == ["case-hero-one"]
 
     retired = editor.post(
         f"/internal/admin/v1/case-media/{asset_id}/retire",

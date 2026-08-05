@@ -12,6 +12,7 @@ assert contract["production_projection"]["preview_fallback_forbidden"] is True
 assert contract["admin_ui"]["no_binary_file_input"] is True
 
 service = (ROOT / "services/api/src/kefe_api/modules/case_media/service.py").read_text()
+delivery = (ROOT / "services/api/src/kefe_api/modules/case_media/delivery.py").read_text()
 router = (
     ROOT / "services/api/src/kefe_api/modules/admin_security/case_media_router.py"
 ).read_text()
@@ -21,6 +22,9 @@ for forbidden in ("preview_case_media", "assets/media/", "UploadFile", "multipar
     assert forbidden not in router
 assert "build_case_media_repository" in main
 assert "admin_case_media_router" in main
+assert "UnavailableCaseMediaDeliveryGate" in main
+assert "delivery_gate.permits" in service
+assert "return False" in delivery
 assert (
     "MEDIA_ASSET_MANAGE"
     in (ROOT / "services/api/src/kefe_api/modules/admin_security/policy.py").read_text()

@@ -16,7 +16,7 @@ from kefe_api.modules.case_media.models import (
     MediaSlot,
     MediaState,
 )
-from kefe_api.modules.case_media.ports import CaseMediaRepository
+from kefe_api.modules.case_media.ports import CaseMediaDeliveryGate, CaseMediaRepository
 from kefe_api.modules.content_authoring.ports import ContentAuthoringRepository
 
 _ASSET_KEY = re.compile(r"^[a-z0-9][a-z0-9._-]{2,127}$")
@@ -34,9 +34,11 @@ class CaseMediaService:
         *,
         repository: CaseMediaRepository,
         authoring: ContentAuthoringRepository,
+        delivery_gate: CaseMediaDeliveryGate,
     ) -> None:
         self._repository = repository
         self._authoring = authoring
+        self._delivery_gate = delivery_gate
 
     def list_assets(
         self,
@@ -264,7 +266,35 @@ class CaseMediaService:
             bound_by=self._text(actor_ref, "actor_ref", 255),
             bound_at=now or datetime.now(UTC),
         )
-        self._repository.insert_binding(binding)
+        try:
+            self._repository.insert_binding(binding)
+        except ValueError as exc:
+            concurrent = self._repository.get_binding(
+                case_version_id=case_version_id,
+                slot=slot,
+                media_asset_id=media_asset_id,
+            )
+            if concurrent is not None:
+                actual = (
+                    concurrent.priority,
+                    concurrent.autoplay,
+                    concurrent.muted,
+                    concurrent.looping,
+                )
+                if actual == (priority, autoplay, muted, looping):
+                    return MediaBindingWriteResult(binding=concurrent, replayed=True)
+            latest = self._repository.get_asset(media_asset_id)
+            if latest is None or latest.state is not MediaState.READY:
+                raise DomainError(
+                    "CASE_MEDIA_STATE_CONFLICT",
+                    "Media state changed before binding",
+                    409,
+                ) from exc
+            raise DomainError(
+                "CASE_MEDIA_BINDING_CONFLICT",
+                "Media binding conflicts with immutable history",
+                409,
+            ) from exc
         return MediaBindingWriteResult(binding=binding, replayed=False)
 
     def list_audit(self, media_asset_id: UUID) -> tuple[MediaAuditEntry, ...]:
@@ -282,6 +312,8 @@ class CaseMediaService:
         for binding in self._repository.list_bindings(case_version_id):
             asset = self._repository.get_asset(binding.media_asset_id)
             if asset is None or asset.state is not MediaState.READY:
+                continue
+            if not self._delivery_gate.permits(asset.delivery_ref):
                 continue
             items.append(
                 CaseMediaProjection(

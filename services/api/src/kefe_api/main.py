@@ -77,6 +77,7 @@ from kefe_api.modules.admin_security.source_brief_ingestion_router import (
 from kefe_api.modules.admin_security.source_brief_review_router import (
     router as admin_source_brief_review_router,
 )
+from kefe_api.modules.case_media.delivery import UnavailableCaseMediaDeliveryGate
 from kefe_api.modules.case_media.service import CaseMediaService
 from kefe_api.modules.community_reason.admin_router import router as community_reason_admin_router
 from kefe_api.modules.community_reason.router import router as community_reason_router
@@ -165,6 +166,7 @@ def create_app() -> FastAPI:
     case_media_service = CaseMediaService(
         repository=case_media_repository,
         authoring=content_authoring_repository,
+        delivery_gate=UnavailableCaseMediaDeliveryGate(),
     )
     secured_case_media_service = SecuredCaseMediaService(
         media=case_media_service,

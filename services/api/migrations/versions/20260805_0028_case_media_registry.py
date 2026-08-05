@@ -131,6 +131,42 @@ def upgrade() -> None:
     )
     op.execute(
         """
+        CREATE FUNCTION media.validate_binding_insert()
+        RETURNS trigger LANGUAGE plpgsql AS $$
+        DECLARE
+            asset_kind text;
+            asset_state text;
+        BEGIN
+            SELECT kind, state INTO asset_kind, asset_state
+            FROM media.asset
+            WHERE media_asset_id = NEW.media_asset_id
+            FOR SHARE;
+            IF NOT FOUND THEN
+                RAISE EXCEPTION 'media asset does not exist';
+            END IF;
+            IF asset_state <> 'READY' THEN
+                RAISE EXCEPTION 'only READY media may be bound';
+            END IF;
+            IF NEW.autoplay THEN
+                RAISE EXCEPTION 'media autoplay is forbidden';
+            END IF;
+            IF asset_kind = 'IMAGE' AND (NEW.muted OR NEW.looping) THEN
+                RAISE EXCEPTION 'image presentation flags are invalid';
+            END IF;
+            RETURN NEW;
+        END;
+        $$
+        """
+    )
+    op.execute(
+        """
+        CREATE TRIGGER media_binding_insert_guard
+        BEFORE INSERT ON media.case_version_binding
+        FOR EACH ROW EXECUTE FUNCTION media.validate_binding_insert()
+        """
+    )
+    op.execute(
+        """
         CREATE INDEX media_asset_state_registered_idx
         ON media.asset(state, registered_at DESC, media_asset_id DESC)
         """
@@ -211,6 +247,8 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    op.execute("DROP TRIGGER IF EXISTS media_binding_insert_guard ON media.case_version_binding")
+    op.execute("DROP FUNCTION IF EXISTS media.validate_binding_insert()")
     op.execute("DROP TRIGGER IF EXISTS media_asset_delete_guard ON media.asset")
     op.execute(
         "DROP TRIGGER IF EXISTS media_case_version_binding_append_only_update_guard ON media.case_version_binding"

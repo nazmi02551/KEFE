@@ -12,6 +12,10 @@ from kefe_api.modules.case_media.models import (
 )
 
 
+class CaseMediaDeliveryGate(Protocol):
+    def permits(self, delivery_ref: str) -> bool: ...
+
+
 class CaseMediaRepository(Protocol):
     def list_assets(
         self,
