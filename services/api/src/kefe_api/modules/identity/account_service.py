@@ -186,7 +186,7 @@ class AccountContinuityService:
         message = (
             f"{self._MERGE_TOKEN_DOMAIN}:{verification_token_hash}:"
             f"{source_actor_id}:{expiry}"
-        ).encode("utf-8")
+        ).encode()
         digest = hmac.new(
             self._account_merge_replay_secret,
             message,
