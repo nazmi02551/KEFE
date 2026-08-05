@@ -44,10 +44,16 @@ def moderate_reason(
 ) -> ModerateCommunityReasonResponse:
     request.app.state.admin_security_service.authorize(
         principal,
-        AdminCapability.CONTENT_REVIEW,
+        AdminCapability.CONTENT_MODERATE,
     )
-    reason = service.moderate(reason_id=reason_id, state=body.state)
+    rationale = request.headers.get("X-KEFE-Moderation-Rationale", "")
+    decision = service.moderate(
+        reason_id=reason_id,
+        state=body.state,
+        actor_ref=principal.audit_actor_ref,
+        rationale=rationale,
+    )
     return ModerateCommunityReasonResponse(
-        reason_id=reason.id,
-        moderation_state=reason.moderation_state.value,
+        reason_id=decision.reason.id,
+        moderation_state=decision.reason.moderation_state.value,
     )
