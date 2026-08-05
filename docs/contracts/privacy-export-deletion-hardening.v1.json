@@ -98,6 +98,8 @@
     "identity": [
       "identity.actor_session",
       "identity.account_identifier",
+      "identity.actor_merge_as_guest_or_account",
+      "identity.in_memory_merge_alias_as_source_or_destination",
       "identity.otp_challenge_by_identifier_hash",
       "identity.otp_verification_by_identifier_hash",
       "identity.actor_state_to_DELETED"
@@ -181,6 +183,7 @@
     "AUTOMATED_LEGAL_HOLD_ENGINE",
     "EXPORT_PAYLOAD_PERSISTENCE",
     "PRIVACY_DATA_WAREHOUSE",
+    "CAP_084_MERGE_BEHAVIOR_CHANGE",
     "PRODUCTION_DEPLOYMENT",
     "DEPLOYED_LOAD_SLO_ALERTING_OR_ROLLBACK",
     "HUMAN_LEGAL_CQB_OR_USABILITY_ACCEPTANCE",
@@ -193,6 +196,7 @@
     "postgres_restart_tests": true,
     "postgres_concurrency_tests": true,
     "receipt_direct_mutation_tests": true,
+    "merge_link_cleanup_tests": true,
     "focused_openapi_exact_contract": true,
     "exact_head_api_mobile_mvp_global": true,
     "no_pass_without_exact_head_ci": true
