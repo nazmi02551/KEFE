@@ -49,6 +49,7 @@ def main() -> None:
     tests = _text("services/api/tests/test_otp_http_delivery.py")
     workflow = _text(".github/workflows/otp-http-delivery.yml")
     adr = _text("docs/adr/0112-provider-neutral-production-otp-delivery.md")
+    error_codes = _text("docs/contracts/error-codes.v1.yaml")
 
     for fragment in (
         'otp_delivery_mode: Literal["CAPTURE", "DISABLED", "HTTP"]',
@@ -83,10 +84,23 @@ def main() -> None:
         "test_retryable_network_failure_exhaustion_is_unavailable",
         "test_final_provider_rejection_is_not_retried_or_body_exposed",
         "test_urllib_transport_invokes_post_with_bounded_read_and_timeout",
-        "test_production_forbids_non_http_delivery_modes",
+        "test_account_request_propagates_persisted_challenge_identity_and_expiry",
+        "test_full_production_app_rejects_capture_composition",
+        "test_full_production_app_composes_http_delivery_only_when_configured",
     ):
         _require(fragment in tests, f"missing evidence: {fragment}")
 
+    _require("registry_version: 1.21.0" in error_codes, "error registry version")
+    _require(
+        "- code: AUTH_OTP_DELIVERY_UNAVAILABLE\n  http_status: 503\n  retryable: true"
+        in error_codes,
+        "retryable OTP delivery error registration",
+    )
+    _require(
+        "- code: AUTH_OTP_DELIVERY_REJECTED\n  http_status: 502\n  retryable: false"
+        in error_codes,
+        "final OTP delivery error registration",
+    )
     _require("Exact OpenAPI remains unchanged" in workflow, "exact OpenAPI gate")
     _require("real provider deliverability" in adr.lower(), "external provider non-claim")
     _require("automatic email/sms fallback" in adr.lower(), "no silent fallback decision")
@@ -103,7 +117,7 @@ def main() -> None:
     print(
         "OTP HTTP delivery contract: PASS — challenge-bound idempotency, HTTPS-only "
         "provider-neutral POST, bounded retries/response, production fail-closed, "
-        "redacted operations, unchanged public API and explicit external non-claims."
+        "registered redacted errors, unchanged public API and explicit external non-claims."
     )
 
 
