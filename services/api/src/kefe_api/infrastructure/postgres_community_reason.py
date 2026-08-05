@@ -37,7 +37,7 @@ _MODERATION_SELECT = """
         rs.latest_reported_at,
         CASE
             WHEN :kind = 'PENDING' THEN r.created_at
-            ELSE rs.latest_reported_at
+            ELSE COALESCE(rs.latest_reported_at, r.created_at)
         END AS candidate_at
     FROM community.reason r
     LEFT JOIN LATERAL (
