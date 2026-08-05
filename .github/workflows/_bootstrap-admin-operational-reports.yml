@@ -51,7 +51,7 @@ jobs:
             src/kefe_api/modules/admin_security/policy.py \
             src/kefe_api/main.py \
             tests/test_admin_operational_reports_http.py
-          ruff check \
+          ruff check --fix \
             src/kefe_api/modules/admin_operational_reports \
             src/kefe_api/modules/admin_security/operational_reports.py \
             src/kefe_api/modules/admin_security/operational_reports_router.py \
