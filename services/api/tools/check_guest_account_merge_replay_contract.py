@@ -35,7 +35,6 @@ def main() -> None:
     memory = _text("services/api/src/kefe_api/modules/identity/account_in_memory.py")
     postgres = _text("services/api/src/kefe_api/infrastructure/postgres_account_continuity.py")
     postgres_identity = _text("services/api/src/kefe_api/infrastructure/postgres_identity.py")
-    privacy = _text("services/api/src/kefe_api/infrastructure/postgres_privacy.py")
     settings = _text("services/api/src/kefe_api/core/settings.py")
     migration = _text(
         "services/api/migrations/versions/20260805_0030_guest_merge_replay.py"
@@ -48,13 +47,13 @@ def main() -> None:
     _require("guest_merge_replay" in migration, "durable replay table")
     _require("verification_token_hash" in migration, "verification hash replay key")
     _require("access_token" not in migration, "migration must not persist plaintext token")
+    _require("ON DELETE CASCADE" in migration, "verification-linked privacy cleanup")
     _require("account_merge_replay_secret" in settings, "HMAC secret setting")
     _require("hmac.new" in service, "HMAC credential derivation")
     _require("kefe:guest-account-merge:v1" in service, "domain separation")
     _require("authenticate_guest_merge" in identity_service, "narrow replay authorization")
     _require("authenticate_guest_merge" in router, "router uses narrow authorization")
     _require("TokenStatus.REVOKED" in postgres_identity, "revoked principal resolution")
-    _require("guest_merge_replay" in privacy, "privacy replay cleanup")
 
     forbidden_fragments = (
         "access_token text",
@@ -69,7 +68,7 @@ def main() -> None:
     print(
         "Guest account merge replay contract: PASS — natural verification replay key, "
         "HMAC credential reconstruction, atomic persistence, narrow revoked-token replay, "
-        "privacy cleanup, and unchanged public schema."
+        "privacy cascade, and unchanged public schema."
     )
 
 
