@@ -54,7 +54,9 @@ def main() -> None:
     for fragment in (
         'otp_delivery_mode: Literal["CAPTURE", "DISABLED", "HTTP"]',
         "otp_http_endpoint",
+        "otp_http_secret_ref: SecretStr",
         "otp_http_bearer_token: SecretStr",
+        "otp_http_secret_lease_seconds",
         "otp_http_timeout_ms",
         "otp_http_max_response_bytes",
         "otp_http_max_attempts",
@@ -75,7 +77,8 @@ def main() -> None:
     _require("AUTH_OTP_DELIVERY_REJECTED" in delivery, "final domain error")
     _require("response.read(request.max_response_bytes + 1)" in delivery, "response bound")
     _require("endpoint=<redacted>" in delivery, "endpoint redaction")
-    _require("bearer_token=<redacted>" in delivery, "credential redaction")
+    _require("secret_resolver=<redacted>" in delivery, "credential redaction")
+    _require("build_otp_secret_lease_resolver" in delivery, "lease-backed credential build")
     _require(
         "otp_delivery = build_otp_delivery(" in main_module
         and "observer=otp_delivery_health_observer" in main_module,
@@ -121,7 +124,8 @@ def main() -> None:
     print(
         "OTP HTTP delivery contract: PASS — challenge-bound idempotency, HTTPS-only "
         "provider-neutral POST, bounded retries/response, production fail-closed, "
-        "registered redacted errors, unchanged public API and explicit external non-claims."
+        "lease-backed redacted credentials, unchanged public API and explicit "
+        "external non-claims."
     )
 
 
