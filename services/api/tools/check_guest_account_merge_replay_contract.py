@@ -54,8 +54,12 @@ def main() -> None:
     _require("ON DELETE CASCADE" in migration, "verification-linked privacy cleanup")
     _require("account_merge_replay_secret" in settings, "HMAC secret setting")
     _require(
-        "validate_production_replay_secret" in settings,
-        "production replay secret fail-closed validator",
+        "DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET" in settings,
+        "explicit development replay secret marker",
+    )
+    _require(
+        "production requires KEFE_ACCOUNT_MERGE_REPLAY_SECRET" in service,
+        "identity startup fail-closed guard",
     )
     _require("hmac.new" in service, "HMAC credential derivation")
     _require("kefe:guest-account-merge:v1" in service, "domain separation")
