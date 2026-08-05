@@ -10,6 +10,10 @@ from kefe_api.modules.content_supply_health.models import (
     ContentSupplyHealthPolicy,
     ContentSupplyHealthSnapshot,
 )
+from kefe_api.modules.identity.otp_delivery_health import (
+    OtpDeliveryHealthPolicy,
+    OtpDeliveryHealthSnapshot,
+)
 
 
 def _require_utc(value: datetime, field_name: str) -> None:
@@ -30,6 +34,8 @@ class AdminOperationalReason(StrEnum):
     EDITORIAL_IN_REVIEW_BACKLOG = "EDITORIAL_IN_REVIEW_BACKLOG"
     PROPOSAL_REVIEW_BACKLOG = "PROPOSAL_REVIEW_BACKLOG"
     MODERATION_BACKLOG = "MODERATION_BACKLOG"
+    OTP_DELIVERY_ATTENTION = "OTP_DELIVERY_ATTENTION"
+    OTP_DELIVERY_CRITICAL = "OTP_DELIVERY_CRITICAL"
 
 
 @dataclass(frozen=True, slots=True)
@@ -38,6 +44,7 @@ class AdminOperationalReportPolicy:
     pending_proposal_attention_threshold: int = 100
     moderation_candidate_attention_threshold: int = 50
     content_supply: ContentSupplyHealthPolicy = field(default_factory=ContentSupplyHealthPolicy)
+    otp_delivery: OtpDeliveryHealthPolicy = field(default_factory=OtpDeliveryHealthPolicy)
 
     def __post_init__(self) -> None:
         for value, name in (
@@ -62,6 +69,7 @@ class AdminOperationalReportSnapshot:
     reason_codes: tuple[str, ...]
     policy: AdminOperationalReportPolicy
     content_supply: ContentSupplyHealthSnapshot
+    otp_delivery: OtpDeliveryHealthSnapshot
     editorial_lifecycle: Mapping[str, int]
     proposal_review: Mapping[str, int]
     moderation: Mapping[str, int]
@@ -70,6 +78,8 @@ class AdminOperationalReportSnapshot:
         _require_utc(self.as_of, "as_of")
         if self.content_supply.as_of != self.as_of:
             raise ValueError("content supply snapshot must share report as_of")
+        if self.otp_delivery.as_of != self.as_of:
+            raise ValueError("OTP delivery snapshot must share report as_of")
         if tuple(sorted(set(self.reason_codes))) != self.reason_codes:
             raise ValueError("reason_codes must be sorted and unique")
         for section in (

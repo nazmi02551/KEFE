@@ -76,7 +76,11 @@ def main() -> None:
     _require("response.read(request.max_response_bytes + 1)" in delivery, "response bound")
     _require("endpoint=<redacted>" in delivery, "endpoint redaction")
     _require("bearer_token=<redacted>" in delivery, "credential redaction")
-    _require("build_otp_delivery(settings)" in main_module, "explicit composition")
+    _require(
+        "otp_delivery = build_otp_delivery(" in main_module
+        and "observer=otp_delivery_health_observer" in main_module,
+        "explicit composition",
+    )
 
     for fragment in (
         "test_http_delivery_uses_exact_redacted_idempotent_request_contract",

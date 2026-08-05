@@ -37,6 +37,23 @@ class Settings(BaseSettings):
     otp_http_timeout_ms: int = Field(default=3_000, ge=100, le=10_000)
     otp_http_max_response_bytes: int = Field(default=16_384, ge=1, le=65_536)
     otp_http_max_attempts: int = Field(default=2, ge=1, le=3)
+    otp_delivery_health_window_seconds: int = Field(default=900, ge=60, le=86_400)
+    otp_delivery_health_retention_seconds: int = Field(
+        default=604_800,
+        ge=900,
+        le=2_592_000,
+    )
+    otp_delivery_health_minimum_ratio_sample: int = Field(
+        default=5,
+        ge=1,
+        le=100_000,
+    )
+    otp_delivery_health_failure_attention: int = Field(default=3, ge=1, le=100_000)
+    otp_delivery_health_failure_critical: int = Field(default=10, ge=1, le=100_000)
+    otp_delivery_health_unavailable_attention: int = Field(default=2, ge=1, le=100_000)
+    otp_delivery_health_unavailable_critical: int = Field(default=5, ge=1, le=100_000)
+    otp_delivery_health_ratio_attention_bps: int = Field(default=2_000, ge=1, le=10_000)
+    otp_delivery_health_ratio_critical_bps: int = Field(default=5_000, ge=1, le=10_000)
     otp_request_guard_mode: Literal["AUTO", "OFF", "ENFORCE"] = "AUTO"
     otp_request_cooldown_seconds: int = Field(default=60, ge=1, le=3_600)
     otp_request_window_seconds: int = Field(default=900, ge=60, le=86_400)

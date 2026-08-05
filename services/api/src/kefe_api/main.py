@@ -17,12 +17,16 @@ from kefe_api.infrastructure.persistence import (
     build_context_repository,
     build_decision_repository,
     build_identity_repository,
+    build_otp_delivery_health_repository,
     build_privacy_repository,
     build_progress_repository,
     build_share_repository,
 )
 from kefe_api.infrastructure.raw_evidence_runtime import (
     build_raw_source_evidence_store,
+)
+from kefe_api.modules.admin_operational_reports.models import (
+    AdminOperationalReportPolicy,
 )
 from kefe_api.modules.admin_operational_reports.service import (
     AdminOperationalReportsService,
@@ -115,6 +119,12 @@ from kefe_api.modules.identity.admission import (
     UnconfiguredDeviceIntegrityVerifier,
 )
 from kefe_api.modules.identity.otp_delivery import build_otp_delivery
+from kefe_api.modules.identity.otp_delivery_health import (
+    DurableOtpDeliveryObserver,
+    FailOpenOtpDeliveryObserver,
+    OtpDeliveryHealthPolicy,
+    OtpDeliveryHealthService,
+)
 from kefe_api.modules.identity.router import router as identity_router
 from kefe_api.modules.identity.service import IdentityService
 from kefe_api.modules.privacy.router import router as privacy_router
@@ -144,6 +154,31 @@ def create_app() -> FastAPI:
     account_continuity_repository = build_account_continuity_repository(
         settings,
         identity_repository,
+    )
+    otp_delivery_health_repository = build_otp_delivery_health_repository(settings)
+    otp_delivery_health_policy = OtpDeliveryHealthPolicy.from_seconds(
+        window_seconds=settings.otp_delivery_health_window_seconds,
+        retention_seconds=settings.otp_delivery_health_retention_seconds,
+        minimum_ratio_sample=settings.otp_delivery_health_minimum_ratio_sample,
+        failure_count_attention=settings.otp_delivery_health_failure_attention,
+        failure_count_critical=settings.otp_delivery_health_failure_critical,
+        unavailable_count_attention=settings.otp_delivery_health_unavailable_attention,
+        unavailable_count_critical=settings.otp_delivery_health_unavailable_critical,
+        failure_ratio_attention_bps=settings.otp_delivery_health_ratio_attention_bps,
+        failure_ratio_critical_bps=settings.otp_delivery_health_ratio_critical_bps,
+    )
+    otp_delivery_health_service = OtpDeliveryHealthService(
+        otp_delivery_health_repository
+    )
+    otp_delivery_health_observer = FailOpenOtpDeliveryObserver(
+        DurableOtpDeliveryObserver(
+            otp_delivery_health_repository,
+            retention=otp_delivery_health_policy.retention,
+        )
+    )
+    otp_delivery = build_otp_delivery(
+        settings,
+        observer=otp_delivery_health_observer,
     )
     progress_repository = build_progress_repository(settings, decision_repository)
     share_repository = build_share_repository(settings)
@@ -198,6 +233,10 @@ def create_app() -> FastAPI:
         content_authoring=content_authoring_repository,
         proposal_review=editorial_pipeline.proposal_queue_repository,
         community_reason=community_reason_repository,
+        otp_delivery_health=otp_delivery_health_service,
+        default_policy=AdminOperationalReportPolicy(
+            otp_delivery=otp_delivery_health_policy,
+        ),
     )
     secured_admin_operational_reports_service = SecuredAdminOperationalReportsService(
         reports=admin_operational_reports_service,
@@ -213,7 +252,6 @@ def create_app() -> FastAPI:
         security=admin_security_service,
     )
     flow_runtime_service = FlowRuntimeService(decision_repository)
-    otp_delivery = build_otp_delivery(settings)
 
     app.state.context_repository = context_repository
     app.state.context_service = ContextService(context_repository)
@@ -240,6 +278,10 @@ def create_app() -> FastAPI:
         guest_token_ttl_days=settings.guest_token_ttl_days,
     )
     app.state.otp_delivery = otp_delivery
+    app.state.otp_delivery_health_repository = otp_delivery_health_repository
+    app.state.otp_delivery_health_policy = otp_delivery_health_policy
+    app.state.otp_delivery_health_service = otp_delivery_health_service
+    app.state.otp_delivery_health_observer = otp_delivery_health_observer
     app.state.account_continuity_repository = account_continuity_repository
     app.state.account_continuity_service = AccountContinuityService(
         repository=account_continuity_repository,
