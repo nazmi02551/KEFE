@@ -23,7 +23,6 @@ from kefe_api.modules.community_reason.models import (
     ReasonReportCode,
 )
 
-
 _MODERATION_SELECT = """
     SELECT
         r.id AS reason_id,
