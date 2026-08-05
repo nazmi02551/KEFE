@@ -70,18 +70,18 @@ class EnvironmentSecretReferenceResolver:
             raise SecretResolutionFinalError()
 
         parsed = urlsplit(secret_ref)
+        variable_name = parsed.netloc
         if (
             parsed.scheme.lower() != self.scheme
             or parsed.username is not None
             or parsed.password is not None
-            or parsed.port is not None
+            or ":" in variable_name
             or parsed.path not in ("", "/")
             or parsed.query
             or parsed.fragment
-            or _ENVIRONMENT_NAME.fullmatch(parsed.hostname or "") is None
+            or _ENVIRONMENT_NAME.fullmatch(variable_name) is None
         ):
             raise SecretResolutionFinalError()
-        variable_name = parsed.hostname or ""
         try:
             value = self._reader(variable_name)
         except (OSError, TimeoutError) as exc:
