@@ -4,11 +4,16 @@ from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 from fastapi.testclient import TestClient
-from pydantic import ValidationError
 
-from kefe_api.core.settings import Settings
+from kefe_api.core.settings import DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET
 from kefe_api.main import create_app
+from kefe_api.modules.identity.account_in_memory import (
+    InMemoryAccountContinuityRepository,
+)
 from kefe_api.modules.identity.account_models import OtpChannel
+from kefe_api.modules.identity.account_service import AccountContinuityService
+from kefe_api.modules.identity.in_memory import InMemoryIdentityRepository
+from kefe_api.modules.identity.otp_delivery import CapturingOtpDelivery
 
 
 def _guest(client: TestClient) -> tuple[dict[str, str], str]:
@@ -34,17 +39,34 @@ def _verification(app, client: TestClient, email: str) -> str:
     return verified.json()["verification_token"]
 
 
-def test_production_rejects_development_replay_secret() -> None:
-    with pytest.raises(ValidationError, match="KEFE_ACCOUNT_MERGE_REPLAY_SECRET"):
-        Settings(environment="production")
-
-
-def test_production_accepts_managed_replay_secret() -> None:
-    settings = Settings(
-        environment="production",
-        account_merge_replay_secret="managed-production-replay-secret-0123456789",
+def _account_service(
+    *,
+    environment: str,
+    replay_secret: str,
+) -> AccountContinuityService:
+    identity = InMemoryIdentityRepository()
+    return AccountContinuityService(
+        repository=InMemoryAccountContinuityRepository(identity),
+        delivery=CapturingOtpDelivery(),
+        environment=environment,
+        account_merge_replay_secret=replay_secret,
     )
-    assert settings.environment == "production"
+
+
+def test_production_identity_service_rejects_development_replay_secret() -> None:
+    with pytest.raises(ValueError, match="KEFE_ACCOUNT_MERGE_REPLAY_SECRET"):
+        _account_service(
+            environment="production",
+            replay_secret=DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET,
+        )
+
+
+def test_production_identity_service_accepts_managed_replay_secret() -> None:
+    service = _account_service(
+        environment="production",
+        replay_secret="managed-production-replay-secret-0123456789",
+    )
+    assert service is not None
 
 
 def test_exact_retry_with_revoked_guest_returns_identical_credential() -> None:
