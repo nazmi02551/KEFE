@@ -6,6 +6,7 @@ on:
       - feature/admin-operational-reports-snapshot
     paths:
       - apps/admin/tools/fix_operational_reports_test_imports.mjs
+      - services/api/tools/fix_operational_reports_postgres_fixture.py
       - .github/workflows/_bootstrap-admin-operational-reports-surface-v7.yml
 
 permissions:
@@ -54,6 +55,7 @@ jobs:
           npm ci --no-audit --no-fund
       - name: Apply surface, restore verified tools and remove bootstrap machinery
         run: |
+          python services/api/tools/fix_operational_reports_postgres_fixture.py
           python services/api/tools/strip_postgres_block_from_operational_reports_patcher.py
           python services/api/tools/bootstrap_admin_operational_reports_surface.py
           cp services/api/tools/_admin_operational_reports_checker.template \
@@ -73,6 +75,7 @@ jobs:
           rm services/api/tools/fix_admin_operational_reports_surface_patcher.py
           rm services/api/tools/strip_postgres_block_from_operational_reports_patcher.py
           rm services/api/tools/fix_generated_operational_reports_python.py
+          rm services/api/tools/fix_operational_reports_postgres_fixture.py
           rm services/api/tools/_admin_operational_reports_checker.template
           rm services/api/tools/_admin_operational_reports_openapi.template
           rm apps/admin/tools/_operational_reports_checker.template
