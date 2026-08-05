@@ -109,11 +109,13 @@ class InMemoryAccountContinuityRepository:
             self._identity.promote_or_merge_actor(
                 guest_actor_id=guest_actor_id,
                 account_actor_id=existing.actor_id,
+                now=verified_at,
             )
             return existing.actor_id, guest_actor_id
         self._identity.promote_or_merge_actor(
             guest_actor_id=guest_actor_id,
             account_actor_id=guest_actor_id,
+            now=verified_at,
         )
         account = AccountIdentity(
             actor_id=guest_actor_id,
