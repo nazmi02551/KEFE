@@ -126,10 +126,13 @@ def test_postgres_case_media_restart_projection_and_immutability(
         assert created.status_code == 201, created.text
         asset_id = UUID(created.json()["asset"]["media_asset_id"])
 
-        assert editor.post(
-            f"/internal/admin/v1/case-media/{asset_id}/ready",
-            headers={ADMIN_CSRF_HEADER: csrf},
-        ).status_code == 200
+        assert (
+            editor.post(
+                f"/internal/admin/v1/case-media/{asset_id}/ready",
+                headers={ADMIN_CSRF_HEADER: csrf},
+            ).status_code
+            == 200
+        )
         bound = editor.post(
             f"/internal/admin/v1/case-media/{asset_id}/bindings",
             headers={ADMIN_CSRF_HEADER: csrf},
@@ -156,9 +159,7 @@ def test_postgres_case_media_restart_projection_and_immutability(
         )
         assert projection.status_code == 200
         assert projection.json()["preview_fallback"] is False
-        assert [item["asset_key"] for item in projection.json()["items"]] == [
-            "postgres-case-hero"
-        ]
+        assert [item["asset_key"] for item in projection.json()["items"]] == ["postgres-case-hero"]
 
         reviewer, _ = _admin_client(second_app, reviewer_subject, step_up=False)
         audit = reviewer.get(f"/internal/admin/v1/case-media/{asset_id}/audit")
@@ -177,16 +178,12 @@ def test_postgres_case_media_restart_projection_and_immutability(
             )
         with pytest.raises(DBAPIError), engine.begin() as connection:
             connection.execute(
-                text(
-                    "UPDATE media.asset_audit SET actor_ref = 'mutated' WHERE audit_id = :id"
-                ),
+                text("UPDATE media.asset_audit SET actor_ref = 'mutated' WHERE audit_id = :id"),
                 {"id": audit_id},
             )
         with pytest.raises(DBAPIError), engine.begin() as connection:
             connection.execute(
-                text(
-                    "UPDATE media.case_version_binding SET priority = 1 WHERE binding_id = :id"
-                ),
+                text("UPDATE media.case_version_binding SET priority = 1 WHERE binding_id = :id"),
                 {"id": binding_id},
             )
 
@@ -214,9 +211,7 @@ def test_postgres_case_media_restart_projection_and_immutability(
         assert after.status_code == 200
         assert after.json()["items"] == []
         third_reviewer, _ = _admin_client(third_app, reviewer_subject, step_up=False)
-        final_audit = third_reviewer.get(
-            f"/internal/admin/v1/case-media/{asset_id}/audit"
-        )
+        final_audit = third_reviewer.get(f"/internal/admin/v1/case-media/{asset_id}/audit")
         assert final_audit.status_code == 200
         assert [item["command"] for item in final_audit.json()["items"]] == [
             "REGISTER",

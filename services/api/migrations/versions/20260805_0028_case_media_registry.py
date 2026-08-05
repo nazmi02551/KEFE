@@ -37,7 +37,8 @@ def upgrade() -> None:
                 asset_key ~ '^[a-z0-9][a-z0-9._-]{2,127}$'
             ),
             CONSTRAINT media_delivery_ref_ck CHECK (
-                delivery_ref ~ '^media-ref:[a-z0-9][a-z0-9._:/-]{2,509}$'
+                length(delivery_ref) BETWEEN 13 AND 512 AND
+                delivery_ref ~ '^media-ref:[a-z0-9][a-z0-9._:/-]+$'
             ),
             CONSTRAINT media_content_hash_ck CHECK (
                 content_hash ~ '^[a-f0-9]{64}$'
@@ -192,6 +193,13 @@ def upgrade() -> None:
         $$
         """
     )
+    op.execute(
+        """
+        CREATE TRIGGER media_asset_delete_guard
+        BEFORE DELETE ON media.asset
+        FOR EACH ROW EXECUTE FUNCTION media.reject_append_only_mutation()
+        """
+    )
     for table in ("asset_audit", "case_version_binding"):
         op.execute(
             f"""
@@ -203,6 +211,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    op.execute("DROP TRIGGER IF EXISTS media_asset_delete_guard ON media.asset")
     op.execute(
         "DROP TRIGGER IF EXISTS media_case_version_binding_append_only_update_guard ON media.case_version_binding"
     )

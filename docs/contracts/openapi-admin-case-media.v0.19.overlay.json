@@ -1,0 +1,1029 @@
+{
+  "components": {
+    "schemas": {
+      "BindMediaRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "autoplay": {
+            "default": false,
+            "title": "Autoplay",
+            "type": "boolean"
+          },
+          "case_version_id": {
+            "format": "uuid",
+            "title": "Case Version Id",
+            "type": "string"
+          },
+          "looping": {
+            "default": false,
+            "title": "Looping",
+            "type": "boolean"
+          },
+          "muted": {
+            "default": false,
+            "title": "Muted",
+            "type": "boolean"
+          },
+          "priority": {
+            "maximum": 1000000.0,
+            "minimum": 1.0,
+            "title": "Priority",
+            "type": "integer"
+          },
+          "slot": {
+            "$ref": "#/components/schemas/MediaSlot"
+          }
+        },
+        "required": [
+          "case_version_id",
+          "slot",
+          "priority"
+        ],
+        "title": "BindMediaRequest",
+        "type": "object"
+      },
+      "CaseMediaProjectionListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CaseMediaProjectionResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "preview_fallback": {
+            "default": false,
+            "title": "Preview Fallback",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "CaseMediaProjectionListResponse",
+        "type": "object"
+      },
+      "CaseMediaProjectionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "alt_text": {
+            "title": "Alt Text",
+            "type": "string"
+          },
+          "asset_key": {
+            "title": "Asset Key",
+            "type": "string"
+          },
+          "autoplay": {
+            "title": "Autoplay",
+            "type": "boolean"
+          },
+          "caption": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Caption"
+          },
+          "credit_label": {
+            "title": "Credit Label",
+            "type": "string"
+          },
+          "delivery_ref": {
+            "title": "Delivery Ref",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "looping": {
+            "title": "Looping",
+            "type": "boolean"
+          },
+          "muted": {
+            "title": "Muted",
+            "type": "boolean"
+          },
+          "poster_asset_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Poster Asset Key"
+          },
+          "priority": {
+            "title": "Priority",
+            "type": "integer"
+          },
+          "slot": {
+            "title": "Slot",
+            "type": "string"
+          },
+          "source_label": {
+            "title": "Source Label",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_key",
+          "kind",
+          "slot",
+          "delivery_ref",
+          "title",
+          "alt_text",
+          "caption",
+          "credit_label",
+          "source_label",
+          "poster_asset_key",
+          "autoplay",
+          "muted",
+          "looping",
+          "priority"
+        ],
+        "title": "CaseMediaProjectionResponse",
+        "type": "object"
+      },
+      "MediaAssetResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "alt_text": {
+            "title": "Alt Text",
+            "type": "string"
+          },
+          "asset_key": {
+            "title": "Asset Key",
+            "type": "string"
+          },
+          "byte_length": {
+            "title": "Byte Length",
+            "type": "integer"
+          },
+          "caption": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Caption"
+          },
+          "content_hash": {
+            "title": "Content Hash",
+            "type": "string"
+          },
+          "credit_label": {
+            "title": "Credit Label",
+            "type": "string"
+          },
+          "delivery_ref": {
+            "title": "Delivery Ref",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "media_asset_id": {
+            "format": "uuid",
+            "title": "Media Asset Id",
+            "type": "string"
+          },
+          "media_type": {
+            "title": "Media Type",
+            "type": "string"
+          },
+          "poster_asset_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Poster Asset Key"
+          },
+          "registered_at": {
+            "format": "date-time",
+            "title": "Registered At",
+            "type": "string"
+          },
+          "registered_by": {
+            "title": "Registered By",
+            "type": "string"
+          },
+          "source_label": {
+            "title": "Source Label",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "media_asset_id",
+          "asset_key",
+          "kind",
+          "delivery_ref",
+          "content_hash",
+          "byte_length",
+          "media_type",
+          "title",
+          "alt_text",
+          "caption",
+          "credit_label",
+          "source_label",
+          "poster_asset_key",
+          "state",
+          "registered_by",
+          "registered_at"
+        ],
+        "title": "MediaAssetResponse",
+        "type": "object"
+      },
+      "MediaAssetWriteResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "asset": {
+            "$ref": "#/components/schemas/MediaAssetResponse"
+          },
+          "replayed": {
+            "title": "Replayed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "asset",
+          "replayed"
+        ],
+        "title": "MediaAssetWriteResponse",
+        "type": "object"
+      },
+      "MediaAuditResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "actor_ref": {
+            "title": "Actor Ref",
+            "type": "string"
+          },
+          "audit_id": {
+            "format": "uuid",
+            "title": "Audit Id",
+            "type": "string"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "media_asset_id": {
+            "format": "uuid",
+            "title": "Media Asset Id",
+            "type": "string"
+          },
+          "new_state": {
+            "title": "New State",
+            "type": "string"
+          },
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "previous_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous State"
+          }
+        },
+        "required": [
+          "audit_id",
+          "media_asset_id",
+          "actor_ref",
+          "command",
+          "previous_state",
+          "new_state",
+          "occurred_at"
+        ],
+        "title": "MediaAuditResponse",
+        "type": "object"
+      },
+      "MediaAuditTrailResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MediaAuditResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "MediaAuditTrailResponse",
+        "type": "object"
+      },
+      "MediaBindingResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "autoplay": {
+            "title": "Autoplay",
+            "type": "boolean"
+          },
+          "binding_id": {
+            "format": "uuid",
+            "title": "Binding Id",
+            "type": "string"
+          },
+          "bound_at": {
+            "format": "date-time",
+            "title": "Bound At",
+            "type": "string"
+          },
+          "bound_by": {
+            "title": "Bound By",
+            "type": "string"
+          },
+          "case_version_id": {
+            "format": "uuid",
+            "title": "Case Version Id",
+            "type": "string"
+          },
+          "looping": {
+            "title": "Looping",
+            "type": "boolean"
+          },
+          "media_asset_id": {
+            "format": "uuid",
+            "title": "Media Asset Id",
+            "type": "string"
+          },
+          "muted": {
+            "title": "Muted",
+            "type": "boolean"
+          },
+          "priority": {
+            "title": "Priority",
+            "type": "integer"
+          },
+          "slot": {
+            "title": "Slot",
+            "type": "string"
+          }
+        },
+        "required": [
+          "binding_id",
+          "case_version_id",
+          "media_asset_id",
+          "slot",
+          "priority",
+          "autoplay",
+          "muted",
+          "looping",
+          "bound_by",
+          "bound_at"
+        ],
+        "title": "MediaBindingResponse",
+        "type": "object"
+      },
+      "MediaBindingWriteResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "binding": {
+            "$ref": "#/components/schemas/MediaBindingResponse"
+          },
+          "replayed": {
+            "title": "Replayed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "binding",
+          "replayed"
+        ],
+        "title": "MediaBindingWriteResponse",
+        "type": "object"
+      },
+      "MediaInventoryResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MediaAssetResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "MediaInventoryResponse",
+        "type": "object"
+      },
+      "MediaKind": {
+        "enum": [
+          "IMAGE",
+          "VIDEO"
+        ],
+        "title": "MediaKind",
+        "type": "string"
+      },
+      "MediaSlot": {
+        "enum": [
+          "HERO",
+          "CONTEXT",
+          "REVEAL",
+          "IMPACT"
+        ],
+        "title": "MediaSlot",
+        "type": "string"
+      },
+      "MediaState": {
+        "enum": [
+          "REGISTERED",
+          "READY",
+          "RETIRED"
+        ],
+        "title": "MediaState",
+        "type": "string"
+      },
+      "RegisterMediaRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "alt_text": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Alt Text",
+            "type": "string"
+          },
+          "asset_key": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Asset Key",
+            "type": "string"
+          },
+          "byte_length": {
+            "maximum": 1073741824.0,
+            "minimum": 1.0,
+            "title": "Byte Length",
+            "type": "integer"
+          },
+          "caption": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Caption"
+          },
+          "content_hash": {
+            "maxLength": 64,
+            "minLength": 64,
+            "title": "Content Hash",
+            "type": "string"
+          },
+          "credit_label": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Credit Label",
+            "type": "string"
+          },
+          "delivery_ref": {
+            "maxLength": 512,
+            "minLength": 3,
+            "title": "Delivery Ref",
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/MediaKind"
+          },
+          "media_type": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Media Type",
+            "type": "string"
+          },
+          "poster_asset_key": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Poster Asset Key"
+          },
+          "source_label": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Source Label",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_key",
+          "kind",
+          "delivery_ref",
+          "content_hash",
+          "byte_length",
+          "media_type",
+          "title",
+          "alt_text",
+          "credit_label",
+          "source_label"
+        ],
+        "title": "RegisterMediaRequest",
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/internal/admin/v1/case-media": {
+      "get": {
+        "operationId": "inventory_internal_admin_v1_case_media_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/MediaState"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaInventoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Inventory",
+        "tags": [
+          "Internal Admin Case Media"
+        ]
+      },
+      "post": {
+        "operationId": "register_internal_admin_v1_case_media_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-KEFE-CSRF",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Csrf"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterMediaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaAssetWriteResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Register",
+        "tags": [
+          "Internal Admin Case Media"
+        ]
+      }
+    },
+    "/internal/admin/v1/case-media/case-versions/{case_version_id}/projection": {
+      "get": {
+        "operationId": "projection_internal_admin_v1_case_media_case_versions__case_version_id__projection_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseMediaProjectionListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Projection",
+        "tags": [
+          "Internal Admin Case Media"
+        ]
+      }
+    },
+    "/internal/admin/v1/case-media/{media_asset_id}": {
+      "get": {
+        "operationId": "detail_internal_admin_v1_case_media__media_asset_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "media_asset_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Media Asset Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaAssetResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Detail",
+        "tags": [
+          "Internal Admin Case Media"
+        ]
+      }
+    },
+    "/internal/admin/v1/case-media/{media_asset_id}/audit": {
+      "get": {
+        "operationId": "audit_internal_admin_v1_case_media__media_asset_id__audit_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "media_asset_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Media Asset Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaAuditTrailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Audit",
+        "tags": [
+          "Internal Admin Case Media"
+        ]
+      }
+    },
+    "/internal/admin/v1/case-media/{media_asset_id}/bindings": {
+      "post": {
+        "operationId": "bind_internal_admin_v1_case_media__media_asset_id__bindings_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "media_asset_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Media Asset Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-KEFE-CSRF",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Csrf"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BindMediaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaBindingWriteResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Bind",
+        "tags": [
+          "Internal Admin Case Media"
+        ]
+      }
+    },
+    "/internal/admin/v1/case-media/{media_asset_id}/ready": {
+      "post": {
+        "operationId": "mark_ready_internal_admin_v1_case_media__media_asset_id__ready_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "media_asset_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Media Asset Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-KEFE-CSRF",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Csrf"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaAssetWriteResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Mark Ready",
+        "tags": [
+          "Internal Admin Case Media"
+        ]
+      }
+    },
+    "/internal/admin/v1/case-media/{media_asset_id}/retire": {
+      "post": {
+        "operationId": "retire_internal_admin_v1_case_media__media_asset_id__retire_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "media_asset_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Media Asset Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-KEFE-CSRF",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Csrf"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaAssetWriteResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Retire",
+        "tags": [
+          "Internal Admin Case Media"
+        ]
+      }
+    }
+  },
+  "target_version": "0.19.0"
+}

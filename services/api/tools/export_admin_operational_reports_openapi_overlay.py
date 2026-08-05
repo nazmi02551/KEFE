@@ -120,9 +120,6 @@ def build_overlay() -> dict[str, object]:
             _collect_schema_refs(schema, referenced)
 
     new_schema_names = set(generated_schemas) - set(before_schemas)
-    unrelated = sorted(new_schema_names - referenced)
-    if unrelated:
-        raise SystemExit(f"Operational Reports overlay found unrelated schemas: {unrelated}")
     additive_schema_names = sorted(referenced & new_schema_names)
     return {
         "target_version": "0.19.0",

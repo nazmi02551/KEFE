@@ -18,6 +18,7 @@ OPENAPI_OVERLAYS = (
     "openapi-admin-publication-operations.v0.19.overlay.json",
     "openapi-admin-community-reason-moderation.v0.19.overlay.json",
     "openapi-admin-operational-reports.v0.19.overlay.json",
+    "openapi-admin-case-media.v0.19.overlay.json",
 )
 
 
