@@ -50,3 +50,13 @@ class AccountIdentity:
     channel: OtpChannel
     identifier_hint: str
     verified_at: datetime
+
+
+@dataclass(frozen=True, slots=True)
+class GuestMergeReplay:
+    verification_token_hash: str
+    source_actor_id: UUID
+    account_actor_id: UUID
+    merged_from_actor_id: UUID | None
+    account_session_expires_at: datetime
+    completed_at: datetime
