@@ -200,8 +200,10 @@ def test_community_reason_is_explicit_moderated_and_commit_gated_for_read() -> N
     allowed = app.state.community_reason_service.moderate(
         reason_id=UUID(reason_id),
         state=CommunityReasonModeration.ALLOWED,
+        actor_ref="test:mvp-completion",
+        rationale="Explicit test moderation permits the submitted reason.",
     )
-    assert allowed.moderation_state.value == "ALLOWED"
+    assert allowed.reason.moderation_state.value == "ALLOWED"
     visible = client.get(
         f"/v1/weigh-sessions/{session_id}/community-reasons",
         headers=headers,
