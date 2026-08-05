@@ -23,6 +23,9 @@ from kefe_api.infrastructure.persistence import (
 from kefe_api.infrastructure.raw_evidence_runtime import (
     build_raw_source_evidence_store,
 )
+from kefe_api.modules.admin_operational_reports.service import (
+    AdminOperationalReportsService,
+)
 from kefe_api.modules.admin_security.candidate_bundle_router import (
     router as admin_candidate_bundle_router,
 )
@@ -47,6 +50,12 @@ from kefe_api.modules.admin_security.feed_item_review_router import (
 )
 from kefe_api.modules.admin_security.flow_composer_router import (
     router as admin_flow_composer_router,
+)
+from kefe_api.modules.admin_security.operational_reports import (
+    SecuredAdminOperationalReportsService,
+)
+from kefe_api.modules.admin_security.operational_reports_router import (
+    router as admin_operational_reports_router,
 )
 from kefe_api.modules.admin_security.policy import default_admin_security_policy
 from kefe_api.modules.admin_security.proposal_queue_router import (
@@ -167,6 +176,16 @@ def create_app() -> FastAPI:
         admin_security_service=admin_security_service,
         editorial_pipeline=editorial_pipeline,
     )
+    admin_operational_reports_service = AdminOperationalReportsService(
+        content_supply=editorial_pipeline.content_supply_health_service,
+        content_authoring=content_authoring_repository,
+        proposal_review=editorial_pipeline.proposal_queue_repository,
+        community_reason=community_reason_repository,
+    )
+    secured_admin_operational_reports_service = SecuredAdminOperationalReportsService(
+        reports=admin_operational_reports_service,
+        security=admin_security_service,
+    )
     content_configuration_service = ContentConfigurationService(
         repository=content_configuration_repository,
         security=admin_security_service,
@@ -281,6 +300,8 @@ def create_app() -> FastAPI:
     app.state.admin_security_service = admin_security_service
     app.state.secured_content_authoring_service = secured_content_authoring_service
     app.state.secured_content_configuration_service = secured_content_configuration_service
+    app.state.admin_operational_reports_service = admin_operational_reports_service
+    app.state.secured_admin_operational_reports_service = secured_admin_operational_reports_service
     app.state.guest_admission_guard = GuestAdmissionGuard(
         limiter=InMemoryGuestIssueRateLimiter(),
         integrity_verifier=UnconfiguredDeviceIntegrityVerifier(),
@@ -324,6 +345,7 @@ def create_app() -> FastAPI:
     app.include_router(admin_editorial_projection_router)
     app.include_router(admin_content_configuration_router)
     app.include_router(community_reason_admin_router)
+    app.include_router(admin_operational_reports_router)
     return app
 
 

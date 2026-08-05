@@ -13,6 +13,7 @@ from kefe_api.modules.ingestion_orchestration.models import (
     ProposalReviewDecisionKind,
 )
 from kefe_api.modules.ingestion_orchestration.review_queue import (
+    ProposalQueueCountQuery,
     ProposalQueueQuery,
     ProposalQueueRecord,
     ProposalQueueReviewState,
@@ -94,9 +95,7 @@ class PostgresProposalReviewQueueRepository:
             params["pipeline_code"] = query.pipeline_code
         if query.after_created_at is not None:
             assert query.after_proposal_id is not None
-            clauses.append(
-                "(p.created_at, p.id) > (:after_created_at, :after_proposal_id)"
-            )
+            clauses.append("(p.created_at, p.id) > (:after_created_at, :after_proposal_id)")
             params["after_created_at"] = query.after_created_at
             params["after_proposal_id"] = query.after_proposal_id
 
@@ -108,15 +107,52 @@ class PostgresProposalReviewQueueRepository:
             rows = connection.execute(text(statement), params).mappings().all()
         return tuple(self._record_from_row(row) for row in rows)
 
+    def count_proposal_queue(self, query: ProposalQueueCountQuery) -> int:
+        clauses: list[str] = []
+        params: dict[str, object] = {}
+        if query.review_state is ProposalQueueReviewState.PENDING:
+            clauses.append("rd.id IS NULL")
+        elif query.review_state is not None:
+            clauses.append("rd.decision = :review_state")
+            params["review_state"] = query.review_state.value
+        if query.proposal_kind is not None:
+            clauses.append("p.proposal_kind = :proposal_kind")
+            params["proposal_kind"] = query.proposal_kind
+        if query.risk_code is not None:
+            clauses.append("p.risk_code = :risk_code")
+            params["risk_code"] = query.risk_code
+        if query.run_id is not None:
+            clauses.append("p.run_id = :run_id")
+            params["run_id"] = query.run_id
+        if query.pipeline_code is not None:
+            clauses.append("ir.pipeline_code = :pipeline_code")
+            params["pipeline_code"] = query.pipeline_code
+
+        statement = """
+            SELECT count(*)
+            FROM ingestion.proposal p
+            JOIN ingestion.ingestion_run ir ON ir.id = p.run_id
+            LEFT JOIN ingestion.proposal_review_decision rd ON rd.proposal_id = p.id
+        """
+        if clauses:
+            statement += " WHERE " + " AND ".join(clauses)
+        with self._engine.connect() as connection:
+            value = connection.execute(text(statement), params).scalar_one()
+        return int(value)
+
     def get_proposal_queue_record(
         self,
         proposal_id: UUID,
     ) -> ProposalQueueRecord | None:
         with self._engine.connect() as connection:
-            row = connection.execute(
-                text(_QUEUE_SELECT + " WHERE p.id = :proposal_id"),
-                {"proposal_id": proposal_id},
-            ).mappings().one_or_none()
+            row = (
+                connection.execute(
+                    text(_QUEUE_SELECT + " WHERE p.id = :proposal_id"),
+                    {"proposal_id": proposal_id},
+                )
+                .mappings()
+                .one_or_none()
+            )
         return self._record_from_row(row) if row else None
 
     @classmethod

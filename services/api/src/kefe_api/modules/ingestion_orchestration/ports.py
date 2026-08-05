@@ -12,6 +12,7 @@ from kefe_api.modules.ingestion_orchestration.models import (
     StageProcessorResult,
 )
 from kefe_api.modules.ingestion_orchestration.review_queue import (
+    ProposalQueueCountQuery,
     ProposalQueueQuery,
     ProposalQueueRecord,
 )
@@ -65,6 +66,8 @@ class ProposalReviewQueueRepository(Protocol):
         self,
         query: ProposalQueueQuery,
     ) -> tuple[ProposalQueueRecord, ...]: ...
+
+    def count_proposal_queue(self, query: ProposalQueueCountQuery) -> int: ...
 
     def get_proposal_queue_record(
         self,

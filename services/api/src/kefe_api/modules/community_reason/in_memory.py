@@ -152,6 +152,23 @@ class InMemoryCommunityReasonRepository:
         items.sort(key=lambda item: (item.candidate_at, str(item.reason_id)))
         return tuple(items[offset : offset + limit])
 
+    def count_moderation_queue(
+        self,
+        *,
+        kind: CommunityReasonModerationQueueKind,
+        case_version_id: UUID | None = None,
+        report_code: ReasonReportCode | None = None,
+    ) -> int:
+        return len(
+            self.moderation_queue(
+                kind=kind,
+                limit=max(len(self._reasons), 1),
+                offset=0,
+                case_version_id=case_version_id,
+                report_code=report_code,
+            )
+        )
+
     def moderation_inspection(
         self,
         reason_id: UUID,

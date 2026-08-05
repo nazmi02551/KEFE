@@ -45,6 +45,7 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
                     AdminCapability.SOURCE_MANAGE,
                     AdminCapability.RISK_REVIEW,
                     AdminCapability.AUDIT_READ,
+                    AdminCapability.OPERATIONAL_REPORT_READ,
                 }
             ),
             AdminRole.PUBLISHER: frozenset(
@@ -52,6 +53,7 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
                     AdminCapability.CONTENT_PUBLISH,
                     AdminCapability.CONTENT_WITHDRAW,
                     AdminCapability.AUDIT_READ,
+                    AdminCapability.OPERATIONAL_REPORT_READ,
                 }
             ),
             AdminRole.TAXONOMY_MANAGER: frozenset(
@@ -66,6 +68,7 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
                     AdminCapability.SOURCE_APPROVE,
                     AdminCapability.SOURCE_ACTIVATE,
                     AdminCapability.AUDIT_READ,
+                    AdminCapability.OPERATIONAL_REPORT_READ,
                 }
             ),
         },
