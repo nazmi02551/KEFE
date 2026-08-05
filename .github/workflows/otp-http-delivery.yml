@@ -1,0 +1,140 @@
+name: OTP HTTP Delivery CI
+
+on:
+  pull_request:
+    paths:
+      - "services/api/src/kefe_api/core/settings.py"
+      - "services/api/src/kefe_api/main.py"
+      - "services/api/src/kefe_api/modules/identity/account_ports.py"
+      - "services/api/src/kefe_api/modules/identity/account_service.py"
+      - "services/api/src/kefe_api/modules/identity/otp_delivery.py"
+      - "services/api/tests/test_otp_http_delivery.py"
+      - "services/api/tools/check_otp_http_delivery_contract.py"
+      - "docs/adr/0112-provider-neutral-production-otp-delivery.md"
+      - "docs/contracts/otp-http-delivery.v1.json"
+      - "docs/status/F4_OTP_HTTP_DELIVERY_2026-08-05.md"
+      - ".github/workflows/otp-http-delivery.yml"
+  push:
+    branches: [main]
+    paths:
+      - "services/api/src/kefe_api/core/settings.py"
+      - "services/api/src/kefe_api/main.py"
+      - "services/api/src/kefe_api/modules/identity/account_ports.py"
+      - "services/api/src/kefe_api/modules/identity/account_service.py"
+      - "services/api/src/kefe_api/modules/identity/otp_delivery.py"
+      - "services/api/tests/test_otp_http_delivery.py"
+      - "services/api/tools/check_otp_http_delivery_contract.py"
+      - "docs/adr/0112-provider-neutral-production-otp-delivery.md"
+      - "docs/contracts/otp-http-delivery.v1.json"
+      - "docs/status/F4_OTP_HTTP_DELIVERY_2026-08-05.md"
+      - ".github/workflows/otp-http-delivery.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: otp-http-delivery-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  memory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Lint OTP delivery slice
+        working-directory: services/api
+        run: >-
+          ruff check
+          src/kefe_api/core/settings.py
+          src/kefe_api/main.py
+          src/kefe_api/modules/identity/account_ports.py
+          src/kefe_api/modules/identity/account_service.py
+          src/kefe_api/modules/identity/otp_delivery.py
+          tests/test_otp_http_delivery.py
+          tools/check_otp_http_delivery_contract.py
+      - name: Executable OTP HTTP delivery contract
+        working-directory: services/api
+        run: python tools/check_otp_http_delivery_contract.py
+      - name: Exact OpenAPI remains unchanged
+        working-directory: services/api
+        run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
+      - name: Memory delivery replay privacy and account regression proof
+        working-directory: services/api
+        run: >-
+          pytest -q
+          tests/test_otp_http_delivery.py
+          tests/test_guest_merge_key_rotation.py
+          tests/test_guest_merge_replay.py
+          tests/test_guest_session_rotation.py
+          tests/test_mvp_completion.py
+          tests/test_privacy_export_deletion_hardening.py
+
+  postgres:
+    needs: memory
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: kefe
+          POSTGRES_USER: kefe
+          POSTGRES_PASSWORD: kefe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kefe -d kefe"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Migrate PostgreSQL
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: alembic upgrade head
+      - name: Seed canonical fixtures
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: |
+          python -m kefe_api.infrastructure.seed_demo
+          python -m kefe_api.infrastructure.seed_context_demo
+          python -m kefe_api.infrastructure.seed_beta_catalog
+      - name: PostgreSQL identity replay privacy and continuity proof
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+          KEFE_PERSISTENCE_BACKEND: postgres
+          KEFE_RUN_POSTGRES_TESTS: "1"
+          KEFE_ACCOUNT_MERGE_REPLAY_ACTIVE_KEY_ID: ci-primary-v1
+          KEFE_ACCOUNT_MERGE_REPLAY_SECRET: ci-guest-merge-replay-secret-0123456789012345
+          KEFE_ACCOUNT_MERGE_REPLAY_RETAINED_KEYS: '{}'
+        run: >-
+          pytest -q
+          tests/test_guest_merge_key_rotation_postgres.py
+          tests/test_guest_merge_replay_postgres.py
+          tests/test_mvp_completion_postgres.py
+          tests/test_privacy_export_deletion_hardening_postgres.py
