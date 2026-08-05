@@ -122,6 +122,13 @@ This ADR does not implement or prove:
 - automatic Case mutation, review, approval, publication or consumer fallback;
 - production deployment, SLO, alerting, rollback, store compliance or human CQB/usability acceptance.
 
+## Implementation enforcement
+
+- The runtime injects an unavailable delivery gate until a separately reviewed provider-neutral resolver exists; therefore production projection is empty by default even when READY bindings are present.
+- Memory and PostgreSQL repositories re-check READY state at binding insertion so a concurrent retirement cannot create a newly eligible binding.
+- PostgreSQL insert guards also reject autoplay and image-only misuse of `muted` or `looping`, while append-only and immutable-field triggers protect asset, binding and audit history from direct mutation.
+- An allow-all test gate is used only inside repository tests to prove deterministic eligible projection ordering; it is not wired into application runtime or treated as provider activation evidence.
+
 ## Consequences
 
 - CAP-094 advances through a contract-verified metadata and management slice, but remains partial until provider/storage/CDN operation and human/external gates are separately proven.
