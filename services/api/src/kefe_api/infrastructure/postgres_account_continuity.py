@@ -211,6 +211,16 @@ class PostgresAccountContinuityRepository:
 
             if existing is None:
                 connection.execute(
+                    text(
+                        """
+                        UPDATE identity.actor_session
+                        SET revoked_at = COALESCE(revoked_at, :revoked_at)
+                        WHERE actor_id = :guest_actor_id
+                        """
+                    ),
+                    {"guest_actor_id": guest_actor_id, "revoked_at": verified_at},
+                )
+                connection.execute(
                     text("UPDATE identity.actor SET actor_kind = 'ACCOUNT' WHERE id = :id"),
                     {"id": guest_actor_id},
                 )
@@ -236,6 +246,16 @@ class PostgresAccountContinuityRepository:
 
             account_actor_id = existing
             if account_actor_id == guest_actor_id:
+                connection.execute(
+                    text(
+                        """
+                        UPDATE identity.actor_session
+                        SET revoked_at = COALESCE(revoked_at, :revoked_at)
+                        WHERE actor_id = :guest_actor_id
+                        """
+                    ),
+                    {"guest_actor_id": guest_actor_id, "revoked_at": verified_at},
+                )
                 connection.execute(
                     text("UPDATE identity.actor SET actor_kind = 'ACCOUNT' WHERE id = :id"),
                     {"id": guest_actor_id},
@@ -361,15 +381,18 @@ class PostgresAccountContinuityRepository:
                 {"guest_actor_id": guest_actor_id, "account_actor_id": account_actor_id},
             )
 
+            # Never promote or re-parent a bearer issued to the guest identity. Account
+            # conversion is a credential-rotation boundary, while destination-account
+            # sessions must remain untouched.
             connection.execute(
                 text(
                     """
                     UPDATE identity.actor_session
-                    SET actor_id = :account_actor_id
+                    SET revoked_at = COALESCE(revoked_at, :revoked_at)
                     WHERE actor_id = :guest_actor_id
                     """
                 ),
-                {"guest_actor_id": guest_actor_id, "account_actor_id": account_actor_id},
+                {"guest_actor_id": guest_actor_id, "revoked_at": verified_at},
             )
             connection.execute(
                 text(

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from threading import RLock
 from uuid import UUID
 
@@ -54,14 +54,21 @@ class InMemoryIdentityRepository:
         *,
         guest_actor_id: UUID,
         account_actor_id: UUID,
+        now: datetime | None = None,
     ) -> None:
+        revoked_at = now or datetime.now(UTC)
         with self._lock:
             self._actor_kinds[account_actor_id] = ActorKind.ACCOUNT
+
+            # Account conversion is a credential-rotation boundary. Every bearer issued
+            # to the source guest must stop working before the new account credential is
+            # created; otherwise a copied guest token silently inherits account access.
+            for session in self._sessions.values():
+                if session.actor_id == guest_actor_id:
+                    session.revoked_at = session.revoked_at or revoked_at
+
             if guest_actor_id != account_actor_id:
                 self._merged_into[guest_actor_id] = account_actor_id
-                for session in self._sessions.values():
-                    if session.actor_id == guest_actor_id:
-                        session.actor_id = account_actor_id
                 self._actor_kinds.pop(guest_actor_id, None)
             else:
                 self._actor_kinds[guest_actor_id] = ActorKind.ACCOUNT
