@@ -1,0 +1,76 @@
+{
+  "contract_id": "KEFE-GUEST-ACCOUNT-MERGE-REPLAY-001",
+  "version": "1.0.0",
+  "status": "ACCEPTED",
+  "capabilities": ["CAP-084"],
+  "foundation_phase": "F4",
+  "issue": 316,
+  "adr": "docs/adr/0110-durable-guest-account-conversion-replay.md",
+  "public_api": {
+    "path": "/v1/auth/guest-merge",
+    "request_schema_changed": false,
+    "response_schema_changed": false,
+    "replay_key": "sha256(verification_token)",
+    "normal_auth_rejects_revoked_tokens": true,
+    "revoked_token_exception": "exact_completed_guest_merge_replay_only"
+  },
+  "credential": {
+    "prefix": "kefe_a_",
+    "derivation": "HMAC-SHA-256",
+    "secret_setting": "KEFE_ACCOUNT_MERGE_REPLAY_SECRET",
+    "domain_separator": "kefe:guest-account-merge:v1",
+    "plaintext_persisted": false,
+    "persisted_value": "sha256(access_token)"
+  },
+  "postgres_transaction": {
+    "required_steps": [
+      "load_matching_completed_replay",
+      "consume_verification_once",
+      "promote_or_merge_actor",
+      "revoke_source_guest_sessions",
+      "create_one_account_session",
+      "persist_completed_replay"
+    ],
+    "all_or_nothing": true,
+    "concurrent_duplicates_converge": true,
+    "restart_replay": true
+  },
+  "replay_record": {
+    "table": "identity.guest_merge_replay",
+    "primary_key": "verification_token_hash",
+    "fields": [
+      "verification_token_hash",
+      "source_actor_id",
+      "account_actor_id",
+      "merged_from_actor_id",
+      "account_session_expires_at",
+      "completed_at"
+    ],
+    "forbidden_fields": [
+      "access_token",
+      "verification_token",
+      "otp_code"
+    ]
+  },
+  "errors": {
+    "actor_mismatch": "AUTH_MERGE_REPLAY_MISMATCH",
+    "revoked_without_replay": "AUTH_TOKEN_REVOKED",
+    "invalid_verification_without_replay": "AUTH_VERIFICATION_INVALID"
+  },
+  "privacy": {
+    "delete_when_source_actor_deleted": true,
+    "delete_when_account_actor_deleted": true,
+    "delete_before_verification_material": true,
+    "exported_as_product_data": false
+  },
+  "required_evidence": [
+    "memory_exact_replay",
+    "memory_actor_mismatch",
+    "postgres_exact_replay_after_restart",
+    "postgres_concurrent_duplicate_convergence",
+    "postgres_single_account_session",
+    "postgres_no_plaintext_credential",
+    "privacy_replay_cleanup",
+    "exact_openapi_no_drift"
+  ]
+}
