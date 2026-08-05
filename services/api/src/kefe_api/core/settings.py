@@ -33,7 +33,9 @@ class Settings(BaseSettings):
     otp_max_attempts: int = 5
     otp_delivery_mode: Literal["CAPTURE", "DISABLED", "HTTP"] = "CAPTURE"
     otp_http_endpoint: str | None = None
+    otp_http_secret_ref: SecretStr | None = None
     otp_http_bearer_token: SecretStr | None = None
+    otp_http_secret_lease_seconds: int = Field(default=30, ge=1, le=300)
     otp_http_timeout_ms: int = Field(default=3_000, ge=100, le=10_000)
     otp_http_max_response_bytes: int = Field(default=16_384, ge=1, le=65_536)
     otp_http_max_attempts: int = Field(default=2, ge=1, le=3)

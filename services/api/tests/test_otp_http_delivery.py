@@ -23,9 +23,16 @@ from kefe_api.modules.identity.otp_delivery import (
     UrllibOtpHttpTransport,
     build_otp_delivery,
 )
+from kefe_api.modules.identity.otp_secret_resolution import (
+    EnvironmentSecretReferenceResolver,
+)
+from kefe_api.modules.knowledge.provider_secret_execution import (
+    InMemorySecretResolverRegistry,
+)
 
 _ENDPOINT = "https://otp.provider.example/v1/deliveries"
 _TOKEN = "managed-provider-bearer-token-01234567890123456789"
+_SECRET_REF = "envref://KEFE_OTP_PROVIDER_CREDENTIAL"
 _REPLAY_SECRET = "managed-production-replay-secret-0123456789012345"
 
 
@@ -285,6 +292,14 @@ def test_production_forbids_non_http_delivery_modes(mode: str) -> None:
 def test_http_mode_requires_endpoint_and_managed_secret() -> None:
     with pytest.raises(RuntimeError, match="KEFE_OTP_HTTP_ENDPOINT"):
         build_otp_delivery(Settings(otp_delivery_mode="HTTP"))
+    with pytest.raises(RuntimeError, match="KEFE_OTP_HTTP_SECRET_REF"):
+        build_otp_delivery(
+            Settings(
+                environment="production",
+                otp_delivery_mode="HTTP",
+                otp_http_endpoint=_ENDPOINT,
+            )
+        )
 
 
 def test_production_http_delivery_builds_with_secretstr_redaction() -> None:
@@ -292,14 +307,19 @@ def test_production_http_delivery_builds_with_secretstr_redaction() -> None:
         environment="production",
         otp_delivery_mode="HTTP",
         otp_http_endpoint=_ENDPOINT,
-        otp_http_bearer_token=SecretStr(_TOKEN),
+        otp_http_secret_ref=SecretStr(_SECRET_REF),
+    )
+    registry = InMemorySecretResolverRegistry(
+        (EnvironmentSecretReferenceResolver(lambda _: _TOKEN),)
     )
     delivery = build_otp_delivery(
         settings,
+        secret_resolver_registry=registry,
         transport=SequenceTransport([OtpHttpResponse(status_code=202, response_bytes=0)]),
     )
     assert isinstance(delivery, HttpOtpDelivery)
-    assert _TOKEN not in repr(settings)
+    assert _SECRET_REF not in repr(settings)
+    assert _SECRET_REF not in repr(delivery)
     assert _TOKEN not in repr(delivery)
 
 
@@ -323,12 +343,14 @@ def test_full_production_app_composes_http_delivery_only_when_configured(
     monkeypatch.setenv("KEFE_ENVIRONMENT", "production")
     monkeypatch.setenv("KEFE_OTP_DELIVERY_MODE", "HTTP")
     monkeypatch.setenv("KEFE_OTP_HTTP_ENDPOINT", _ENDPOINT)
-    monkeypatch.setenv("KEFE_OTP_HTTP_BEARER_TOKEN", _TOKEN)
+    monkeypatch.setenv("KEFE_OTP_HTTP_SECRET_REF", _SECRET_REF)
+    monkeypatch.setenv("KEFE_OTP_PROVIDER_CREDENTIAL", _TOKEN)
     monkeypatch.setenv("KEFE_ACCOUNT_MERGE_REPLAY_SECRET", _REPLAY_SECRET)
     get_settings.cache_clear()
     try:
         app = create_app()
         assert isinstance(app.state.otp_delivery, HttpOtpDelivery)
+        assert _SECRET_REF not in repr(app.state.otp_delivery)
         assert _TOKEN not in repr(app.state.otp_delivery)
     finally:
         get_settings.cache_clear()

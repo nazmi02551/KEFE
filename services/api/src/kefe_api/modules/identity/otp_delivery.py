@@ -14,6 +14,16 @@ from uuid import UUID
 from kefe_api.core.errors import DomainError
 from kefe_api.core.settings import Settings
 from kefe_api.modules.identity.account_models import OtpChannel
+from kefe_api.modules.identity.otp_secret_resolution import (
+    OtpSecretLeaseResolver,
+    StaticOtpSecretLeaseResolver,
+    build_otp_secret_lease_resolver,
+)
+from kefe_api.modules.knowledge.provider_secret_execution import (
+    SecretResolutionFinalError,
+    SecretResolutionRetryableError,
+    SecretResolverRegistry,
+)
 
 _RETRYABLE_HTTP_STATUSES = frozenset({408, 425, 429, 500, 502, 503, 504})
 _MAX_REQUEST_BYTES = 4_096
@@ -226,15 +236,23 @@ class HttpOtpDelivery:
         self,
         *,
         endpoint: str,
-        bearer_token: str,
         timeout_ms: int,
         max_response_bytes: int,
         max_attempts: int,
+        secret_resolver: OtpSecretLeaseResolver | None = None,
+        bearer_token: str | None = None,
         transport: OtpHttpTransport | None = None,
         observer: OtpDeliveryObserver | None = None,
     ) -> None:
         self._endpoint = self._validated_endpoint(endpoint)
-        self._bearer_token = self._validated_secret(bearer_token)
+        if (secret_resolver is None) == (bearer_token is None):
+            raise ValueError(
+                "OTP delivery requires exactly one secret resolver or bearer token"
+            )
+        self._secret_resolver = secret_resolver or StaticOtpSecretLeaseResolver(
+            bearer_token or "",
+            lease_ttl_seconds=30,
+        )
         if not 100 <= timeout_ms <= 10_000:
             raise ValueError("OTP provider timeout is outside the supported range")
         if not 1 <= max_response_bytes <= 65_536:
@@ -256,7 +274,77 @@ class HttpOtpDelivery:
         code: str,
         expires_at: datetime,
     ) -> None:
+        resolved_at = datetime.now(UTC)
+        try:
+            lease = self._secret_resolver.resolve(
+                at=resolved_at,
+                expires_at=expires_at,
+            )
+        except SecretResolutionRetryableError as exc:
+            self._record(
+                OtpDeliveryOutcome.UNAVAILABLE,
+                channel,
+                1,
+                None,
+                "OTP_SECRET_RESOLUTION_RETRYABLE",
+            )
+            raise self._unavailable_error() from exc
+        except SecretResolutionFinalError as exc:
+            self._record(
+                OtpDeliveryOutcome.REJECTED,
+                channel,
+                1,
+                None,
+                "OTP_SECRET_RESOLUTION_FINAL",
+            )
+            raise self._rejected_error() from exc
+        except Exception as exc:
+            self._record(
+                OtpDeliveryOutcome.REJECTED,
+                channel,
+                1,
+                None,
+                "OTP_SECRET_RESOLUTION_UNEXPECTED",
+            )
+            raise self._rejected_error() from exc
+
+        try:
+            try:
+                lease.use_bytes(
+                    lambda secret: self._send_with_secret(
+                        secret=secret,
+                        delivery_id=delivery_id,
+                        channel=channel,
+                        identifier=identifier,
+                        code=code,
+                        expires_at=expires_at,
+                    ),
+                    at=resolved_at,
+                )
+            except (RuntimeError, ValueError) as exc:
+                self._record(
+                    OtpDeliveryOutcome.REJECTED,
+                    channel,
+                    1,
+                    None,
+                    "OTP_SECRET_MATERIAL_INVALID",
+                )
+                raise self._rejected_error() from exc
+        finally:
+            lease.close()
+
+    def _send_with_secret(
+        self,
+        *,
+        secret: memoryview,
+        delivery_id: UUID,
+        channel: OtpChannel,
+        identifier: str,
+        code: str,
+        expires_at: datetime,
+    ) -> None:
         request = self._request(
+            secret=secret,
             delivery_id=delivery_id,
             channel=channel,
             identifier=identifier,
@@ -322,12 +410,14 @@ class HttpOtpDelivery:
     def _request(
         self,
         *,
+        secret: memoryview,
         delivery_id: UUID,
         channel: OtpChannel,
         identifier: str,
         code: str,
         expires_at: datetime,
     ) -> OtpHttpRequest:
+        bearer_token = self._validated_secret(secret)
         payload = json.dumps(
             {
                 "channel": channel.value,
@@ -344,7 +434,7 @@ class HttpOtpDelivery:
         return OtpHttpRequest(
             endpoint=self._endpoint,
             headers=(
-                ("authorization", f"Bearer {self._bearer_token}"),
+                ("authorization", f"Bearer {bearer_token}"),
                 ("content-type", "application/json"),
                 ("idempotency-key", str(delivery_id)),
                 ("user-agent", "kefe-otp-delivery/1"),
@@ -391,12 +481,20 @@ class HttpOtpDelivery:
         )
 
     @staticmethod
-    def _validated_secret(value: str) -> str:
-        if value != value.strip() or len(value) < 32 or "\r" in value or "\n" in value:
+    def _validated_secret(value: memoryview) -> str:
+        if not value or len(value) < 32:
             raise ValueError(
                 "OTP provider bearer token must contain at least 32 unpadded characters"
             )
-        return value
+        try:
+            decoded = bytes(value).decode("ascii")
+        except UnicodeDecodeError as exc:
+            raise ValueError("OTP provider bearer token must be ASCII") from exc
+        if decoded != decoded.strip() or "\r" in decoded or "\n" in decoded:
+            raise ValueError(
+                "OTP provider bearer token must contain at least 32 unpadded characters"
+            )
+        return decoded
 
     @staticmethod
     def _validated_endpoint(value: str) -> str:
@@ -436,7 +534,7 @@ class HttpOtpDelivery:
 
     def __repr__(self) -> str:
         return (
-            "HttpOtpDelivery(endpoint=<redacted>, bearer_token=<redacted>, "
+            "HttpOtpDelivery(endpoint=<redacted>, secret_resolver=<redacted>, "
             f"timeout_seconds={self._timeout_seconds!r}, "
             f"max_response_bytes={self._max_response_bytes}, "
             f"max_attempts={self._max_attempts})"
@@ -448,6 +546,7 @@ def build_otp_delivery(
     *,
     transport: OtpHttpTransport | None = None,
     observer: OtpDeliveryObserver | None = None,
+    secret_resolver_registry: SecretResolverRegistry | None = None,
 ):
     mode = settings.otp_delivery_mode
     production = settings.environment.strip().lower() == "production"
@@ -459,15 +558,15 @@ def build_otp_delivery(
         return DisabledOtpDelivery()
 
     endpoint = settings.otp_http_endpoint
-    token_setting = settings.otp_http_bearer_token
-    if endpoint is None or token_setting is None:
-        raise RuntimeError(
-            "HTTP OTP delivery requires KEFE_OTP_HTTP_ENDPOINT and "
-            "KEFE_OTP_HTTP_BEARER_TOKEN"
-        )
+    if endpoint is None:
+        raise RuntimeError("HTTP OTP delivery requires KEFE_OTP_HTTP_ENDPOINT")
+    secret_resolver = build_otp_secret_lease_resolver(
+        settings,
+        registry=secret_resolver_registry,
+    )
     return HttpOtpDelivery(
         endpoint=endpoint,
-        bearer_token=token_setting.get_secret_value(),
+        secret_resolver=secret_resolver,
         timeout_ms=settings.otp_http_timeout_ms,
         max_response_bytes=settings.otp_http_max_response_bytes,
         max_attempts=settings.otp_http_max_attempts,
