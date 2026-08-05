@@ -25,6 +25,10 @@ def main() -> None:
     _require(contract["public_api"]["request_schema_changed"] is False, "request drift")
     _require(contract["public_api"]["response_schema_changed"] is False, "response drift")
     _require(contract["credential"]["plaintext_persisted"] is False, "plaintext credential")
+    _require(
+        contract["credential"]["production_default_allowed"] is False,
+        "production default secret policy",
+    )
     _require(contract["postgres_transaction"]["all_or_nothing"] is True, "atomicity")
 
     models = _text("services/api/src/kefe_api/modules/identity/account_models.py")
@@ -49,6 +53,10 @@ def main() -> None:
     _require("access_token" not in migration, "migration must not persist plaintext token")
     _require("ON DELETE CASCADE" in migration, "verification-linked privacy cleanup")
     _require("account_merge_replay_secret" in settings, "HMAC secret setting")
+    _require(
+        "validate_production_replay_secret" in settings,
+        "production replay secret fail-closed validator",
+    )
     _require("hmac.new" in service, "HMAC credential derivation")
     _require("kefe:guest-account-merge:v1" in service, "domain separation")
     _require("authenticate_guest_merge" in identity_service, "narrow replay authorization")
@@ -67,8 +75,8 @@ def main() -> None:
 
     print(
         "Guest account merge replay contract: PASS — natural verification replay key, "
-        "HMAC credential reconstruction, atomic persistence, narrow revoked-token replay, "
-        "privacy cascade, and unchanged public schema."
+        "HMAC credential reconstruction, managed production secret, atomic persistence, "
+        "narrow revoked-token replay, privacy cascade, and unchanged public schema."
     )
 
 
