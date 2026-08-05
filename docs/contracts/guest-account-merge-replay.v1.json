@@ -1,6 +1,6 @@
 {
   "contract_id": "KEFE-GUEST-ACCOUNT-MERGE-REPLAY-001",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "status": "ACCEPTED",
   "capabilities": ["CAP-084"],
   "foundation_phase": "F4",
@@ -19,6 +19,7 @@
     "derivation": "HMAC-SHA-256",
     "secret_setting": "KEFE_ACCOUNT_MERGE_REPLAY_SECRET",
     "domain_separator": "kefe:guest-account-merge:v1",
+    "production_default_allowed": false,
     "plaintext_persisted": false,
     "persisted_value": "sha256(access_token)"
   },
@@ -66,6 +67,7 @@
   "required_evidence": [
     "memory_exact_replay",
     "memory_actor_mismatch",
+    "production_managed_secret_required",
     "postgres_exact_replay_after_restart",
     "postgres_concurrent_duplicate_convergence",
     "postgres_single_account_session",
