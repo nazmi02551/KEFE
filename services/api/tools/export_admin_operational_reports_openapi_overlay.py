@@ -24,7 +24,11 @@ BEFORE_OPERATIONAL_REPORTS_OVERLAYS = (
     CONTRACTS / "openapi-admin-publication-operations.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-community-reason-moderation.v0.19.overlay.json",
 )
-EXPECTED_PATHS = ("/internal/admin/v1/operational-reports/snapshot",)
+EXPECTED_PATHS = (
+    "/internal/admin/v1/operational-reports/snapshot",
+    "/internal/admin/v1/operational-reports/otp-delivery-alerts",
+    "/internal/admin/v1/operational-reports/otp-delivery-alerts/{candidate_id}/acknowledgement",
+)
 
 
 def _load_before_contract() -> dict[str, object]:
