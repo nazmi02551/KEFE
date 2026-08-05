@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime, timedelta
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
+from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
 from kefe_api.core.errors import DomainError
-from kefe_api.core.settings import Settings
+from kefe_api.core.settings import Settings, get_settings
+from kefe_api.main import create_app
 from kefe_api.modules.identity.account_models import OtpChannel
 from kefe_api.modules.identity.otp_delivery import (
     CapturingOtpDelivery,
@@ -24,6 +26,7 @@ from kefe_api.modules.identity.otp_delivery import (
 
 _ENDPOINT = "https://otp.provider.example/v1/deliveries"
 _TOKEN = "managed-provider-bearer-token-01234567890123456789"
+_REPLAY_SECRET = "managed-production-replay-secret-0123456789012345"
 
 
 class SequenceTransport:
@@ -143,9 +146,7 @@ def test_retryable_status_reuses_exact_request_and_idempotency_key() -> None:
 
     assert len(transport.requests) == 2
     assert transport.requests[0] is transport.requests[1]
-    assert observer.results == [
-        observer.results[0]
-    ]
+    assert len(observer.results) == 1
     assert observer.results[0].outcome is OtpDeliveryOutcome.ACCEPTED
     assert observer.results[0].attempts == 2
 
@@ -238,6 +239,27 @@ def test_unsafe_provider_endpoints_are_rejected(endpoint: str) -> None:
         )
 
 
+def test_account_request_propagates_persisted_challenge_identity_and_expiry() -> None:
+    app = create_app()
+    client = TestClient(app)
+    response = client.post(
+        "/v1/auth/otp/request",
+        json={"channel": "EMAIL", "identifier": "propagation@example.test"},
+    )
+    assert response.status_code == 201
+    assert isinstance(app.state.otp_delivery, CapturingOtpDelivery)
+
+    metadata = app.state.otp_delivery.metadata_for(
+        channel=OtpChannel.EMAIL,
+        identifier="propagation@example.test",
+    )
+    assert metadata is not None
+    delivery_id, delivery_expiry = metadata
+    body = response.json()
+    assert delivery_id == UUID(body["challenge_id"])
+    assert delivery_expiry == datetime.fromisoformat(body["expires_at"])
+
+
 def test_build_otp_delivery_keeps_capture_explicit_and_redacted() -> None:
     delivery = build_otp_delivery(Settings())
     assert isinstance(delivery, CapturingOtpDelivery)
@@ -279,3 +301,34 @@ def test_production_http_delivery_builds_with_secretstr_redaction() -> None:
     assert isinstance(delivery, HttpOtpDelivery)
     assert _TOKEN not in repr(settings)
     assert _TOKEN not in repr(delivery)
+
+
+def test_full_production_app_rejects_capture_composition(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("KEFE_ENVIRONMENT", "production")
+    monkeypatch.setenv("KEFE_OTP_DELIVERY_MODE", "CAPTURE")
+    monkeypatch.setenv("KEFE_ACCOUNT_MERGE_REPLAY_SECRET", _REPLAY_SECRET)
+    get_settings.cache_clear()
+    try:
+        with pytest.raises(RuntimeError, match="KEFE_OTP_DELIVERY_MODE=HTTP"):
+            create_app()
+    finally:
+        get_settings.cache_clear()
+
+
+def test_full_production_app_composes_http_delivery_only_when_configured(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("KEFE_ENVIRONMENT", "production")
+    monkeypatch.setenv("KEFE_OTP_DELIVERY_MODE", "HTTP")
+    monkeypatch.setenv("KEFE_OTP_HTTP_ENDPOINT", _ENDPOINT)
+    monkeypatch.setenv("KEFE_OTP_HTTP_BEARER_TOKEN", _TOKEN)
+    monkeypatch.setenv("KEFE_ACCOUNT_MERGE_REPLAY_SECRET", _REPLAY_SECRET)
+    get_settings.cache_clear()
+    try:
+        app = create_app()
+        assert isinstance(app.state.otp_delivery, HttpOtpDelivery)
+        assert _TOKEN not in repr(app.state.otp_delivery)
+    finally:
+        get_settings.cache_clear()
