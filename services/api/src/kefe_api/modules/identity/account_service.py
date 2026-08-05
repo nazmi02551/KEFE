@@ -9,6 +9,7 @@ from datetime import UTC, datetime, timedelta
 from uuid import UUID, uuid4
 
 from kefe_api.core.errors import DomainError
+from kefe_api.core.settings import get_settings
 from kefe_api.modules.identity.account_models import (
     AccountCredential,
     GuestMergeReplay,
@@ -31,17 +32,20 @@ class AccountContinuityService:
         challenge_ttl_minutes: int = 10,
         verification_ttl_minutes: int = 15,
         account_token_ttl_days: int = 30,
-        account_merge_replay_secret: str = "development-only-guest-merge-replay-secret-v1",
+        account_merge_replay_secret: str | None = None,
         max_attempts: int = 5,
     ) -> None:
-        if len(account_merge_replay_secret) < 32:
+        replay_secret = (
+            account_merge_replay_secret or get_settings().account_merge_replay_secret
+        )
+        if len(replay_secret) < 32:
             raise ValueError("account merge replay secret must contain at least 32 characters")
         self._repo = repository
         self._delivery = delivery
         self._challenge_ttl = timedelta(minutes=challenge_ttl_minutes)
         self._verification_ttl = timedelta(minutes=verification_ttl_minutes)
         self._account_token_ttl = timedelta(days=account_token_ttl_days)
-        self._account_merge_replay_secret = account_merge_replay_secret.encode("utf-8")
+        self._account_merge_replay_secret = replay_secret.encode("utf-8")
         self._max_attempts = max_attempts
 
     def request_otp(self, *, channel: OtpChannel, identifier: str) -> OtpChallenge:
