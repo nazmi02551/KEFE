@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import hashlib
 import hmac
 import re
@@ -10,15 +11,18 @@ from uuid import UUID, uuid4
 from kefe_api.core.errors import DomainError
 from kefe_api.modules.identity.account_models import (
     AccountCredential,
+    GuestMergeReplay,
     OtpChallenge,
     OtpChannel,
     OtpVerification,
 )
 from kefe_api.modules.identity.account_ports import AccountContinuityRepository, OtpDeliveryPort
-from kefe_api.modules.identity.models import ActorKind, ActorPrincipal
+from kefe_api.modules.identity.models import ActorKind, TokenResolution, TokenStatus
 
 
 class AccountContinuityService:
+    _MERGE_TOKEN_DOMAIN = "kefe:guest-account-merge:v1"
+
     def __init__(
         self,
         *,
@@ -27,13 +31,17 @@ class AccountContinuityService:
         challenge_ttl_minutes: int = 10,
         verification_ttl_minutes: int = 15,
         account_token_ttl_days: int = 30,
+        account_merge_replay_secret: str = "development-only-guest-merge-replay-secret-v1",
         max_attempts: int = 5,
     ) -> None:
+        if len(account_merge_replay_secret) < 32:
+            raise ValueError("account merge replay secret must contain at least 32 characters")
         self._repo = repository
         self._delivery = delivery
         self._challenge_ttl = timedelta(minutes=challenge_ttl_minutes)
         self._verification_ttl = timedelta(minutes=verification_ttl_minutes)
         self._account_token_ttl = timedelta(days=account_token_ttl_days)
+        self._account_merge_replay_secret = account_merge_replay_secret.encode("utf-8")
         self._max_attempts = max_attempts
 
     def request_otp(self, *, channel: OtpChannel, identifier: str) -> OtpChallenge:
@@ -99,46 +107,89 @@ class AccountContinuityService:
     def merge_guest(
         self,
         *,
-        principal: ActorPrincipal,
+        authorization: TokenResolution,
         verification_token: str,
     ) -> AccountCredential:
+        verification_token_hash = self._hash_secret(verification_token.strip())
+        replay = self._repo.get_guest_merge_replay(verification_token_hash)
+        if replay is not None:
+            self._validate_replay_actor(authorization, replay)
+            return self._credential_from_replay(replay)
+
+        if authorization.status is TokenStatus.REVOKED:
+            raise DomainError("AUTH_TOKEN_REVOKED", "Authentication token revoked", 401)
+        principal = authorization.principal
+        if authorization.status is not TokenStatus.ACTIVE or principal is None:
+            raise DomainError("AUTH_TOKEN_INVALID", "Authentication token invalid", 401)
         if principal.actor_kind is not ActorKind.GUEST:
             raise DomainError(
                 "AUTH_GUEST_REQUIRED",
                 "Guest identity is required for account conversion",
                 409,
             )
-        now = datetime.now(UTC)
-        verification = self._repo.consume_verification(
-            token_hash=self._hash_secret(verification_token.strip()),
-            now=now,
+
+        completed_at = datetime.now(UTC)
+        account_session_expires_at = completed_at + self._account_token_ttl
+        candidate_token = self._derive_account_token(
+            verification_token_hash=verification_token_hash,
+            source_actor_id=principal.actor_id,
+            expires_at=account_session_expires_at,
         )
-        if verification is None:
-            raise DomainError(
-                "AUTH_VERIFICATION_INVALID",
-                "Verification token is invalid or expired",
-                401,
-            )
-        actor_id, merged_from = self._repo.upgrade_or_merge_guest(
-            guest_actor_id=principal.actor_id,
-            identifier_hash=verification.identifier_hash,
-            channel=verification.channel,
-            identifier_hint=verification.identifier_hint,
-            verified_at=verification.verified_at,
+        replay = self._repo.complete_guest_merge(
+            source_actor_id=principal.actor_id,
+            verification_token_hash=verification_token_hash,
+            account_token_hash=self._hash_secret(candidate_token),
+            account_session_expires_at=account_session_expires_at,
+            completed_at=completed_at,
         )
-        access_token = f"kefe_a_{secrets.token_urlsafe(32)}"
-        expires_at = now + self._account_token_ttl
-        self._repo.create_account_session(
-            actor_id=actor_id,
-            token_hash=self._hash_secret(access_token),
-            expires_at=expires_at,
+        self._validate_replay_actor(authorization, replay)
+        return self._credential_from_replay(replay)
+
+    def _credential_from_replay(self, replay: GuestMergeReplay) -> AccountCredential:
+        access_token = self._derive_account_token(
+            verification_token_hash=replay.verification_token_hash,
+            source_actor_id=replay.source_actor_id,
+            expires_at=replay.account_session_expires_at,
         )
         return AccountCredential(
-            actor_id=actor_id,
+            actor_id=replay.account_actor_id,
             access_token=access_token,
-            expires_at=expires_at,
-            merged_from_actor_id=merged_from,
+            expires_at=replay.account_session_expires_at,
+            merged_from_actor_id=replay.merged_from_actor_id,
         )
+
+    @staticmethod
+    def _validate_replay_actor(
+        authorization: TokenResolution,
+        replay: GuestMergeReplay,
+    ) -> None:
+        principal = authorization.principal
+        if principal is None or principal.actor_id != replay.source_actor_id:
+            raise DomainError(
+                "AUTH_MERGE_REPLAY_MISMATCH",
+                "Completed account conversion belongs to a different source identity",
+                409,
+            )
+
+    def _derive_account_token(
+        self,
+        *,
+        verification_token_hash: str,
+        source_actor_id: UUID,
+        expires_at: datetime,
+    ) -> str:
+        expiry = expires_at.astimezone(UTC).isoformat(timespec="microseconds")
+        message = (
+            f"{self._MERGE_TOKEN_DOMAIN}:{verification_token_hash}:"
+            f"{source_actor_id}:{expiry}"
+        ).encode("utf-8")
+        digest = hmac.new(
+            self._account_merge_replay_secret,
+            message,
+            hashlib.sha256,
+        ).digest()
+        encoded = base64.urlsafe_b64encode(digest).decode("ascii").rstrip("=")
+        return f"kefe_a_{encoded}"
 
     @staticmethod
     def _normalize_identifier(channel: OtpChannel, identifier: str) -> tuple[str, str]:
