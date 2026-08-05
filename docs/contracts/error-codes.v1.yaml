@@ -1,4 +1,4 @@
-registry_version: 1.17.0
+registry_version: 1.18.0
 errors:
 - code: AUTH_REQUIRED
   http_status: 401
@@ -268,6 +268,30 @@ errors:
   http_status: 422
   retryable: false
 - code: REASON_BLOCKED_BY_POLICY
+  http_status: 422
+  retryable: false
+- code: COMMUNITY_REASON_NOT_FOUND
+  http_status: 404
+  retryable: false
+- code: COMMUNITY_REASON_MODERATION_INVALID
+  http_status: 422
+  retryable: false
+- code: COMMUNITY_REASON_MODERATION_LIMIT_INVALID
+  http_status: 422
+  retryable: false
+- code: COMMUNITY_REASON_MODERATION_OFFSET_INVALID
+  http_status: 422
+  retryable: false
+- code: COMMUNITY_REASON_MODERATION_AUDIT_LIMIT_INVALID
+  http_status: 422
+  retryable: false
+- code: COMMUNITY_REASON_MODERATION_RATIONALE_INVALID
+  http_status: 422
+  retryable: false
+- code: COMMUNITY_REASON_MODERATION_STATE_INVALID
+  http_status: 409
+  retryable: false
+- code: COMMUNITY_REASON_MODERATION_CONFIRMATION_INVALID
   http_status: 422
   retryable: false
 - code: CONSENSUS_COMMIT_REQUIRED
