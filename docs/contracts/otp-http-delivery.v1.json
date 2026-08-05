@@ -1,0 +1,117 @@
+{
+  "contract_id": "KEFE-OTP-HTTP-DELIVERY-001",
+  "version": "1.0.0",
+  "status": "ACCEPTED",
+  "capabilities": ["CAP-084"],
+  "foundation_phase": "F4",
+  "issue": 320,
+  "adr": "docs/adr/0112-provider-neutral-production-otp-delivery.md",
+  "parent_contracts": [
+    "docs/contracts/guest-account-merge-replay.v1.json",
+    "docs/contracts/guest-account-merge-key-rotation.v1.json"
+  ],
+  "public_api": {
+    "otp_request_schema_changed": false,
+    "otp_verify_schema_changed": false,
+    "guest_merge_schema_changed": false,
+    "provider_metadata_exposed": false,
+    "openapi_drift_allowed": false
+  },
+  "runtime_modes": {
+    "supported": ["CAPTURE", "DISABLED", "HTTP"],
+    "production_required": "HTTP",
+    "capture_allowed_in_production": false,
+    "disabled_allowed_in_production": false
+  },
+  "delivery_identity": {
+    "source": "OtpChallenge.id",
+    "format": "UUID",
+    "header": "Idempotency-Key",
+    "payload_field": "delivery_id",
+    "retry_reuses_exact_request": true
+  },
+  "request": {
+    "method": "POST",
+    "media_type": "application/json",
+    "fields": ["channel", "code", "delivery_id", "expires_at", "recipient"],
+    "channel_values": ["EMAIL", "SMS"],
+    "recipient_normalized_before_delivery": true,
+    "expiry_utc_iso8601": true,
+    "max_request_bytes": 4096
+  },
+  "endpoint_policy": {
+    "scheme": "https",
+    "allowed_ports": [443],
+    "explicit_path_required": true,
+    "userinfo_allowed": false,
+    "query_allowed": false,
+    "fragment_allowed": false,
+    "ip_literal_allowed": false,
+    "localhost_allowed": false,
+    "single_label_hostname_allowed": false,
+    "redirects_followed": false
+  },
+  "credential": {
+    "type": "bearer",
+    "setting": "KEFE_OTP_HTTP_BEARER_TOKEN",
+    "minimum_characters": 32,
+    "padded_allowed": false,
+    "rendered_in_repr": false,
+    "returned_to_consumer": false,
+    "persisted": false
+  },
+  "bounds": {
+    "timeout_ms": {"minimum": 100, "maximum": 10000},
+    "response_bytes": {"minimum": 1, "maximum": 65536},
+    "attempts": {"minimum": 1, "maximum": 3}
+  },
+  "outcomes": {
+    "accepted_status_range": "200-299",
+    "retryable_statuses": [408, 425, 429, 500, 502, 503, 504],
+    "retryable_error": {
+      "code": "AUTH_OTP_DELIVERY_UNAVAILABLE",
+      "http_status": 503,
+      "retryable": true
+    },
+    "final_error": {
+      "code": "AUTH_OTP_DELIVERY_REJECTED",
+      "http_status": 502,
+      "retryable": false
+    },
+    "provider_response_body_exposed": false
+  },
+  "operational_result": {
+    "fields": ["outcome", "channel", "attempts", "status_code", "error_code"],
+    "delivery_id_included": false,
+    "recipient_included": false,
+    "code_included": false,
+    "credential_included": false,
+    "endpoint_included": false
+  },
+  "persistence": {
+    "new_table_required": false,
+    "plaintext_code_persisted": false,
+    "recipient_added_to_persistence": false,
+    "provider_response_persisted": false
+  },
+  "external_non_claims": [
+    "REAL_PROVIDER_DELIVERABILITY",
+    "PRODUCTION_CREDENTIAL_DEPLOYMENT",
+    "DEPLOYED_DNS_AND_NETWORK_POLICY",
+    "DEPLOYED_SLO_AND_ALERTING",
+    "OPERATOR_VALIDATED_ROLLBACK"
+  ],
+  "required_evidence": [
+    "CHALLENGE_ID_AND_EXPIRY_PROPAGATION",
+    "DETERMINISTIC_JSON_AND_IDEMPOTENCY_HEADER",
+    "EXACT_REQUEST_REUSE_ON_RETRY",
+    "RETRYABLE_STATUS_AND_NETWORK_MAPPING",
+    "FINAL_REJECTION_MAPPING",
+    "RESPONSE_BODY_BOUND",
+    "SECRET_AND_OTP_REDACTION",
+    "URLLIB_POST_INVOCATION",
+    "PRODUCTION_COMPOSITION_FAIL_CLOSED",
+    "EXACT_OPENAPI_NO_DRIFT",
+    "ACCOUNT_PRIVACY_POSTGRES_MOBILE_GLOBAL_REGRESSIONS"
+  ]
+}
