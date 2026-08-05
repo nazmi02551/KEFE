@@ -1,0 +1,102 @@
+{
+  "contract_id": "KEFE-OTP-ALERT-CANDIDATES-001",
+  "version": "1.0.0",
+  "foundation_wave": "F4",
+  "capabilities": [
+    "CAP-123"
+  ],
+  "source": {
+    "authority": "OtpDeliveryHealthSnapshot",
+    "eligible_signals": [
+      "ATTENTION",
+      "CRITICAL"
+    ],
+    "evaluation_trigger": "AFTER_DURABLE_FINAL_DELIVERY_EVENT",
+    "background_polling": false
+  },
+  "deduplication": {
+    "scope": "GREATER_OR_EQUAL_SEVERITY_WITHIN_COOLDOWN",
+    "same_or_higher_severity_suppressed": true,
+    "attention_to_critical_escalation_immediate": true,
+    "repeated_critical_suppressed_until_cooldown": true
+  },
+  "candidate": {
+    "immutable": true,
+    "restart_durable": true,
+    "bounded_retention": true,
+    "allowed_fields": [
+      "candidate_id",
+      "signal",
+      "reason_codes",
+      "observed_at",
+      "window_started_at",
+      "total_count",
+      "accepted_count",
+      "unavailable_count",
+      "rejected_count",
+      "failure_ratio_bps",
+      "created_at"
+    ]
+  },
+  "acknowledgement": {
+    "separate_record": true,
+    "immutable": true,
+    "idempotent": true,
+    "free_text_allowed": false,
+    "server_derived_actor": true,
+    "server_derived_time": true,
+    "means_resolution": false,
+    "means_recovery": false
+  },
+  "privacy": {
+    "aggregate_only": true,
+    "forbidden_fields": [
+      "recipient",
+      "destination",
+      "destination_hash",
+      "otp_code",
+      "otp_hash",
+      "challenge_id",
+      "delivery_id",
+      "account_id",
+      "user_id",
+      "device_id",
+      "session_id",
+      "provider_request_body",
+      "provider_response_body",
+      "credential",
+      "secret_ref",
+      "endpoint",
+      "provider_request_id"
+    ]
+  },
+  "admin_security": {
+    "read_capability": "OPERATIONAL_REPORT_READ",
+    "acknowledge_capability": "OPERATIONAL_ALERT_ACKNOWLEDGE",
+    "acknowledge_requires_recent_step_up": true,
+    "acknowledge_requires_same_session_csrf": true,
+    "acknowledge_requires_exact_candidate_confirmation": true
+  },
+  "failure_isolation": {
+    "provider_semantics_authoritative": true,
+    "candidate_failure_retries_provider_send": false,
+    "candidate_failure_masks_provider_result": false
+  },
+  "api": {
+    "consumer_api_changed": false,
+    "mobile_api_changed": false,
+    "admin_api_additive": true,
+    "external_notification_integration": false
+  },
+  "external_non_claims": [
+    "external paging",
+    "email or Slack notification",
+    "incident management integration",
+    "automated remediation",
+    "provider delivery receipt",
+    "real email or SMS deliverability",
+    "production threshold quality",
+    "deployed alert or SLO behavior",
+    "operator response effectiveness"
+  ]
+}
