@@ -88,8 +88,8 @@ def test_account_offer_is_functional_and_guest_history_survives_conversion() -> 
     assert after.json()["account_offer"]["account_creation_available"] is False
 
     old_token_progress = client.get("/v1/me/progress", headers=guest_headers)
-    assert old_token_progress.status_code == 200
-    assert old_token_progress.json()["progress"]["meaningful_weigh_count"] == 1
+    assert old_token_progress.status_code == 401
+    assert old_token_progress.json()["code"] == "AUTH_TOKEN_REVOKED"
     assert session_id
 
 
@@ -230,7 +230,9 @@ def test_privacy_export_excludes_credentials_then_delete_revokes_identity() -> N
     assert exported.status_code == 200
     body = exported.json()
     assert body["product_data"]["weigh_sessions"][0]["session_id"] == session_id
-    assert body["product_data"]["private_reasons"][0]["text"] == ("owner-visible private reason")
+    assert body["product_data"]["private_reasons"][0]["text"] == (
+        "owner-visible private reason"
+    )
     serialized = str(body).lower()
     assert "token_hash" not in serialized
     assert "access_token" not in serialized
