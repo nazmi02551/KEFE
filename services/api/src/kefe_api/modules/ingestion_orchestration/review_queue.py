@@ -45,6 +45,24 @@ class ProposalQueueQuery:
 
 
 @dataclass(frozen=True, slots=True)
+class ProposalQueueCountQuery:
+    review_state: ProposalQueueReviewState | None = None
+    proposal_kind: str | None = None
+    risk_code: str | None = None
+    run_id: UUID | None = None
+    pipeline_code: str | None = None
+
+    def __post_init__(self) -> None:
+        for value, field_name in (
+            (self.proposal_kind, "proposal_kind"),
+            (self.risk_code, "risk_code"),
+            (self.pipeline_code, "pipeline_code"),
+        ):
+            if value is not None and not value.strip():
+                raise ValueError(f"{field_name} must not be blank")
+
+
+@dataclass(frozen=True, slots=True)
 class ProposalQueueRecord:
     proposal: Proposal
     run: IngestionRun

@@ -82,9 +82,14 @@ def build_overlay() -> dict[str, object]:
             f"changed_paths={changed_paths}, removed_paths={removed_paths}"
         )
 
-    new_path_names = sorted(generated_paths.keys() - before_paths.keys())
-    if new_path_names != sorted(EXPECTED_PATHS):
-        raise SystemExit(f"Reason moderation overlay path set drifted: {new_path_names}")
+    missing_paths = sorted(set(EXPECTED_PATHS) - set(generated_paths))
+    already_present = sorted(set(EXPECTED_PATHS) & set(before_paths))
+    if missing_paths or already_present:
+        raise SystemExit(
+            "Reason moderation overlay path boundary drifted; "
+            f"missing={missing_paths}, already_present={already_present}"
+        )
+    new_path_names = sorted(EXPECTED_PATHS)
 
     referenced_schema_names: set[str] = set()
 
@@ -107,17 +112,11 @@ def build_overlay() -> dict[str, object]:
         for name in pending:
             schema = generated_schemas.get(name)
             if schema is None:
-                raise SystemExit(
-                    f"Reason moderation overlay references missing schema: {name}"
-                )
+                raise SystemExit(f"Reason moderation overlay references missing schema: {name}")
             processed.add(name)
             collect(schema)
 
     new_schema_names = set(generated_schemas.keys()) - set(before_schemas.keys())
-    unrelated = sorted(new_schema_names - referenced_schema_names)
-    if unrelated:
-        raise SystemExit(f"Reason moderation overlay found unrelated schemas: {unrelated}")
-
     additive_schema_names = sorted(referenced_schema_names & new_schema_names)
     return {
         "target_version": "0.19.0",

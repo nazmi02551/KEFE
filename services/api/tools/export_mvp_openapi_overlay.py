@@ -22,6 +22,7 @@ NON_MVP_ADDITIVE_OVERLAYS = (
     CONTRACTS / "openapi-admin-flow-composer.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-publication-operations.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-community-reason-moderation.v0.19.overlay.json",
+    CONTRACTS / "openapi-admin-operational-reports.v0.19.overlay.json",
 )
 
 

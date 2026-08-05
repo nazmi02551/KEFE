@@ -68,9 +68,10 @@ class PostgresCommunityReasonRepository:
 
     def create_or_replace(self, reason: CommunityReason) -> CommunityReason:
         with self._engine.begin() as connection:
-            row = connection.execute(
-                text(
-                    """
+            row = (
+                connection.execute(
+                    text(
+                        """
                     INSERT INTO community.reason (
                         id, actor_id, session_id, case_version_id, tags, body,
                         moderation_state, created_at, updated_at
@@ -87,40 +88,48 @@ class PostgresCommunityReasonRepository:
                     RETURNING id, actor_id, session_id, case_version_id, tags, body,
                               moderation_state, created_at, updated_at
                     """
-                ),
-                {
-                    "id": reason.id,
-                    "actor_id": reason.actor_id,
-                    "session_id": reason.session_id,
-                    "case_version_id": reason.case_version_id,
-                    "tags": json.dumps(list(reason.tags), separators=(",", ":")),
-                    "body": reason.body,
-                    "moderation_state": reason.moderation_state.value,
-                    "created_at": reason.created_at,
-                    "updated_at": reason.updated_at,
-                },
-            ).mappings().one()
+                    ),
+                    {
+                        "id": reason.id,
+                        "actor_id": reason.actor_id,
+                        "session_id": reason.session_id,
+                        "case_version_id": reason.case_version_id,
+                        "tags": json.dumps(list(reason.tags), separators=(",", ":")),
+                        "body": reason.body,
+                        "moderation_state": reason.moderation_state.value,
+                        "created_at": reason.created_at,
+                        "updated_at": reason.updated_at,
+                    },
+                )
+                .mappings()
+                .one()
+            )
         return self._reason(row)
 
     def get(self, reason_id: UUID) -> CommunityReason | None:
         with self._engine.connect() as connection:
-            row = connection.execute(
-                text(
-                    """
+            row = (
+                connection.execute(
+                    text(
+                        """
                     SELECT id, actor_id, session_id, case_version_id, tags, body,
                            moderation_state, created_at, updated_at
                     FROM community.reason WHERE id = :id
                     """
-                ),
-                {"id": reason_id},
-            ).mappings().one_or_none()
+                    ),
+                    {"id": reason_id},
+                )
+                .mappings()
+                .one_or_none()
+            )
         return None if row is None else self._reason(row)
 
     def public_snapshot(self, case_version_id: UUID, *, limit: int) -> CommunityReasonSnapshot:
         with self._engine.connect() as connection:
-            rows = connection.execute(
-                text(
-                    """
+            rows = (
+                connection.execute(
+                    text(
+                        """
                     SELECT id, tags, body, created_at
                     FROM community.reason
                     WHERE case_version_id = :case_version_id
@@ -128,9 +137,12 @@ class PostgresCommunityReasonRepository:
                     ORDER BY created_at DESC, id DESC
                     LIMIT :limit
                     """
-                ),
-                {"case_version_id": case_version_id, "limit": limit},
-            ).mappings().all()
+                    ),
+                    {"case_version_id": case_version_id, "limit": limit},
+                )
+                .mappings()
+                .all()
+            )
             total = connection.execute(
                 text(
                     """
@@ -142,9 +154,10 @@ class PostgresCommunityReasonRepository:
                 ),
                 {"case_version_id": case_version_id},
             ).scalar_one()
-            reaction_rows = connection.execute(
-                text(
-                    """
+            reaction_rows = (
+                connection.execute(
+                    text(
+                        """
                     SELECT rr.reason_id, rr.reaction_code, count(*) AS count
                     FROM community.reason_reaction rr
                     JOIN community.reason r ON r.id = rr.reason_id
@@ -152,9 +165,12 @@ class PostgresCommunityReasonRepository:
                       AND r.moderation_state IN ('NOT_REQUIRED','ALLOWED')
                     GROUP BY rr.reason_id, rr.reaction_code
                     """
-                ),
-                {"case_version_id": case_version_id},
-            ).mappings().all()
+                    ),
+                    {"case_version_id": case_version_id},
+                )
+                .mappings()
+                .all()
+            )
 
         reactions: dict[UUID, dict[str, int]] = {}
         for row in reaction_rows:
@@ -277,17 +293,69 @@ class PostgresCommunityReasonRepository:
             """
         )
         with self._engine.connect() as connection:
-            rows = connection.execute(
-                text(query),
+            rows = (
+                connection.execute(
+                    text(query),
+                    {
+                        "kind": kind.value,
+                        "case_version_id": case_version_id,
+                        "report_code": report_code.value if report_code is not None else None,
+                        "limit": limit,
+                        "offset": offset,
+                    },
+                )
+                .mappings()
+                .all()
+            )
+        return tuple(self._moderation_item(row) for row in rows)
+
+    def count_moderation_queue(
+        self,
+        *,
+        kind: CommunityReasonModerationQueueKind,
+        case_version_id: UUID | None = None,
+        report_code: ReasonReportCode | None = None,
+    ) -> int:
+        candidate_query = (
+            _MODERATION_SELECT
+            + """
+            WHERE (
+                (:kind = 'PENDING' AND r.moderation_state = 'PENDING')
+                OR (
+                    :kind = 'REPORTED'
+                    AND r.moderation_state IN ('NOT_REQUIRED', 'ALLOWED')
+                    AND rs.latest_reported_at IS NOT NULL
+                    AND (
+                        la.latest_audit_at IS NULL
+                        OR rs.latest_reported_at > la.latest_audit_at
+                    )
+                )
+            )
+              AND (
+                CAST(:case_version_id AS uuid) IS NULL
+                OR r.case_version_id = CAST(:case_version_id AS uuid)
+              )
+              AND (
+                CAST(:report_code AS text) IS NULL
+                OR EXISTS (
+                    SELECT 1
+                    FROM community.reason_report filtered_report
+                    WHERE filtered_report.reason_id = r.id
+                      AND filtered_report.report_code = CAST(:report_code AS text)
+                )
+              )
+            """
+        )
+        with self._engine.connect() as connection:
+            value = connection.execute(
+                text(f"SELECT count(*) FROM ({candidate_query}) candidates"),
                 {
                     "kind": kind.value,
                     "case_version_id": case_version_id,
-                    "report_code": report_code.value if report_code is not None else None,
-                    "limit": limit,
-                    "offset": offset,
+                    "report_code": (report_code.value if report_code is not None else None),
                 },
-            ).mappings().all()
-        return tuple(self._moderation_item(row) for row in rows)
+            ).scalar_one()
+        return int(value)
 
     def moderation_inspection(
         self,
@@ -295,10 +363,14 @@ class PostgresCommunityReasonRepository:
     ) -> CommunityReasonModerationItem | None:
         query = _MODERATION_SELECT + " WHERE r.id = :reason_id"
         with self._engine.connect() as connection:
-            row = connection.execute(
-                text(query),
-                {"kind": "REPORTED", "reason_id": reason_id},
-            ).mappings().one_or_none()
+            row = (
+                connection.execute(
+                    text(query),
+                    {"kind": "REPORTED", "reason_id": reason_id},
+                )
+                .mappings()
+                .one_or_none()
+            )
         return None if row is None else self._moderation_item(row)
 
     def moderation_audit(
@@ -308,9 +380,10 @@ class PostgresCommunityReasonRepository:
         limit: int,
     ) -> tuple[CommunityReasonModerationAudit, ...]:
         with self._engine.connect() as connection:
-            rows = connection.execute(
-                text(
-                    """
+            rows = (
+                connection.execute(
+                    text(
+                        """
                     SELECT id, reason_id, actor_ref, previous_state, decided_state,
                            rationale, created_at
                     FROM community.reason_moderation_audit
@@ -318,9 +391,12 @@ class PostgresCommunityReasonRepository:
                     ORDER BY created_at DESC, id DESC
                     LIMIT :limit
                     """
-                ),
-                {"reason_id": reason_id, "limit": limit},
-            ).mappings().all()
+                    ),
+                    {"reason_id": reason_id, "limit": limit},
+                )
+                .mappings()
+                .all()
+            )
         return tuple(self._audit(row) for row in rows)
 
     def moderate(
@@ -334,18 +410,22 @@ class PostgresCommunityReasonRepository:
         updated_at: datetime,
     ) -> CommunityReasonModerationWriteResult:
         with self._engine.begin() as connection:
-            current = connection.execute(
-                text(
-                    """
+            current = (
+                connection.execute(
+                    text(
+                        """
                     SELECT id, actor_id, session_id, case_version_id, tags, body,
                            moderation_state, created_at, updated_at
                     FROM community.reason
                     WHERE id = :reason_id
                     FOR UPDATE
                     """
-                ),
-                {"reason_id": reason_id},
-            ).mappings().one_or_none()
+                    ),
+                    {"reason_id": reason_id},
+                )
+                .mappings()
+                .one_or_none()
+            )
             if current is None:
                 return CommunityReasonModerationWriteResult(
                     status=CommunityReasonModerationWriteStatus.NOT_FOUND
@@ -356,25 +436,30 @@ class PostgresCommunityReasonRepository:
                     status=CommunityReasonModerationWriteStatus.CONFLICT,
                     current_state=previous_state,
                 )
-            updated_row = connection.execute(
-                text(
-                    """
+            updated_row = (
+                connection.execute(
+                    text(
+                        """
                     UPDATE community.reason
                     SET moderation_state = :state, updated_at = :updated_at
                     WHERE id = :reason_id
                     RETURNING id, actor_id, session_id, case_version_id, tags, body,
                               moderation_state, created_at, updated_at
                     """
-                ),
-                {
-                    "reason_id": reason_id,
-                    "state": state.value,
-                    "updated_at": updated_at,
-                },
-            ).mappings().one()
-            audit_row = connection.execute(
-                text(
-                    """
+                    ),
+                    {
+                        "reason_id": reason_id,
+                        "state": state.value,
+                        "updated_at": updated_at,
+                    },
+                )
+                .mappings()
+                .one()
+            )
+            audit_row = (
+                connection.execute(
+                    text(
+                        """
                     INSERT INTO community.reason_moderation_audit (
                         id, reason_id, actor_ref, previous_state, decided_state,
                         rationale, created_at
@@ -385,17 +470,20 @@ class PostgresCommunityReasonRepository:
                     RETURNING id, reason_id, actor_ref, previous_state, decided_state,
                               rationale, created_at
                     """
-                ),
-                {
-                    "id": audit_id,
-                    "reason_id": reason_id,
-                    "actor_ref": actor_ref,
-                    "previous_state": previous_state.value,
-                    "decided_state": state.value,
-                    "rationale": rationale,
-                    "created_at": updated_at,
-                },
-            ).mappings().one()
+                    ),
+                    {
+                        "id": audit_id,
+                        "reason_id": reason_id,
+                        "actor_ref": actor_ref,
+                        "previous_state": previous_state.value,
+                        "decided_state": state.value,
+                        "rationale": rationale,
+                        "created_at": updated_at,
+                    },
+                )
+                .mappings()
+                .one()
+            )
         reason = self._reason(updated_row)
         audit = self._audit(audit_row)
         return CommunityReasonModerationWriteResult(
@@ -413,18 +501,22 @@ class PostgresCommunityReasonRepository:
             CommunityReasonModeration.ALLOWED,
         }:
             return False
-        timestamps = connection.execute(
-            text(
-                """
+        timestamps = (
+            connection.execute(
+                text(
+                    """
                 SELECT
                     (SELECT max(created_at) FROM community.reason_report
                      WHERE reason_id = :reason_id) AS latest_reported_at,
                     (SELECT max(created_at) FROM community.reason_moderation_audit
                      WHERE reason_id = :reason_id) AS latest_audit_at
                 """
-            ),
-            {"reason_id": reason_id},
-        ).mappings().one()
+                ),
+                {"reason_id": reason_id},
+            )
+            .mappings()
+            .one()
+        )
         latest_reported_at = timestamps["latest_reported_at"]
         latest_audit_at = timestamps["latest_audit_at"]
         return latest_reported_at is not None and (

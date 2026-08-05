@@ -1,0 +1,302 @@
+{
+  "components": {
+    "schemas": {
+      "ContentSupplyPolicyResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "failure_window_seconds": {
+            "title": "Failure Window Seconds",
+            "type": "integer"
+          },
+          "max_cycle_silence_seconds": {
+            "title": "Max Cycle Silence Seconds",
+            "type": "integer"
+          },
+          "pending_dispatch_attention_threshold": {
+            "title": "Pending Dispatch Attention Threshold",
+            "type": "integer"
+          },
+          "queued_run_attention_threshold": {
+            "title": "Queued Run Attention Threshold",
+            "type": "integer"
+          },
+          "recent_non_success_attention_threshold": {
+            "title": "Recent Non Success Attention Threshold",
+            "type": "integer"
+          },
+          "unreviewed_proposal_attention_threshold": {
+            "title": "Unreviewed Proposal Attention Threshold",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pending_dispatch_attention_threshold",
+          "queued_run_attention_threshold",
+          "unreviewed_proposal_attention_threshold",
+          "recent_non_success_attention_threshold",
+          "max_cycle_silence_seconds",
+          "failure_window_seconds"
+        ],
+        "title": "ContentSupplyPolicyResponse",
+        "type": "object"
+      },
+      "ContentSupplySnapshotResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "active_schedule_count": {
+            "title": "Active Schedule Count",
+            "type": "integer"
+          },
+          "as_of": {
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "due_schedule_count": {
+            "title": "Due Schedule Count",
+            "type": "integer"
+          },
+          "latest_terminal_cycle_completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Terminal Cycle Completed At"
+          },
+          "latest_terminal_cycle_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Terminal Cycle State"
+          },
+          "paused_schedule_count": {
+            "title": "Paused Schedule Count",
+            "type": "integer"
+          },
+          "pending_dispatch_count": {
+            "title": "Pending Dispatch Count",
+            "type": "integer"
+          },
+          "queued_ingestion_run_count": {
+            "title": "Queued Ingestion Run Count",
+            "type": "integer"
+          },
+          "reason_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reason Codes",
+            "type": "array"
+          },
+          "recent_dispatch_non_success_count": {
+            "title": "Recent Dispatch Non Success Count",
+            "type": "integer"
+          },
+          "recent_failed_ingestion_run_count": {
+            "title": "Recent Failed Ingestion Run Count",
+            "type": "integer"
+          },
+          "recent_non_success_cycle_count": {
+            "title": "Recent Non Success Cycle Count",
+            "type": "integer"
+          },
+          "running_cycle_count": {
+            "title": "Running Cycle Count",
+            "type": "integer"
+          },
+          "running_dispatch_count": {
+            "title": "Running Dispatch Count",
+            "type": "integer"
+          },
+          "running_ingestion_run_count": {
+            "title": "Running Ingestion Run Count",
+            "type": "integer"
+          },
+          "seconds_since_latest_terminal_cycle": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seconds Since Latest Terminal Cycle"
+          },
+          "signal": {
+            "title": "Signal",
+            "type": "string"
+          },
+          "stale_cycle_count": {
+            "title": "Stale Cycle Count",
+            "type": "integer"
+          },
+          "stale_dispatch_count": {
+            "title": "Stale Dispatch Count",
+            "type": "integer"
+          },
+          "stale_ingestion_lease_count": {
+            "title": "Stale Ingestion Lease Count",
+            "type": "integer"
+          },
+          "unreviewed_proposal_count": {
+            "title": "Unreviewed Proposal Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "signal",
+          "as_of",
+          "reason_codes",
+          "active_schedule_count",
+          "paused_schedule_count",
+          "due_schedule_count",
+          "pending_dispatch_count",
+          "running_dispatch_count",
+          "stale_dispatch_count",
+          "recent_dispatch_non_success_count",
+          "queued_ingestion_run_count",
+          "running_ingestion_run_count",
+          "stale_ingestion_lease_count",
+          "recent_failed_ingestion_run_count",
+          "unreviewed_proposal_count",
+          "running_cycle_count",
+          "stale_cycle_count",
+          "recent_non_success_cycle_count",
+          "latest_terminal_cycle_state",
+          "latest_terminal_cycle_completed_at",
+          "seconds_since_latest_terminal_cycle"
+        ],
+        "title": "ContentSupplySnapshotResponse",
+        "type": "object"
+      },
+      "OperationalReportsSnapshotResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "aggregate_only": {
+            "default": true,
+            "title": "Aggregate Only",
+            "type": "boolean"
+          },
+          "as_of": {
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "content_supply": {
+            "$ref": "#/components/schemas/ContentSupplySnapshotResponse"
+          },
+          "content_supply_policy": {
+            "$ref": "#/components/schemas/ContentSupplyPolicyResponse"
+          },
+          "editorial_lifecycle": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Editorial Lifecycle",
+            "type": "object"
+          },
+          "moderation": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Moderation",
+            "type": "object"
+          },
+          "overall_signal": {
+            "title": "Overall Signal",
+            "type": "string"
+          },
+          "proposal_review": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Proposal Review",
+            "type": "object"
+          },
+          "reason_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reason Codes",
+            "type": "array"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/OperationalThresholdsResponse"
+          }
+        },
+        "required": [
+          "as_of",
+          "overall_signal",
+          "reason_codes",
+          "thresholds",
+          "content_supply_policy",
+          "content_supply",
+          "editorial_lifecycle",
+          "proposal_review",
+          "moderation"
+        ],
+        "title": "OperationalReportsSnapshotResponse",
+        "type": "object"
+      },
+      "OperationalThresholdsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "in_review_attention_threshold": {
+            "title": "In Review Attention Threshold",
+            "type": "integer"
+          },
+          "moderation_candidate_attention_threshold": {
+            "title": "Moderation Candidate Attention Threshold",
+            "type": "integer"
+          },
+          "pending_proposal_attention_threshold": {
+            "title": "Pending Proposal Attention Threshold",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "in_review_attention_threshold",
+          "pending_proposal_attention_threshold",
+          "moderation_candidate_attention_threshold"
+        ],
+        "title": "OperationalThresholdsResponse",
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/internal/admin/v1/operational-reports/snapshot": {
+      "get": {
+        "operationId": "operational_reports_snapshot_internal_admin_v1_operational_reports_snapshot_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationalReportsSnapshotResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Operational Reports Snapshot",
+        "tags": [
+          "Internal Admin Operational Reports"
+        ]
+      }
+    }
+  },
+  "target_version": "0.19.0"
+}

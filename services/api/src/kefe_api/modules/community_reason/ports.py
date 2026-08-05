@@ -53,6 +53,14 @@ class CommunityReasonRepository(Protocol):
         report_code: ReasonReportCode | None,
     ) -> tuple[CommunityReasonModerationItem, ...]: ...
 
+    def count_moderation_queue(
+        self,
+        *,
+        kind: CommunityReasonModerationQueueKind,
+        case_version_id: UUID | None = None,
+        report_code: ReasonReportCode | None = None,
+    ) -> int: ...
+
     def moderation_inspection(
         self,
         reason_id: UUID,

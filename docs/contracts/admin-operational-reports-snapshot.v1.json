@@ -1,0 +1,258 @@
+{
+  "contract_id": "admin-operational-reports-snapshot.v1",
+  "status": "accepted_for_implementation",
+  "accepted_at": "2026-08-05",
+  "parent_runtime": {
+    "pull_request": 307,
+    "sha": "6d5bc52388b590706a3a07aef9b2be08bc501aae"
+  },
+  "capabilities": {
+    "primary": [
+      "CAP-123"
+    ],
+    "supporting": [
+      "CAP-126"
+    ],
+    "lifecycle_promotion": false
+  },
+  "authority": {
+    "content_supply": "ContentSupplyHealthService",
+    "editorial_lifecycle": "ContentAuthoringRepository",
+    "proposal_review": "ProposalReviewQueueRepository",
+    "moderation": "CommunityReasonRepository",
+    "second_analytics_store_allowed": false,
+    "report_persistence_allowed": false,
+    "event_pipeline_allowed": false,
+    "materialized_report_table_allowed": false
+  },
+  "endpoint": {
+    "method": "GET",
+    "path": "/internal/admin/v1/operational-reports/snapshot",
+    "write_methods_allowed": false,
+    "query_parameters": [],
+    "request_body": false,
+    "server_generated_as_of": true,
+    "single_logical_as_of": true,
+    "serializable_cross_repository_claim": false
+  },
+  "sections": {
+    "content_supply": {
+      "source": "ContentSupplyHealthService.snapshot",
+      "preserves_existing_signal_and_reason_codes": true,
+      "returns_policy": true
+    },
+    "editorial_lifecycle": {
+      "source": "ContentAuthoringRepository.count_by_state",
+      "states": [
+        "DRAFT",
+        "IN_REVIEW",
+        "APPROVED",
+        "PUBLISHED",
+        "SUPERSEDED",
+        "WITHDRAWN"
+      ]
+    },
+    "proposal_review": {
+      "source": "ProposalReviewQueueRepository.count_proposal_queue",
+      "states": [
+        "PENDING",
+        "ACCEPTED",
+        "REJECTED",
+        "CHANGES_REQUESTED"
+      ]
+    },
+    "moderation": {
+      "source": "CommunityReasonRepository.count_moderation_queue",
+      "queue_kinds": [
+        "PENDING",
+        "REPORTED"
+      ],
+      "reuses_existing_candidate_eligibility": true,
+      "blocked_included": false
+    }
+  },
+  "operational_signal": {
+    "values": [
+      "QUIET",
+      "NOMINAL",
+      "ATTENTION",
+      "CRITICAL"
+    ],
+    "weighted_score": false,
+    "prediction": false,
+    "recommendation": false,
+    "reason_codes_sorted_unique": true,
+    "critical_rule": "content_supply.signal == CRITICAL",
+    "attention_rules": [
+      "content_supply.signal == ATTENTION",
+      "editorial_lifecycle.IN_REVIEW > in_review_attention_threshold",
+      "proposal_review.PENDING > pending_proposal_attention_threshold",
+      "moderation.PENDING + moderation.REPORTED > moderation_candidate_attention_threshold"
+    ],
+    "quiet_rule": "content_supply.signal == QUIET and all editorial/proposal/moderation backlog counts are zero",
+    "otherwise": "NOMINAL",
+    "thresholds": {
+      "in_review_attention_threshold": 50,
+      "pending_proposal_attention_threshold": 100,
+      "moderation_candidate_attention_threshold": 50
+    },
+    "reason_codes": [
+      "CONTENT_SUPPLY_ATTENTION",
+      "CONTENT_SUPPLY_CRITICAL",
+      "EDITORIAL_IN_REVIEW_BACKLOG",
+      "PROPOSAL_REVIEW_BACKLOG",
+      "MODERATION_BACKLOG"
+    ]
+  },
+  "privacy": {
+    "aggregate_only": true,
+    "exposes": [
+      "as_of",
+      "overall_signal",
+      "reason_codes",
+      "thresholds",
+      "aggregate_counts",
+      "content_supply_signal",
+      "content_supply_reason_codes",
+      "operational_timestamps"
+    ],
+    "never_exposes": [
+      "case_id",
+      "case_version_id",
+      "proposal_id",
+      "reason_id",
+      "actor_id",
+      "author_actor_id",
+      "reporter_actor_id",
+      "session_id",
+      "account_id",
+      "device_id",
+      "title",
+      "summary",
+      "prompt",
+      "answer",
+      "reason_body",
+      "rationale",
+      "source_content",
+      "raw_evidence",
+      "source_locator",
+      "credential",
+      "secret",
+      "storage_reference",
+      "backend_object_key",
+      "user_segment",
+      "demographic_attribute",
+      "inferred_user_attribute"
+    ],
+    "personality_inference": false,
+    "ideology_inference": false,
+    "psychometric_inference": false,
+    "bias_inference": false,
+    "causal_inference": false,
+    "normative_inference": false
+  },
+  "security": {
+    "new_capability": "OPERATIONAL_REPORT_READ",
+    "role_grants": [
+      "REVIEWER",
+      "PUBLISHER",
+      "ACCESS_ADMIN"
+    ],
+    "read_principal_required": true,
+    "csrf_required": false,
+    "recent_step_up_required": false,
+    "browser_supplied_actor_allowed": false,
+    "browser_supplied_threshold_allowed": false,
+    "browser_supplied_policy_allowed": false
+  },
+  "admin_ui": {
+    "route": "/operational-reports",
+    "request_on_mount": false,
+    "request_on_query_prefill": false,
+    "request_on_navigation": false,
+    "request_on_focus": false,
+    "explicit_commands": [
+      "set_session",
+      "load_snapshot"
+    ],
+    "read_only": true,
+    "thresholds_visible": true,
+    "reason_codes_visible": true,
+    "polling": false,
+    "auto_refresh": false,
+    "autosave": false,
+    "local_storage": false,
+    "session_storage": false,
+    "export": false,
+    "acknowledgement": false,
+    "assignment": false,
+    "notification": false,
+    "remediation": false,
+    "mutation": false
+  },
+  "repository_extensions": {
+    "content_authoring": "count_by_state",
+    "proposal_review_queue": "count_proposal_queue",
+    "community_reason": "count_moderation_queue",
+    "new_persistence_schema_required": false,
+    "must_reuse_existing_records": true,
+    "memory_and_postgres_required": true
+  },
+  "openapi": {
+    "api_version": "0.19.0",
+    "overlay": "openapi-admin-operational-reports.v0.19.overlay.json",
+    "predecessor": "openapi-admin-community-reason-moderation.v0.19.overlay.json",
+    "additive_only": true,
+    "expected_new_paths": [
+      "/internal/admin/v1/operational-reports/snapshot"
+    ]
+  },
+  "cross_surface": {
+    "consumer_contract_changed": false,
+    "mobile_behavior_changed": false,
+    "ci_mobile_artifact_is_release": false,
+    "repository_snapshot_is_deployed_observability": false,
+    "repository_snapshot_is_slo_proof": false
+  },
+  "excluded": [
+    "report_persistence",
+    "report_cache",
+    "scheduled_report",
+    "polling",
+    "automatic_refresh",
+    "notification",
+    "analytics_warehouse",
+    "event_pipeline",
+    "materialized_report_table",
+    "individual_record_payload",
+    "drill_down_payload",
+    "user_analytics",
+    "segment_analytics",
+    "research_export",
+    "acknowledgement_command",
+    "assignment_command",
+    "remediation_command",
+    "automatic_editorial_action",
+    "automatic_moderation_action",
+    "automatic_publication_action",
+    "automatic_provider_action",
+    "opaque_score",
+    "prediction",
+    "recommendation",
+    "production_health_certification",
+    "media_platform",
+    "object_storage",
+    "cdn",
+    "provider_activation",
+    "production_deployment",
+    "release_apk",
+    "human_cqb_claim",
+    "human_usability_claim",
+    "deployed_slo_claim",
+    "deployed_observability_claim",
+    "incident_response_claim",
+    "operator_rollback_claim",
+    "store_compliance_claim",
+    "production_readiness_claim"
+  ]
+}

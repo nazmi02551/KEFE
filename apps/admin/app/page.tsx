@@ -12,6 +12,7 @@ export default function AdminStudioPage() {
         <Link href="/flow-composer">Flow Composer DRAFT alanını aç</Link>
         <Link href="/publication-operations">Publication Operations alanını aç</Link>
         <Link href="/reason-moderation">Community Reason Moderation alanını aç</Link>
+        <Link href="/operational-reports">Operational Reports alanını aç</Link>
       </nav>
       <EditorialWorkspace />
     </>

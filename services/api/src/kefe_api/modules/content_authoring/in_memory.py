@@ -75,6 +75,10 @@ class InMemoryContentAuthoringRepository:
             versions.sort(key=lambda version: (version.created_at, str(version.id)), reverse=True)
             return tuple(versions[offset : offset + limit])
 
+    def count_by_state(self, state: ContentLifecycle) -> int:
+        with self._lock:
+            return sum(1 for version in self._versions.values() if version.state is state)
+
     def next_version_no(self, case_id: UUID) -> int:
         with self._lock:
             versions = self.list_versions(case_id)

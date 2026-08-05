@@ -18,9 +18,7 @@ from kefe_api.modules.content_authoring.models import (
 )
 
 
-class PostgresFlowPinnedContentAuthoringRepository(
-    PostgresContentAuthoringRepository
-):
+class PostgresFlowPinnedContentAuthoringRepository(PostgresContentAuthoringRepository):
     """Extends authoring with immutable Flow/config and global distribution provenance."""
 
     @staticmethod
@@ -77,8 +75,7 @@ class PostgresFlowPinnedContentAuthoringRepository(
             "summary": localization.summary,
             "question_prompts": dict(localization.question_prompts),
             "option_labels": {
-                code: dict(labels)
-                for code, labels in localization.option_labels.items()
+                code: dict(labels) for code, labels in localization.option_labels.items()
             },
             "cultural_context_note": localization.cultural_context_note,
             "legal_context_note": localization.legal_context_note,
@@ -94,8 +91,7 @@ class PostgresFlowPinnedContentAuthoringRepository(
             summary=document["summary"],
             question_prompts=dict(document.get("question_prompts", {})),
             option_labels={
-                code: dict(labels)
-                for code, labels in document.get("option_labels", {}).items()
+                code: dict(labels) for code, labels in document.get("option_labels", {}).items()
             },
             cultural_context_note=document.get("cultural_context_note"),
             legal_context_note=document.get("legal_context_note"),
@@ -113,9 +109,7 @@ class PostgresFlowPinnedContentAuthoringRepository(
                     if version.content_configuration_id is not None
                     else None
                 ),
-                "content_configuration_version_no": (
-                    version.content_configuration_version_no
-                ),
+                "content_configuration_version_no": (version.content_configuration_version_no),
                 "resolved_flow": cls._resolved_flow_document(version.resolved_flow),
                 "content_locale": version.content_locale,
                 "market_scope": version.market_scope.value,
@@ -140,24 +134,17 @@ class PostgresFlowPinnedContentAuthoringRepository(
                 "flow_template_code",
                 "STANDARD_COMMIT_REVEAL",
             ),
-            flow_template_version_no=int(
-                document.get("flow_template_version_no", 1)
-            ),
+            flow_template_version_no=int(document.get("flow_template_version_no", 1)),
             content_configuration_id=UUID(config_id) if config_id else None,
-            content_configuration_version_no=document.get(
-                "content_configuration_version_no"
-            ),
-            resolved_flow=cls._resolved_flow_from_document(
-                document.get("resolved_flow")
-            ),
+            content_configuration_version_no=document.get("content_configuration_version_no"),
+            resolved_flow=cls._resolved_flow_from_document(document.get("resolved_flow")),
             content_locale=document.get("content_locale", "tr-TR"),
             market_scope=MarketScope(document.get("market_scope", "GLOBAL")),
             country_codes=tuple(document.get("country_codes", [])),
             cultural_context_note=document.get("cultural_context_note"),
             legal_context_note=document.get("legal_context_note"),
             localizations=tuple(
-                cls._localization_from_document(item)
-                for item in document.get("localizations", [])
+                cls._localization_from_document(item) for item in document.get("localizations", [])
             ),
         )
 
@@ -171,9 +158,10 @@ class PostgresFlowPinnedContentAuthoringRepository(
         primary_domain_code: str | None = None,
     ) -> tuple[AuthoringCaseVersion, ...]:
         with self._engine.connect() as connection:
-            rows = connection.execute(
-                text(
-                    """
+            rows = (
+                connection.execute(
+                    text(
+                        """
                     SELECT id, case_id, version_no, lifecycle_state, aggregate,
                            created_at, published_at
                     FROM editorial.case_version
@@ -190,16 +178,33 @@ class PostgresFlowPinnedContentAuthoringRepository(
                     ORDER BY created_at DESC, id DESC
                     LIMIT :limit OFFSET :offset
                     """
-                ),
-                {
-                    "state": state.value,
-                    "content_risk": content_risk,
-                    "primary_domain_code": primary_domain_code,
-                    "limit": limit,
-                    "offset": offset,
-                },
-            ).mappings().all()
+                    ),
+                    {
+                        "state": state.value,
+                        "content_risk": content_risk,
+                        "primary_domain_code": primary_domain_code,
+                        "limit": limit,
+                        "offset": offset,
+                    },
+                )
+                .mappings()
+                .all()
+            )
         return tuple(self._version_from_row(row) for row in rows)
+
+    def count_by_state(self, state: ContentLifecycle) -> int:
+        with self._engine.connect() as connection:
+            value = connection.execute(
+                text(
+                    """
+                    SELECT count(*)
+                    FROM editorial.case_version
+                    WHERE lifecycle_state = :state
+                    """
+                ),
+                {"state": state.value},
+            ).scalar_one()
+        return int(value)
 
     def _materialize_consumer(
         self,
@@ -217,8 +222,7 @@ class PostgresFlowPinnedContentAuthoringRepository(
             )
 
         localization_map = {
-            item.locale: self._localization_document(item)
-            for item in version.localizations
+            item.locale: self._localization_document(item) for item in version.localizations
         }
         connection.execute(
             text(
@@ -241,14 +245,10 @@ class PostgresFlowPinnedContentAuthoringRepository(
             {
                 "version_id": version.id,
                 "content_configuration_id": version.content_configuration_id,
-                "content_configuration_version_no": (
-                    version.content_configuration_version_no
-                ),
+                "content_configuration_version_no": (version.content_configuration_version_no),
                 "flow_template_code": version.resolved_flow.template_code,
                 "flow_template_version_no": version.resolved_flow.template_version_no,
-                "resolved_flow": json.dumps(
-                    self._resolved_flow_document(version.resolved_flow)
-                ),
+                "resolved_flow": json.dumps(self._resolved_flow_document(version.resolved_flow)),
                 "content_locale": version.content_locale,
                 "market_scope": version.market_scope.value,
                 "country_codes": list(version.country_codes),

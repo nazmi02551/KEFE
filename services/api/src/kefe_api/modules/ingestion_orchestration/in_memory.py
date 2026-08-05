@@ -16,6 +16,7 @@ from kefe_api.modules.ingestion_orchestration.models import (
     StageExecution,
 )
 from kefe_api.modules.ingestion_orchestration.review_queue import (
+    ProposalQueueCountQuery,
     ProposalQueueQuery,
     ProposalQueueRecord,
 )
@@ -131,9 +132,7 @@ class InMemoryIngestionOrchestrationRepository:
                 if superseded is None:
                     raise KeyError(proposal.supersedes_proposal_id)
                 if superseded.run_id != proposal.run_id:
-                    raise ValueError(
-                        "proposal cannot supersede a proposal from another run"
-                    )
+                    raise ValueError("proposal cannot supersede a proposal from another run")
             if proposal.id in self._proposals:
                 raise ValueError("proposal already exists")
             self._proposals[proposal.id] = deepcopy(proposal)
@@ -174,10 +173,23 @@ class InMemoryIngestionOrchestrationRepository:
                 if not self._matches_queue_query(record, query):
                     continue
                 records.append(record)
-            records.sort(
-                key=lambda item: (item.proposal.created_at, str(item.proposal.id))
-            )
+            records.sort(key=lambda item: (item.proposal.created_at, str(item.proposal.id)))
             return tuple(deepcopy(item) for item in records[: query.limit])
+
+    def count_proposal_queue(self, query: ProposalQueueCountQuery) -> int:
+        with self._lock:
+            return sum(
+                1
+                for proposal in self._proposals.values()
+                if self._matches_count_query(
+                    ProposalQueueRecord(
+                        proposal=proposal,
+                        run=self._runs[proposal.run_id],
+                        review=self._review_decisions.get(proposal.id),
+                    ),
+                    query,
+                )
+            )
 
     def get_proposal_queue_record(
         self,
@@ -249,6 +261,37 @@ class InMemoryIngestionOrchestrationRepository:
         record: ProposalQueueRecord,
         query: ProposalQueueQuery,
     ) -> bool:
+        if not InMemoryIngestionOrchestrationRepository._matches_count_query(
+            record,
+            ProposalQueueCountQuery(
+                review_state=query.review_state,
+                proposal_kind=query.proposal_kind,
+                risk_code=query.risk_code,
+                run_id=query.run_id,
+                pipeline_code=query.pipeline_code,
+            ),
+        ):
+            return False
+        proposal = record.proposal
+        if query.proposal_kind is not None and proposal.proposal_kind != query.proposal_kind:
+            return False
+        if query.risk_code is not None and proposal.risk_code != query.risk_code:
+            return False
+        if query.run_id is not None and proposal.run_id != query.run_id:
+            return False
+        if query.after_created_at is not None:
+            assert query.after_proposal_id is not None
+            key = (proposal.created_at, str(proposal.id))
+            cursor_key = (query.after_created_at, str(query.after_proposal_id))
+            if key <= cursor_key:
+                return False
+        return True
+
+    @staticmethod
+    def _matches_count_query(
+        record: ProposalQueueRecord,
+        query: ProposalQueueCountQuery,
+    ) -> bool:
         proposal = record.proposal
         run = record.run
         if query.review_state is not None and record.review_state != query.review_state:
@@ -261,12 +304,6 @@ class InMemoryIngestionOrchestrationRepository:
             return False
         if query.pipeline_code is not None and run.pipeline_code != query.pipeline_code:
             return False
-        if query.after_created_at is not None:
-            assert query.after_proposal_id is not None
-            key = (proposal.created_at, str(proposal.id))
-            cursor_key = (query.after_created_at, str(query.after_proposal_id))
-            if key <= cursor_key:
-                return False
         return True
 
     def _validate_stage_execution_available(self, execution: StageExecution) -> None:
