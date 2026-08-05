@@ -97,6 +97,8 @@ MVP treats Operational Reports as an independent non-MVP additive overlay. Globa
 
 Consumer and mobile contracts do not change. Repository snapshots and CI prove only deterministic repository-candidate behavior. They do not prove deployed monitoring, alert delivery, production SLOs, provider readiness, human operational acceptance or incident-response effectiveness.
 
+Operational signals and reason codes are triage labels only. They must not be interpreted as incident-severity classification, a deployed alert, or evidence that a production SLO has been breached.
+
 ## Consequences
 
 - Admin operators gain a single explicit, privacy-safe overview of existing content supply, editorial, Proposal and moderation backlogs.
