@@ -9,7 +9,10 @@ from datetime import UTC, datetime, timedelta
 from uuid import UUID, uuid4
 
 from kefe_api.core.errors import DomainError
-from kefe_api.core.settings import get_settings
+from kefe_api.core.settings import (
+    DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET,
+    get_settings,
+)
 from kefe_api.modules.identity.account_models import (
     AccountCredential,
     GuestMergeReplay,
@@ -33,11 +36,22 @@ class AccountContinuityService:
         verification_ttl_minutes: int = 15,
         account_token_ttl_days: int = 30,
         account_merge_replay_secret: str | None = None,
+        environment: str | None = None,
         max_attempts: int = 5,
     ) -> None:
+        runtime_settings = get_settings()
         replay_secret = (
-            account_merge_replay_secret or get_settings().account_merge_replay_secret
+            account_merge_replay_secret
+            or runtime_settings.account_merge_replay_secret
         )
+        runtime_environment = environment or runtime_settings.environment
+        if (
+            runtime_environment.strip().lower() == "production"
+            and replay_secret == DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET
+        ):
+            raise ValueError(
+                "production requires KEFE_ACCOUNT_MERGE_REPLAY_SECRET from secret management"
+            )
         if len(replay_secret) < 32:
             raise ValueError("account merge replay secret must contain at least 32 characters")
         self._repo = repository
