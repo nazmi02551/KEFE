@@ -91,7 +91,15 @@ class InMemoryIdentityRepository:
             if session is None:
                 return TokenResolution(TokenStatus.INVALID)
             if session.revoked_at is not None:
-                return TokenResolution(TokenStatus.REVOKED)
+                # Generic authentication still rejects REVOKED. The principal is retained
+                # only so the guest-merge boundary can validate an exact completed replay.
+                return TokenResolution(
+                    TokenStatus.REVOKED,
+                    ActorPrincipal(
+                        actor_id=session.actor_id,
+                        actor_kind=self._actor_kinds.get(session.actor_id, ActorKind.GUEST),
+                    ),
+                )
             if session.expires_at <= now:
                 return TokenResolution(TokenStatus.EXPIRED)
             actor_id = self._merged_into.get(session.actor_id, session.actor_id)

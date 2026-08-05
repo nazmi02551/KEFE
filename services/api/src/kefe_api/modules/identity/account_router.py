@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 
 from kefe_api.modules.identity.account_models import OtpChannel
 from kefe_api.modules.identity.account_service import AccountContinuityService
-from kefe_api.modules.identity.dependencies import PrincipalDep
+from kefe_api.modules.identity.dependencies import GuestMergeAuthorizationDep
 
 router = APIRouter(prefix="/v1/auth", tags=["Account Continuity"])
 
@@ -75,11 +75,11 @@ def verify_otp(body: OtpVerifyRequest, service: AccountServiceDep) -> OtpVerific
 @router.post("/guest-merge", response_model=AccountCredentialResponse)
 def merge_guest(
     body: GuestMergeRequest,
-    principal: PrincipalDep,
+    authorization: GuestMergeAuthorizationDep,
     service: AccountServiceDep,
 ) -> AccountCredentialResponse:
     credential = service.merge_guest(
-        principal=principal,
+        authorization=authorization,
         verification_token=body.verification_token,
     )
     return AccountCredentialResponse(

@@ -1,4 +1,4 @@
-registry_version: 1.19.0
+registry_version: 1.20.0
 errors:
 - code: AUTH_REQUIRED
   http_status: 401
@@ -11,6 +11,9 @@ errors:
   retryable: false
 - code: AUTH_TOKEN_REVOKED
   http_status: 401
+  retryable: false
+- code: AUTH_MERGE_REPLAY_MISMATCH
+  http_status: 409
   retryable: false
 - code: AUTH_GUEST_RATE_LIMITED
   http_status: 429

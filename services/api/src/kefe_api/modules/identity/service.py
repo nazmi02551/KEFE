@@ -6,7 +6,12 @@ from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from kefe_api.core.errors import DomainError
-from kefe_api.modules.identity.models import ActorPrincipal, GuestCredential, TokenStatus
+from kefe_api.modules.identity.models import (
+    ActorPrincipal,
+    GuestCredential,
+    TokenResolution,
+    TokenStatus,
+)
 from kefe_api.modules.identity.ports import IdentityRepository
 
 
@@ -27,11 +32,7 @@ class IdentityService:
         return GuestCredential(actor_id=actor_id, access_token=token, expires_at=expires_at)
 
     def authenticate(self, authorization: str | None) -> ActorPrincipal:
-        token = self._extract_bearer(authorization)
-        resolution = self._repo.resolve_token(
-            token_hash=self._hash_token(token),
-            now=datetime.now(UTC),
-        )
+        resolution = self._resolve_authorization(authorization)
         if resolution.status is TokenStatus.EXPIRED:
             raise DomainError("AUTH_TOKEN_EXPIRED", "Authentication token expired", 401)
         if resolution.status is TokenStatus.REVOKED:
@@ -40,9 +41,28 @@ class IdentityService:
             raise DomainError("AUTH_TOKEN_INVALID", "Authentication token invalid", 401)
         return resolution.principal
 
+    def authenticate_guest_merge(self, authorization: str | None) -> TokenResolution:
+        """Resolve active or revoked identity only for exact guest-merge replay validation."""
+
+        resolution = self._resolve_authorization(authorization)
+        if resolution.status is TokenStatus.EXPIRED:
+            raise DomainError("AUTH_TOKEN_EXPIRED", "Authentication token expired", 401)
+        if resolution.status is TokenStatus.INVALID or resolution.principal is None:
+            raise DomainError("AUTH_TOKEN_INVALID", "Authentication token invalid", 401)
+        if resolution.status not in (TokenStatus.ACTIVE, TokenStatus.REVOKED):
+            raise DomainError("AUTH_TOKEN_INVALID", "Authentication token invalid", 401)
+        return resolution
+
     def revoke(self, authorization: str | None) -> None:
         token = self._extract_bearer(authorization)
         self._repo.revoke_token(
+            token_hash=self._hash_token(token),
+            now=datetime.now(UTC),
+        )
+
+    def _resolve_authorization(self, authorization: str | None) -> TokenResolution:
+        token = self._extract_bearer(authorization)
+        return self._repo.resolve_token(
             token_hash=self._hash_token(token),
             now=datetime.now(UTC),
         )

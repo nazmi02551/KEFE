@@ -33,6 +33,9 @@ EXPECTED_ACTOR_FOREIGN_KEYS = {
     ("identity", "actor_merge", "account_actor_id"),
     ("identity", "actor_merge", "guest_actor_id"),
     ("identity", "actor_session", "actor_id"),
+    ("identity", "guest_merge_replay", "account_actor_id"),
+    ("identity", "guest_merge_replay", "merged_from_actor_id"),
+    ("identity", "guest_merge_replay", "source_actor_id"),
     ("sharing", "share_record", "actor_id"),
 }
 

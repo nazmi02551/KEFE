@@ -1,8 +1,14 @@
+from __future__ import annotations
+
 from functools import lru_cache
 from typing import Literal
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET = (
+    "development-only-guest-merge-replay-secret-v1"
+)
 
 
 class Settings(BaseSettings):
@@ -25,6 +31,10 @@ class Settings(BaseSettings):
     otp_verification_ttl_minutes: int = 15
     otp_max_attempts: int = 5
     account_token_ttl_days: int = 30
+    account_merge_replay_secret: str = Field(
+        default=DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET,
+        min_length=32,
+    )
     share_ttl_days: int = 30
 
     event_transport: Literal["logging"] = "logging"

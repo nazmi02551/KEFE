@@ -76,10 +76,17 @@ class PostgresIdentityRepository:
 
         if row is None:
             return TokenResolution(TokenStatus.INVALID)
-        # Session lifecycle is more specific than actor lifecycle. Preserve an explicit
-        # revoked classification even when a merge has retired the source guest actor.
+        # Session lifecycle is more specific than actor lifecycle. Generic authentication
+        # still rejects REVOKED, while the retained principal lets guest-merge validate
+        # only an exact completed replay after the source actor has been retired.
         if row["revoked_at"] is not None:
-            return TokenResolution(TokenStatus.REVOKED)
+            return TokenResolution(
+                TokenStatus.REVOKED,
+                ActorPrincipal(
+                    actor_id=row["actor_id"],
+                    actor_kind=ActorKind(row["actor_kind"]),
+                ),
+            )
         if row["state"] != "ACTIVE":
             return TokenResolution(TokenStatus.INVALID)
         if row["expires_at"] <= now:
