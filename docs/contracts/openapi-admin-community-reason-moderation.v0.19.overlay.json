@@ -1,0 +1,518 @@
+{
+  "components": {
+    "schemas": {
+      "CommunityReasonModerationQueueKind": {
+        "enum": [
+          "PENDING",
+          "REPORTED"
+        ],
+        "title": "CommunityReasonModerationQueueKind",
+        "type": "string"
+      },
+      "ReasonModerationAuditResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "actor_ref": {
+            "title": "Actor Ref",
+            "type": "string"
+          },
+          "audit_id": {
+            "format": "uuid",
+            "title": "Audit Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "decided_state": {
+            "title": "Decided State",
+            "type": "string"
+          },
+          "previous_state": {
+            "title": "Previous State",
+            "type": "string"
+          },
+          "rationale": {
+            "title": "Rationale",
+            "type": "string"
+          },
+          "reason_id": {
+            "format": "uuid",
+            "title": "Reason Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "audit_id",
+          "reason_id",
+          "actor_ref",
+          "previous_state",
+          "decided_state",
+          "rationale",
+          "created_at"
+        ],
+        "title": "ReasonModerationAuditResponse",
+        "type": "object"
+      },
+      "ReasonModerationAuditTrailResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ReasonModerationAuditResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "ReasonModerationAuditTrailResponse",
+        "type": "object"
+      },
+      "ReasonModerationDecisionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "confirm_reason_id": {
+            "format": "uuid",
+            "title": "Confirm Reason Id",
+            "type": "string"
+          },
+          "rationale": {
+            "maxLength": 1000,
+            "minLength": 10,
+            "title": "Rationale",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "ALLOWED",
+              "BLOCKED"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "rationale",
+          "confirm_reason_id"
+        ],
+        "title": "ReasonModerationDecisionRequest",
+        "type": "object"
+      },
+      "ReasonModerationDecisionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/ReasonModerationAuditResponse"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/ReasonModerationItemResponse"
+          }
+        },
+        "required": [
+          "reason",
+          "audit"
+        ],
+        "title": "ReasonModerationDecisionResponse",
+        "type": "object"
+      },
+      "ReasonModerationItemResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "body": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body"
+          },
+          "candidate_at": {
+            "format": "date-time",
+            "title": "Candidate At",
+            "type": "string"
+          },
+          "case_version_id": {
+            "format": "uuid",
+            "title": "Case Version Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "latest_reported_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Reported At"
+          },
+          "moderation_state": {
+            "title": "Moderation State",
+            "type": "string"
+          },
+          "reason_id": {
+            "format": "uuid",
+            "title": "Reason Id",
+            "type": "string"
+          },
+          "report_count": {
+            "title": "Report Count",
+            "type": "integer"
+          },
+          "report_counts_by_code": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Report Counts By Code",
+            "type": "object"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason_id",
+          "case_version_id",
+          "tags",
+          "body",
+          "moderation_state",
+          "created_at",
+          "updated_at",
+          "report_count",
+          "report_counts_by_code",
+          "latest_reported_at",
+          "candidate_at"
+        ],
+        "title": "ReasonModerationItemResponse",
+        "type": "object"
+      },
+      "ReasonModerationQueueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ReasonModerationItemResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Offset"
+          }
+        },
+        "required": [
+          "items",
+          "next_offset"
+        ],
+        "title": "ReasonModerationQueueResponse",
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/internal/admin/v1/community-reason-moderation": {
+      "get": {
+        "operationId": "moderation_queue_internal_admin_v1_community_reason_moderation_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/CommunityReasonModerationQueueKind",
+              "default": "PENDING"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 10000,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "case_version_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Case Version Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "report_code",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ReasonReportCode"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Report Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReasonModerationQueueResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Moderation Queue",
+        "tags": [
+          "Internal Admin",
+          "Internal Admin Community Reason Moderation"
+        ]
+      }
+    },
+    "/internal/admin/v1/community-reason-moderation/{reason_id}": {
+      "get": {
+        "operationId": "moderation_detail_internal_admin_v1_community_reason_moderation__reason_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reason_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Reason Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReasonModerationItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Moderation Detail",
+        "tags": [
+          "Internal Admin",
+          "Internal Admin Community Reason Moderation"
+        ]
+      }
+    },
+    "/internal/admin/v1/community-reason-moderation/{reason_id}/audit": {
+      "get": {
+        "operationId": "moderation_audit_internal_admin_v1_community_reason_moderation__reason_id__audit_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reason_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Reason Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReasonModerationAuditTrailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Moderation Audit",
+        "tags": [
+          "Internal Admin",
+          "Internal Admin Community Reason Moderation"
+        ]
+      }
+    },
+    "/internal/admin/v1/community-reason-moderation/{reason_id}/decision": {
+      "post": {
+        "operationId": "moderation_decision_internal_admin_v1_community_reason_moderation__reason_id__decision_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reason_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Reason Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-KEFE-CSRF",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kefe-Csrf"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonModerationDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReasonModerationDecisionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Moderation Decision",
+        "tags": [
+          "Internal Admin",
+          "Internal Admin Community Reason Moderation"
+        ]
+      }
+    }
+  },
+  "target_version": "0.19.0"
+}

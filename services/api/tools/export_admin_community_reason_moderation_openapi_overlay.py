@@ -13,7 +13,7 @@ from kefe_api.core.settings import get_settings
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACTS = REPO_ROOT / "docs" / "contracts"
 BASE = CONTRACTS / "openapi.v1.json"
-BEFORE_PUBLICATION_OVERLAYS = (
+BEFORE_REASON_MODERATION_OVERLAYS = (
     CONTRACTS / "openapi-consensus.v0.18.overlay.json",
     CONTRACTS / "openapi-mvp.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-projection.v0.19.overlay.json",
@@ -21,23 +21,24 @@ BEFORE_PUBLICATION_OVERLAYS = (
     CONTRACTS / "openapi-admin-case-builder.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-editorial-quality-review.v0.19.overlay.json",
     CONTRACTS / "openapi-admin-flow-composer.v0.19.overlay.json",
+    CONTRACTS / "openapi-admin-publication-operations.v0.19.overlay.json",
 )
 EXPECTED_PATHS = [
-    "/internal/admin/v1/publication-operations",
-    "/internal/admin/v1/publication-operations/{version_id}",
-    "/internal/admin/v1/publication-operations/{version_id}/decision",
-    "/internal/admin/v1/publication-operations/{version_id}/preflight",
+    "/internal/admin/v1/community-reason-moderation",
+    "/internal/admin/v1/community-reason-moderation/{reason_id}",
+    "/internal/admin/v1/community-reason-moderation/{reason_id}/audit",
+    "/internal/admin/v1/community-reason-moderation/{reason_id}/decision",
 ]
 
 
-def _load_before_publication_contract() -> dict[str, object]:
+def _load_before_reason_moderation_contract() -> dict[str, object]:
     expected = deepcopy(json.loads(BASE.read_text(encoding="utf-8")))
-    for path in BEFORE_PUBLICATION_OVERLAYS:
+    for path in BEFORE_REASON_MODERATION_OVERLAYS:
         _merge_overlay(expected, json.loads(path.read_text(encoding="utf-8")), path.name)
     return expected
 
 
-def _build_publication_runtime_openapi() -> dict[str, object]:
+def _build_reason_moderation_runtime_openapi() -> dict[str, object]:
     previous = os.environ.get("KEFE_API_VERSION")
     os.environ["KEFE_API_VERSION"] = "0.19.0"
     get_settings.cache_clear()
@@ -52,10 +53,10 @@ def _build_publication_runtime_openapi() -> dict[str, object]:
 
 
 def build_overlay() -> dict[str, object]:
-    before = _load_before_publication_contract()
-    generated = _build_publication_runtime_openapi()
+    before = _load_before_reason_moderation_contract()
+    generated = _build_reason_moderation_runtime_openapi()
     if generated.get("info", {}).get("version") != "0.19.0":
-        raise SystemExit("Publication Operations overlay expects API version 0.19.0")
+        raise SystemExit("Reason moderation overlay expects API version 0.19.0")
 
     before_schemas = before.get("components", {}).get("schemas", {})
     generated_schemas = generated.get("components", {}).get("schemas", {})
@@ -76,19 +77,14 @@ def build_overlay() -> dict[str, object]:
     removed_paths = sorted(before_paths.keys() - generated_paths.keys())
     if changed_schemas or removed_schemas or changed_paths or removed_paths:
         raise SystemExit(
-            "Publication Operations API must remain additive; "
+            "Reason moderation API must remain additive; "
             f"changed_schemas={changed_schemas}, removed_schemas={removed_schemas}, "
             f"changed_paths={changed_paths}, removed_paths={removed_paths}"
         )
 
-    missing_paths = sorted(set(EXPECTED_PATHS) - set(generated_paths))
-    already_present = sorted(set(EXPECTED_PATHS) & set(before_paths))
-    if missing_paths or already_present:
-        raise SystemExit(
-            "Publication Operations overlay path boundary drifted; "
-            f"missing={missing_paths}, already_present={already_present}"
-        )
-    new_path_names = sorted(EXPECTED_PATHS)
+    new_path_names = sorted(generated_paths.keys() - before_paths.keys())
+    if new_path_names != sorted(EXPECTED_PATHS):
+        raise SystemExit(f"Reason moderation overlay path set drifted: {new_path_names}")
 
     referenced_schema_names: set[str] = set()
 
@@ -112,12 +108,16 @@ def build_overlay() -> dict[str, object]:
             schema = generated_schemas.get(name)
             if schema is None:
                 raise SystemExit(
-                    f"Publication Operations overlay references missing schema: {name}"
+                    f"Reason moderation overlay references missing schema: {name}"
                 )
             processed.add(name)
             collect(schema)
 
     new_schema_names = set(generated_schemas.keys()) - set(before_schemas.keys())
+    unrelated = sorted(new_schema_names - referenced_schema_names)
+    if unrelated:
+        raise SystemExit(f"Reason moderation overlay found unrelated schemas: {unrelated}")
+
     additive_schema_names = sorted(referenced_schema_names & new_schema_names)
     return {
         "target_version": "0.19.0",
@@ -130,7 +130,7 @@ def build_overlay() -> dict[str, object]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Generate additive Admin Publication Operations OpenAPI overlay"
+        description="Generate additive Admin Community Reason moderation OpenAPI overlay"
     )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--check", action="store_true")
@@ -140,15 +140,15 @@ def main() -> None:
     rendered = json.dumps(overlay, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     if args.check:
         if not args.output.exists():
-            raise SystemExit("Checked-in Publication Operations overlay is missing")
+            raise SystemExit("Checked-in reason moderation OpenAPI overlay is missing")
         checked = json.loads(args.output.read_text(encoding="utf-8"))
         if checked != overlay:
-            raise SystemExit("Checked-in Publication Operations overlay is stale")
-        print(f"Publication Operations OpenAPI overlay matches {args.output}")
+            raise SystemExit("Checked-in reason moderation OpenAPI overlay is stale")
+        print(f"Reason moderation OpenAPI overlay matches {args.output}")
         return
 
     args.output.write_text(rendered, encoding="utf-8")
-    print(f"Publication Operations OpenAPI overlay written to {args.output}")
+    print(f"Reason moderation OpenAPI overlay written to {args.output}")
 
 
 if __name__ == "__main__":

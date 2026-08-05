@@ -40,6 +40,7 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
             AdminRole.REVIEWER: frozenset(
                 {
                     AdminCapability.CONTENT_REVIEW,
+                    AdminCapability.CONTENT_MODERATE,
                     AdminCapability.SOURCE_VERIFY,
                     AdminCapability.SOURCE_MANAGE,
                     AdminCapability.RISK_REVIEW,
@@ -70,6 +71,7 @@ def default_admin_security_policy() -> AdminSecurityPolicy:
         },
         step_up_capabilities=frozenset(
             {
+                AdminCapability.CONTENT_MODERATE,
                 AdminCapability.CONTENT_PUBLISH,
                 AdminCapability.CONTENT_WITHDRAW,
                 AdminCapability.SOURCE_APPROVE,

@@ -1,0 +1,223 @@
+{
+  "contract_id": "admin-community-reason-moderation-operations.v1",
+  "status": "accepted_for_implementation",
+  "accepted_at": "2026-08-05",
+  "parent_runtime": {
+    "pull_request": 305,
+    "sha": "9342989bf76b22036501f7792d1adb5ffb309f8b"
+  },
+  "capabilities": {
+    "primary": [
+      "CAP-066"
+    ],
+    "supporting": [
+      "CAP-126"
+    ],
+    "lifecycle_promotion": false
+  },
+  "authority": {
+    "decision_command": "CommunityReasonService.moderate",
+    "repository": "CommunityReasonRepository",
+    "public_visibility": "CommunityReason.publicly_readable",
+    "alternate_moderation_domain_allowed": false,
+    "admin_content_copy_allowed": false
+  },
+  "queue": {
+    "endpoint": "/internal/admin/v1/community-reason-moderation",
+    "kinds": {
+      "PENDING": {
+        "states": [
+          "PENDING"
+        ],
+        "candidate_timestamp": "created_at"
+      },
+      "REPORTED": {
+        "states": [
+          "NOT_REQUIRED",
+          "ALLOWED"
+        ],
+        "requires_report_newer_than_latest_audit": true,
+        "candidate_timestamp": "latest_reported_at"
+      }
+    },
+    "default_kind": "PENDING",
+    "ordering": [
+      "candidate_timestamp ASC",
+      "reason_id ASC"
+    ],
+    "pagination": {
+      "default_limit": 25,
+      "minimum_limit": 1,
+      "maximum_limit": 100,
+      "minimum_offset": 0,
+      "maximum_offset": 10000,
+      "next_offset_only_when_page_full": true
+    },
+    "exact_filters": [
+      "case_version_id",
+      "report_code"
+    ],
+    "automatic_polling": false
+  },
+  "inspection": {
+    "exact_detail_endpoint": "/internal/admin/v1/community-reason-moderation/{reason_id}",
+    "audit_endpoint": "/internal/admin/v1/community-reason-moderation/{reason_id}/audit",
+    "exposes": [
+      "reason_id",
+      "case_version_id",
+      "tags",
+      "body",
+      "moderation_state",
+      "created_at",
+      "updated_at",
+      "report_count",
+      "report_counts_by_code",
+      "latest_reported_at"
+    ],
+    "never_exposes": [
+      "author_actor_id",
+      "weigh_session_id",
+      "reporter_actor_id",
+      "reporter_order",
+      "account_details",
+      "device_data",
+      "inferred_user_attributes"
+    ],
+    "audit_ordering": [
+      "created_at DESC",
+      "audit_id DESC"
+    ],
+    "audit_limit": 100
+  },
+  "decision": {
+    "endpoint": "/internal/admin/v1/community-reason-moderation/{reason_id}/decision",
+    "states": [
+      "ALLOWED",
+      "BLOCKED"
+    ],
+    "rationale": {
+      "required": true,
+      "trimmed": true,
+      "minimum_length": 10,
+      "maximum_length": 1000
+    },
+    "allowed_transitions": [
+      "PENDING->ALLOWED",
+      "PENDING->BLOCKED",
+      "NOT_REQUIRED->ALLOWED",
+      "NOT_REQUIRED->BLOCKED",
+      "ALLOWED->ALLOWED",
+      "ALLOWED->BLOCKED"
+    ],
+    "blocked_terminal_in_slice": true,
+    "atomic_state_and_audit": true,
+    "actor_server_derived": true,
+    "report_resolution": "only_reports_at_or_before_the_decision_timestamp",
+    "same_session_csrf_required": true,
+    "recent_step_up_required": true
+  },
+  "audit": {
+    "append_only": true,
+    "fields": [
+      "audit_id",
+      "reason_id",
+      "actor_ref",
+      "previous_state",
+      "decided_state",
+      "rationale",
+      "created_at"
+    ],
+    "mutation_or_deletion_endpoint": false,
+    "reporter_identity_in_audit": false
+  },
+  "security": {
+    "new_capability": "CONTENT_MODERATE",
+    "role_grant": "REVIEWER",
+    "step_up_capability": true,
+    "queue_capability": "CONTENT_MODERATE",
+    "detail_capability": "CONTENT_MODERATE",
+    "audit_capability": "AUDIT_READ",
+    "decision_capability": "CONTENT_MODERATE",
+    "browser_supplied_actor_allowed": false
+  },
+  "compatibility_endpoint": {
+    "path": "/internal/admin/v1/community-reasons/{reason_id}/moderation",
+    "openapi_request_schema_changed": false,
+    "rationale_header": "X-KEFE-Moderation-Rationale",
+    "rationale_required": true,
+    "uses_same_capability": true,
+    "uses_same_step_up": true,
+    "uses_same_csrf": true,
+    "uses_same_service_command": true,
+    "uses_same_atomic_audit": true
+  },
+  "admin_ui": {
+    "route": "/reason-moderation",
+    "request_on_mount": false,
+    "request_on_query_prefill": false,
+    "request_on_filter_change": false,
+    "request_on_selection": false,
+    "explicit_commands": [
+      "set_session",
+      "load_queue",
+      "load_detail",
+      "load_audit",
+      "submit_decision"
+    ],
+    "read_only_reason_content": true,
+    "confirmation_reset_on_context_change": true,
+    "autosave": false,
+    "local_storage": false,
+    "session_storage": false,
+    "polling": false,
+    "bulk_actions": false,
+    "automatic_moderation": false
+  },
+  "openapi": {
+    "api_version": "0.19.0",
+    "overlay": "openapi-admin-community-reason-moderation.v0.19.overlay.json",
+    "predecessor": "openapi-admin-publication-operations.v0.19.overlay.json",
+    "additive_only": true,
+    "expected_new_paths": [
+      "/internal/admin/v1/community-reason-moderation",
+      "/internal/admin/v1/community-reason-moderation/{reason_id}",
+      "/internal/admin/v1/community-reason-moderation/{reason_id}/audit",
+      "/internal/admin/v1/community-reason-moderation/{reason_id}/decision"
+    ]
+  },
+  "cross_surface": {
+    "consumer_contract_changed": false,
+    "mobile_behavior_changed": false,
+    "public_visibility_changed": false,
+    "ci_mobile_artifact_is_release": false
+  },
+  "excluded": [
+    "automatic_moderation",
+    "model_assisted_moderation",
+    "bulk_moderation",
+    "content_rewriting",
+    "reporter_identity_disclosure",
+    "author_identity_disclosure",
+    "user_reputation_scoring",
+    "personality_inference",
+    "ideology_inference",
+    "bias_inference",
+    "causal_inference",
+    "appeal",
+    "unblock",
+    "restore",
+    "deletion",
+    "case_moderation",
+    "source_moderation",
+    "media_moderation",
+    "provider_activation",
+    "production_deployment",
+    "release_apk",
+    "human_cqb_claim",
+    "human_usability_claim",
+    "deployed_slo_claim",
+    "operator_rollback_claim",
+    "store_compliance_claim",
+    "production_readiness_claim"
+  ]
+}

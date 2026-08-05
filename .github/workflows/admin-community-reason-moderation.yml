@@ -1,0 +1,177 @@
+name: Admin Community Reason Moderation CI
+
+on:
+  pull_request:
+    paths:
+      - "apps/admin/**"
+      - "apps/mobile/docs/admin-community-reason-moderation-cross-surface-boundary.md"
+      - "services/api/src/kefe_api/modules/community_reason/**"
+      - "services/api/src/kefe_api/infrastructure/postgres_community_reason.py"
+      - "services/api/src/kefe_api/modules/admin_security/models.py"
+      - "services/api/src/kefe_api/modules/admin_security/policy.py"
+      - "services/api/migrations/versions/20260805_0027_reason_moderation_audit.py"
+      - "services/api/tests/test_admin_community_reason_moderation_http.py"
+      - "services/api/tests/test_admin_community_reason_moderation_http_postgres.py"
+      - "services/api/tools/check_admin_community_reason_moderation_contract.py"
+      - "services/api/tools/export_admin_community_reason_moderation_openapi_overlay.py"
+      - "services/api/tools/export_admin_publication_operations_openapi_overlay.py"
+      - "services/api/tools/export_openapi.py"
+      - "services/api/tools/export_mvp_openapi_overlay.py"
+      - "services/api/tools/export_global_openapi_overlay.py"
+      - "docs/adr/0105-admin-community-reason-moderation-operations.md"
+      - "docs/contracts/admin-community-reason-moderation-operations.v1.json"
+      - "docs/contracts/openapi-admin-community-reason-moderation.v0.19.overlay.json"
+      - "docs/contracts/error-codes.v1.yaml"
+      - ".github/workflows/admin-community-reason-moderation.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/admin/**"
+      - "apps/mobile/docs/admin-community-reason-moderation-cross-surface-boundary.md"
+      - "services/api/src/kefe_api/modules/community_reason/**"
+      - "services/api/src/kefe_api/infrastructure/postgres_community_reason.py"
+      - "services/api/src/kefe_api/modules/admin_security/models.py"
+      - "services/api/src/kefe_api/modules/admin_security/policy.py"
+      - "services/api/migrations/versions/20260805_0027_reason_moderation_audit.py"
+      - "services/api/tests/test_admin_community_reason_moderation_http.py"
+      - "services/api/tests/test_admin_community_reason_moderation_http_postgres.py"
+      - "services/api/tools/check_admin_community_reason_moderation_contract.py"
+      - "services/api/tools/export_admin_community_reason_moderation_openapi_overlay.py"
+      - "services/api/tools/export_admin_publication_operations_openapi_overlay.py"
+      - "services/api/tools/export_openapi.py"
+      - "services/api/tools/export_mvp_openapi_overlay.py"
+      - "services/api/tools/export_global_openapi_overlay.py"
+      - "docs/adr/0105-admin-community-reason-moderation-operations.md"
+      - "docs/contracts/admin-community-reason-moderation-operations.v1.json"
+      - "docs/contracts/openapi-admin-community-reason-moderation.v0.19.overlay.json"
+      - "docs/contracts/error-codes.v1.yaml"
+      - ".github/workflows/admin-community-reason-moderation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: admin-community-reason-moderation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api-memory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Lint Community Reason moderation slice
+        working-directory: services/api
+        run: >-
+          ruff check
+          src/kefe_api/modules/community_reason
+          src/kefe_api/infrastructure/postgres_community_reason.py
+          src/kefe_api/modules/admin_security/models.py
+          src/kefe_api/modules/admin_security/policy.py
+          tests/test_admin_community_reason_moderation_http.py
+          tests/test_admin_community_reason_moderation_http_postgres.py
+          tools/check_admin_community_reason_moderation_contract.py
+          tools/export_admin_community_reason_moderation_openapi_overlay.py
+          tools/export_admin_publication_operations_openapi_overlay.py
+          tools/export_openapi.py
+          tools/export_mvp_openapi_overlay.py
+          tools/export_global_openapi_overlay.py
+      - name: Executable backend architecture contract
+        working-directory: services/api
+        run: python tools/check_admin_community_reason_moderation_contract.py
+      - name: Exact reason moderation OpenAPI overlay
+        working-directory: services/api
+        run: >-
+          python tools/export_admin_community_reason_moderation_openapi_overlay.py
+          --output ../../docs/contracts/openapi-admin-community-reason-moderation.v0.19.overlay.json
+          --check
+      - name: Exact predecessor Publication Operations overlay
+        working-directory: services/api
+        run: >-
+          python tools/export_admin_publication_operations_openapi_overlay.py
+          --output ../../docs/contracts/openapi-admin-publication-operations.v0.19.overlay.json
+          --check
+      - name: Full composed OpenAPI drift gate
+        working-directory: services/api
+        run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
+      - name: Memory HTTP privacy, security and decision behavior
+        working-directory: services/api
+        run: >-
+          pytest -q
+          tests/test_admin_community_reason_moderation_http.py
+          tests/test_admin_http.py
+          tests/test_mvp_completion.py
+
+  admin-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/admin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.13.0"
+          cache: npm
+          cache-dependency-path: apps/admin/package-lock.json
+      - name: Install locked Admin dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify Admin contracts, lint, types, tests and production build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: npm run verify
+
+  postgres:
+    needs: api-memory
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: kefe
+          POSTGRES_USER: kefe
+          POSTGRES_PASSWORD: kefe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kefe -d kefe"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Migrate PostgreSQL
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: alembic upgrade head
+      - name: Durable queue, report, audit and restart proof
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+          KEFE_PERSISTENCE_BACKEND: postgres
+          KEFE_RUN_POSTGRES_TESTS: "1"
+        run: pytest -q tests/test_admin_community_reason_moderation_http_postgres.py

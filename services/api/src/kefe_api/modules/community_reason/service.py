@@ -8,6 +8,11 @@ from kefe_api.core.errors import DomainError
 from kefe_api.modules.community_reason.models import (
     CommunityReason,
     CommunityReasonModeration,
+    CommunityReasonModerationAudit,
+    CommunityReasonModerationDecision,
+    CommunityReasonModerationItem,
+    CommunityReasonModerationQueueKind,
+    CommunityReasonModerationWriteStatus,
     CommunityReasonSnapshot,
     ReasonReaction,
     ReasonReportCode,
@@ -197,12 +202,73 @@ class CommunityReasonService:
             created_at=datetime.now(UTC),
         )
 
+    def moderation_queue(
+        self,
+        *,
+        kind: CommunityReasonModerationQueueKind,
+        limit: int = 25,
+        offset: int = 0,
+        case_version_id: UUID | None = None,
+        report_code: ReasonReportCode | None = None,
+    ) -> tuple[CommunityReasonModerationItem, ...]:
+        if not 1 <= limit <= 100:
+            raise DomainError(
+                "COMMUNITY_REASON_MODERATION_LIMIT_INVALID",
+                "Moderation queue limit must be between 1 and 100",
+                422,
+            )
+        if not 0 <= offset <= 10000:
+            raise DomainError(
+                "COMMUNITY_REASON_MODERATION_OFFSET_INVALID",
+                "Moderation queue offset must be between 0 and 10000",
+                422,
+            )
+        return self._repo.moderation_queue(
+            kind=kind,
+            limit=limit,
+            offset=offset,
+            case_version_id=case_version_id,
+            report_code=report_code,
+        )
+
+    def moderation_inspection(self, *, reason_id: UUID) -> CommunityReasonModerationItem:
+        item = self._repo.moderation_inspection(reason_id)
+        if item is None:
+            raise DomainError(
+                "COMMUNITY_REASON_NOT_FOUND",
+                "Community Reason not found",
+                404,
+            )
+        return item
+
+    def moderation_audit(
+        self,
+        *,
+        reason_id: UUID,
+        limit: int = 100,
+    ) -> tuple[CommunityReasonModerationAudit, ...]:
+        if not 1 <= limit <= 100:
+            raise DomainError(
+                "COMMUNITY_REASON_MODERATION_AUDIT_LIMIT_INVALID",
+                "Moderation audit limit must be between 1 and 100",
+                422,
+            )
+        if self._repo.get(reason_id) is None:
+            raise DomainError(
+                "COMMUNITY_REASON_NOT_FOUND",
+                "Community Reason not found",
+                404,
+            )
+        return self._repo.moderation_audit(reason_id=reason_id, limit=limit)
+
     def moderate(
         self,
         *,
         reason_id: UUID,
         state: CommunityReasonModeration,
-    ) -> CommunityReason:
+        actor_ref: str,
+        rationale: str,
+    ) -> CommunityReasonModerationDecision:
         if state not in {
             CommunityReasonModeration.ALLOWED,
             CommunityReasonModeration.BLOCKED,
@@ -212,18 +278,41 @@ class CommunityReasonService:
                 "Invalid moderation state",
                 422,
             )
-        reason = self._repo.moderate(
+        normalized_rationale = rationale.strip()
+        if not 10 <= len(normalized_rationale) <= 1000:
+            raise DomainError(
+                "COMMUNITY_REASON_MODERATION_RATIONALE_INVALID",
+                "Moderation rationale must be between 10 and 1000 characters",
+                422,
+            )
+        result = self._repo.moderate(
+            audit_id=uuid4(),
             reason_id=reason_id,
             state=state,
+            actor_ref=actor_ref,
+            rationale=normalized_rationale,
             updated_at=datetime.now(UTC),
         )
-        if reason is None:
+        if result.status is CommunityReasonModerationWriteStatus.NOT_FOUND:
             raise DomainError(
                 "COMMUNITY_REASON_NOT_FOUND",
                 "Community Reason not found",
                 404,
             )
-        return reason
+        if result.status is CommunityReasonModerationWriteStatus.CONFLICT:
+            raise DomainError(
+                "COMMUNITY_REASON_MODERATION_STATE_INVALID",
+                "Community Reason cannot be moderated from its current state",
+                409,
+                meta={
+                    "current_state": (
+                        result.current_state.value if result.current_state is not None else None
+                    )
+                },
+            )
+        if result.decision is None:
+            raise RuntimeError("Applied moderation result must include a decision")
+        return result.decision
 
     @staticmethod
     def _reason_policy(questions: tuple[Question, ...]) -> Mapping[str, object] | None:
