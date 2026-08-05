@@ -259,14 +259,17 @@ class PostgresCommunityReasonRepository:
                     )
                 )
             )
-              AND (:case_version_id IS NULL OR r.case_version_id = :case_version_id)
               AND (
-                :report_code IS NULL
+                CAST(:case_version_id AS uuid) IS NULL
+                OR r.case_version_id = CAST(:case_version_id AS uuid)
+              )
+              AND (
+                CAST(:report_code AS text) IS NULL
                 OR EXISTS (
                     SELECT 1
                     FROM community.reason_report filtered_report
                     WHERE filtered_report.reason_id = r.id
-                      AND filtered_report.report_code = :report_code
+                      AND filtered_report.report_code = CAST(:report_code AS text)
                 )
               )
             ORDER BY candidate_at ASC, r.id ASC
