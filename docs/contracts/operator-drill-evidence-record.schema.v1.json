@@ -1,0 +1,543 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kefe:contract:operator-drill-evidence-record:v1",
+  "title": "KEFE operator drill evidence record",
+  "description": "Structural schema only. Semantic proof acceptance is enforced by check_operator_drill_evidence_protocol.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_id",
+    "record_type",
+    "classification",
+    "template",
+    "environment",
+    "exercise",
+    "timeline",
+    "actors",
+    "outcomes",
+    "artifacts",
+    "redaction",
+    "attestation",
+    "claims"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "record_id": {
+      "type": "string",
+      "pattern": "^KEFE-(IR|RB)-[A-Z0-9][A-Z0-9_-]{5,63}$"
+    },
+    "record_type": {
+      "enum": [
+        "INCIDENT_RESPONSE",
+        "ROLLBACK_EXECUTION"
+      ]
+    },
+    "classification": {
+      "enum": [
+        "TEMPLATE_ONLY",
+        "CI_SIMULATED",
+        "HUMAN_ATTESTED_NON_PRODUCTION",
+        "HUMAN_ATTESTED_PRODUCTION"
+      ]
+    },
+    "template": {
+      "type": "boolean"
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "name",
+        "approved",
+        "deployment_identity",
+        "surface_ids"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "TEMPLATE",
+            "CI",
+            "NON_PRODUCTION",
+            "PRODUCTION"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "approved": {
+          "type": "boolean"
+        },
+        "deployment_identity": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 256
+        },
+        "surface_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "exercise": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scenario_id",
+        "title",
+        "objective",
+        "started_at",
+        "ended_at"
+      ],
+      "properties": {
+        "scenario_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "objective": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "started_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "ended_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      }
+    },
+    "timeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sequence",
+          "phase",
+          "occurred_at",
+          "action",
+          "observed_result"
+        ],
+        "properties": {
+          "sequence": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "phase": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "occurred_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "observed_result": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        }
+      }
+    },
+    "actors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operator",
+        "approver"
+      ],
+      "properties": {
+        "operator": {
+          "$ref": "#/$defs/actor"
+        },
+        "approver": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/actor"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "outcomes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "result",
+        "observed_effect",
+        "recovery_metrics"
+      ],
+      "properties": {
+        "result": {
+          "enum": [
+            "NOT_EXECUTED",
+            "SUCCESS",
+            "PARTIAL",
+            "FAILED"
+          ]
+        },
+        "observed_effect": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "recovery_metrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rto_objective_seconds",
+            "rto_observed_seconds",
+            "rpo_objective_seconds",
+            "rpo_observed_seconds",
+            "source_artifact_sha256"
+          ],
+          "properties": {
+            "rto_objective_seconds": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "rto_observed_seconds": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "rpo_objective_seconds": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "rpo_observed_seconds": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "source_artifact_sha256": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "uri",
+          "sha256",
+          "captured_at"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "uri": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "captured_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "redaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewed",
+        "contains_secrets",
+        "contains_raw_customer_data",
+        "notes"
+      ],
+      "properties": {
+        "reviewed": {
+          "type": "boolean"
+        },
+        "contains_secrets": {
+          "type": "boolean"
+        },
+        "contains_raw_customer_data": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      }
+    },
+    "attestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operator_attested",
+        "approver_attested",
+        "operator_signed_at",
+        "approver_signed_at",
+        "method",
+        "statement"
+      ],
+      "properties": {
+        "operator_attested": {
+          "type": "boolean"
+        },
+        "approver_attested": {
+          "type": "boolean"
+        },
+        "operator_signed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "approver_signed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "method": {
+          "enum": [
+            "NONE",
+            "REPOSITORY_REVIEW",
+            "SIGNED_RECORD",
+            "TICKET_APPROVAL"
+          ]
+        },
+        "statement": {
+          "type": "string",
+          "maxLength": 2000
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "incident_response_executed",
+        "rollback_executed",
+        "production_executed",
+        "rto_attained",
+        "rpo_attained"
+      ],
+      "properties": {
+        "incident_response_executed": {
+          "type": "boolean"
+        },
+        "rollback_executed": {
+          "type": "boolean"
+        },
+        "production_executed": {
+          "type": "boolean"
+        },
+        "rto_attained": {
+          "type": "boolean"
+        },
+        "rpo_attained": {
+          "type": "boolean"
+        }
+      }
+    },
+    "incident": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "severity",
+        "trigger_source",
+        "closure_reason"
+      ],
+      "properties": {
+        "severity": {
+          "enum": [
+            "SEV0",
+            "SEV1",
+            "SEV2",
+            "SEV3",
+            "EXERCISE"
+          ]
+        },
+        "trigger_source": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "closure_reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from_revision",
+        "to_revision",
+        "reason",
+        "validation_checks"
+      ],
+      "properties": {
+        "from_revision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "to_revision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "validation_checks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identity_provider",
+        "subject_ref",
+        "role"
+      ],
+      "properties": {
+        "identity_provider": {
+          "enum": [
+            "TEMPLATE",
+            "GITHUB_ACTIONS",
+            "ORGANIZATION_IDP",
+            "TICKET_SYSTEM"
+          ]
+        },
+        "subject_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "record_type": {
+            "const": "INCIDENT_RESPONSE"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "incident"
+        ],
+        "not": {
+          "required": [
+            "rollback"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "record_type": {
+            "const": "ROLLBACK_EXECUTION"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "rollback"
+        ],
+        "not": {
+          "required": [
+            "incident"
+          ]
+        }
+      }
+    }
+  ]
+}
