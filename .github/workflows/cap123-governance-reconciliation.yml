@@ -1,0 +1,70 @@
+name: CAP-123 Governance Reconciliation CI
+
+on:
+  pull_request:
+    paths:
+      - "docs/contracts/cap123-governance-reconciliation.v1.json"
+      - "scripts/validate_cap123_governance_reconciliation.py"
+      - "docs/adr/0121-cap123-governance-reconciliation.md"
+      - "docs/status/F4_CAP123_GOVERNANCE_RECONCILIATION_2026-08-07.md"
+      - ".github/workflows/cap123-governance-reconciliation.yml"
+      - "docs/roadmap/capability-portfolio.v1.tsv"
+      - "docs/roadmap/CAPABILITY_PORTFOLIO.md"
+      - "docs/product/PRODUCT_BIBLE.md"
+      - "docs/contracts/operational-readiness-evidence.v1.json"
+      - "docs/contracts/operator-drill-evidence-protocol.v1.json"
+      - "services/api/tools/check_operational_readiness_evidence.py"
+      - "services/api/tools/check_operator_drill_evidence_protocol.py"
+  push:
+    branches: [main]
+    paths:
+      - "docs/contracts/cap123-governance-reconciliation.v1.json"
+      - "scripts/validate_cap123_governance_reconciliation.py"
+      - "docs/adr/0121-cap123-governance-reconciliation.md"
+      - "docs/status/F4_CAP123_GOVERNANCE_RECONCILIATION_2026-08-07.md"
+      - ".github/workflows/cap123-governance-reconciliation.yml"
+      - "docs/roadmap/capability-portfolio.v1.tsv"
+      - "docs/roadmap/CAPABILITY_PORTFOLIO.md"
+      - "docs/product/PRODUCT_BIBLE.md"
+      - "docs/contracts/operational-readiness-evidence.v1.json"
+      - "docs/contracts/operator-drill-evidence-protocol.v1.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cap123-governance-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  reconciliation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate reconciliation JSON
+        run: >-
+          python -m json.tool
+          docs/contracts/cap123-governance-reconciliation.v1.json >/dev/null
+      - name: Compile reconciliation checker
+        run: >-
+          python -m py_compile
+          scripts/validate_cap123_governance_reconciliation.py
+      - name: Executable CAP-123 reconciliation
+        run: python scripts/validate_cap123_governance_reconciliation.py
+      - name: Existing capability portfolio gate
+        run: python scripts/validate_capability_portfolio.py
+      - name: Parent F4 evidence boundaries
+        run: |
+          python services/api/tools/check_operational_readiness_evidence.py
+          python services/api/tools/check_operator_drill_evidence_protocol.py
+      - name: No product lifecycle promotion
+        run: >-
+          echo "CI catalogs repository evidence only; it does not modify the
+          CAP-123 portfolio status, create a Product Bible decision, prove
+          production readiness, or complete F4."
