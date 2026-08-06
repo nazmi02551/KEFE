@@ -7,7 +7,15 @@
   "capability_slug": "admin-operational-reports",
   "portfolio_path": "docs/roadmap/capability-portfolio.v1.tsv",
   "portfolio_governance_path": "docs/roadmap/CAPABILITY_PORTFOLIO.md",
-  "owning_document": "docs/product/PRODUCT_BIBLE.md",
+  "owning_authority": {
+    "product_register": "Product Bible Roadmap Capability Register",
+    "repository_authority_record": "docs/roadmap/CAPABILITY_PORTFOLIO.md",
+    "owner_document_ids": [
+      "KEFE-ADM-001",
+      "KEFE-AED-001"
+    ],
+    "repository_mirror_can_promote": false
+  },
   "observed_at": "2026-08-07",
   "current_portfolio_state": {
     "status": "ROADMAP_ACCEPTED",
