@@ -117,7 +117,7 @@ def test_malformed_and_oversized_bodies_are_rejected_before_schema_detail_leaks(
         response = client.post(_PATH, content=raw, headers=headers)
         assert response.status_code == 401
         assert response.json()["code"] == "AUTH_OTP_RECEIPT_REJECTED"
-        assert "detail" not in response.json()
+        assert response.json()["detail"] is None
 
     facts = client.app.state.otp_provider_receipt_service.facts(
         window=timedelta(hours=1)
