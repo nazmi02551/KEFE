@@ -14,7 +14,9 @@ KEFE has several different kinds of software surface, but their current evidence
 - the consumer web directory is a product placeholder rather than a runtime;
 - the mobile production entrypoint compiles against a reserved `.invalid` API hostname;
 - the explicit phone preview is built as an installable debug APK in GitHub Actions;
-- mobile and web deeplinks have not been configured;
+- the MVP workflow creates a transient Android host, inserts a hostless `kefe:` custom scheme, compiles the production shell and deliberately does not upload that APK;
+- the mobile app has in-app `/case/:caseId` routing, while committed Android/iOS external-entry declarations and association evidence do not exist;
+- web deeplinks have not been configured;
 - the OTP provider receipt route is implemented as an internal API boundary but has no deployed provider binding.
 
 A CI build, local process, generated APK or internal route can be useful engineering evidence without proving that a production or preview surface is reachable by its intended audience. Treating these as equivalent would falsely satisfy the F4 reachability exit criterion.
@@ -52,12 +54,13 @@ The inventory distinguishes these states:
 
 Static configuration, a local probe or a CI build can never independently create a production reachability claim. Endpoints containing `.invalid`, `localhost`, `127.0.0.1`, `0.0.0.0` or the Android emulator alias `10.0.2.2` are forbidden as evidence for production reachability.
 
-The executable checker compares the inventory to the repository. It verifies the production mobile placeholder, local API/Admin defaults, consumer web placeholder, CI phone artifact boundary, absence of committed native deeplink hosts, and the internal-only provider callback boundary.
+The executable checker compares the inventory to the repository. It verifies the production mobile placeholder, local API/Admin defaults, consumer web placeholder, installable CI phone artifact boundary, hostless/non-uploaded transient share-scheme compile candidate, absence of committed native deeplink hosts, in-app Case route semantics, and the internal-only provider callback boundary.
 
 ## Consequences
 
 - The F4 exit criterion gains an honest, reviewable inventory rather than an inferred deployment claim.
 - Product and engineering can see exactly which proof is missing for each surface.
+- The transient `kefe:` scheme compile candidate is tracked independently from both the installable phone preview and production deeplinks.
 - A future deployment changes inventory state only together with external evidence and the relevant configuration.
 - The inventory can be complete while every production surface remains unverified; inventory completeness and production readiness are separate facts.
 - The consumer OpenAPI and runtime behavior remain unchanged.
@@ -69,6 +72,7 @@ This decision does not prove:
 - a deployed production API origin;
 - a deployed consumer web or Admin Studio origin;
 - Android App Links, iOS Universal Links or web association files;
+- that the transient hostless `kefe:` scheme exists in a committed, signed or distributed application;
 - public preview distribution, Play Store/App Store acceptance or a signed release artifact;
 - production reachability of the internal OTP provider callback;
 - real provider delivery, callback availability or network authenticity beyond the implemented HMAC boundary;
