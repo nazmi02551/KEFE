@@ -1,0 +1,102 @@
+{
+  "contract_id": "KEFE-OTP-PROVIDER-RECEIPT-001",
+  "version": "1.0.0",
+  "capabilities": [
+    "CAP-084",
+    "CAP-123"
+  ],
+  "wave": "F4",
+  "endpoint": {
+    "method": "POST",
+    "path": "/internal/provider/v1/otp-delivery-receipts",
+    "openapi_exposed": false,
+    "success_status": 202,
+    "disabled_status": 404
+  },
+  "authentication": {
+    "mode": "HMAC_SHA256",
+    "canonical_bytes": "v1\\n{timestamp}\\n{key_id}\\n{provider_event_id}\\n{exact_raw_body}",
+    "headers": {
+      "timestamp": "X-KEFE-OTP-Receipt-Timestamp",
+      "key_id": "X-KEFE-OTP-Receipt-Key-Id",
+      "provider_event_id": "X-KEFE-OTP-Receipt-Event-Id",
+      "signature": "X-KEFE-OTP-Receipt-Signature"
+    },
+    "signature_encoding": "64 lowercase hexadecimal characters",
+    "constant_time_compare": true,
+    "secret_source": "opaque key-id to secret-reference mapping",
+    "secret_material_retained": false,
+    "bounded_secret_lease": true,
+    "rotation_model": "overlapping key ids without process restart"
+  },
+  "request_bounds": {
+    "maximum_body_bytes": 4096,
+    "maximum_clock_skew_seconds": 300,
+    "key_id_pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+    "provider_event_id_pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{15,127}$",
+    "content_type": "application/json"
+  },
+  "body": {
+    "additional_properties": false,
+    "required": [
+      "delivery_id",
+      "outcome",
+      "occurred_at"
+    ],
+    "delivery_id": "UUID",
+    "outcome": [
+      "DELIVERED",
+      "UNDELIVERABLE",
+      "EXPIRED"
+    ],
+    "occurred_at": "timezone-aware UTC datetime"
+  },
+  "persistence": {
+    "append_only": true,
+    "retention_seconds_default": 2592000,
+    "provider_event_ref": "sha256(provider_event_id UTF-8 bytes)",
+    "delivery_ref": "sha256(lowercase canonical delivery UUID ASCII bytes)",
+    "unique_key": "provider_event_ref",
+    "raw_provider_event_id_stored": false,
+    "raw_delivery_id_stored": false,
+    "raw_body_stored": false,
+    "signature_stored": false,
+    "secret_reference_stored": false,
+    "secret_material_stored": false
+  },
+  "idempotency": {
+    "same_event_same_facts": "202 duplicate=true",
+    "same_event_conflicting_facts": "409 AUTH_OTP_RECEIPT_EVENT_CONFLICT",
+    "concurrent_duplicate_converges": true,
+    "restart_durable": true
+  },
+  "failure_mapping": {
+    "disabled": "404 AUTH_OTP_RECEIPT_DISABLED",
+    "secret_resolution_retryable": "503 AUTH_OTP_RECEIPT_AUTH_UNAVAILABLE",
+    "invalid_or_stale_authentication": "401 AUTH_OTP_RECEIPT_REJECTED",
+    "conflicting_replay": "409 AUTH_OTP_RECEIPT_EVENT_CONFLICT"
+  },
+  "privacy_forbidden": [
+    "recipient or destination",
+    "recipient hash",
+    "OTP or OTP hash",
+    "raw callback body",
+    "provider response payload",
+    "raw delivery id",
+    "raw provider event id",
+    "signature",
+    "credential or secret material",
+    "secret reference",
+    "provider endpoint",
+    "account, actor, device or session id"
+  ],
+  "explicit_non_claims": [
+    "real email or SMS delivery",
+    "provider callback transport availability",
+    "provider-specific semantic completeness",
+    "deployed callback latency or SLO behavior",
+    "production key rotation quality",
+    "operator incident response effectiveness",
+    "delivery receipt correlation to a user-visible outcome"
+  ]
+}

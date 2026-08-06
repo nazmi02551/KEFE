@@ -22,6 +22,9 @@ from kefe_api.infrastructure.postgres_knowledge import PostgresKnowledgeReposito
 from kefe_api.infrastructure.postgres_otp_delivery_health import (
     PostgresOtpDeliveryHealthRepository,
 )
+from kefe_api.infrastructure.postgres_otp_provider_receipts import (
+    PostgresOtpProviderReceiptRepository,
+)
 from kefe_api.infrastructure.postgres_otp_request_guard import (
     GuardedPostgresAccountContinuityRepository,
 )
@@ -64,6 +67,10 @@ from kefe_api.modules.identity.otp_delivery_health import (
     OtpDeliveryAlertPolicy,
     OtpDeliveryHealthPolicy,
     OtpDeliveryHealthRepository,
+)
+from kefe_api.modules.identity.otp_provider_receipts import (
+    InMemoryOtpProviderReceiptRepository,
+    OtpProviderReceiptRepository,
 )
 from kefe_api.modules.identity.otp_request_guard import (
     GuardedInMemoryAccountContinuityRepository,
@@ -178,6 +185,20 @@ def build_otp_delivery_health_repository(
         build_engine(settings.database_url),
         health_policy=health_policy,
         alert_policy=alert_policy,
+    )
+
+
+def build_otp_provider_receipt_repository(
+    settings: Settings,
+) -> OtpProviderReceiptRepository:
+    if settings.persistence_backend == "memory":
+        return InMemoryOtpProviderReceiptRepository()
+    if not settings.database_url:
+        raise RuntimeError(
+            "KEFE_DATABASE_URL is required when persistence_backend=postgres"
+        )
+    return PostgresOtpProviderReceiptRepository(
+        build_engine(settings.database_url)
     )
 
 
