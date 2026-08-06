@@ -1,0 +1,104 @@
+name: Surface Reachability Inventory CI
+
+on:
+  pull_request:
+    paths:
+      - "apps/web/**"
+      - "apps/admin/README.md"
+      - "apps/admin/.env.example"
+      - "apps/mobile/README.md"
+      - "apps/mobile/pubspec.yaml"
+      - "apps/mobile/lib/main.dart"
+      - "apps/mobile/lib/main_preview.dart"
+      - "apps/mobile/lib/core/config/app_config.dart"
+      - "apps/mobile/tool/check_installable_phone_artifact_boundary.py"
+      - "apps/mobile/tool/check_production_copy_boundary.py"
+      - "infra/local/compose.yaml"
+      - "services/api/src/kefe_api/modules/identity/otp_provider_receipts_router.py"
+      - "services/api/tools/check_otp_provider_receipts_contract.py"
+      - "services/api/tools/check_surface_reachability_inventory.py"
+      - "docs/contracts/installable-phone-preview-hotfix.v1.json"
+      - "docs/contracts/otp-provider-receipts.v1.json"
+      - "docs/contracts/surface-reachability-inventory.v1.json"
+      - "docs/adr/0118-production-and-preview-surface-reachability-inventory.md"
+      - "docs/status/F4_SURFACE_REACHABILITY_INVENTORY_2026-08-06.md"
+      - ".github/workflows/global-readiness.yml"
+      - ".github/workflows/surface-reachability-inventory.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "apps/admin/README.md"
+      - "apps/admin/.env.example"
+      - "apps/mobile/README.md"
+      - "apps/mobile/pubspec.yaml"
+      - "apps/mobile/lib/main.dart"
+      - "apps/mobile/lib/main_preview.dart"
+      - "apps/mobile/lib/core/config/app_config.dart"
+      - "apps/mobile/tool/check_installable_phone_artifact_boundary.py"
+      - "apps/mobile/tool/check_production_copy_boundary.py"
+      - "infra/local/compose.yaml"
+      - "services/api/src/kefe_api/modules/identity/otp_provider_receipts_router.py"
+      - "services/api/tools/check_otp_provider_receipts_contract.py"
+      - "services/api/tools/check_surface_reachability_inventory.py"
+      - "docs/contracts/installable-phone-preview-hotfix.v1.json"
+      - "docs/contracts/otp-provider-receipts.v1.json"
+      - "docs/contracts/surface-reachability-inventory.v1.json"
+      - "docs/adr/0118-production-and-preview-surface-reachability-inventory.md"
+      - "docs/status/F4_SURFACE_REACHABILITY_INVENTORY_2026-08-06.md"
+      - ".github/workflows/global-readiness.yml"
+      - ".github/workflows/surface-reachability-inventory.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: surface-reachability-inventory-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate inventory JSON
+        run: python -m json.tool docs/contracts/surface-reachability-inventory.v1.json >/dev/null
+      - name: Executable surface reachability inventory
+        run: python services/api/tools/check_surface_reachability_inventory.py
+      - name: Phone artifact boundary parent contract
+        run: python apps/mobile/tool/check_installable_phone_artifact_boundary.py
+      - name: Production copy boundary parent contract
+        run: python apps/mobile/tool/check_production_copy_boundary.py
+      - name: OTP provider receipt parent contract
+        run: python services/api/tools/check_otp_provider_receipts_contract.py
+      - name: No external reachability probe
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          inventory = json.loads(
+              Path("docs/contracts/surface-reachability-inventory.v1.json").read_text()
+          )
+          reachable = [
+              surface["surface_id"]
+              for surface in inventory["surfaces"]
+              if surface["externally_reachable"]
+              or surface["status"] == "REACHABLE_VERIFIED"
+          ]
+          if reachable:
+              raise SystemExit(
+                  "External reachability requires separately reviewed probe/store/operator "
+                  f"evidence; unexpected claims: {reachable}"
+              )
+          print(
+              "PASS — this CI validates inventory consistency only; it does not contact "
+              "or attest any production endpoint, store or operator surface."
+          )
+          PY
