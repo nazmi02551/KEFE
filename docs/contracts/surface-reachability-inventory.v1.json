@@ -155,6 +155,23 @@
       "next_required_proof": "Use a controlled distribution channel and attach installation evidence if preview distribution must be claimed."
     },
     {
+      "surface_id": "mobile-share-scheme-compile-candidate",
+      "surface_type": "DEEPLINK_COMPILE_PROOF",
+      "environment": "CI_CANDIDATE",
+      "audience": "ENGINEERING",
+      "status": "COMPILE_ONLY",
+      "externally_reachable": false,
+      "endpoint": "kefe:",
+      "evidence_kind": "CI_BUILD_ARTIFACT",
+      "evidence_sources": [
+        ".github/workflows/mvp-beta-gates.yml"
+      ],
+      "artifact_uploaded": false,
+      "host_bound": false,
+      "committed_native_configuration": false,
+      "next_required_proof": "Commit reviewed Android/iOS declarations, define host/path semantics, add route tests and provide signed distribution evidence."
+    },
+    {
       "surface_id": "mobile-deeplinks",
       "surface_type": "DEEPLINK",
       "environment": "PRODUCTION",
@@ -165,7 +182,8 @@
       "evidence_kind": "STATIC_CONFIG",
       "evidence_sources": [
         "apps/mobile/pubspec.yaml",
-        "apps/mobile/README.md"
+        "apps/mobile/README.md",
+        ".github/workflows/mvp-beta-gates.yml"
       ],
       "next_required_proof": "Commit Android/iOS host declarations, route mapping tests and verified association files."
     },
@@ -204,6 +222,7 @@
     "No consumer web runtime or web deeplink origin is deployed.",
     "No Admin Studio production origin or operator access path is deployed.",
     "No Android App Link, iOS Universal Link or association-file configuration is committed.",
+    "The transient kefe custom-scheme candidate is generated only in CI, has no host binding and is not uploaded.",
     "The mobile production shell is compile-only and targets a reserved invalid hostname.",
     "The installable phone preview is a GitHub Actions artifact, not a store release or public distribution channel.",
     "The internal OTP provider callback has no production network reachability or provider binding evidence.",
