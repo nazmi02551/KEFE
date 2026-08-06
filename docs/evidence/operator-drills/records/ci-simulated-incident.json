@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0.0",
+  "record_id": "KEFE-IR-CI_SIM_001",
+  "record_type": "INCIDENT_RESPONSE",
+  "classification": "CI_SIMULATED",
+  "template": false,
+  "environment": {
+    "kind": "CI",
+    "name": "github-actions-structural-fixture",
+    "approved": false,
+    "deployment_identity": null,
+    "surface_ids": [
+      "canonical-api-local"
+    ]
+  },
+  "exercise": {
+    "scenario_id": "ci-incident-structure-v1",
+    "title": "CI-only incident timeline fixture",
+    "objective": "Exercise the acceptance validator without representing human execution.",
+    "started_at": "2026-08-06T00:00:00Z",
+    "ended_at": "2026-08-06T00:06:00Z"
+  },
+  "timeline": [
+    {
+      "sequence": 1,
+      "phase": "DETECTION",
+      "occurred_at": "2026-08-06T00:01:00Z",
+      "action": "Create a synthetic validation signal.",
+      "observed_result": "Synthetic signal recorded in the fixture."
+    },
+    {
+      "sequence": 2,
+      "phase": "ACKNOWLEDGEMENT",
+      "occurred_at": "2026-08-06T00:02:00Z",
+      "action": "Advance the fixture to acknowledgement.",
+      "observed_result": "No human acknowledgement occurred."
+    },
+    {
+      "sequence": 3,
+      "phase": "DIAGNOSIS",
+      "occurred_at": "2026-08-06T00:03:00Z",
+      "action": "Evaluate the fixture diagnosis fields.",
+      "observed_result": "Required diagnosis fields are structurally present."
+    },
+    {
+      "sequence": 4,
+      "phase": "ACTION",
+      "occurred_at": "2026-08-06T00:04:00Z",
+      "action": "Exercise the action record path.",
+      "observed_result": "No runtime remediation was performed."
+    },
+    {
+      "sequence": 5,
+      "phase": "CLOSURE",
+      "occurred_at": "2026-08-06T00:05:00Z",
+      "action": "Close the structural fixture.",
+      "observed_result": "Validator path completed without an incident."
+    }
+  ],
+  "actors": {
+    "operator": {
+      "identity_provider": "GITHUB_ACTIONS",
+      "subject_ref": "workflow:operator-drill-evidence-protocol",
+      "role": "simulation-runner"
+    },
+    "approver": null
+  },
+  "outcomes": {
+    "result": "SUCCESS",
+    "observed_effect": "The CI fixture exercises record validation only.",
+    "recovery_metrics": {
+      "rto_objective_seconds": null,
+      "rto_observed_seconds": null,
+      "rpo_objective_seconds": null,
+      "rpo_observed_seconds": null,
+      "source_artifact_sha256": null
+    }
+  },
+  "artifacts": [],
+  "redaction": {
+    "reviewed": true,
+    "contains_secrets": false,
+    "contains_raw_customer_data": false,
+    "notes": "Synthetic fixture with no user or operator data."
+  },
+  "attestation": {
+    "operator_attested": false,
+    "approver_attested": false,
+    "operator_signed_at": null,
+    "approver_signed_at": null,
+    "method": "NONE",
+    "statement": "CI simulation only; no human attestation."
+  },
+  "claims": {
+    "incident_response_executed": false,
+    "rollback_executed": false,
+    "production_executed": false,
+    "rto_attained": false,
+    "rpo_attained": false
+  },
+  "incident": {
+    "severity": "EXERCISE",
+    "trigger_source": "synthetic-validator-fixture",
+    "closure_reason": "Structural fixture completed; no incident existed."
+  }
+}
