@@ -62,6 +62,16 @@ class Settings(BaseSettings):
         ge=3_600,
         le=7_776_000,
     )
+    otp_receipt_mode: Literal["DISABLED", "HMAC_SHA256"] = "DISABLED"
+    otp_receipt_secret_refs: dict[str, str] = Field(default_factory=dict)
+    otp_receipt_secret_lease_seconds: int = Field(default=30, ge=1, le=300)
+    otp_receipt_max_skew_seconds: int = Field(default=300, ge=30, le=3_600)
+    otp_receipt_max_body_bytes: int = Field(default=4_096, ge=256, le=65_536)
+    otp_receipt_retention_seconds: int = Field(
+        default=2_592_000,
+        ge=86_400,
+        le=7_776_000,
+    )
     otp_request_guard_mode: Literal["AUTO", "OFF", "ENFORCE"] = "AUTO"
     otp_request_cooldown_seconds: int = Field(default=60, ge=1, le=3_600)
     otp_request_window_seconds: int = Field(default=900, ge=60, le=86_400)

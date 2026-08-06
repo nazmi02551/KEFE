@@ -18,6 +18,7 @@ from kefe_api.infrastructure.persistence import (
     build_decision_repository,
     build_identity_repository,
     build_otp_delivery_health_repository,
+    build_otp_provider_receipt_repository,
     build_privacy_repository,
     build_progress_repository,
     build_share_repository,
@@ -125,6 +126,12 @@ from kefe_api.modules.identity.otp_delivery_health import (
     OtpDeliveryHealthPolicy,
     OtpDeliveryHealthService,
 )
+from kefe_api.modules.identity.otp_provider_receipts import (
+    build_otp_provider_receipt_service,
+)
+from kefe_api.modules.identity.otp_provider_receipts_router import (
+    router as otp_provider_receipts_router,
+)
 from kefe_api.modules.identity.router import router as identity_router
 from kefe_api.modules.identity.service import IdentityService
 from kefe_api.modules.privacy.router import router as privacy_router
@@ -156,6 +163,11 @@ def create_app() -> FastAPI:
         identity_repository,
     )
     otp_delivery_health_repository = build_otp_delivery_health_repository(settings)
+    otp_provider_receipt_repository = build_otp_provider_receipt_repository(settings)
+    otp_provider_receipt_service = build_otp_provider_receipt_service(
+        settings,
+        repository=otp_provider_receipt_repository,
+    )
     otp_delivery_health_policy = OtpDeliveryHealthPolicy.from_seconds(
         window_seconds=settings.otp_delivery_health_window_seconds,
         retention_seconds=settings.otp_delivery_health_retention_seconds,
@@ -282,6 +294,8 @@ def create_app() -> FastAPI:
     app.state.otp_delivery_health_policy = otp_delivery_health_policy
     app.state.otp_delivery_health_service = otp_delivery_health_service
     app.state.otp_delivery_health_observer = otp_delivery_health_observer
+    app.state.otp_provider_receipt_repository = otp_provider_receipt_repository
+    app.state.otp_provider_receipt_service = otp_provider_receipt_service
     app.state.account_continuity_repository = account_continuity_repository
     app.state.account_continuity_service = AccountContinuityService(
         repository=account_continuity_repository,
@@ -372,6 +386,7 @@ def create_app() -> FastAPI:
     app.include_router(health_router)
     app.include_router(identity_router)
     app.include_router(account_router)
+    app.include_router(otp_provider_receipts_router)
     app.include_router(context_router)
     app.include_router(decision_router)
     if _api_at_least(settings.api_version, 0, 20):

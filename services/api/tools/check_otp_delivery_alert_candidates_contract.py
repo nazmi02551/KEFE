@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -16,6 +17,17 @@ def _text(relative_path: str) -> str:
     path = ROOT / relative_path
     _require(path.is_file(), f"missing required file: {relative_path}")
     return path.read_text(encoding="utf-8")
+
+
+def _registry_version(text: str) -> tuple[int, int, int]:
+    match = re.search(
+        r"^registry_version:\s*(\d+)\.(\d+)\.(\d+)$",
+        text,
+        re.M,
+    )
+    _require(match is not None, "error registry version format")
+    assert match is not None
+    return tuple(int(part) for part in match.groups())
 
 
 def main() -> None:
@@ -200,7 +212,10 @@ def main() -> None:
     ):
         _require(fragment in postgres_tests, f"missing PostgreSQL evidence: {fragment}")
 
-    _require("registry_version: 1.22.0" in error_codes, "error registry version")
+    _require(
+        _registry_version(error_codes) >= (1, 22, 0),
+        "error registry minimum version",
+    )
     for fragment in (
         "- code: ADMIN_OPERATIONAL_ALERT_NOT_FOUND\n  http_status: 404",
         "- code: ADMIN_OPERATIONAL_ALERT_ACK_MISMATCH\n  http_status: 409",
