@@ -5,6 +5,7 @@ on:
     paths:
       - "docs/contracts/cap123-governance-reconciliation.v1.json"
       - "scripts/validate_cap123_governance_reconciliation.py"
+      - "scripts/validate_capability_portfolio.py"
       - "docs/adr/0121-cap123-governance-reconciliation.md"
       - "docs/status/F4_CAP123_GOVERNANCE_RECONCILIATION_2026-08-07.md"
       - ".github/workflows/cap123-governance-reconciliation.yml"
@@ -19,6 +20,7 @@ on:
     paths:
       - "docs/contracts/cap123-governance-reconciliation.v1.json"
       - "scripts/validate_cap123_governance_reconciliation.py"
+      - "scripts/validate_capability_portfolio.py"
       - "docs/adr/0121-cap123-governance-reconciliation.md"
       - "docs/status/F4_CAP123_GOVERNANCE_RECONCILIATION_2026-08-07.md"
       - ".github/workflows/cap123-governance-reconciliation.yml"
