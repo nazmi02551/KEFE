@@ -1,0 +1,71 @@
+name: Operator Drill Evidence Protocol CI
+
+on:
+  pull_request:
+    paths:
+      - "docs/contracts/operator-drill-evidence-protocol.v1.json"
+      - "docs/contracts/operator-drill-evidence-record.schema.v1.json"
+      - "docs/evidence/operator-drills/**"
+      - "docs/adr/0120-operator-drill-evidence-acceptance-protocol.md"
+      - "docs/status/F4_OPERATOR_DRILL_EVIDENCE_PROTOCOL_2026-08-06.md"
+      - "docs/contracts/operational-readiness-evidence.v1.json"
+      - "services/api/tools/check_operator_drill_evidence_protocol.py"
+      - "services/api/tools/check_operational_readiness_evidence.py"
+      - ".github/workflows/operator-drill-evidence-protocol.yml"
+      - ".github/workflows/operational-readiness-evidence.yml"
+  push:
+    branches: [main]
+    paths:
+      - "docs/contracts/operator-drill-evidence-protocol.v1.json"
+      - "docs/contracts/operator-drill-evidence-record.schema.v1.json"
+      - "docs/evidence/operator-drills/**"
+      - "docs/adr/0120-operator-drill-evidence-acceptance-protocol.md"
+      - "docs/status/F4_OPERATOR_DRILL_EVIDENCE_PROTOCOL_2026-08-06.md"
+      - "services/api/tools/check_operator_drill_evidence_protocol.py"
+      - ".github/workflows/operator-drill-evidence-protocol.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: operator-drill-evidence-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  protocol:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Validate protocol JSON
+        run: |
+          python -m json.tool docs/contracts/operator-drill-evidence-protocol.v1.json >/dev/null
+          python -m json.tool docs/contracts/operator-drill-evidence-record.schema.v1.json >/dev/null
+          python -m json.tool docs/evidence/operator-drills/templates/incident-response.template.json >/dev/null
+          python -m json.tool docs/evidence/operator-drills/templates/rollback-execution.template.json >/dev/null
+          python -m json.tool docs/evidence/operator-drills/records/ci-simulated-incident.json >/dev/null
+          python -m json.tool docs/evidence/operator-drills/records/ci-simulated-rollback.json >/dev/null
+      - name: Lint protocol checker
+        working-directory: services/api
+        run: ruff check tools/check_operator_drill_evidence_protocol.py
+      - name: Executable evidence acceptance protocol
+        working-directory: services/api
+        run: python tools/check_operator_drill_evidence_protocol.py
+      - name: Parent operational readiness evidence boundary
+        working-directory: services/api
+        run: python tools/check_operational_readiness_evidence.py
+      - name: No human or production drill executed
+        run: >-
+          echo "CI validates schemas and synthetic fixtures only; it does not
+          create human attestation, execute incident response, change a
+          deployment, perform rollback, or prove production readiness."
