@@ -11,6 +11,7 @@ CONTRACT_PATH = Path(
 )
 PORTFOLIO_PATH = Path("docs/roadmap/capability-portfolio.v1.tsv")
 PORTFOLIO_GOVERNANCE_PATH = Path("docs/roadmap/CAPABILITY_PORTFOLIO.md")
+PORTFOLIO_VALIDATOR_PATH = Path("scripts/validate_capability_portfolio.py")
 OPERATIONAL_READINESS_PATH = Path(
     "docs/contracts/operational-readiness-evidence.v1.json"
 )
@@ -106,21 +107,23 @@ def validate_contract(contract: dict[str, Any]) -> None:
     require(current["source"] == "canonical", "canonical source")
 
     policy = contract["reconciliation_policy"]
-    for key in (
+    true_policies = {
         "repository_evidence_can_be_recorded",
         "ci_evidence_can_be_recorded",
         "explicit_owning_document_decision_required",
         "parent_stack_integration_required_before_status_change",
         "exact_head_ci_required_before_status_change",
-    ):
-        require(policy[key] is True, f"required policy: {key}")
-    for key in (
+    }
+    false_policies = {
         "repository_evidence_is_deployed_evidence",
         "ci_evidence_is_production_evidence",
         "protocol_availability_is_human_execution",
         "automatic_portfolio_mutation_allowed",
         "mirror_can_create_product_decision",
-    ):
+    }
+    for key in true_policies:
+        require(policy[key] is True, f"required policy: {key}")
+    for key in false_policies:
         require(policy[key] is False, f"false-claim policy: {key}")
 
     transition = contract["candidate_transition"]
@@ -141,7 +144,6 @@ def validate_contract(contract: dict[str, Any]) -> None:
 
     verified = contract["implemented_verified_gate"]
     require(verified["status_allowed_now"] is False, "verified gate")
-    required = set(verified["required_evidence"])
     require(
         {
             "approved_production_deployment_identity",
@@ -153,15 +155,14 @@ def validate_contract(contract: dict[str, Any]) -> None:
             "human_rollback_execution_attestation",
             "explicit_owning_document_decision",
         }
-        <= required,
+        <= set(verified["required_evidence"]),
         "verified evidence requirements",
     )
 
-    evidence_catalog = contract["evidence_catalog"]
-    require(len(evidence_catalog) == 3, "evidence catalog")
-    evidence_ids = {item["evidence_id"] for item in evidence_catalog}
+    catalog = contract["evidence_catalog"]
+    require(len(catalog) == 3, "evidence catalog")
     require(
-        evidence_ids
+        {item["evidence_id"] for item in catalog}
         == {
             "CAP123-REPOSITORY-RUNTIME",
             "CAP123-DELIVERY-OBSERVABILITY",
@@ -169,7 +170,7 @@ def validate_contract(contract: dict[str, Any]) -> None:
         },
         "evidence ids",
     )
-    for item in evidence_catalog:
+    for item in catalog:
         require(item["verified_in_repository"] is True, "repository evidence")
         require(item["production_verified"] is False, "production boundary")
         require(item["human_verified"] is False, "human boundary")
@@ -247,10 +248,12 @@ def validate_portfolio(contract: dict[str, Any]) -> None:
         "product bible roadmap capability register",
         "does not create or promote product decisions",
         "owning documents and explicit decisions",
-        "implemented_partial",
-        "implemented_verified",
     ):
         require(phrase in governance, f"portfolio governance: {phrase}")
+
+    validator = load_text(PORTFOLIO_VALIDATOR_PATH)
+    require("IMPLEMENTED_PARTIAL" in validator, "partial lifecycle catalog")
+    require("IMPLEMENTED_VERIFIED" in validator, "verified lifecycle catalog")
 
 
 def validate_parent_evidence() -> None:
@@ -262,35 +265,16 @@ def validate_parent_evidence() -> None:
         "parent reconciliation policy",
     )
     items = {item["item_id"]: item for item in readiness["items"]}
-    require(
-        items["cap123-portfolio-status"]["status"]
-        == "PORTFOLIO_STATUS_STALE",
-        "parent stale status",
-    )
-    require(
-        items["production-deployment"]["status"]
-        == "DEPLOYMENT_UNCONFIGURED",
-        "deployment state",
-    )
-    require(
-        items["deployed-telemetry-slo-query"]["status"]
-        == "TELEMETRY_UNVERIFIED",
-        "telemetry state",
-    )
-    require(
-        items["external-paging"]["status"] == "PAGING_UNVERIFIED",
-        "paging state",
-    )
-    require(
-        items["incident-response-execution"]["status"]
-        == "OPERATOR_DRILL_PENDING",
-        "incident state",
-    )
-    require(
-        items["rollback-execution"]["status"]
-        == "OPERATOR_DRILL_PENDING",
-        "rollback state",
-    )
+    expected = {
+        "cap123-portfolio-status": "PORTFOLIO_STATUS_STALE",
+        "production-deployment": "DEPLOYMENT_UNCONFIGURED",
+        "deployed-telemetry-slo-query": "TELEMETRY_UNVERIFIED",
+        "external-paging": "PAGING_UNVERIFIED",
+        "incident-response-execution": "OPERATOR_DRILL_PENDING",
+        "rollback-execution": "OPERATOR_DRILL_PENDING",
+    }
+    for item_id, status in expected.items():
+        require(items[item_id]["status"] == status, f"parent state: {item_id}")
 
     drills = load_json(OPERATOR_DRILL_PATH)
     current = drills["current_evidence"]
