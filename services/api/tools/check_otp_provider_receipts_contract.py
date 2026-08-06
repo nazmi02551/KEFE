@@ -46,6 +46,11 @@ def main() -> None:
         "constant-time compare",
     )
     _require(
+        contract["authentication"]["rotation_model"]
+        == "overlapping key ids without process restart",
+        "rotation model",
+    )
+    _require(
         contract["persistence"]["raw_body_stored"] is False,
         "raw body non-persistence",
     )
@@ -75,6 +80,9 @@ def main() -> None:
     )
     memory_tests = _text("services/api/tests/test_otp_provider_receipts.py")
     http_tests = _text("services/api/tests/test_otp_provider_receipts_http.py")
+    rotation_tests = _text(
+        "services/api/tests/test_otp_provider_receipt_secret_rotation.py"
+    )
     postgres_tests = _text(
         "services/api/tests/test_otp_provider_receipts_postgres.py"
     )
@@ -112,7 +120,10 @@ def main() -> None:
     for fragment in (
         '"/otp-delivery-receipts"',
         "include_in_schema=False",
-        "await request.body()",
+        "raw_body = await request.body()",
+        "len(raw_body) > service.policy.maximum_body_bytes",
+        "OtpProviderReceiptBody.model_validate_json(raw_body)",
+        "except ValidationError",
         'Header(alias="X-KEFE-OTP-Receipt-Timestamp")',
         'Header(alias="X-KEFE-OTP-Receipt-Key-Id")',
         'Header(alias="X-KEFE-OTP-Receipt-Event-Id")',
@@ -150,10 +161,15 @@ def main() -> None:
         "test_invalid_signature_stale_timestamp_and_unknown_key_are_indistinguishable",
     ):
         _require(fragment in memory_tests, f"missing memory proof: {fragment}")
+    for fragment in (
+        "test_signed_callback_is_accepted_and_exact_replay_is_duplicate",
+        "test_malformed_and_oversized_bodies_are_rejected_before_schema_detail_leaks",
+    ):
+        _require(fragment in http_tests, f"missing HTTP proof: {fragment}")
     _require(
-        "test_signed_callback_is_accepted_and_exact_replay_is_duplicate"
-        in http_tests,
-        "HTTP replay proof",
+        "test_overlapping_key_ids_and_live_secret_rotation_require_no_process_restart"
+        in rotation_tests,
+        "overlapping key-id and live rotation proof",
     )
     for fragment in (
         "test_postgres_receipt_survives_restart_and_exact_replay_is_idempotent",
@@ -171,6 +187,10 @@ def main() -> None:
     ):
         _require(f"- code: {code}" in errors, f"missing error code: {code}")
     _require("Exact composed OpenAPI remains unchanged" in workflow, "OpenAPI gate")
+    _require(
+        "tests/test_otp_provider_receipt_secret_rotation.py" in workflow,
+        "rotation CI gate",
+    )
     _require("real email or SMS delivery" in adr, "real delivery non-claim")
     _require("callback transport availability" in adr, "transport non-claim")
 
@@ -188,9 +208,9 @@ def main() -> None:
 
     print(
         "OTP provider receipts contract: PASS — exact-body HMAC authentication, "
-        "rotation-safe secret references, bounded replay protection, privacy-safe "
-        "append-only persistence, restart/concurrency evidence and unchanged consumer "
-        "OpenAPI are executable."
+        "pre-parse body bounds, overlapping key-id rotation, bounded replay "
+        "protection, privacy-safe append-only persistence, restart/concurrency "
+        "evidence and unchanged consumer OpenAPI are executable."
     )
 
 
