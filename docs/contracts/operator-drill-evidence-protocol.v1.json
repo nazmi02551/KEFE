@@ -1,0 +1,156 @@
+{
+  "contract_id": "KEFE-OPERATOR-DRILL-EVIDENCE-PROTOCOL-001",
+  "version": "1.0.0",
+  "status": "IMPLEMENTED_PROTOCOL_ONLY",
+  "foundation_wave": "F4",
+  "capabilities": [
+    "CAP-123"
+  ],
+  "exit_criterion": "OBSERVABILITY_SLO_AND_ROLLBACK_EVIDENCE_EXPLICIT",
+  "parent_contract": "docs/contracts/operational-readiness-evidence.v1.json",
+  "record_schema": "docs/contracts/operator-drill-evidence-record.schema.v1.json",
+  "record_directory": "docs/evidence/operator-drills/records",
+  "observed_at": "2026-08-06",
+  "policy": {
+    "template_is_execution_evidence": false,
+    "ci_simulation_is_human_execution": false,
+    "ci_can_create_human_attestation": false,
+    "human_attestation_requires_independent_approver": true,
+    "production_claim_requires_approved_environment": true,
+    "production_claim_requires_deployment_identity": true,
+    "human_evidence_requires_artifact_provenance": true,
+    "sensitive_data_is_forbidden": true,
+    "missing_evidence_keeps_operator_state_pending": true,
+    "protocol_availability_is_production_readiness": false
+  },
+  "classification_catalog": [
+    "TEMPLATE_ONLY",
+    "CI_SIMULATED",
+    "HUMAN_ATTESTED_NON_PRODUCTION",
+    "HUMAN_ATTESTED_PRODUCTION"
+  ],
+  "record_type_catalog": [
+    "INCIDENT_RESPONSE",
+    "ROLLBACK_EXECUTION"
+  ],
+  "environment_catalog": [
+    "TEMPLATE",
+    "CI",
+    "NON_PRODUCTION",
+    "PRODUCTION"
+  ],
+  "result_catalog": [
+    "NOT_EXECUTED",
+    "SUCCESS",
+    "PARTIAL",
+    "FAILED"
+  ],
+  "proof_effects": {
+    "TEMPLATE_ONLY": {
+      "human_executed": false,
+      "eligible_for_relevant_requirement": false,
+      "production_verified": false
+    },
+    "CI_SIMULATED": {
+      "human_executed": false,
+      "eligible_for_relevant_requirement": false,
+      "production_verified": false
+    },
+    "HUMAN_ATTESTED_NON_PRODUCTION": {
+      "human_executed": true,
+      "eligible_for_relevant_requirement": true,
+      "production_verified": false
+    },
+    "HUMAN_ATTESTED_PRODUCTION": {
+      "human_executed": true,
+      "eligible_for_relevant_requirement": true,
+      "production_verified": true
+    }
+  },
+  "required_timeline_phases": {
+    "INCIDENT_RESPONSE": [
+      "DETECTION",
+      "ACKNOWLEDGEMENT",
+      "DIAGNOSIS",
+      "ACTION",
+      "CLOSURE"
+    ],
+    "ROLLBACK_EXECUTION": [
+      "PRECHECK",
+      "DECISION",
+      "EXECUTION",
+      "VERIFICATION",
+      "CLOSURE"
+    ]
+  },
+  "human_attestation_requirements": [
+    "approved_environment",
+    "opaque_operator_subject",
+    "independent_opaque_approver_subject",
+    "operator_and_approver_attestations",
+    "bounded_utc_timeline",
+    "artifact_uri_and_sha256",
+    "result_and_observed_effect",
+    "redaction_confirmation"
+  ],
+  "production_requirements": [
+    "environment_kind_production",
+    "approved_environment",
+    "deployment_identity",
+    "production_execution_claim",
+    "human_attestation_requirements"
+  ],
+  "forbidden_content": {
+    "keys": [
+      "password",
+      "passwd",
+      "secret",
+      "client_secret",
+      "access_token",
+      "refresh_token",
+      "authorization",
+      "api_key",
+      "private_key",
+      "session_cookie",
+      "raw_customer_data"
+    ],
+    "value_fragments": [
+      "-----BEGIN PRIVATE KEY-----",
+      "-----BEGIN RSA PRIVATE KEY-----",
+      "Bearer ",
+      "postgresql://",
+      "postgres://"
+    ]
+  },
+  "templates": [
+    {
+      "record_type": "INCIDENT_RESPONSE",
+      "path": "docs/evidence/operator-drills/templates/incident-response.template.json",
+      "classification": "TEMPLATE_ONLY",
+      "proof": false
+    },
+    {
+      "record_type": "ROLLBACK_EXECUTION",
+      "path": "docs/evidence/operator-drills/templates/rollback-execution.template.json",
+      "classification": "TEMPLATE_ONLY",
+      "proof": false
+    }
+  ],
+  "current_evidence": {
+    "accepted_record_ids": [],
+    "incident_response_status": "OPERATOR_DRILL_PENDING",
+    "rollback_status": "OPERATOR_DRILL_PENDING",
+    "production_verified": false
+  },
+  "explicit_non_claims": [
+    "No incident-response exercise is executed by this protocol.",
+    "No rollback is executed by this protocol.",
+    "The templates are not execution evidence.",
+    "CI validation is not human operator attestation.",
+    "No production deployment or production environment is proven.",
+    "No production SLO, error-budget, paging, RTO or RPO result is proven.",
+    "No incident response effectiveness or recovery effectiveness is proven.",
+    "No CAP-123 lifecycle promotion is performed.",
+    "F4 remains pending."
+  ]
+}
