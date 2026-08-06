@@ -1,0 +1,145 @@
+{
+  "contract_id": "KEFE-CAP123-GOVERNANCE-RECONCILIATION-001",
+  "version": "1.0.0",
+  "status": "EVIDENCE_RECONCILIATION_ONLY",
+  "foundation_wave": "F4",
+  "capability_id": "CAP-123",
+  "capability_slug": "admin-operational-reports",
+  "portfolio_path": "docs/roadmap/capability-portfolio.v1.tsv",
+  "portfolio_governance_path": "docs/roadmap/CAPABILITY_PORTFOLIO.md",
+  "owning_authority": {
+    "product_register": "Product Bible Roadmap Capability Register",
+    "repository_authority_record": "docs/roadmap/CAPABILITY_PORTFOLIO.md",
+    "owner_document_ids": [
+      "KEFE-ADM-001",
+      "KEFE-AED-001"
+    ],
+    "repository_mirror_can_promote": false
+  },
+  "observed_at": "2026-08-07",
+  "current_portfolio_state": {
+    "status": "ROADMAP_ACCEPTED",
+    "evidence": "",
+    "source": "canonical"
+  },
+  "reconciliation_policy": {
+    "repository_evidence_can_be_recorded": true,
+    "ci_evidence_can_be_recorded": true,
+    "repository_evidence_is_deployed_evidence": false,
+    "ci_evidence_is_production_evidence": false,
+    "protocol_availability_is_human_execution": false,
+    "automatic_portfolio_mutation_allowed": false,
+    "mirror_can_create_product_decision": false,
+    "explicit_owning_document_decision_required": true,
+    "parent_stack_integration_required_before_status_change": true,
+    "exact_head_ci_required_before_status_change": true
+  },
+  "candidate_transition": {
+    "from": "ROADMAP_ACCEPTED",
+    "to": "IMPLEMENTED_PARTIAL",
+    "eligible_for_governance_review": true,
+    "performed_by_this_change": false,
+    "authority": "Explicit Product Bible and documentation-governance decision",
+    "reason": "Repository/runtime and CI evidence exists, while deployed, external and human operator evidence remains incomplete."
+  },
+  "implemented_verified_gate": {
+    "status_allowed_now": false,
+    "required_evidence": [
+      "integrated_implementation_line",
+      "passing_exact_head_ci",
+      "approved_production_deployment_identity",
+      "externally_observed_surface_reachability",
+      "deployed_telemetry_query",
+      "slo_and_error_budget_result",
+      "external_pager_delivery_receipt",
+      "human_incident_response_attestation",
+      "human_rollback_execution_attestation",
+      "behavioral_validation",
+      "explicit_owning_document_decision"
+    ]
+  },
+  "evidence_catalog": [
+    {
+      "evidence_id": "CAP123-REPOSITORY-RUNTIME",
+      "classification": "REPOSITORY_RUNTIME",
+      "verified_in_repository": true,
+      "production_verified": false,
+      "human_verified": false,
+      "paths": [
+        "docs/contracts/admin-operational-reports-snapshot.v1.json",
+        "services/api/src/kefe_api/modules/admin_operational_reports/service.py",
+        "services/api/tests/test_admin_operational_reports_http.py",
+        "services/api/tests/test_admin_operational_reports_http_postgres.py",
+        ".github/workflows/admin-operational-reports.yml"
+      ]
+    },
+    {
+      "evidence_id": "CAP123-DELIVERY-OBSERVABILITY",
+      "classification": "REPOSITORY_RUNTIME",
+      "verified_in_repository": true,
+      "production_verified": false,
+      "human_verified": false,
+      "paths": [
+        "docs/contracts/otp-delivery-health.v1.json",
+        "docs/contracts/otp-delivery-alert-candidates.v1.json",
+        "services/api/src/kefe_api/modules/identity/otp_delivery_health.py",
+        ".github/workflows/otp-delivery-health.yml",
+        ".github/workflows/otp-delivery-alert-candidates.yml"
+      ]
+    },
+    {
+      "evidence_id": "CAP123-OPERATIONAL-READINESS-BOUNDARY",
+      "classification": "REPOSITORY_CI_PROTOCOL",
+      "verified_in_repository": true,
+      "production_verified": false,
+      "human_verified": false,
+      "paths": [
+        "docs/contracts/operational-readiness-evidence.v1.json",
+        "services/api/tools/check_operational_readiness_evidence.py",
+        "docs/contracts/operator-drill-evidence-protocol.v1.json",
+        "services/api/tools/check_operator_drill_evidence_protocol.py"
+      ]
+    }
+  ],
+  "stack_references": [
+    "PR-323",
+    "PR-325",
+    "PR-327",
+    "PR-329",
+    "PR-331",
+    "PR-333",
+    "PR-335",
+    "PR-338"
+  ],
+  "unresolved_gates": [
+    "parent_stack_integration",
+    "approved_production_deployment",
+    "external_surface_reachability",
+    "deployed_telemetry_and_slo_evidence",
+    "external_pager_delivery_receipt",
+    "human_incident_response_evidence",
+    "human_rollback_evidence",
+    "explicit_product_bible_lifecycle_decision"
+  ],
+  "current_evidence_state": {
+    "repository_runtime_present": true,
+    "ci_validation_present": true,
+    "production_deployment_verified": false,
+    "external_reachability_verified": false,
+    "deployed_telemetry_verified": false,
+    "external_paging_verified": false,
+    "human_incident_response_verified": false,
+    "human_rollback_verified": false,
+    "portfolio_lifecycle_promoted": false,
+    "f4_complete": false
+  },
+  "explicit_non_claims": [
+    "This reconciliation does not change the CAP-123 portfolio status.",
+    "This reconciliation does not create or replace a Product Bible decision.",
+    "Repository and CI evidence are not production deployment evidence.",
+    "CI protocols and simulations are not human operator execution.",
+    "CAP-123 is not IMPLEMENTED_VERIFIED.",
+    "No production readiness claim is made.",
+    "F4 remains pending."
+  ]
+}
