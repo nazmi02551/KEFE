@@ -1,0 +1,135 @@
+name: Operational Readiness Evidence CI
+
+on:
+  pull_request:
+    paths:
+      - "docs/contracts/operational-readiness-evidence.v1.json"
+      - "docs/adr/0119-operational-readiness-evidence-boundary.md"
+      - "docs/status/F4_OPERATIONAL_READINESS_EVIDENCE_2026-08-06.md"
+      - "docs/contracts/foundation-completion-program.v1.json"
+      - "docs/roadmap/capability-portfolio.v1.tsv"
+      - "docs/contracts/admin-operational-reports-snapshot.v1.json"
+      - "docs/contracts/otp-delivery-health.v1.json"
+      - "docs/contracts/otp-delivery-alert-candidates.v1.json"
+      - "docs/contracts/surface-reachability-inventory.v1.json"
+      - "services/api/src/kefe_api/modules/admin_operational_reports/**"
+      - "services/api/src/kefe_api/modules/identity/otp_delivery_health.py"
+      - "services/api/tests/test_admin_operational_reports_http.py"
+      - "services/api/tests/test_admin_operational_reports_http_postgres.py"
+      - "services/api/tests/test_otp_delivery_health.py"
+      - "services/api/tests/test_otp_delivery_health_postgres.py"
+      - "services/api/tests/test_otp_delivery_alert_candidates.py"
+      - "services/api/tests/test_otp_delivery_alert_candidates_postgres.py"
+      - "services/api/tests/test_otp_delivery_alerts_http.py"
+      - "services/api/tools/check_operational_readiness_evidence.py"
+      - "services/api/tools/check_otp_delivery_health_contract.py"
+      - "services/api/tools/check_otp_delivery_alert_candidates_contract.py"
+      - ".github/workflows/admin-operational-reports.yml"
+      - ".github/workflows/otp-delivery-health.yml"
+      - ".github/workflows/otp-delivery-alert-candidates.yml"
+      - ".github/workflows/operational-readiness-evidence.yml"
+  push:
+    branches: [main]
+    paths:
+      - "docs/contracts/operational-readiness-evidence.v1.json"
+      - "docs/adr/0119-operational-readiness-evidence-boundary.md"
+      - "docs/status/F4_OPERATIONAL_READINESS_EVIDENCE_2026-08-06.md"
+      - "services/api/tools/check_operational_readiness_evidence.py"
+      - ".github/workflows/operational-readiness-evidence.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: operational-readiness-evidence-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Validate readiness JSON
+        run: python -m json.tool docs/contracts/operational-readiness-evidence.v1.json >/dev/null
+      - name: Lint evidence checker
+        working-directory: services/api
+        run: ruff check tools/check_operational_readiness_evidence.py
+      - name: Executable operational readiness evidence boundary
+        working-directory: services/api
+        run: python tools/check_operational_readiness_evidence.py
+      - name: Parent OTP delivery health contract
+        working-directory: services/api
+        run: python tools/check_otp_delivery_health_contract.py
+      - name: Parent OTP alert candidate contract
+        working-directory: services/api
+        run: python tools/check_otp_delivery_alert_candidates_contract.py
+      - name: Targeted memory evidence
+        working-directory: services/api
+        run: >-
+          pytest -q
+          tests/test_admin_operational_reports_http.py
+          tests/test_otp_delivery_health.py
+          tests/test_otp_delivery_alert_candidates.py
+          tests/test_otp_delivery_alerts_http.py
+      - name: No deployed telemetry, pager, incident or rollback proof
+        run: >-
+          echo "CI validates repository contracts only; it does not query production telemetry,
+          deliver an external page, execute incident response or perform rollback."
+
+  postgres:
+    needs: evidence
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: kefe
+          POSTGRES_USER: kefe
+          POSTGRES_PASSWORD: kefe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kefe -d kefe"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+      - name: Install API
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Migrate PostgreSQL
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: alembic upgrade head
+      - name: Targeted PostgreSQL evidence
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+          KEFE_PERSISTENCE_BACKEND: postgres
+          KEFE_RUN_POSTGRES_TESTS: "1"
+        run: >-
+          pytest -q
+          tests/test_admin_operational_reports_http_postgres.py
+          tests/test_otp_delivery_health_postgres.py
+          tests/test_otp_delivery_alert_candidates_postgres.py
