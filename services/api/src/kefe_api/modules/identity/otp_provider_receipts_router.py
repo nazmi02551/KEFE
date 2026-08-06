@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Header, Request
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, ValidationError
 
+from kefe_api.core.errors import DomainError
 from kefe_api.modules.identity.otp_provider_receipts import (
     OtpProviderReceiptOutcome,
     OtpProviderReceiptService,
@@ -35,6 +36,15 @@ def get_service(request: Request) -> OtpProviderReceiptService:
     return request.app.state.otp_provider_receipt_service
 
 
+def _rejected_error() -> DomainError:
+    return DomainError(
+        "AUTH_OTP_RECEIPT_REJECTED",
+        "OTP provider receipt authentication failed",
+        401,
+        retryable=False,
+    )
+
+
 @router.post(
     "/otp-delivery-receipts",
     response_model=OtpProviderReceiptResponse,
@@ -42,7 +52,6 @@ def get_service(request: Request) -> OtpProviderReceiptService:
     include_in_schema=False,
 )
 async def receive_otp_provider_receipt(
-    body: OtpProviderReceiptBody,
     request: Request,
     timestamp: Annotated[
         str,
@@ -61,8 +70,22 @@ async def receive_otp_provider_receipt(
         Header(alias="X-KEFE-OTP-Receipt-Signature"),
     ],
 ) -> OtpProviderReceiptResponse:
-    result = get_service(request).receive(
-        raw_body=await request.body(),
+    service = get_service(request)
+    raw_body = await request.body()
+    if not raw_body or len(raw_body) > service.policy.maximum_body_bytes:
+        raise _rejected_error()
+    try:
+        body = OtpProviderReceiptBody.model_validate_json(raw_body)
+    except ValidationError as exc:
+        raise _rejected_error() from exc
+    if (
+        body.occurred_at.tzinfo is None
+        or body.occurred_at.utcoffset() != UTC.utcoffset(body.occurred_at)
+    ):
+        raise _rejected_error()
+
+    result = service.receive(
+        raw_body=raw_body,
         timestamp=timestamp,
         key_id=key_id,
         provider_event_id=provider_event_id,
