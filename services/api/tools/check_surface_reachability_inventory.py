@@ -238,6 +238,11 @@ def main() -> None:
     _require(web_entries == ["README.md"], "consumer web must remain placeholder-only")
 
     _require("go_router:" in mobile_pubspec, "mobile route library")
+    _require("`/case/:caseId`" in mobile_readme, "in-app direct Case route")
+    _require(
+        "GoRouter for declarative routes and Case deep links" in mobile_readme,
+        "in-app Case route semantics",
+    )
     for forbidden_dependency in ("app_links:", "uni_links:", "firebase_dynamic_links:"):
         _require(
             forbidden_dependency not in mobile_pubspec,
@@ -245,7 +250,6 @@ def main() -> None:
         )
     _require(not (ROOT / "apps/mobile/android").exists(), "committed Android host")
     _require(not (ROOT / "apps/mobile/ios").exists(), "committed iOS host")
-    _require("deep link" not in mobile_readme.lower(), "undeclared mobile deeplinks")
 
     production_entry = installable_contract["production_entry"]
     preview = installable_contract["installable_phone_preview"]
