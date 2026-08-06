@@ -11,7 +11,6 @@ CONTRACT_PATH = Path(
 )
 PORTFOLIO_PATH = Path("docs/roadmap/capability-portfolio.v1.tsv")
 PORTFOLIO_GOVERNANCE_PATH = Path("docs/roadmap/CAPABILITY_PORTFOLIO.md")
-PRODUCT_BIBLE_PATH = Path("docs/product/PRODUCT_BIBLE.md")
 OPERATIONAL_READINESS_PATH = Path(
     "docs/contracts/operational-readiness-evidence.v1.json"
 )
@@ -80,9 +79,25 @@ def validate_contract(contract: dict[str, Any]) -> None:
         == str(PORTFOLIO_GOVERNANCE_PATH),
         "portfolio governance path",
     )
+
+    authority = contract["owning_authority"]
     require(
-        contract["owning_document"] == str(PRODUCT_BIBLE_PATH),
-        "owning document",
+        authority["product_register"]
+        == "Product Bible Roadmap Capability Register",
+        "product register authority",
+    )
+    require(
+        authority["repository_authority_record"]
+        == str(PORTFOLIO_GOVERNANCE_PATH),
+        "repository authority record",
+    )
+    require(
+        authority["owner_document_ids"] == ["KEFE-ADM-001", "KEFE-AED-001"],
+        "owner document ids",
+    )
+    require(
+        authority["repository_mirror_can_promote"] is False,
+        "mirror promotion boundary",
     )
 
     current = contract["current_portfolio_state"]
@@ -176,9 +191,9 @@ def validate_contract(contract: dict[str, Any]) -> None:
         ],
         "stack references",
     )
-    unresolved = set(contract["unresolved_gates"])
     require(
-        {
+        set(contract["unresolved_gates"])
+        == {
             "parent_stack_integration",
             "approved_production_deployment",
             "external_surface_reachability",
@@ -187,8 +202,7 @@ def validate_contract(contract: dict[str, Any]) -> None:
             "human_incident_response_evidence",
             "human_rollback_evidence",
             "explicit_product_bible_lifecycle_decision",
-        }
-        == unresolved,
+        },
         "unresolved gates",
     )
 
@@ -219,15 +233,24 @@ def validate_portfolio(contract: dict[str, Any]) -> None:
     require(row["evidence"] == "", "portfolio evidence remains unchanged")
     require(row["source"] == "canonical", "portfolio source")
     require(
+        row["owners"].split("|")
+        == contract["owning_authority"]["owner_document_ids"],
+        "portfolio owner authority",
+    )
+    require(
         row["status"] == contract["current_portfolio_state"]["status"],
         "contract/portfolio status convergence",
     )
 
     governance = load_text(PORTFOLIO_GOVERNANCE_PATH).lower()
-    require("product bible" in governance, "Product Bible authority text")
-    require("implemented_partial" in governance, "partial lifecycle text")
-    require("implemented_verified" in governance, "verified lifecycle text")
-    load_text(PRODUCT_BIBLE_PATH)
+    for phrase in (
+        "product bible roadmap capability register",
+        "does not create or promote product decisions",
+        "owning documents and explicit decisions",
+        "implemented_partial",
+        "implemented_verified",
+    ):
+        require(phrase in governance, f"portfolio governance: {phrase}")
 
 
 def validate_parent_evidence() -> None:
