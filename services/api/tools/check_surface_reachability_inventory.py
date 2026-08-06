@@ -217,9 +217,19 @@ def main() -> None:
     workflow = _text(".github/workflows/surface-reachability-inventory.yml")
 
     _require(
-        "https://beta-api.invalid/" in mobile_main,
-        "production mobile placeholder endpoint",
+        "HttpReflectionDecisionRepository" in mobile_main,
+        "production mobile network repository",
     )
+    for forbidden_fragment in (
+        "PreviewJourneyDecisionRepository",
+        "MemoryDecisionDraftStore",
+        "main_preview.dart",
+    ):
+        _require(
+            forbidden_fragment not in mobile_main,
+            f"production mobile preview fallback: {forbidden_fragment}",
+        )
+    _require("AppConfig.fromEnvironment" in mobile_config, "mobile API environment boundary")
     _require("http://localhost:8000" in mobile_config, "mobile local API default")
     _require("http://localhost:8000" in admin_env, "Admin local API default")
     _require("production deployment" in admin_readme.lower(), "Admin non-claim")
@@ -242,6 +252,11 @@ def main() -> None:
     _require(
         production_entry["placeholder_endpoint"] == "https://beta-api.invalid/",
         "phone contract placeholder endpoint",
+    )
+    _require(
+        surfaces["mobile-production-shell"]["endpoint"]
+        == production_entry["placeholder_endpoint"],
+        "inventory/phone placeholder convergence",
     )
     _require(production_entry["apk_uploaded"] is False, "production APK non-claim")
     _require(
