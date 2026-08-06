@@ -10,7 +10,6 @@ on:
       - ".github/workflows/cap123-governance-reconciliation.yml"
       - "docs/roadmap/capability-portfolio.v1.tsv"
       - "docs/roadmap/CAPABILITY_PORTFOLIO.md"
-      - "docs/product/PRODUCT_BIBLE.md"
       - "docs/contracts/operational-readiness-evidence.v1.json"
       - "docs/contracts/operator-drill-evidence-protocol.v1.json"
       - "services/api/tools/check_operational_readiness_evidence.py"
@@ -25,7 +24,6 @@ on:
       - ".github/workflows/cap123-governance-reconciliation.yml"
       - "docs/roadmap/capability-portfolio.v1.tsv"
       - "docs/roadmap/CAPABILITY_PORTFOLIO.md"
-      - "docs/product/PRODUCT_BIBLE.md"
       - "docs/contracts/operational-readiness-evidence.v1.json"
       - "docs/contracts/operator-drill-evidence-protocol.v1.json"
 
