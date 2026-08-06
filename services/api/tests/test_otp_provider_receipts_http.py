@@ -104,6 +104,27 @@ def test_callback_auth_failure_is_generic_and_consumer_openapi_is_unchanged(monk
     assert _PATH not in client.get("/openapi.json").json()["paths"]
 
 
+def test_malformed_and_oversized_bodies_are_rejected_before_schema_detail_leaks(
+    monkeypatch,
+) -> None:
+    client = _client(monkeypatch)
+    _, headers = _signed_request(
+        now=datetime.now(UTC),
+        event_id="evt_01J9K5R4X2Y7Z8A9B0C1D2E404",
+    )
+
+    for raw in (b"{", b"{" + b"x" * 4_097):
+        response = client.post(_PATH, content=raw, headers=headers)
+        assert response.status_code == 401
+        assert response.json()["code"] == "AUTH_OTP_RECEIPT_REJECTED"
+        assert "detail" not in response.json()
+
+    facts = client.app.state.otp_provider_receipt_service.facts(
+        window=timedelta(hours=1)
+    )
+    assert facts.total_count == 0
+
+
 def test_disabled_callback_returns_not_found_without_receipt_configuration(monkeypatch) -> None:
     monkeypatch.setenv("KEFE_ENVIRONMENT", "development")
     monkeypatch.setenv("KEFE_PERSISTENCE_BACKEND", "memory")
