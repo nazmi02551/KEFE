@@ -15,6 +15,7 @@ EXPECTED_SURFACE_IDS = {
     "consumer-web-production",
     "mobile-production-shell",
     "installable-phone-preview",
+    "mobile-share-scheme-compile-candidate",
     "mobile-deeplinks",
     "web-deeplinks",
     "otp-provider-receipt-callback",
@@ -181,6 +182,11 @@ def main() -> None:
             "CI_BUILD_ARTIFACT",
             False,
         ),
+        "mobile-share-scheme-compile-candidate": (
+            "COMPILE_ONLY",
+            "CI_BUILD_ARTIFACT",
+            False,
+        ),
         "mobile-deeplinks": ("NOT_CONFIGURED", "STATIC_CONFIG", False),
         "web-deeplinks": ("NOT_CONFIGURED", "STATIC_CONFIG", False),
         "otp-provider-receipt-callback": ("INTERNAL_ONLY", "STATIC_CONFIG", False),
@@ -204,6 +210,7 @@ def main() -> None:
         _text("docs/contracts/installable-phone-preview-hotfix.v1.json")
     )
     global_workflow = _text(".github/workflows/global-readiness.yml")
+    mvp_workflow = _text(".github/workflows/mvp-beta-gates.yml")
     callback_router = _text(
         "services/api/src/kefe_api/modules/identity/otp_provider_receipts_router.py"
     )
@@ -275,6 +282,26 @@ def main() -> None:
     ):
         _require(fragment in global_workflow, f"phone CI artifact evidence: {fragment}")
 
+    share_candidate = surfaces["mobile-share-scheme-compile-candidate"]
+    _require(share_candidate["endpoint"] == "kefe:", "share scheme identity")
+    _require(share_candidate["artifact_uploaded"] is False, "share artifact non-upload")
+    _require(share_candidate["host_bound"] is False, "share host non-binding")
+    _require(
+        share_candidate["committed_native_configuration"] is False,
+        "share native configuration non-claim",
+    )
+    for fragment in (
+        "Register KEFE Share deep link in candidate Android host",
+        'android:scheme="kefe"',
+        'android:host="share"',
+        "Production shell APK is intentionally not uploaded",
+    ):
+        _require(fragment in mvp_workflow, f"share compile proof: {fragment}")
+    _require(
+        "assert 'android:host=\"share\"' not in manifest" in mvp_workflow,
+        "share candidate must remain hostless",
+    )
+
     for fragment in (
         '"/otp-delivery-receipts"',
         "include_in_schema=False",
@@ -293,6 +320,7 @@ def main() -> None:
         "No production surface is externally verified",
         "CI_ARTIFACT_AVAILABLE",
         "PRODUCTION_AND_PREVIEW_SURFACE_REACHABILITY_INVENTORIED",
+        "mobile-share-scheme-compile-candidate",
     ):
         _require(phrase in status_doc, f"status checkpoint: {phrase}")
 
@@ -306,13 +334,14 @@ def main() -> None:
         _require(fragment in workflow, f"workflow evidence: {fragment}")
 
     non_claims = contract["explicit_non_claims"]
-    _require(isinstance(non_claims, list) and len(non_claims) >= 8, "explicit non-claims")
+    _require(isinstance(non_claims, list) and len(non_claims) >= 9, "explicit non-claims")
     combined_non_claims = " ".join(non_claims).lower()
     for phrase in (
         "production api",
         "consumer web",
         "admin studio",
         "app link",
+        "transient kefe",
         "github actions artifact",
         "otp provider callback",
         "slo",
