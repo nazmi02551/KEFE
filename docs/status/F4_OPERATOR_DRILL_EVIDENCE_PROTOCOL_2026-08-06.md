@@ -39,6 +39,14 @@ No production deployment, external reachability, deployed telemetry, SLO
 attainment, page delivery, recovery effectiveness, RTO or RPO result is
 verified. CAP-123 is not promoted and F4 remains pending.
 
+## Verification discipline
+
+Only successful checks attached to the current exact PR head are admissible as
+repository validation evidence. A queued, cancelled, skipped, infrastructure-
+failed or stale workflow run is neither a repository failure nor a passing
+result and cannot advance this protocol, CAP-123 or F4. Retrying CI does not
+change the evidence classification of templates or synthetic records.
+
 ## Next admissible proof
 
 For either operator state to advance, add a record under
