@@ -172,7 +172,7 @@ def test_exact_replay_is_idempotent_and_conflicting_reuse_is_rejected() -> None:
             }
         )
     assert exc_info.value.code == "AUTH_OTP_RECEIPT_EVENT_CONFLICT"
-    assert exc_info.value.http_status == 409
+    assert exc_info.value.status_code == 409
 
 
 def test_invalid_signature_stale_timestamp_and_unknown_key_are_indistinguishable() -> None:
@@ -218,7 +218,7 @@ def test_invalid_signature_stale_timestamp_and_unknown_key_are_indistinguishable
                 received_at=now,
             )
         assert exc_info.value.code == "AUTH_OTP_RECEIPT_REJECTED"
-        assert exc_info.value.http_status == 401
+        assert exc_info.value.status_code == 401
 
 
 def test_disabled_receipt_boundary_is_fail_closed() -> None:
@@ -241,4 +241,4 @@ def test_disabled_receipt_boundary_is_fail_closed() -> None:
             received_at=now,
         )
     assert exc_info.value.code == "AUTH_OTP_RECEIPT_DISABLED"
-    assert exc_info.value.http_status == 404
+    assert exc_info.value.status_code == 404
