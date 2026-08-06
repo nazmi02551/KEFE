@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0.0",
+  "record_id": "KEFE-RB-CI_SIM_001",
+  "record_type": "ROLLBACK_EXECUTION",
+  "classification": "CI_SIMULATED",
+  "template": false,
+  "environment": {
+    "kind": "CI",
+    "name": "github-actions-structural-fixture",
+    "approved": false,
+    "deployment_identity": null,
+    "surface_ids": [
+      "canonical-api-local"
+    ]
+  },
+  "exercise": {
+    "scenario_id": "ci-rollback-structure-v1",
+    "title": "CI-only rollback timeline fixture",
+    "objective": "Exercise the rollback acceptance validator without changing a deployment.",
+    "started_at": "2026-08-06T00:00:00Z",
+    "ended_at": "2026-08-06T00:06:00Z"
+  },
+  "timeline": [
+    {
+      "sequence": 1,
+      "phase": "PRECHECK",
+      "occurred_at": "2026-08-06T00:01:00Z",
+      "action": "Evaluate synthetic precheck fields.",
+      "observed_result": "No environment was changed."
+    },
+    {
+      "sequence": 2,
+      "phase": "DECISION",
+      "occurred_at": "2026-08-06T00:02:00Z",
+      "action": "Advance the fixture to decision.",
+      "observed_result": "No operator made a rollback decision."
+    },
+    {
+      "sequence": 3,
+      "phase": "EXECUTION",
+      "occurred_at": "2026-08-06T00:03:00Z",
+      "action": "Exercise the execution record path.",
+      "observed_result": "No rollback command was run."
+    },
+    {
+      "sequence": 4,
+      "phase": "VERIFICATION",
+      "occurred_at": "2026-08-06T00:04:00Z",
+      "action": "Evaluate synthetic verification fields.",
+      "observed_result": "Only fixture structure was validated."
+    },
+    {
+      "sequence": 5,
+      "phase": "CLOSURE",
+      "occurred_at": "2026-08-06T00:05:00Z",
+      "action": "Close the structural fixture.",
+      "observed_result": "Validator path completed without rollback."
+    }
+  ],
+  "actors": {
+    "operator": {
+      "identity_provider": "GITHUB_ACTIONS",
+      "subject_ref": "workflow:operator-drill-evidence-protocol",
+      "role": "simulation-runner"
+    },
+    "approver": null
+  },
+  "outcomes": {
+    "result": "SUCCESS",
+    "observed_effect": "The CI fixture exercises rollback record validation only.",
+    "recovery_metrics": {
+      "rto_objective_seconds": null,
+      "rto_observed_seconds": null,
+      "rpo_objective_seconds": null,
+      "rpo_observed_seconds": null,
+      "source_artifact_sha256": null
+    }
+  },
+  "artifacts": [],
+  "redaction": {
+    "reviewed": true,
+    "contains_secrets": false,
+    "contains_raw_customer_data": false,
+    "notes": "Synthetic fixture with no user or operator data."
+  },
+  "attestation": {
+    "operator_attested": false,
+    "approver_attested": false,
+    "operator_signed_at": null,
+    "approver_signed_at": null,
+    "method": "NONE",
+    "statement": "CI simulation only; no human attestation."
+  },
+  "claims": {
+    "incident_response_executed": false,
+    "rollback_executed": false,
+    "production_executed": false,
+    "rto_attained": false,
+    "rpo_attained": false
+  },
+  "rollback": {
+    "from_revision": "synthetic-revision-a",
+    "to_revision": "synthetic-revision-b",
+    "reason": "Exercise the record validator only.",
+    "validation_checks": [
+      "Confirm no deployment or runtime state changed."
+    ]
+  }
+}
