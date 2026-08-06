@@ -25,7 +25,8 @@ That conclusion is deliberate and evidence-based:
 | Consumer web | `PLACEHOLDER_ONLY` | `apps/web` contains only its intent README. |
 | Mobile production shell | `COMPILE_ONLY` | It builds against `https://beta-api.invalid/`; it is not usable production distribution. |
 | Installable phone preview | `CI_ARTIFACT_AVAILABLE` | GitHub Actions creates a debug APK artifact from the explicit preview entrypoint. |
-| Mobile deeplinks | `NOT_CONFIGURED` | No committed Android/iOS host declarations or association evidence exists. |
+| `mobile-share-scheme-compile-candidate` | `COMPILE_ONLY` | MVP CI creates a transient Android host with hostless `kefe:` scheme, builds the production shell and deliberately does not upload the APK. |
+| Mobile production deeplinks | `NOT_CONFIGURED` | In-app `/case/:caseId` routing exists, but no committed Android/iOS host declarations or association evidence exists. |
 | Web deeplinks | `NOT_CONFIGURED` | No web runtime or externally probed canonical routes exist. |
 | OTP provider receipt callback | `INTERNAL_ONLY` | The hidden HMAC callback route exists; no deployed provider/network binding exists. |
 
@@ -39,8 +40,9 @@ That conclusion is deliberate and evidence-based:
 - the compile-only production mobile endpoint;
 - local mobile/Admin API defaults;
 - consumer web placeholder-only state;
-- absence of committed native deeplink hosts and deeplink dependencies;
-- the transient Android host and debug APK artifact produced in CI;
+- in-app Case routing while distinguishing absent committed native deeplink hosts;
+- the hostless, non-uploaded transient `kefe:` scheme compile candidate;
+- the separately generated installable preview debug APK artifact;
 - the internal-only, OpenAPI-hidden OTP provider callback;
 - explicit next-proof requirements and non-claims for every surface.
 
@@ -54,7 +56,7 @@ It does not make F4 production-ready. The following remain external or future ga
 
 1. production API provisioning and timestamped external route probes;
 2. deployed consumer web and Admin Studio origins;
-3. Android App Links, iOS Universal Links and association files;
+3. committed Android App Links, iOS Universal Links or approved custom-scheme declarations and association files;
 4. controlled preview or store distribution evidence;
 5. provider-bound callback reachability and availability evidence;
 6. deployed SLO, incident response and operator-executed rollback evidence.
@@ -62,6 +64,7 @@ It does not make F4 production-ready. The following remain external or future ga
 ## Non-claims
 
 - A CI artifact is not a public release or store distribution.
+- A transient hostless `kefe:` scheme inserted into generated CI files is not committed production deeplink configuration.
 - A successful build is not a reachable product surface.
 - A local process is not a production deployment.
 - An internal route is not proof that an external provider can reach it.
