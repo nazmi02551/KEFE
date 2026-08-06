@@ -12,6 +12,7 @@ on:
       - "services/api/migrations/versions/20260806_0034_otp_provider_receipts.py"
       - "services/api/tests/test_otp_provider_receipts.py"
       - "services/api/tests/test_otp_provider_receipts_http.py"
+      - "services/api/tests/test_otp_provider_receipt_secret_rotation.py"
       - "services/api/tests/test_otp_provider_receipts_postgres.py"
       - "services/api/tools/check_otp_provider_receipts_contract.py"
       - "services/api/tools/check_otp_http_delivery_contract.py"
@@ -36,6 +37,7 @@ on:
       - "services/api/migrations/versions/20260806_0034_otp_provider_receipts.py"
       - "services/api/tests/test_otp_provider_receipts.py"
       - "services/api/tests/test_otp_provider_receipts_http.py"
+      - "services/api/tests/test_otp_provider_receipt_secret_rotation.py"
       - "services/api/tests/test_otp_provider_receipts_postgres.py"
       - "services/api/tools/check_otp_provider_receipts_contract.py"
       - "services/api/tools/check_otp_http_delivery_contract.py"
@@ -85,6 +87,7 @@ jobs:
           migrations/versions/20260806_0034_otp_provider_receipts.py
           tests/test_otp_provider_receipts.py
           tests/test_otp_provider_receipts_http.py
+          tests/test_otp_provider_receipt_secret_rotation.py
           tests/test_otp_provider_receipts_postgres.py
           tools/check_otp_provider_receipts_contract.py
           tools/check_otp_delivery_alert_candidates_contract.py
@@ -103,12 +106,13 @@ jobs:
       - name: Executable OTP provider receipt contract
         working-directory: services/api
         run: python tools/check_otp_provider_receipts_contract.py
-      - name: Memory exact-body HMAC replay privacy and identity regressions
+      - name: Memory exact-body HMAC replay privacy rotation and identity regressions
         working-directory: services/api
         run: >-
           pytest -q
           tests/test_otp_provider_receipts.py
           tests/test_otp_provider_receipts_http.py
+          tests/test_otp_provider_receipt_secret_rotation.py
           tests/test_otp_http_delivery.py
           tests/test_otp_secret_resolution.py
           tests/test_otp_delivery_health.py
