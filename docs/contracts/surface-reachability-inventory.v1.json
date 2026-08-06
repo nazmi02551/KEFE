@@ -1,0 +1,212 @@
+{
+  "contract_id": "KEFE-SURFACE-REACHABILITY-INVENTORY-001",
+  "version": "1.0.0",
+  "status": "IMPLEMENTED_PARTIAL",
+  "wave": "F4",
+  "capabilities": [
+    "CAP-092",
+    "CAP-123"
+  ],
+  "exit_criterion": "PRODUCTION_AND_PREVIEW_SURFACE_REACHABILITY_INVENTORIED",
+  "inventory_observed_at": "2026-08-06",
+  "policy": {
+    "inventory_is_deployment_evidence": false,
+    "ci_build_is_external_reachability_evidence": false,
+    "local_probe_is_external_reachability_evidence": false,
+    "placeholder_endpoint_may_be_marked_reachable": false,
+    "production_reachable_requires_external_evidence": true,
+    "external_evidence_kinds": [
+      "EXTERNAL_HTTP_PROBE",
+      "STORE_DISTRIBUTION",
+      "HUMAN_OPERATOR_ATTESTATION"
+    ],
+    "forbidden_production_endpoint_patterns": [
+      ".invalid",
+      "localhost",
+      "127.0.0.1",
+      "0.0.0.0",
+      "10.0.2.2"
+    ]
+  },
+  "status_catalog": [
+    "REACHABLE_VERIFIED",
+    "CI_ARTIFACT_AVAILABLE",
+    "LOCAL_ONLY",
+    "COMPILE_ONLY",
+    "PLACEHOLDER_ONLY",
+    "INTERNAL_ONLY",
+    "NOT_CONFIGURED",
+    "VERIFICATION_PENDING"
+  ],
+  "evidence_catalog": [
+    "STATIC_CONFIG",
+    "CI_BUILD_ARTIFACT",
+    "LOCAL_RUNTIME",
+    "EXTERNAL_HTTP_PROBE",
+    "STORE_DISTRIBUTION",
+    "HUMAN_OPERATOR_ATTESTATION"
+  ],
+  "surfaces": [
+    {
+      "surface_id": "canonical-api-local",
+      "surface_type": "API",
+      "environment": "LOCAL",
+      "audience": "ENGINEERING",
+      "status": "LOCAL_ONLY",
+      "externally_reachable": false,
+      "endpoint": "http://localhost:8000",
+      "evidence_kind": "LOCAL_RUNTIME",
+      "evidence_sources": [
+        "apps/mobile/lib/core/config/app_config.dart",
+        "apps/admin/.env.example",
+        "infra/local/compose.yaml"
+      ],
+      "next_required_proof": "None for local development; this surface cannot satisfy production reachability."
+    },
+    {
+      "surface_id": "canonical-api-production",
+      "surface_type": "API",
+      "environment": "PRODUCTION",
+      "audience": "CONSUMER_AND_ADMIN",
+      "status": "NOT_CONFIGURED",
+      "externally_reachable": false,
+      "endpoint": null,
+      "evidence_kind": "STATIC_CONFIG",
+      "evidence_sources": [
+        "apps/mobile/lib/main.dart",
+        "docs/contracts/installable-phone-preview-hotfix.v1.json"
+      ],
+      "next_required_proof": "Provision an HTTPS endpoint and attach an external probe with timestamp, expected route and response policy."
+    },
+    {
+      "surface_id": "admin-studio-local",
+      "surface_type": "ADMIN_WEB",
+      "environment": "LOCAL",
+      "audience": "OPERATOR",
+      "status": "LOCAL_ONLY",
+      "externally_reachable": false,
+      "endpoint": "http://localhost:3000",
+      "evidence_kind": "LOCAL_RUNTIME",
+      "evidence_sources": [
+        "apps/admin/README.md",
+        "apps/admin/.env.example"
+      ],
+      "next_required_proof": "None for local development; this surface cannot satisfy production reachability."
+    },
+    {
+      "surface_id": "admin-studio-production",
+      "surface_type": "ADMIN_WEB",
+      "environment": "PRODUCTION",
+      "audience": "OPERATOR",
+      "status": "NOT_CONFIGURED",
+      "externally_reachable": false,
+      "endpoint": null,
+      "evidence_kind": "STATIC_CONFIG",
+      "evidence_sources": [
+        "apps/admin/README.md",
+        "apps/admin/.env.example"
+      ],
+      "next_required_proof": "Deploy behind authenticated HTTPS and attach external probe plus operator access attestation."
+    },
+    {
+      "surface_id": "consumer-web-production",
+      "surface_type": "CONSUMER_WEB",
+      "environment": "PRODUCTION",
+      "audience": "PUBLIC",
+      "status": "PLACEHOLDER_ONLY",
+      "externally_reachable": false,
+      "endpoint": null,
+      "evidence_kind": "STATIC_CONFIG",
+      "evidence_sources": [
+        "apps/web/README.md"
+      ],
+      "next_required_proof": "Implement a runtime, deploy an HTTPS origin and attach external route probes."
+    },
+    {
+      "surface_id": "mobile-production-shell",
+      "surface_type": "MOBILE_APP",
+      "environment": "PRODUCTION",
+      "audience": "PUBLIC",
+      "status": "COMPILE_ONLY",
+      "externally_reachable": false,
+      "endpoint": "https://beta-api.invalid/",
+      "evidence_kind": "CI_BUILD_ARTIFACT",
+      "evidence_sources": [
+        "apps/mobile/lib/main.dart",
+        "docs/contracts/installable-phone-preview-hotfix.v1.json"
+      ],
+      "next_required_proof": "Replace the placeholder with an approved HTTPS API and provide signed distribution/store evidence."
+    },
+    {
+      "surface_id": "installable-phone-preview",
+      "surface_type": "MOBILE_PREVIEW",
+      "environment": "PREVIEW",
+      "audience": "INTERNAL_TESTER",
+      "status": "CI_ARTIFACT_AVAILABLE",
+      "externally_reachable": false,
+      "endpoint": null,
+      "evidence_kind": "CI_BUILD_ARTIFACT",
+      "evidence_sources": [
+        ".github/workflows/global-readiness.yml",
+        "docs/contracts/installable-phone-preview-hotfix.v1.json",
+        "apps/mobile/lib/main_preview.dart"
+      ],
+      "artifact_name": "kefe-installable-phone-preview",
+      "next_required_proof": "Use a controlled distribution channel and attach installation evidence if preview distribution must be claimed."
+    },
+    {
+      "surface_id": "mobile-deeplinks",
+      "surface_type": "DEEPLINK",
+      "environment": "PRODUCTION",
+      "audience": "PUBLIC",
+      "status": "NOT_CONFIGURED",
+      "externally_reachable": false,
+      "endpoint": null,
+      "evidence_kind": "STATIC_CONFIG",
+      "evidence_sources": [
+        "apps/mobile/pubspec.yaml",
+        "apps/mobile/README.md"
+      ],
+      "next_required_proof": "Commit Android/iOS host declarations, route mapping tests and verified association files."
+    },
+    {
+      "surface_id": "web-deeplinks",
+      "surface_type": "DEEPLINK",
+      "environment": "PRODUCTION",
+      "audience": "PUBLIC",
+      "status": "NOT_CONFIGURED",
+      "externally_reachable": false,
+      "endpoint": null,
+      "evidence_kind": "STATIC_CONFIG",
+      "evidence_sources": [
+        "apps/web/README.md"
+      ],
+      "next_required_proof": "Implement canonical web routes and attach external route probes plus mobile association files."
+    },
+    {
+      "surface_id": "otp-provider-receipt-callback",
+      "surface_type": "PROVIDER_CALLBACK",
+      "environment": "PRODUCTION",
+      "audience": "INTERNAL_PROVIDER",
+      "status": "INTERNAL_ONLY",
+      "externally_reachable": false,
+      "endpoint": "/internal/provider/v1/otp-delivery-receipts",
+      "evidence_kind": "STATIC_CONFIG",
+      "evidence_sources": [
+        "services/api/src/kefe_api/modules/identity/otp_provider_receipts_router.py",
+        "docs/contracts/otp-provider-receipts.v1.json"
+      ],
+      "next_required_proof": "Bind a provider-specific callback origin and attach authenticated external delivery plus availability evidence."
+    }
+  ],
+  "explicit_non_claims": [
+    "No production API origin is deployed or externally probed.",
+    "No consumer web runtime or web deeplink origin is deployed.",
+    "No Admin Studio production origin or operator access path is deployed.",
+    "No Android App Link, iOS Universal Link or association-file configuration is committed.",
+    "The mobile production shell is compile-only and targets a reserved invalid hostname.",
+    "The installable phone preview is a GitHub Actions artifact, not a store release or public distribution channel.",
+    "The internal OTP provider callback has no production network reachability or provider binding evidence.",
+    "This inventory does not prove availability, latency, SLO compliance, rollback, store acceptance or operator usability."
+  ]
+}
