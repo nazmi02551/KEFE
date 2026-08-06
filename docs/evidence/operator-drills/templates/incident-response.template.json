@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0.0",
+  "record_id": "KEFE-IR-TEMPLATE",
+  "record_type": "INCIDENT_RESPONSE",
+  "classification": "TEMPLATE_ONLY",
+  "template": true,
+  "environment": {
+    "kind": "TEMPLATE",
+    "name": "replace-with-approved-environment",
+    "approved": false,
+    "deployment_identity": null,
+    "surface_ids": []
+  },
+  "exercise": {
+    "scenario_id": "replace-with-scenario-id",
+    "title": "Replace with incident exercise title",
+    "objective": "Replace with a bounded exercise objective.",
+    "started_at": null,
+    "ended_at": null
+  },
+  "timeline": [],
+  "actors": {
+    "operator": {
+      "identity_provider": "TEMPLATE",
+      "subject_ref": "replace-with-opaque-operator-subject",
+      "role": "incident-commander"
+    },
+    "approver": null
+  },
+  "outcomes": {
+    "result": "NOT_EXECUTED",
+    "observed_effect": "Template only; no incident exercise has been executed.",
+    "recovery_metrics": {
+      "rto_objective_seconds": null,
+      "rto_observed_seconds": null,
+      "rpo_objective_seconds": null,
+      "rpo_observed_seconds": null,
+      "source_artifact_sha256": null
+    }
+  },
+  "artifacts": [],
+  "redaction": {
+    "reviewed": false,
+    "contains_secrets": false,
+    "contains_raw_customer_data": false,
+    "notes": "Remove secrets, credentials and raw customer data before review."
+  },
+  "attestation": {
+    "operator_attested": false,
+    "approver_attested": false,
+    "operator_signed_at": null,
+    "approver_signed_at": null,
+    "method": "NONE",
+    "statement": "Template only; no human attestation."
+  },
+  "claims": {
+    "incident_response_executed": false,
+    "rollback_executed": false,
+    "production_executed": false,
+    "rto_attained": false,
+    "rpo_attained": false
+  },
+  "incident": {
+    "severity": "EXERCISE",
+    "trigger_source": "replace-with-trigger-source",
+    "closure_reason": "Template only; no closure decision."
+  }
+}
