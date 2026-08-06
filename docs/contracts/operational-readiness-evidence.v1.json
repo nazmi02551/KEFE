@@ -1,0 +1,208 @@
+{
+  "contract_id": "KEFE-OPERATIONAL-READINESS-EVIDENCE-001",
+  "version": "1.0.0",
+  "status": "IMPLEMENTED_PARTIAL",
+  "foundation_wave": "F4",
+  "capabilities": [
+    "CAP-123"
+  ],
+  "exit_criterion": "OBSERVABILITY_SLO_AND_ROLLBACK_EVIDENCE_EXPLICIT",
+  "observed_at": "2026-08-06",
+  "policy": {
+    "source_or_ci_is_deployed_observability": false,
+    "aggregate_snapshot_is_slo_attainment": false,
+    "alert_candidate_is_external_page_delivery": false,
+    "acknowledgement_is_incident_resolution": false,
+    "runbook_text_is_operator_execution": false,
+    "production_readiness_requires_external_evidence": true,
+    "capability_portfolio_status_must_match_evidence": true
+  },
+  "status_catalog": [
+    "CI_VALIDATED",
+    "DEPLOYMENT_UNCONFIGURED",
+    "TELEMETRY_UNVERIFIED",
+    "PAGING_UNVERIFIED",
+    "OPERATOR_DRILL_PENDING",
+    "PORTFOLIO_STATUS_STALE",
+    "EXTERNALLY_VERIFIED"
+  ],
+  "evidence_catalog": [
+    "SOURCE_DEFINITION",
+    "UNIT_TEST",
+    "CI_WORKFLOW",
+    "CAPABILITY_PORTFOLIO",
+    "DEPLOYED_TELEMETRY_QUERY",
+    "ALERT_DELIVERY_RECEIPT",
+    "INCIDENT_TIMELINE",
+    "HUMAN_OPERATOR_ATTESTATION",
+    "ROLLBACK_EXECUTION_RECORD"
+  ],
+  "items": [
+    {
+      "item_id": "admin-operational-reports",
+      "status": "CI_VALIDATED",
+      "production_verified": false,
+      "evidence_kinds": [
+        "SOURCE_DEFINITION",
+        "UNIT_TEST",
+        "CI_WORKFLOW"
+      ],
+      "evidence_sources": [
+        "docs/contracts/admin-operational-reports-snapshot.v1.json",
+        "services/api/src/kefe_api/modules/admin_operational_reports/service.py",
+        "services/api/tests/test_admin_operational_reports_http.py",
+        "services/api/tests/test_admin_operational_reports_http_postgres.py",
+        ".github/workflows/admin-operational-reports.yml"
+      ],
+      "next_required_proof": "Deploy the reporting dependencies and attach timestamped production telemetry queries; repository snapshots remain aggregate application reads, not SLO evidence."
+    },
+    {
+      "item_id": "otp-delivery-health",
+      "status": "CI_VALIDATED",
+      "production_verified": false,
+      "evidence_kinds": [
+        "SOURCE_DEFINITION",
+        "UNIT_TEST",
+        "CI_WORKFLOW"
+      ],
+      "evidence_sources": [
+        "docs/contracts/otp-delivery-health.v1.json",
+        "services/api/src/kefe_api/modules/identity/otp_delivery_health.py",
+        "services/api/tests/test_otp_delivery_health.py",
+        "services/api/tests/test_otp_delivery_health_postgres.py",
+        ".github/workflows/otp-delivery-health.yml"
+      ],
+      "next_required_proof": "Attach deployed telemetry completeness and provider-bound production observations before making an availability or deliverability claim."
+    },
+    {
+      "item_id": "otp-alert-candidates",
+      "status": "CI_VALIDATED",
+      "production_verified": false,
+      "evidence_kinds": [
+        "SOURCE_DEFINITION",
+        "UNIT_TEST",
+        "CI_WORKFLOW"
+      ],
+      "evidence_sources": [
+        "docs/contracts/otp-delivery-alert-candidates.v1.json",
+        "services/api/src/kefe_api/modules/identity/otp_delivery_health.py",
+        "services/api/tests/test_otp_delivery_alert_candidates.py",
+        "services/api/tests/test_otp_delivery_alert_candidates_postgres.py",
+        "services/api/tests/test_otp_delivery_alerts_http.py",
+        ".github/workflows/otp-delivery-alert-candidates.yml"
+      ],
+      "next_required_proof": "Connect an external paging destination and retain delivery receipts before claiming that an operator was paged."
+    },
+    {
+      "item_id": "production-deployment",
+      "status": "DEPLOYMENT_UNCONFIGURED",
+      "production_verified": false,
+      "evidence_kinds": [
+        "SOURCE_DEFINITION"
+      ],
+      "evidence_sources": [
+        "docs/contracts/surface-reachability-inventory.v1.json",
+        "docs/contracts/foundation-completion-program.v1.json"
+      ],
+      "next_required_proof": "Provision approved production surfaces and attach deployment identity plus externally observed reachability evidence."
+    },
+    {
+      "item_id": "deployed-telemetry-slo-query",
+      "status": "TELEMETRY_UNVERIFIED",
+      "production_verified": false,
+      "evidence_kinds": [
+        "SOURCE_DEFINITION"
+      ],
+      "evidence_sources": [
+        "docs/contracts/admin-operational-reports-snapshot.v1.json",
+        "docs/contracts/otp-delivery-health.v1.json"
+      ],
+      "next_required_proof": "Attach a timestamped deployed telemetry query, objective definition, evaluation window and result provenance."
+    },
+    {
+      "item_id": "external-paging",
+      "status": "PAGING_UNVERIFIED",
+      "production_verified": false,
+      "evidence_kinds": [
+        "SOURCE_DEFINITION"
+      ],
+      "evidence_sources": [
+        "docs/contracts/otp-delivery-alert-candidates.v1.json",
+        "docs/adr/0116-durable-otp-alert-candidates-and-acknowledgement.md"
+      ],
+      "next_required_proof": "Attach an external pager delivery receipt bound to a production alert event and destination policy."
+    },
+    {
+      "item_id": "incident-response-execution",
+      "status": "OPERATOR_DRILL_PENDING",
+      "production_verified": false,
+      "evidence_kinds": [
+        "SOURCE_DEFINITION"
+      ],
+      "evidence_sources": [
+        "docs/contracts/otp-delivery-alert-candidates.v1.json",
+        "docs/contracts/foundation-completion-program.v1.json"
+      ],
+      "next_required_proof": "Attach an incident timeline and human operator attestation covering detection, acknowledgement, diagnosis, action and closure."
+    },
+    {
+      "item_id": "rollback-execution",
+      "status": "OPERATOR_DRILL_PENDING",
+      "production_verified": false,
+      "evidence_kinds": [
+        "SOURCE_DEFINITION"
+      ],
+      "evidence_sources": [
+        "docs/contracts/surface-reachability-inventory.v1.json",
+        "docs/contracts/foundation-completion-program.v1.json"
+      ],
+      "next_required_proof": "Attach a rollback execution record and human operator attestation from an approved environment."
+    },
+    {
+      "item_id": "cap123-portfolio-status",
+      "status": "PORTFOLIO_STATUS_STALE",
+      "production_verified": false,
+      "evidence_kinds": [
+        "CAPABILITY_PORTFOLIO",
+        "SOURCE_DEFINITION",
+        "UNIT_TEST",
+        "CI_WORKFLOW"
+      ],
+      "evidence_sources": [
+        "docs/roadmap/capability-portfolio.v1.tsv",
+        "docs/contracts/admin-operational-reports-snapshot.v1.json",
+        "services/api/src/kefe_api/modules/admin_operational_reports/service.py",
+        ".github/workflows/admin-operational-reports.yml"
+      ],
+      "next_required_proof": "Reconcile CAP-123 from ROADMAP_ACCEPTED to an evidence-matched partial status in a separate governance change after the stacked runtime line is integrated."
+    }
+  ],
+  "verification_requirements": {
+    "deployed_telemetry_slo": [
+      "DEPLOYED_TELEMETRY_QUERY"
+    ],
+    "external_paging": [
+      "ALERT_DELIVERY_RECEIPT"
+    ],
+    "incident_response": [
+      "INCIDENT_TIMELINE",
+      "HUMAN_OPERATOR_ATTESTATION"
+    ],
+    "rollback": [
+      "ROLLBACK_EXECUTION_RECORD",
+      "HUMAN_OPERATOR_ATTESTATION"
+    ]
+  },
+  "explicit_non_claims": [
+    "No production deployment is proven.",
+    "No deployed telemetry backend or production query is proven.",
+    "No SLO objective attainment or error-budget result is proven.",
+    "No external pager delivery is proven.",
+    "An internal alert candidate is not a page delivery receipt.",
+    "An acknowledgement is not incident resolution or remediation.",
+    "No incident-response exercise or production incident timeline is proven.",
+    "No operator-executed rollback is proven.",
+    "No production recovery time or recovery point objective is proven.",
+    "CAP-123 portfolio reconciliation is not performed by this evidence-only slice."
+  ]
+}
