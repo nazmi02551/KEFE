@@ -149,15 +149,29 @@ class Settings(BaseSettings):
 
         database = urlsplit(self.database_url)
         if not database.scheme.startswith("postgresql") or not database.hostname:
-            raise ValueError("production KEFE_DATABASE_URL must be a PostgreSQL network URL")
+            raise ValueError(
+                "production KEFE_DATABASE_URL must be a PostgreSQL network URL"
+            )
         hostname = database.hostname.lower()
-        if hostname in _FORBIDDEN_PRODUCTION_DATABASE_HOSTS or hostname.endswith(".invalid"):
-            raise ValueError("production KEFE_DATABASE_URL cannot target a local or reserved host")
+        if (
+            hostname in _FORBIDDEN_PRODUCTION_DATABASE_HOSTS
+            or hostname.endswith(".invalid")
+        ):
+            raise ValueError(
+                "production KEFE_DATABASE_URL cannot target a local or reserved host"
+            )
 
         if self.account_merge_replay_secret == DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET:
-            raise ValueError("production requires a non-development account merge replay secret")
-        if DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET in self.account_merge_replay_retained_keys.values():
-            raise ValueError("production cannot retain the development account merge replay secret")
+            raise ValueError(
+                "production requires a non-development account merge replay secret"
+            )
+        if (
+            DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET
+            in self.account_merge_replay_retained_keys.values()
+        ):
+            raise ValueError(
+                "production cannot retain the development account merge replay secret"
+            )
 
         if self.otp_delivery_mode == "CAPTURE":
             raise ValueError("production forbids KEFE_OTP_DELIVERY_MODE=CAPTURE")
