@@ -15,6 +15,13 @@
     "container_port": 8000,
     "provider_neutral": true
   },
+  "initial_connected_alpha_topology": {
+    "api_replica_count": 1,
+    "reason": "Guest admission rate limiting is currently process-local.",
+    "horizontal_scaling_allowed": false,
+    "horizontal_scaling_requires": "Durable/distributed guest admission limiting or an explicitly approved equivalent edge control.",
+    "runbook": "docs/runbooks/CONNECTED_ALPHA_API_DEPLOYMENT.md"
+  },
   "production_configuration": {
     "environment_value": "production",
     "required_persistence_backend": "postgres",
@@ -38,7 +45,7 @@
     "migration_command": "alembic upgrade head",
     "mode": "EXPLICIT_PRE_DEPLOY",
     "auto_migrate_on_api_startup": false,
-    "reason": "Avoid migration races between horizontally scaled API replicas."
+    "reason": "Avoid migration races between API replicas."
   },
   "health": {
     "liveness_path": "/health",
@@ -75,6 +82,7 @@
     "deployed_slo_verified",
     "pager_delivery_verified",
     "human_operator_drill_verified",
+    "horizontal_scaling_ready",
     "store_distribution_verified",
     "f4_complete",
     "cap123_lifecycle_promoted"
