@@ -1,0 +1,13 @@
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.coverage
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.env.*
+openapi.generated.json
+*-output.txt
+ruff-results.json
