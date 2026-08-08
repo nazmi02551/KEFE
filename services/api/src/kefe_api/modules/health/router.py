@@ -3,6 +3,8 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel
 
+from kefe_api.infrastructure.readiness import get_readiness_probe
+
 router = APIRouter(tags=["Health"])
 
 
@@ -23,10 +25,7 @@ def readiness_check(request: Request) -> HealthResponse:
 
     probe = getattr(request.app.state, "readiness_probe", None)
     if probe is None:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="not ready",
-        )
+        probe = get_readiness_probe()
     try:
         probe()
     except Exception as exc:
