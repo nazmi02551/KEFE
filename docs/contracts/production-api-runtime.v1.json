@@ -1,0 +1,82 @@
+{
+  "contract_id": "KEFE-PRODUCTION-API-RUNTIME-001",
+  "version": "1.0.0",
+  "status": "DEPLOYMENT_BOUNDARY_PREPARED",
+  "wave": "F4",
+  "capabilities": [
+    "CAP-092",
+    "CAP-123"
+  ],
+  "canonical_runtime": {
+    "framework": "FastAPI",
+    "persistence": "PostgreSQL",
+    "application": "kefe_api.main:app",
+    "container_path": "services/api/Dockerfile",
+    "container_port": 8000,
+    "provider_neutral": true
+  },
+  "production_configuration": {
+    "environment_value": "production",
+    "required_persistence_backend": "postgres",
+    "database_url_required": true,
+    "database_scheme_prefix": "postgresql",
+    "forbidden_database_hosts": [
+      "localhost",
+      "127.0.0.1",
+      "0.0.0.0",
+      "10.0.2.2"
+    ],
+    "forbidden_database_host_suffixes": [
+      ".invalid"
+    ],
+    "development_merge_secret_forbidden": true,
+    "otp_capture_forbidden": true,
+    "otp_abuse_guard_off_forbidden": true,
+    "committed_credentials_allowed": false
+  },
+  "schema_release": {
+    "migration_command": "alembic upgrade head",
+    "mode": "EXPLICIT_PRE_DEPLOY",
+    "auto_migrate_on_api_startup": false,
+    "reason": "Avoid migration races between horizontally scaled API replicas."
+  },
+  "health": {
+    "liveness_path": "/health",
+    "readiness_path": "/ready",
+    "readiness_public_openapi": false,
+    "postgres_readiness_query": "SELECT 1",
+    "failure_status": 503,
+    "failure_detail": "not ready",
+    "dependency_error_details_exposed": false
+  },
+  "reachability_policy": {
+    "repository_configuration_is_external_reachability_evidence": false,
+    "container_build_is_external_reachability_evidence": false,
+    "current_inventory_status": "NOT_CONFIGURED",
+    "configured_endpoint_without_external_probe_status": "VERIFICATION_PENDING",
+    "externally_probed_https_status": "REACHABLE_VERIFIED",
+    "inventory_contract": "docs/contracts/surface-reachability-inventory.v1.json"
+  },
+  "architecture_guards": {
+    "parallel_backend_allowed": false,
+    "hosting_vendor_in_domain_code_allowed": false,
+    "preview_data_as_production_fallback_allowed": false,
+    "commit_first_preserved": true,
+    "blind_first_preserved": true,
+    "immutable_published_case_version_preserved": true,
+    "generic_flow_runtime_preserved": true,
+    "my_kefe_inference_allowed": false
+  },
+  "non_claims": [
+    "production_endpoint_deployed",
+    "external_https_reachability_verified",
+    "production_postgres_durability_verified",
+    "otp_provider_delivery_verified",
+    "deployed_slo_verified",
+    "pager_delivery_verified",
+    "human_operator_drill_verified",
+    "store_distribution_verified",
+    "f4_complete",
+    "cap123_lifecycle_promoted"
+  ]
+}
