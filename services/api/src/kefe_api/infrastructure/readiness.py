@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from functools import lru_cache
 
 from sqlalchemy import text
 
-from kefe_api.core.settings import Settings
+from kefe_api.core.settings import Settings, get_settings
 from kefe_api.infrastructure.db import build_engine
 
 ReadinessProbe = Callable[[], None]
@@ -26,3 +27,10 @@ def build_readiness_probe(settings: Settings) -> ReadinessProbe:
             connection.execute(text("SELECT 1"))
 
     return probe
+
+
+@lru_cache
+def get_readiness_probe() -> ReadinessProbe:
+    """Reuse the canonical runtime probe and its connection pool."""
+
+    return build_readiness_probe(get_settings())
