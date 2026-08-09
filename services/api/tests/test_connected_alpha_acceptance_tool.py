@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -10,11 +11,13 @@ TOOL_PATH = Path(__file__).resolve().parents[1] / "tools/run_connected_alpha_acc
 SPEC = importlib.util.spec_from_file_location("connected_alpha_acceptance_tool", TOOL_PATH)
 assert SPEC is not None and SPEC.loader is not None
 acceptance = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = acceptance
 SPEC.loader.exec_module(acceptance)
 
 CASE_ID = "11111111-1111-4111-8111-111111111111"
 CASE_VERSION_ID = "22222222-2222-4222-8222-222222222222"
 QUESTION_ID = "33333333-3333-4333-8333-333333333333"
+SOURCE_COMMIT = "d" * 40
 
 
 @pytest.mark.parametrize(
@@ -44,6 +47,19 @@ def test_base_url_accepts_https_external_origin_and_path() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    "value",
+    ["", "unknown", "deadbeef", "g" * 40, "a" * 39, "b" * 41],
+)
+def test_source_commit_requires_exact_40_hex_sha(value: str) -> None:
+    with pytest.raises(acceptance.AcceptanceError, match="40-character"):
+        acceptance._validate_source_commit(value)
+
+
+def test_source_commit_normalizes_hex_case() -> None:
+    assert acceptance._validate_source_commit("A" * 40) == "a" * 40
+
+
 def test_refuses_remote_mutation_without_explicit_allow_write() -> None:
     with pytest.raises(acceptance.AcceptanceError, match="--allow-write"):
         acceptance.run_acceptance(
@@ -51,7 +67,7 @@ def test_refuses_remote_mutation_without_explicit_allow_write() -> None:
             case_id=CASE_ID,
             allow_write=False,
             timeout_seconds=12,
-            source_commit="abc123",
+            source_commit=SOURCE_COMMIT,
         )
 
 
@@ -160,7 +176,7 @@ def test_two_actor_acceptance_proves_shared_increment_and_cleanup(
         case_id=CASE_ID,
         allow_write=True,
         timeout_seconds=12,
-        source_commit="deadbeef",
+        source_commit=SOURCE_COMMIT,
     )
 
     client = FakeClient.last
@@ -169,6 +185,7 @@ def test_two_actor_acceptance_proves_shared_increment_and_cleanup(
     assert record["sample_size_after_second"] == record["sample_size_after_first"] + 1
     assert record["actor_count"] == 2
     assert record["cleanup"] == "PASSED"
+    assert record["source_commit"] == SOURCE_COMMIT
     assert len(client.deleted_actor_ids) == 2
     assert "token" not in str(record).lower()
 
@@ -183,7 +200,7 @@ def test_trusted_case_is_not_accepted_as_live_raw_proof_and_actors_are_cleaned(
             case_id=CASE_ID,
             allow_write=True,
             timeout_seconds=12,
-            source_commit="deadbeef",
+            source_commit=SOURCE_COMMIT,
         )
 
     client = TrustedRevealClient.last
