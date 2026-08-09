@@ -36,22 +36,43 @@ class HttpPrivacyRepository implements PrivacyRepository {
 
   @override
   Future<PrivacyDeletionReceipt> delete() async {
+    final actorId = await _resolveActorId();
     final response = await _request(
       () async => _client.delete(
         _uri('/v1/me'),
         headers: {
           ...await _authorizedHeaders(),
-          'X-KEFE-Delete-Confirm': 'DELETE',
+          'X-KEFE-Delete-Confirm': 'DELETE:$actorId',
         },
       ),
     );
     final body = _decode(response);
-    await _credentialStore.clear();
-    return PrivacyDeletionReceipt(
+    if (body['actor_id'] != actorId ||
+        body['private_data_deleted'] != true ||
+        body['aggregate_contributions_anonymized'] != true) {
+      throw ApiFailure('PRIVACY_DELETE_RECEIPT_INVALID', 502);
+    }
+    final receipt = PrivacyDeletionReceipt(
       receiptId: body['receipt_id'] as String,
       deletedAt: DateTime.parse(body['deleted_at'] as String),
       policyVersion: body['policy_version'] as String,
     );
+    await _credentialStore.clear();
+    return receipt;
+  }
+
+  Future<String> _resolveActorId() async {
+    final stored = (await _credentialStore.readActorId())?.trim();
+    if (stored != null && stored.isNotEmpty) return stored;
+
+    final data = await export();
+    final rawActorId = data['actor_id'];
+    if (rawActorId is! String || rawActorId.trim().isEmpty) {
+      throw ApiFailure('PRIVACY_ACTOR_ID_UNAVAILABLE', 502);
+    }
+    final actorId = rawActorId.trim();
+    await _credentialStore.writeActorId(actorId);
+    return actorId;
   }
 
   Future<Map<String, String>> _authorizedHeaders() async {
