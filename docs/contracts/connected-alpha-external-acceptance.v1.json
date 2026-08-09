@@ -11,6 +11,7 @@
     "dedicated_acceptance_case_required": true,
     "acceptance_case_trusted_snapshot_allowed": false,
     "explicit_allow_write_required": true,
+    "exact_deployed_source_commit_required": true,
     "canonical_schema_required": true,
     "external_reachability_required_before_execution": true
   },
@@ -59,6 +60,7 @@
   },
   "evidence_record": {
     "schema_version": "connected-alpha-acceptance.v1",
+    "source_commit_pattern": "^[0-9a-f]{40}$",
     "allowed_fields": [
       "status",
       "origin",
