@@ -6,6 +6,7 @@ import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_content_localizer.dart';
 import '../../../core/localization/kefe_strings.dart';
+import '../../../core/localization/result_methodology_strings.dart';
 import '../domain/decision_models.dart';
 
 class RevealResultCard extends ConsumerWidget {
@@ -459,7 +460,8 @@ class _MethodologyNote extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              strings.resultMethodology(
+              strings.resultMethodologyForLayer(
+                layer: reveal.layer,
                 sampleSize: reveal.sampleSize,
                 confidence: reveal.confidence,
               ),
