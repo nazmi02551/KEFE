@@ -60,6 +60,35 @@ void main() {
     expect(await store.readActorId(), guestActorId);
   });
 
+  test('persisted account credential supersedes cached guest credential', () async {
+    final store = MemoryCredentialStore();
+    var guestIssueCalls = 0;
+    final client = MockClient((request) async {
+      guestIssueCalls += 1;
+      return jsonResponse({
+        'actor_id': guestActorId,
+        'access_token': 'guest-token',
+        'expires_at': '2026-09-08T09:30:00Z',
+      }, status: 201);
+    });
+    final repository = HttpDecisionRepository(
+      config: config,
+      client: client,
+      credentialStore: store,
+    );
+
+    final guest = await repository.ensureGuestCredential();
+    expect(guest.accessToken, 'guest-token');
+    await store.write('account-token');
+    await store.writeActorId(accountActorId);
+
+    final account = await repository.ensureGuestCredential();
+
+    expect(account.accessToken, 'account-token');
+    expect(account.actorId, accountActorId);
+    expect(guestIssueCalls, 1);
+  });
+
   test('account merge replaces persisted token and actor id together', () async {
     final store = MemoryCredentialStore();
     await store.write('guest-token');
@@ -203,6 +232,36 @@ void main() {
     );
 
     await expectLater(repository.delete(), throwsA(isA<ApiFailure>()));
+
+    expect(await store.read(), 'account-token');
+    expect(await store.readActorId(), accountActorId);
+  });
+
+  test('malformed deletion receipt fails closed and keeps credentials', () async {
+    final store = MemoryCredentialStore();
+    await store.write('account-token');
+    await store.writeActorId(accountActorId);
+    final client = MockClient((request) async {
+      final body = validDeletionReceipt(accountActorId);
+      body['deleted_at'] = 'not-a-date';
+      return jsonResponse(body);
+    });
+    final repository = HttpPrivacyRepository(
+      config: config,
+      client: client,
+      credentialStore: store,
+    );
+
+    await expectLater(
+      repository.delete(),
+      throwsA(
+        isA<ApiFailure>().having(
+          (error) => error.code,
+          'code',
+          'PRIVACY_DELETE_RECEIPT_INVALID',
+        ),
+      ),
+    );
 
     expect(await store.read(), 'account-token');
     expect(await store.readActorId(), accountActorId);
