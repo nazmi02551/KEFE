@@ -1,0 +1,71 @@
+{
+  "contract_id": "KEFE-CONTEXT-SOURCE-TRUST-PRESENTATION-001",
+  "version": "1.0.0",
+  "status": "CANDIDATE",
+  "wave": "F4",
+  "capabilities": ["CAP-069", "CAP-070", "CAP-095"],
+  "surface": "consumer_context_sources",
+  "semantics": {
+    "source_existence_implies_verified": false,
+    "source_kind_implies_verified": false,
+    "publisher_identity_implies_verified": false,
+    "url_presence_implies_verified": false,
+    "claim_status_is_block_level": true,
+    "source_verification_state_available_in_current_model": false
+  },
+  "presentation": {
+    "shared_source_tile_required": true,
+    "legacy_and_progressive_must_share_source_tile": true,
+    "unconditional_verified_source_icon_allowed": false,
+    "neutral_source_reference_label_required": true,
+    "publisher_and_source_kind_preserved": true,
+    "url_host_metadata_allowed": true,
+    "url_host_metadata_is_verification_signal": false,
+    "external_url_launch_required": false
+  },
+  "claim_status": {
+    "preserve_existing_values": ["VERIFIED", "CLAIMED", "DISPUTED", "UNKNOWN"],
+    "preserve_existing_localization": true,
+    "may_be_projected_onto_source_row": false
+  },
+  "architecture": {
+    "backend_shape_changed": false,
+    "public_api_changed": false,
+    "openapi_changed": false,
+    "database_schema_changed": false,
+    "migration_required": false,
+    "source_trust_score_added": false,
+    "source_verification_methodology_added": false,
+    "url_launcher_dependency_added": false,
+    "new_github_actions_workflow_allowed": false
+  },
+  "accessibility": {
+    "source_row_has_stable_semantics": true,
+    "verification_must_not_be_conveyed_by_icon_alone": true,
+    "low_end_safe_static_presentation": true
+  },
+  "evidence": {
+    "focused_widget_tests_required": true,
+    "executable_repository_guard_required": true,
+    "existing_mobile_ci_required": true,
+    "exact_head_ci_required_before_pass": true
+  },
+  "preserved_invariants": [
+    "COMMIT_FIRST",
+    "PRE_RESULT_ISOLATION",
+    "IMMUTABLE_PUBLISHED_CASE_VERSION",
+    "CASE_AGNOSTIC_COMPOSABLE_RUNTIME",
+    "PREVIEW_PRODUCTION_ISOLATION",
+    "RAW_DOMAIN_VALUES_UNCHANGED_BY_PRESENTATION",
+    "COLLECTIVE_RESULT_IS_NOT_AUTOMATICALLY_SIGNAL"
+  ],
+  "non_claims": [
+    "source_verified",
+    "publisher_verified",
+    "source_trust_score",
+    "source_diversity",
+    "correction_history",
+    "signal_or_impact",
+    "capability_lifecycle_promotion"
+  ]
+}
