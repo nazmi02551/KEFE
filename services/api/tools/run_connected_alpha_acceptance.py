@@ -215,7 +215,8 @@ def _reveal(client: JsonHttpClient, actor: GuestActor) -> dict[str, Any]:
     )
     if result.get("layer") != "RAW":
         raise AcceptanceError(
-            "acceptance Case must expose live RAW result; choose a dedicated Case without a TRUSTED snapshot"
+            "acceptance Case must expose live RAW result; choose a dedicated Case "
+            "without a TRUSTED snapshot"
         )
     if not isinstance(result.get("n"), int):
         raise AcceptanceError("RAW reveal returned an invalid sample size")
@@ -313,7 +314,9 @@ def run_acceptance(
 
         reread_first = _reveal(client, first)
         if reread_first["n"] != after_second["n"]:
-            raise AcceptanceError("first actor does not observe the shared post-second-commit sample")
+            raise AcceptanceError(
+                "first actor does not observe the shared post-second-commit sample"
+            )
         if reread_first["result"] != after_second["result"]:
             raise AcceptanceError("actors do not observe the same shared RAW option payload")
 
