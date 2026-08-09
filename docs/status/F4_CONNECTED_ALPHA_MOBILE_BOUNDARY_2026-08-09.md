@@ -40,9 +40,9 @@ A future artifact requires a real approved HTTPS endpoint and a separately revie
 
 ## Infrastructure preparation outside repository claims
 
-An isolated PostgreSQL project has been provisioned for the future Connected Alpha environment. This does not change repository reachability status and is not production durability evidence. The database remains separate from Product Preview. Canonical schema migration must be performed through the repository Alembic chain before application traffic is allowed.
+An isolated PostgreSQL environment has been provisioned for the future Connected Alpha. This does not change repository reachability status and is not production durability evidence. The database remains separate from Product Preview. Canonical schema migration must be performed through the repository Alembic chain before application traffic is allowed.
 
-No database credential or provider-specific connection value is committed to this repository.
+The infrastructure checkpoint is recorded separately in `docs/status/F4_CONNECTED_ALPHA_DB_ENVIRONMENT_2026-08-09.md`. No database credential or provider-specific connection value is committed to this repository.
 
 ## Evidence currently available
 
