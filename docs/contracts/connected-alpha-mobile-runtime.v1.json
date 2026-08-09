@@ -1,0 +1,76 @@
+{
+  "contract_id": "KEFE-CONNECTED-ALPHA-MOBILE-RUNTIME-001",
+  "version": "1.0.0",
+  "status": "MOBILE_BOUNDARY_PREPARED",
+  "wave": "F4",
+  "capabilities": [
+    "CAP-001",
+    "CAP-008",
+    "CAP-009",
+    "CAP-092",
+    "CAP-095",
+    "CAP-123"
+  ],
+  "entrypoints": {
+    "local_or_production_shell": "apps/mobile/lib/main.dart",
+    "product_preview": "apps/mobile/lib/main_preview.dart",
+    "connected_alpha": "apps/mobile/lib/main_connected_alpha.dart"
+  },
+  "connected_alpha_configuration": {
+    "api_base_url_define": "KEFE_API_BASE_URL",
+    "timeout_define": "KEFE_HTTP_TIMEOUT_SECONDS",
+    "api_base_url_required": true,
+    "required_scheme": "https",
+    "forbidden_hosts": [
+      "localhost",
+      "127.0.0.1",
+      "0.0.0.0",
+      "10.0.2.2",
+      "::1"
+    ],
+    "forbidden_host_suffixes": [
+      ".invalid"
+    ],
+    "credentials_in_url_allowed": false,
+    "query_in_url_allowed": false,
+    "fragment_in_url_allowed": false,
+    "timeout_seconds_min": 3,
+    "timeout_seconds_max": 60,
+    "hosting_vendor_hardcoded": false
+  },
+  "composition": {
+    "canonical_http_repositories_required": true,
+    "secure_credential_store_required": true,
+    "persistent_decision_draft_store_required": true,
+    "product_preview_repository_allowed": false,
+    "product_preview_memory_store_allowed": false,
+    "product_preview_fallback_allowed": false
+  },
+  "artifact_policy": {
+    "compile_proof_before_real_endpoint_allowed": true,
+    "installable_connected_alpha_artifact_before_real_endpoint_allowed": false,
+    "artifact_upload_before_real_endpoint_allowed": false,
+    "production_reachability_claim_from_compile_allowed": false,
+    "external_https_probe_required_for_reachability": true
+  },
+  "architecture_guards": {
+    "parallel_backend_allowed": false,
+    "commit_first_preserved": true,
+    "blind_first_preserved": true,
+    "immutable_published_case_version_preserved": true,
+    "generic_flow_runtime_preserved": true,
+    "my_kefe_inference_allowed": false,
+    "product_preview_isolation_preserved": true,
+    "local_development_config_semantics_preserved": true
+  },
+  "non_claims": [
+    "connected_alpha_endpoint_deployed",
+    "external_https_reachability_verified",
+    "installable_connected_alpha_artifact_released",
+    "store_distribution_verified",
+    "production_slo_verified",
+    "human_usability_verified",
+    "f4_complete",
+    "cap123_lifecycle_promoted"
+  ]
+}
