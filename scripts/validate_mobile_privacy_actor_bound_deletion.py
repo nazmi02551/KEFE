@@ -10,7 +10,10 @@ DECISION_REPO = ROOT / "apps/mobile/lib/features/decision/data/http_decision_rep
 ACCOUNT_REPO = ROOT / "apps/mobile/lib/features/account/data/http_account_repository.dart"
 PRIVACY_REPO = ROOT / "apps/mobile/lib/features/privacy/data/http_privacy_repository.dart"
 SECURE_STORE = ROOT / "apps/mobile/lib/core/storage/secure_credential_store.dart"
+STRINGS = ROOT / "apps/mobile/lib/core/localization/internal_alpha_strings.dart"
+ERROR_CATALOG = ROOT / "apps/mobile/lib/core/localization/privacy_error_string_catalog.dart"
 TEST = ROOT / "apps/mobile/test/mobile_privacy_actor_bound_delete_test.dart"
+COPY_TEST = ROOT / "apps/mobile/test/privacy_error_copy_test.dart"
 FORBIDDEN_WORKFLOW = ROOT / ".github/workflows/mobile-privacy-actor-bound-delete.yml"
 
 
@@ -48,7 +51,10 @@ def main() -> None:
     account = ACCOUNT_REPO.read_text(encoding="utf-8")
     privacy = PRIVACY_REPO.read_text(encoding="utf-8")
     secure = SECURE_STORE.read_text(encoding="utf-8")
+    strings = STRINGS.read_text(encoding="utf-8")
+    error_catalog = ERROR_CATALOG.read_text(encoding="utf-8")
     test = TEST.read_text(encoding="utf-8")
+    copy_test = COPY_TEST.read_text(encoding="utf-8")
 
     require(server, 'expected = f"DELETE:{principal.actor_id}"', where="privacy service")
     require(server, "hmac.compare_digest(confirmation, expected)", where="privacy service")
@@ -105,6 +111,22 @@ def main() -> None:
         raise SystemExit("credentials must be cleared only after complete receipt validation")
 
     for needle in (
+        "PrivacyErrorStringCatalog.resources",
+        "PRIVACY_ACTOR_ID_UNAVAILABLE",
+        "PRIVACY_DELETE_RECEIPT_INVALID",
+        "_privacyErrorText('receipt_invalid')",
+    ):
+        require(strings, needle, where="privacy error localization")
+    for needle in (
+        "'tr':",
+        "'en':",
+        "silindiği varsayılmadı",
+        "not treated as deleted",
+        "secure-deletion receipt",
+    ):
+        require(error_catalog, needle, where="privacy error string catalog")
+
+    for needle in (
         "guest issuance persists opaque token and actor id separately",
         "persisted account credential replaces guest credential without restart",
         "cleared credential store forces fresh guest issuance in same process",
@@ -118,6 +140,13 @@ def main() -> None:
         "PRIVACY_DELETE_RECEIPT_INVALID",
     ):
         require(test, needle, where="mobile privacy repository tests")
+    for needle in (
+        "Turkish invalid deletion receipt copy hides internal error code",
+        "English invalid deletion receipt copy hides internal error code",
+        "identity migration error is explicit without leaking code",
+        "isNot(contains('PRIVACY_DELETE_RECEIPT_INVALID'))",
+    ):
+        require(copy_test, needle, where="privacy error copy tests")
 
     print("Mobile privacy actor-bound deletion: OK")
 
