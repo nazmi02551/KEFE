@@ -1,0 +1,75 @@
+{
+  "contract_id": "KEFE-CONNECTED-ALPHA-CI-CONSOLIDATION-001",
+  "version": "1.0.0",
+  "status": "CANDIDATE",
+  "wave": "F4",
+  "purpose": "Preserve Connected Alpha verification while consolidating feature-specific GitHub Actions workflows into existing core gates.",
+  "core_workflows": {
+    "api": ".github/workflows/api-ci.yml",
+    "mobile": ".github/workflows/mobile-ci.yml"
+  },
+  "dedicated_workflows_forbidden": [
+    ".github/workflows/production-api-runtime.yml",
+    ".github/workflows/connected-alpha-mobile-runtime.yml",
+    ".github/workflows/connected-alpha-schema-snapshot.yml",
+    ".github/workflows/live-raw-collective-result.yml",
+    ".github/workflows/connected-alpha-external-acceptance.yml",
+    ".github/workflows/raw-result-methodology-presentation.yml"
+  ],
+  "api_evidence_required": [
+    "PRODUCTION_RUNTIME_CONTRACT",
+    "PROVIDER_NEUTRAL_CONTAINER_BUILD",
+    "CANONICAL_APP_CONTAINER_IMPORT",
+    "SCHEMA_CHAIN_VALIDATION",
+    "OFFLINE_SCHEMA_SNAPSHOT",
+    "SCHEMA_SNAPSHOT_VALIDATION",
+    "SCHEMA_SNAPSHOT_SHA256_ARTIFACT",
+    "LIVE_RAW_CONTRACT",
+    "LIVE_RAW_POSTGRES_TEST",
+    "EXTERNAL_ACCEPTANCE_CONTRACT",
+    "NETWORKLESS_ACCEPTANCE_TEST",
+    "NO_REAL_ALPHA_ENDPOINT_IN_CI"
+  ],
+  "mobile_evidence_required": [
+    "CONNECTED_ALPHA_RUNTIME_CONTRACT",
+    "CONNECTED_ALPHA_CONFIG_TEST",
+    "CONNECTED_ALPHA_COMPILE_ONLY",
+    "CONNECTED_ALPHA_APK_DELETED_BEFORE_UPLOAD",
+    "RAW_METHODOLOGY_PRESENTATION_CONTRACT",
+    "RAW_METHODOLOGY_TEST",
+    "RAW_GAP_INTERPRETATION_CONTRACT",
+    "RAW_GAP_INTERPRETATION_TEST",
+    "PREVIEW_APK_REMAINS_SEPARATE"
+  ],
+  "run_control": {
+    "new_feature_specific_workflow_allowed": false,
+    "core_workflow_concurrency_cancel_in_progress_required": true,
+    "duplicate_checkout_setup_for_connected_alpha_required": false
+  },
+  "evidence_boundaries": {
+    "ci_is_deployed_evidence": false,
+    "offline_schema_snapshot_mutates_database": false,
+    "connected_alpha_compile_publishes_apk": false,
+    "external_acceptance_ci_may_write_remote": false,
+    "raw_is_signal": false,
+    "product_preview_is_production": false
+  },
+  "preserved_invariants": [
+    "COMMIT_FIRST",
+    "BLIND_FIRST",
+    "IMMUTABLE_PUBLISHED_CASE_VERSION",
+    "GENERIC_CASE_AGNOSTIC_FLOW",
+    "COLLECTIVE_RESULT_NOT_SIGNAL",
+    "MY_KEFE_DESCRIPTIVE_ONLY",
+    "PRODUCT_PREVIEW_PRODUCTION_ISOLATION"
+  ],
+  "non_claims": [
+    "ACTIONS_ACCOUNT_RESTORED",
+    "EXACT_HEAD_CI_PASS",
+    "DEPLOYED_REACHABILITY",
+    "PRODUCTION_DATABASE_MIGRATED",
+    "STORE_DISTRIBUTION",
+    "F4_COMPLETE",
+    "CAP123_LIFECYCLE_PROMOTED"
+  ]
+}

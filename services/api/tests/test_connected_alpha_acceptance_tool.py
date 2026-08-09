@@ -151,7 +151,11 @@ class FakeClient:
             actor_id = self.actor_by_token[token]
             assert headers == {"X-KEFE-Delete-Confirm": f"DELETE:{actor_id}"}
             self.deleted_actor_ids.append(actor_id)
-            return {"actor_id": actor_id, "private_data_deleted": True}
+            return {
+                "actor_id": actor_id,
+                "private_data_deleted": True,
+                "aggregate_contributions_anonymized": True,
+            }
         raise AssertionError(f"unexpected request: {method} {path}")
 
 
@@ -165,6 +169,14 @@ class TrustedRevealClient(FakeClient):
                 "result": {"A": 0.5, "B": 0.5},
             }
         return super().request(method, path, **kwargs)
+
+
+class InvalidCleanupReceiptClient(FakeClient):
+    def request(self, method: str, path: str, **kwargs: Any) -> dict[str, Any]:
+        result = super().request(method, path, **kwargs)
+        if method == "DELETE" and path == "/v1/me":
+            result["private_data_deleted"] = False
+        return result
 
 
 def test_two_actor_acceptance_proves_shared_increment_and_cleanup(
@@ -206,3 +218,18 @@ def test_trusted_case_is_not_accepted_as_live_raw_proof_and_actors_are_cleaned(
     client = TrustedRevealClient.last
     assert client is not None
     assert len(client.deleted_actor_ids) == 2
+
+
+def test_invalid_privacy_cleanup_receipt_is_acceptance_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(acceptance, "JsonHttpClient", InvalidCleanupReceiptClient)
+
+    with pytest.raises(acceptance.AcceptanceError, match="cleanup failed"):
+        acceptance.run_acceptance(
+            base_url="https://alpha-api.example.com",
+            case_id=CASE_ID,
+            allow_write=True,
+            timeout_seconds=12,
+            source_commit=SOURCE_COMMIT,
+        )

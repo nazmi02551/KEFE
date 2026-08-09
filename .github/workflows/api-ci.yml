@@ -6,6 +6,8 @@ on:
       - 'services/api/**'
       - 'docs/contracts/**'
       - 'infra/local/**'
+      - 'scripts/validate_connected_alpha_schema_snapshot.py'
+      - 'scripts/validate_connected_alpha_ci_consolidation.py'
       - '.github/workflows/api-ci.yml'
   push:
     branches: [main]
@@ -13,10 +15,16 @@ on:
       - 'services/api/**'
       - 'docs/contracts/**'
       - 'infra/local/**'
+      - 'scripts/validate_connected_alpha_schema_snapshot.py'
+      - 'scripts/validate_connected_alpha_ci_consolidation.py'
       - '.github/workflows/api-ci.yml'
 
 permissions:
   contents: read
+
+concurrency:
+  group: api-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint-unit:
@@ -33,6 +41,24 @@ jobs:
       - name: Install
         working-directory: services/api
         run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+      - name: Connected Alpha CI consolidation contract
+        run: python3 scripts/validate_connected_alpha_ci_consolidation.py
+      - name: Connected Alpha schema migration-chain contract
+        run: python3 scripts/validate_connected_alpha_schema_snapshot.py
+      - name: Production runtime contract
+        working-directory: services/api
+        run: python tools/check_production_api_runtime.py
+      - name: Live RAW Collective Result contract
+        working-directory: services/api
+        run: python tools/check_live_raw_collective_result.py
+      - name: Connected Alpha external acceptance contract
+        working-directory: services/api
+        run: python tools/check_connected_alpha_external_acceptance.py
+      - name: Enforce networkless external acceptance CI
+        run: |
+          test -z "${KEFE_CONNECTED_ALPHA_BASE_URL:-}"
+          test -z "${KEFE_CONNECTED_ALPHA_CASE_ID:-}"
+          echo "Connected Alpha acceptance remains fake-transport/networkless in CI."
       - name: Lint
         id: lint
         continue-on-error: true
@@ -170,6 +196,42 @@ jobs:
       - name: OpenAPI drift gate
         working-directory: services/api
         run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
+      - name: Generate offline Connected Alpha PostgreSQL schema snapshot
+        working-directory: services/api
+        env:
+          KEFE_ENVIRONMENT: development
+          KEFE_DATABASE_URL: postgresql+psycopg://offline:offline@schema.invalid:5432/kefe
+        run: |
+          mkdir -p ../../artifacts
+          alembic upgrade head --sql > ../../artifacts/kefe-connected-alpha-schema.sql
+      - name: Validate offline schema snapshot
+        run: >-
+          python3 scripts/validate_connected_alpha_schema_snapshot.py
+          --snapshot artifacts/kefe-connected-alpha-schema.sql
+      - name: Generate schema snapshot digest
+        run: >-
+          sha256sum artifacts/kefe-connected-alpha-schema.sql
+          > artifacts/kefe-connected-alpha-schema.sha256
+      - name: Upload schema snapshot evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: kefe-connected-alpha-schema-snapshot
+          path: |
+            artifacts/kefe-connected-alpha-schema.sql
+            artifacts/kefe-connected-alpha-schema.sha256
+          if-no-files-found: error
+          retention-days: 7
+      - name: Build provider-neutral API image
+        run: docker build --tag kefe-api:ci --file services/api/Dockerfile services/api
+      - name: Verify canonical app is importable in image
+        run: >-
+          docker run --rm --entrypoint python kefe-api:ci
+          -c "from kefe_api.main import app; assert app.title == 'KEFE API'"
+      - name: Preserve Connected Alpha evidence boundary
+        run: >-
+          echo "Repository CI proves contracts, packaging and offline schema generation only;
+          it does not prove external deployment, PostgreSQL durability, OTP delivery,
+          representativeness, Signal/Impact, store distribution or F4 completion."
 
   postgres-integration:
     needs: lint-unit
@@ -255,6 +317,7 @@ jobs:
           tests/test_decision_revision_lineage_postgres.py
           tests/test_knowledge_graph_postgres.py
           tests/test_consensus_postgres.py
+          tests/test_live_raw_collective_result_postgres.py
           > postgres-test-output.txt 2>&1
       - name: Upload PostgreSQL diagnostics on failure
         if: steps.postgres-tests.outcome == 'failure'
