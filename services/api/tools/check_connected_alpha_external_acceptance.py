@@ -34,6 +34,16 @@ def main() -> None:
         raise SystemExit("acceptance must remain exactly two-actor")
     if contract["write_scope"]["privacy_cleanup_required"] is not True:
         raise SystemExit("acceptance actors must be cleaned through privacy self-service")
+    if contract["write_scope"]["privacy_cleanup_receipt_required"] is not True:
+        raise SystemExit("privacy cleanup must be verified from the deletion receipt")
+    for key in (
+        "cleanup_receipt_actor_match_required",
+        "cleanup_receipt_private_data_deleted_required",
+        "cleanup_receipt_aggregate_handling_required",
+        "cleanup_failure_is_acceptance_failure",
+    ):
+        if contract["write_scope"][key] is not True:
+            raise SystemExit(f"missing cleanup receipt boundary: {key}")
     external_ci_allowed = contract["execution_authority"][
         "ci_may_execute_against_real_endpoint_automatically"
     ]
@@ -62,6 +72,9 @@ def main() -> None:
         '"DELETE"',
         '"/v1/me"',
         '"X-KEFE-Delete-Confirm": f"DELETE:{actor.actor_id}"',
+        'receipt.get("actor_id") != actor.actor_id',
+        'receipt.get("private_data_deleted") is not True',
+        'receipt.get("aggregate_contributions_anonymized") is not True',
         'for actor in reversed(actors):',
         '"status": "ACCEPTED_PENDING_CLEANUP"',
         'record["status"] = "ACCEPTED_CLEANED"',
