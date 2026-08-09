@@ -1,0 +1,59 @@
+{
+  "contract_id": "KEFE-RAW-RESULT-METHODOLOGY-PRESENTATION-001",
+  "version": "1.0.0",
+  "status": "CANDIDATE",
+  "wave": "F4",
+  "capabilities": ["CAP-123"],
+  "scope": "MOBILE_PRESENTATION_COPY_ONLY",
+  "trusted": {
+    "existing_copy_preserved": true,
+    "trusted_sample_label_preserved": true,
+    "existing_confidence_labels_preserved": ["HIGH", "MEDIUM", "LOW"]
+  },
+  "raw": {
+    "trusted_sample_label_allowed": false,
+    "technical_insufficient_code_visible": false,
+    "participation_wording_required": true,
+    "representativeness_disclaimer_required": true,
+    "confidence_not_assessed_wording_required": true,
+    "turkish_copy": {
+      "participation": "Gözlenen kaydedilmiş katılım",
+      "confidence": "Güven düzeyi hesaplanmadı",
+      "disclaimer": "Temsiliyet iddiası yok"
+    },
+    "english_copy": {
+      "participation": "Observed committed participation",
+      "confidence": "Confidence not assessed",
+      "disclaimer": "No representativeness claim"
+    }
+  },
+  "unknown_layer": {
+    "trusted_default_allowed": false,
+    "neutral_layer_label_required": true
+  },
+  "behavior_preserved": [
+    "RESULT_ARITHMETIC",
+    "OPTION_PERCENTAGES",
+    "KEFE_GAP",
+    "SELECTED_OPTION_HIGHLIGHT",
+    "COMMIT_FIRST",
+    "BLIND_FIRST",
+    "FLOW_RUNTIME",
+    "RESULT_ENDPOINT",
+    "PRODUCT_PREVIEW_PRODUCTION_ISOLATION"
+  ],
+  "forbidden_claims": [
+    "RAW_IS_TRUSTED_SAMPLE",
+    "RAW_IS_REPRESENTATIVE",
+    "RAW_IS_STATISTICALLY_CONFIDENT",
+    "RAW_IS_SIGNAL",
+    "RAW_IS_IMPACT",
+    "RAW_IS_TRUTH"
+  ],
+  "non_claims": [
+    "methodology_qualification_complete",
+    "signal_or_impact",
+    "f4_complete",
+    "cap123_lifecycle_promoted"
+  ]
+}
