@@ -52,10 +52,25 @@ class HttpPrivacyRepository implements PrivacyRepository {
         body['aggregate_contributions_anonymized'] != true) {
       throw ApiFailure('PRIVACY_DELETE_RECEIPT_INVALID', 502);
     }
+    final receiptId = body['receipt_id'];
+    final deletedAt = body['deleted_at'];
+    final policyVersion = body['policy_version'];
+    if (receiptId is! String ||
+        receiptId.isEmpty ||
+        deletedAt is! String ||
+        deletedAt.isEmpty ||
+        policyVersion is! String ||
+        policyVersion.isEmpty) {
+      throw ApiFailure('PRIVACY_DELETE_RECEIPT_INVALID', 502);
+    }
+    final parsedDeletedAt = DateTime.tryParse(deletedAt);
+    if (parsedDeletedAt == null) {
+      throw ApiFailure('PRIVACY_DELETE_RECEIPT_INVALID', 502);
+    }
     final receipt = PrivacyDeletionReceipt(
-      receiptId: body['receipt_id'] as String,
-      deletedAt: DateTime.parse(body['deleted_at'] as String),
-      policyVersion: body['policy_version'] as String,
+      receiptId: receiptId,
+      deletedAt: parsedDeletedAt,
+      policyVersion: policyVersion,
     );
     await _credentialStore.clear();
     return receipt;
