@@ -1,0 +1,89 @@
+name: Connected Alpha External Acceptance CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'services/api/tools/run_connected_alpha_acceptance.py'
+      - 'services/api/tools/check_connected_alpha_external_acceptance.py'
+      - 'services/api/tests/test_connected_alpha_acceptance_tool.py'
+      - 'docs/contracts/connected-alpha-external-acceptance.v1.json'
+      - 'docs/adr/0126-external-connected-alpha-acceptance-proof.md'
+      - 'docs/status/F4_CONNECTED_ALPHA_EXTERNAL_ACCEPTANCE_2026-08-09.md'
+      - '.github/workflows/connected-alpha-external-acceptance.yml'
+  push:
+    branches:
+      - main
+      - feature/f4-external-alpha-acceptance
+    paths:
+      - 'services/api/tools/run_connected_alpha_acceptance.py'
+      - 'services/api/tools/check_connected_alpha_external_acceptance.py'
+      - 'services/api/tests/test_connected_alpha_acceptance_tool.py'
+      - 'docs/contracts/connected-alpha-external-acceptance.v1.json'
+      - 'docs/adr/0126-external-connected-alpha-acceptance-proof.md'
+      - 'docs/status/F4_CONNECTED_ALPHA_EXTERNAL_ACCEPTANCE_2026-08-09.md'
+      - '.github/workflows/connected-alpha-external-acceptance.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: connected-alpha-external-acceptance-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  harness-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+
+      - name: Install API test dependencies
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+
+      - name: Validate contract JSON
+        run: python -m json.tool docs/contracts/connected-alpha-external-acceptance.v1.json >/dev/null
+
+      - name: Compile acceptance tools
+        run: >-
+          python -m py_compile
+          services/api/tools/run_connected_alpha_acceptance.py
+          services/api/tools/check_connected_alpha_external_acceptance.py
+          services/api/tests/test_connected_alpha_acceptance_tool.py
+
+      - name: Executable external acceptance contract
+        working-directory: services/api
+        run: python tools/check_connected_alpha_external_acceptance.py
+
+      - name: Lint focused harness
+        working-directory: services/api
+        run: >-
+          ruff check
+          tools/run_connected_alpha_acceptance.py
+          tools/check_connected_alpha_external_acceptance.py
+          tests/test_connected_alpha_acceptance_tool.py
+
+      - name: Verify harness with fake transport only
+        working-directory: services/api
+        run: pytest -q tests/test_connected_alpha_acceptance_tool.py
+
+      - name: Enforce no external execution in CI
+        run: |
+          test -z "${KEFE_CONNECTED_ALPHA_BASE_URL:-}"
+          test -z "${KEFE_CONNECTED_ALPHA_CASE_ID:-}"
+          echo "Harness CI is networkless; no real Connected Alpha endpoint or write credential is configured."
+
+      - name: Preserve evidence boundary
+        run: >-
+          echo "This CI validates only the operator harness. It does not prove a deployed API,
+          external reachability, shared production state, SLO attainment, store readiness,
+          representativeness, Signal/Impact, or F4 completion."

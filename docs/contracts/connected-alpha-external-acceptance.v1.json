@@ -1,0 +1,99 @@
+{
+  "contract_id": "KEFE-CONNECTED-ALPHA-EXTERNAL-ACCEPTANCE-001",
+  "version": "1.0.0",
+  "status": "CANDIDATE",
+  "wave": "F4",
+  "capabilities": ["CAP-092", "CAP-123"],
+  "purpose": "Prove external shared multi-user Connected Alpha state after a real HTTPS deployment exists.",
+  "preconditions": {
+    "real_https_origin_required": true,
+    "explicit_case_id_required": true,
+    "dedicated_acceptance_case_required": true,
+    "acceptance_case_trusted_snapshot_allowed": false,
+    "explicit_allow_write_required": true,
+    "exact_deployed_source_commit_required": true,
+    "canonical_schema_required": true,
+    "external_reachability_required_before_execution": true
+  },
+  "network_policy": {
+    "https_only": true,
+    "tls_verification_bypass_allowed": false,
+    "url_credentials_allowed": false,
+    "url_query_allowed": false,
+    "url_fragment_allowed": false,
+    "forbidden_hosts": ["localhost", "127.0.0.1", "0.0.0.0", "::1", "10.0.2.2"],
+    "forbidden_host_suffixes": [".invalid"],
+    "timeout_seconds_min": 3,
+    "timeout_seconds_max": 60
+  },
+  "flow": [
+    "GET_HEALTH",
+    "GET_READY",
+    "GET_EXPLICIT_CASE",
+    "CREATE_GUEST_1",
+    "CREATE_GUEST_2",
+    "CREATE_AND_ANSWER_BOTH_DRAFTS",
+    "COMMIT_GUEST_1",
+    "REVEAL_RAW_GUEST_1",
+    "COMMIT_GUEST_2",
+    "REVEAL_RAW_GUEST_2",
+    "REREAD_GUEST_1_SHARED_RAW",
+    "DELETE_GUEST_2",
+    "DELETE_GUEST_1"
+  ],
+  "shared_state_assertions": {
+    "layer": "RAW",
+    "second_commit_exact_sample_increment": 1,
+    "first_actor_reread_matches_second_sample_size": true,
+    "first_actor_reread_matches_second_result_payload": true,
+    "proportions_sum_to_one": true,
+    "uncommitted_second_draft_excluded_before_second_commit": true
+  },
+  "write_scope": {
+    "private_reason_written": false,
+    "confidence_answer_written": false,
+    "demographics_written": false,
+    "profile_data_written": false,
+    "exact_guest_count": 2,
+    "privacy_cleanup_required": true,
+    "cleanup_failure_is_acceptance_failure": true
+  },
+  "evidence_record": {
+    "schema_version": "connected-alpha-acceptance.v1",
+    "source_commit_pattern": "^[0-9a-f]{40}$",
+    "allowed_fields": [
+      "status",
+      "origin",
+      "case_id",
+      "case_version_id",
+      "layer",
+      "sample_size_after_first",
+      "sample_size_after_second",
+      "actor_count",
+      "source_commit",
+      "started_at",
+      "completed_at",
+      "cleanup"
+    ],
+    "bearer_token_allowed": false,
+    "actor_id_allowed": false,
+    "selected_option_allowed": false,
+    "private_payload_allowed": false
+  },
+  "execution_authority": {
+    "tool": "services/api/tools/run_connected_alpha_acceptance.py",
+    "ci_may_execute_against_real_endpoint_automatically": false,
+    "operator_review_required": true,
+    "automatic_reachability_promotion_allowed": false,
+    "automatic_capability_promotion_allowed": false
+  },
+  "non_claims": [
+    "representative_sampling",
+    "signal_or_impact",
+    "load_test",
+    "slo_attainment",
+    "store_distribution",
+    "f4_complete",
+    "cap123_lifecycle_promoted"
+  ]
+}
