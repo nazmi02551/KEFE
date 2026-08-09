@@ -18,11 +18,13 @@ on:
       - 'docs/contracts/raw-result-gap-interpretation.v1.json'
       - 'docs/contracts/connected-alpha-ci-consolidation.v1.json'
       - 'docs/contracts/context-source-trust-presentation.v1.json'
+      - 'docs/contracts/mobile-privacy-actor-bound-deletion.v1.json'
       - 'scripts/validate_connected_alpha_mobile_runtime.py'
       - 'scripts/validate_raw_result_methodology_presentation.py'
       - 'scripts/validate_raw_result_gap_interpretation.py'
       - 'scripts/validate_connected_alpha_ci_consolidation.py'
       - 'scripts/validate_context_source_trust_presentation.py'
+      - 'scripts/validate_mobile_privacy_actor_bound_deletion.py'
       - '.github/workflows/mobile-ci.yml'
   push:
     branches: [main]
@@ -42,11 +44,13 @@ on:
       - 'docs/contracts/raw-result-gap-interpretation.v1.json'
       - 'docs/contracts/connected-alpha-ci-consolidation.v1.json'
       - 'docs/contracts/context-source-trust-presentation.v1.json'
+      - 'docs/contracts/mobile-privacy-actor-bound-deletion.v1.json'
       - 'scripts/validate_connected_alpha_mobile_runtime.py'
       - 'scripts/validate_raw_result_methodology_presentation.py'
       - 'scripts/validate_raw_result_gap_interpretation.py'
       - 'scripts/validate_connected_alpha_ci_consolidation.py'
       - 'scripts/validate_context_source_trust_presentation.py'
+      - 'scripts/validate_mobile_privacy_actor_bound_deletion.py'
       - '.github/workflows/mobile-ci.yml'
 
 permissions:
@@ -73,6 +77,8 @@ jobs:
         run: python3 scripts/validate_raw_result_gap_interpretation.py
       - name: Context source trust presentation contract
         run: python3 scripts/validate_context_source_trust_presentation.py
+      - name: Mobile privacy actor-bound deletion contract
+        run: python3 scripts/validate_mobile_privacy_actor_bound_deletion.py
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.44.4'
