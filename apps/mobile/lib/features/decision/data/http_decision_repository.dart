@@ -69,16 +69,12 @@ class HttpDecisionRepository
   final http.Client _client;
   final CredentialStore _credentialStore;
 
-  String? _token;
-
   Uri _uri(String path) => _config.apiBaseUri.resolve(path);
 
   @override
   Future<GuestCredential> ensureGuestCredential() async {
-    final stored = await _credentialStore.read();
-    final existing = stored ?? _token;
+    final existing = await _credentialStore.read();
     if (existing != null) {
-      _token = existing;
       return GuestCredential(
         actorId: await _credentialStore.readActorId() ?? '',
         accessToken: existing,
@@ -98,7 +94,6 @@ class HttpDecisionRepository
       accessToken: body['access_token'] as String,
       expiresAt: DateTime.parse(body['expires_at'] as String),
     );
-    _token = credential.accessToken;
     await _credentialStore.write(credential.accessToken);
     await _credentialStore.writeActorId(credential.actorId);
     return credential;
