@@ -8,9 +8,9 @@ import 'package:kefe_mobile/features/account/data/http_account_repository.dart';
 import 'package:kefe_mobile/features/decision/data/http_decision_repository.dart';
 import 'package:kefe_mobile/features/privacy/data/http_privacy_repository.dart';
 
-const config = AppConfig(
-  apiBaseUri: Uri(scheme: 'https', host: 'api.example.com'),
-  requestTimeout: Duration(seconds: 5),
+final config = AppConfig(
+  apiBaseUri: Uri.parse('https://api.example.com'),
+  requestTimeout: const Duration(seconds: 5),
 );
 
 const guestActorId = '11111111-1111-4111-8111-111111111111';
