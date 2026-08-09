@@ -1,0 +1,60 @@
+{
+  "contract_id": "KEFE-RAW-RESULT-GAP-INTERPRETATION-001",
+  "version": "1.0.0",
+  "status": "CANDIDATE",
+  "wave": "F4",
+  "purpose": "Keep unqualified RAW Collective Result presentation descriptive-only while preserving reviewed TRUSTED result interpretation.",
+  "result_layer_policy": {
+    "TRUSTED": {
+      "distribution_visible": true,
+      "methodology_visible": true,
+      "kefe_gap_interpretation_allowed": true
+    },
+    "RAW": {
+      "distribution_visible": true,
+      "methodology_visible": true,
+      "kefe_gap_interpretation_allowed": false,
+      "representativeness_claim_allowed": false,
+      "signal_claim_allowed": false
+    },
+    "UNKNOWN_OR_FUTURE": {
+      "distribution_visible": true,
+      "methodology_visible": true,
+      "kefe_gap_interpretation_allowed": false,
+      "fail_closed": true
+    }
+  },
+  "presentation": {
+    "gap_widget_key": "reveal-gap-insight",
+    "distribution_preserved_for_raw": true,
+    "personal_decision_preserved_for_raw": true,
+    "raw_methodology_note_preserved": true,
+    "magic_sample_threshold_allowed": false
+  },
+  "preserved_invariants": [
+    "COMMIT_FIRST",
+    "BLIND_FIRST",
+    "IMMUTABLE_PUBLISHED_CASE_VERSION",
+    "GENERIC_CASE_AGNOSTIC_FLOW",
+    "COLLECTIVE_RESULT_NOT_SIGNAL",
+    "MY_KEFE_DESCRIPTIVE_ONLY",
+    "PRODUCT_PREVIEW_PRODUCTION_ISOLATION"
+  ],
+  "verification": {
+    "trusted_gap_visible": true,
+    "raw_gap_hidden": true,
+    "unknown_layer_gap_hidden": true,
+    "raw_distribution_visible": true,
+    "trusted_copy_unchanged": true,
+    "existing_mobile_ci_required": true,
+    "new_dedicated_workflow_allowed": false
+  },
+  "non_claims": [
+    "TRUSTED_IS_SIGNAL",
+    "REPRESENTATIVE_SAMPLING",
+    "STATISTICAL_CONFIDENCE",
+    "IMPACT",
+    "COUNTRY_OR_DEMOGRAPHIC_INFERENCE",
+    "F4_COMPLETE"
+  ]
+}

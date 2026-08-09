@@ -13,6 +13,8 @@ on:
       - 'services/api/src/kefe_api/modules/admin_security/source_brief_review_router.py'
       - 'services/api/src/kefe_api/modules/ingestion_orchestration/source_brief_ingestion.py'
       - 'docs/contracts/canonical-admin-feed-source-brief-review.v1.json'
+      - 'docs/contracts/raw-result-gap-interpretation.v1.json'
+      - 'scripts/validate_raw_result_gap_interpretation.py'
       - '.github/workflows/mobile-ci.yml'
   push:
     branches: [main]
@@ -27,6 +29,8 @@ on:
       - 'services/api/src/kefe_api/modules/admin_security/source_brief_review_router.py'
       - 'services/api/src/kefe_api/modules/ingestion_orchestration/source_brief_ingestion.py'
       - 'docs/contracts/canonical-admin-feed-source-brief-review.v1.json'
+      - 'docs/contracts/raw-result-gap-interpretation.v1.json'
+      - 'scripts/validate_raw_result_gap_interpretation.py'
       - '.github/workflows/mobile-ci.yml'
 
 permissions:
@@ -39,6 +43,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           show-progress: false
+      - name: RAW Result KEFE Gap interpretation contract
+        run: python3 scripts/validate_raw_result_gap_interpretation.py
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.44.4'

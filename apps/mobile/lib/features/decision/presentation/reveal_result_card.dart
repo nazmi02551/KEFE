@@ -34,6 +34,7 @@ class RevealResultCard extends ConsumerWidget {
     final gapPoints = selectedShare == null || topEntry == null
         ? null
         : ((topEntry.value - selectedShare).abs() * 100).round();
+    final showGapInsight = reveal.layer == 'TRUSTED';
 
     String optionLabel(String raw) => content.text(
       namespace: KefeContentNamespace.option,
@@ -89,7 +90,8 @@ class RevealResultCard extends ConsumerWidget {
             ),
             if (index != entries.length - 1) const SizedBox(height: 14),
           ],
-          if (selectedShare != null &&
+          if (showGapInsight &&
+              selectedShare != null &&
               topEntry != null &&
               gapPoints != null) ...[
             const SizedBox(height: 20),
