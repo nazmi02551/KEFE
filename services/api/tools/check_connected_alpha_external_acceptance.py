@@ -26,6 +26,10 @@ def main() -> None:
         raise SystemExit("unexpected external acceptance contract id")
     if contract["preconditions"]["explicit_allow_write_required"] is not True:
         raise SystemExit("remote write acceptance must be explicit")
+    if contract["preconditions"]["exact_deployed_source_commit_required"] is not True:
+        raise SystemExit("deployed source identity must be exact")
+    if contract["evidence_record"]["source_commit_pattern"] != "^[0-9a-f]{40}$":
+        raise SystemExit("evidence source commit must be an exact 40-hex SHA")
     if contract["write_scope"]["exact_guest_count"] != 2:
         raise SystemExit("acceptance must remain exactly two-actor")
     if contract["write_scope"]["privacy_cleanup_required"] is not True:
@@ -40,6 +44,8 @@ def main() -> None:
     for needle in (
         'parsed.scheme.lower() != "https"',
         'hostname.endswith(".invalid")',
+        '_EXACT_COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")',
+        '_validate_source_commit(source_commit)',
         'if not allow_write:',
         'client.request("GET", "/health")',
         'client.request("GET", "/ready")',
@@ -56,6 +62,7 @@ def main() -> None:
         'for actor in reversed(actors):',
         '"status": "ACCEPTED_PENDING_CLEANUP"',
         'record["status"] = "ACCEPTED_CLEANED"',
+        'raise AcceptanceError("unexpected acceptance failure") from primary_error',
     ):
         require(tool, needle, where="acceptance tool")
 
@@ -65,6 +72,7 @@ def main() -> None:
         "private_reason",
         "demograph",
         "confidence_answer",
+        'default=os.getenv("GITHUB_SHA", "unknown")',
         "access_token\":",
         "actor_id\": actor.actor_id",
     ):
