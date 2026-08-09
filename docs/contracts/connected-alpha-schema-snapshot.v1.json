@@ -1,0 +1,67 @@
+{
+  "contract_id": "KEFE-CONNECTED-ALPHA-SCHEMA-SNAPSHOT-001",
+  "version": "1.0.0",
+  "status": "CANDIDATE",
+  "wave": "F4",
+  "capabilities": [
+    "CAP-092",
+    "CAP-123"
+  ],
+  "authority": {
+    "alembic_config": "services/api/alembic.ini",
+    "migration_environment": "services/api/migrations/env.py",
+    "versions_directory": "services/api/migrations/versions",
+    "generation_command": "alembic upgrade head --sql"
+  },
+  "canonical_chain": {
+    "expected_root": "20260727_0001",
+    "expected_head": "20260806_0034",
+    "expected_migration_file_count": 34,
+    "single_root_required": true,
+    "single_head_required": true,
+    "merge_revision_allowed": false,
+    "cycle_allowed": false
+  },
+  "generation": {
+    "mode": "OFFLINE_SQL_ONLY",
+    "database_connection_required": false,
+    "database_mutation_allowed": false,
+    "dialect": "postgresql",
+    "placeholder_host_suffix": ".invalid",
+    "literal_binds_required": true,
+    "snapshot_filename": "kefe-connected-alpha-schema.sql",
+    "digest_filename": "kefe-connected-alpha-schema.sha256",
+    "digest_algorithm": "sha256"
+  },
+  "artifact_policy": {
+    "ci_artifact_name": "kefe-connected-alpha-schema-snapshot",
+    "artifact_is_database_application_authority": false,
+    "artifact_is_production_readiness_evidence": false,
+    "artifact_is_external_reachability_evidence": false,
+    "application_requires_separate_review": true
+  },
+  "security": {
+    "committed_database_credentials_allowed": false,
+    "provider_connection_string_in_artifact_allowed": false,
+    "product_preview_data_allowed": false,
+    "live_database_fallback_allowed": false
+  },
+  "preserved_invariants": [
+    "COMMIT_FIRST",
+    "BLIND_FIRST",
+    "IMMUTABLE_PUBLISHED_CASE_VERSION",
+    "GENERIC_CASE_AGNOSTIC_FLOW",
+    "PRODUCT_PREVIEW_PRODUCTION_ISOLATION",
+    "COLLECTIVE_RESULT_NOT_AUTOMATIC_SIGNAL",
+    "MY_KEFE_DESCRIPTIVE_ONLY"
+  ],
+  "non_claims": [
+    "alpha_database_migrated",
+    "production_database_migrated",
+    "production_postgres_durability_verified",
+    "api_deployed",
+    "external_https_reachability_verified",
+    "f4_complete",
+    "cap123_lifecycle_promoted"
+  ]
+}
