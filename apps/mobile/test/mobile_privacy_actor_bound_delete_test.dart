@@ -18,6 +18,14 @@ const accountActorId = '22222222-2222-4222-8222-222222222222';
 const otherActorId = '33333333-3333-4333-8333-333333333333';
 const receiptId = '44444444-4444-4444-8444-444444444444';
 
+String? requestHeader(http.BaseRequest request, String name) {
+  final normalized = name.toLowerCase();
+  for (final entry in request.headers.entries) {
+    if (entry.key.toLowerCase() == normalized) return entry.value;
+  }
+  return null;
+}
+
 http.Response jsonResponse(Map<String, Object?> body, {int status = 200}) =>
     http.Response(
       jsonEncode(body),
@@ -124,7 +132,7 @@ void main() {
     final client = MockClient((request) async {
       expect(request.method, 'POST');
       expect(request.url.path, '/v1/auth/guest-merge');
-      expect(request.headers['authorization'], 'Bearer guest-token');
+      expect(requestHeader(request, 'authorization'), 'Bearer guest-token');
       return jsonResponse({
         'actor_id': accountActorId,
         'access_token': 'account-token',
@@ -155,9 +163,9 @@ void main() {
     final client = MockClient((request) async {
       expect(request.method, 'DELETE');
       expect(request.url.path, '/v1/me');
-      expect(request.headers['authorization'], 'Bearer account-token');
+      expect(requestHeader(request, 'authorization'), 'Bearer account-token');
       expect(
-        request.headers['x-kefe-delete-confirm'],
+        requestHeader(request, 'X-KEFE-Delete-Confirm'),
         'DELETE:$accountActorId',
       );
       deleteCalls += 1;
@@ -183,7 +191,7 @@ void main() {
     final calls = <String>[];
     final client = MockClient((request) async {
       calls.add('${request.method} ${request.url.path}');
-      expect(request.headers['authorization'], 'Bearer legacy-token');
+      expect(requestHeader(request, 'authorization'), 'Bearer legacy-token');
       if (request.method == 'GET' &&
           request.url.path == '/v1/me/privacy-export') {
         return jsonResponse({
@@ -193,7 +201,7 @@ void main() {
       }
       if (request.method == 'DELETE' && request.url.path == '/v1/me') {
         expect(
-          request.headers['x-kefe-delete-confirm'],
+          requestHeader(request, 'X-KEFE-Delete-Confirm'),
           'DELETE:$guestActorId',
         );
         return jsonResponse(validDeletionReceipt(guestActorId));
