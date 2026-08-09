@@ -233,12 +233,20 @@ def _reveal(client: JsonHttpClient, actor: GuestActor) -> dict[str, Any]:
 
 
 def _delete_actor(client: JsonHttpClient, actor: GuestActor) -> None:
-    client.request(
+    receipt = client.request(
         "DELETE",
         "/v1/me",
         token=actor.token,
         headers={"X-KEFE-Delete-Confirm": f"DELETE:{actor.actor_id}"},
     )
+    if receipt.get("actor_id") != actor.actor_id:
+        raise AcceptanceError("privacy cleanup receipt actor does not match test actor")
+    if receipt.get("private_data_deleted") is not True:
+        raise AcceptanceError("privacy cleanup receipt did not confirm private data deletion")
+    if receipt.get("aggregate_contributions_anonymized") is not True:
+        raise AcceptanceError(
+            "privacy cleanup receipt did not confirm aggregate contribution handling"
+        )
 
 
 def run_acceptance(
