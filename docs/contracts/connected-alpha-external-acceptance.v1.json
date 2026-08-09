@@ -1,6 +1,6 @@
 {
   "contract_id": "KEFE-CONNECTED-ALPHA-EXTERNAL-ACCEPTANCE-001",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "CANDIDATE",
   "wave": "F4",
   "capabilities": ["CAP-092", "CAP-123"],
@@ -38,8 +38,8 @@
     "COMMIT_GUEST_2",
     "REVEAL_RAW_GUEST_2",
     "REREAD_GUEST_1_SHARED_RAW",
-    "DELETE_GUEST_2",
-    "DELETE_GUEST_1"
+    "DELETE_GUEST_2_AND_VERIFY_RECEIPT",
+    "DELETE_GUEST_1_AND_VERIFY_RECEIPT"
   ],
   "shared_state_assertions": {
     "layer": "RAW",
@@ -56,6 +56,10 @@
     "profile_data_written": false,
     "exact_guest_count": 2,
     "privacy_cleanup_required": true,
+    "privacy_cleanup_receipt_required": true,
+    "cleanup_receipt_actor_match_required": true,
+    "cleanup_receipt_private_data_deleted_required": true,
+    "cleanup_receipt_aggregate_handling_required": true,
     "cleanup_failure_is_acceptance_failure": true
   },
   "evidence_record": {
