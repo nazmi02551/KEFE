@@ -16,7 +16,8 @@
     "actor_id_is_authorization_authority": false,
     "guest_issuance_persists_actor_id": true,
     "account_merge_replaces_actor_id": true,
-    "persisted_credential_supersedes_in_memory_guest_cache_after_merge": true,
+    "persisted_store_is_mobile_bearer_source_of_truth": true,
+    "decision_repository_bearer_cache_allowed": false,
     "credential_clear_removes_actor_id": true,
     "opaque_token_decoding_allowed": false
   },
