@@ -16,6 +16,7 @@
     "actor_id_is_authorization_authority": false,
     "guest_issuance_persists_actor_id": true,
     "account_merge_replaces_actor_id": true,
+    "persisted_credential_supersedes_in_memory_guest_cache_after_merge": true,
     "credential_clear_removes_actor_id": true,
     "opaque_token_decoding_allowed": false
   },
@@ -36,8 +37,10 @@
     "actor_id_must_match_request_actor": true,
     "private_data_deleted_must_be_true": true,
     "aggregate_contributions_anonymized_must_be_true": true,
+    "required_metadata_must_parse_before_clear": true,
     "credentials_cleared_before_valid_receipt": false,
-    "invalid_receipt_is_success": false
+    "invalid_receipt_is_success": false,
+    "malformed_receipt_is_success": false
   },
   "architecture": {
     "server_privacy_service_changed": false,
