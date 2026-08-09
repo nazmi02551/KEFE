@@ -34,7 +34,10 @@ def main() -> None:
         raise SystemExit("acceptance must remain exactly two-actor")
     if contract["write_scope"]["privacy_cleanup_required"] is not True:
         raise SystemExit("acceptance actors must be cleaned through privacy self-service")
-    if contract["execution_authority"]["ci_may_execute_against_real_endpoint_automatically"] is not False:
+    external_ci_allowed = contract["execution_authority"][
+        "ci_may_execute_against_real_endpoint_automatically"
+    ]
+    if external_ci_allowed is not False:
         raise SystemExit("CI must not automatically mutate an external alpha deployment")
 
     tool = TOOL.read_text(encoding="utf-8")
