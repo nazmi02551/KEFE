@@ -132,7 +132,9 @@ void main() {
       expect(find.text('Ek bağlam.'), findsOneWidget);
       expect(find.text('Bilinmiyor'), findsOneWidget);
 
-      await tester.tap(find.byKey(const ValueKey('context-sources')));
+      final sources = find.byKey(const ValueKey('context-sources'));
+      await tester.ensureVisible(sources);
+      await tester.tap(sources);
       await tester.pumpAndSettle();
       expect(
         find.byKey(const ValueKey('context-source-source-1')),
