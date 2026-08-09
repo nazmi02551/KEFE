@@ -11,21 +11,33 @@ import 'decision_repository.dart';
 
 abstract interface class CredentialStore {
   Future<String?> read();
+  Future<String?> readActorId();
   Future<void> write(String token);
+  Future<void> writeActorId(String actorId);
   Future<void> clear();
 }
 
 class MemoryCredentialStore implements CredentialStore {
   String? _token;
+  String? _actorId;
 
   @override
-  Future<void> clear() async => _token = null;
+  Future<void> clear() async {
+    _token = null;
+    _actorId = null;
+  }
 
   @override
   Future<String?> read() async => _token;
 
   @override
+  Future<String?> readActorId() async => _actorId;
+
+  @override
   Future<void> write(String token) async => _token = token;
+
+  @override
+  Future<void> writeActorId(String actorId) async => _actorId = actorId;
 }
 
 class ApiFailure implements Exception {
@@ -57,17 +69,14 @@ class HttpDecisionRepository
   final http.Client _client;
   final CredentialStore _credentialStore;
 
-  String? _token;
-
   Uri _uri(String path) => _config.apiBaseUri.resolve(path);
 
   @override
   Future<GuestCredential> ensureGuestCredential() async {
-    final existing = _token ?? await _credentialStore.read();
+    final existing = await _credentialStore.read();
     if (existing != null) {
-      _token = existing;
       return GuestCredential(
-        actorId: '',
+        actorId: await _credentialStore.readActorId() ?? '',
         accessToken: existing,
         expiresAt: DateTime.now().toUtc().add(const Duration(days: 30)),
       );
@@ -85,8 +94,8 @@ class HttpDecisionRepository
       accessToken: body['access_token'] as String,
       expiresAt: DateTime.parse(body['expires_at'] as String),
     );
-    _token = credential.accessToken;
     await _credentialStore.write(credential.accessToken);
+    await _credentialStore.writeActorId(credential.actorId);
     return credential;
   }
 

@@ -1,6 +1,7 @@
 import 'internal_alpha_string_catalog.dart';
 import 'kefe_locale_catalog.dart';
 import 'kefe_strings.dart';
+import 'privacy_error_string_catalog.dart';
 
 extension InternalAlphaStrings on KefeStrings {
   String _iaText(String key, {Map<String, Object?> placeholders = const {}}) =>
@@ -10,6 +11,12 @@ extension InternalAlphaStrings on KefeStrings {
         key: key,
         placeholders: placeholders,
       );
+
+  String _privacyErrorText(String key) => KefeLocaleCatalog.resolve(
+    locale: locale,
+    resources: PrivacyErrorStringCatalog.resources,
+    key: key,
+  );
 
   String get primaryNavExplore => _iaText('primary_nav.explore');
   String get primaryNavWeigh => _iaText('primary_nav.weigh');
@@ -69,8 +76,13 @@ extension InternalAlphaStrings on KefeStrings {
   String get privacyDone => _iaText('privacy.done');
   String get privacyExport => _iaText('privacy.export');
   String get privacyDelete => _iaText('privacy.delete');
-  String privacyFailure(String code) =>
-      _iaText('privacy.failure', placeholders: {'code': code});
+  String privacyFailure(String code) => switch (code) {
+    'AUTH_REQUIRED' => _privacyErrorText('auth_required'),
+    'PRIVACY_ACTOR_ID_UNAVAILABLE' =>
+      _privacyErrorText('identity_unavailable'),
+    'PRIVACY_DELETE_RECEIPT_INVALID' => _privacyErrorText('receipt_invalid'),
+    _ => _iaText('privacy.failure', placeholders: {'code': code}),
+  };
   String get privacyDeleteTitle => _iaText('privacy.delete_title');
   String get privacyDeleteBody => _iaText('privacy.delete_body');
   String get privacyCancel => _iaText('privacy.cancel');

@@ -1,0 +1,76 @@
+{
+  "contract_id": "KEFE-MOBILE-PRIVACY-ACTOR-BOUND-DELETION-001",
+  "version": "1.0.0",
+  "status": "CANDIDATE",
+  "wave": "F4",
+  "capabilities": ["CAP-084", "CAP-085", "CAP-095"],
+  "problem": {
+    "server_confirmation_shape": "DELETE:<actor_id>",
+    "previous_mobile_confirmation_shape": "DELETE",
+    "previous_mobile_is_compatible": false,
+    "bearer_token_is_opaque": true
+  },
+  "credential_continuity": {
+    "access_token_persisted_securely": true,
+    "actor_id_persisted_separately": true,
+    "actor_id_is_authorization_authority": false,
+    "guest_issuance_persists_actor_id": true,
+    "account_merge_replaces_actor_id": true,
+    "persisted_store_is_mobile_bearer_source_of_truth": true,
+    "decision_repository_bearer_cache_allowed": false,
+    "credential_clear_removes_actor_id": true,
+    "opaque_token_decoding_allowed": false
+  },
+  "legacy_compatibility": {
+    "legacy_token_without_actor_id_supported": true,
+    "fallback_source": "authenticated_privacy_export_actor_id",
+    "fallback_is_deletion_authority": false,
+    "resolved_actor_id_may_be_persisted": true,
+    "server_confirmation_requirement_may_be_weakened": false
+  },
+  "deletion_request": {
+    "confirmation_header": "X-KEFE-Delete-Confirm",
+    "confirmation_prefix": "DELETE:",
+    "exact_actor_id_required": true,
+    "plain_delete_allowed": false
+  },
+  "deletion_receipt": {
+    "actor_id_must_match_request_actor": true,
+    "private_data_deleted_must_be_true": true,
+    "aggregate_contributions_anonymized_must_be_true": true,
+    "required_metadata_must_parse_before_clear": true,
+    "credentials_cleared_before_valid_receipt": false,
+    "invalid_receipt_is_success": false,
+    "malformed_receipt_is_success": false
+  },
+  "architecture": {
+    "server_privacy_service_changed": false,
+    "public_api_shape_changed": false,
+    "openapi_changed": false,
+    "database_schema_changed": false,
+    "migration_required": false,
+    "new_auth_endpoint_required": false,
+    "new_mobile_dependency_required": false,
+    "new_github_actions_workflow_allowed": false
+  },
+  "evidence": {
+    "mobile_repository_tests_required": true,
+    "credential_store_tests_required": true,
+    "executable_repository_guard_required": true,
+    "existing_mobile_ci_required": true,
+    "exact_head_ci_required_before_pass": true
+  },
+  "preserved_invariants": [
+    "OPAQUE_REVOCABLE_BEARER_CREDENTIALS",
+    "SERVER_DERIVES_PRINCIPAL_FROM_BEARER_TOKEN",
+    "ACTOR_ID_IS_NOT_CLIENT_AUTHORITY",
+    "PREVIEW_PRODUCTION_ISOLATION",
+    "PRIVACY_DELETE_FAILS_CLOSED"
+  ],
+  "non_claims": [
+    "external_auth_provider_operable",
+    "privacy_policy_legal_approval",
+    "cap085_lifecycle_promoted",
+    "f4_complete"
+  ]
+}
