@@ -2,14 +2,23 @@ from __future__ import annotations
 
 from functools import lru_cache
 from typing import Literal
+from urllib.parse import urlsplit
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET = (
     "development-only-guest-merge-replay-secret-v1"
 )
 DEFAULT_ACCOUNT_MERGE_REPLAY_KEY_ID = "primary-v1"
+_FORBIDDEN_PRODUCTION_DATABASE_HOSTS = frozenset(
+    {
+        "localhost",
+        "127.0.0.1",
+        "0.0.0.0",
+        "10.0.2.2",
+    }
+)
 
 
 class Settings(BaseSettings):
@@ -127,6 +136,49 @@ class Settings(BaseSettings):
                 "raw evidence backend profile code must not be blank or padded"
             )
         return value
+
+    @model_validator(mode="after")
+    def validate_production_runtime(self) -> Settings:
+        if self.environment.strip().lower() != "production":
+            return self
+
+        if self.persistence_backend != "postgres":
+            raise ValueError("production requires KEFE_PERSISTENCE_BACKEND=postgres")
+        if not self.database_url:
+            raise ValueError("production requires KEFE_DATABASE_URL")
+
+        database = urlsplit(self.database_url)
+        if not database.scheme.startswith("postgresql") or not database.hostname:
+            raise ValueError(
+                "production KEFE_DATABASE_URL must be a PostgreSQL network URL"
+            )
+        hostname = database.hostname.lower()
+        if (
+            hostname in _FORBIDDEN_PRODUCTION_DATABASE_HOSTS
+            or hostname.endswith(".invalid")
+        ):
+            raise ValueError(
+                "production KEFE_DATABASE_URL cannot target a local or reserved host"
+            )
+
+        if self.account_merge_replay_secret == DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET:
+            raise ValueError(
+                "production requires a non-development account merge replay secret"
+            )
+        if (
+            DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET
+            in self.account_merge_replay_retained_keys.values()
+        ):
+            raise ValueError(
+                "production cannot retain the development account merge replay secret"
+            )
+
+        if self.otp_delivery_mode == "CAPTURE":
+            raise ValueError("production forbids KEFE_OTP_DELIVERY_MODE=CAPTURE")
+        if self.otp_request_guard_mode == "OFF":
+            raise ValueError("production forbids KEFE_OTP_REQUEST_GUARD_MODE=OFF")
+
+        return self
 
 
 @lru_cache

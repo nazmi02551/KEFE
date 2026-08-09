@@ -1,0 +1,92 @@
+name: Production API Runtime CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "services/api/Dockerfile"
+      - "services/api/.dockerignore"
+      - "services/api/src/kefe_api/core/settings.py"
+      - "services/api/src/kefe_api/infrastructure/readiness.py"
+      - "services/api/src/kefe_api/modules/health/router.py"
+      - "services/api/tests/test_production_runtime_settings.py"
+      - "services/api/tests/test_health_readiness.py"
+      - "services/api/tools/check_production_api_runtime.py"
+      - "docs/contracts/production-api-runtime.v1.json"
+      - "docs/contracts/surface-reachability-inventory.v1.json"
+      - "docs/adr/0122-provider-neutral-production-api-runtime-boundary.md"
+      - "docs/runbooks/CONNECTED_ALPHA_API_DEPLOYMENT.md"
+      - ".github/workflows/production-api-runtime.yml"
+  push:
+    branches: [main]
+    paths:
+      - "services/api/Dockerfile"
+      - "services/api/.dockerignore"
+      - "services/api/src/kefe_api/core/settings.py"
+      - "services/api/src/kefe_api/infrastructure/readiness.py"
+      - "services/api/src/kefe_api/modules/health/router.py"
+      - "services/api/tests/test_production_runtime_settings.py"
+      - "services/api/tests/test_health_readiness.py"
+      - "services/api/tools/check_production_api_runtime.py"
+      - "docs/contracts/production-api-runtime.v1.json"
+      - "docs/contracts/surface-reachability-inventory.v1.json"
+      - "docs/adr/0122-provider-neutral-production-api-runtime-boundary.md"
+      - "docs/runbooks/CONNECTED_ALPHA_API_DEPLOYMENT.md"
+      - ".github/workflows/production-api-runtime.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-api-runtime-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  runtime-boundary:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install API test dependencies
+        run: python -m pip install -e "services/api[dev]"
+      - name: Validate runtime contract JSON
+        run: python -m json.tool docs/contracts/production-api-runtime.v1.json >/dev/null
+      - name: Compile production boundary modules
+        run: >-
+          python -m py_compile
+          services/api/src/kefe_api/core/settings.py
+          services/api/src/kefe_api/infrastructure/readiness.py
+          services/api/src/kefe_api/modules/health/router.py
+          services/api/tools/check_production_api_runtime.py
+      - name: Executable production runtime contract
+        run: python services/api/tools/check_production_api_runtime.py
+      - name: Production guardrail and health tests
+        run: >-
+          python -m pytest
+          services/api/tests/test_production_runtime_settings.py
+          services/api/tests/test_health_readiness.py
+      - name: Lint production runtime slice
+        run: >-
+          ruff check
+          services/api/src/kefe_api/core/settings.py
+          services/api/src/kefe_api/infrastructure/readiness.py
+          services/api/src/kefe_api/modules/health/router.py
+          services/api/tests/test_production_runtime_settings.py
+          services/api/tests/test_health_readiness.py
+          services/api/tools/check_production_api_runtime.py
+      - name: Build provider-neutral API image
+        run: docker build --tag kefe-api:ci --file services/api/Dockerfile services/api
+      - name: Verify canonical app is importable in image
+        run: >-
+          docker run --rm --entrypoint python kefe-api:ci
+          -c "from kefe_api.main import app; assert app.title == 'KEFE API'"
+      - name: Preserve reachability evidence boundary
+        run: >-
+          echo "Container build and CI prove repository packaging only; they do not prove
+          an external production HTTPS endpoint, PostgreSQL durability, OTP provider
+          delivery, SLO attainment, store distribution, or F4 completion."
