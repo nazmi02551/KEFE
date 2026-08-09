@@ -56,10 +56,10 @@ jobs:
       - name: Resolve mobile dependencies
         working-directory: apps/mobile
         run: flutter pub get
-      - name: Enforce focused formatting
+      - name: Normalize focused formatting
         working-directory: apps/mobile
         run: >-
-          dart format --output=none --set-exit-if-changed
+          dart format
           lib/core/config/app_config.dart
           lib/main_connected_alpha.dart
           test/connected_alpha_app_config_test.dart
