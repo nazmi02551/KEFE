@@ -75,7 +75,8 @@ class HttpDecisionRepository
 
   @override
   Future<GuestCredential> ensureGuestCredential() async {
-    final existing = _token ?? await _credentialStore.read();
+    final stored = await _credentialStore.read();
+    final existing = stored ?? _token;
     if (existing != null) {
       _token = existing;
       return GuestCredential(
