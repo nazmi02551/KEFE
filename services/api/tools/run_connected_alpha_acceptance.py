@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -22,6 +23,7 @@ _FORBIDDEN_HOSTS = frozenset(
         "10.0.2.2",
     }
 )
+_EXACT_COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
 class AcceptanceError(RuntimeError):
@@ -69,7 +71,12 @@ class JsonHttpClient:
                 payload = response.read()
                 if not payload:
                     return {}
-                decoded = json.loads(payload)
+                try:
+                    decoded = json.loads(payload)
+                except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+                    raise AcceptanceError(
+                        f"{method} {path}: response was not valid JSON"
+                    ) from exc
                 if not isinstance(decoded, dict):
                     raise AcceptanceError(f"{method} {path}: expected a JSON object")
                 return decoded
@@ -105,6 +112,13 @@ def _validate_base_url(raw: str) -> str:
     if hostname in _FORBIDDEN_HOSTS or hostname.endswith(".invalid"):
         raise AcceptanceError("local, emulator and reserved API hosts are forbidden")
     normalized = f"https://{parsed.netloc}{parsed.path}".rstrip("/")
+    return normalized
+
+
+def _validate_source_commit(value: str) -> str:
+    normalized = value.strip().lower()
+    if not _EXACT_COMMIT_RE.fullmatch(normalized):
+        raise AcceptanceError("--source-commit must be an exact 40-character Git SHA")
     return normalized
 
 
@@ -146,7 +160,10 @@ def _new_guest(client: JsonHttpClient) -> GuestActor:
     token = body.get("access_token")
     if not isinstance(actor_id, str) or not isinstance(token, str):
         raise AcceptanceError("guest issuance returned an invalid credential response")
-    UUID(actor_id)
+    try:
+        UUID(actor_id)
+    except ValueError as exc:
+        raise AcceptanceError("guest issuance returned an invalid actor id") from exc
     return GuestActor(actor_id=actor_id, token=token)
 
 
@@ -205,7 +222,10 @@ def _reveal(client: JsonHttpClient, actor: GuestActor) -> dict[str, Any]:
     values = result.get("result")
     if not isinstance(values, dict) or not values:
         raise AcceptanceError("RAW reveal returned no option proportions")
-    total = sum(float(value) for value in values.values())
+    try:
+        total = sum(float(value) for value in values.values())
+    except (TypeError, ValueError) as exc:
+        raise AcceptanceError("RAW reveal returned non-numeric option proportions") from exc
     if abs(total - 1.0) > 1e-9:
         raise AcceptanceError("RAW reveal proportions do not sum to 1.0")
     return result
@@ -236,6 +256,7 @@ def run_acceptance(
         raise AcceptanceError("--case-id must be a UUID") from exc
     if not 3 <= timeout_seconds <= 60:
         raise AcceptanceError("timeout must be between 3 and 60 seconds")
+    exact_source_commit = _validate_source_commit(source_commit)
 
     started_at = datetime.now(UTC)
     client = JsonHttpClient(base_url, timeout_seconds=timeout_seconds)
@@ -252,6 +273,10 @@ def run_acceptance(
         case_version_id = case.get("case_version_id")
         if not isinstance(case_version_id, str):
             raise AcceptanceError("Case response has no CaseVersion id")
+        try:
+            UUID(case_version_id)
+        except ValueError as exc:
+            raise AcceptanceError("Case response has an invalid CaseVersion id") from exc
         question_id, options = _required_decision(case)
 
         first = _new_guest(client)
@@ -302,7 +327,7 @@ def run_acceptance(
             "sample_size_after_first": after_first["n"],
             "sample_size_after_second": after_second["n"],
             "actor_count": 2,
-            "source_commit": source_commit,
+            "source_commit": exact_source_commit,
             "started_at": started_at.isoformat(),
         }
     except Exception as exc:  # cleanup must still run for any partially created actor
@@ -320,7 +345,9 @@ def run_acceptance(
                 "acceptance actor cleanup failed: " + ",".join(cleanup_errors)
             ) from primary_error
         if primary_error is not None:
-            raise primary_error
+            if isinstance(primary_error, AcceptanceError):
+                raise primary_error
+            raise AcceptanceError("unexpected acceptance failure") from primary_error
 
     assert record is not None
     record["status"] = "ACCEPTED_CLEANED"
@@ -339,7 +366,8 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--timeout-seconds", type=int, default=12)
     parser.add_argument(
         "--source-commit",
-        default=os.getenv("GITHUB_SHA", "unknown"),
+        default=os.getenv("GITHUB_SHA", ""),
+        help="Exact 40-character commit SHA of the deployed KEFE source.",
     )
     parser.add_argument("--output", type=Path)
     return parser
