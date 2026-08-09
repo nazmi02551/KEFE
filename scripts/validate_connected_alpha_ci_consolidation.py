@@ -7,11 +7,20 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = ROOT / "docs/contracts/connected-alpha-ci-consolidation.v1.json"
 API_CI = ROOT / ".github/workflows/api-ci.yml"
 MOBILE_CI = ROOT / ".github/workflows/mobile-ci.yml"
+ACCEPTANCE_TEST = ROOT / "services/api/tests/test_connected_alpha_acceptance_tool.py"
+MOBILE_CONFIG_TEST = ROOT / "apps/mobile/test/connected_alpha_app_config_test.dart"
+RAW_METHODOLOGY_TEST = ROOT / "apps/mobile/test/raw_result_methodology_copy_test.dart"
+RAW_GAP_TEST = ROOT / "apps/mobile/test/raw_result_gap_interpretation_test.dart"
 
 
 def require(text: str, needle: str, *, where: str) -> None:
     if needle not in text:
         raise SystemExit(f"{where} missing required consolidated evidence: {needle}")
+
+
+def require_file(path: Path) -> None:
+    if not path.is_file():
+        raise SystemExit(f"missing consolidated test evidence: {path.relative_to(ROOT)}")
 
 
 def main() -> None:
@@ -23,6 +32,14 @@ def main() -> None:
         path = ROOT / raw_path
         if path.exists():
             raise SystemExit(f"dedicated Connected Alpha workflow must be removed: {raw_path}")
+
+    for path in (
+        ACCEPTANCE_TEST,
+        MOBILE_CONFIG_TEST,
+        RAW_METHODOLOGY_TEST,
+        RAW_GAP_TEST,
+    ):
+        require_file(path)
 
     api_ci = API_CI.read_text(encoding="utf-8")
     mobile_ci = MOBILE_CI.read_text(encoding="utf-8")
@@ -38,7 +55,7 @@ def main() -> None:
         "check_live_raw_collective_result.py",
         "test_live_raw_collective_result_postgres.py",
         "check_connected_alpha_external_acceptance.py",
-        "test_connected_alpha_acceptance_tool.py",
+        "pytest --cov=kefe_api",
         'test -z "${KEFE_CONNECTED_ALPHA_BASE_URL:-}"',
         'test -z "${KEFE_CONNECTED_ALPHA_CASE_ID:-}"',
     ):
@@ -49,6 +66,7 @@ def main() -> None:
         "validate_connected_alpha_mobile_runtime.py",
         "validate_raw_result_methodology_presentation.py",
         "validate_raw_result_gap_interpretation.py",
+        "flutter test --reporter expanded",
         "main_connected_alpha.dart",
         "https://alpha-build-proof.example.com",
         "rm -f build/app/outputs/flutter-apk/app-debug.apk",
