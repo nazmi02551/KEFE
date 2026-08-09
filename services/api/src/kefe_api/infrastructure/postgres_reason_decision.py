@@ -6,7 +6,9 @@ from uuid import UUID
 
 from sqlalchemy import text as sql_text
 
-from kefe_api.infrastructure.postgres_explore_decision import PostgresExploreDecisionRepository
+from kefe_api.infrastructure.postgres_live_raw_decision import (
+    PostgresLiveRawDecisionRepository,
+)
 from kefe_api.modules.decision.models import (
     DraftUpdateStatus,
     PrivateReason,
@@ -16,7 +18,7 @@ from kefe_api.modules.decision.models import (
 )
 
 
-class PostgresReasonDecisionRepository(PostgresExploreDecisionRepository):
+class PostgresReasonDecisionRepository(PostgresLiveRawDecisionRepository):
     """Decision adapter including private-by-default reason persistence."""
 
     def update_private_reason(

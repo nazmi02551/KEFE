@@ -1,0 +1,78 @@
+{
+  "contract_id": "KEFE-LIVE-RAW-COLLECTIVE-RESULT-001",
+  "version": "1.0.0",
+  "status": "CANDIDATE",
+  "wave": "F4",
+  "capabilities": ["CAP-123"],
+  "purpose": "Provide a truthful small-scale Connected Alpha Collective Result when no reviewed TRUSTED snapshot exists.",
+  "selection_policy": {
+    "trusted_snapshot_precedence": true,
+    "fallback_layer": "RAW",
+    "fallback_only_when_trusted_missing": true,
+    "no_result_when_sample_size_zero": true,
+    "existing_result_not_ready_semantics_preserved": true
+  },
+  "raw_population": {
+    "session_state": "COMMITTED",
+    "one_committed_session_per_actor_case_version_invariant_required": true,
+    "question_selection": "FIRST_REQUIRED_SINGLE_CHOICE_IN_CANONICAL_ISSUE_QUESTION_ORDER",
+    "latest_active_question_version_only": true,
+    "configured_options_included_when_zero_count": true,
+    "unknown_response_values_excluded": true,
+    "payload_kind": "OPTION_PROPORTIONS",
+    "proportions_sum_to_one_when_non_empty": true
+  },
+  "excluded_inputs": [
+    "DRAFT_SESSIONS",
+    "PRIVATE_REASON_TEXT",
+    "PRIVATE_REASON_TAGS",
+    "CONFIDENCE_ANSWERS",
+    "DEMOGRAPHICS",
+    "COUNTRY",
+    "IDENTITY_PROFILE_ATTRIBUTES",
+    "DEVICE_ATTRIBUTES",
+    "TRUST_SCORE",
+    "BOT_SCORE"
+  ],
+  "methodology_boundary": {
+    "confidence_label": "INSUFFICIENT",
+    "representativeness_claim_allowed": false,
+    "statistical_confidence_claim_allowed": false,
+    "signal_claim_allowed": false,
+    "impact_claim_allowed": false,
+    "truth_claim_allowed": false,
+    "normative_claim_allowed": false,
+    "personality_or_ideology_inference_allowed": false
+  },
+  "persistence": {
+    "raw_snapshot_persisted": false,
+    "calculation_mode": "READ_TIME_POSTGRES_AGGREGATION",
+    "new_schema_required": false,
+    "new_migration_required": false,
+    "future_precomputation_requires_separate_review": true
+  },
+  "api": {
+    "existing_reveal_endpoint_preserved": true,
+    "response_shape_changed": false,
+    "openapi_change_required": false,
+    "mobile_layer_is_generic_string": true
+  },
+  "preserved_invariants": [
+    "COMMIT_FIRST",
+    "BLIND_FIRST",
+    "IMMUTABLE_PUBLISHED_CASE_VERSION",
+    "GENERIC_CASE_AGNOSTIC_FLOW",
+    "PRODUCT_PREVIEW_PRODUCTION_ISOLATION",
+    "COLLECTIVE_RESULT_NOT_AUTOMATIC_SIGNAL",
+    "MY_KEFE_DESCRIPTIVE_ONLY"
+  ],
+  "non_claims": [
+    "representative_sample",
+    "qualified_signal",
+    "impact_measurement",
+    "country_comparison",
+    "production_scale_performance",
+    "f4_complete",
+    "cap123_lifecycle_promoted"
+  ]
+}

@@ -1,0 +1,118 @@
+name: Live RAW Collective Result CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'services/api/src/kefe_api/infrastructure/postgres_live_raw_decision.py'
+      - 'services/api/src/kefe_api/infrastructure/postgres_reason_decision.py'
+      - 'services/api/tests/test_live_raw_collective_result_postgres.py'
+      - 'services/api/tools/check_live_raw_collective_result.py'
+      - 'docs/contracts/live-raw-collective-result.v1.json'
+      - 'docs/adr/0125-live-raw-collective-result-fallback.md'
+      - 'docs/status/F4_LIVE_RAW_COLLECTIVE_RESULT_2026-08-09.md'
+      - '.github/workflows/live-raw-collective-result.yml'
+  push:
+    branches:
+      - main
+      - feature/f4-postgres-live-raw-result
+    paths:
+      - 'services/api/src/kefe_api/infrastructure/postgres_live_raw_decision.py'
+      - 'services/api/src/kefe_api/infrastructure/postgres_reason_decision.py'
+      - 'services/api/tests/test_live_raw_collective_result_postgres.py'
+      - 'services/api/tools/check_live_raw_collective_result.py'
+      - 'docs/contracts/live-raw-collective-result.v1.json'
+      - 'docs/adr/0125-live-raw-collective-result-fallback.md'
+      - 'docs/status/F4_LIVE_RAW_COLLECTIVE_RESULT_2026-08-09.md'
+      - '.github/workflows/live-raw-collective-result.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-raw-collective-result-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  postgres-live-raw:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: kefe
+          POSTGRES_USER: kefe
+          POSTGRES_PASSWORD: kefe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kefe -d kefe"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/api/pyproject.toml
+
+      - name: Install API dependencies
+        working-directory: services/api
+        run: python -m pip install -q -U pip && pip install -q -e '.[dev]'
+
+      - name: Validate contract JSON
+        run: python -m json.tool docs/contracts/live-raw-collective-result.v1.json >/dev/null
+
+      - name: Executable live RAW contract
+        working-directory: services/api
+        run: python tools/check_live_raw_collective_result.py
+
+      - name: Lint focused slice
+        working-directory: services/api
+        run: >-
+          ruff check
+          src/kefe_api/infrastructure/postgres_live_raw_decision.py
+          src/kefe_api/infrastructure/postgres_reason_decision.py
+          tests/test_live_raw_collective_result_postgres.py
+          tools/check_live_raw_collective_result.py
+
+      - name: Migrate PostgreSQL
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: alembic upgrade head
+
+      - name: Seed canonical demo fixtures
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+        run: |
+          python -m kefe_api.infrastructure.seed_demo
+          python -m kefe_api.infrastructure.seed_context_demo
+
+      - name: Prove live RAW PostgreSQL behavior
+        working-directory: services/api
+        env:
+          KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
+          KEFE_RUN_POSTGRES_TESTS: '1'
+        run: >-
+          pytest -q
+          tests/test_live_raw_collective_result_postgres.py
+          tests/test_postgres_integration.py
+
+      - name: Preserve exact OpenAPI shape
+        working-directory: services/api
+        run: python tools/export_openapi.py --check ../../docs/contracts/openapi.v1.json
+
+      - name: Preserve methodology boundary
+        run: >-
+          echo "RAW is observed committed-option aggregation only; this CI does not prove
+          representativeness, Signal, Impact, production-scale performance, deployed
+          reachability, or F4 completion."
