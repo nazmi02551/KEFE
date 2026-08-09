@@ -52,6 +52,8 @@ def main() -> None:
     for needle in (
         "Future<String?> readActorId();",
         "Future<void> writeActorId(String actorId);",
+        "final stored = await _credentialStore.read();",
+        "final existing = stored ?? _token;",
         "await _credentialStore.writeActorId(credential.actorId);",
         "actorId: await _credentialStore.readActorId() ?? ''",
     ):
@@ -75,6 +77,7 @@ def main() -> None:
         "body['actor_id'] != actorId",
         "body['private_data_deleted'] != true",
         "body['aggregate_contributions_anonymized'] != true",
+        "DateTime.tryParse(deletedAt)",
         "PRIVACY_DELETE_RECEIPT_INVALID",
         "await _credentialStore.clear();",
     ):
@@ -85,17 +88,26 @@ def main() -> None:
         where="mobile privacy repository",
     )
     receipt_check = privacy.find("body['actor_id'] != actorId")
+    receipt_parse = privacy.find("DateTime.tryParse(deletedAt)")
     clear_call = privacy.find("await _credentialStore.clear();")
-    if receipt_check < 0 or clear_call < 0 or clear_call <= receipt_check:
-        raise SystemExit("credentials must be cleared only after receipt validation")
+    if (
+        receipt_check < 0
+        or receipt_parse < 0
+        or clear_call < 0
+        or clear_call <= receipt_check
+        or clear_call <= receipt_parse
+    ):
+        raise SystemExit("credentials must be cleared only after complete receipt validation")
 
     for needle in (
         "guest issuance persists opaque token and actor id separately",
+        "persisted account credential supersedes cached guest credential",
         "account merge replaces persisted token and actor id together",
         "privacy delete sends exact actor-bound confirmation then clears",
         "legacy token resolves actor id through authenticated export once",
         "mismatched deletion receipt fails closed and keeps credentials",
         "false deletion flags fail closed and keep credentials",
+        "malformed deletion receipt fails closed and keeps credentials",
         "'DELETE:$accountActorId'",
         "PRIVACY_DELETE_RECEIPT_INVALID",
     ):
