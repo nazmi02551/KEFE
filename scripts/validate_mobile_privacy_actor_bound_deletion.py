@@ -30,6 +30,10 @@ def main() -> None:
         raise SystemExit("unexpected mobile privacy deletion contract id")
     if contract["problem"]["bearer_token_is_opaque"] is not True:
         raise SystemExit("bearer token must remain opaque")
+    if contract["credential_continuity"]["persisted_store_is_mobile_bearer_source_of_truth"] is not True:
+        raise SystemExit("persisted credential store must remain bearer source of truth")
+    if contract["credential_continuity"]["decision_repository_bearer_cache_allowed"] is not False:
+        raise SystemExit("parallel DecisionRepository bearer cache must remain forbidden")
     if contract["legacy_compatibility"]["server_confirmation_requirement_may_be_weakened"] is not False:
         raise SystemExit("server destructive confirmation must not be weakened")
     if contract["deletion_request"]["plain_delete_allowed"] is not False:
@@ -52,12 +56,13 @@ def main() -> None:
     for needle in (
         "Future<String?> readActorId();",
         "Future<void> writeActorId(String actorId);",
-        "final stored = await _credentialStore.read();",
-        "final existing = stored ?? _token;",
+        "final existing = await _credentialStore.read();",
         "await _credentialStore.writeActorId(credential.actorId);",
         "actorId: await _credentialStore.readActorId() ?? ''",
     ):
         require(decision, needle, where="mobile credential/guest repository")
+    forbid(decision, "String? _token;", where="DecisionRepository credential state")
+    forbid(decision, "_token =", where="DecisionRepository credential state")
 
     require(account, "await _credentialStore.writeActorId(actorId);", where="account merge")
 
@@ -101,7 +106,8 @@ def main() -> None:
 
     for needle in (
         "guest issuance persists opaque token and actor id separately",
-        "persisted account credential supersedes cached guest credential",
+        "persisted account credential replaces guest credential without restart",
+        "cleared credential store forces fresh guest issuance in same process",
         "account merge replaces persisted token and actor id together",
         "privacy delete sends exact actor-bound confirmation then clears",
         "legacy token resolves actor id through authenticated export once",
