@@ -1,0 +1,91 @@
+name: Connected Alpha Schema Snapshot CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'services/api/alembic.ini'
+      - 'services/api/migrations/**'
+      - 'services/api/pyproject.toml'
+      - 'docs/contracts/connected-alpha-schema-snapshot.v1.json'
+      - 'docs/adr/0124-connected-alpha-schema-snapshot.md'
+      - 'docs/status/F4_CONNECTED_ALPHA_SCHEMA_SNAPSHOT_2026-08-09.md'
+      - 'scripts/validate_connected_alpha_schema_snapshot.py'
+      - '.github/workflows/connected-alpha-schema-snapshot.yml'
+  push:
+    branches:
+      - main
+      - feature/f4-connected-alpha-schema-snapshot
+    paths:
+      - 'services/api/alembic.ini'
+      - 'services/api/migrations/**'
+      - 'services/api/pyproject.toml'
+      - 'docs/contracts/connected-alpha-schema-snapshot.v1.json'
+      - 'docs/adr/0124-connected-alpha-schema-snapshot.md'
+      - 'docs/status/F4_CONNECTED_ALPHA_SCHEMA_SNAPSHOT_2026-08-09.md'
+      - 'scripts/validate_connected_alpha_schema_snapshot.py'
+      - '.github/workflows/connected-alpha-schema-snapshot.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: connected-alpha-schema-snapshot-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  schema-snapshot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate contract JSON
+        run: python -m json.tool docs/contracts/connected-alpha-schema-snapshot.v1.json >/dev/null
+
+      - name: Validate canonical migration chain
+        run: python scripts/validate_connected_alpha_schema_snapshot.py
+
+      - name: Install canonical API package
+        run: python -m pip install -e services/api
+
+      - name: Generate offline PostgreSQL schema snapshot
+        working-directory: services/api
+        env:
+          KEFE_ENVIRONMENT: development
+          KEFE_DATABASE_URL: postgresql+psycopg://offline:offline@schema.invalid:5432/kefe
+        run: |
+          mkdir -p ../../artifacts
+          alembic upgrade head --sql > ../../artifacts/kefe-connected-alpha-schema.sql
+
+      - name: Validate generated snapshot
+        run: >-
+          python scripts/validate_connected_alpha_schema_snapshot.py
+          --snapshot artifacts/kefe-connected-alpha-schema.sql
+
+      - name: Generate snapshot digest
+        run: >-
+          sha256sum artifacts/kefe-connected-alpha-schema.sql
+          > artifacts/kefe-connected-alpha-schema.sha256
+
+      - name: Report artifact identity
+        run: |
+          wc -c artifacts/kefe-connected-alpha-schema.sql
+          cat artifacts/kefe-connected-alpha-schema.sha256
+          echo "Offline SQL generation is repository evidence only. No database connection or mutation occurred."
+
+      - name: Upload schema snapshot evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: kefe-connected-alpha-schema-snapshot
+          path: |
+            artifacts/kefe-connected-alpha-schema.sql
+            artifacts/kefe-connected-alpha-schema.sha256
+          if-no-files-found: error
+          retention-days: 7
