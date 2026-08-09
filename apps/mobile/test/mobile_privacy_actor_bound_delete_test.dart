@@ -60,7 +60,7 @@ void main() {
     expect(await store.readActorId(), guestActorId);
   });
 
-  test('persisted account credential supersedes cached guest credential', () async {
+  test('persisted account credential replaces guest credential without restart', () async {
     final store = MemoryCredentialStore();
     var guestIssueCalls = 0;
     final client = MockClient((request) async {
@@ -87,6 +87,34 @@ void main() {
     expect(account.accessToken, 'account-token');
     expect(account.actorId, accountActorId);
     expect(guestIssueCalls, 1);
+  });
+
+  test('cleared credential store forces fresh guest issuance in same process', () async {
+    final store = MemoryCredentialStore();
+    var calls = 0;
+    final client = MockClient((request) async {
+      calls += 1;
+      final actorId = calls == 1 ? guestActorId : otherActorId;
+      return jsonResponse({
+        'actor_id': actorId,
+        'access_token': 'guest-token-$calls',
+        'expires_at': '2026-09-08T09:30:00Z',
+      }, status: 201);
+    });
+    final repository = HttpDecisionRepository(
+      config: config,
+      client: client,
+      credentialStore: store,
+    );
+
+    final first = await repository.ensureGuestCredential();
+    await store.clear();
+    final second = await repository.ensureGuestCredential();
+
+    expect(first.accessToken, 'guest-token-1');
+    expect(second.accessToken, 'guest-token-2');
+    expect(second.actorId, otherActorId);
+    expect(calls, 2);
   });
 
   test('account merge replaces persisted token and actor id together', () async {
