@@ -1,0 +1,86 @@
+name: Connected Alpha Mobile Runtime CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'apps/mobile/lib/core/config/app_config.dart'
+      - 'apps/mobile/lib/main_connected_alpha.dart'
+      - 'apps/mobile/lib/main_preview.dart'
+      - 'apps/mobile/test/connected_alpha_app_config_test.dart'
+      - 'docs/contracts/connected-alpha-mobile-runtime.v1.json'
+      - 'docs/adr/0123-connected-alpha-mobile-runtime-boundary.md'
+      - 'docs/status/F4_CONNECTED_ALPHA_MOBILE_BOUNDARY_2026-08-09.md'
+      - 'scripts/validate_connected_alpha_mobile_runtime.py'
+      - '.github/workflows/connected-alpha-mobile-runtime.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile/lib/core/config/app_config.dart'
+      - 'apps/mobile/lib/main_connected_alpha.dart'
+      - 'apps/mobile/lib/main_preview.dart'
+      - 'apps/mobile/test/connected_alpha_app_config_test.dart'
+      - 'docs/contracts/connected-alpha-mobile-runtime.v1.json'
+      - 'docs/adr/0123-connected-alpha-mobile-runtime-boundary.md'
+      - 'docs/status/F4_CONNECTED_ALPHA_MOBILE_BOUNDARY_2026-08-09.md'
+      - 'scripts/validate_connected_alpha_mobile_runtime.py'
+      - '.github/workflows/connected-alpha-mobile-runtime.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: connected-alpha-mobile-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mobile-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.4'
+          channel: stable
+          cache: true
+      - name: Validate contract JSON
+        run: python -m json.tool docs/contracts/connected-alpha-mobile-runtime.v1.json >/dev/null
+      - name: Validate executable boundary
+        run: python scripts/validate_connected_alpha_mobile_runtime.py
+      - name: Resolve mobile dependencies
+        working-directory: apps/mobile
+        run: flutter pub get
+      - name: Normalize focused formatting
+        working-directory: apps/mobile
+        run: >-
+          dart format
+          lib/core/config/app_config.dart
+          lib/main_connected_alpha.dart
+          test/connected_alpha_app_config_test.dart
+      - name: Analyze mobile package
+        working-directory: apps/mobile
+        run: flutter analyze
+      - name: Test Connected Alpha configuration
+        working-directory: apps/mobile
+        run: flutter test --reporter expanded test/connected_alpha_app_config_test.dart
+      - name: Generate transient Android host
+        working-directory: apps/mobile
+        run: flutter create --platforms=android --project-name kefe_mobile .
+      - name: Compile Connected Alpha entrypoint without publishing it
+        working-directory: apps/mobile
+        run: >-
+          flutter build apk --debug -t lib/main_connected_alpha.dart
+          --dart-define=KEFE_API_BASE_URL=https://alpha-build-proof.example.com
+          --dart-define=KEFE_HTTP_TIMEOUT_SECONDS=12
+      - name: Enforce compile-only artifact boundary
+        working-directory: apps/mobile
+        run: |
+          test -f build/app/outputs/flutter-apk/app-debug.apk
+          rm -f build/app/outputs/flutter-apk/app-debug.apk
+          echo "Connected Alpha compile proof completed. No installable artifact is published and no external endpoint is claimed."
