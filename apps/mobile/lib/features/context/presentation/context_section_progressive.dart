@@ -214,40 +214,15 @@ class _ProgressiveContextContentState
 
   Widget _sources() {
     final strings = KefeStrings.of(context);
-    final visual = context.kefeVisual;
     final content = ref.watch(kefeContentLocalizerProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (final source in widget.snapshot.sources)
-          ListTile(
-            key: ValueKey('context-source-${source.id}'),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-            leading: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: visual.subtleRulesSurface,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                Icons.verified_outlined,
-                color: visual.rules,
-                size: 20,
-              ),
-            ),
-            title: Text(
-              content.text(
-                namespace: KefeContentNamespace.contextSourceTitle,
-                id: source.id,
-                locale: strings.locale,
-                fallback: source.title,
-              ),
-            ),
-            subtitle: Text(
-              '${content.text(namespace: KefeContentNamespace.contextPublisher, id: source.publisher, locale: strings.locale, fallback: source.publisher)} · ${strings.contextSourceKind(source.sourceKind)}',
-              style: TextStyle(color: visual.mutedForeground),
-            ),
+          _ContextSourceTile(
+            source: source,
+            content: content,
+            locale: strings.locale,
           ),
       ],
     );
@@ -256,6 +231,6 @@ class _ProgressiveContextContentState
   IconData _icon(ContextJourneyLayer layer) => switch (layer) {
     ContextJourneyLayer.essential => Icons.article_outlined,
     ContextJourneyLayer.details => Icons.subject_rounded,
-    ContextJourneyLayer.sources => Icons.verified_outlined,
+    ContextJourneyLayer.sources => Icons.link_rounded,
   };
 }

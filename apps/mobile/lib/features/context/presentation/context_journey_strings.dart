@@ -14,6 +14,7 @@ abstract final class ContextJourneyStringCatalog {
       'sources.title': 'Kaynakları incele',
       'sources.helper':
           'Bilgilerin dayandığı yayıncı ve kaynak türlerini burada görebilirsin.',
+      'sources.reference': 'Kaynak kaydı',
       'next': 'Sonraki katman',
       'back': 'Önceki katman',
       'optional': 'İsteğe bağlı',
@@ -29,6 +30,7 @@ abstract final class ContextJourneyStringCatalog {
       'sources.title': 'Review the sources',
       'sources.helper':
           'See the publishers and source types supporting the information.',
+      'sources.reference': 'Source reference',
       'next': 'Next layer',
       'back': 'Previous layer',
       'optional': 'Optional',
@@ -60,6 +62,8 @@ extension ContextJourneyStrings on KefeStrings {
   String contextJourneyHelper(ContextJourneyLayer layer) =>
       _contextJourneyText('${layer.name}.helper');
 
+  String get contextJourneySourceReference =>
+      _contextJourneyText('sources.reference');
   String get contextJourneyNext => _contextJourneyText('next');
   String get contextJourneyBack => _contextJourneyText('back');
   String get contextJourneyOptional => _contextJourneyText('optional');

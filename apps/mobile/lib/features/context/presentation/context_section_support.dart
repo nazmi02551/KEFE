@@ -164,6 +164,79 @@ class _ContextBlockTile extends StatelessWidget {
   }
 }
 
+class _ContextSourceTile extends StatelessWidget {
+  const _ContextSourceTile({
+    required this.source,
+    required this.content,
+    required this.locale,
+  });
+
+  final CaseContextSource source;
+  final KefeContentLocalizer content;
+  final Locale locale;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
+    final title = content.text(
+      namespace: KefeContentNamespace.contextSourceTitle,
+      id: source.id,
+      locale: locale,
+      fallback: source.title,
+    );
+    final publisher = content.text(
+      namespace: KefeContentNamespace.contextPublisher,
+      id: source.publisher,
+      locale: locale,
+      fallback: source.publisher,
+    );
+    final sourceKind = strings.contextSourceKind(source.sourceKind);
+    final host = source.url?.host.trim() ?? '';
+
+    return Semantics(
+      container: true,
+      label: '$title, ${strings.contextJourneySourceReference}',
+      child: ListTile(
+        key: ValueKey('context-source-${source.id}'),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+        leading: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: visual.subtleRulesSurface,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ExcludeSemantics(
+            child: Icon(Icons.link_rounded, color: visual.rules, size: 20),
+          ),
+        ),
+        title: Text(title),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 3),
+            Text(
+              '${strings.contextJourneySourceReference} · $publisher · $sourceKind',
+              style: TextStyle(color: visual.mutedForeground),
+            ),
+            if (host.isNotEmpty) ...[
+              const SizedBox(height: 3),
+              Text(
+                host,
+                key: ValueKey('context-source-host-${source.id}'),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: visual.mutedForeground,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _CountBadge extends StatelessWidget {
   const _CountBadge({required this.value});
 

@@ -89,7 +89,7 @@ class ContextFakeRepository implements DecisionRepository, ContextRepository {
 
 void main() {
   testWidgets(
-    'Context is visible before Commit with details and sources collapsed',
+    'Context keeps claim verification separate from neutral source records',
     (tester) async {
       tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
       addTearDown(tester.platformDispatcher.clearLocaleTestValue);
@@ -111,7 +111,9 @@ void main() {
               GlobalCupertinoLocalizations.delegate,
             ],
             home: const Scaffold(
-              body: ContextSection(caseVersionId: caseVersionId),
+              body: SingleChildScrollView(
+                child: ContextSection(caseVersionId: caseVersionId),
+              ),
             ),
           ),
         ),
@@ -130,6 +132,21 @@ void main() {
       expect(find.text('Ek bağlam.'), findsOneWidget);
       expect(find.text('Bilinmiyor'), findsOneWidget);
 
+      final sources = find.byKey(const ValueKey('context-sources'));
+      await tester.ensureVisible(sources);
+      await tester.tap(sources);
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('context-source-source-1')),
+        findsOneWidget,
+      );
+      expect(find.text('Senaryo notu'), findsOneWidget);
+      expect(
+        find.text('Kaynak kaydı · KEFE Editorial · Editoryal kaynak'),
+        findsOneWidget,
+      );
+      expect(find.byIcon(Icons.verified_outlined), findsNothing);
+
       expect(find.textContaining('result', findRichText: true), findsNothing);
       expect(
         find.textContaining('community', findRichText: true),
@@ -138,7 +155,7 @@ void main() {
     },
   );
 
-  testWidgets('Progressive Context shows one optional layer at a time', (
+  testWidgets('Progressive Context shows neutral source references', (
     tester,
   ) async {
     tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
@@ -176,6 +193,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Temel bağlam.'), findsOneWidget);
+    expect(find.text('Doğrulandı'), findsOneWidget);
     expect(find.text('Ek bağlam.'), findsNothing);
     expect(find.text('Senaryo notu'), findsNothing);
 
@@ -188,6 +206,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Ek bağlam.'), findsNothing);
     expect(find.text('Senaryo notu'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('context-source-source-1')),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Kaynak kaydı · KEFE Editorial · Editoryal kaynak'),
+      findsOneWidget,
+    );
+    expect(find.byIcon(Icons.verified_outlined), findsNothing);
+    expect(find.byIcon(Icons.link_rounded), findsWidgets);
 
     await tester.tap(find.byKey(const ValueKey('context-journey-back')));
     await tester.pumpAndSettle();

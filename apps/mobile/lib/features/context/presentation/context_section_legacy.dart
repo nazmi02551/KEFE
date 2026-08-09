@@ -240,33 +240,10 @@ class _ContextContent extends ConsumerWidget {
               ),
               children: [
                 for (final source in snapshot.sources)
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                    leading: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: visual.subtleRulesSurface,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.verified_outlined,
-                        color: visual.rules,
-                        size: 20,
-                      ),
-                    ),
-                    title: Text(
-                      content.text(
-                        namespace: KefeContentNamespace.contextSourceTitle,
-                        id: source.id,
-                        locale: strings.locale,
-                        fallback: source.title,
-                      ),
-                    ),
-                    subtitle: Text(
-                      '${content.text(namespace: KefeContentNamespace.contextPublisher, id: source.publisher, locale: strings.locale, fallback: source.publisher)} · ${strings.contextSourceKind(source.sourceKind)}',
-                      style: TextStyle(color: visual.mutedForeground),
-                    ),
+                  _ContextSourceTile(
+                    source: source,
+                    content: content,
+                    locale: strings.locale,
                   ),
               ],
             ),
