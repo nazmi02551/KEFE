@@ -85,9 +85,11 @@ class HttpAccountRepository implements AccountRepository {
       ),
     );
     final accountToken = body['access_token'] as String;
+    final actorId = body['actor_id'] as String;
     await _credentialStore.write(accountToken);
+    await _credentialStore.writeActorId(actorId);
     return AccountConversion(
-      actorId: body['actor_id'] as String,
+      actorId: actorId,
       mergedExistingHistory: body['merged_from_actor_id'] != null,
     );
   }
