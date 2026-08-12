@@ -128,6 +128,70 @@ class _Overview extends StatelessWidget {
   }
 }
 
+class _NextStep extends StatelessWidget {
+  const _NextStep({required this.journey, required this.strings});
+
+  final MyKefeJourney journey;
+  final KefeStrings strings;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    final hasPendingReflection = journey.recentJourneys.any(
+      (item) => !item.reflectionCompleted,
+    );
+    final title = hasPendingReflection
+        ? strings.journeyNextReflectionTitle
+        : journey.revisitedCaseCount == 0
+        ? strings.journeyNextRevisitTitle
+        : strings.journeyNextExploreTitle;
+    final body = hasPendingReflection
+        ? strings.journeyNextReflectionBody
+        : journey.revisitedCaseCount == 0
+        ? strings.journeyNextRevisitBody
+        : strings.journeyNextExploreBody;
+
+    return KefeSurface(
+      key: const ValueKey('my-kefe-next-step'),
+      tone: KefeSurfaceTone.raised,
+      accent: visual.empathy,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          KefeEyebrow(
+            strings.journeyNextEyebrow,
+            icon: Icons.explore_outlined,
+            color: visual.empathy,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            title,
+            key: const ValueKey('my-kefe-next-step-title'),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 7),
+          Text(
+            body,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: visual.mutedForeground,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 14),
+          FilledButton.icon(
+            key: const ValueKey('my-kefe-next-step-action'),
+            onPressed: () => context.go('/explore'),
+            icon: const Icon(Icons.arrow_forward_rounded),
+            label: Text(strings.journeyNextAction),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _Metric extends StatelessWidget {
   const _Metric({
     required this.value,
