@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/design/kefe_theme.dart';
+import '../core/localization/experience_hub_strings.dart';
 import '../core/localization/kefe_strings.dart';
 import '../core/localization/settings_strings.dart';
 import '../core/preferences/app_preferences.dart';
@@ -11,6 +12,7 @@ import '../features/account/presentation/account_conversion_screen.dart';
 import '../features/activity/presentation/activity_screen.dart';
 import '../features/decision/presentation/decision_experience_screen.dart';
 import '../features/explore/presentation/discovery_explore_screen.dart';
+import '../features/explore/presentation/experience_hub_screen.dart';
 import '../features/onboarding/presentation/onboarding_experience_screen.dart';
 import '../features/privacy/presentation/privacy_screen.dart';
 import '../features/progress/presentation/my_kefe_journey_screen.dart';
@@ -39,9 +41,15 @@ class _KefeAppState extends ConsumerState<KefeApp> {
       ),
       GoRoute(
         path: '/explore',
-        builder: (context, state) => const PrimaryNavigationShell(
+        builder: (context, state) => PrimaryNavigationShell(
           selectedIndex: 0,
-          child: DiscoveryExploreScreen(embedded: true),
+          floatingActionButton: KefeShellAction(
+            actionKey: const ValueKey('open-experience-hub'),
+            icon: Icons.dashboard_customize_outlined,
+            tooltip: KefeStrings.of(context).experienceHubOpen,
+            onPressed: () => context.push('/experiences'),
+          ),
+          child: const DiscoveryExploreScreen(embedded: true),
         ),
       ),
       GoRoute(
@@ -70,6 +78,10 @@ class _KefeAppState extends ConsumerState<KefeApp> {
           ),
           child: const MyKefeJourneyScreen(embedded: true),
         ),
+      ),
+      GoRoute(
+        path: '/experiences',
+        builder: (context, state) => const ExperienceHubScreen(),
       ),
       GoRoute(
         path: '/account',
