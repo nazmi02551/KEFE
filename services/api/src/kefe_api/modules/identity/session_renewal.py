@@ -16,6 +16,13 @@ class RenewalTokenMatch(StrEnum):
     PREVIOUS_GRACE = "PREVIOUS_GRACE"
 
 
+class RenewalResolutionStatus(StrEnum):
+    ACTIVE = "ACTIVE"
+    INVALID = "INVALID"
+    REVOKED = "REVOKED"
+    CONTINUITY_EXPIRED = "CONTINUITY_EXPIRED"
+
+
 @dataclass(frozen=True, slots=True)
 class SessionContinuityPolicy:
     access_ttl: timedelta
@@ -82,10 +89,34 @@ class SessionRenewalSnapshot:
     actor_kind: ActorKind
     rotation_counter: int
     derivation_key_id: str
+    access_token_hash: str
+    renewal_token_hash: str
     access_expires_at: datetime
     continuity_absolute_expires_at: datetime
     continuity_inactive_expires_at: datetime
     token_match: RenewalTokenMatch
+
+
+@dataclass(frozen=True, slots=True)
+class RenewalResolution:
+    status: RenewalResolutionStatus
+    snapshot: SessionRenewalSnapshot | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class SessionRotationMutation:
+    session_id: UUID
+    expected_rotation_counter: int
+    current_access_token_hash: str
+    current_renewal_token_hash: str
+    next_access_token_hash: str
+    next_renewal_token_hash: str
+    next_access_expires_at: datetime
+    next_inactive_expires_at: datetime
+    next_rotation_counter: int
+    next_derivation_key_id: str
+    previous_pair_valid_until: datetime
+    renewed_at: datetime
 
 
 class SessionTokenDeriver:
