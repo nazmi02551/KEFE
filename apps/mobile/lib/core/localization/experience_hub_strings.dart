@@ -19,8 +19,13 @@ extension KefeExperienceHubStrings on KefeStrings {
   String get experienceSportsBody => _experienceText('sports_body');
   String get experienceSportsAction => _experienceText('sports_action');
   String get experienceSportsEmpty => _experienceText('sports_empty');
+  String get experienceRadarTitle => _experienceText('radar_title');
+  String get experienceRadarBody => _experienceText('radar_body');
+  String get experienceRadarAction => _experienceText('radar_action');
+  String get experiencePreviewStatus => _experienceText('preview_status');
   String get experienceAtlasTitle => _experienceText('atlas_title');
   String get experienceAtlasBody => _experienceText('atlas_body');
+  String get experienceAtlasAction => _experienceText('atlas_action');
   String get experienceAtlasStatus => _experienceText('atlas_status');
   String get experienceTruthNote => _experienceText('truth_note');
   String get experienceLoading => _experienceText('loading');
