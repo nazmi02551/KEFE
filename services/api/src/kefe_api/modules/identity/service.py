@@ -5,10 +5,7 @@ from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from kefe_api.core.errors import DomainError
-from kefe_api.core.settings import (
-    DEFAULT_SESSION_RENEWAL_KEY_ID,
-    DEVELOPMENT_SESSION_RENEWAL_SECRET,
-)
+from kefe_api.core.settings import get_settings
 from kefe_api.modules.identity.models import (
     ActorKind,
     ActorPrincipal,
@@ -32,21 +29,21 @@ class IdentityService:
         continuity_policy: SessionContinuityPolicy | None = None,
         token_deriver: SessionTokenDeriver | None = None,
     ) -> None:
+        runtime_settings = get_settings()
         self._repo = repository
         self._guest_token_ttl = timedelta(days=guest_token_ttl_days)
-        if continuity_policy is None:
-            inactivity_days = max(60, guest_token_ttl_days + 1)
-            absolute_days = max(180, inactivity_days)
-            continuity_policy = SessionContinuityPolicy.from_days(
-                access_ttl_days=guest_token_ttl_days,
-                absolute_lifetime_days=absolute_days,
-                inactivity_lifetime_days=inactivity_days,
-                previous_pair_grace_seconds=60,
-            )
-        self._continuity_policy = continuity_policy
+        self._continuity_policy = continuity_policy or SessionContinuityPolicy.from_days(
+            access_ttl_days=guest_token_ttl_days,
+            absolute_lifetime_days=runtime_settings.session_renewal_absolute_lifetime_days,
+            inactivity_lifetime_days=runtime_settings.session_renewal_inactivity_days,
+            previous_pair_grace_seconds=(
+                runtime_settings.session_renewal_previous_pair_grace_seconds
+            ),
+        )
         self._token_deriver = token_deriver or SessionTokenDeriver(
-            active_key_id=DEFAULT_SESSION_RENEWAL_KEY_ID,
-            active_secret=DEVELOPMENT_SESSION_RENEWAL_SECRET,
+            active_key_id=runtime_settings.session_renewal_active_key_id,
+            active_secret=runtime_settings.session_renewal_secret,
+            retained_keys=runtime_settings.session_renewal_retained_keys,
         )
 
     def create_guest(self) -> GuestCredential:
@@ -60,8 +57,8 @@ class IdentityService:
             rotation_counter=0,
         )
         expires_at = now + self._guest_token_ttl
-        absolute_expires_at, inactive_expires_at = self._continuity_policy.initial_deadlines(
-            now=now
+        absolute_expires_at, inactive_expires_at = (
+            self._continuity_policy.initial_deadlines(now=now)
         )
         self._repo.create_guest_session(
             actor_id=actor_id,
