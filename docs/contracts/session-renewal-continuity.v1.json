@@ -1,6 +1,6 @@
 {
   "contract_id": "KEFE-SESSION-RENEWAL-CONTINUITY-001",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "ARCHITECTURE_CANDIDATE",
   "wave": "F4",
   "capabilities": ["CAP-084", "CAP-085", "CAP-095"],
@@ -27,6 +27,23 @@
     "session_revocation_blocks_access_and_renewal": true,
     "privacy_deletion_blocks_access_and_renewal": true,
     "guest_to_account_merge_retires_guest_family": true
+  },
+  "lifetime_policy": {
+    "same_policy_for_guest_and_account_v1": true,
+    "absolute_lifetime_days_default": 180,
+    "sliding_inactivity_days_default": 60,
+    "successful_renewal_advances_inactivity_deadline": true,
+    "successful_renewal_advances_absolute_deadline": false,
+    "access_use_without_renewal_advances_inactivity_deadline": false,
+    "absolute_deadline_anchored_at_family_creation": true,
+    "renewal_allowed_after_access_expiry": true,
+    "renewal_allowed_after_inactivity_expiry": false,
+    "renewal_allowed_after_absolute_expiry": false,
+    "expired_family_may_create_new_actor_implicitly": false,
+    "server_settings_may_tighten_defaults": true,
+    "server_settings_may_extend_defaults_without_contract_review": false,
+    "account_absolute_or_inactivity_expiry_behavior": "EXPLICIT_REAUTHENTICATION_REQUIRED",
+    "guest_absolute_or_inactivity_expiry_behavior": "CONTINUITY_ERROR_EXPLICIT_START_OVER_ONLY"
   },
   "token_model": {
     "access_token": {
@@ -90,7 +107,10 @@
     "bootstrap_requires_active_access_bearer": true,
     "bootstrap_purpose": "upgrade_legacy_access_only_session_before_expiry",
     "guest_issue_returns_renewal_bundle": true,
-    "account_merge_returns_renewal_bundle": true
+    "account_merge_returns_renewal_bundle": true,
+    "family_expired_error": "AUTH_SESSION_CONTINUITY_EXPIRED",
+    "renewal_invalid_error": "AUTH_RENEWAL_INVALID",
+    "renewal_replayed_error": "AUTH_RENEWAL_REPLAYED"
   },
   "mobile": {
     "atomic_credential_bundle_required": true,
@@ -114,6 +134,7 @@
   },
   "legacy_mobile": {
     "v1_access_only_token_may_bootstrap_while_active": true,
+    "bootstrap_creates_family_deadlines_from_bootstrap_time": true,
     "expired_v1_guest_token_can_be_recovered_without_new_server_proof": false,
     "silent_new_actor_fallback_allowed": false
   },
@@ -137,7 +158,9 @@
       "previous_renewal_valid_until",
       "rotation_counter",
       "token_derivation_key_id",
-      "renewed_at"
+      "renewed_at",
+      "continuity_absolute_expires_at",
+      "continuity_inactive_expires_at"
     ],
     "new_parallel_identity_store_allowed": false
   },
@@ -147,6 +170,9 @@
     "concurrent_renewal_test_required": true,
     "response_loss_retry_test_required": true,
     "stale_replay_rejection_test_required": true,
+    "absolute_expiry_test_required": true,
+    "inactivity_expiry_test_required": true,
+    "renewal_does_not_extend_absolute_deadline_test_required": true,
     "guest_merge_revokes_guest_renewal_test_required": true,
     "privacy_delete_revokes_renewal_test_required": true,
     "mobile_atomic_store_tests_required": true,
