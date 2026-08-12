@@ -80,15 +80,26 @@ class InMemoryIdentityRepository:
         actor_id: UUID,
         token_hash: str,
         expires_at: datetime,
+        session_id: UUID | None = None,
+        renewal_token_hash: str | None = None,
+        rotation_counter: int = 0,
+        token_derivation_key_id: str | None = None,
+        continuity_absolute_expires_at: datetime | None = None,
+        continuity_inactive_expires_at: datetime | None = None,
     ) -> None:
         with self._lock:
             self._actor_kinds[actor_id] = ActorKind.ACCOUNT
-            session_id = uuid4()
-            self._sessions[session_id] = _Session(
-                session_id=session_id,
+            resolved_session_id = session_id or uuid4()
+            self._sessions[resolved_session_id] = _Session(
+                session_id=resolved_session_id,
                 actor_id=actor_id,
                 token_hash=token_hash,
                 expires_at=expires_at,
+                renewal_token_hash=renewal_token_hash,
+                rotation_counter=rotation_counter,
+                token_derivation_key_id=token_derivation_key_id,
+                continuity_absolute_expires_at=continuity_absolute_expires_at,
+                continuity_inactive_expires_at=continuity_inactive_expires_at,
             )
 
     def promote_or_merge_actor(
