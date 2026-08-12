@@ -24,6 +24,13 @@ class ShareSection extends ConsumerWidget {
     final controller = ref.read(shareControllerProvider.notifier);
     final created = state.created;
     final visual = context.kefeVisual;
+    final isTurkish = Localizations.localeOf(context).languageCode == 'tr';
+    final previewReceiverLabel = isTurkish
+        ? 'Davet görünümünü önizle'
+        : 'Preview recipient view';
+    final externalEntryBoundary = isTurkish
+        ? 'Bu önizleme uygulama içindeki alıcı yolculuğunu gösterir. Dışarıdan açılan üretim bağlantıları henüz etkin değildir.'
+        : 'This preview shows the in-app recipient journey. Production links that open from outside the app are not enabled yet.';
 
     return KefeSurface(
       key: const ValueKey('share-section'),
@@ -152,11 +159,11 @@ class ShareSection extends ConsumerWidget {
                     key: const ValueKey('share-preview-receiver'),
                     onPressed: () => context.push('/share/${created.token}'),
                     icon: const Icon(Icons.visibility_outlined),
-                    label: Text(strings.sharePreviewReceiver),
+                    label: Text(previewReceiverLabel),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    strings.shareExternalEntryBoundary,
+                    externalEntryBoundary,
                     key: const ValueKey('share-external-entry-boundary'),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: visual.mutedForeground,
