@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 from kefe_api.modules.identity.account_models import OtpChannel
 from kefe_api.modules.identity.account_service import AccountContinuityService
 from kefe_api.modules.identity.dependencies import GuestMergeAuthorizationDep
+from kefe_api.modules.identity.models import ActorKind
 
 router = APIRouter(prefix="/v1/auth", tags=["Account Continuity"])
 
@@ -42,10 +43,13 @@ class GuestMergeRequest(BaseModel):
 
 class AccountCredentialResponse(BaseModel):
     actor_id: UUID
+    actor_kind: ActorKind = ActorKind.ACCOUNT
     token_type: str = "Bearer"
     access_token: str
     expires_at: datetime
     merged_from_actor_id: UUID | None = None
+    renewal_token: str | None = None
+    rotation_counter: int = 0
 
 
 def get_service(request: Request) -> AccountContinuityService:
@@ -87,4 +91,6 @@ def merge_guest(
         access_token=credential.access_token,
         expires_at=credential.expires_at,
         merged_from_actor_id=credential.merged_from_actor_id,
+        renewal_token=credential.renewal_token,
+        rotation_counter=credential.rotation_counter,
     )
