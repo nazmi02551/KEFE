@@ -15,6 +15,9 @@ extension KefeExperienceHubStrings on KefeStrings {
   String get experienceStandardTitle => _experienceText('standard_title');
   String get experienceStandardBody => _experienceText('standard_body');
   String get experienceStandardAction => _experienceText('standard_action');
+  String get experienceCommunityTitle => _experienceText('community_title');
+  String get experienceCommunityBody => _experienceText('community_body');
+  String get experienceCommunityAction => _experienceText('community_action');
   String get experienceSportsTitle => _experienceText('sports_title');
   String get experienceSportsBody => _experienceText('sports_body');
   String get experienceSportsAction => _experienceText('sports_action');
