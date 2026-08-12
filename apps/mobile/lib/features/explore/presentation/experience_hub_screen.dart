@@ -7,6 +7,7 @@ import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/experience_hub_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../decision/application/decision_controller.dart';
+import '../../decision/data/decision_repository.dart';
 import '../../decision/domain/decision_models.dart';
 
 class ExperienceHubScreen extends ConsumerStatefulWidget {
