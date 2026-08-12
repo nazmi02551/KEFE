@@ -1,0 +1,145 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from uuid import UUID
+
+from kefe_api.core.errors import DomainError
+from kefe_api.modules.identity.models import ActorKind
+from kefe_api.modules.identity.ports import IdentityRepository
+from kefe_api.modules.identity.session_renewal import (
+    RenewalResolutionStatus,
+    RenewalTokenMatch,
+    SessionContinuityPolicy,
+    SessionRotationMutation,
+    SessionTokenDeriver,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class RenewedSessionCredential:
+    actor_id: UUID
+    actor_kind: ActorKind
+    access_token: str
+    access_expires_at: datetime
+    renewal_token: str
+    rotation_counter: int
+
+
+class SessionRenewalService:
+    def __init__(
+        self,
+        *,
+        repository: IdentityRepository,
+        policy: SessionContinuityPolicy,
+        deriver: SessionTokenDeriver,
+    ) -> None:
+        self._repo = repository
+        self._policy = policy
+        self._deriver = deriver
+
+    def renew(self, *, renewal_token: str) -> RenewedSessionCredential:
+        normalized = renewal_token.strip()
+        if not normalized:
+            raise DomainError("AUTH_RENEWAL_INVALID", "Renewal credential is invalid", 401)
+        renewal_hash = self._deriver.token_hash(normalized)
+
+        for _ in range(2):
+            now = datetime.now(UTC)
+            resolution = self._repo.resolve_renewal(
+                renewal_token_hash=renewal_hash,
+                now=now,
+            )
+            self._raise_for_resolution(resolution.status)
+            snapshot = resolution.snapshot
+            if snapshot is None:
+                raise DomainError("AUTH_RENEWAL_INVALID", "Renewal credential is invalid", 401)
+
+            if snapshot.token_match is RenewalTokenMatch.PREVIOUS_GRACE:
+                return self._reproduce_current(snapshot=snapshot)
+
+            next_counter = snapshot.rotation_counter + 1
+            next_pair = self._deriver.derive_pair(
+                session_id=snapshot.session_id,
+                actor_id=snapshot.actor_id,
+                actor_kind=snapshot.actor_kind,
+                rotation_counter=next_counter,
+            )
+            next_access_expires_at = now + self._policy.access_ttl
+            next_inactive_expires_at = self._policy.renewed_inactivity_deadline(
+                now=now,
+                absolute_expires_at=snapshot.continuity_absolute_expires_at,
+            )
+            mutation = SessionRotationMutation(
+                session_id=snapshot.session_id,
+                expected_rotation_counter=snapshot.rotation_counter,
+                current_access_token_hash=snapshot.access_token_hash,
+                current_renewal_token_hash=snapshot.renewal_token_hash,
+                next_access_token_hash=self._deriver.token_hash(next_pair.access_token),
+                next_renewal_token_hash=self._deriver.token_hash(next_pair.renewal_token),
+                next_access_expires_at=next_access_expires_at,
+                next_inactive_expires_at=next_inactive_expires_at,
+                next_rotation_counter=next_counter,
+                next_derivation_key_id=next_pair.derivation_key_id,
+                previous_pair_valid_until=now + self._policy.previous_pair_grace,
+                renewed_at=now,
+            )
+            if self._repo.rotate_session(mutation=mutation):
+                return RenewedSessionCredential(
+                    actor_id=snapshot.actor_id,
+                    actor_kind=snapshot.actor_kind,
+                    access_token=next_pair.access_token,
+                    access_expires_at=next_access_expires_at,
+                    renewal_token=next_pair.renewal_token,
+                    rotation_counter=next_counter,
+                )
+            # Another same-token renewal may have won between read and CAS. Re-read the
+            # original token once; it should now resolve through PREVIOUS_GRACE and return
+            # the already-current pair instead of rotating again.
+
+        raise DomainError(
+            "AUTH_RENEWAL_REPLAYED",
+            "Renewal credential cannot be replayed",
+            409,
+        )
+
+    def _reproduce_current(self, *, snapshot) -> RenewedSessionCredential:
+        pair = self._deriver.derive_pair(
+            session_id=snapshot.session_id,
+            actor_id=snapshot.actor_id,
+            actor_kind=snapshot.actor_kind,
+            rotation_counter=snapshot.rotation_counter,
+            key_id=snapshot.derivation_key_id,
+        )
+        if (
+            self._deriver.token_hash(pair.access_token) != snapshot.access_token_hash
+            or self._deriver.token_hash(pair.renewal_token) != snapshot.renewal_token_hash
+        ):
+            raise DomainError(
+                "DEPENDENCY_TEMPORARILY_UNAVAILABLE",
+                "Session credential derivation state is unavailable",
+                503,
+                retryable=True,
+            )
+        return RenewedSessionCredential(
+            actor_id=snapshot.actor_id,
+            actor_kind=snapshot.actor_kind,
+            access_token=pair.access_token,
+            access_expires_at=snapshot.access_expires_at,
+            renewal_token=pair.renewal_token,
+            rotation_counter=snapshot.rotation_counter,
+        )
+
+    @staticmethod
+    def _raise_for_resolution(status: RenewalResolutionStatus) -> None:
+        if status is RenewalResolutionStatus.ACTIVE:
+            return
+        if status is RenewalResolutionStatus.REVOKED:
+            raise DomainError("AUTH_TOKEN_REVOKED", "Authentication session revoked", 401)
+        if status is RenewalResolutionStatus.CONTINUITY_EXPIRED:
+            raise DomainError(
+                "AUTH_SESSION_CONTINUITY_EXPIRED",
+                "Session continuity expired",
+                401,
+            )
+        raise DomainError("AUTH_RENEWAL_INVALID", "Renewal credential is invalid", 401)
