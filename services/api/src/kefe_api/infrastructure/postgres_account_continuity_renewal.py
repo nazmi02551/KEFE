@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import Connection, text
 
@@ -89,14 +89,16 @@ class _RenewalAccountMergeMixin:
             if material is None:
                 session_id = None
                 session_expires_at = account_session_expires_at
+                legacy_session_id = uuid4()
                 connection.execute(
                     text(
                         """
                         INSERT INTO identity.actor_session (id, actor_id, token_hash, expires_at)
-                        VALUES (gen_random_uuid(), :actor_id, :token_hash, :expires_at)
+                        VALUES (:id, :actor_id, :token_hash, :expires_at)
                         """
                     ),
                     {
+                        "id": legacy_session_id,
                         "actor_id": account_actor_id,
                         "token_hash": account_token_hash,
                         "expires_at": account_session_expires_at,
