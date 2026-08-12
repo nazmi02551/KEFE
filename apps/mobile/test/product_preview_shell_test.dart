@@ -99,7 +99,7 @@ void main() {
   });
 
   testWidgets(
-    'Product Preview uses four canonical tabs and keeps Radar secondary',
+    'Product Preview uses four canonical tabs and keeps secondary experiences in one hub',
     (tester) async {
       _useTurkishLocale(tester);
 
@@ -136,8 +136,12 @@ void main() {
         find.byKey(const ValueKey('open-preview-first-use')),
         findsOneWidget,
       );
-      expect(find.byKey(const ValueKey('open-preview-radar')), findsOneWidget);
-      expect(find.byKey(const ValueKey('open-preview-atlas')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('open-preview-experiences')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('open-preview-radar')), findsNothing);
+      expect(find.byKey(const ValueKey('open-preview-atlas')), findsNothing);
       expect(
         find.byKey(
           const ValueKey(
@@ -147,7 +151,17 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.tap(find.byKey(const ValueKey('open-preview-radar')));
+      await tester.tap(
+        find.byKey(const ValueKey('open-preview-experiences')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('experience-hub')), findsOneWidget);
+      final radarCard = find.byKey(const ValueKey('experience-radar'));
+      expect(radarCard, findsOneWidget);
+      await tester.tap(
+        find.descendant(of: radarCard, matching: find.byType(FilledButton)),
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Dünya şu an\nneyi tartışıyor?'), findsOneWidget);
