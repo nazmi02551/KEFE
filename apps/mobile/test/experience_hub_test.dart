@@ -12,7 +12,44 @@ void useTurkishLocale(WidgetTester tester) {
 }
 
 void main() {
-  testWidgets('experience hub surfaces real Sports CALL and truthful Atlas state', (
+  testWidgets(
+    'experience hub surfaces community, real Sports CALL and truthful Atlas state',
+    (tester) async {
+      useTurkishLocale(tester);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            decisionRepositoryProvider.overrideWithValue(
+              PreviewDecisionRepository(),
+            ),
+            decisionDraftStoreProvider.overrideWithValue(
+              MemoryDecisionDraftStore(),
+            ),
+          ],
+          child: const KefeApp(initialLocation: '/experiences'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('experience-hub')), findsOneWidget);
+      expect(find.byKey(const ValueKey('experience-community')), findsOneWidget);
+      expect(find.text('Birlikte tart'), findsOneWidget);
+      expect(find.text('Önce kendi kararımı ver'), findsOneWidget);
+      expect(find.byKey(const ValueKey('experience-sports-call')), findsOneWidget);
+      expect(find.text('Bu pozisyonda penaltı kararı doğru muydu?'), findsOneWidget);
+
+      final atlas = find.byKey(const ValueKey('experience-atlas'));
+      expect(atlas, findsOneWidget);
+      expect(
+        find.descendant(of: atlas, matching: find.byType(FilledButton)),
+        findsNothing,
+      );
+      expect(find.byKey(const ValueKey('experience-truth-note')), findsOneWidget);
+    },
+  );
+
+  testWidgets('community entry starts with the canonical blind-first Case journey', (
     tester,
   ) async {
     useTurkishLocale(tester);
@@ -28,17 +65,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('experience-hub')), findsOneWidget);
-    expect(find.byKey(const ValueKey('experience-sports-call')), findsOneWidget);
-    expect(find.text('Bu pozisyonda penaltı kararı doğru muydu?'), findsOneWidget);
+    await tester.tap(find.text('Önce kendi kararımı ver'));
+    await tester.pumpAndSettle();
 
-    final atlas = find.byKey(const ValueKey('experience-atlas'));
-    expect(atlas, findsOneWidget);
-    expect(
-      find.descendant(of: atlas, matching: find.byType(FilledButton)),
-      findsNothing,
-    );
-    expect(find.byKey(const ValueKey('experience-truth-note')), findsOneWidget);
+    expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
+    expect(find.byKey(const ValueKey('commit-button')), findsOneWidget);
+    expect(find.byKey(const ValueKey('post-commit-journey')), findsNothing);
+    expect(find.byKey(const ValueKey('consensus-section')), findsNothing);
   });
 
   testWidgets('Sports CALL enters the canonical Case journey', (tester) async {
