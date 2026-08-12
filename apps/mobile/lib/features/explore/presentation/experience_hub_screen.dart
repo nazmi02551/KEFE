@@ -7,11 +7,17 @@ import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/experience_hub_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../decision/application/decision_controller.dart';
-import '../../decision/data/decision_repository.dart';
 import '../../decision/domain/decision_models.dart';
 
 class ExperienceHubScreen extends ConsumerStatefulWidget {
-  const ExperienceHubScreen({super.key});
+  const ExperienceHubScreen({
+    this.previewRadarEnabled = false,
+    this.previewAtlasEnabled = false,
+    super.key,
+  });
+
+  final bool previewRadarEnabled;
+  final bool previewAtlasEnabled;
 
   @override
   ConsumerState<ExperienceHubScreen> createState() => _ExperienceHubScreenState();
@@ -36,7 +42,9 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
       });
     }
     try {
-      final cases = await ref.read(decisionRepositoryProvider).fetchExploreCases(limit: 50);
+      final cases = await ref
+          .read(decisionRepositoryProvider)
+          .fetchExploreCases(limit: 50);
       DecisionCaseSummary? sports;
       for (final item in cases) {
         if (item.format == 'SPORTS_CALL' || item.domain == 'SPORTS') {
@@ -68,6 +76,8 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
     final visual = context.kefeVisual;
+    final previewExperiencesEnabled =
+        widget.previewRadarEnabled || widget.previewAtlasEnabled;
 
     return Scaffold(
       appBar: AppBar(title: Text(strings.experienceHubTitle)),
@@ -142,13 +152,33 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
                 title: strings.experienceSportsTitle,
                 body: strings.experienceSportsEmpty,
               ),
+            if (widget.previewRadarEnabled) ...[
+              const SizedBox(height: 14),
+              _ExperienceCard(
+                cardKey: const ValueKey('experience-radar'),
+                icon: Icons.radar_rounded,
+                title: strings.experienceRadarTitle,
+                body: strings.experienceRadarBody,
+                statusLabel: strings.experiencePreviewStatus,
+                actionLabel: strings.experienceRadarAction,
+                onPressed: () => context.push('/radar'),
+              ),
+            ],
             const SizedBox(height: 14),
             _ExperienceCard(
               cardKey: const ValueKey('experience-atlas'),
               icon: Icons.public_rounded,
               title: strings.experienceAtlasTitle,
               body: strings.experienceAtlasBody,
-              statusLabel: strings.experienceAtlasStatus,
+              statusLabel: widget.previewAtlasEnabled
+                  ? strings.experiencePreviewStatus
+                  : strings.experienceAtlasStatus,
+              actionLabel: widget.previewAtlasEnabled
+                  ? strings.experienceAtlasAction
+                  : null,
+              onPressed: widget.previewAtlasEnabled
+                  ? () => context.push('/atlas')
+                  : null,
             ),
             const SizedBox(height: 14),
             KefeSurface(
@@ -161,7 +191,9 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      strings.experienceTruthNote,
+                      previewExperiencesEnabled
+                          ? strings.experienceTruthNote
+                          : strings.experienceAtlasStatus,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: visual.mutedForeground,
                         height: 1.45,
