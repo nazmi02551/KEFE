@@ -21,13 +21,25 @@ The canonical identity runtime has explicit access-token lifecycle states but no
 
 ADR-0012 requires optional guest continuation and actor-owned progress. Automatically creating a different guest actor after expiry would therefore hide a continuity break rather than recover the user.
 
+A continuation audit on 2026-08-12 found one material architecture gap in the initial candidate: Issue #364 required a bounded renewal lifetime/inactivity policy, while the first v1.0.0 contract defined rotation/replay behavior but no family horizon.
+
 ## Architecture candidate
 
-ADR-0132 defines:
+ADR-0132 and contract v1.0.1 now define:
 
 - same-actor session-family renewal;
 - separate opaque access and renewal credentials;
 - server-side hash-only storage;
+- **180-day absolute continuity lifetime** from family creation;
+- **60-day sliding inactivity lifetime** advanced only by successful renewal;
+- ordinary bearer/API use does not silently extend continuity;
+- successful renewal never extends the absolute deadline;
+- guest/account use the same v1 defaults;
+- server configuration may tighten defaults but extending them requires contract review;
+- `AUTH_SESSION_CONTINUITY_EXPIRED` after either family horizon;
+- expired account requires explicit reauthentication;
+- expired guest enters continuity error and may start over only through a separate explicit user decision;
+- active legacy bootstrap anchors family horizons at bootstrap time and cannot resurrect expired access-only sessions;
 - dedicated HMAC derivation keyring and domain separation;
 - monotonic rotation counter;
 - previous access/renewal hash slots;
@@ -52,7 +64,7 @@ The architecture is therefore locked separately before runtime implementation.
 
 1. actor-session migration + schema snapshot update;
 2. token derivation and domain/port model;
-3. in-memory renewal contract tests;
+3. in-memory renewal contract tests, including absolute/inactivity expiry;
 4. PostgreSQL row-lock/concurrency/retry behavior;
 5. guest issuance/account merge token-bundle responses;
 6. renew/bootstrap HTTP API + OpenAPI;
@@ -63,6 +75,6 @@ The architecture is therefore locked separately before runtime implementation.
 
 ## Verification state
 
-GitHub Actions currently has no run for parent head `439d771c93ff69b5303bfba0bf761061053920e5`. This architecture checkpoint makes no runtime PASS claim.
+GitHub Actions currently has no run for parent head `439d771c93ff69b5303bfba0bf761061053920e5`; recent stack PRs also record account-level Actions unavailability. This architecture checkpoint therefore makes no runtime or exact-head PASS claim.
 
 No CAP lifecycle status is promoted and no new GitHub Actions workflow is introduced.
