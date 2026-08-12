@@ -6,11 +6,21 @@ from uuid import UUID
 
 from kefe_api.modules.identity.account_models import (
     AccountIdentity,
+    AccountSessionMaterial,
     GuestMergeReplay,
     OtpChallenge,
     OtpChannel,
     OtpVerification,
 )
+
+
+class AccountSessionMaterialFactory(Protocol):
+    def __call__(
+        self,
+        *,
+        actor_id: UUID,
+        now: datetime,
+    ) -> AccountSessionMaterial: ...
 
 
 class AccountContinuityRepository(Protocol):
@@ -45,6 +55,7 @@ class AccountContinuityRepository(Protocol):
         account_token_hash: str,
         account_session_expires_at: datetime,
         completed_at: datetime,
+        session_material_factory: AccountSessionMaterialFactory | None = None,
     ) -> GuestMergeReplay: ...
 
     def upgrade_or_merge_guest(
