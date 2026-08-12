@@ -48,10 +48,25 @@ void main() {
 
       expect(find.byKey(const ValueKey('my-kefe-journey')), findsOneWidget);
       expect(find.byKey(const ValueKey('saved-cases-section')), findsNothing);
+      expect(find.byKey(const ValueKey('my-kefe-next-step')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('my-kefe-next-step-title')),
+        findsOneWidget,
+      );
+      expect(find.textContaining('personality'), findsNothing);
+      expect(find.textContaining('ideology'), findsNothing);
       expect(
         find.byKey(const ValueKey('preview-build-identity')),
         findsNothing,
       );
+
+      final nextStepAction = find.byKey(
+        const ValueKey('my-kefe-next-step-action'),
+      );
+      await tester.ensureVisible(nextStepAction);
+      await tester.tap(nextStepAction);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('explore-list')), findsOneWidget);
 
       await tester.tap(find.byIcon(Icons.history_outlined));
       await tester.pumpAndSettle();
