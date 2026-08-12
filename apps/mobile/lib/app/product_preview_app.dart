@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../core/build/preview_build_info.dart';
 import '../core/design/kefe_theme.dart';
 import '../core/design/kefe_visual_system.dart';
+import '../core/localization/experience_hub_strings.dart';
 import '../core/localization/kefe_strings.dart';
 import '../core/localization/settings_strings.dart';
 import '../core/preferences/app_preferences.dart';
@@ -13,6 +14,7 @@ import '../features/account/presentation/account_conversion_screen.dart';
 import '../features/activity/presentation/activity_screen.dart';
 import '../features/decision/presentation/decision_experience_screen.dart';
 import '../features/explore/presentation/discovery_explore_screen.dart';
+import '../features/explore/presentation/experience_hub_screen.dart';
 import '../features/onboarding/presentation/onboarding_experience_screen.dart';
 import '../features/privacy/presentation/privacy_screen.dart';
 import '../features/progress/presentation/my_kefe_journey_screen.dart';
@@ -75,6 +77,13 @@ class _ProductPreviewAppState extends ConsumerState<ProductPreviewApp> {
           ),
           footer: const _PreviewBuildIdentity(),
           child: const MyKefeJourneyScreen(embedded: true),
+        ),
+      ),
+      GoRoute(
+        path: '/experiences',
+        builder: (_, _) => const ExperienceHubScreen(
+          previewRadarEnabled: true,
+          previewAtlasEnabled: true,
         ),
       ),
       GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
@@ -176,19 +185,11 @@ class _ExploreSecondaryActions extends StatelessWidget {
         ),
         const SizedBox(width: 10),
         KefeShellAction(
-          actionKey: const ValueKey('open-preview-radar'),
-          heroTag: 'preview-radar',
-          tooltip: 'Radar',
-          icon: Icons.radar_rounded,
-          onPressed: () => context.push('/radar'),
-        ),
-        const SizedBox(width: 10),
-        KefeShellAction(
-          actionKey: const ValueKey('open-preview-atlas'),
-          heroTag: 'preview-atlas',
-          tooltip: 'Atlas',
-          icon: Icons.public_rounded,
-          onPressed: () => context.push('/atlas'),
+          actionKey: const ValueKey('open-preview-experiences'),
+          heroTag: 'preview-experiences',
+          tooltip: strings.experienceHubOpen,
+          icon: Icons.dashboard_customize_outlined,
+          onPressed: () => context.push('/experiences'),
         ),
       ],
     );
