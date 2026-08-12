@@ -192,8 +192,8 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
                   Expanded(
                     child: Text(
                       previewExperiencesEnabled
-                          ? strings.experienceTruthNote
-                          : strings.experienceAtlasStatus,
+                          ? strings.experiencePreviewTruthNote
+                          : strings.experienceProductionTruthNote,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: visual.mutedForeground,
                         height: 1.45,
