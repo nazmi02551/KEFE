@@ -18,6 +18,7 @@ from kefe_api.core.settings import (
 )
 from kefe_api.modules.identity.account_models import (
     AccountCredential,
+    AccountSessionMaterial,
     GuestMergeReplay,
     OtpChallenge,
     OtpChannel,
@@ -25,6 +26,7 @@ from kefe_api.modules.identity.account_models import (
 )
 from kefe_api.modules.identity.account_ports import AccountContinuityRepository, OtpDeliveryPort
 from kefe_api.modules.identity.models import ActorKind, TokenResolution, TokenStatus
+from kefe_api.modules.identity.session_renewal import SessionContinuityPolicy, SessionTokenDeriver
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,10 +57,7 @@ class AccountContinuityService:
         max_attempts: int = 5,
     ) -> None:
         runtime_settings = get_settings()
-        active_secret = (
-            account_merge_replay_secret
-            or runtime_settings.account_merge_replay_secret
-        )
+        active_secret = account_merge_replay_secret or runtime_settings.account_merge_replay_secret
         active_key_id = (
             account_merge_replay_active_key_id
             or runtime_settings.account_merge_replay_active_key_id
@@ -85,6 +84,19 @@ class AccountContinuityService:
         self._account_merge_replay_keys = {
             key_id: secret.encode() for key_id, secret in keyring.items()
         }
+        self._session_policy = SessionContinuityPolicy.from_days(
+            access_ttl_days=account_token_ttl_days,
+            absolute_lifetime_days=runtime_settings.session_renewal_absolute_lifetime_days,
+            inactivity_lifetime_days=runtime_settings.session_renewal_inactivity_days,
+            previous_pair_grace_seconds=(
+                runtime_settings.session_renewal_previous_pair_grace_seconds
+            ),
+        )
+        self._session_deriver = SessionTokenDeriver(
+            active_key_id=runtime_settings.session_renewal_active_key_id,
+            active_secret=runtime_settings.session_renewal_secret,
+            retained_keys=runtime_settings.session_renewal_retained_keys,
+        )
         self._max_attempts = max_attempts
 
     def request_otp(self, *, channel: OtpChannel, identifier: str) -> OtpChallenge:
@@ -110,8 +122,6 @@ class AccountContinuityService:
                 expires_at=challenge.expires_at,
             )
         except Exception:
-            # Persisted challenge is intentionally unusable without successful delivery;
-            # callers receive the delivery failure and may request a new challenge later.
             raise
         return challenge
 
@@ -169,11 +179,7 @@ class AccountContinuityService:
         replay = self._repo.get_guest_merge_replay(verification_token_hash)
         if replay is not None:
             self._validate_replay_actor(authorization, replay)
-            return self._credential_from_replay(
-                replay,
-                key_reference=key_reference,
-                now=now,
-            )
+            return self._credential_from_replay(replay, key_reference=key_reference, now=now)
 
         if authorization.status is TokenStatus.REVOKED:
             raise DomainError("AUTH_TOKEN_REVOKED", "Authentication token revoked", 401)
@@ -200,12 +206,34 @@ class AccountContinuityService:
             account_token_hash=self._hash_secret(candidate_token),
             account_session_expires_at=account_session_expires_at,
             completed_at=now,
+            session_material_factory=self._build_account_session_material,
         )
         self._validate_replay_actor(authorization, replay)
-        return self._credential_from_replay(
-            replay,
-            key_reference=key_reference,
-            now=now,
+        return self._credential_from_replay(replay, key_reference=key_reference, now=now)
+
+    def _build_account_session_material(
+        self,
+        *,
+        actor_id: UUID,
+        now: datetime,
+    ) -> AccountSessionMaterial:
+        session_id = uuid4()
+        pair = self._session_deriver.derive_pair(
+            session_id=session_id,
+            actor_id=actor_id,
+            actor_kind=ActorKind.ACCOUNT,
+            rotation_counter=0,
+        )
+        absolute_expires_at, inactive_expires_at = self._session_policy.initial_deadlines(now=now)
+        return AccountSessionMaterial(
+            session_id=session_id,
+            access_token_hash=self._hash_secret(pair.access_token),
+            renewal_token_hash=self._hash_secret(pair.renewal_token),
+            access_expires_at=now + self._account_token_ttl,
+            rotation_counter=pair.rotation_counter,
+            derivation_key_id=pair.derivation_key_id,
+            continuity_absolute_expires_at=absolute_expires_at,
+            continuity_inactive_expires_at=inactive_expires_at,
         )
 
     def _credential_from_replay(
@@ -221,6 +249,23 @@ class AccountContinuityService:
                 "Completed account conversion replay has expired",
                 401,
             )
+        if replay.account_session_id is not None and replay.account_session_derivation_key_id:
+            pair = self._session_deriver.derive_pair(
+                session_id=replay.account_session_id,
+                actor_id=replay.account_actor_id,
+                actor_kind=ActorKind.ACCOUNT,
+                rotation_counter=replay.account_session_rotation_counter,
+                key_id=replay.account_session_derivation_key_id,
+            )
+            return AccountCredential(
+                actor_id=replay.account_actor_id,
+                access_token=pair.access_token,
+                expires_at=replay.account_session_expires_at,
+                merged_from_actor_id=replay.merged_from_actor_id,
+                renewal_token=pair.renewal_token,
+                rotation_counter=pair.rotation_counter,
+            )
+
         access_token = self._derive_account_token(
             verification_token_hash=replay.verification_token_hash,
             source_actor_id=replay.source_actor_id,

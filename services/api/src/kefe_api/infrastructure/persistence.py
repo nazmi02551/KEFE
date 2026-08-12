@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from kefe_api.core.settings import Settings
 from kefe_api.infrastructure.db import build_engine
-from kefe_api.infrastructure.postgres_account_continuity import PostgresAccountContinuityRepository
+from kefe_api.infrastructure.postgres_account_continuity_renewal import (
+    GuardedRenewalPostgresAccountContinuityRepository,
+    RenewalPostgresAccountContinuityRepository,
+)
 from kefe_api.infrastructure.postgres_admin_security import PostgresAdminSessionStore
 from kefe_api.infrastructure.postgres_case_media import PostgresCaseMediaRepository
 from kefe_api.infrastructure.postgres_community_reason import PostgresCommunityReasonRepository
@@ -24,9 +27,6 @@ from kefe_api.infrastructure.postgres_otp_delivery_health import (
 )
 from kefe_api.infrastructure.postgres_otp_provider_receipts import (
     PostgresOtpProviderReceiptRepository,
-)
-from kefe_api.infrastructure.postgres_otp_request_guard import (
-    GuardedPostgresAccountContinuityRepository,
 )
 from kefe_api.infrastructure.postgres_privacy import PostgresPrivacyRepository
 from kefe_api.infrastructure.postgres_progress import PostgresProgressRepository
@@ -197,9 +197,7 @@ def build_otp_provider_receipt_repository(
         raise RuntimeError(
             "KEFE_DATABASE_URL is required when persistence_backend=postgres"
         )
-    return PostgresOtpProviderReceiptRepository(
-        build_engine(settings.database_url)
-    )
+    return PostgresOtpProviderReceiptRepository(build_engine(settings.database_url))
 
 
 def _otp_request_abuse_policy(settings: Settings) -> OtpRequestAbusePolicy:
@@ -215,9 +213,7 @@ def _otp_request_guard_enabled(settings: Settings) -> bool:
     mode = settings.otp_request_guard_mode
     production = settings.environment.strip().lower() == "production"
     if production and mode == "OFF":
-        raise RuntimeError(
-            "production forbids KEFE_OTP_REQUEST_GUARD_MODE=OFF"
-        )
+        raise RuntimeError("production forbids KEFE_OTP_REQUEST_GUARD_MODE=OFF")
     return mode == "ENFORCE" or (mode == "AUTO" and production)
 
 
@@ -240,8 +236,8 @@ def build_account_continuity_repository(
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
     engine = build_engine(settings.database_url)
     if policy is not None:
-        return GuardedPostgresAccountContinuityRepository(engine, policy)
-    return PostgresAccountContinuityRepository(engine)
+        return GuardedRenewalPostgresAccountContinuityRepository(engine, policy)
+    return RenewalPostgresAccountContinuityRepository(engine)
 
 
 def build_share_repository(settings: Settings) -> ShareRepository:
