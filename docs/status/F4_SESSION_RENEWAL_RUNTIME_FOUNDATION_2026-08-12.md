@@ -1,6 +1,6 @@
 # F4 Session Renewal Runtime Foundation — 2026-08-12
 
-Status: IMPLEMENTATION_PARTIAL / DRAFT / EXACT_HEAD_CI_PENDING
+Status: IMPLEMENTATION_PARTIAL / CONSUMER_HTTP_CANDIDATE / MOBILE_PENDING / EXACT_HEAD_CI_PENDING
 
 Issue: #364  
 Parent architecture: PR #365 / ADR-0132 / `session-renewal-continuity.v1.json` v1.0.1  
@@ -9,67 +9,62 @@ Capabilities: CAP-084, CAP-085, CAP-095
 
 ## Implemented in this checkpoint
 
-- linear migration `20260806_0034 -> 20260812_0035` extends `identity.actor_session` with renewal/previous-pair/rotation/continuity metadata;
-- no parallel identity/session table is introduced;
-- reviewed runtime defaults are explicit: 30-day access, 60-day sliding inactivity, 180-day non-sliding absolute continuity and 60-second previous-renewal response-loss grace;
-- configuration may tighten the reviewed continuity defaults but cannot silently extend them beyond the contract bounds;
-- production rejects the development renewal derivation secret and retained development material;
-- deterministic HMAC-SHA256 access/renewal derivation uses separate purpose domains, session family, actor identity and monotonic rotation counter;
-- retained derivation keys can reproduce already-current credentials without plaintext server persistence;
-- repository contract exposes typed renewal resolution and compare-and-swap rotation semantics;
-- in-memory identity repository supports current renewal lookup, bounded previous-renewal grace, continuity expiry, revocation, stale-rotation rejection and previous-access grace;
-- PostgreSQL identity repository implements the same current/previous renewal lookup and atomic CAS rotation boundary;
-- previous access grace is capped by the old access expiry so renewal cannot revive an already-expired bearer credential;
-- `SessionRenewalService` rotates only the same actor/session family, retries one CAS race, and reproduces the already-current pair for response-loss retry without rotating twice;
+- linear migrations `20260806_0034 -> 20260812_0035 -> 20260812_0036` extend the existing identity session and guest-merge replay stores; no parallel identity/session store is introduced;
+- reviewed runtime defaults remain 30-day access, 60-day sliding inactivity, 180-day non-sliding absolute continuity and 60-second previous-renewal response-loss grace;
+- configuration may tighten continuity defaults but cannot silently extend beyond reviewed bounds;
+- production rejects development renewal derivation material;
+- deterministic HMAC-SHA256 access/renewal derivation uses separate purpose domains, session family, final actor identity and monotonic rotation counter;
+- memory and PostgreSQL identity repositories implement current/previous renewal lookup, continuity/revocation checks and compare-and-swap rotation;
+- previous-access grace is capped by the old access expiry, so renewal never revives an already-expired bearer;
+- `SessionRenewalService` rotates only the same actor/session family, converges one CAS race and reproduces the already-current pair for bounded response-loss retry;
+- renewal honors guest/account access TTL settings independently;
 - central error registry 1.24.0 includes `AUTH_RENEWAL_INVALID`, `AUTH_RENEWAL_REPLAYED` and `AUTH_SESSION_CONTINUITY_EXPIRED`;
-- new guest creation now creates session family id, rotation-0 access/renewal pair and absolute/inactivity deadlines atomically on the server;
-- `IdentityService` derives renewal credentials from the validated runtime keyring rather than bypassing production settings with a development fallback;
-- existing mobile guest response parsing remains structurally tolerant of additive server fields, but the router still intentionally does not expose the renewal token until OpenAPI/mobile storage are updated together;
-- focused test candidates cover policy/derivation, in-memory CAS/replay, service response-loss retry and atomic guest renewal-family issuance.
+- new guest creation creates session-family id, rotation-0 access/renewal pair and continuity deadlines atomically;
+- guest→account conversion now resolves the final account actor first and then creates renewal-capable account session material inside the same repository transaction;
+- guest→existing-account and guest→new-account therefore derive credentials from the correct final actor id;
+- `guest_merge_replay` stores immutable initial account-session metadata only; no plaintext token is persisted;
+- completed account-conversion replay can reproduce the same initial access/renewal pair while later rotations remain separate;
+- guarded and unguarded PostgreSQL account-continuity composition both use the renewal-aware transactional adapter;
+- `POST /v1/identity/session/renew` is now exposed as a candidate HTTP surface;
+- guest issuance and account merge responses expose additive actor kind, renewal token and rotation counter metadata;
+- focused candidate tests cover policy/derivation, memory CAS/replay, renewal service, guest issuance and guest renewal HTTP retry convergence.
 
-## Intentionally not exposed yet
+## Current consumer boundary
 
-The server has renewal-capable guest session state internally, but the consumer contract is not opened yet:
+Server identity continuity is now candidate-complete enough to expose renewal HTTP, but the full consumer capability is not complete:
 
-- `/v1/identity/session/renew` is not exposed;
-- continuity bootstrap is not exposed;
-- `GuestCredentialResponse` does not yet expose renewal metadata;
-- account conversion does not yet create/return a renewal-capable account session family;
-- mobile still stores access token + actor id separately and synthesizes expiry for an already-persisted credential;
-- mobile atomic credential bundle and single-flight renewal remain pending.
+- active-access legacy continuity bootstrap is still pending;
+- exact OpenAPI snapshot/regeneration is pending;
+- mobile still persists access token and actor id separately;
+- mobile still synthesizes expiry for an already-persisted credential;
+- mobile does not yet persist actor kind, renewal token or rotation counter;
+- mobile proactive/single-flight renewal and explicit continuity failure states remain pending.
 
-This prevents a guest-only or half-working security-sensitive API while account conversion, exact OpenAPI and mobile persistence are not yet converged.
+No silent new-guest fallback has been introduced.
 
-## Account-conversion boundary discovered
+## Account conversion invariants now preserved
 
-The existing guest→account replay transaction determines the target account actor inside the repository transaction. This matters because session-token derivation requires the final target actor id and session-family id.
-
-The next account slice must therefore create deterministic account session material only **after** the target actor is resolved and still **inside the same merge transaction**. Moving derivation outside that transaction would break the existing guest→existing-account path or weaken atomic ownership transfer.
-
-The planned transaction-safe shape is:
-
-1. consume/lock verification and resolve the final account actor;
-2. allocate the account session-family id;
-3. derive rotation-0 access/renewal material from final account actor + session id via a provider-neutral session-material factory;
-4. insert the renewal-capable `identity.actor_session` in the same transaction;
-5. persist enough immutable initial session metadata in `guest_merge_replay` to reproduce the completed conversion response safely;
-6. retire every guest session family as the current merge transaction already requires;
-7. keep later rotated account credentials separate from the immutable conversion replay record.
+1. verification is consumed under the existing merge transaction;
+2. final target account actor is resolved before session derivation;
+3. session-family id and rotation-0 access/renewal material are created for that final actor;
+4. the account session and immutable replay metadata are persisted in the same transaction;
+5. source guest sessions are retired by the existing merge boundary;
+6. replay reproduces only the initial completed conversion credential pair;
+7. later account renewal rotation does not mutate or expose a replayed later credential.
 
 ## Next implementation boundary
 
-1. extend guest-merge replay/model/ports with immutable initial account-session metadata;
-2. implement the transaction-safe account session-material factory in memory and PostgreSQL merge repositories;
-3. add account conversion renewal/replay/revocation coverage;
-4. expose guest/account renewal bundles together with exact OpenAPI and central HTTP contract;
-5. add `/v1/identity/session/renew` and active-access legacy bootstrap;
-6. migrate mobile to one atomic credential bundle with exact server expiry, actor kind, renewal token and rotation counter;
-7. implement single-flight proactive/on-401 renewal without silent new-guest fallback;
-8. run exact-head API/Mobile/PostgreSQL core gates once Actions execution is available;
-9. perform Connected Alpha expiry/renewal proof before any CAP lifecycle promotion.
+1. migrate mobile secure storage to one versioned atomic credential bundle containing actor id, actor kind, access token, exact server access expiry, renewal token and rotation counter;
+2. migrate legacy access-only mobile state only while the access bearer remains valid; never synthesize a recoverable actor after expiry;
+3. add single-flight renewal with proactive skew and one retry after `AUTH_TOKEN_EXPIRED`;
+4. add explicit guest continuity-error and account reauthentication-required states with TR/EN copy;
+5. implement active-access `/v1/identity/session/continuity/bootstrap` for legacy installed clients;
+6. regenerate exact OpenAPI and central contract snapshots;
+7. run exact-head API/Mobile/PostgreSQL core gates once Actions execution is available;
+8. perform Connected Alpha expiry/renewal proof before any CAP lifecycle promotion.
 
 ## Verification boundary
 
-Recent stack records show GitHub Actions unavailable. The isolated agent runtime also cannot resolve github.com for a clone-based local execution path. Connector readback confirms the branch files, but no exact-head test/CI PASS is claimed.
+No exact-head CI PASS is claimed. The isolated runtime cannot currently provide clone-based execution, and recent stack records showed unavailable Actions execution. Connector readback verifies repository state only; test files are candidate evidence, not execution evidence.
 
-Static repository delta and test code are candidate evidence only. Human usability, production auth operability, CAP lifecycle promotion and F4 completion remain unclaimed.
+Human usability, production auth operability, CAP lifecycle promotion and F4 completion remain unclaimed.
