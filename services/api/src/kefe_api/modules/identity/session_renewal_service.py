@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from kefe_api.core.errors import DomainError
@@ -33,10 +33,12 @@ class SessionRenewalService:
         repository: IdentityRepository,
         policy: SessionContinuityPolicy,
         deriver: SessionTokenDeriver,
+        account_access_ttl: timedelta | None = None,
     ) -> None:
         self._repo = repository
         self._policy = policy
         self._deriver = deriver
+        self._account_access_ttl = account_access_ttl or policy.access_ttl
 
     def renew(self, *, renewal_token: str) -> RenewedSessionCredential:
         normalized = renewal_token.strip()
@@ -65,7 +67,12 @@ class SessionRenewalService:
                 actor_kind=snapshot.actor_kind,
                 rotation_counter=next_counter,
             )
-            next_access_expires_at = now + self._policy.access_ttl
+            access_ttl = (
+                self._account_access_ttl
+                if snapshot.actor_kind is ActorKind.ACCOUNT
+                else self._policy.access_ttl
+            )
+            next_access_expires_at = now + access_ttl
             next_inactive_expires_at = self._policy.renewed_inactivity_deadline(
                 now=now,
                 absolute_expires_at=snapshot.continuity_absolute_expires_at,
@@ -93,9 +100,6 @@ class SessionRenewalService:
                     renewal_token=next_pair.renewal_token,
                     rotation_counter=next_counter,
                 )
-            # Another same-token renewal may have won between read and CAS. Re-read the
-            # original token once; it should now resolve through PREVIOUS_GRACE and return
-            # the already-current pair instead of rotating again.
 
         raise DomainError(
             "AUTH_RENEWAL_REPLAYED",
