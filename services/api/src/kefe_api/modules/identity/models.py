@@ -29,6 +29,8 @@ class GuestCredential:
     actor_id: UUID
     access_token: str
     expires_at: datetime
+    renewal_token: str | None = None
+    rotation_counter: int = 0
 
 
 @dataclass(frozen=True, slots=True)
