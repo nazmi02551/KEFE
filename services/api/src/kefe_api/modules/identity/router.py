@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import UUID
 
 from fastapi import APIRouter, Request
@@ -66,6 +66,7 @@ def _renewal_service(request: Request) -> SessionRenewalService:
         repository=request.app.state.identity_repository,
         policy=policy,
         deriver=deriver,
+        account_access_ttl=timedelta(days=settings.account_token_ttl_days),
     )
 
 
