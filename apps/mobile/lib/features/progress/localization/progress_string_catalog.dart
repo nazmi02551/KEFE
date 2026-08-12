@@ -34,6 +34,17 @@ abstract final class ProgressStringCatalog {
           'Henüz tamamlanmış bir tartım yok. İlk kararın burada görünmeye başlayacak.',
       'journey.non_inference_note':
           'Bu özet yalnızca gözlenen uygulama geçmişini gösterir; kişilik, ideoloji, psikolojik profil veya neden-sonuç çıkarımı yapmaz.',
+      'journey.next.eyebrow': 'SIRADAKİ ADIM',
+      'journey.next.reflection.title': 'Bir sonraki tartımında yansımayı tamamla',
+      'journey.next.reflection.body':
+          'Geçmişinde henüz yansıma kaydı olmayan kararlar var. Yeni bir vakayı tartarken sonuçtan sonra kısa yansıma adımını tamamlayabilirsin.',
+      'journey.next.revisit.title': 'Bir karara daha sonra tekrar dön',
+      'journey.next.revisit.body':
+          'Henüz yeniden tartım kaydın yok. Yeni vakaları tartmaya devam et; zaman içinde bir kararına geri dönmek değişimi gözlemlemene yardım eder.',
+      'journey.next.explore.title': 'Başka bir alanda yeni vaka tart',
+      'journey.next.explore.body':
+          'Tartım, yeniden tartım ve yansıma geçmişin oluşuyor. Yeni bir alan seçerek karar geçmişini genişletebilirsin.',
+      'journey.next.action': 'Yeni vaka keşfet',
       'journey.weigh_count': '{count} tartım',
       'journey.update_count.one': '{count} yeniden tartım',
       'journey.update_count.many': '{count} yeniden tartım',
@@ -82,6 +93,17 @@ abstract final class ProgressStringCatalog {
           'No completed weighs yet. Your first decision will begin your history here.',
       'journey.non_inference_note':
           'This summary only shows observed product history; it does not infer personality, ideology, psychological traits or causality.',
+      'journey.next.eyebrow': 'NEXT STEP',
+      'journey.next.reflection.title': 'Complete a reflection on your next weigh',
+      'journey.next.reflection.body':
+          'Your history includes decisions without a recorded reflection. When you weigh a new case, you can complete the short reflection step after the result.',
+      'journey.next.revisit.title': 'Return to a decision later',
+      'journey.next.revisit.body':
+          'You do not have a revisit recorded yet. Keep weighing new cases; returning to a decision later can help you observe change over time.',
+      'journey.next.explore.title': 'Weigh a case from another domain',
+      'journey.next.explore.body':
+          'Your weigh, revisit and reflection history is taking shape. Choose another domain to broaden the decisions represented in your history.',
+      'journey.next.action': 'Explore a new case',
       'journey.weigh_count': '{count} weighs',
       'journey.update_count.one': '{count} revisit',
       'journey.update_count.many': '{count} revisits',
