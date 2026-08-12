@@ -43,6 +43,20 @@ extension ProgressStrings on KefeStrings {
   String get journeyEmpty => _progressText('journey.empty');
   String get journeyNonInferenceNote =>
       _progressText('journey.non_inference_note');
+  String get journeyNextEyebrow => _progressText('journey.next.eyebrow');
+  String get journeyNextReflectionTitle =>
+      _progressText('journey.next.reflection.title');
+  String get journeyNextReflectionBody =>
+      _progressText('journey.next.reflection.body');
+  String get journeyNextRevisitTitle =>
+      _progressText('journey.next.revisit.title');
+  String get journeyNextRevisitBody =>
+      _progressText('journey.next.revisit.body');
+  String get journeyNextExploreTitle =>
+      _progressText('journey.next.explore.title');
+  String get journeyNextExploreBody =>
+      _progressText('journey.next.explore.body');
+  String get journeyNextAction => _progressText('journey.next.action');
   String get journeyDetails => _progressText('journey.details');
   String get journeyTimeline => _progressText('journey.timeline');
   String get journeyInitialCommit => _progressText('journey.initial_commit');
