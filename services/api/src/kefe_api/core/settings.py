@@ -11,6 +11,10 @@ DEVELOPMENT_ACCOUNT_MERGE_REPLAY_SECRET = (
     "development-only-guest-merge-replay-secret-v1"
 )
 DEFAULT_ACCOUNT_MERGE_REPLAY_KEY_ID = "primary-v1"
+DEVELOPMENT_SESSION_RENEWAL_SECRET = (
+    "development-only-session-renewal-secret-v1"
+)
+DEFAULT_SESSION_RENEWAL_KEY_ID = "primary-v1"
 _FORBIDDEN_PRODUCTION_DATABASE_HOSTS = frozenset(
     {
         "localhost",
@@ -36,6 +40,16 @@ class Settings(BaseSettings):
     guest_issue_rate_limit: int = 10
     guest_issue_rate_window_seconds: int = 60
     device_integrity_mode: Literal["OFF", "OPTIONAL", "REQUIRED"] = "OPTIONAL"
+
+    session_renewal_absolute_lifetime_days: int = Field(default=180, ge=31, le=180)
+    session_renewal_inactivity_days: int = Field(default=60, ge=31, le=60)
+    session_renewal_previous_pair_grace_seconds: int = Field(default=60, ge=10, le=120)
+    session_renewal_active_key_id: str = DEFAULT_SESSION_RENEWAL_KEY_ID
+    session_renewal_secret: str = Field(
+        default=DEVELOPMENT_SESSION_RENEWAL_SECRET,
+        min_length=32,
+    )
+    session_renewal_retained_keys: dict[str, str] = Field(default_factory=dict)
 
     otp_challenge_ttl_minutes: int = 10
     otp_verification_ttl_minutes: int = 15
@@ -138,6 +152,20 @@ class Settings(BaseSettings):
         return value
 
     @model_validator(mode="after")
+    def validate_session_renewal_policy(self) -> Settings:
+        access_ttl_days = max(self.guest_token_ttl_days, self.account_token_ttl_days)
+        if self.session_renewal_inactivity_days <= access_ttl_days:
+            raise ValueError("session renewal inactivity must exceed access token TTL")
+        if self.session_renewal_absolute_lifetime_days < self.session_renewal_inactivity_days:
+            raise ValueError("session renewal absolute lifetime cannot be shorter than inactivity")
+        if self.session_renewal_active_key_id in self.session_renewal_retained_keys:
+            raise ValueError("active session renewal key id must not also be retained")
+        for secret in self.session_renewal_retained_keys.values():
+            if len(secret.encode("utf-8")) < 32:
+                raise ValueError("retained session renewal secrets must be at least 32 bytes")
+        return self
+
+    @model_validator(mode="after")
     def validate_production_runtime(self) -> Settings:
         if self.environment.strip().lower() != "production":
             return self
@@ -172,6 +200,10 @@ class Settings(BaseSettings):
             raise ValueError(
                 "production cannot retain the development account merge replay secret"
             )
+        if self.session_renewal_secret == DEVELOPMENT_SESSION_RENEWAL_SECRET:
+            raise ValueError("production requires a non-development session renewal secret")
+        if DEVELOPMENT_SESSION_RENEWAL_SECRET in self.session_renewal_retained_keys.values():
+            raise ValueError("production cannot retain the development session renewal secret")
 
         if self.otp_delivery_mode == "CAPTURE":
             raise ValueError("production forbids KEFE_OTP_DELIVERY_MODE=CAPTURE")
