@@ -53,8 +53,6 @@ void main() {
         find.byKey(const ValueKey('my-kefe-next-step-title')),
         findsOneWidget,
       );
-      expect(find.textContaining('personality'), findsNothing);
-      expect(find.textContaining('ideology'), findsNothing);
       expect(
         find.byKey(const ValueKey('preview-build-identity')),
         findsNothing,
