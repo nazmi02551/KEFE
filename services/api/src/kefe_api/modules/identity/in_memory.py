@@ -224,7 +224,10 @@ class InMemoryIdentityRepository:
                 return False
 
             session.previous_token_hash = session.token_hash
-            session.previous_token_valid_until = mutation.previous_pair_valid_until
+            session.previous_token_valid_until = min(
+                mutation.previous_pair_valid_until,
+                session.expires_at,
+            )
             session.previous_renewal_token_hash = session.renewal_token_hash
             session.previous_renewal_valid_until = mutation.previous_pair_valid_until
             session.token_hash = mutation.next_access_token_hash
