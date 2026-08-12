@@ -27,6 +27,7 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
   bool _loading = true;
   String? _errorCode;
   DecisionCaseSummary? _sportsCall;
+  DecisionCaseSummary? _communityCase;
 
   @override
   void initState() {
@@ -46,15 +47,22 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
           .read(decisionRepositoryProvider)
           .fetchExploreCases(limit: 50);
       DecisionCaseSummary? sports;
+      DecisionCaseSummary? community;
       for (final item in cases) {
-        if (item.format == 'SPORTS_CALL' || item.domain == 'SPORTS') {
+        final isSports = item.format == 'SPORTS_CALL' || item.domain == 'SPORTS';
+        if (sports == null && isSports) {
           sports = item;
-          break;
         }
+        if (community == null && !isSports) {
+          community = item;
+        }
+        if (sports != null && community != null) break;
       }
+      community ??= cases.isNotEmpty ? cases.first : null;
       if (!mounted) return;
       setState(() {
         _sportsCall = sports;
+        _communityCase = community;
         _loading = false;
       });
     } on ClientTransportFailure catch (error) {
@@ -102,6 +110,18 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
               actionLabel: strings.experienceStandardAction,
               onPressed: () => context.go('/explore'),
             ),
+            if (!_loading && _errorCode == null && _communityCase != null) ...[
+              const SizedBox(height: 14),
+              _ExperienceCard(
+                cardKey: const ValueKey('experience-community'),
+                icon: Icons.groups_2_outlined,
+                title: strings.experienceCommunityTitle,
+                body:
+                    '${strings.experienceCommunityBody}\n\n${_communityCase!.title}',
+                actionLabel: strings.experienceCommunityAction,
+                onPressed: () => context.push('/case/${_communityCase!.id}'),
+              ),
+            ],
             const SizedBox(height: 14),
             if (_loading)
               KefeSurface(
