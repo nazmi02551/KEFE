@@ -214,7 +214,19 @@ void main() {
       await tester.tap(experiencesAction);
       await tester.pumpAndSettle();
 
+      final hub = find.byKey(const ValueKey('experience-hub'));
+      expect(hub, findsOneWidget);
+      final hubScroll = find.descendant(
+        of: hub,
+        matching: find.byType(Scrollable),
+      );
       final atlasCard = find.byKey(const ValueKey('experience-atlas'));
+      await tester.scrollUntilVisible(
+        atlasCard,
+        300,
+        scrollable: hubScroll,
+      );
+      await tester.pumpAndSettle();
       expect(atlasCard, findsOneWidget);
       final atlasAction = find.descendant(
         of: atlasCard,
