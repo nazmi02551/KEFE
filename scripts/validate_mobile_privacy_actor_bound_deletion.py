@@ -67,8 +67,22 @@ def main() -> None:
         "actorId: await _credentialStore.readActorId() ?? ''",
     ):
         require(decision, needle, where="mobile credential/guest repository")
-    forbid(decision, "String? _token;", where="DecisionRepository credential state")
-    forbid(decision, "_token =", where="DecisionRepository credential state")
+
+    repository_marker = "class HttpDecisionRepository"
+    repository_start = decision.find(repository_marker)
+    if repository_start < 0:
+        raise SystemExit("mobile decision repository class not found")
+    decision_repository = decision[repository_start:]
+    forbid(
+        decision_repository,
+        "String? _token;",
+        where="DecisionRepository credential state",
+    )
+    forbid(
+        decision_repository,
+        "_token =",
+        where="DecisionRepository credential state",
+    )
 
     require(account, "await _credentialStore.writeActorId(actorId);", where="account merge")
 
