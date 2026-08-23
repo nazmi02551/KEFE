@@ -201,8 +201,9 @@ void main() {
     ).readAsStringSync();
     expect(previewSource, contains('PreviewBuildInfo.label'));
     expect(previewSource, contains("ValueKey('preview-build-identity')"));
-    expect(previewSource, contains("ValueKey('open-preview-radar')"));
-    expect(previewSource, contains("ValueKey('open-preview-atlas')"));
+    expect(previewSource, contains("ValueKey('open-preview-experiences')"));
+    expect(previewSource, isNot(contains("ValueKey('open-preview-radar')")));
+    expect(previewSource, isNot(contains("ValueKey('open-preview-atlas')")));
     expect(previewSource, contains("ValueKey('open-preview-settings')"));
   });
 }
