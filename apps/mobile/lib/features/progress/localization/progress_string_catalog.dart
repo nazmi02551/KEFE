@@ -35,7 +35,8 @@ abstract final class ProgressStringCatalog {
       'journey.non_inference_note':
           'Bu özet yalnızca gözlenen uygulama geçmişini gösterir; kişilik, ideoloji, psikolojik profil veya neden-sonuç çıkarımı yapmaz.',
       'journey.next.eyebrow': 'SIRADAKİ ADIM',
-      'journey.next.reflection.title': 'Bir sonraki tartımında yansımayı tamamla',
+      'journey.next.reflection.title':
+          'Bir sonraki tartımında yansımayı tamamla',
       'journey.next.reflection.body':
           'Geçmişinde henüz yansıma kaydı olmayan kararlar var. Yeni bir vakayı tartarken sonuçtan sonra kısa yansıma adımını tamamlayabilirsin.',
       'journey.next.revisit.title': 'Bir karara daha sonra tekrar dön',
@@ -94,7 +95,8 @@ abstract final class ProgressStringCatalog {
       'journey.non_inference_note':
           'This summary only shows observed product history; it does not infer personality, ideology, psychological traits or causality.',
       'journey.next.eyebrow': 'NEXT STEP',
-      'journey.next.reflection.title': 'Complete a reflection on your next weigh',
+      'journey.next.reflection.title':
+          'Complete a reflection on your next weigh',
       'journey.next.reflection.body':
           'Your history includes decisions without a recorded reflection. When you weigh a new case, you can complete the short reflection step after the result.',
       'journey.next.revisit.title': 'Return to a decision later',

@@ -29,15 +29,14 @@ void main() {
     expect(catalog, contains("'account.title': 'Account and continuity'"));
     expect(catalog, contains("'account.title': 'Hesap ve devamlılık'"));
     expect(catalog, contains('Guest use remains available.'));
-    expect(
-      catalog,
-      contains('Misafir olarak kullanmaya devam edebilirsin.'),
-    );
+    expect(catalog, contains('Misafir olarak kullanmaya devam edebilirsin.'));
   });
 
   test('production and Product Preview reuse the governed account route', () {
     final productionApp = File('lib/app/kefe_app.dart').readAsStringSync();
-    final previewApp = File('lib/app/product_preview_app.dart').readAsStringSync();
+    final previewApp = File(
+      'lib/app/product_preview_app.dart',
+    ).readAsStringSync();
     final accountScreen = File(
       'lib/features/account/presentation/account_conversion_screen.dart',
     ).readAsStringSync();

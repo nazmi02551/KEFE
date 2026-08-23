@@ -21,7 +21,8 @@ class ExperienceHubScreen extends ConsumerStatefulWidget {
   final bool previewAtlasEnabled;
 
   @override
-  ConsumerState<ExperienceHubScreen> createState() => _ExperienceHubScreenState();
+  ConsumerState<ExperienceHubScreen> createState() =>
+      _ExperienceHubScreenState();
 }
 
 class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
@@ -50,7 +51,8 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
       DecisionCaseSummary? sports;
       DecisionCaseSummary? community;
       for (final item in cases) {
-        final isSports = item.format == 'SPORTS_CALL' || item.domain == 'SPORTS';
+        final isSports =
+            item.format == 'SPORTS_CALL' || item.domain == 'SPORTS';
         if (sports == null && isSports) {
           sports = item;
         }
@@ -162,7 +164,8 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
                 cardKey: const ValueKey('experience-sports-call'),
                 icon: Icons.sports_soccer_rounded,
                 title: strings.experienceSportsTitle,
-                body: '${strings.experienceSportsBody}\n\n${_sportsCall!.title}',
+                body:
+                    '${strings.experienceSportsBody}\n\n${_sportsCall!.title}',
                 actionLabel: strings.experienceSportsAction,
                 onPressed: () => context.push('/case/${_sportsCall!.id}'),
               )
@@ -287,10 +290,11 @@ class _ExperienceCard extends StatelessWidget {
                       const SizedBox(height: 6),
                       Text(
                         statusLabel!,
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: visual.goldSoft,
-                          fontWeight: FontWeight.w800,
-                        ),
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: visual.goldSoft,
+                              fontWeight: FontWeight.w800,
+                            ),
                       ),
                     ],
                   ],

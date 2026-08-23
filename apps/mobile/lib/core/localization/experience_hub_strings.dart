@@ -32,7 +32,8 @@ extension KefeExperienceHubStrings on KefeStrings {
   String get experienceAtlasStatus => _experienceText('atlas_status');
   String get experienceProductionTruthNote =>
       _experienceText('production_truth_note');
-  String get experiencePreviewTruthNote => _experienceText('preview_truth_note');
+  String get experiencePreviewTruthNote =>
+      _experienceText('preview_truth_note');
   String get experienceLoading => _experienceText('loading');
   String get experienceRetry => _experienceText('retry');
 }

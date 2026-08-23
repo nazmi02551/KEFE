@@ -10,7 +10,9 @@ import 'package:kefe_mobile/features/sharing/presentation/public_share_screen.da
 import 'package:kefe_mobile/features/sharing/presentation/share_section.dart';
 
 void main() {
-  testWidgets('sender can preview the case-only recipient journey', (tester) async {
+  testWidgets('sender can preview the case-only recipient journey', (
+    tester,
+  ) async {
     final repository = PreviewShareRepository();
     final router = GoRouter(
       initialLocation: '/sender',
@@ -67,7 +69,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('public-share-screen')), findsOneWidget);
-    expect(find.byKey(const ValueKey('public-share-case-surface')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('public-share-case-surface')),
+      findsOneWidget,
+    );
     expect(
       find.byKey(const ValueKey('public-share-blind-first-surface')),
       findsOneWidget,
