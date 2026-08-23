@@ -17,6 +17,9 @@ abstract final class SettingsStringCatalog {
       'theme.system': 'Use device setting',
       'theme.light': 'Light',
       'theme.dark': 'Dark',
+      'account.title': 'Account and continuity',
+      'account.helper':
+          'Optionally link your current KEFE history to a verified email or phone. Guest use remains available.',
       'privacy.title': 'Privacy and data',
       'privacy.helper': 'Manage export, deletion and data preferences.',
       'preview.internal_label': 'Internal product preview',
@@ -36,6 +39,9 @@ abstract final class SettingsStringCatalog {
       'theme.system': 'Cihaz ayarını kullan',
       'theme.light': 'Açık',
       'theme.dark': 'Koyu',
+      'account.title': 'Hesap ve devamlılık',
+      'account.helper':
+          'Mevcut KEFE geçmişini istersen doğrulanmış e-posta veya telefonla ilişkilendir. Misafir olarak kullanmaya devam edebilirsin.',
       'privacy.title': 'Gizlilik ve veriler',
       'privacy.helper': 'Dışa aktarma, silme ve veri tercihlerini yönet.',
       'preview.internal_label': 'Dahili ürün önizlemesi',
