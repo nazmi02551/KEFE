@@ -53,7 +53,9 @@ class AppConfig {
         'Connected Alpha requires HTTPS.',
       );
     }
-    if (uri.userInfo.isNotEmpty || uri.query.isNotEmpty || uri.fragment.isNotEmpty) {
+    if (uri.userInfo.isNotEmpty ||
+        uri.query.isNotEmpty ||
+        uri.fragment.isNotEmpty) {
       throw ArgumentError.value(
         rawApiBaseUrl,
         'rawApiBaseUrl',
@@ -63,7 +65,8 @@ class AppConfig {
 
     final host = uri.host.toLowerCase();
     final parsedIp = InternetAddress.tryParse(host);
-    final forbiddenHost = host == 'localhost' ||
+    final forbiddenHost =
+        host == 'localhost' ||
         host == '0.0.0.0' ||
         host == '10.0.2.2' ||
         host.endsWith('.invalid') ||

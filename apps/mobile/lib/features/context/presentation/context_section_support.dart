@@ -225,9 +225,9 @@ class _ContextSourceTile extends StatelessWidget {
               Text(
                 host,
                 key: ValueKey('context-source-host-${source.id}'),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: visual.mutedForeground,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: visual.mutedForeground),
               ),
             ],
           ],

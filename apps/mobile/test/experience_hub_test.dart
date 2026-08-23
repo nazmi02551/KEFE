@@ -33,11 +33,20 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('experience-hub')), findsOneWidget);
-      expect(find.byKey(const ValueKey('experience-community')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('experience-community')),
+        findsOneWidget,
+      );
       expect(find.text('Birlikte tart'), findsOneWidget);
       expect(find.text('Önce kendi kararımı ver'), findsOneWidget);
-      expect(find.byKey(const ValueKey('experience-sports-call')), findsOneWidget);
-      expect(find.text('Bu pozisyonda penaltı kararı doğru muydu?'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('experience-sports-call')),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Bu pozisyonda penaltı kararı doğru muydu?'),
+        findsOneWidget,
+      );
 
       final atlas = find.byKey(const ValueKey('experience-atlas'));
       expect(atlas, findsOneWidget);
@@ -45,34 +54,42 @@ void main() {
         find.descendant(of: atlas, matching: find.byType(FilledButton)),
         findsNothing,
       );
-      expect(find.byKey(const ValueKey('experience-truth-note')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('experience-truth-note')),
+        findsOneWidget,
+      );
     },
   );
 
-  testWidgets('community entry starts with the canonical blind-first Case journey', (
-    tester,
-  ) async {
-    useTurkishLocale(tester);
+  testWidgets(
+    'community entry starts with the canonical blind-first Case journey',
+    (tester) async {
+      useTurkishLocale(tester);
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          decisionRepositoryProvider.overrideWithValue(PreviewDecisionRepository()),
-          decisionDraftStoreProvider.overrideWithValue(MemoryDecisionDraftStore()),
-        ],
-        child: const KefeApp(initialLocation: '/experiences'),
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            decisionRepositoryProvider.overrideWithValue(
+              PreviewDecisionRepository(),
+            ),
+            decisionDraftStoreProvider.overrideWithValue(
+              MemoryDecisionDraftStore(),
+            ),
+          ],
+          child: const KefeApp(initialLocation: '/experiences'),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Önce kendi kararımı ver'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Önce kendi kararımı ver'));
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
-    expect(find.byKey(const ValueKey('commit-button')), findsOneWidget);
-    expect(find.byKey(const ValueKey('post-commit-journey')), findsNothing);
-    expect(find.byKey(const ValueKey('consensus-section')), findsNothing);
-  });
+      expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
+      expect(find.byKey(const ValueKey('commit-button')), findsOneWidget);
+      expect(find.byKey(const ValueKey('post-commit-journey')), findsNothing);
+      expect(find.byKey(const ValueKey('consensus-section')), findsNothing);
+    },
+  );
 
   testWidgets('Sports CALL enters the canonical Case journey', (tester) async {
     useTurkishLocale(tester);
@@ -80,8 +97,12 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          decisionRepositoryProvider.overrideWithValue(PreviewDecisionRepository()),
-          decisionDraftStoreProvider.overrideWithValue(MemoryDecisionDraftStore()),
+          decisionRepositoryProvider.overrideWithValue(
+            PreviewDecisionRepository(),
+          ),
+          decisionDraftStoreProvider.overrideWithValue(
+            MemoryDecisionDraftStore(),
+          ),
         ],
         child: const KefeApp(initialLocation: '/experiences'),
       ),
@@ -92,7 +113,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
-    expect(find.text('Bu pozisyonda penaltı kararı doğru muydu?'), findsOneWidget);
+    expect(
+      find.text('Bu pozisyonda penaltı kararı doğru muydu?'),
+      findsOneWidget,
+    );
     expect(find.byKey(const ValueKey('commit-button')), findsOneWidget);
   });
 }

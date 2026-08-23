@@ -151,9 +151,7 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.tap(
-        find.byKey(const ValueKey('open-preview-experiences')),
-      );
+      await tester.tap(find.byKey(const ValueKey('open-preview-experiences')));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('experience-hub')), findsOneWidget);

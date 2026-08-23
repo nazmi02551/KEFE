@@ -78,8 +78,7 @@ extension InternalAlphaStrings on KefeStrings {
   String get privacyDelete => _iaText('privacy.delete');
   String privacyFailure(String code) => switch (code) {
     'AUTH_REQUIRED' => _privacyErrorText('auth_required'),
-    'PRIVACY_ACTOR_ID_UNAVAILABLE' =>
-      _privacyErrorText('identity_unavailable'),
+    'PRIVACY_ACTOR_ID_UNAVAILABLE' => _privacyErrorText('identity_unavailable'),
     'PRIVACY_DELETE_RECEIPT_INVALID' => _privacyErrorText('receipt_invalid'),
     _ => _iaText('privacy.failure', placeholders: {'code': code}),
   };
