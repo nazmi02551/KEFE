@@ -7,6 +7,7 @@ import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/experience_hub_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../../decision/application/decision_controller.dart';
+import '../../decision/data/decision_repository.dart';
 import '../../decision/domain/decision_models.dart';
 
 class ExperienceHubScreen extends ConsumerStatefulWidget {
@@ -179,50 +180,29 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
                 icon: Icons.radar_rounded,
                 title: strings.experienceRadarTitle,
                 body: strings.experienceRadarBody,
-                statusLabel: strings.experiencePreviewStatus,
                 actionLabel: strings.experienceRadarAction,
                 onPressed: () => context.push('/radar'),
               ),
             ],
-            const SizedBox(height: 14),
-            _ExperienceCard(
-              cardKey: const ValueKey('experience-atlas'),
-              icon: Icons.public_rounded,
-              title: strings.experienceAtlasTitle,
-              body: strings.experienceAtlasBody,
-              statusLabel: widget.previewAtlasEnabled
-                  ? strings.experiencePreviewStatus
-                  : strings.experienceAtlasStatus,
-              actionLabel: widget.previewAtlasEnabled
-                  ? strings.experienceAtlasAction
-                  : null,
-              onPressed: widget.previewAtlasEnabled
-                  ? () => context.push('/atlas')
-                  : null,
-            ),
-            const SizedBox(height: 14),
-            KefeSurface(
-              key: const ValueKey('experience-truth-note'),
-              tone: KefeSurfaceTone.sunken,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.verified_outlined, color: visual.goldSoft),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      previewExperiencesEnabled
-                          ? strings.experiencePreviewTruthNote
-                          : strings.experienceProductionTruthNote,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: visual.mutedForeground,
-                        height: 1.45,
-                      ),
-                    ),
-                  ),
-                ],
+            if (widget.previewAtlasEnabled) ...[
+              const SizedBox(height: 14),
+              _ExperienceCard(
+                cardKey: const ValueKey('experience-atlas'),
+                icon: Icons.public_rounded,
+                title: strings.experienceAtlasTitle,
+                body: strings.experienceAtlasBody,
+                actionLabel: strings.experienceAtlasAction,
+                onPressed: () => context.push('/atlas'),
               ),
-            ),
+            ] else if (!previewExperiencesEnabled) ...[
+              const SizedBox(height: 14),
+              _ExperienceCard(
+                cardKey: const ValueKey('experience-atlas-production'),
+                icon: Icons.public_off_outlined,
+                title: strings.experienceAtlasTitle,
+                body: strings.experienceAtlasProductionUnavailable,
+              ),
+            ],
           ],
         ),
       ),
@@ -237,7 +217,6 @@ class _ExperienceCard extends StatelessWidget {
     required this.title,
     required this.body,
     this.actionLabel,
-    this.statusLabel,
     this.onPressed,
   });
 
@@ -246,32 +225,27 @@ class _ExperienceCard extends StatelessWidget {
   final String title;
   final String body;
   final String? actionLabel;
-  final String? statusLabel;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
+    final action = actionLabel;
+    final callback = onPressed;
+
     return KefeSurface(
       key: cardKey,
       tone: KefeSurfaceTone.raised,
-      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: visual.subtleGoldSurface,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(icon, color: visual.goldSoft),
+              ExcludeSemantics(
+                child: Icon(icon, color: visual.goldSoft, size: 28),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -282,35 +256,24 @@ class _ExperienceCard extends StatelessWidget {
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    if (statusLabel != null) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        statusLabel!,
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: visual.goldSoft,
-                          fontWeight: FontWeight.w800,
-                        ),
+                    const SizedBox(height: 6),
+                    Text(
+                      body,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: visual.mutedForeground,
+                        height: 1.4,
                       ),
-                    ],
+                    ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          Text(
-            body,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: visual.mutedForeground,
-              height: 1.45,
-            ),
-          ),
-          if (actionLabel != null && onPressed != null) ...[
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: onPressed,
-              icon: const Icon(Icons.arrow_forward_rounded),
-              label: Text(actionLabel!),
+          if (action != null && callback != null) ...[
+            const SizedBox(height: 14),
+            FilledButton(
+              onPressed: callback,
+              child: Text(action),
             ),
           ],
         ],
