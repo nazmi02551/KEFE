@@ -48,7 +48,11 @@ Focused repository regression coverage checks:
 - production and Product Preview still reuse the same governed account route;
 - Account Conversion still exposes `Continue as guest`.
 
-No exact-head GitHub Actions PASS is claimed. Static connector readback and source-regression intent are repository evidence only, not executed Flutter/CI evidence or human usability approval.
+The first exact-head Mobile CI run exposed a pre-existing checker false positive: `validate_mobile_privacy_actor_bound_deletion.py` scanned the whole decision repository file and rejected the legitimate in-memory CredentialStore field `String? _token;` as if it were a parallel `HttpDecisionRepository` bearer cache. The checker is now scoped to the `HttpDecisionRepository` class body, preserving the contract prohibition while allowing the credential-store implementation.
+
+That checker correction changes no runtime or privacy semantics. New exact-head workflow evidence is required after the correction; no PASS is inferred from the failed predecessor run.
+
+Static connector readback and source-regression intent are repository evidence only, not executed Flutter/CI evidence or human usability approval.
 
 ## Non-claims
 
