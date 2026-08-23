@@ -46,7 +46,8 @@ void main() {
       await tester.tap(find.byIcon(Icons.person_outline_rounded));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('my-kefe-journey')), findsOneWidget);
+      final journey = find.byKey(const ValueKey('my-kefe-journey'));
+      expect(journey, findsOneWidget);
       expect(find.byKey(const ValueKey('saved-cases-section')), findsNothing);
       expect(find.byKey(const ValueKey('my-kefe-next-step')), findsOneWidget);
       expect(
@@ -61,7 +62,15 @@ void main() {
       final nextStepAction = find.byKey(
         const ValueKey('my-kefe-next-step-action'),
       );
-      await tester.ensureVisible(nextStepAction);
+      await tester.scrollUntilVisible(
+        nextStepAction,
+        260,
+        scrollable: find.descendant(
+          of: journey,
+          matching: find.byType(Scrollable),
+        ),
+      );
+      await tester.pumpAndSettle();
       await tester.tap(nextStepAction);
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('explore-list')), findsOneWidget);
