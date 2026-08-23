@@ -154,8 +154,18 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('open-preview-experiences')));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('experience-hub')), findsOneWidget);
+      final hub = find.byKey(const ValueKey('experience-hub'));
+      expect(hub, findsOneWidget);
       final radarCard = find.byKey(const ValueKey('experience-radar'));
+      await tester.scrollUntilVisible(
+        radarCard,
+        300,
+        scrollable: find.descendant(
+          of: hub,
+          matching: find.byType(Scrollable),
+        ),
+      );
+      await tester.pumpAndSettle();
       expect(radarCard, findsOneWidget);
       await tester.tap(
         find.descendant(of: radarCard, matching: find.byType(FilledButton)),
