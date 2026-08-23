@@ -176,7 +176,9 @@ def main() -> None:
     _require(guards["generic_flow_runtime_preserved"] is True, "generic Flow runtime")
     _require(guards["my_kefe_inference_allowed"] is False, "My KEFE non-inference")
 
-    adr = _text("docs/adr/0122-provider-neutral-production-api-runtime-boundary.md")
+    adr = " ".join(
+        _text("docs/adr/0122-provider-neutral-production-api-runtime-boundary.md").split()
+    )
     _require("No Supabase, Firebase, alternate API" in adr, "canonical backend ADR")
     _require(
         "does not make the API externally reachable" in adr,
