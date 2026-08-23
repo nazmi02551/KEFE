@@ -14,8 +14,8 @@ class HealthResponse(BaseModel):
 
 @router.get("/health", response_model=HealthResponse, operation_id="healthCheck")
 def health_check() -> HealthResponse:
-    """Process liveness only; no external dependency claims."""
-
+    # Process liveness only; no external dependency claims. Keep this as a
+    # source comment so the established public OpenAPI path remains unchanged.
     return HealthResponse()
 
 
