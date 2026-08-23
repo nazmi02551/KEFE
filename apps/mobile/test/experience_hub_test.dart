@@ -11,6 +11,20 @@ void useTurkishLocale(WidgetTester tester) {
   addTearDown(tester.platformDispatcher.clearLocaleTestValue);
 }
 
+Finder experienceScrollable() => find.descendant(
+  of: find.byKey(const ValueKey('experience-hub')),
+  matching: find.byType(Scrollable),
+);
+
+Future<void> revealExperience(WidgetTester tester, Finder target) async {
+  await tester.scrollUntilVisible(
+    target,
+    280,
+    scrollable: experienceScrollable(),
+  );
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets(
     'experience hub surfaces community, real Sports CALL and truthful Atlas state',
@@ -33,31 +47,32 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('experience-hub')), findsOneWidget);
-      expect(
-        find.byKey(const ValueKey('experience-community')),
-        findsOneWidget,
-      );
+
+      final community = find.byKey(const ValueKey('experience-community'));
+      await revealExperience(tester, community);
+      expect(community, findsOneWidget);
       expect(find.text('Birlikte tart'), findsOneWidget);
       expect(find.text('Önce kendi kararımı ver'), findsOneWidget);
-      expect(
-        find.byKey(const ValueKey('experience-sports-call')),
-        findsOneWidget,
-      );
+
+      final sports = find.byKey(const ValueKey('experience-sports-call'));
+      await revealExperience(tester, sports);
+      expect(sports, findsOneWidget);
       expect(
         find.text('Bu pozisyonda penaltı kararı doğru muydu?'),
         findsOneWidget,
       );
 
       final atlas = find.byKey(const ValueKey('experience-atlas'));
+      await revealExperience(tester, atlas);
       expect(atlas, findsOneWidget);
       expect(
         find.descendant(of: atlas, matching: find.byType(FilledButton)),
         findsNothing,
       );
-      expect(
-        find.byKey(const ValueKey('experience-truth-note')),
-        findsOneWidget,
-      );
+
+      final truth = find.byKey(const ValueKey('experience-truth-note'));
+      await revealExperience(tester, truth);
+      expect(truth, findsOneWidget);
     },
   );
 
@@ -81,7 +96,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Önce kendi kararımı ver'));
+      final community = find.byKey(const ValueKey('experience-community'));
+      await revealExperience(tester, community);
+      final action = find.descendant(
+        of: community,
+        matching: find.byType(FilledButton),
+      );
+      expect(action, findsOneWidget);
+      await tester.tap(action);
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
@@ -109,7 +131,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Kararını ver'));
+    final sports = find.byKey(const ValueKey('experience-sports-call'));
+    await revealExperience(tester, sports);
+    final action = find.descendant(
+      of: sports,
+      matching: find.byType(FilledButton),
+    );
+    expect(action, findsOneWidget);
+    await tester.tap(action);
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
