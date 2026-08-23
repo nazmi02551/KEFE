@@ -22,6 +22,8 @@ extension KefeSettingsStrings on KefeStrings {
   String get themeSystem => _settingsText('theme.system');
   String get themeLight => _settingsText('theme.light');
   String get themeDark => _settingsText('theme.dark');
+  String get accountAndContinuity => _settingsText('account.title');
+  String get accountAndContinuityHelper => _settingsText('account.helper');
   String get privacyAndData => _settingsText('privacy.title');
   String get privacyAndDataHelper => _settingsText('privacy.helper');
   String get internalPreviewLabel => _settingsText('preview.internal_label');
