@@ -125,6 +125,65 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 10),
+            KefeSurface(
+              key: const ValueKey('settings-account-entry'),
+              tone: KefeSurfaceTone.raised,
+              padding: EdgeInsets.zero,
+              borderRadius: 18,
+              child: Semantics(
+                button: true,
+                label: strings.accountAndContinuity,
+                child: InkWell(
+                  onTap: () => context.push('/account'),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _SettingsIcon(
+                          icon: Icons.manage_accounts_outlined,
+                          color: visual.goldSoft,
+                          compact: true,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                strings.accountAndContinuity,
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.w800),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                strings.accountAndContinuityHelper,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: visual.mutedForeground),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ExcludeSemantics(
+                          child: Icon(
+                            Icons.chevron_right_rounded,
+                            size: 20,
+                            color: visual.mutedForeground,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
             if (widget.showPrivacyControls) ...[
               const SizedBox(height: 10),
               KefeSurface(
