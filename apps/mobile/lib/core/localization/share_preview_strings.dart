@@ -9,7 +9,8 @@ extension SharePreviewStrings on KefeStrings {
     key: key,
   );
 
-  String get sharePreviewReceiver => _sharePreviewText('share.preview_receiver');
+  String get sharePreviewReceiver =>
+      _sharePreviewText('share.preview_receiver');
   String get shareExternalEntryBoundary =>
       _sharePreviewText('share.external_entry_boundary');
 }
