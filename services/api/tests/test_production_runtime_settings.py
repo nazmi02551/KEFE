@@ -33,52 +33,59 @@ def test_production_rejects_in_memory_persistence(backend: str) -> None:
         _production_settings(persistence_backend=backend)
 
 
-def test_production_rejects_missing_database_url() -> None:
-    with pytest.raises(ValidationError, match="KEFE_DATABASE_URL is required"):
+def test_production_requires_database_url() -> None:
+    with pytest.raises(ValidationError, match="KEFE_DATABASE_URL"):
         _production_settings(database_url=None)
 
 
 @pytest.mark.parametrize(
     "database_url",
     [
-        "sqlite+pysqlite:///:memory:",
         "postgresql+psycopg://kefe:secret@localhost:5432/kefe",
         "postgresql+psycopg://kefe:secret@127.0.0.1:5432/kefe",
         "postgresql+psycopg://kefe:secret@10.0.2.2:5432/kefe",
-        "postgresql+psycopg://kefe:secret@alpha-db.invalid:5432/kefe",
+        "postgresql+psycopg://kefe:secret@database.invalid:5432/kefe",
     ],
 )
-def test_production_rejects_non_network_or_reserved_database_targets(
-    database_url: str,
-) -> None:
-    with pytest.raises(ValidationError):
+def test_production_rejects_local_or_reserved_database_hosts(database_url: str) -> None:
+    with pytest.raises(ValidationError, match="local or reserved host"):
         _production_settings(database_url=database_url)
 
 
-def test_production_rejects_known_development_merge_secret() -> None:
-    with pytest.raises(ValidationError, match="development account merge replay secret"):
+def test_production_rejects_non_postgres_database_url() -> None:
+    with pytest.raises(ValidationError, match="PostgreSQL network URL"):
+        _production_settings(database_url="sqlite:///tmp/kefe.db")
+
+
+def test_production_rejects_development_account_merge_secret() -> None:
+    with pytest.raises(ValidationError, match="non-development account merge replay secret"):
         _production_settings(
-            account_merge_replay_secret=(
-                "development-only-account-merge-replay-secret-change-me"
-            )
+            account_merge_replay_secret="development-only-guest-merge-replay-secret-v1"
         )
 
 
-def test_production_rejects_development_merge_secret_in_retained_keyring() -> None:
-    with pytest.raises(ValidationError, match="development account merge replay secret"):
+def test_production_rejects_retained_development_account_merge_secret() -> None:
+    with pytest.raises(ValidationError, match="cannot retain the development"):
         _production_settings(
-            account_merge_replay_keys=(
-                "old=development-only-account-merge-replay-secret-change-me;"
-                "future=production-account-merge-replay-secret-0002"
-            )
+            account_merge_replay_retained_keys={
+                "previous-v0": "development-only-guest-merge-replay-secret-v1"
+            }
         )
 
 
-def test_production_rejects_otp_capture_mode() -> None:
-    with pytest.raises(ValidationError, match="OTP capture mode"):
+def test_production_rejects_capturing_otp_adapter() -> None:
+    with pytest.raises(ValidationError, match="KEFE_OTP_DELIVERY_MODE=CAPTURE"):
         _production_settings(otp_delivery_mode="CAPTURE")
 
 
 def test_production_rejects_disabled_otp_abuse_guard() -> None:
-    with pytest.raises(ValidationError, match="OTP request abuse guard"):
+    with pytest.raises(ValidationError, match="KEFE_OTP_REQUEST_GUARD_MODE=OFF"):
         _production_settings(otp_request_guard_mode="OFF")
+
+
+def test_development_defaults_remain_available_for_local_and_unit_work() -> None:
+    settings = Settings()
+
+    assert settings.environment == "development"
+    assert settings.persistence_backend == "memory"
+    assert settings.otp_delivery_mode == "CAPTURE"
