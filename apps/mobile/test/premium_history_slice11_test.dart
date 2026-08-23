@@ -101,24 +101,33 @@ void main() {
           expect(find.byType(KefeSurface), findsWidgets);
 
           final journeyList = find.byKey(const ValueKey('my-kefe-journey'));
+          final journeyScroll = find.descendant(
+            of: journeyList,
+            matching: find.byType(Scrollable),
+          );
           final recentJourneys = find.byKey(
             const ValueKey('my-kefe-recent-journeys'),
           );
-          for (
-            var attempt = 0;
-            attempt < 6 && recentJourneys.evaluate().isEmpty;
-            attempt++
-          ) {
-            await tester.drag(journeyList, const Offset(0, -500));
-            await tester.pumpAndSettle();
-          }
+          await tester.scrollUntilVisible(
+            recentJourneys,
+            300,
+            scrollable: journeyScroll,
+          );
+          await tester.pumpAndSettle();
           expect(recentJourneys, findsOneWidget);
+
           final firstJourney = find
               .descendant(
                 of: recentJourneys,
                 matching: find.byType(ExpansionTile),
               )
               .first;
+          await tester.scrollUntilVisible(
+            firstJourney,
+            220,
+            scrollable: journeyScroll,
+          );
+          await tester.pumpAndSettle();
           await tester.tap(firstJourney);
           await tester.pumpAndSettle();
           expect(
@@ -128,10 +137,6 @@ void main() {
 
           final footnote = find.byKey(
             const ValueKey('my-kefe-no-inference-note'),
-          );
-          final journeyScroll = find.descendant(
-            of: find.byKey(const ValueKey('my-kefe-journey')),
-            matching: find.byType(Scrollable),
           );
           await tester.scrollUntilVisible(
             footnote,
