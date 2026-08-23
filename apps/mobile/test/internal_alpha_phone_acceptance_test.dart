@@ -100,7 +100,11 @@ void main() {
         Brightness.dark,
       );
 
-      await tester.tap(find.text('Privacy and data'));
+      final privacyEntry = find.byKey(
+        const ValueKey('settings-privacy-entry'),
+      );
+      await _scrollTo(tester, privacyEntry);
+      await tester.tap(privacyEntry);
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('privacy-controls')), findsOneWidget);
     },
