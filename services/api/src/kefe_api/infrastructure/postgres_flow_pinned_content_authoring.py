@@ -238,7 +238,8 @@ class PostgresFlowPinnedContentAuthoringRepository(PostgresContentAuthoringRepos
                     country_codes = CAST(:country_codes AS text[]),
                     cultural_context_note = :cultural_context_note,
                     legal_context_note = :legal_context_note,
-                    localizations = CAST(:localizations AS jsonb)
+                    localizations = CAST(:localizations AS jsonb),
+                    is_real_event = :is_real_event
                 WHERE id = :version_id
                 """
             ),
@@ -255,5 +256,6 @@ class PostgresFlowPinnedContentAuthoringRepository(PostgresContentAuthoringRepos
                 "cultural_context_note": version.cultural_context_note,
                 "legal_context_note": version.legal_context_note,
                 "localizations": json.dumps(localization_map),
+                "is_real_event": version.is_real_event,
             },
         )
