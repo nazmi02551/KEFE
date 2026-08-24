@@ -53,6 +53,7 @@ class ApiFailure implements Exception {
 class HttpDecisionRepository
     implements
         DecisionRepository,
+        TodayDecisionRepository,
         FlowRuntimeRepository,
         DecisionLineageRepository,
         PerspectiveRepository,
@@ -106,19 +107,30 @@ class HttpDecisionRepository
     );
     return (body['items'] as List<Object?>)
         .cast<Map<String, Object?>>()
-        .map(
-          (item) => DecisionCaseSummary(
-            id: item['case_id'] as String,
-            versionId: item['case_version_id'] as String,
-            title: item['title'] as String,
-            summary: item['summary'] as String,
-            format: item['base_format'] as String,
-            domain: item['primary_domain'] as String,
-            risk: item['content_risk'] as String,
-            isRealEvent: item['is_real_event'] == true,
-          ),
-        )
+        .map(_parseCaseSummary)
         .toList(growable: false);
+  }
+
+  @override
+  Future<DecisionCaseSummary?> fetchTodayCase() async {
+    final body = _decode(
+      await _request(() => _client.get(_uri('/v1/today'))),
+    );
+    final rawItem = body['item'];
+    if (rawItem == null) return null;
+    return _parseCaseSummary((rawItem as Map).cast<String, Object?>());
+  }
+
+  DecisionCaseSummary _parseCaseSummary(Map<String, Object?> item) {
+    return DecisionCaseSummary(
+      id: item['case_id'] as String,
+      versionId: item['case_version_id'] as String,
+      title: item['title'] as String,
+      summary: item['summary'] as String,
+      format: item['base_format'] as String,
+      domain: item['primary_domain'] as String,
+      risk: item['content_risk'] as String,
+    );
   }
 
   @override
