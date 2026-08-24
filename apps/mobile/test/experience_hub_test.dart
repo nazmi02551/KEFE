@@ -13,7 +13,7 @@ void useTurkishLocale(WidgetTester tester) {
 
 void main() {
   testWidgets(
-    'experience hub surfaces community, real Sports CALL and truthful Atlas state',
+    'experience hub surfaces Dilemma, community, Sports CALL and truthful Atlas state',
     (tester) async {
       useTurkishLocale(tester);
 
@@ -33,6 +33,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('experience-hub')), findsOneWidget);
+      expect(find.byKey(const ValueKey('experience-dilemma')), findsOneWidget);
+      expect(find.text('İkilemler'), findsOneWidget);
+      expect(find.text('Son koltuk kime verilmeli?'), findsWidgets);
       expect(
         find.byKey(const ValueKey('experience-community')),
         findsOneWidget,
@@ -61,6 +64,37 @@ void main() {
     },
   );
 
+  testWidgets('Dilemma enters the canonical blind-first Case journey', (
+    tester,
+  ) async {
+    useTurkishLocale(tester);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          decisionRepositoryProvider.overrideWithValue(
+            PreviewDecisionRepository(),
+          ),
+          decisionDraftStoreProvider.overrideWithValue(
+            MemoryDecisionDraftStore(),
+          ),
+        ],
+        child: const KefeApp(initialLocation: '/experiences'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final action = find.text('Bir ikilemi tart');
+    await tester.ensureVisible(action);
+    await tester.tap(action);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
+    expect(find.text('Son koltuk kime verilmeli?'), findsOneWidget);
+    expect(find.byKey(const ValueKey('commit-button')), findsOneWidget);
+    expect(find.byKey(const ValueKey('post-commit-journey')), findsNothing);
+  });
+
   testWidgets(
     'community entry starts with the canonical blind-first Case journey',
     (tester) async {
@@ -81,7 +115,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Önce kendi kararımı ver'));
+      final action = find.text('Önce kendi kararımı ver');
+      await tester.ensureVisible(action);
+      await tester.tap(action);
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
@@ -109,7 +145,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Kararını ver'));
+    final action = find.text('Kararını ver');
+    await tester.ensureVisible(action);
+    await tester.tap(action);
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
