@@ -113,6 +113,7 @@ class CaseVersion:
     content_risk: str
     version_no: int
     questions: tuple[Question, ...]
+    is_real_event: bool = False
     accepts_weighs: bool = True
     content_configuration_id: UUID | None = None
     content_configuration_version_no: int | None = None
