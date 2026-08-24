@@ -17,6 +17,15 @@ def upgrade() -> None:
     )
     op.execute(
         """
+        UPDATE content.case_version AS consumer
+        SET is_real_event = true
+        FROM editorial.case_version AS editorial
+        WHERE editorial.id = consumer.id
+          AND editorial.aggregate->>'is_real_event' = 'true'
+        """
+    )
+    op.execute(
+        """
         CREATE INDEX case_version_real_event_published_idx
         ON content.case_version(published_at DESC, id)
         WHERE status = 'PUBLISHED' AND is_real_event = true
