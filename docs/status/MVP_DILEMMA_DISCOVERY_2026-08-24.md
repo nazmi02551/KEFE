@@ -1,0 +1,49 @@
+# MVP Dilemma Discovery — 2026-08-24
+
+Status: DRAFT CANDIDATE / NO CAPABILITY PROMOTION
+
+Issue: #371
+
+Stack base: PR #370 / `feature/mvp-account-continuity-discovery` exact head `738aa0ee2eaeba4a77d1a24dc92df5591fdbcbbd`.
+
+## Why this slice exists
+
+The horizontal-first MVP delivery strategy requires KEFE's principal consumer experiences to become directly demonstrable before another long hardening sequence. The canonical MVP product authority includes low-risk DILEMMA as a primary entry format, while the current experience hub exposed the general catalog, community participation, Sports CALL and bounded Atlas/Radar states but no first-class Dilemma entry.
+
+## Delivered boundary
+
+The existing KEFE Experiences hub now:
+
+- discovers an actual Case only when its exact runtime `format` is `DILEMMA`;
+- presents localized EN/TR Dilemma copy;
+- displays the selected Case title so the lane is grounded in repository/runtime content;
+- enters the existing `/case/:caseId` journey rather than creating a Dilemma-specific engine;
+- preserves Blind First and Commit First because Result/participation surfaces remain behind the canonical Case journey;
+- shows a truthful non-actionable empty state when no Dilemma is published;
+- keeps Sports CALL, community participation, Radar/Atlas Preview boundaries and the general Explore catalog unchanged.
+
+No backend, API, OpenAPI, schema, migration, Case model, Flow engine, fixture or analytics behavior changes in this slice.
+
+## KEFE Today truthfulness boundary
+
+This slice deliberately does **not** infer KEFE Today from `format=CIVIC`, domain, risk or list order.
+
+The current mobile `DecisionCaseSummary` exposes Case id/version, title, summary, format, domain and risk, but no trusted current-event/source/freshness discriminator. A Civic Case is not necessarily a current real-world event, and a current real-world Case is not necessarily Civic.
+
+Therefore KEFE Today remains separate follow-up work that must first establish a trustworthy runtime classification/projection. No fake Today fixture or presentation claim is introduced merely to fill the MVP surface.
+
+## Focused regression intent
+
+`apps/mobile/test/experience_hub_test.dart` now checks that Product Preview:
+
+- exposes the Dilemma lane from its existing real `format=DILEMMA` fixture;
+- shows the actual selected Case title;
+- enters the canonical Case screen through the Dilemma CTA;
+- still has Commit available before post-Commit journey content;
+- preserves existing community, Sports CALL and truthful production Atlas expectations.
+
+## Evidence boundary
+
+Repository readback and focused test source are static evidence only. GitHub Actions exact-head execution is required before any Mobile CI PASS claim.
+
+No claim is made for human usability approval, deployed Connected Alpha behavior, store readiness, production reachability, KEFE Today implementation or capability lifecycle promotion.
