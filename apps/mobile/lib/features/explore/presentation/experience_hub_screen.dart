@@ -29,6 +29,7 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
   bool _loading = true;
   String? _errorCode;
   DecisionCaseSummary? _dilemmaCase;
+  DecisionCaseSummary? _todayCase;
   DecisionCaseSummary? _sportsCall;
   DecisionCaseSummary? _communityCase;
 
@@ -50,6 +51,7 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
           .read(decisionRepositoryProvider)
           .fetchExploreCases(limit: 50);
       DecisionCaseSummary? dilemma;
+      DecisionCaseSummary? today;
       DecisionCaseSummary? sports;
       DecisionCaseSummary? community;
       for (final item in cases) {
@@ -59,18 +61,27 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
         if (dilemma == null && isDilemma) {
           dilemma = item;
         }
+        if (today == null && item.isRealEvent) {
+          today = item;
+        }
         if (sports == null && isSports) {
           sports = item;
         }
         if (community == null && !isSports) {
           community = item;
         }
-        if (dilemma != null && sports != null && community != null) break;
+        if (dilemma != null &&
+            today != null &&
+            sports != null &&
+            community != null) {
+          break;
+        }
       }
       community ??= cases.isNotEmpty ? cases.first : null;
       if (!mounted) return;
       setState(() {
         _dilemmaCase = dilemma;
+        _todayCase = today;
         _sportsCall = sports;
         _communityCase = community;
         _loading = false;
@@ -139,6 +150,25 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
                   title: strings.experienceDilemmaTitle,
                   body: strings.experienceDilemmaEmpty,
                 ),
+            if (!_loading && _errorCode == null) ...[
+              const SizedBox(height: 14),
+              if (_todayCase != null)
+                _ExperienceCard(
+                  cardKey: const ValueKey('experience-today'),
+                  icon: Icons.newspaper_rounded,
+                  title: strings.experienceTodayTitle,
+                  body: '${strings.experienceTodayBody}\n\n${_todayCase!.title}',
+                  actionLabel: strings.experienceTodayAction,
+                  onPressed: () => context.push('/case/${_todayCase!.id}'),
+                )
+              else
+                _ExperienceCard(
+                  cardKey: const ValueKey('experience-today-empty'),
+                  icon: Icons.newspaper_rounded,
+                  title: strings.experienceTodayTitle,
+                  body: strings.experienceTodayEmpty,
+                ),
+            ],
             if (!_loading && _errorCode == null && _communityCase != null) ...[
               const SizedBox(height: 14),
               _ExperienceCard(
