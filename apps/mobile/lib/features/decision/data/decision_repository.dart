@@ -39,6 +39,20 @@ abstract interface class DecisionRepository {
   Future<RevealResult> reveal(String sessionId);
 }
 
+abstract interface class TodayDecisionRepository {
+  Future<DecisionCaseSummary?> fetchTodayCase();
+}
+
+extension TodayDecisionRepositoryAccess on DecisionRepository {
+  Future<DecisionCaseSummary?> fetchTodayCase() {
+    final repository = this;
+    if (repository is TodayDecisionRepository) {
+      return (repository as TodayDecisionRepository).fetchTodayCase();
+    }
+    return Future<DecisionCaseSummary?>.value(null);
+  }
+}
+
 abstract interface class FlowRuntimeRepository {
   Future<FlowRuntimeSnapshot> fetchFlowRuntime(String sessionId);
 }
