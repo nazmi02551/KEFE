@@ -22,11 +22,25 @@ class CaseSummaryResponse(BaseModel):
     base_format: str
     primary_domain: str
     content_risk: str
-    is_real_event: bool
 
 
 class CaseListResponse(BaseModel):
     items: list[CaseSummaryResponse]
+
+
+class TodayCaseItemResponse(BaseModel):
+    case_id: UUID
+    case_version_id: UUID
+    version_no: int
+    title: str
+    summary: str
+    base_format: str
+    primary_domain: str
+    content_risk: str
+
+
+class TodayCaseResponse(BaseModel):
+    item: TodayCaseItemResponse | None
 
 
 class QuestionResponse(BaseModel):
@@ -131,10 +145,31 @@ def list_cases(
                 base_format=case.base_format,
                 primary_domain=case.primary_domain,
                 content_risk=case.content_risk,
-                is_real_event=case.is_real_event,
             )
             for case in cases
         ]
+    )
+
+
+@router.get("/today", response_model=TodayCaseResponse)
+def get_today(service: DecisionServiceDep) -> TodayCaseResponse:
+    case = next(
+        (item for item in service.list_cases(limit=50) if item.is_real_event),
+        None,
+    )
+    if case is None:
+        return TodayCaseResponse(item=None)
+    return TodayCaseResponse(
+        item=TodayCaseItemResponse(
+            case_id=case.case_id,
+            case_version_id=case.id,
+            version_no=case.version_no,
+            title=case.title,
+            summary=case.summary,
+            base_format=case.base_format,
+            primary_domain=case.primary_domain,
+            content_risk=case.content_risk,
+        )
     )
 
 
