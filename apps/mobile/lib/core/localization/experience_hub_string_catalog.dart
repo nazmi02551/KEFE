@@ -15,6 +15,12 @@ abstract final class ExperienceHubStringCatalog {
           'Weigh a low-risk everyday or ethical dilemma. Make your own decision before seeing results and opposing perspectives.',
       'dilemma_action': 'Weigh a dilemma',
       'dilemma_empty': 'No Dilemma is published right now.',
+      'today_title': 'KEFE Today',
+      'today_body':
+          'Weigh a real-world event that has passed KEFE editorial review and requires source verification.',
+      'today_action': 'Weigh the real-world case',
+      'today_empty':
+          'No source-verified real-world event Case is published right now.',
       'community_title': 'Weigh together',
       'community_body':
           'Make your own decision first. After Commit, compare perspectives and join the consensus/community participation step without seeing the crowd first.',
@@ -54,6 +60,12 @@ abstract final class ExperienceHubStringCatalog {
           'Düşük riskli gündelik veya etik bir ikilemi tart. Sonuçları ve karşı perspektifleri görmeden önce kendi kararını ver.',
       'dilemma_action': 'Bir ikilemi tart',
       'dilemma_empty': 'Şu anda yayımlanmış bir İkilem yok.',
+      'today_title': 'KEFE Today',
+      'today_body':
+          'KEFE editoryal incelemesinden geçmiş ve kaynak doğrulaması gerektiren gerçek bir olayı tart.',
+      'today_action': 'Gerçek olay vakasını tart',
+      'today_empty':
+          'Şu anda yayımlanmış, kaynak doğrulamalı bir gerçek olay vakası yok.',
       'community_title': 'Birlikte tart',
       'community_body':
           'Önce kendi kararını ver. Kararını sabitledikten sonra kalabalığı önceden görmeden karşı görüşleri incele ve konsensüs/topluluk katılımına geç.',
