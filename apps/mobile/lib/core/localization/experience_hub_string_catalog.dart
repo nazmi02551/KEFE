@@ -10,6 +10,11 @@ abstract final class ExperienceHubStringCatalog {
       'standard_body':
           'Browse the full case catalog across daily life, technology, public life and more.',
       'standard_action': 'Browse cases',
+      'dilemma_title': 'Dilemmas',
+      'dilemma_body':
+          'Weigh a low-risk everyday or ethical dilemma. Make your own decision before seeing results and opposing perspectives.',
+      'dilemma_action': 'Weigh a dilemma',
+      'dilemma_empty': 'No Dilemma is published right now.',
       'community_title': 'Weigh together',
       'community_body':
           'Make your own decision first. After Commit, compare perspectives and join the consensus/community participation step without seeing the crowd first.',
@@ -44,6 +49,11 @@ abstract final class ExperienceHubStringCatalog {
       'standard_body':
           'Günlük yaşamdan teknolojiye ve kamusal yaşama kadar tüm vaka kataloğunu keşfet.',
       'standard_action': 'Vakaları keşfet',
+      'dilemma_title': 'İkilemler',
+      'dilemma_body':
+          'Düşük riskli gündelik veya etik bir ikilemi tart. Sonuçları ve karşı perspektifleri görmeden önce kendi kararını ver.',
+      'dilemma_action': 'Bir ikilemi tart',
+      'dilemma_empty': 'Şu anda yayımlanmış bir İkilem yok.',
       'community_title': 'Birlikte tart',
       'community_body':
           'Önce kendi kararını ver. Kararını sabitledikten sonra kalabalığı önceden görmeden karşı görüşleri incele ve konsensüs/topluluk katılımına geç.',
