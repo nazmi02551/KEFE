@@ -27,6 +27,20 @@ from kefe_api.modules.knowledge.source_evidence_backend import (
 PROFILE_CODE = "test.raw_profile.v1"
 BACKEND_CODE = "test.raw_backend.v1"
 AT = datetime(2026, 8, 2, 20, 50, tzinfo=UTC)
+_PRODUCTION_DATABASE_URL = "postgresql+psycopg://kefe:secret@db.internal:5432/kefe"
+_PRODUCTION_REPLAY_SECRET = "production-account-merge-replay-secret-0001"
+
+
+def _production_settings(**overrides: object) -> Settings:
+    values = {
+        "environment": "production",
+        "persistence_backend": "postgres",
+        "database_url": _PRODUCTION_DATABASE_URL,
+        "account_merge_replay_secret": _PRODUCTION_REPLAY_SECRET,
+        "otp_delivery_mode": "DISABLED",
+        **overrides,
+    }
+    return Settings(**values)
 
 
 def _profile() -> RawEvidenceBackendProfile:
@@ -117,9 +131,7 @@ def test_external_mode_requires_exact_registered_profile_and_backend() -> None:
         RuntimeError,
         match="RAW_EVIDENCE_BACKEND_PROFILE_REQUIRED",
     ):
-        build_raw_source_evidence_store(
-            Settings(raw_evidence_runtime_mode="EXTERNAL_DURABLE")
-        )
+        build_raw_source_evidence_store(Settings(raw_evidence_runtime_mode="EXTERNAL_DURABLE"))
 
     settings = Settings(
         raw_evidence_runtime_mode="EXTERNAL_DURABLE",
@@ -143,8 +155,7 @@ def test_external_mode_requires_exact_registered_profile_and_backend() -> None:
 
 
 def test_external_mode_builds_only_exact_durable_store_without_fallback() -> None:
-    settings = Settings(
-        environment="production",
+    settings = _production_settings(
         raw_evidence_runtime_mode="EXTERNAL_DURABLE",
         raw_evidence_backend_profile_code=PROFILE_CODE,
     )

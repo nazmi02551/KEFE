@@ -47,9 +47,12 @@ def main() -> None:
     ):
         require(catalog, needle, where="result methodology catalog")
 
+    # Keep this gate resilient to canonical Dart formatter line wrapping while
+    # still requiring the TRUSTED path to delegate to InternalAlphaStrings.
     for needle in (
         "if (layer == 'TRUSTED')",
-        "InternalAlphaStrings(this).resultMethodology(",
+        "InternalAlphaStrings(",
+        ").resultMethodology(",
         "if (layer == 'RAW')",
         "'result.raw_methodology'",
         "'result.generic_methodology'",

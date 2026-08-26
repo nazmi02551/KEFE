@@ -5,7 +5,6 @@ from pydantic import ValidationError
 
 from kefe_api.core.settings import Settings
 
-
 _VALID_PRODUCTION = {
     "environment": "production",
     "persistence_backend": "postgres",

@@ -72,7 +72,7 @@ def test_refuses_remote_mutation_without_explicit_allow_write() -> None:
 
 
 class FakeClient:
-    last: "FakeClient | None" = None
+    last: FakeClient | None = None
 
     def __init__(self, base_url: str, *, timeout_seconds: int) -> None:
         self.base_url = acceptance._validate_base_url(base_url)

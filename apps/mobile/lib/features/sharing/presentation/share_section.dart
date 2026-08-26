@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/design/kefe_surface.dart';
 import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
+import '../../../core/localization/share_preview_strings.dart';
 import '../application/share_controller.dart';
 
 class ShareSection extends ConsumerWidget {
@@ -145,6 +147,22 @@ class ShareSection extends ConsumerWidget {
                         icon: const Icon(Icons.link_off_rounded),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    key: const ValueKey('share-preview-receiver'),
+                    onPressed: () => context.push('/share/${created.token}'),
+                    icon: const Icon(Icons.visibility_outlined),
+                    label: Text(strings.sharePreviewReceiver),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    strings.shareExternalEntryBoundary,
+                    key: const ValueKey('share-external-entry-boundary'),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: visual.mutedForeground,
+                      height: 1.4,
+                    ),
                   ),
                 ],
               ),

@@ -65,7 +65,11 @@ def is_technical_literal(value: str, line: str) -> bool:
 
     residual = re.sub(r"\$\{[^}]+\}", "", value)
     residual = re.sub(r"\$[A-Za-z_][A-Za-z0-9_.]*", "", residual)
-    if not re.search(r"[A-Za-zÇĞİÖŞÜçğıöşü]", residual):
+    # A presentation string made only from localized/runtime interpolations plus
+    # formatting escapes (for example "${localized}\\n\\n${caseTitle}") does
+    # not introduce untranslated user-facing copy.
+    residual_without_escapes = re.sub(r"\\[nrt]", "", residual)
+    if not re.search(r"[A-Za-zÇĞİÖŞÜçğıöşü]", residual_without_escapes):
         return True
     if re.fullmatch(r"[\s·:%()/+\-=,.]*n[\s=:+\-0-9.,%]*", residual):
         return True

@@ -44,14 +44,8 @@ Future<void> pumpResultCard(
 }
 
 void expectDistributionRemainsVisible() {
-  expect(
-    find.byKey(const ValueKey(('reveal-option', 'A'))),
-    findsOneWidget,
-  );
-  expect(
-    find.byKey(const ValueKey(('reveal-option', 'B'))),
-    findsOneWidget,
-  );
+  expect(find.byKey(const ValueKey(('reveal-option', 'A'))), findsOneWidget);
+  expect(find.byKey(const ValueKey(('reveal-option', 'B'))), findsOneWidget);
   expect(find.byKey(const ValueKey('reveal-methodology')), findsOneWidget);
 }
 
@@ -59,11 +53,7 @@ void main() {
   testWidgets('RAW result shows distribution but no KEFE Gap interpretation', (
     tester,
   ) async {
-    await pumpResultCard(
-      tester,
-      layer: 'RAW',
-      confidence: 'INSUFFICIENT',
-    );
+    await pumpResultCard(tester, layer: 'RAW', confidence: 'INSUFFICIENT');
 
     expectDistributionRemainsVisible();
     expect(find.byKey(const ValueKey('reveal-gap-insight')), findsNothing);

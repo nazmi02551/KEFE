@@ -6,10 +6,17 @@ from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
 from kefe_api.core.errors import DomainError
 from kefe_api.core.settings import Settings, get_settings
-from kefe_api.infrastructure.persistence import build_account_continuity_repository
+from kefe_api.infrastructure.persistence import (
+    build_account_continuity_repository,
+    build_identity_repository,
+)
+from kefe_api.infrastructure.postgres_otp_request_guard import (
+    GuardedPostgresAccountContinuityRepository,
+)
 from kefe_api.main import create_app
 from kefe_api.modules.identity.account_in_memory import (
     InMemoryAccountContinuityRepository,
@@ -22,6 +29,21 @@ from kefe_api.modules.identity.otp_request_guard import (
     GuardedInMemoryAccountContinuityRepository,
     OtpRequestAbusePolicy,
 )
+
+_PRODUCTION_DATABASE_URL = "postgresql+psycopg://kefe:secret@db.internal:5432/kefe"
+_PRODUCTION_REPLAY_SECRET = "production-account-merge-replay-secret-0001"
+
+
+def _production_settings(**overrides: object) -> Settings:
+    values = {
+        "environment": "production",
+        "persistence_backend": "postgres",
+        "database_url": _PRODUCTION_DATABASE_URL,
+        "account_merge_replay_secret": _PRODUCTION_REPLAY_SECRET,
+        "otp_delivery_mode": "DISABLED",
+        **overrides,
+    }
+    return Settings(**values)
 
 
 class FailingDelivery:
@@ -86,23 +108,21 @@ def test_auto_mode_is_compatible_in_development_and_enforced_in_production() -> 
     assert isinstance(development, InMemoryAccountContinuityRepository)
     assert not isinstance(development, GuardedInMemoryAccountContinuityRepository)
 
-    production_identity = InMemoryIdentityRepository()
+    production_settings = _production_settings(otp_request_guard_mode="AUTO")
+    production_identity = build_identity_repository(production_settings)
     production = build_account_continuity_repository(
-        Settings(environment="production", otp_request_guard_mode="AUTO"),
+        production_settings,
         production_identity,
     )
-    assert isinstance(production, GuardedInMemoryAccountContinuityRepository)
+    assert isinstance(production, GuardedPostgresAccountContinuityRepository)
 
 
 def test_production_cannot_disable_otp_request_guard() -> None:
     with pytest.raises(
-        RuntimeError,
-        match="production forbids KEFE_OTP_REQUEST_GUARD_MODE=OFF",
+        ValidationError,
+        match="KEFE_OTP_REQUEST_GUARD_MODE=OFF",
     ):
-        build_account_continuity_repository(
-            Settings(environment="production", otp_request_guard_mode="OFF"),
-            InMemoryIdentityRepository(),
-        )
+        _production_settings(otp_request_guard_mode="OFF")
 
 
 def test_normalized_destination_is_limited_before_second_delivery() -> None:

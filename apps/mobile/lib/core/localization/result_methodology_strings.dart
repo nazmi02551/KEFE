@@ -20,10 +20,9 @@ extension ResultMethodologyStrings on KefeStrings {
     required String confidence,
   }) {
     if (layer == 'TRUSTED') {
-      return InternalAlphaStrings(this).resultMethodology(
-        sampleSize: sampleSize,
-        confidence: confidence,
-      );
+      return InternalAlphaStrings(
+        this,
+      ).resultMethodology(sampleSize: sampleSize, confidence: confidence);
     }
 
     final confidenceText = confidence == 'INSUFFICIENT'
@@ -33,10 +32,7 @@ extension ResultMethodologyStrings on KefeStrings {
     if (layer == 'RAW') {
       return _resultText(
         'result.raw_methodology',
-        placeholders: {
-          'sampleSize': sampleSize,
-          'confidence': confidenceText,
-        },
+        placeholders: {'sampleSize': sampleSize, 'confidence': confidenceText},
       );
     }
 

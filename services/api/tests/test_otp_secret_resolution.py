@@ -33,6 +33,20 @@ _ENDPOINT = "https://otp.provider.example/v1/deliveries"
 _TOKEN_A = "rotation-token-a-012345678901234567890123456789"
 _TOKEN_B = "rotation-token-b-012345678901234567890123456789"
 _SECRET_REF = "envref://KEFE_OTP_PROVIDER_CREDENTIAL"
+_PRODUCTION_DATABASE_URL = "postgresql+psycopg://kefe:secret@db.internal:5432/kefe"
+_PRODUCTION_REPLAY_SECRET = "production-account-merge-replay-secret-0001"
+
+
+def _production_settings(**overrides: object) -> Settings:
+    values = {
+        "environment": "production",
+        "persistence_backend": "postgres",
+        "database_url": _PRODUCTION_DATABASE_URL,
+        "account_merge_replay_secret": _PRODUCTION_REPLAY_SECRET,
+        "otp_delivery_mode": "DISABLED",
+        **overrides,
+    }
+    return Settings(**values)
 
 
 class SequenceTransport:
@@ -181,9 +195,7 @@ def test_resolution_failure_does_not_call_provider_or_leak_secret_reference(
     assert captured.value.code == domain_code
     assert transport.requests == []
     assert resolver.calls == 1
-    assert observer.results == [
-        observer.results[0]
-    ]
+    assert observer.results == [observer.results[0]]
     assert observer.results[0].outcome is outcome
     assert observer.results[0].error_code == operational_code
     rendered = f"{captured.value!s} {captured.value!r} {observer.results!r}"
@@ -221,16 +233,14 @@ def test_environment_reference_reads_rotated_value_without_restart() -> None:
 def test_production_requires_opaque_reference_and_forbids_direct_token() -> None:
     with pytest.raises(RuntimeError, match="forbids KEFE_OTP_HTTP_BEARER_TOKEN"):
         build_otp_secret_lease_resolver(
-            Settings(
-                environment="production",
+            _production_settings(
                 otp_delivery_mode="HTTP",
                 otp_http_endpoint=_ENDPOINT,
                 otp_http_bearer_token=SecretStr(_TOKEN_A),
             )
         )
 
-    settings = Settings(
-        environment="production",
+    settings = _production_settings(
         otp_delivery_mode="HTTP",
         otp_http_endpoint=_ENDPOINT,
         otp_http_secret_ref=SecretStr(_SECRET_REF),
@@ -241,9 +251,7 @@ def test_production_requires_opaque_reference_and_forbids_direct_token() -> None
     delivery = build_otp_delivery(
         settings,
         secret_resolver_registry=registry,
-        transport=SequenceTransport(
-            [OtpHttpResponse(status_code=202, response_bytes=0)]
-        ),
+        transport=SequenceTransport([OtpHttpResponse(status_code=202, response_bytes=0)]),
     )
 
     assert isinstance(delivery, HttpOtpDelivery)

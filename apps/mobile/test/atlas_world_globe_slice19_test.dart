@@ -13,6 +13,9 @@ import 'package:kefe_mobile/app/product_preview/preview_components.dart';
 import 'package:kefe_mobile/app/product_preview_app.dart';
 import 'package:kefe_mobile/core/design/kefe_theme.dart';
 import 'package:kefe_mobile/core/localization/kefe_strings.dart';
+import 'package:kefe_mobile/features/decision/application/decision_controller.dart';
+import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
+import 'package:kefe_mobile/features/decision/data/preview_decision_repository.dart';
 
 void main() {
   test('Slice 19 contract preserves representative Preview truthfulness', () {
@@ -79,7 +82,7 @@ void main() {
 
     expect(productionApp, isNot(contains("path: '/atlas'")));
     expect(previewApp, contains("path: '/atlas'"));
-    expect(previewApp, contains("ValueKey('open-preview-atlas')"));
+    expect(previewApp, contains("ValueKey('open-preview-experiences')"));
   });
 
   testWidgets(
@@ -187,12 +190,44 @@ void main() {
   });
 
   testWidgets(
-    'Product Preview secondary action reaches the Atlas truth surface',
+    'Product Preview experience hub reaches the Atlas truth surface',
     (tester) async {
-      await tester.pumpWidget(const ProviderScope(child: ProductPreviewApp()));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            decisionRepositoryProvider.overrideWithValue(
+              PreviewDecisionRepository(),
+            ),
+            decisionDraftStoreProvider.overrideWithValue(
+              MemoryDecisionDraftStore(),
+            ),
+          ],
+          child: const ProductPreviewApp(),
+        ),
+      );
       await tester.pumpAndSettle();
 
-      final atlasAction = find.byKey(const ValueKey('open-preview-atlas'));
+      final experiencesAction = find.byKey(
+        const ValueKey('open-preview-experiences'),
+      );
+      expect(experiencesAction, findsOneWidget);
+      await tester.tap(experiencesAction);
+      await tester.pumpAndSettle();
+
+      final hub = find.byKey(const ValueKey('experience-hub'));
+      expect(hub, findsOneWidget);
+      final hubScroll = find.descendant(
+        of: hub,
+        matching: find.byType(Scrollable),
+      );
+      final atlasCard = find.byKey(const ValueKey('experience-atlas'));
+      await tester.scrollUntilVisible(atlasCard, 300, scrollable: hubScroll);
+      await tester.pumpAndSettle();
+      expect(atlasCard, findsOneWidget);
+      final atlasAction = find.descendant(
+        of: atlasCard,
+        matching: find.byType(FilledButton),
+      );
       expect(atlasAction, findsOneWidget);
       await tester.tap(atlasAction);
       await tester.pumpAndSettle();

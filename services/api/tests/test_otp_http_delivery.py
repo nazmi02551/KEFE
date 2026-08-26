@@ -6,8 +6,9 @@ from uuid import UUID, uuid4
 
 import pytest
 from fastapi.testclient import TestClient
-from pydantic import SecretStr
+from pydantic import SecretStr, ValidationError
 
+import kefe_api.main as kefe_main
 from kefe_api.core.errors import DomainError
 from kefe_api.core.settings import Settings, get_settings
 from kefe_api.main import create_app
@@ -34,6 +35,26 @@ _ENDPOINT = "https://otp.provider.example/v1/deliveries"
 _TOKEN = "managed-provider-bearer-token-01234567890123456789"
 _SECRET_REF = "envref://KEFE_OTP_PROVIDER_CREDENTIAL"
 _REPLAY_SECRET = "managed-production-replay-secret-0123456789012345"
+_PRODUCTION_DATABASE_URL = "postgresql+psycopg://kefe:secret@db.internal:5432/kefe"
+
+
+def _production_settings(**overrides: object) -> Settings:
+    values = {
+        "environment": "production",
+        "persistence_backend": "postgres",
+        "database_url": _PRODUCTION_DATABASE_URL,
+        "account_merge_replay_secret": _REPLAY_SECRET,
+        "otp_delivery_mode": "DISABLED",
+        **overrides,
+    }
+    return Settings(**values)
+
+
+def _configure_production_runtime(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("KEFE_ENVIRONMENT", "production")
+    monkeypatch.setenv("KEFE_PERSISTENCE_BACKEND", "postgres")
+    monkeypatch.setenv("KEFE_DATABASE_URL", _PRODUCTION_DATABASE_URL)
+    monkeypatch.setenv("KEFE_ACCOUNT_MERGE_REPLAY_SECRET", _REPLAY_SECRET)
 
 
 class SequenceTransport:
@@ -282,9 +303,13 @@ def test_build_otp_delivery_keeps_capture_explicit_and_redacted() -> None:
     assert "capture@example.test" not in rendered
 
 
-@pytest.mark.parametrize("mode", ["CAPTURE", "DISABLED"])
-def test_production_forbids_non_http_delivery_modes(mode: str) -> None:
-    settings = Settings(environment="production", otp_delivery_mode=mode)
+def test_production_settings_forbid_capture_delivery() -> None:
+    with pytest.raises(ValidationError, match="KEFE_OTP_DELIVERY_MODE=CAPTURE"):
+        _production_settings(otp_delivery_mode="CAPTURE")
+
+
+def test_production_delivery_builder_forbids_disabled_delivery() -> None:
+    settings = _production_settings(otp_delivery_mode="DISABLED")
     with pytest.raises(RuntimeError, match="KEFE_OTP_DELIVERY_MODE=HTTP"):
         build_otp_delivery(settings)
 
@@ -294,8 +319,7 @@ def test_http_mode_requires_endpoint_and_managed_secret() -> None:
         build_otp_delivery(Settings(otp_delivery_mode="HTTP"))
     with pytest.raises(RuntimeError, match="KEFE_OTP_HTTP_SECRET_REF"):
         build_otp_delivery(
-            Settings(
-                environment="production",
+            _production_settings(
                 otp_delivery_mode="HTTP",
                 otp_http_endpoint=_ENDPOINT,
             )
@@ -303,8 +327,7 @@ def test_http_mode_requires_endpoint_and_managed_secret() -> None:
 
 
 def test_production_http_delivery_builds_with_secretstr_redaction() -> None:
-    settings = Settings(
-        environment="production",
+    settings = _production_settings(
         otp_delivery_mode="HTTP",
         otp_http_endpoint=_ENDPOINT,
         otp_http_secret_ref=SecretStr(_SECRET_REF),
@@ -326,31 +349,27 @@ def test_production_http_delivery_builds_with_secretstr_redaction() -> None:
 def test_full_production_app_rejects_capture_composition(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("KEFE_ENVIRONMENT", "production")
+    _configure_production_runtime(monkeypatch)
     monkeypatch.setenv("KEFE_OTP_DELIVERY_MODE", "CAPTURE")
-    monkeypatch.setenv("KEFE_ACCOUNT_MERGE_REPLAY_SECRET", _REPLAY_SECRET)
     get_settings.cache_clear()
     try:
-        with pytest.raises(RuntimeError, match="KEFE_OTP_DELIVERY_MODE=HTTP"):
+        with pytest.raises(ValidationError, match="KEFE_OTP_DELIVERY_MODE=CAPTURE"):
             create_app()
     finally:
         get_settings.cache_clear()
 
 
-def test_full_production_app_composes_http_delivery_only_when_configured(
+def test_full_app_composes_configured_http_delivery(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("KEFE_ENVIRONMENT", "production")
-    monkeypatch.setenv("KEFE_OTP_DELIVERY_MODE", "HTTP")
-    monkeypatch.setenv("KEFE_OTP_HTTP_ENDPOINT", _ENDPOINT)
-    monkeypatch.setenv("KEFE_OTP_HTTP_SECRET_REF", _SECRET_REF)
-    monkeypatch.setenv("KEFE_OTP_PROVIDER_CREDENTIAL", _TOKEN)
-    monkeypatch.setenv("KEFE_ACCOUNT_MERGE_REPLAY_SECRET", _REPLAY_SECRET)
-    get_settings.cache_clear()
-    try:
-        app = create_app()
-        assert isinstance(app.state.otp_delivery, HttpOtpDelivery)
-        assert _SECRET_REF not in repr(app.state.otp_delivery)
-        assert _TOKEN not in repr(app.state.otp_delivery)
-    finally:
-        get_settings.cache_clear()
+    settings = Settings(
+        otp_delivery_mode="HTTP",
+        otp_http_endpoint=_ENDPOINT,
+        otp_http_bearer_token=SecretStr(_TOKEN),
+    )
+    monkeypatch.setattr(kefe_main, "get_settings", lambda: settings)
+
+    app = create_app()
+
+    assert isinstance(app.state.otp_delivery, HttpOtpDelivery)
+    assert _TOKEN not in repr(app.state.otp_delivery)

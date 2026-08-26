@@ -59,6 +59,7 @@ def main() -> None:
     adr = _text("docs/adr/0112-provider-neutral-production-otp-delivery.md")
     error_codes = _text("docs/contracts/error-codes.v1.yaml")
 
+    # Keep production fail-closed proof separate from generic app wiring evidence.
     for fragment in (
         'otp_delivery_mode: Literal["CAPTURE", "DISABLED", "HTTP"]',
         "otp_http_endpoint",
@@ -101,7 +102,9 @@ def main() -> None:
         "test_urllib_transport_invokes_post_with_bounded_read_and_timeout",
         "test_account_request_propagates_persisted_challenge_identity_and_expiry",
         "test_full_production_app_rejects_capture_composition",
-        "test_full_production_app_composes_http_delivery_only_when_configured",
+        "test_production_delivery_builder_forbids_disabled_delivery",
+        "test_production_http_delivery_builds_with_secretstr_redaction",
+        "test_full_app_composes_configured_http_delivery",
     ):
         _require(fragment in tests, f"missing evidence: {fragment}")
 
