@@ -221,11 +221,7 @@ void main() {
         matching: find.byType(Scrollable),
       );
       final atlasCard = find.byKey(const ValueKey('experience-atlas'));
-      await tester.scrollUntilVisible(
-        atlasCard,
-        300,
-        scrollable: hubScroll,
-      );
+      await tester.scrollUntilVisible(atlasCard, 300, scrollable: hubScroll);
       await tester.pumpAndSettle();
       expect(atlasCard, findsOneWidget);
       final atlasAction = find.descendant(

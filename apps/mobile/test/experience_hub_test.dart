@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kefe_mobile/app/kefe_app.dart';
+import 'package:kefe_mobile/core/preferences/app_preferences.dart';
 import 'package:kefe_mobile/features/decision/application/decision_controller.dart';
 import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/preview_decision_repository.dart';
@@ -9,6 +10,16 @@ import 'package:kefe_mobile/features/decision/data/preview_decision_repository.d
 void useTurkishLocale(WidgetTester tester) {
   tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
   addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+}
+
+MemoryAppPreferencesStore turkishPreferences() {
+  return MemoryAppPreferencesStore(
+    const AppPreferencesState(
+      locale: AppLocalePreference.tr,
+      theme: AppThemePreference.system,
+      loaded: true,
+    ),
+  );
 }
 
 Finder experienceScrollable() => find.descendant(
@@ -25,6 +36,15 @@ Future<void> revealExperience(WidgetTester tester, Finder target) async {
   await tester.pumpAndSettle();
 }
 
+Future<void> revealCaseControl(WidgetTester tester, Finder target) async {
+  await tester.scrollUntilVisible(
+    target,
+    280,
+    scrollable: find.byType(Scrollable).last,
+  );
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets(
     'experience hub surfaces community, real Sports CALL and truthful Atlas state',
@@ -34,6 +54,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            appPreferencesStoreProvider.overrideWithValue(turkishPreferences()),
             decisionRepositoryProvider.overrideWithValue(
               PreviewDecisionRepository(),
             ),
@@ -58,7 +79,12 @@ void main() {
       await revealExperience(tester, sports);
       expect(sports, findsOneWidget);
       expect(
-        find.text('Bu pozisyonda penaltı kararı doğru muydu?'),
+        find.descendant(
+          of: sports,
+          matching: find.textContaining(
+            'Bu pozisyonda penaltı kararı doğru muydu?',
+          ),
+        ),
         findsOneWidget,
       );
 
@@ -84,6 +110,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            appPreferencesStoreProvider.overrideWithValue(turkishPreferences()),
             decisionRepositoryProvider.overrideWithValue(
               PreviewDecisionRepository(),
             ),
@@ -107,6 +134,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
+      await revealCaseControl(
+        tester,
+        find.byKey(const ValueKey('commit-button')),
+      );
       expect(find.byKey(const ValueKey('commit-button')), findsOneWidget);
       expect(find.byKey(const ValueKey('post-commit-journey')), findsNothing);
       expect(find.byKey(const ValueKey('consensus-section')), findsNothing);
@@ -119,6 +150,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          appPreferencesStoreProvider.overrideWithValue(turkishPreferences()),
           decisionRepositoryProvider.overrideWithValue(
             PreviewDecisionRepository(),
           ),
@@ -145,6 +177,10 @@ void main() {
     expect(
       find.text('Bu pozisyonda penaltı kararı doğru muydu?'),
       findsOneWidget,
+    );
+    await revealCaseControl(
+      tester,
+      find.byKey(const ValueKey('commit-button')),
     );
     expect(find.byKey(const ValueKey('commit-button')), findsOneWidget);
   });

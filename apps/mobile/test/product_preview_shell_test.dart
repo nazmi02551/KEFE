@@ -160,10 +160,7 @@ void main() {
       await tester.scrollUntilVisible(
         radarCard,
         300,
-        scrollable: find.descendant(
-          of: hub,
-          matching: find.byType(Scrollable),
-        ),
+        scrollable: find.descendant(of: hub, matching: find.byType(Scrollable)),
       );
       await tester.pumpAndSettle();
       expect(radarCard, findsOneWidget);
