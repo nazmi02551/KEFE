@@ -28,6 +28,7 @@ Finder experienceScrollable() => find.descendant(
 );
 
 Future<void> revealExperience(WidgetTester tester, Finder target) async {
+  // The hub lazily builds off-screen cards, so assertions must reveal their target.
   await tester.scrollUntilVisible(
     target,
     280,

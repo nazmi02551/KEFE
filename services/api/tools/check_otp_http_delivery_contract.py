@@ -59,6 +59,7 @@ def main() -> None:
     adr = _text("docs/adr/0112-provider-neutral-production-otp-delivery.md")
     error_codes = _text("docs/contracts/error-codes.v1.yaml")
 
+    # Keep production fail-closed proof separate from generic app wiring evidence.
     for fragment in (
         'otp_delivery_mode: Literal["CAPTURE", "DISABLED", "HTTP"]',
         "otp_http_endpoint",
