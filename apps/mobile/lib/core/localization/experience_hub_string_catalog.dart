@@ -7,17 +7,19 @@ abstract final class ExperienceHubStringCatalog {
       'subtitle': 'Choose how you want to weigh a question.',
       'open': 'Explore experiences',
       'standard_title': 'Current weighs',
-      'standard_body':
-          'Browse the full case catalog across daily life, technology, public life and more.',
+      'standard_body': 'Browse the full case catalog across daily life, technology, public life and more.',
       'standard_action': 'Browse cases',
+      'today_title': 'KEFE Today',
+      'today_body': 'Weigh a source-reviewed real-world Case through the same blind-first KEFE journey.',
+      'today_action': 'Weigh today\'s Case',
+      'today_empty':
+          'No source-reviewed real-world Case is published right now.',
       'dilemma_title': 'Dilemmas',
-      'dilemma_body':
-          'Weigh a low-risk everyday or ethical dilemma. Make your own decision before seeing results and opposing perspectives.',
+      'dilemma_body': 'Weigh a low-risk everyday or ethical dilemma. Make your own decision before seeing results and opposing perspectives.',
       'dilemma_action': 'Weigh a dilemma',
       'dilemma_empty': 'No Dilemma is published right now.',
       'community_title': 'Weigh together',
-      'community_body':
-          'Make your own decision first. After Commit, compare perspectives and join the consensus/community participation step without seeing the crowd first.',
+      'community_body': 'Make your own decision first. After Commit, compare perspectives and join the consensus/community participation step without seeing the crowd first.',
       'community_action': 'Start with my decision',
       'sports_title': 'Sports CALL',
       'sports_body':
@@ -25,19 +27,15 @@ abstract final class ExperienceHubStringCatalog {
       'sports_action': 'Make the call',
       'sports_empty': 'No Sports CALL is published right now.',
       'radar_title': 'Radar',
-      'radar_body':
-          'Preview how emerging discussion patterns could be surfaced without turning them into claims about society.',
+      'radar_body': 'Preview how emerging discussion patterns could be surfaced without turning them into claims about society.',
       'radar_action': 'Open Radar preview',
       'preview_status': 'Representative Product Preview',
       'atlas_title': 'Atlas',
-      'atlas_body':
-          'Explore the existing representative world view while real cross-country methodology and live data remain separate work.',
+      'atlas_body': 'Explore the existing representative world view while real cross-country methodology and live data remain separate work.',
       'atlas_action': 'Open Atlas preview',
       'atlas_status': 'Preparing real data & methodology',
-      'production_truth_note':
-          'KEFE does not invent country scores or comparisons when the evidence and methodology are not ready.',
-      'preview_truth_note':
-          'Preview Radar and Atlas use representative fixture data. KEFE does not present those fixtures as live, nationally representative or validated country analytics.',
+      'production_truth_note': 'KEFE does not invent country scores or comparisons when the evidence and methodology are not ready.',
+      'preview_truth_note': 'Preview Radar and Atlas use representative fixture data. KEFE does not present those fixtures as live, nationally representative or validated country analytics.',
       'loading': 'Loading experiences…',
       'retry': 'Try again',
     },
@@ -46,37 +44,33 @@ abstract final class ExperienceHubStringCatalog {
       'subtitle': 'Bir soruyu nasıl tartmak istediğini seç.',
       'open': 'Deneyimleri keşfet',
       'standard_title': 'Güncel tartımlar',
-      'standard_body':
-          'Günlük yaşamdan teknolojiye ve kamusal yaşama kadar tüm vaka kataloğunu keşfet.',
+      'standard_body': 'Günlük yaşamdan teknolojiye ve kamusal yaşama kadar tüm vaka kataloğunu keşfet.',
       'standard_action': 'Vakaları keşfet',
+      'today_title': 'KEFE Today',
+      'today_body': 'Kaynak doğrulamasından geçmiş gerçek dünyadan bir vakayı aynı kör-önce KEFE yolculuğuyla tart.',
+      'today_action': 'Günün vakasını tart',
+      'today_empty': 'Şu anda kaynak doğrulamasından geçmiş yayımlanmış bir gerçek dünya vakası yok.',
       'dilemma_title': 'İkilemler',
-      'dilemma_body':
-          'Düşük riskli gündelik veya etik bir ikilemi tart. Sonuçları ve karşı perspektifleri görmeden önce kendi kararını ver.',
+      'dilemma_body': 'Düşük riskli gündelik veya etik bir ikilemi tart. Sonuçları ve karşı perspektifleri görmeden önce kendi kararını ver.',
       'dilemma_action': 'Bir ikilemi tart',
       'dilemma_empty': 'Şu anda yayımlanmış bir İkilem yok.',
       'community_title': 'Birlikte tart',
-      'community_body':
-          'Önce kendi kararını ver. Kararını sabitledikten sonra kalabalığı önceden görmeden karşı görüşleri incele ve konsensüs/topluluk katılımına geç.',
+      'community_body': 'Önce kendi kararını ver. Kararını sabitledikten sonra kalabalığı önceden görmeden karşı görüşleri incele ve konsensüs/topluluk katılımına geç.',
       'community_action': 'Önce kendi kararımı ver',
       'sports_title': 'Sports CALL',
-      'sports_body':
-          'Tartışmalı bir spor kararını aynı KEFE tartım yolculuğuyla değerlendir.',
+      'sports_body': 'Tartışmalı bir spor kararını aynı KEFE tartım yolculuğuyla değerlendir.',
       'sports_action': 'Kararını ver',
       'sports_empty': 'Şu anda yayımlanmış bir Sports CALL yok.',
       'radar_title': 'Radar',
-      'radar_body':
-          'Yeni tartışma örüntülerinin toplum hakkında kesin hükme dönüştürülmeden nasıl gösterilebileceğini önizle.',
+      'radar_body': 'Yeni tartışma örüntülerinin toplum hakkında kesin hükme dönüştürülmeden nasıl gösterilebileceğini önizle.',
       'radar_action': 'Radar önizlemesini aç',
       'preview_status': 'Temsili Product Preview',
       'atlas_title': 'Atlas',
-      'atlas_body':
-          'Gerçek ülkeler arası metodoloji ve canlı veri ayrı çalışma olarak sürerken mevcut temsili dünya görünümünü incele.',
+      'atlas_body': 'Gerçek ülkeler arası metodoloji ve canlı veri ayrı çalışma olarak sürerken mevcut temsili dünya görünümünü incele.',
       'atlas_action': 'Atlas önizlemesini aç',
       'atlas_status': 'Gerçek veri ve metodoloji hazırlanıyor',
-      'production_truth_note':
-          'KEFE, kanıt ve metodoloji hazır değilken ülke puanı veya karşılaştırması uydurmaz.',
-      'preview_truth_note':
-          'Preview Radar ve Atlas temsili fixture verisi kullanır. KEFE bu verileri canlı, ulusal olarak temsili veya doğrulanmış ülke analitiği gibi sunmaz.',
+      'production_truth_note': 'KEFE, kanıt ve metodoloji hazır değilken ülke puanı veya karşılaştırması uydurmaz.',
+      'preview_truth_note': 'Preview Radar ve Atlas temsili fixture verisi kullanır. KEFE bu verileri canlı, ulusal olarak temsili veya doğrulanmış ülke analitiği gibi sunmaz.',
       'loading': 'Deneyimler yükleniyor…',
       'retry': 'Tekrar dene',
     },

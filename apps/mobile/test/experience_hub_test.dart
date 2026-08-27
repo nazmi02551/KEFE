@@ -6,6 +6,28 @@ import 'package:kefe_mobile/core/preferences/app_preferences.dart';
 import 'package:kefe_mobile/features/decision/application/decision_controller.dart';
 import 'package:kefe_mobile/features/decision/data/decision_draft_store.dart';
 import 'package:kefe_mobile/features/decision/data/preview_decision_repository.dart';
+import 'package:kefe_mobile/features/decision/domain/decision_models.dart';
+
+class TodayPreviewDecisionRepository extends PreviewDecisionRepository {
+  @override
+  Future<List<DecisionCaseSummary>> fetchExploreCases({int limit = 20}) async {
+    final cases = await super.fetchExploreCases(limit: limit);
+    final first = cases.first;
+    return [
+      DecisionCaseSummary(
+        id: first.id,
+        versionId: first.versionId,
+        title: first.title,
+        summary: first.summary,
+        format: first.format,
+        domain: first.domain,
+        risk: first.risk,
+        isRealEvent: true,
+      ),
+      ...cases.skip(1),
+    ];
+  }
+}
 
 void useTurkishLocale(WidgetTester tester) {
   tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
@@ -70,6 +92,15 @@ void main() {
 
       expect(find.byKey(const ValueKey('experience-hub')), findsOneWidget);
 
+      final todayEmpty = find.byKey(const ValueKey('experience-today-empty'));
+      await revealExperience(tester, todayEmpty);
+      expect(todayEmpty, findsOneWidget);
+      expect(find.text('KEFE Today'), findsOneWidget);
+      expect(
+        find.descendant(of: todayEmpty, matching: find.byType(FilledButton)),
+        findsNothing,
+      );
+
       final dilemma = find.byKey(const ValueKey('experience-dilemma'));
       await revealExperience(tester, dilemma);
       expect(dilemma, findsOneWidget);
@@ -106,6 +137,56 @@ void main() {
       final truth = find.byKey(const ValueKey('experience-truth-note'));
       await revealExperience(tester, truth);
       expect(truth, findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'KEFE Today uses only governed metadata and enters the canonical Case journey',
+    (tester) async {
+      useTurkishLocale(tester);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            appPreferencesStoreProvider.overrideWithValue(turkishPreferences()),
+            decisionRepositoryProvider.overrideWithValue(
+              TodayPreviewDecisionRepository(),
+            ),
+            decisionDraftStoreProvider.overrideWithValue(
+              MemoryDecisionDraftStore(),
+            ),
+          ],
+          child: const KefeApp(initialLocation: '/experiences'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final today = find.byKey(const ValueKey('experience-today'));
+      await revealExperience(tester, today);
+      expect(today, findsOneWidget);
+      expect(
+        find.descendant(
+          of: today,
+          matching: find.textContaining('Son koltuk kime verilmeli?'),
+        ),
+        findsOneWidget,
+      );
+
+      final action = find.descendant(
+        of: today,
+        matching: find.byType(FilledButton),
+      );
+      expect(action, findsOneWidget);
+      await tester.tap(action);
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
+      await revealCaseControl(
+        tester,
+        find.byKey(const ValueKey('commit-button')),
+      );
+      expect(find.byKey(const ValueKey('commit-button')), findsOneWidget);
+      expect(find.byKey(const ValueKey('post-commit-journey')), findsNothing);
     },
   );
 

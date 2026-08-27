@@ -163,6 +163,7 @@ class HttpDecisionRepository
             format: item['base_format'] as String,
             domain: item['primary_domain'] as String,
             risk: item['content_risk'] as String,
+            isRealEvent: item['is_real_event'] == true,
           ),
         )
         .toList(growable: false);

@@ -28,6 +28,7 @@ class ExperienceHubScreen extends ConsumerStatefulWidget {
 class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
   bool _loading = true;
   String? _errorCode;
+  DecisionCaseSummary? _todayCase;
   DecisionCaseSummary? _dilemmaCase;
   DecisionCaseSummary? _sportsCall;
   DecisionCaseSummary? _communityCase;
@@ -52,10 +53,14 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
       DecisionCaseSummary? dilemma;
       DecisionCaseSummary? sports;
       DecisionCaseSummary? community;
+      DecisionCaseSummary? today;
       for (final item in cases) {
         final isDilemma = item.format == 'DILEMMA';
         final isSports =
             item.format == 'SPORTS_CALL' || item.domain == 'SPORTS';
+        if (today == null && item.isRealEvent) {
+          today = item;
+        }
         if (dilemma == null && isDilemma) {
           dilemma = item;
         }
@@ -65,11 +70,17 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
         if (community == null && !isSports) {
           community = item;
         }
-        if (dilemma != null && sports != null && community != null) break;
+        if (today != null &&
+            dilemma != null &&
+            sports != null &&
+            community != null) {
+          break;
+        }
       }
       community ??= cases.isNotEmpty ? cases.first : null;
       if (!mounted) return;
       setState(() {
+        _todayCase = today;
         _dilemmaCase = dilemma;
         _sportsCall = sports;
         _communityCase = community;
@@ -106,10 +117,8 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
           children: [
             Text(
               strings.experienceHubSubtitle,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: visual.mutedForeground,
-                height: 1.35,
-              ),
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(color: visual.mutedForeground, height: 1.35),
             ),
             const SizedBox(height: 20),
             _ExperienceCard(
@@ -120,6 +129,25 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
               actionLabel: strings.experienceStandardAction,
               onPressed: () => context.go('/explore'),
             ),
+            const SizedBox(height: 14),
+            if (!_loading && _errorCode == null)
+              if (_todayCase != null)
+                _ExperienceCard(
+                  cardKey: const ValueKey('experience-today'),
+                  icon: Icons.today_rounded,
+                  title: strings.experienceTodayTitle,
+                  body:
+                      '${strings.experienceTodayBody}\n\n${_todayCase!.title}',
+                  actionLabel: strings.experienceTodayAction,
+                  onPressed: () => context.push('/case/${_todayCase!.id}'),
+                )
+              else
+                _ExperienceCard(
+                  cardKey: const ValueKey('experience-today-empty'),
+                  icon: Icons.today_rounded,
+                  title: strings.experienceTodayTitle,
+                  body: strings.experienceTodayEmpty,
+                ),
             const SizedBox(height: 14),
             if (!_loading && _errorCode == null)
               if (_dilemmaCase != null)
@@ -308,9 +336,8 @@ class _ExperienceCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w900,
-                      ),
+                      style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w900),
                     ),
                     if (statusLabel != null) ...[
                       const SizedBox(height: 6),
@@ -331,10 +358,8 @@ class _ExperienceCard extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             body,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: visual.mutedForeground,
-              height: 1.45,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium
+                ?.copyWith(color: visual.mutedForeground, height: 1.45),
           ),
           if (actionLabel != null && onPressed != null) ...[
             const SizedBox(height: 16),

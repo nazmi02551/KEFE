@@ -15,6 +15,10 @@ extension KefeExperienceHubStrings on KefeStrings {
   String get experienceStandardTitle => _experienceText('standard_title');
   String get experienceStandardBody => _experienceText('standard_body');
   String get experienceStandardAction => _experienceText('standard_action');
+  String get experienceTodayTitle => _experienceText('today_title');
+  String get experienceTodayBody => _experienceText('today_body');
+  String get experienceTodayAction => _experienceText('today_action');
+  String get experienceTodayEmpty => _experienceText('today_empty');
   String get experienceDilemmaTitle => _experienceText('dilemma_title');
   String get experienceDilemmaBody => _experienceText('dilemma_body');
   String get experienceDilemmaAction => _experienceText('dilemma_action');

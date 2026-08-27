@@ -23,6 +23,7 @@ class DecisionCaseSummary {
     required this.format,
     required this.domain,
     required this.risk,
+    this.isRealEvent = false,
   });
 
   final String id;
@@ -32,6 +33,7 @@ class DecisionCaseSummary {
   final String format;
   final String domain;
   final String risk;
+  final bool isRealEvent;
 }
 
 @immutable
