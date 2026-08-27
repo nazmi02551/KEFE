@@ -1,0 +1,76 @@
+contract_version: 1.0.0
+updated_at: '2026-07-30'
+authority:
+  documentation_package: KEFE_Documentation_Ecosystem_2026-07-28_v3.4_CURRENT
+  analytics_dictionary: KEFE_Analytics_Event_Dictionary_v1.2.0
+  adr: docs/adr/0034-mobile-discovery-continuity-and-release-promotion.md
+privacy:
+  raw_search_query: forbidden
+  case_title: forbidden
+  case_summary: forbidden
+  private_reason: forbidden
+  sensitive_profile: forbidden
+  actor_identity_in_client_payload: forbidden
+common_properties:
+  - app_surface
+  - app_version
+  - locale
+  - case_version_id_when_applicable
+events:
+  explore.search_applied:
+    trigger: explicit_search_submission_or_settled_search_state
+    properties:
+      query_length_bucket:
+        allowed: [EMPTY, SHORT, MEDIUM, LONG]
+      result_count_bucket:
+        allowed: [ZERO, ONE, FEW, MANY]
+      domain_filter_active:
+        type: boolean
+      saved_only:
+        type: boolean
+  explore.filter_changed:
+    trigger: domain_or_saved_only_filter_change
+    properties:
+      filter_kind:
+        allowed: [DOMAIN, SAVED_ONLY, RESET]
+      result_count_bucket:
+        allowed: [ZERO, ONE, FEW, MANY]
+  case.saved:
+    trigger: durable_saved_case_write_succeeds
+    properties:
+      case_id:
+        type: opaque_identifier
+      case_version_id:
+        type: opaque_identifier
+      source_surface:
+        allowed: [EXPLORE, CASE, ACTIVITY]
+  case.unsaved:
+    trigger: durable_saved_case_removal_succeeds
+    properties:
+      case_id:
+        type: opaque_identifier
+      case_version_id:
+        type: opaque_identifier
+      source_surface:
+        allowed: [EXPLORE, CASE, ACTIVITY]
+  activity.opened:
+    trigger: activity_primary_destination_visible
+    properties:
+      saved_count_bucket:
+        allowed: [ZERO, ONE, FEW, MANY]
+      history_count_bucket:
+        allowed: [ZERO, ONE, FEW, MANY]
+  saved_case.opened:
+    trigger: saved_case_reopens_canonical_case_route
+    properties:
+      case_id:
+        type: opaque_identifier
+      case_version_id:
+        type: opaque_identifier
+      source_surface:
+        const: ACTIVITY
+runtime:
+  provider_neutral_port_required: true
+  delivery_adapter: deferred_until_analytics_infrastructure_slice
+  no_op_adapter_allowed_before_delivery_adapter: true
+  schema_validation_required_before_non_noop_delivery: true

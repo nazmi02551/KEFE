@@ -12,6 +12,8 @@ import 'package:kefe_mobile/features/media_presentation/application/case_media_p
 import 'package:kefe_mobile/features/media_presentation/data/preview_case_media_repository.dart';
 import 'package:kefe_mobile/features/progress/application/progress_controller.dart';
 import 'package:kefe_mobile/features/progress/data/preview_progress_repository.dart';
+import 'package:kefe_mobile/features/saved_cases/application/saved_cases_controller.dart';
+import 'package:kefe_mobile/features/saved_cases/data/saved_case_store.dart';
 
 void main() {
   test('preview catalog contains multiple domains and cases', () async {
@@ -34,7 +36,7 @@ void main() {
   });
 
   testWidgets(
-    'Product Preview opens on rich Explore with media and navigates to Radar',
+    'Product Preview uses four canonical tabs and keeps Radar secondary',
     (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -45,6 +47,7 @@ void main() {
             caseMediaRepositoryProvider.overrideWithValue(
               const PreviewCaseMediaRepository(),
             ),
+            savedCaseStoreProvider.overrideWithValue(MemorySavedCaseStore()),
             productPreviewVisualModeProvider.overrideWithValue(true),
           ],
           child: const ProductPreviewApp(),
@@ -53,7 +56,16 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Bugün dünya\nneyi tartıyor?'), findsOneWidget);
-      expect(find.text('Radar'), findsOneWidget);
+      expect(find.byKey(const ValueKey('explore-search-field')), findsOneWidget);
+      expect(find.byKey(const ValueKey('domain-filter-all')), findsOneWidget);
+      expect(find.byKey(const ValueKey('saved-only-filter')), findsOneWidget);
+      expect(find.byType(NavigationDestination), findsNWidgets(4));
+      expect(find.text('Keşfet'), findsOneWidget);
+      expect(find.text('Tartım'), findsOneWidget);
+      expect(find.text('Aktivite'), findsOneWidget);
+      expect(find.text('My KEFE'), findsOneWidget);
+      expect(find.byKey(const ValueKey('open-preview-radar')), findsOneWidget);
+      expect(find.byKey(const ValueKey('open-preview-atlas')), findsOneWidget);
       expect(
         find.byKey(
           const ValueKey(
@@ -63,19 +75,12 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.scrollUntilVisible(
-        find.text('Trend tartımlar'),
-        260,
-        scrollable: find.byType(Scrollable).last,
-      );
-      await tester.pumpAndSettle();
-      expect(find.text('Trend tartımlar'), findsOneWidget);
-
-      await tester.tap(find.text('Radar'));
+      await tester.tap(find.byKey(const ValueKey('open-preview-radar')));
       await tester.pumpAndSettle();
 
       expect(find.text('Dünya şu an\nneyi tartışıyor?'), findsOneWidget);
       expect(find.textContaining('Canlı trend verisi değil'), findsOneWidget);
+      expect(find.byKey(const ValueKey('primary-navigation')), findsNothing);
     },
   );
 
@@ -94,6 +99,7 @@ void main() {
             caseMediaRepositoryProvider.overrideWithValue(
               const PreviewCaseMediaRepository(),
             ),
+            savedCaseStoreProvider.overrideWithValue(MemorySavedCaseStore()),
             productPreviewVisualModeProvider.overrideWithValue(true),
           ],
           child: const ProductPreviewApp(),
@@ -101,13 +107,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(
-        find.byKey(
-          const ValueKey(
-            'explore-case-11111111-1111-4111-8111-111111111111',
-          ),
+      final caseCard = find.byKey(
+        const ValueKey(
+          'explore-case-11111111-1111-4111-8111-111111111111',
         ),
       );
+      await tester.ensureVisible(caseCard);
+      await tester.pumpAndSettle();
+      await tester.tap(caseCard);
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
@@ -172,7 +179,36 @@ void main() {
   );
 
   testWidgets(
-    'My KEFE is repository-driven descriptive journey data',
+    'Activity owns saved Cases and decision continuation',
+    (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            decisionRepositoryProvider.overrideWithValue(
+              PreviewDecisionRepository(),
+            ),
+            progressRepositoryProvider.overrideWithValue(
+              PreviewProgressRepository(),
+            ),
+            savedCaseStoreProvider.overrideWithValue(MemorySavedCaseStore()),
+          ],
+          child: const ProductPreviewApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Aktivite'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('activity-screen')), findsOneWidget);
+      expect(find.byKey(const ValueKey('saved-cases-section')), findsOneWidget);
+      expect(find.byKey(const ValueKey('activity-history')), findsOneWidget);
+      expect(find.byKey(const ValueKey('activity-preview-notice')), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'My KEFE remains repository-driven insights without saved Cases',
     (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -186,6 +222,7 @@ void main() {
             progressRepositoryProvider.overrideWithValue(
               PreviewProgressRepository(),
             ),
+            savedCaseStoreProvider.overrideWithValue(MemorySavedCaseStore()),
             productPreviewVisualModeProvider.overrideWithValue(true),
           ],
           child: const ProductPreviewApp(),
@@ -193,7 +230,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Profil'));
+      await tester.tap(find.text('My KEFE'));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('my-kefe-journey')), findsOneWidget);
@@ -206,6 +243,7 @@ void main() {
         find.byKey(const ValueKey('my-kefe-preview-notice')),
         findsOneWidget,
       );
+      expect(find.byKey(const ValueKey('saved-cases-section')), findsNothing);
       expect(find.byKey(const ValueKey('my-kefe-weigh-count')), findsOneWidget);
       expect(find.byKey(const ValueKey('my-kefe-update-count')), findsOneWidget);
       expect(
@@ -223,21 +261,6 @@ void main() {
         find.byKey(const ValueKey('my-kefe-domain-activity')),
         findsOneWidget,
       );
-
-      await tester.scrollUntilVisible(
-        find.byKey(const ValueKey('my-kefe-recent-journeys')),
-        300,
-        scrollable: find.byType(Scrollable).last,
-      );
-      await tester.pumpAndSettle();
-      expect(
-        find.text(
-          'Çocuklar uçakta ebeveynleriyle ücretsiz yan yana oturmalı mı?',
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('1 yeniden tartım'), findsWidgets);
-      expect(find.text('Yansıma tamamlandı'), findsWidgets);
 
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('my-kefe-no-inference-note')),
