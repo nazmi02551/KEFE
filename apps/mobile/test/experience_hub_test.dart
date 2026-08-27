@@ -109,6 +109,7 @@ void main() {
     },
   );
 
+  // Dilemma discovery must remain on the generic blind-first Case journey.
   testWidgets('Dilemma enters the canonical blind-first Case journey', (
     tester,
   ) async {

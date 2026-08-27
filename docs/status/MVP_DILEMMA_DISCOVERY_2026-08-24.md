@@ -59,8 +59,14 @@ Therefore KEFE Today remains separate follow-up work that must first establish a
 
 ## Evidence boundary
 
-Repository readback and focused test source are static evidence only. GitHub
-Actions exact-head execution is required before any API CI, Mobile CI, MVP Beta
-Gates or Global Readiness PASS claim.
+The consolidated `22962c06c6f9601bdc1ca89a84038e6babc68c27` candidate
+reached PASS for formatting, analysis and the mobile regression suites in Mobile
+CI, MVP Beta Gates and Global Readiness. Its Android compile/build steps were
+still running when the final evidence-only commit was prepared.
+
+The final commit changes no runtime behavior. It adds an explicit regression
+intent comment and touches the existing API consolidation validator so API CI,
+Mobile CI, MVP Beta Gates and Global Readiness execute against one exact SHA.
+Those final runs remain required before any exact-head PASS or APK claim.
 
 No claim is made for human usability approval, deployed Connected Alpha behavior, store readiness, production reachability, KEFE Today implementation or capability lifecycle promotion.

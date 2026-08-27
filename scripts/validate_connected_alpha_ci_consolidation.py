@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-# This gate also anchors exact-head API evidence for stacked mobile-only slices.
+# This gate anchors exact-head API evidence for stacked mobile discovery slices.
 CONTRACT = ROOT / "docs/contracts/connected-alpha-ci-consolidation.v1.json"
 API_CI = ROOT / ".github/workflows/api-ci.yml"
 MOBILE_CI = ROOT / ".github/workflows/mobile-ci.yml"
