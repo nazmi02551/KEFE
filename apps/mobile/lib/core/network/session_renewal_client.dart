@@ -146,9 +146,7 @@ class SessionRenewalCoordinator {
     if (response.body.isEmpty) return <String, Object?>{};
     try {
       final decoded = jsonDecode(response.body);
-      return decoded is Map<String, Object?>
-          ? decoded
-          : <String, Object?>{};
+      return decoded is Map<String, Object?> ? decoded : <String, Object?>{};
     } on FormatException {
       return <String, Object?>{};
     }
@@ -196,7 +194,8 @@ class RenewingHttpClient extends http.BaseClient {
     } on SessionContinuityFailure catch (failure) {
       return _failureResponse(request, failure);
     }
-    final firstToken = current?.accessToken ?? _bearerToken(originalAuthorization);
+    final firstToken =
+        current?.accessToken ?? _bearerToken(originalAuthorization);
     final first = await _buffer(
       await _inner.send(_clone(request, accessToken: firstToken)),
     );
@@ -297,7 +296,9 @@ class _BufferedResponse {
   String? get errorCode {
     try {
       final decoded = jsonDecode(utf8.decode(bodyBytes));
-      return decoded is Map<String, Object?> ? decoded['code'] as String? : null;
+      return decoded is Map<String, Object?>
+          ? decoded['code'] as String?
+          : null;
     } on FormatException {
       return null;
     }

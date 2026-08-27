@@ -72,6 +72,10 @@ def main() -> None:
 
     settings = _text("services/api/src/kefe_api/core/settings.py")
     persistence = _text("services/api/src/kefe_api/infrastructure/persistence.py")
+    renewal_persistence = _text(
+        "services/api/src/kefe_api/infrastructure/"
+        "postgres_account_continuity_renewal.py"
+    )
     memory = _text("services/api/src/kefe_api/modules/identity/otp_request_guard.py")
     postgres = _text(
         "services/api/src/kefe_api/infrastructure/postgres_otp_request_guard.py"
@@ -99,11 +103,21 @@ def main() -> None:
 
     for fragment in (
         "GuardedInMemoryAccountContinuityRepository",
-        "GuardedPostgresAccountContinuityRepository",
+        "GuardedRenewalPostgresAccountContinuityRepository",
         'mode == "ENFORCE" or (mode == "AUTO" and production)',
         "production forbids KEFE_OTP_REQUEST_GUARD_MODE=OFF",
     ):
         _require(fragment in persistence, f"missing composition fragment: {fragment}")
+
+    for fragment in (
+        "class GuardedRenewalPostgresAccountContinuityRepository",
+        "GuardedPostgresAccountContinuityRepository",
+        "_RenewalAccountMergeMixin",
+    ):
+        _require(
+            fragment in renewal_persistence,
+            f"missing guarded renewal composition fragment: {fragment}",
+        )
 
     for fragment in (
         "class OtpRequestAbusePolicy",

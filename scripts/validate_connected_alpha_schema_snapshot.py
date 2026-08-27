@@ -3,15 +3,20 @@ from __future__ import annotations
 import argparse
 import ast
 import hashlib
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSIONS = ROOT / "services/api/migrations/versions"
 ENV_PATH = ROOT / "services/api/migrations/env.py"
 INI_PATH = ROOT / "services/api/alembic.ini"
-EXPECTED_ROOT = "20260727_0001"
-EXPECTED_HEAD = "20260806_0034"
-EXPECTED_COUNT = 34
+CONTRACT_PATH = ROOT / "docs/contracts/connected-alpha-schema-snapshot.v1.json"
+
+CONTRACT = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
+CANONICAL_CHAIN = CONTRACT["canonical_chain"]
+EXPECTED_ROOT = CANONICAL_CHAIN["expected_root"]
+EXPECTED_HEAD = CANONICAL_CHAIN["expected_head"]
+EXPECTED_COUNT = CANONICAL_CHAIN["expected_migration_file_count"]
 
 
 def _literal_assignment(tree: ast.Module, name: str):
