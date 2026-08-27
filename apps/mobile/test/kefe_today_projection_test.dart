@@ -11,17 +11,20 @@ final config = AppConfig(
   requestTimeout: Duration(seconds: 5),
 );
 
-Map<String, Object?> summary({Object? isRealEvent}) => {
-  'case_id': '11111111-1111-4111-8111-111111111111',
-  'case_version_id': '22222222-2222-4222-8222-222222222222',
-  'version_no': 1,
-  'title': 'Governed real event',
-  'summary': 'Source-reviewed Case.',
-  'base_format': 'DILEMMA',
-  'primary_domain': 'DAILY_LIFE',
-  'content_risk': 'L0',
-  if (isRealEvent != null) 'is_real_event': isRealEvent,
-};
+Map<String, Object?> summary({Object? isRealEvent}) {
+  final result = <String, Object?>{
+    'case_id': '11111111-1111-4111-8111-111111111111',
+    'case_version_id': '22222222-2222-4222-8222-222222222222',
+    'version_no': 1,
+    'title': 'Governed real event',
+    'summary': 'Source-reviewed Case.',
+    'base_format': 'DILEMMA',
+    'primary_domain': 'DAILY_LIFE',
+    'content_risk': 'L0',
+  };
+  if (isRealEvent != null) result['is_real_event'] = isRealEvent;
+  return result;
+}
 
 HttpDecisionRepository repositoryFor(Object? isRealEvent) {
   final client = MockClient((request) async {
