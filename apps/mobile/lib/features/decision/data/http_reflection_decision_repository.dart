@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../../core/config/app_config.dart';
+import '../../../core/network/session_renewal_client.dart';
 import '../../context/data/context_repository.dart';
 import '../../context/domain/context_models.dart';
 import '../domain/decision_models.dart';
@@ -23,12 +24,14 @@ class HttpReflectionDecisionRepository
     required AppConfig config,
     required http.Client client,
     required CredentialStore credentialStore,
+    SessionRenewalCoordinator? sessionRenewalCoordinator,
   }) : _config = config,
        _client = client,
        _delegate = HttpDecisionRepository(
          config: config,
          client: client,
          credentialStore: credentialStore,
+         sessionRenewalCoordinator: sessionRenewalCoordinator,
        );
 
   final AppConfig _config;

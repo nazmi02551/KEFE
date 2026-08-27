@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../core/config/app_config.dart';
+import '../../../core/network/session_renewal_client.dart';
 import '../../../core/storage/secure_credential_store.dart';
 import '../data/decision_draft_store.dart';
 import '../data/decision_repository.dart';
@@ -16,14 +17,25 @@ const demoCaseId = '11111111-1111-4111-8111-111111111111';
 final appConfigProvider = Provider<AppConfig>(
   (ref) => AppConfig.fromEnvironment(),
 );
+final credentialStoreProvider = Provider<SessionCredentialStore>(
+  (ref) => SecureCredentialStore(),
+);
+final _rawHttpClientProvider = Provider<http.Client>((ref) => http.Client());
+final sessionRenewalCoordinatorProvider = Provider<SessionRenewalCoordinator>(
+  (ref) => SessionRenewalCoordinator(
+    config: ref.watch(appConfigProvider),
+    client: ref.watch(_rawHttpClientProvider),
+    credentialStore: ref.watch(credentialStoreProvider),
+  ),
+);
 final httpClientProvider = Provider<http.Client>((ref) {
-  final client = http.Client();
+  final client = RenewingHttpClient(
+    inner: ref.watch(_rawHttpClientProvider),
+    coordinator: ref.watch(sessionRenewalCoordinatorProvider),
+  );
   ref.onDispose(client.close);
   return client;
 });
-final credentialStoreProvider = Provider<CredentialStore>(
-  (ref) => SecureCredentialStore(),
-);
 final decisionDraftStoreProvider = Provider<DecisionDraftStore>(
   (ref) => SecureDecisionDraftStore(),
 );
@@ -32,6 +44,7 @@ final decisionRepositoryProvider = Provider<DecisionRepository>((ref) {
     config: ref.watch(appConfigProvider),
     client: ref.watch(httpClientProvider),
     credentialStore: ref.watch(credentialStoreProvider),
+    sessionRenewalCoordinator: ref.watch(sessionRenewalCoordinatorProvider),
   );
 });
 

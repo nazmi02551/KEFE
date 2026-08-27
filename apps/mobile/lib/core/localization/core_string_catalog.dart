@@ -127,6 +127,12 @@ abstract final class CoreStringCatalog {
           'Something went wrong. Your decision was not lost; you can retry.',
       'error.network_unavailable':
           'Could not connect. The decision on this device is preserved.',
+      'error.guest_continuity_required':
+          'This guest session can no longer be renewed. KEFE did not silently replace it with a new identity.',
+      'error.account_reauthentication_required':
+          'This account session ended. Verify your account again to restore access to its history.',
+      'error.legacy_continuity_required':
+          'This earlier session could not be upgraded safely. KEFE did not create a replacement guest identity.',
     },
     'tr': {
       'promise': 'Kararını tart. Farklı düşünmenin nedenlerini gör.',
@@ -253,6 +259,12 @@ abstract final class CoreStringCatalog {
           'Bir sorun oluştu. Kararın kaybolmadı; tekrar deneyebilirsin.',
       'error.network_unavailable':
           'Bağlantı kurulamadı. Cihazdaki karar korunuyor.',
+      'error.guest_continuity_required':
+          'Bu misafir oturumu artık yenilenemiyor. KEFE kimliği sessizce yeni bir kimlikle değiştirmedi.',
+      'error.account_reauthentication_required':
+          'Bu hesap oturumu sona erdi. Geçmişe yeniden erişmek için hesabını tekrar doğrula.',
+      'error.legacy_continuity_required':
+          'Bu eski oturum güvenli biçimde yükseltilemedi. KEFE yerine yeni bir misafir kimliği oluşturmadı.',
     },
   };
 }

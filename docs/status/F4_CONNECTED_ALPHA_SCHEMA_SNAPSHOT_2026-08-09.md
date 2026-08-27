@@ -14,13 +14,18 @@ Create a deterministic transport artifact from the canonical Alembic migration a
 
 - migration authority: `services/api/migrations`;
 - root revision: `20260727_0001`;
-- expected head: `20260806_0034`;
-- current migration files: 34;
+- expected head: `20260812_0036`;
+- current migration files: 36;
 - generation mode: Alembic offline SQL;
 - generation command: `alembic upgrade head --sql`;
 - target dialect: PostgreSQL.
 
 The validator derives continuity from `revision` and `down_revision`; numeric filename gaps or repeated date-local counters are not treated as sequence authority.
+
+The 2026-08-27 session-renewal convergence extends the same linear authority
+with `20260812_0035 -> 20260812_0036`. The snapshot contract is now the
+validator's head/count source, so later migration additions must update the
+reviewed contract rather than a parallel script constant.
 
 ## Artifact boundary
 

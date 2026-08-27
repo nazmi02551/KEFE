@@ -170,6 +170,15 @@ class KefeStrings {
     'FLOW_RUNTIME_VERSION_MISMATCH' => flowRuntimeMismatch,
     'NETWORK_UNAVAILABLE' ||
     'NETWORK_TIMEOUT' => _text('error.network_unavailable'),
+    'AUTH_GUEST_CONTINUITY_REQUIRED' => _text(
+      'error.guest_continuity_required',
+    ),
+    'AUTH_ACCOUNT_REAUTHENTICATION_REQUIRED' => _text(
+      'error.account_reauthentication_required',
+    ),
+    'AUTH_LEGACY_CONTINUITY_REQUIRED' => _text(
+      'error.legacy_continuity_required',
+    ),
     _ => genericError,
   };
 }

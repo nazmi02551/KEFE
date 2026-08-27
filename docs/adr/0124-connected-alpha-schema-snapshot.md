@@ -23,8 +23,10 @@ The snapshot is CI evidence only. Generation and application are separate operat
 The snapshot generator must:
 
 1. use `services/api/alembic.ini` and the committed migration tree;
-2. prove a single connected chain from `20260727_0001` to `20260806_0034`;
-3. prove the current migration-file count is 34;
+2. prove a single connected chain from `20260727_0001` to the head/count recorded
+   by `connected-alpha-schema-snapshot.v1.json` (currently
+   `20260812_0036` / 36 files);
+3. fail when the committed migration graph drifts from that contract;
 4. run in offline PostgreSQL-dialect mode without a live database connection;
 5. produce a SHA-256 digest;
 6. upload SQL + digest as one named CI artifact;

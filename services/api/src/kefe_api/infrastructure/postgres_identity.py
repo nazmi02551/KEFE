@@ -11,6 +11,17 @@ from kefe_api.modules.identity.models import (
     TokenResolution,
     TokenStatus,
 )
+from kefe_api.modules.identity.session_renewal import (
+    RenewalResolution,
+    RenewalResolutionStatus,
+    RenewalTokenMatch,
+    SessionBootstrapMutation,
+    SessionBootstrapResolution,
+    SessionBootstrapSnapshot,
+    SessionBootstrapStatus,
+    SessionRenewalSnapshot,
+    SessionRotationMutation,
+)
 
 
 class PostgresIdentityRepository:
@@ -23,6 +34,12 @@ class PostgresIdentityRepository:
         actor_id: UUID,
         token_hash: str,
         expires_at: datetime,
+        session_id: UUID | None = None,
+        renewal_token_hash: str | None = None,
+        rotation_counter: int = 0,
+        token_derivation_key_id: str | None = None,
+        continuity_absolute_expires_at: datetime | None = None,
+        continuity_inactive_expires_at: datetime | None = None,
     ) -> None:
         with self._engine.begin() as connection:
             connection.execute(
@@ -41,44 +58,72 @@ class PostgresIdentityRepository:
                         id,
                         actor_id,
                         token_hash,
-                        expires_at
+                        expires_at,
+                        renewal_token_hash,
+                        rotation_counter,
+                        token_derivation_key_id,
+                        continuity_absolute_expires_at,
+                        continuity_inactive_expires_at
                     )
-                    VALUES (:id, :actor_id, :token_hash, :expires_at)
+                    VALUES (
+                        :id,
+                        :actor_id,
+                        :token_hash,
+                        :expires_at,
+                        :renewal_token_hash,
+                        :rotation_counter,
+                        :token_derivation_key_id,
+                        :continuity_absolute_expires_at,
+                        :continuity_inactive_expires_at
+                    )
                     """
                 ),
                 {
-                    "id": uuid4(),
+                    "id": session_id or uuid4(),
                     "actor_id": actor_id,
                     "token_hash": token_hash,
                     "expires_at": expires_at,
+                    "renewal_token_hash": renewal_token_hash,
+                    "rotation_counter": rotation_counter,
+                    "token_derivation_key_id": token_derivation_key_id,
+                    "continuity_absolute_expires_at": continuity_absolute_expires_at,
+                    "continuity_inactive_expires_at": continuity_inactive_expires_at,
                 },
             )
 
     def resolve_token(self, *, token_hash: str, now: datetime) -> TokenResolution:
         with self._engine.connect() as connection:
-            row = connection.execute(
-                text(
-                    """
+            row = (
+                connection.execute(
+                    text(
+                        """
                     SELECT
                         actor.id AS actor_id,
                         actor.actor_kind,
                         actor.state,
+                        session.token_hash,
                         session.expires_at,
                         session.revoked_at
                     FROM identity.actor_session AS session
                     JOIN identity.actor AS actor ON actor.id = session.actor_id
-                    WHERE session.token_hash = :token_hash
+                    WHERE
+                        session.token_hash = :token_hash
+                        OR (
+                            session.previous_token_hash = :token_hash
+                            AND session.previous_token_valid_until IS NOT NULL
+                            AND session.previous_token_valid_until >= :now
+                        )
                     LIMIT 1
                     """
-                ),
-                {"token_hash": token_hash},
-            ).mappings().one_or_none()
+                    ),
+                    {"token_hash": token_hash, "now": now},
+                )
+                .mappings()
+                .one_or_none()
+            )
 
         if row is None:
             return TokenResolution(TokenStatus.INVALID)
-        # Session lifecycle is more specific than actor lifecycle. Generic authentication
-        # still rejects REVOKED, while the retained principal lets guest-merge validate
-        # only an exact completed replay after the source actor has been retired.
         if row["revoked_at"] is not None:
             return TokenResolution(
                 TokenStatus.REVOKED,
@@ -89,7 +134,7 @@ class PostgresIdentityRepository:
             )
         if row["state"] != "ACTIVE":
             return TokenResolution(TokenStatus.INVALID)
-        if row["expires_at"] <= now:
+        if row["token_hash"] == token_hash and row["expires_at"] <= now:
             return TokenResolution(TokenStatus.EXPIRED)
         return TokenResolution(
             TokenStatus.ACTIVE,
@@ -99,6 +144,279 @@ class PostgresIdentityRepository:
             ),
         )
 
+    def resolve_renewal(
+        self,
+        *,
+        renewal_token_hash: str,
+        now: datetime,
+    ) -> RenewalResolution:
+        with self._engine.connect() as connection:
+            row = (
+                connection.execute(
+                    text(
+                        """
+                    SELECT
+                        session.id AS session_id,
+                        actor.id AS actor_id,
+                        actor.actor_kind,
+                        actor.state,
+                        session.token_hash,
+                        session.renewal_token_hash,
+                        session.rotation_counter,
+                        session.token_derivation_key_id,
+                        session.expires_at,
+                        session.revoked_at,
+                        session.continuity_absolute_expires_at,
+                        session.continuity_inactive_expires_at,
+                        CASE
+                            WHEN session.renewal_token_hash = :renewal_token_hash
+                                THEN 'CURRENT'
+                            ELSE 'PREVIOUS_GRACE'
+                        END AS token_match
+                    FROM identity.actor_session AS session
+                    JOIN identity.actor AS actor ON actor.id = session.actor_id
+                    WHERE
+                        session.renewal_token_hash = :renewal_token_hash
+                        OR (
+                            session.previous_renewal_token_hash = :renewal_token_hash
+                            AND session.previous_renewal_valid_until IS NOT NULL
+                            AND session.previous_renewal_valid_until >= :now
+                        )
+                    LIMIT 1
+                    """
+                    ),
+                    {"renewal_token_hash": renewal_token_hash, "now": now},
+                )
+                .mappings()
+                .one_or_none()
+            )
+
+        if row is None:
+            return RenewalResolution(RenewalResolutionStatus.INVALID)
+        if row["revoked_at"] is not None:
+            return RenewalResolution(RenewalResolutionStatus.REVOKED)
+        if row["state"] != "ACTIVE":
+            return RenewalResolution(RenewalResolutionStatus.INVALID)
+        if (
+            row["token_derivation_key_id"] is None
+            or row["renewal_token_hash"] is None
+            or row["continuity_absolute_expires_at"] is None
+            or row["continuity_inactive_expires_at"] is None
+        ):
+            return RenewalResolution(RenewalResolutionStatus.INVALID)
+        if (
+            now >= row["continuity_absolute_expires_at"]
+            or now >= row["continuity_inactive_expires_at"]
+        ):
+            return RenewalResolution(RenewalResolutionStatus.CONTINUITY_EXPIRED)
+
+        return RenewalResolution(
+            RenewalResolutionStatus.ACTIVE,
+            SessionRenewalSnapshot(
+                session_id=row["session_id"],
+                actor_id=row["actor_id"],
+                actor_kind=ActorKind(row["actor_kind"]),
+                rotation_counter=row["rotation_counter"],
+                derivation_key_id=row["token_derivation_key_id"],
+                access_token_hash=row["token_hash"],
+                renewal_token_hash=row["renewal_token_hash"],
+                access_expires_at=row["expires_at"],
+                continuity_absolute_expires_at=row["continuity_absolute_expires_at"],
+                continuity_inactive_expires_at=row["continuity_inactive_expires_at"],
+                token_match=RenewalTokenMatch(row["token_match"]),
+            ),
+        )
+
+    def rotate_session(self, *, mutation: SessionRotationMutation) -> bool:
+        with self._engine.begin() as connection:
+            row = connection.execute(
+                text(
+                    """
+                    UPDATE identity.actor_session
+                    SET
+                        previous_token_hash = token_hash,
+                        previous_token_valid_until = LEAST(
+                            :previous_pair_valid_until,
+                            expires_at
+                        ),
+                        previous_renewal_token_hash = renewal_token_hash,
+                        previous_renewal_valid_until = :previous_pair_valid_until,
+                        token_hash = :next_access_token_hash,
+                        renewal_token_hash = :next_renewal_token_hash,
+                        expires_at = :next_access_expires_at,
+                        continuity_inactive_expires_at = LEAST(
+                            :next_inactive_expires_at,
+                            continuity_absolute_expires_at
+                        ),
+                        rotation_counter = :next_rotation_counter,
+                        token_derivation_key_id = :next_derivation_key_id,
+                        renewed_at = :renewed_at
+                    WHERE
+                        id = :session_id
+                        AND revoked_at IS NULL
+                        AND rotation_counter = :expected_rotation_counter
+                        AND token_hash = :current_access_token_hash
+                        AND renewal_token_hash = :current_renewal_token_hash
+                        AND continuity_absolute_expires_at > :renewed_at
+                        AND continuity_inactive_expires_at > :renewed_at
+                    RETURNING id
+                    """
+                ),
+                {
+                    "session_id": mutation.session_id,
+                    "expected_rotation_counter": mutation.expected_rotation_counter,
+                    "current_access_token_hash": mutation.current_access_token_hash,
+                    "current_renewal_token_hash": mutation.current_renewal_token_hash,
+                    "next_access_token_hash": mutation.next_access_token_hash,
+                    "next_renewal_token_hash": mutation.next_renewal_token_hash,
+                    "next_access_expires_at": mutation.next_access_expires_at,
+                    "next_inactive_expires_at": mutation.next_inactive_expires_at,
+                    "next_rotation_counter": mutation.next_rotation_counter,
+                    "next_derivation_key_id": mutation.next_derivation_key_id,
+                    "previous_pair_valid_until": mutation.previous_pair_valid_until,
+                    "renewed_at": mutation.renewed_at,
+                },
+            ).first()
+        return row is not None
+
+    def resolve_bootstrap(
+        self,
+        *,
+        access_token_hash: str,
+        now: datetime,
+    ) -> SessionBootstrapResolution:
+        with self._engine.connect() as connection:
+            row = (
+                connection.execute(
+                    text(
+                        """
+                    SELECT
+                        session.id AS session_id,
+                        actor.id AS actor_id,
+                        actor.actor_kind,
+                        actor.state,
+                        session.token_hash,
+                        session.renewal_token_hash,
+                        session.rotation_counter,
+                        session.token_derivation_key_id,
+                        session.expires_at,
+                        session.revoked_at,
+                        session.continuity_absolute_expires_at,
+                        session.continuity_inactive_expires_at
+                    FROM identity.actor_session AS session
+                    JOIN identity.actor AS actor ON actor.id = session.actor_id
+                    WHERE
+                        session.token_hash = :access_token_hash
+                        OR (
+                            session.previous_token_hash = :access_token_hash
+                            AND session.previous_token_valid_until IS NOT NULL
+                            AND session.previous_token_valid_until >= :now
+                        )
+                    LIMIT 1
+                    """
+                    ),
+                    {"access_token_hash": access_token_hash, "now": now},
+                )
+                .mappings()
+                .one_or_none()
+            )
+
+        if row is None or row["state"] != "ACTIVE":
+            return SessionBootstrapResolution(SessionBootstrapStatus.INVALID)
+        if row["revoked_at"] is not None:
+            return SessionBootstrapResolution(SessionBootstrapStatus.REVOKED)
+        if row["token_hash"] == access_token_hash and row["expires_at"] <= now:
+            return SessionBootstrapResolution(SessionBootstrapStatus.EXPIRED)
+
+        renewal_fields = (
+            row["renewal_token_hash"],
+            row["token_derivation_key_id"],
+            row["continuity_absolute_expires_at"],
+            row["continuity_inactive_expires_at"],
+        )
+        if all(value is None for value in renewal_fields):
+            if row["rotation_counter"] != 0 or row["token_hash"] != access_token_hash:
+                return SessionBootstrapResolution(SessionBootstrapStatus.INVALID)
+            status = SessionBootstrapStatus.ACTIVE_LEGACY
+        elif all(value is not None for value in renewal_fields):
+            status = SessionBootstrapStatus.ACTIVE_CURRENT
+        else:
+            return SessionBootstrapResolution(SessionBootstrapStatus.INVALID)
+
+        return SessionBootstrapResolution(
+            status,
+            SessionBootstrapSnapshot(
+                session_id=row["session_id"],
+                actor_id=row["actor_id"],
+                actor_kind=ActorKind(row["actor_kind"]),
+                rotation_counter=row["rotation_counter"],
+                derivation_key_id=row["token_derivation_key_id"],
+                access_token_hash=row["token_hash"],
+                renewal_token_hash=row["renewal_token_hash"],
+                access_expires_at=row["expires_at"],
+                continuity_absolute_expires_at=(row["continuity_absolute_expires_at"]),
+                continuity_inactive_expires_at=(row["continuity_inactive_expires_at"]),
+            ),
+        )
+
+    def bootstrap_session(self, *, mutation: SessionBootstrapMutation) -> bool:
+        with self._engine.begin() as connection:
+            row = connection.execute(
+                text(
+                    """
+                    UPDATE identity.actor_session AS session
+                    SET
+                        previous_token_hash = token_hash,
+                        previous_token_valid_until = LEAST(
+                            :previous_access_valid_until,
+                            expires_at
+                        ),
+                        token_hash = :next_access_token_hash,
+                        renewal_token_hash = :next_renewal_token_hash,
+                        expires_at = :next_access_expires_at,
+                        rotation_counter = 0,
+                        token_derivation_key_id = :derivation_key_id,
+                        renewed_at = :bootstrapped_at,
+                        continuity_absolute_expires_at = (
+                            :continuity_absolute_expires_at
+                        ),
+                        continuity_inactive_expires_at = (
+                            :continuity_inactive_expires_at
+                        )
+                    WHERE
+                        session.id = :session_id
+                        AND session.revoked_at IS NULL
+                        AND session.token_hash = :expected_access_token_hash
+                        AND session.expires_at > :bootstrapped_at
+                        AND session.renewal_token_hash IS NULL
+                        AND session.token_derivation_key_id IS NULL
+                        AND session.continuity_absolute_expires_at IS NULL
+                        AND session.continuity_inactive_expires_at IS NULL
+                        AND session.rotation_counter = 0
+                        AND EXISTS (
+                            SELECT 1
+                            FROM identity.actor AS actor
+                            WHERE actor.id = session.actor_id
+                            AND actor.state = 'ACTIVE'
+                        )
+                    RETURNING session.id
+                    """
+                ),
+                {
+                    "session_id": mutation.session_id,
+                    "expected_access_token_hash": (mutation.expected_access_token_hash),
+                    "next_access_token_hash": mutation.next_access_token_hash,
+                    "next_renewal_token_hash": mutation.next_renewal_token_hash,
+                    "next_access_expires_at": mutation.next_access_expires_at,
+                    "derivation_key_id": mutation.derivation_key_id,
+                    "continuity_absolute_expires_at": (mutation.continuity_absolute_expires_at),
+                    "continuity_inactive_expires_at": (mutation.continuity_inactive_expires_at),
+                    "previous_access_valid_until": (mutation.previous_access_valid_until),
+                    "bootstrapped_at": mutation.bootstrapped_at,
+                },
+            ).first()
+        return row is not None
+
     def revoke_token(self, *, token_hash: str, now: datetime) -> None:
         with self._engine.begin() as connection:
             connection.execute(
@@ -106,7 +424,13 @@ class PostgresIdentityRepository:
                     """
                     UPDATE identity.actor_session
                     SET revoked_at = COALESCE(revoked_at, :now)
-                    WHERE token_hash = :token_hash
+                    WHERE
+                        token_hash = :token_hash
+                        OR (
+                            previous_token_hash = :token_hash
+                            AND previous_token_valid_until IS NOT NULL
+                            AND previous_token_valid_until >= :now
+                        )
                     """
                 ),
                 {"token_hash": token_hash, "now": now},

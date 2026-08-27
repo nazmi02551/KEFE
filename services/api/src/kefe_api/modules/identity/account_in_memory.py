@@ -12,6 +12,7 @@ from kefe_api.modules.identity.account_models import (
     OtpChannel,
     OtpVerification,
 )
+from kefe_api.modules.identity.account_ports import AccountSessionMaterialFactory
 from kefe_api.modules.identity.in_memory import InMemoryIdentityRepository
 
 
@@ -120,6 +121,7 @@ class InMemoryAccountContinuityRepository:
         account_token_hash: str,
         account_session_expires_at: datetime,
         completed_at: datetime,
+        session_material_factory: AccountSessionMaterialFactory | None = None,
     ) -> GuestMergeReplay:
         with self._lock:
             existing = self._guest_merge_replays.get(verification_token_hash)
@@ -149,18 +151,53 @@ class InMemoryAccountContinuityRepository:
                 identifier_hint=verification.identifier_hint,
                 verified_at=verification.verified_at,
             )
-            self.create_account_session(
-                actor_id=account_actor_id,
-                token_hash=account_token_hash,
-                expires_at=account_session_expires_at,
+            material = (
+                session_material_factory(actor_id=account_actor_id, now=completed_at)
+                if session_material_factory is not None
+                else None
             )
+            if material is None:
+                self.create_account_session(
+                    actor_id=account_actor_id,
+                    token_hash=account_token_hash,
+                    expires_at=account_session_expires_at,
+                )
+            else:
+                self._identity.create_account_session(
+                    actor_id=account_actor_id,
+                    session_id=material.session_id,
+                    token_hash=material.access_token_hash,
+                    expires_at=material.access_expires_at,
+                    renewal_token_hash=material.renewal_token_hash,
+                    rotation_counter=material.rotation_counter,
+                    token_derivation_key_id=material.derivation_key_id,
+                    continuity_absolute_expires_at=material.continuity_absolute_expires_at,
+                    continuity_inactive_expires_at=material.continuity_inactive_expires_at,
+                )
             replay = GuestMergeReplay(
                 verification_token_hash=verification_token_hash,
                 source_actor_id=source_actor_id,
                 account_actor_id=account_actor_id,
                 merged_from_actor_id=merged_from_actor_id,
-                account_session_expires_at=account_session_expires_at,
+                account_session_expires_at=(
+                    material.access_expires_at
+                    if material is not None
+                    else account_session_expires_at
+                ),
                 completed_at=completed_at,
+                account_session_id=material.session_id if material is not None else None,
+                account_session_rotation_counter=(
+                    material.rotation_counter if material is not None else 0
+                ),
+                account_session_derivation_key_id=(
+                    material.derivation_key_id if material is not None else None
+                ),
+                continuity_absolute_expires_at=(
+                    material.continuity_absolute_expires_at if material is not None else None
+                ),
+                continuity_inactive_expires_at=(
+                    material.continuity_inactive_expires_at if material is not None else None
+                ),
             )
             self._guest_merge_replays[verification_token_hash] = replay
             return replay

@@ -1,0 +1,194 @@
+{
+  "contract_id": "KEFE-SESSION-RENEWAL-CONTINUITY-001",
+  "version": "1.0.1",
+  "status": "ARCHITECTURE_CANDIDATE",
+  "wave": "F4",
+  "capabilities": ["CAP-084", "CAP-085", "CAP-095"],
+  "authority_alignment": {
+    "guest_continuation_preserved": true,
+    "actor_owned_progress_preserved": true,
+    "opaque_revocable_credentials_preserved": true,
+    "silent_guest_replacement_allowed": false,
+    "silent_account_to_guest_downgrade_allowed": false
+  },
+  "current_gap": {
+    "guest_access_ttl_days_default": 30,
+    "account_access_ttl_days_default": 30,
+    "renewal_credential_exists": false,
+    "mobile_persists_exact_access_expiry": false,
+    "mobile_persists_actor_kind": false,
+    "expired_guest_can_recover_same_actor_today": false
+  },
+  "session_family": {
+    "family_id": "identity.actor_session.id",
+    "same_actor_only": true,
+    "actor_id_client_selectable": false,
+    "actor_state_must_be_active": true,
+    "session_revocation_blocks_access_and_renewal": true,
+    "privacy_deletion_blocks_access_and_renewal": true,
+    "guest_to_account_merge_retires_guest_family": true
+  },
+  "lifetime_policy": {
+    "same_policy_for_guest_and_account_v1": true,
+    "absolute_lifetime_days_default": 180,
+    "sliding_inactivity_days_default": 60,
+    "successful_renewal_advances_inactivity_deadline": true,
+    "successful_renewal_advances_absolute_deadline": false,
+    "access_use_without_renewal_advances_inactivity_deadline": false,
+    "absolute_deadline_anchored_at_family_creation": true,
+    "renewal_allowed_after_access_expiry": true,
+    "renewal_allowed_after_inactivity_expiry": false,
+    "renewal_allowed_after_absolute_expiry": false,
+    "expired_family_may_create_new_actor_implicitly": false,
+    "server_settings_may_tighten_defaults": true,
+    "server_settings_may_extend_defaults_without_contract_review": false,
+    "account_absolute_or_inactivity_expiry_behavior": "EXPLICIT_REAUTHENTICATION_REQUIRED",
+    "guest_absolute_or_inactivity_expiry_behavior": "CONTINUITY_ERROR_EXPLICIT_START_OVER_ONLY"
+  },
+  "token_model": {
+    "access_token": {
+      "opaque": true,
+      "bearer": true,
+      "server_plaintext_persisted": false,
+      "default_ttl_days": 30,
+      "purpose": "authenticated_api_access"
+    },
+    "renewal_token": {
+      "opaque": true,
+      "bearer_api_access_allowed": false,
+      "server_plaintext_persisted": false,
+      "client_secure_storage_required": true,
+      "actor_id_derivation_allowed": false,
+      "purpose": "same_actor_access_renewal"
+    }
+  },
+  "derivation": {
+    "algorithm": "HMAC_SHA256",
+    "separate_secret_domain_required": true,
+    "active_key_id_required": true,
+    "retained_keyring_required": true,
+    "inputs": [
+      "purpose_domain",
+      "session_family_id",
+      "actor_id",
+      "rotation_counter"
+    ],
+    "server_can_reproduce_current_pair_without_plaintext_storage": true,
+    "database_only_compromise_can_derive_tokens": false
+  },
+  "rotation": {
+    "renewal_rotates_on_success": true,
+    "access_rotates_with_renewal": true,
+    "rotation_counter_monotonic": true,
+    "transaction_row_lock_required": true,
+    "previous_renewal_hash_retained": true,
+    "previous_access_hash_retained": true,
+    "previous_pair_retry_grace_seconds": 60,
+    "previous_token_within_grace_returns_same_current_pair": true,
+    "previous_token_retry_rotates_again": false,
+    "older_or_outside_grace_token_accepted": false,
+    "stale_replay_must_not_create_new_actor": true,
+    "concurrent_same_token_requests_converge": true
+  },
+  "api": {
+    "renew_path": "/v1/identity/session/renew",
+    "renew_requires_access_bearer": false,
+    "renew_request_contains_actor_id": false,
+    "renew_request_contains_renewal_token": true,
+    "renew_response_contains": [
+      "actor_id",
+      "actor_kind",
+      "access_token",
+      "access_expires_at",
+      "renewal_token",
+      "rotation_counter"
+    ],
+    "bootstrap_path": "/v1/identity/session/continuity/bootstrap",
+    "bootstrap_requires_active_access_bearer": true,
+    "bootstrap_purpose": "upgrade_legacy_access_only_session_before_expiry",
+    "guest_issue_returns_renewal_bundle": true,
+    "account_merge_returns_renewal_bundle": true,
+    "family_expired_error": "AUTH_SESSION_CONTINUITY_EXPIRED",
+    "renewal_invalid_error": "AUTH_RENEWAL_INVALID",
+    "renewal_replayed_error": "AUTH_RENEWAL_REPLAYED"
+  },
+  "mobile": {
+    "atomic_credential_bundle_required": true,
+    "bundle_fields": [
+      "actor_id",
+      "actor_kind",
+      "access_token",
+      "access_expires_at",
+      "renewal_token",
+      "rotation_counter"
+    ],
+    "client_token_decoding_allowed": false,
+    "synthesized_access_expiry_allowed": false,
+    "single_flight_renewal_required": true,
+    "proactive_renewal_skew_seconds": 60,
+    "expired_access_with_renewal_may_renew": true,
+    "renewal_failure_may_auto_create_new_guest": false,
+    "account_renewal_failure_requires_explicit_reauthentication": true,
+    "guest_renewal_failure_must_preserve_continuity_error_state": true,
+    "auth_error_copy_localized_tr_en": true
+  },
+  "legacy_mobile": {
+    "v1_access_only_token_may_bootstrap_while_active": true,
+    "bootstrap_creates_family_deadlines_from_bootstrap_time": true,
+    "expired_v1_guest_token_can_be_recovered_without_new_server_proof": false,
+    "silent_new_actor_fallback_allowed": false
+  },
+  "privacy_and_logging": {
+    "access_token_in_logs_allowed": false,
+    "renewal_token_in_logs_allowed": false,
+    "access_token_in_privacy_export_allowed": false,
+    "renewal_token_in_privacy_export_allowed": false,
+    "token_in_url_allowed": false,
+    "renewal_events_may_include_actor_id": false,
+    "renewal_events_may_include_session_family_id": false,
+    "renewal_events_may_include_rotation_counter": true,
+    "renewal_events_may_include_status_code": true
+  },
+  "schema_candidate": {
+    "actor_session_additions": [
+      "previous_token_hash",
+      "previous_token_valid_until",
+      "renewal_token_hash",
+      "previous_renewal_token_hash",
+      "previous_renewal_valid_until",
+      "rotation_counter",
+      "token_derivation_key_id",
+      "renewed_at",
+      "continuity_absolute_expires_at",
+      "continuity_inactive_expires_at"
+    ],
+    "new_parallel_identity_store_allowed": false
+  },
+  "verification": {
+    "in_memory_repository_tests_required": true,
+    "postgres_transaction_tests_required": true,
+    "concurrent_renewal_test_required": true,
+    "response_loss_retry_test_required": true,
+    "stale_replay_rejection_test_required": true,
+    "absolute_expiry_test_required": true,
+    "inactivity_expiry_test_required": true,
+    "renewal_does_not_extend_absolute_deadline_test_required": true,
+    "guest_merge_revokes_guest_renewal_test_required": true,
+    "privacy_delete_revokes_renewal_test_required": true,
+    "mobile_atomic_store_tests_required": true,
+    "mobile_single_flight_tests_required": true,
+    "existing_api_ci_required": true,
+    "existing_mobile_ci_required": true,
+    "new_feature_specific_workflow_allowed": false,
+    "exact_head_ci_required_before_pass": true
+  },
+  "non_claims": [
+    "cross_device_session_management",
+    "social_login",
+    "oauth_provider_selection",
+    "password_authentication",
+    "production_auth_operability",
+    "cap084_lifecycle_promotion",
+    "f4_complete"
+  ]
+}

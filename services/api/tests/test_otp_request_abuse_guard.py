@@ -32,6 +32,7 @@ from kefe_api.modules.identity.otp_request_guard import (
 
 _PRODUCTION_DATABASE_URL = "postgresql+psycopg://kefe:secret@db.internal:5432/kefe"
 _PRODUCTION_REPLAY_SECRET = "production-account-merge-replay-secret-0001"
+_PRODUCTION_SESSION_SECRET = "production-session-renewal-secret-0000000001"
 
 
 def _production_settings(**overrides: object) -> Settings:
@@ -40,6 +41,7 @@ def _production_settings(**overrides: object) -> Settings:
         "persistence_backend": "postgres",
         "database_url": _PRODUCTION_DATABASE_URL,
         "account_merge_replay_secret": _PRODUCTION_REPLAY_SECRET,
+        "session_renewal_secret": _PRODUCTION_SESSION_SECRET,
         "otp_delivery_mode": "DISABLED",
         **overrides,
     }

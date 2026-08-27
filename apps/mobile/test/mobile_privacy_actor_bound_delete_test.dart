@@ -43,19 +43,37 @@ Map<String, Object?> validDeletionReceipt(String actorId) => {
   'aggregate_contributions_anonymized': true,
 };
 
+Map<String, Object?> validCredentialBundle({
+  required String actorId,
+  required String actorKind,
+  required String accessToken,
+  required String renewalToken,
+}) => {
+  'actor_id': actorId,
+  'actor_kind': actorKind,
+  'access_token': accessToken,
+  'expires_at': '2026-09-08T09:30:00Z',
+  'renewal_token': renewalToken,
+  'rotation_counter': 0,
+};
+
 void main() {
   test(
-    'guest issuance persists opaque token and actor id separately',
+    'guest issuance atomically persists the complete credential bundle',
     () async {
       final store = MemoryCredentialStore();
       final client = MockClient((request) async {
         expect(request.method, 'POST');
         expect(request.url.path, '/v1/identity/guest');
-        return jsonResponse({
-          'actor_id': guestActorId,
-          'access_token': 'guest-token',
-          'expires_at': '2026-09-08T09:30:00Z',
-        }, status: 201);
+        return jsonResponse(
+          validCredentialBundle(
+            actorId: guestActorId,
+            actorKind: 'GUEST',
+            accessToken: 'guest-token',
+            renewalToken: 'guest-renewal-token',
+          ),
+          status: 201,
+        );
       });
       final repository = HttpDecisionRepository(
         config: config,
@@ -68,6 +86,7 @@ void main() {
       expect(credential.actorId, guestActorId);
       expect(await store.read(), 'guest-token');
       expect(await store.readActorId(), guestActorId);
+      expect((await store.readBundle())!.renewalToken, 'guest-renewal-token');
     },
   );
 
@@ -78,11 +97,15 @@ void main() {
       var guestIssueCalls = 0;
       final client = MockClient((request) async {
         guestIssueCalls += 1;
-        return jsonResponse({
-          'actor_id': guestActorId,
-          'access_token': 'guest-token',
-          'expires_at': '2026-09-08T09:30:00Z',
-        }, status: 201);
+        return jsonResponse(
+          validCredentialBundle(
+            actorId: guestActorId,
+            actorKind: 'GUEST',
+            accessToken: 'guest-token',
+            renewalToken: 'guest-renewal-token',
+          ),
+          status: 201,
+        );
       });
       final repository = HttpDecisionRepository(
         config: config,
@@ -111,11 +134,15 @@ void main() {
       final client = MockClient((request) async {
         calls += 1;
         final actorId = calls == 1 ? guestActorId : otherActorId;
-        return jsonResponse({
-          'actor_id': actorId,
-          'access_token': 'guest-token-$calls',
-          'expires_at': '2026-09-08T09:30:00Z',
-        }, status: 201);
+        return jsonResponse(
+          validCredentialBundle(
+            actorId: actorId,
+            actorKind: 'GUEST',
+            accessToken: 'guest-token-$calls',
+            renewalToken: 'guest-renewal-token-$calls',
+          ),
+          status: 201,
+        );
       });
       final repository = HttpDecisionRepository(
         config: config,
@@ -145,9 +172,12 @@ void main() {
         expect(request.url.path, '/v1/auth/guest-merge');
         expect(requestHeader(request, 'authorization'), 'Bearer guest-token');
         return jsonResponse({
-          'actor_id': accountActorId,
-          'access_token': 'account-token',
-          'expires_at': '2026-09-08T09:30:00Z',
+          ...validCredentialBundle(
+            actorId: accountActorId,
+            actorKind: 'ACCOUNT',
+            accessToken: 'account-token',
+            renewalToken: 'account-renewal-token',
+          ),
           'merged_from_actor_id': guestActorId,
         });
       });
@@ -164,6 +194,7 @@ void main() {
       expect(conversion.actorId, accountActorId);
       expect(await store.read(), 'account-token');
       expect(await store.readActorId(), accountActorId);
+      expect((await store.readBundle())!.actorKind, 'ACCOUNT');
     },
   );
 

@@ -1,4 +1,4 @@
-registry_version: 1.23.0
+registry_version: 1.24.0
 errors:
 - code: AUTH_REQUIRED
   http_status: 401
@@ -10,6 +10,15 @@ errors:
   http_status: 401
   retryable: false
 - code: AUTH_TOKEN_REVOKED
+  http_status: 401
+  retryable: false
+- code: AUTH_RENEWAL_INVALID
+  http_status: 401
+  retryable: false
+- code: AUTH_RENEWAL_REPLAYED
+  http_status: 409
+  retryable: false
+- code: AUTH_SESSION_CONTINUITY_EXPIRED
   http_status: 401
   retryable: false
 - code: AUTH_MERGE_REPLAY_MISMATCH
