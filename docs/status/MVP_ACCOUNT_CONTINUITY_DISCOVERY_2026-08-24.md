@@ -45,11 +45,12 @@ remains historical evidence. It diverged from the old PR #368 base
 formatting and localization fixes that are now already present and exact-green in
 the parent.
 
-The candidate was rebuilt on the exact-green parent with only this slice's five
+The candidate was rebuilt on the exact-green parent with only this slice's seven
 owned files: two localization contracts, Settings presentation, focused
-regression coverage and this checkpoint. The inherited privacy bearer-cache
-checker correction remains supplied by the parent. No duplicated runtime or CI
-fix is replayed in this child.
+account-continuity coverage, two Settings viewport regressions and this
+checkpoint. The inherited privacy bearer-cache checker correction remains
+supplied by the parent. No duplicated runtime or CI fix is replayed in this
+child.
 
 ## Verification boundary
 
@@ -62,9 +63,15 @@ Focused repository regression coverage checks:
 - production and Product Preview still reuse the same governed account route;
 - Account Conversion still exposes `Continue as guest`.
 
-No post-convergence exact-head GitHub Actions PASS is claimed yet. Source
-comparison and focused regression intent are repository evidence only, not
-executed Flutter/CI evidence or human usability approval.
+The first consolidated exact head `f8cf1f3192506fa67767d480c27ad170b07e7596`
+passed API/PostgreSQL sub-jobs, mobile format and analyze, but failed six mobile
+regressions because the new account card moved existing Privacy controls below
+the lazy Settings viewport. The two historical child-owned viewport fixes were
+therefore restored without replaying unrelated parent repairs.
+
+No post-repair exact-head GitHub Actions PASS is claimed yet. Source comparison
+and focused regression intent are repository evidence only, not executed
+Flutter/CI evidence or human usability approval.
 
 ## Non-claims
 
