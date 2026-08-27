@@ -16,6 +16,18 @@ import 'package:kefe_mobile/features/privacy/application/privacy_controller.dart
 import 'package:kefe_mobile/features/privacy/presentation/privacy_controls_section.dart';
 import 'package:kefe_mobile/features/settings/presentation/settings_screen.dart';
 
+Future<void> _revealSettingsEntry(WidgetTester tester, Finder entry) async {
+  await tester.scrollUntilVisible(
+    entry,
+    240,
+    scrollable: find.descendant(
+      of: find.byKey(const ValueKey('settings-screen')),
+      matching: find.byType(Scrollable),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
 void main() {
   test('slice 13 contract preserves trust/control product boundaries', () {
     final contractFile = File(
@@ -96,10 +108,6 @@ void main() {
             findsOneWidget,
           );
           expect(
-            find.byKey(const ValueKey('settings-privacy-entry')),
-            findsOneWidget,
-          );
-          expect(
             find.byType(RadioListTile<AppLocalePreference>),
             findsNWidgets(3),
           );
@@ -107,6 +115,12 @@ void main() {
             find.byType(RadioListTile<AppThemePreference>),
             findsNWidgets(3),
           );
+
+          final privacyEntry = find.byKey(
+            const ValueKey('settings-privacy-entry'),
+          );
+          await _revealSettingsEntry(tester, privacyEntry);
+          expect(privacyEntry, findsOneWidget);
 
           final appBar = tester.widget<AppBar>(find.byType(AppBar));
           expect(appBar.backgroundColor, expectedVisual.surfaceRaised);
@@ -175,7 +189,9 @@ void main() {
         AppLocalePreference.en,
       );
 
-      await tester.tap(find.byKey(const ValueKey('settings-privacy-entry')));
+      final privacyEntry = find.byKey(const ValueKey('settings-privacy-entry'));
+      await _revealSettingsEntry(tester, privacyEntry);
+      await tester.tap(privacyEntry);
       await tester.pumpAndSettle();
       expect(find.text('privacy-route-sentinel'), findsOneWidget);
     },
