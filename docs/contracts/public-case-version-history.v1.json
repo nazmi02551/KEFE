@@ -1,0 +1,103 @@
+{
+  "contract_id": "KEFE-PUBLIC-CASE-VERSION-HISTORY-001",
+  "version": "1.0.0",
+  "status": "CANDIDATE",
+  "issue": 376,
+  "capabilities": [
+    "CAP-072",
+    "CAP-026",
+    "CAP-095"
+  ],
+  "parent": {
+    "pull_request": 375,
+    "exact_head": "ef3378b9263db1db044386ce795fe15df8528f1a"
+  },
+  "public_api": {
+    "method": "GET",
+    "path": "/v1/cases/{case_id}/history",
+    "authentication_required": false,
+    "maximum_items": 20,
+    "ordering": [
+      "version_no DESC"
+    ],
+    "allowed_source_statuses": [
+      "PUBLISHED",
+      "SUPERSEDED"
+    ],
+    "public_classifications": [
+      "CURRENT",
+      "PREVIOUS"
+    ],
+    "active_published_current_required": true,
+    "empty_or_withdrawn_error": "CASE_NOT_FOUND"
+  },
+  "item_fields": [
+    "case_version_id",
+    "version_no",
+    "title",
+    "summary",
+    "published_at",
+    "classification"
+  ],
+  "excluded_data": [
+    "DRAFT",
+    "IN_REVIEW",
+    "APPROVED",
+    "WITHDRAWN",
+    "admin_actor_identity",
+    "lifecycle_audit_command",
+    "lifecycle_audit_rationale",
+    "review_record",
+    "source_verification_inference",
+    "correction_reason_inference"
+  ],
+  "mobile": {
+    "read_only": true,
+    "localized_languages": [
+      "en",
+      "tr"
+    ],
+    "history_failure_blocks_case_journey": false,
+    "unknown_classification_fail_closed": true,
+    "duplicate_version_number_fail_closed": true,
+    "server_order_preserved": true,
+    "previous_version_called_correction": false
+  },
+  "preview": {
+    "current_fixture_projection_allowed": true,
+    "synthetic_previous_version_allowed": false
+  },
+  "preserved_invariants": [
+    "COMMIT_FIRST",
+    "BLIND_FIRST",
+    "IMMUTABLE_PUBLISHED_CASE_VERSION",
+    "GENERIC_CASE_AGNOSTIC_RUNTIME",
+    "PRODUCT_PREVIEW_PRODUCTION_ISOLATION",
+    "RAW_DOMAIN_VALUES_UNCHANGED"
+  ],
+  "evidence": {
+    "memory_api": true,
+    "openapi": true,
+    "postgresql": true,
+    "mobile_parser": true,
+    "localized_widget": true,
+    "source_validator_in_existing_ci": true,
+    "required_exact_head_workflows": [
+      "API CI",
+      "Mobile CI",
+      "MVP Beta Gates",
+      "Global Readiness"
+    ]
+  },
+  "non_claims": [
+    "correction_reason",
+    "source_correction_history",
+    "source_verification_methodology",
+    "editorial_acceptance",
+    "content_freshness",
+    "human_usability",
+    "production_reachability",
+    "store_readiness",
+    "capability_lifecycle_promotion"
+  ]
+}
