@@ -88,6 +88,7 @@ def _aggregate(case_id):
         sources=(source,),
         modifiers=("CONFIDENCE_CAPTURE",),
         is_fact_bearing=True,
+        is_real_event=True,
     )
 
 
@@ -133,6 +134,7 @@ def test_postgres_authoring_materializes_only_on_publish_and_preserves_history()
     assert consumer.primary_domain == "DAILY_LIFE"
     assert consumer.base_format == "DILEMMA"
     assert consumer.content_risk == "L0"
+    assert consumer.is_real_event is True
     assert consumer.questions[0].id == first.issues[0].questions[0].id
 
     first_context = PostgresContextRepository(engine).get_context(first.id)
@@ -166,7 +168,8 @@ def test_postgres_authoring_materializes_only_on_publish_and_preserves_history()
         rows = connection.execute(
             text(
                 """
-                SELECT id, status, accepts_weighs, primary_domain_code
+                SELECT id, status, accepts_weighs, primary_domain_code,
+                       is_real_event
                 FROM content.case_version
                 WHERE case_id = :case_id
                 ORDER BY version_no
@@ -178,6 +181,7 @@ def test_postgres_authoring_materializes_only_on_publish_and_preserves_history()
     assert rows[0]["accepts_weighs"] is False
     assert rows[0]["primary_domain_code"] == "DAILY_LIFE"
     assert rows[1]["primary_domain_code"] == "ECONOMY_MONEY"
+    assert [row["is_real_event"] for row in rows] == [True, True]
 
     historical = PostgresPerspectiveDecisionRepository(engine).get_case_version(first.id)
     current = PostgresPerspectiveDecisionRepository(engine).get_case_version(second.id)

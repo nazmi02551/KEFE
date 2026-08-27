@@ -1,0 +1,67 @@
+{
+  "contract_id": "KEFE-TODAY-REAL-EVENT-PROJECTION-001",
+  "version": "1.0.0",
+  "status": "IMPLEMENTATION_CANDIDATE",
+  "issue": 373,
+  "capabilities": [
+    "CAP-026",
+    "CAP-095"
+  ],
+  "authority": {
+    "source_model": "AuthoringCaseVersion.is_real_event",
+    "review_mode_for_real_event": "SOURCE_VERIFICATION",
+    "consumer_column": "content.case_version.is_real_event",
+    "consumer_api_path": "/v1/cases",
+    "consumer_api_field": "is_real_event"
+  },
+  "projection": {
+    "source_type": "boolean",
+    "consumer_type": "boolean",
+    "consumer_nullable": false,
+    "legacy_default": false,
+    "copy_exact_value": true,
+    "immutable_with_published_case_version": true
+  },
+  "selection": {
+    "mobile_eligible_only_when_exact_boolean_true": true,
+    "first_match_in_server_order": true,
+    "client_reordering_allowed": false,
+    "client_freshness_threshold_allowed": false,
+    "format_inference_allowed": false,
+    "domain_inference_allowed": false,
+    "title_or_summary_inference_allowed": false,
+    "risk_inference_allowed": false,
+    "list_position_inference_allowed": false
+  },
+  "mobile": {
+    "summary_metadata_backwards_compatible": true,
+    "missing_or_invalid_metadata_means_false": true,
+    "localized_languages": [
+      "en",
+      "tr"
+    ],
+    "truthful_non_actionable_empty_state_required": true,
+    "canonical_case_route": "/case/:caseId",
+    "today_specific_decision_runtime_allowed": false
+  },
+  "preview": {
+    "synthetic_real_event_fixture_allowed": false,
+    "existing_cases_default_to_false": true,
+    "empty_state_is_truthful": true
+  },
+  "preserved_invariants": [
+    "COMMIT_FIRST",
+    "BLIND_FIRST",
+    "IMMUTABLE_PUBLISHED_CASE_VERSION",
+    "GENERIC_CASE_AGNOSTIC_FLOW",
+    "PRODUCT_PREVIEW_PRODUCTION_ISOLATION"
+  ],
+  "non_claims": [
+    "case_is_fresh",
+    "external_source_is_live",
+    "preview_contains_real_event",
+    "collective_result_is_signal",
+    "cap026_lifecycle_promoted",
+    "cap095_lifecycle_promoted"
+  ]
+}

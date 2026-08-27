@@ -25,7 +25,7 @@ The snapshot generator must:
 1. use `services/api/alembic.ini` and the committed migration tree;
 2. prove a single connected chain from `20260727_0001` to the head/count recorded
    by `connected-alpha-schema-snapshot.v1.json` (currently
-   `20260812_0036` / 36 files);
+   `20260827_0037` / 37 files);
 3. fail when the committed migration graph drifts from that contract;
 4. run in offline PostgreSQL-dialect mode without a live database connection;
 5. produce a SHA-256 digest;

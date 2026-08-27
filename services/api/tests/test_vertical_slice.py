@@ -42,6 +42,7 @@ def test_explore_lists_published_cases_without_identity() -> None:
     assert len(items) == 1
     assert items[0]["case_id"] == str(DEMO_CASE_ID)
     assert items[0]["base_format"] == "DILEMMA"
+    assert items[0]["is_real_event"] is False
     assert "questions" not in items[0]
     assert "result" not in items[0]
 

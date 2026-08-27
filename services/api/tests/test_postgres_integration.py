@@ -58,6 +58,7 @@ def test_postgres_explore_lists_published_cases(monkeypatch: pytest.MonkeyPatch)
         items = response.json()["items"]
         assert any(item["case_id"] == str(DEMO_CASE_ID) for item in items)
         assert all("questions" not in item for item in items)
+        assert all(type(item["is_real_event"]) is bool for item in items)
     finally:
         get_settings.cache_clear()
 

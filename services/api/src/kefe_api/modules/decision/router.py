@@ -22,6 +22,7 @@ class CaseSummaryResponse(BaseModel):
     base_format: str
     primary_domain: str
     content_risk: str
+    is_real_event: bool
 
 
 class CaseListResponse(BaseModel):
@@ -130,6 +131,7 @@ def list_cases(
                 base_format=case.base_format,
                 primary_domain=case.primary_domain,
                 content_risk=case.content_risk,
+                is_real_event=case.is_real_event,
             )
             for case in cases
         ]
