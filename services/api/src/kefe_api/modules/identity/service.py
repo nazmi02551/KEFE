@@ -1,35 +1,83 @@
 from __future__ import annotations
 
 import hashlib
-import secrets
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from kefe_api.core.errors import DomainError
+from kefe_api.core.settings import get_settings
 from kefe_api.modules.identity.models import (
+    ActorKind,
     ActorPrincipal,
     GuestCredential,
     TokenResolution,
     TokenStatus,
 )
 from kefe_api.modules.identity.ports import IdentityRepository
+from kefe_api.modules.identity.session_renewal import (
+    SessionContinuityPolicy,
+    SessionTokenDeriver,
+)
 
 
 class IdentityService:
-    def __init__(self, *, repository: IdentityRepository, guest_token_ttl_days: int) -> None:
+    def __init__(
+        self,
+        *,
+        repository: IdentityRepository,
+        guest_token_ttl_days: int,
+        continuity_policy: SessionContinuityPolicy | None = None,
+        token_deriver: SessionTokenDeriver | None = None,
+    ) -> None:
+        runtime_settings = get_settings()
         self._repo = repository
         self._guest_token_ttl = timedelta(days=guest_token_ttl_days)
+        self._continuity_policy = continuity_policy or SessionContinuityPolicy.from_days(
+            access_ttl_days=guest_token_ttl_days,
+            absolute_lifetime_days=runtime_settings.session_renewal_absolute_lifetime_days,
+            inactivity_lifetime_days=runtime_settings.session_renewal_inactivity_days,
+            previous_pair_grace_seconds=(
+                runtime_settings.session_renewal_previous_pair_grace_seconds
+            ),
+        )
+        self._token_deriver = token_deriver or SessionTokenDeriver(
+            active_key_id=runtime_settings.session_renewal_active_key_id,
+            active_secret=runtime_settings.session_renewal_secret,
+            retained_keys=runtime_settings.session_renewal_retained_keys,
+        )
 
     def create_guest(self) -> GuestCredential:
+        now = datetime.now(UTC)
         actor_id = uuid4()
-        token = f"kefe_g_{secrets.token_urlsafe(32)}"
-        expires_at = datetime.now(UTC) + self._guest_token_ttl
+        session_id = uuid4()
+        pair = self._token_deriver.derive_pair(
+            session_id=session_id,
+            actor_id=actor_id,
+            actor_kind=ActorKind.GUEST,
+            rotation_counter=0,
+        )
+        expires_at = now + self._guest_token_ttl
+        absolute_expires_at, inactive_expires_at = (
+            self._continuity_policy.initial_deadlines(now=now)
+        )
         self._repo.create_guest_session(
             actor_id=actor_id,
-            token_hash=self._hash_token(token),
+            session_id=session_id,
+            token_hash=self._hash_token(pair.access_token),
             expires_at=expires_at,
+            renewal_token_hash=self._hash_token(pair.renewal_token),
+            rotation_counter=pair.rotation_counter,
+            token_derivation_key_id=pair.derivation_key_id,
+            continuity_absolute_expires_at=absolute_expires_at,
+            continuity_inactive_expires_at=inactive_expires_at,
         )
-        return GuestCredential(actor_id=actor_id, access_token=token, expires_at=expires_at)
+        return GuestCredential(
+            actor_id=actor_id,
+            access_token=pair.access_token,
+            expires_at=expires_at,
+            renewal_token=pair.renewal_token,
+            rotation_counter=pair.rotation_counter,
+        )
 
     def authenticate(self, authorization: str | None) -> ActorPrincipal:
         resolution = self._resolve_authorization(authorization)
