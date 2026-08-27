@@ -386,11 +386,12 @@ class PostgresContentAuthoringRepository:
                 INSERT INTO content.case_version (
                     id, case_id, version_no, status, title, summary, accepts_weighs,
                     published_at, created_at, base_format_code,
-                    primary_domain_code, content_risk
+                    primary_domain_code, content_risk, is_real_event
                 )
                 VALUES (
                     :id, :case_id, :version_no, 'PUBLISHED', :title, :summary, true,
-                    :published_at, :created_at, :base_format, :domain, :risk
+                    :published_at, :created_at, :base_format, :domain, :risk,
+                    :is_real_event
                 )
                 """
             ),
@@ -405,6 +406,7 @@ class PostgresContentAuthoringRepository:
                 "base_format": version.base_format_code,
                 "domain": version.primary_domain_code,
                 "risk": version.content_risk,
+                "is_real_event": version.is_real_event,
             },
         )
 

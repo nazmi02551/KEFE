@@ -56,6 +56,7 @@ class PostgresDecisionRepository:
                         cv.title,
                         cv.summary,
                         cv.accepts_weighs,
+                        cv.is_real_event,
                         ci.base_format_code,
                         ci.primary_domain_code,
                         ci.content_risk
@@ -108,6 +109,7 @@ class PostgresDecisionRepository:
             version_no=row["version_no"],
             questions=questions,
             accepts_weighs=row["accepts_weighs"],
+            is_real_event=row["is_real_event"],
         )
 
     def save_session_with_event(

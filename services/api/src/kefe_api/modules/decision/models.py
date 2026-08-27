@@ -114,6 +114,7 @@ class CaseVersion:
     version_no: int
     questions: tuple[Question, ...]
     accepts_weighs: bool = True
+    is_real_event: bool = False
     content_configuration_id: UUID | None = None
     content_configuration_version_no: int | None = None
     resolved_flow: ResolvedFlow | None = None

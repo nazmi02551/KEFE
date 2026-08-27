@@ -10,6 +10,12 @@ abstract final class ExperienceHubStringCatalog {
       'standard_body':
           'Browse the full case catalog across daily life, technology, public life and more.',
       'standard_action': 'Browse cases',
+      'today_title': 'KEFE Today',
+      'today_body':
+          'Weigh a source-reviewed real-world Case through the same blind-first KEFE journey.',
+      'today_action': 'Weigh today\'s Case',
+      'today_empty':
+          'No source-reviewed real-world Case is published right now.',
       'dilemma_title': 'Dilemmas',
       'dilemma_body':
           'Weigh a low-risk everyday or ethical dilemma. Make your own decision before seeing results and opposing perspectives.',
@@ -49,6 +55,12 @@ abstract final class ExperienceHubStringCatalog {
       'standard_body':
           'Günlük yaşamdan teknolojiye ve kamusal yaşama kadar tüm vaka kataloğunu keşfet.',
       'standard_action': 'Vakaları keşfet',
+      'today_title': 'KEFE Today',
+      'today_body':
+          'Kaynak doğrulamasından geçmiş gerçek dünyadan bir vakayı aynı kör-önce KEFE yolculuğuyla tart.',
+      'today_action': 'Günün vakasını tart',
+      'today_empty':
+          'Şu anda kaynak doğrulamasından geçmiş yayımlanmış bir gerçek dünya vakası yok.',
       'dilemma_title': 'İkilemler',
       'dilemma_body':
           'Düşük riskli gündelik veya etik bir ikilemi tart. Sonuçları ve karşı perspektifleri görmeden önce kendi kararını ver.',

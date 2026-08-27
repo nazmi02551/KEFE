@@ -14,8 +14,8 @@ Create a deterministic transport artifact from the canonical Alembic migration a
 
 - migration authority: `services/api/migrations`;
 - root revision: `20260727_0001`;
-- expected head: `20260812_0036`;
-- current migration files: 36;
+- expected head: `20260827_0037`;
+- current migration files: 37;
 - generation mode: Alembic offline SQL;
 - generation command: `alembic upgrade head --sql`;
 - target dialect: PostgreSQL.
@@ -26,6 +26,11 @@ The 2026-08-27 session-renewal convergence extends the same linear authority
 with `20260812_0035 -> 20260812_0036`. The snapshot contract is now the
 validator's head/count source, so later migration additions must update the
 reviewed contract rather than a parallel script constant.
+
+The 2026-08-27 KEFE Today consumer projection extends that chain with
+`20260812_0036 -> 20260827_0037`. It adds only the governed real-event boolean
+to the existing immutable consumer CaseVersion table; it does not apply the
+snapshot to any database.
 
 ## Artifact boundary
 

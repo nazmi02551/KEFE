@@ -729,6 +729,10 @@
             "title": "Content Risk",
             "type": "string"
           },
+          "is_real_event": {
+            "title": "Is Real Event",
+            "type": "boolean"
+          },
           "primary_domain": {
             "title": "Primary Domain",
             "type": "string"
@@ -754,7 +758,8 @@
           "summary",
           "base_format",
           "primary_domain",
-          "content_risk"
+          "content_risk",
+          "is_real_event"
         ],
         "title": "CaseSummaryResponse",
         "type": "object"
