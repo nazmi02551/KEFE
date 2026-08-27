@@ -104,21 +104,17 @@ class CaseVersionHistorySection extends ConsumerWidget {
                       children: [
                         Text(
                           strings.caseHistoryTitle,
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w900,
-                          ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w900),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           strings.caseHistoryHelper,
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodySmall?.copyWith(
-                            color: visual.mutedForeground,
-                            height: 1.4,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: visual.mutedForeground,
+                                height: 1.4,
+                              ),
                         ),
                       ],
                     ),
@@ -205,9 +201,9 @@ class _VersionTile extends StatelessWidget {
             const SizedBox(height: 3),
             Text(
               strings.caseHistoryPublished(version.publishedAt!),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: visual.mutedForeground,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: visual.mutedForeground),
             ),
           ],
           const SizedBox(height: 7),

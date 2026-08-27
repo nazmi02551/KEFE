@@ -59,10 +59,8 @@ extension CaseVersionHistoryStrings on KefeStrings {
       _historyText('count', placeholders: {'count': count});
   String caseHistoryVersion(int version) =>
       _historyText('version', placeholders: {'version': version});
-  String caseHistoryPublished(DateTime value) => _historyText(
-    'published',
-    placeholders: {'date': _isoDate(value)},
-  );
+  String caseHistoryPublished(DateTime value) =>
+      _historyText('published', placeholders: {'date': _isoDate(value)});
 
   static String _isoDate(DateTime value) {
     final utc = value.toUtc();

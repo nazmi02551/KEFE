@@ -118,52 +118,55 @@ void main() {
     expect(history.last.publishedAt, isNull);
   });
 
-  test('fails closed on duplicate, reordered or unknown public history', () async {
-    for (final items in <List<Object?>>[
-      [
-        version(
-          id: '71000000-0000-4000-8000-000000000003',
-          number: 2,
-          classification: 'CURRENT',
-        ),
-        version(
-          id: '71000000-0000-4000-8000-000000000002',
-          number: 2,
-          classification: 'PREVIOUS',
-        ),
-      ],
-      [
-        version(
-          id: '71000000-0000-4000-8000-000000000002',
-          number: 1,
-          classification: 'CURRENT',
-        ),
-        version(
-          id: '71000000-0000-4000-8000-000000000003',
-          number: 2,
-          classification: 'PREVIOUS',
-        ),
-      ],
-      [
-        version(
-          id: '71000000-0000-4000-8000-000000000003',
-          number: 2,
-          classification: 'CORRECTED',
-        ),
-      ],
-    ]) {
-      await expectLater(
-        repositoryFor(items).fetchPublicCaseHistory(caseId),
-        throwsA(
-          isA<ClientTransportFailure>().having(
-            (error) => error.code,
-            'code',
-            'PUBLIC_CASE_HISTORY_RESPONSE_INVALID',
+  test(
+    'fails closed on duplicate, reordered or unknown public history',
+    () async {
+      for (final items in <List<Object?>>[
+        [
+          version(
+            id: '71000000-0000-4000-8000-000000000003',
+            number: 2,
+            classification: 'CURRENT',
           ),
-        ),
-      );
-    }
-  });
+          version(
+            id: '71000000-0000-4000-8000-000000000002',
+            number: 2,
+            classification: 'PREVIOUS',
+          ),
+        ],
+        [
+          version(
+            id: '71000000-0000-4000-8000-000000000002',
+            number: 1,
+            classification: 'CURRENT',
+          ),
+          version(
+            id: '71000000-0000-4000-8000-000000000003',
+            number: 2,
+            classification: 'PREVIOUS',
+          ),
+        ],
+        [
+          version(
+            id: '71000000-0000-4000-8000-000000000003',
+            number: 2,
+            classification: 'CORRECTED',
+          ),
+        ],
+      ]) {
+        await expectLater(
+          repositoryFor(items).fetchPublicCaseHistory(caseId),
+          throwsA(
+            isA<ClientTransportFailure>().having(
+              (error) => error.code,
+              'code',
+              'PUBLIC_CASE_HISTORY_RESPONSE_INVALID',
+            ),
+          ),
+        );
+      }
+    },
+  );
 
   testWidgets('shows localized current and previous public versions', (
     tester,
@@ -207,25 +210,26 @@ void main() {
     expect(find.textContaining('Düzeltildi'), findsNothing);
   });
 
-  testWidgets('history failure is localized and remains independently retryable', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      historyApp(
-        locale: const Locale('en'),
-        repository: UnavailableHistoryFakeRepository(),
-      ),
-    );
-    await tester.pumpAndSettle();
+  testWidgets(
+    'history failure is localized and remains independently retryable',
+    (tester) async {
+      await tester.pumpWidget(
+        historyApp(
+          locale: const Locale('en'),
+          repository: UnavailableHistoryFakeRepository(),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(
-      find.text(
-        'Published version history is unavailable. You can still review and weigh this case.',
-      ),
-      findsOneWidget,
-    );
-    expect(find.byKey(const ValueKey('case-history-retry')), findsOneWidget);
-  });
+      expect(
+        find.text(
+          'Published version history is unavailable. You can still review and weigh this case.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('case-history-retry')), findsOneWidget);
+    },
+  );
 
   testWidgets('empty history fails closed without blocking the case journey', (
     tester,
