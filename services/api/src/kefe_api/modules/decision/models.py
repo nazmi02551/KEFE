@@ -49,6 +49,11 @@ class PerspectiveSourceKind(StrEnum):
     HUMAN_REASON = "HUMAN_REASON"
 
 
+class PublicCaseVersionClassification(StrEnum):
+    CURRENT = "CURRENT"
+    PREVIOUS = "PREVIOUS"
+
+
 class CommitStatus(StrEnum):
     COMMITTED = "COMMITTED"
     IDEMPOTENT_REPLAY = "IDEMPOTENT_REPLAY"
@@ -124,6 +129,17 @@ class CaseVersion:
     cultural_context_note: str | None = None
     legal_context_note: str | None = None
     localizations: Mapping[str, CaseLocalization] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, slots=True)
+class PublicCaseVersion:
+    case_id: UUID
+    case_version_id: UUID
+    version_no: int
+    title: str
+    summary: str
+    published_at: datetime | None
+    classification: PublicCaseVersionClassification
 
 
 @dataclass(slots=True)

@@ -7,6 +7,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Header, Query, Request
 from pydantic import BaseModel, Field
 
+from kefe_api.modules.decision.models import PublicCaseVersionClassification
 from kefe_api.modules.decision.service import DecisionService
 from kefe_api.modules.identity.dependencies import PrincipalDep
 
@@ -27,6 +28,20 @@ class CaseSummaryResponse(BaseModel):
 
 class CaseListResponse(BaseModel):
     items: list[CaseSummaryResponse]
+
+
+class PublicCaseVersionResponse(BaseModel):
+    case_version_id: UUID
+    version_no: int
+    title: str
+    summary: str
+    published_at: datetime | None
+    classification: PublicCaseVersionClassification
+
+
+class PublicCaseVersionListResponse(BaseModel):
+    case_id: UUID
+    items: list[PublicCaseVersionResponse]
 
 
 class QuestionResponse(BaseModel):
@@ -160,6 +175,32 @@ def get_case(case_id: UUID, service: DecisionServiceDep) -> CaseDetailResponse:
                 options=list(question.options),
             )
             for question in case.questions
+        ],
+    )
+
+
+@router.get(
+    "/cases/{case_id}/history",
+    response_model=PublicCaseVersionListResponse,
+)
+def list_case_history(
+    case_id: UUID,
+    service: DecisionServiceDep,
+    limit: Annotated[int, Query(ge=1, le=20)] = 20,
+) -> PublicCaseVersionListResponse:
+    versions = service.list_public_case_versions(case_id, limit=limit)
+    return PublicCaseVersionListResponse(
+        case_id=case_id,
+        items=[
+            PublicCaseVersionResponse(
+                case_version_id=item.case_version_id,
+                version_no=item.version_no,
+                title=item.title,
+                summary=item.summary,
+                published_at=item.published_at,
+                classification=item.classification,
+            )
+            for item in versions
         ],
     )
 

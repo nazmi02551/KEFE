@@ -33,6 +33,13 @@ class DecisionService:
             raise DomainError("CASE_NOT_FOUND", "Case not found", 404)
         return case
 
+    def list_public_case_versions(self, case_id: UUID, *, limit: int = 20):
+        bounded_limit = min(max(limit, 1), 20)
+        versions = self._repo.list_public_case_versions(case_id, limit=bounded_limit)
+        if not versions:
+            raise DomainError("CASE_NOT_FOUND", "Case not found", 404)
+        return versions
+
     def start_session(self, *, actor_id: UUID, case_id: UUID) -> WeighSession:
         case = self.get_case(case_id)
         if not case.accepts_weighs:
