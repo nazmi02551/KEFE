@@ -36,6 +36,30 @@ class DecisionCaseSummary {
   final bool isRealEvent;
 }
 
+enum PublicCaseVersionClassification { current, previous }
+
+@immutable
+class PublicCaseVersion {
+  const PublicCaseVersion({
+    required this.versionId,
+    required this.versionNo,
+    required this.title,
+    required this.summary,
+    required this.publishedAt,
+    required this.classification,
+  });
+
+  final String versionId;
+  final int versionNo;
+  final String title;
+  final String summary;
+  final DateTime? publishedAt;
+  final PublicCaseVersionClassification classification;
+
+  bool get isCurrent =>
+      classification == PublicCaseVersionClassification.current;
+}
+
 @immutable
 class ReasonPolicy {
   const ReasonPolicy({

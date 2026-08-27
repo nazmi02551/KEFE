@@ -13,6 +13,7 @@ import '../../onboarding/application/onboarding_controller.dart';
 import '../application/decision_controller.dart';
 import '../domain/decision_models.dart';
 import 'case_hero_header.dart';
+import 'case_version_history_section.dart';
 import 'decision_flow_screen.dart';
 import 'decision_journey_stage_resolver.dart';
 import 'decision_journey_strings.dart';

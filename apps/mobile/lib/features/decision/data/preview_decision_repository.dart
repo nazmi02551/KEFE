@@ -8,6 +8,7 @@ class PreviewDecisionRepository
         DecisionRepository,
         FlowRuntimeRepository,
         DecisionLineageRepository,
+        PublicCaseHistoryRepository,
         PerspectiveRepository,
         ContextRepository {
   static const caseId = '11111111-1111-4111-8111-111111111111';
@@ -283,6 +284,28 @@ class PreviewDecisionRepository
     }
     _activeCase = item;
     return item;
+  }
+
+  @override
+  Future<List<PublicCaseVersion>> fetchPublicCaseHistory(
+    String requestedCaseId,
+  ) async {
+    final item = _cases
+        .where((candidate) => candidate.id == requestedCaseId)
+        .firstOrNull;
+    if (item == null) {
+      throw StateError('Unknown preview Case: $requestedCaseId');
+    }
+    return [
+      PublicCaseVersion(
+        versionId: item.versionId,
+        versionNo: 1,
+        title: item.title,
+        summary: item.summary,
+        publishedAt: null,
+        classification: PublicCaseVersionClassification.current,
+      ),
+    ];
   }
 
   @override

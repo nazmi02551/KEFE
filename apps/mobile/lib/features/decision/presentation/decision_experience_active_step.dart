@@ -59,6 +59,8 @@ class _ActiveFlowStep extends ConsumerWidget {
           progressive: true,
         ),
         const SizedBox(height: 16),
+        CaseVersionHistorySection(caseId: state.caseData!.id),
+        const SizedBox(height: 16),
         _ContextAdvancePanel(
           enabled: !state.offlineDraft && !state.submitting,
           onContinue: () => ref

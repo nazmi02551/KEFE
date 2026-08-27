@@ -73,6 +73,7 @@ class HttpDecisionRepository
         DecisionRepository,
         FlowRuntimeRepository,
         DecisionLineageRepository,
+        PublicCaseHistoryRepository,
         PerspectiveRepository,
         ContextRepository {
   HttpDecisionRepository({
@@ -199,6 +200,88 @@ class HttpDecisionRepository
           })
           .toList(growable: false),
     );
+  }
+
+  @override
+  Future<List<PublicCaseVersion>> fetchPublicCaseHistory(String caseId) async {
+    final body = _decode(
+      await _request(() => _client.get(_uri('/v1/cases/$caseId/history'))),
+    );
+    try {
+      if (body['case_id'] != caseId) {
+        throw const FormatException();
+      }
+      final rawItems = body['items'];
+      if (rawItems is! List<Object?> || rawItems.isEmpty) {
+        throw const FormatException();
+      }
+      final versions = <PublicCaseVersion>[];
+      final versionNumbers = <int>{};
+      var previousVersionNo = 1 << 62;
+      var currentCount = 0;
+      for (final raw in rawItems) {
+        if (raw is! Map<String, Object?>) {
+          throw const FormatException();
+        }
+        final versionId = raw['case_version_id'];
+        final versionNo = raw['version_no'];
+        final title = raw['title'];
+        final summary = raw['summary'];
+        final classification = switch (raw['classification']) {
+          'CURRENT' => PublicCaseVersionClassification.current,
+          'PREVIOUS' => PublicCaseVersionClassification.previous,
+          _ => throw const FormatException(),
+        };
+        if (versionId is! String ||
+            versionId.isEmpty ||
+            versionNo is! int ||
+            versionNo <= 0 ||
+            title is! String ||
+            title.isEmpty ||
+            summary is! String ||
+            !versionNumbers.add(versionNo) ||
+            versionNo >= previousVersionNo) {
+          throw const FormatException();
+        }
+        previousVersionNo = versionNo;
+        final rawPublishedAt = raw['published_at'];
+        final DateTime? publishedAt;
+        if (rawPublishedAt == null) {
+          publishedAt = null;
+        } else if (rawPublishedAt is String) {
+          publishedAt = DateTime.tryParse(rawPublishedAt);
+        } else {
+          throw const FormatException();
+        }
+        if (rawPublishedAt != null && publishedAt == null) {
+          throw const FormatException();
+        }
+        if (classification == PublicCaseVersionClassification.current) {
+          currentCount += 1;
+          if (versions.isNotEmpty) {
+            throw const FormatException();
+          }
+        }
+        versions.add(
+          PublicCaseVersion(
+            versionId: versionId,
+            versionNo: versionNo,
+            title: title,
+            summary: summary,
+            publishedAt: publishedAt,
+            classification: classification,
+          ),
+        );
+      }
+      if (currentCount != 1) {
+        throw const FormatException();
+      }
+      return versions;
+    } on FormatException {
+      throw const ClientTransportFailure(
+        code: 'PUBLIC_CASE_HISTORY_RESPONSE_INVALID',
+      );
+    }
   }
 
   @override
