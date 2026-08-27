@@ -10,6 +10,7 @@ on:
       - 'scripts/validate_connected_alpha_ci_consolidation.py'
       - 'scripts/validate_session_renewal_continuity.py'
       - 'scripts/validate_kefe_today_real_event_projection.py'
+      - 'scripts/validate_public_case_version_history.py'
       - '.github/workflows/api-ci.yml'
   push:
     branches: [main]
@@ -21,6 +22,7 @@ on:
       - 'scripts/validate_connected_alpha_ci_consolidation.py'
       - 'scripts/validate_session_renewal_continuity.py'
       - 'scripts/validate_kefe_today_real_event_projection.py'
+      - 'scripts/validate_public_case_version_history.py'
       - '.github/workflows/api-ci.yml'
 
 permissions:
@@ -53,6 +55,8 @@ jobs:
         run: python3 scripts/validate_session_renewal_continuity.py
       - name: KEFE Today real-event projection contract
         run: python3 scripts/validate_kefe_today_real_event_projection.py
+      - name: Public CaseVersion history contract
+        run: python3 scripts/validate_public_case_version_history.py
       - name: Production runtime contract
         working-directory: services/api
         run: python tools/check_production_api_runtime.py

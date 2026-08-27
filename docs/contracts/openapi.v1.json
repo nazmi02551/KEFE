@@ -3479,6 +3479,82 @@
         ],
         "title": "ValidationError",
         "type": "object"
+      },
+      "PublicCaseVersionClassification": {
+        "enum": [
+          "CURRENT",
+          "PREVIOUS"
+        ],
+        "title": "PublicCaseVersionClassification",
+        "type": "string"
+      },
+      "PublicCaseVersionResponse": {
+        "properties": {
+          "case_version_id": {
+            "format": "uuid",
+            "title": "Case Version Id",
+            "type": "string"
+          },
+          "classification": {
+            "$ref": "#/components/schemas/PublicCaseVersionClassification"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "version_no": {
+            "title": "Version No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "case_version_id",
+          "version_no",
+          "title",
+          "summary",
+          "published_at",
+          "classification"
+        ],
+        "title": "PublicCaseVersionResponse",
+        "type": "object"
+      },
+      "PublicCaseVersionListResponse": {
+        "properties": {
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PublicCaseVersionResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "case_id",
+          "items"
+        ],
+        "title": "PublicCaseVersionListResponse",
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -5546,6 +5622,61 @@
           }
         ],
         "summary": "Reveal",
+        "tags": [
+          "Decision"
+        ]
+      }
+    },
+    "/v1/cases/{case_id}/history": {
+      "get": {
+        "operationId": "list_case_history_v1_cases__case_id__history_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 20,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicCaseVersionListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Case History",
         "tags": [
           "Decision"
         ]
