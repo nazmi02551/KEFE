@@ -41,8 +41,12 @@ extension InternalAlphaStrings on KefeStrings {
   String get accountPreserved => _iaText('account.preserved');
   String get accountReturnMyKefe => _iaText('account.return_my_kefe');
   String get accountProtectAction => _iaText('account.protect_action');
-  String accountFailure(String code) =>
-      _iaText('account.failure', placeholders: {'code': code});
+  String accountFailure(String code) => switch (code) {
+    'AUTH_GUEST_CONTINUITY_REQUIRED' ||
+    'AUTH_ACCOUNT_REAUTHENTICATION_REQUIRED' ||
+    'AUTH_LEGACY_CONTINUITY_REQUIRED' => messageForCode(code),
+    _ => _iaText('account.failure', placeholders: {'code': code}),
+  };
 
   String get activityEyebrow => _iaText('activity.eyebrow');
   String get activityTitle => _iaText('activity.title');

@@ -4,40 +4,58 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../../core/config/app_config.dart';
+import '../../../core/network/session_renewal_client.dart';
+import '../../../core/storage/credential_bundle.dart';
+import '../../../core/storage/session_credential_store.dart';
 import '../../context/data/context_repository.dart';
 import '../../context/domain/context_models.dart';
 import '../domain/decision_models.dart';
 import 'decision_repository.dart';
 
-abstract interface class CredentialStore {
-  Future<String?> read();
-  Future<String?> readActorId();
-  Future<void> write(String token);
-  Future<void> writeActorId(String actorId);
-  Future<void> clear();
-}
+export '../../../core/storage/session_credential_store.dart'
+    show SessionCredentialStore;
+
+typedef CredentialStore = SessionCredentialStore;
 
 class MemoryCredentialStore implements CredentialStore {
   String? _token;
   String? _actorId;
+  SessionCredentialBundle? _bundle;
 
   @override
   Future<void> clear() async {
     _token = null;
     _actorId = null;
+    _bundle = null;
   }
 
   @override
-  Future<String?> read() async => _token;
+  Future<String?> read() async => _bundle?.accessToken ?? _token;
 
   @override
-  Future<String?> readActorId() async => _actorId;
+  Future<String?> readActorId() async => _bundle?.actorId ?? _actorId;
 
   @override
-  Future<void> write(String token) async => _token = token;
+  Future<void> write(String token) async {
+    _bundle = null;
+    _token = token;
+  }
 
   @override
   Future<void> writeActorId(String actorId) async => _actorId = actorId;
+
+  @override
+  Future<void> clearBundle() async => _bundle = null;
+
+  @override
+  Future<SessionCredentialBundle?> readBundle() async => _bundle;
+
+  @override
+  Future<void> writeBundle(SessionCredentialBundle bundle) async {
+    _bundle = bundle;
+    _token = null;
+    _actorId = null;
+  }
 }
 
 class ApiFailure implements Exception {
@@ -61,18 +79,46 @@ class HttpDecisionRepository
     required AppConfig config,
     required http.Client client,
     required CredentialStore credentialStore,
+    SessionRenewalCoordinator? sessionRenewalCoordinator,
   }) : _config = config,
        _client = client,
-       _credentialStore = credentialStore;
+       _credentialStore = credentialStore,
+       _sessionRenewalCoordinator = sessionRenewalCoordinator;
 
   final AppConfig _config;
   final http.Client _client;
   final CredentialStore _credentialStore;
+  final SessionRenewalCoordinator? _sessionRenewalCoordinator;
 
   Uri _uri(String path) => _config.apiBaseUri.resolve(path);
 
   @override
   Future<GuestCredential> ensureGuestCredential() async {
+    SessionCredentialBundle? coordinated;
+    try {
+      coordinated = await _sessionRenewalCoordinator?.ensureCurrent();
+    } on SessionContinuityFailure catch (error) {
+      throw ApiFailure(error.code, error.statusCode);
+    } on TimeoutException {
+      throw const ClientTransportFailure(code: 'NETWORK_TIMEOUT');
+    } on http.ClientException {
+      throw const ClientTransportFailure();
+    }
+    if (coordinated != null) {
+      return GuestCredential(
+        actorId: coordinated.actorId,
+        accessToken: coordinated.accessToken,
+        expiresAt: coordinated.accessExpiresAt,
+      );
+    }
+    final bundle = await _credentialStore.readBundle();
+    if (bundle != null) {
+      return GuestCredential(
+        actorId: bundle.actorId,
+        accessToken: bundle.accessToken,
+        expiresAt: bundle.accessExpiresAt,
+      );
+    }
     final existing = await _credentialStore.read();
     if (existing != null) {
       return GuestCredential(
@@ -89,14 +135,16 @@ class HttpDecisionRepository
       ),
     );
     final body = _decode(response);
-    final credential = GuestCredential(
-      actorId: body['actor_id'] as String,
-      accessToken: body['access_token'] as String,
-      expiresAt: DateTime.parse(body['expires_at'] as String),
+    final newBundle = SessionCredentialBundle.fromApiJson(
+      body,
+      accessExpiryKey: 'expires_at',
     );
-    await _credentialStore.write(credential.accessToken);
-    await _credentialStore.writeActorId(credential.actorId);
-    return credential;
+    await _credentialStore.writeBundle(newBundle);
+    return GuestCredential(
+      actorId: newBundle.actorId,
+      accessToken: newBundle.accessToken,
+      expiresAt: newBundle.accessExpiresAt,
+    );
   }
 
   @override

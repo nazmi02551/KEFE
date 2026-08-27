@@ -28,4 +28,31 @@ void main() {
     const raw = '{"version":1,"actor_id":"legacy"}';
     expect(SessionCredentialBundle.decode(raw), isNull);
   });
+
+  test('API bundle preserves exact expiry and actor kind', () {
+    final bundle = SessionCredentialBundle.fromApiJson({
+      'actor_id': 'actor-123',
+      'actor_kind': 'ACCOUNT',
+      'access_token': 'kefe_a_access',
+      'access_expires_at': '2026-09-11T12:30:00Z',
+      'renewal_token': 'kefe_r_renewal',
+      'rotation_counter': 4,
+    });
+
+    expect(bundle.actorKind, 'ACCOUNT');
+    expect(bundle.accessExpiresAt, DateTime.utc(2026, 9, 11, 12, 30));
+    expect(bundle.rotationCounter, 4);
+  });
+
+  test('API bundle rejects missing renewal lifecycle metadata', () {
+    expect(
+      () => SessionCredentialBundle.fromApiJson({
+        'actor_id': 'actor-123',
+        'actor_kind': 'GUEST',
+        'access_token': 'kefe_g_access',
+        'access_expires_at': '2026-09-11T12:30:00Z',
+      }),
+      throwsFormatException,
+    );
+  });
 }

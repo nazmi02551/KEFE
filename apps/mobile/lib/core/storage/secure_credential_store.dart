@@ -1,10 +1,9 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../../features/decision/data/http_decision_repository.dart';
 import 'credential_bundle.dart';
+import 'session_credential_store.dart';
 
-class SecureCredentialStore
-    implements CredentialStore, AtomicCredentialBundleStore {
+class SecureCredentialStore implements SessionCredentialStore {
   SecureCredentialStore({FlutterSecureStorage? storage})
     : _storage = storage ?? const FlutterSecureStorage();
 

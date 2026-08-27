@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../../core/config/app_config.dart';
+import '../../../core/storage/credential_bundle.dart';
 import '../../decision/data/decision_repository.dart';
 import '../../decision/data/http_decision_repository.dart';
 import 'account_repository.dart';
@@ -84,12 +85,13 @@ class HttpAccountRepository implements AccountRepository {
         ),
       ),
     );
-    final accountToken = body['access_token'] as String;
-    final actorId = body['actor_id'] as String;
-    await _credentialStore.write(accountToken);
-    await _credentialStore.writeActorId(actorId);
+    final bundle = SessionCredentialBundle.fromApiJson(
+      body,
+      accessExpiryKey: 'expires_at',
+    );
+    await _credentialStore.writeBundle(bundle);
     return AccountConversion(
-      actorId: actorId,
+      actorId: bundle.actorId,
       mergedExistingHistory: body['merged_from_actor_id'] != null,
     );
   }

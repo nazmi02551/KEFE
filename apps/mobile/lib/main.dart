@@ -23,6 +23,9 @@ void main() {
             config: ref.watch(appConfigProvider),
             client: ref.watch(httpClientProvider),
             credentialStore: ref.watch(credentialStoreProvider),
+            sessionRenewalCoordinator: ref.watch(
+              sessionRenewalCoordinatorProvider,
+            ),
           ),
         ),
         consensusExperienceEnabledProvider.overrideWithValue(true),

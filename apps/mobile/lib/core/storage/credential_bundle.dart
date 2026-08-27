@@ -19,6 +19,39 @@ class SessionCredentialBundle {
   final String renewalToken;
   final int rotationCounter;
 
+  factory SessionCredentialBundle.fromApiJson(
+    Map<String, Object?> body, {
+    String accessExpiryKey = 'access_expires_at',
+  }) {
+    final actorId = body['actor_id'];
+    final actorKind = body['actor_kind'];
+    final accessToken = body['access_token'];
+    final accessExpiresAt = body[accessExpiryKey];
+    final renewalToken = body['renewal_token'];
+    final rotationCounter = body['rotation_counter'];
+    if (actorId is! String ||
+        actorId.isEmpty ||
+        actorKind is! String ||
+        !const {'GUEST', 'ACCOUNT'}.contains(actorKind) ||
+        accessToken is! String ||
+        accessToken.isEmpty ||
+        accessExpiresAt is! String ||
+        renewalToken is! String ||
+        renewalToken.isEmpty ||
+        rotationCounter is! int ||
+        rotationCounter < 0) {
+      throw const FormatException('Invalid session credential bundle');
+    }
+    return SessionCredentialBundle(
+      actorId: actorId,
+      actorKind: actorKind,
+      accessToken: accessToken,
+      accessExpiresAt: DateTime.parse(accessExpiresAt).toUtc(),
+      renewalToken: renewalToken,
+      rotationCounter: rotationCounter,
+    );
+  }
+
   String encode() => jsonEncode(<String, Object>{
     'version': version,
     'actor_id': actorId,
@@ -42,11 +75,16 @@ class SessionCredentialBundle {
     final renewalToken = decoded['renewal_token'];
     final rotationCounter = decoded['rotation_counter'];
     if (actorId is! String ||
+        actorId.isEmpty ||
         actorKind is! String ||
+        !const {'GUEST', 'ACCOUNT'}.contains(actorKind) ||
         accessToken is! String ||
+        accessToken.isEmpty ||
         accessExpiresAt is! String ||
         renewalToken is! String ||
-        rotationCounter is! int) {
+        renewalToken.isEmpty ||
+        rotationCounter is! int ||
+        rotationCounter < 0) {
       return null;
     }
     return SessionCredentialBundle(
