@@ -48,7 +48,7 @@ Future<void> revealCaseControl(WidgetTester tester, Finder target) async {
 
 void main() {
   testWidgets(
-    'experience hub surfaces community, real Sports CALL and truthful Atlas state',
+    'experience hub surfaces Dilemma, community, Sports CALL and truthful Atlas state',
     (tester) async {
       useTurkishLocale(tester);
 
@@ -69,6 +69,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('experience-hub')), findsOneWidget);
+
+      final dilemma = find.byKey(const ValueKey('experience-dilemma'));
+      await revealExperience(tester, dilemma);
+      expect(dilemma, findsOneWidget);
+      expect(find.text('İkilemler'), findsOneWidget);
+      expect(find.textContaining('Son koltuk kime verilmeli?'), findsWidgets);
 
       final community = find.byKey(const ValueKey('experience-community'));
       await revealExperience(tester, community);
@@ -102,6 +108,47 @@ void main() {
       expect(truth, findsOneWidget);
     },
   );
+
+  testWidgets('Dilemma enters the canonical blind-first Case journey', (
+    tester,
+  ) async {
+    useTurkishLocale(tester);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appPreferencesStoreProvider.overrideWithValue(turkishPreferences()),
+          decisionRepositoryProvider.overrideWithValue(
+            PreviewDecisionRepository(),
+          ),
+          decisionDraftStoreProvider.overrideWithValue(
+            MemoryDecisionDraftStore(),
+          ),
+        ],
+        child: const KefeApp(initialLocation: '/experiences'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final dilemma = find.byKey(const ValueKey('experience-dilemma'));
+    await revealExperience(tester, dilemma);
+    final action = find.descendant(
+      of: dilemma,
+      matching: find.byType(FilledButton),
+    );
+    expect(action, findsOneWidget);
+    await tester.tap(action);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
+    expect(find.text('Son koltuk kime verilmeli?'), findsOneWidget);
+    await revealCaseControl(
+      tester,
+      find.byKey(const ValueKey('commit-button')),
+    );
+    expect(find.byKey(const ValueKey('commit-button')), findsOneWidget);
+    expect(find.byKey(const ValueKey('post-commit-journey')), findsNothing);
+  });
 
   testWidgets(
     'community entry starts with the canonical blind-first Case journey',

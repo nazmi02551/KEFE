@@ -28,6 +28,7 @@ class ExperienceHubScreen extends ConsumerStatefulWidget {
 class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
   bool _loading = true;
   String? _errorCode;
+  DecisionCaseSummary? _dilemmaCase;
   DecisionCaseSummary? _sportsCall;
   DecisionCaseSummary? _communityCase;
 
@@ -48,22 +49,28 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
       final cases = await ref
           .read(decisionRepositoryProvider)
           .fetchExploreCases(limit: 50);
+      DecisionCaseSummary? dilemma;
       DecisionCaseSummary? sports;
       DecisionCaseSummary? community;
       for (final item in cases) {
+        final isDilemma = item.format == 'DILEMMA';
         final isSports =
             item.format == 'SPORTS_CALL' || item.domain == 'SPORTS';
+        if (dilemma == null && isDilemma) {
+          dilemma = item;
+        }
         if (sports == null && isSports) {
           sports = item;
         }
         if (community == null && !isSports) {
           community = item;
         }
-        if (sports != null && community != null) break;
+        if (dilemma != null && sports != null && community != null) break;
       }
       community ??= cases.isNotEmpty ? cases.first : null;
       if (!mounted) return;
       setState(() {
+        _dilemmaCase = dilemma;
         _sportsCall = sports;
         _communityCase = community;
         _loading = false;
@@ -113,6 +120,25 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
               actionLabel: strings.experienceStandardAction,
               onPressed: () => context.go('/explore'),
             ),
+            const SizedBox(height: 14),
+            if (!_loading && _errorCode == null)
+              if (_dilemmaCase != null)
+                _ExperienceCard(
+                  cardKey: const ValueKey('experience-dilemma'),
+                  icon: Icons.alt_route_rounded,
+                  title: strings.experienceDilemmaTitle,
+                  body:
+                      '${strings.experienceDilemmaBody}\n\n${_dilemmaCase!.title}',
+                  actionLabel: strings.experienceDilemmaAction,
+                  onPressed: () => context.push('/case/${_dilemmaCase!.id}'),
+                )
+              else
+                _ExperienceCard(
+                  cardKey: const ValueKey('experience-dilemma-empty'),
+                  icon: Icons.alt_route_rounded,
+                  title: strings.experienceDilemmaTitle,
+                  body: strings.experienceDilemmaEmpty,
+                ),
             if (!_loading && _errorCode == null && _communityCase != null) ...[
               const SizedBox(height: 14),
               _ExperienceCard(
