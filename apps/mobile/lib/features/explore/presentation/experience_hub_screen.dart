@@ -117,8 +117,10 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
           children: [
             Text(
               strings.experienceHubSubtitle,
-              style: Theme.of(context).textTheme.titleMedium
-                  ?.copyWith(color: visual.mutedForeground, height: 1.35),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: visual.mutedForeground,
+                height: 1.35,
+              ),
             ),
             const SizedBox(height: 20),
             _ExperienceCard(
@@ -336,8 +338,9 @@ class _ExperienceCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w900),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                     if (statusLabel != null) ...[
                       const SizedBox(height: 6),
@@ -358,8 +361,10 @@ class _ExperienceCard extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             body,
-            style: Theme.of(context).textTheme.bodyMedium
-                ?.copyWith(color: visual.mutedForeground, height: 1.45),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: visual.mutedForeground,
+              height: 1.45,
+            ),
           ),
           if (actionLabel != null && onPressed != null) ...[
             const SizedBox(height: 16),
