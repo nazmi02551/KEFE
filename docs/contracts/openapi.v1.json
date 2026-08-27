@@ -1952,10 +1952,30 @@
             "title": "Actor Id",
             "type": "string"
           },
+          "actor_kind": {
+            "$ref": "#/components/schemas/ActorKind",
+            "default": "GUEST"
+          },
           "expires_at": {
             "format": "date-time",
             "title": "Expires At",
             "type": "string"
+          },
+          "renewal_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Renewal Token"
+          },
+          "rotation_counter": {
+            "default": 0,
+            "title": "Rotation Counter",
+            "type": "integer"
           },
           "token_type": {
             "default": "Bearer",

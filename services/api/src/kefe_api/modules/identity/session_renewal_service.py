@@ -10,6 +10,8 @@ from kefe_api.modules.identity.ports import IdentityRepository
 from kefe_api.modules.identity.session_renewal import (
     RenewalResolutionStatus,
     RenewalTokenMatch,
+    SessionBootstrapMutation,
+    SessionBootstrapStatus,
     SessionContinuityPolicy,
     SessionRotationMutation,
     SessionTokenDeriver,
@@ -67,11 +69,7 @@ class SessionRenewalService:
                 actor_kind=snapshot.actor_kind,
                 rotation_counter=next_counter,
             )
-            access_ttl = (
-                self._account_access_ttl
-                if snapshot.actor_kind is ActorKind.ACCOUNT
-                else self._policy.access_ttl
-            )
+            access_ttl = self._access_ttl(snapshot.actor_kind)
             next_access_expires_at = now + access_ttl
             next_inactive_expires_at = self._policy.renewed_inactivity_deadline(
                 now=now,
@@ -107,7 +105,68 @@ class SessionRenewalService:
             409,
         )
 
+    def bootstrap(self, *, access_token: str) -> RenewedSessionCredential:
+        normalized = access_token.strip()
+        if not normalized:
+            raise DomainError("AUTH_TOKEN_INVALID", "Authentication token invalid", 401)
+        access_hash = self._deriver.token_hash(normalized)
+
+        for _ in range(2):
+            now = datetime.now(UTC)
+            resolution = self._repo.resolve_bootstrap(
+                access_token_hash=access_hash,
+                now=now,
+            )
+            self._raise_for_bootstrap_resolution(resolution.status)
+            snapshot = resolution.snapshot
+            if snapshot is None:
+                raise DomainError("AUTH_TOKEN_INVALID", "Authentication token invalid", 401)
+            if resolution.status is SessionBootstrapStatus.ACTIVE_CURRENT:
+                return self._reproduce_current(snapshot=snapshot)
+
+            pair = self._deriver.derive_pair(
+                session_id=snapshot.session_id,
+                actor_id=snapshot.actor_id,
+                actor_kind=snapshot.actor_kind,
+                rotation_counter=0,
+            )
+            absolute_expires_at, inactive_expires_at = self._policy.initial_deadlines(now=now)
+            mutation = SessionBootstrapMutation(
+                session_id=snapshot.session_id,
+                expected_access_token_hash=snapshot.access_token_hash,
+                next_access_token_hash=self._deriver.token_hash(pair.access_token),
+                next_renewal_token_hash=self._deriver.token_hash(pair.renewal_token),
+                next_access_expires_at=now + self._access_ttl(snapshot.actor_kind),
+                continuity_absolute_expires_at=absolute_expires_at,
+                continuity_inactive_expires_at=inactive_expires_at,
+                derivation_key_id=pair.derivation_key_id,
+                previous_access_valid_until=now + self._policy.previous_pair_grace,
+                bootstrapped_at=now,
+            )
+            if self._repo.bootstrap_session(mutation=mutation):
+                return RenewedSessionCredential(
+                    actor_id=snapshot.actor_id,
+                    actor_kind=snapshot.actor_kind,
+                    access_token=pair.access_token,
+                    access_expires_at=mutation.next_access_expires_at,
+                    renewal_token=pair.renewal_token,
+                    rotation_counter=0,
+                )
+
+        raise DomainError(
+            "AUTH_RENEWAL_REPLAYED",
+            "Session continuity bootstrap did not converge",
+            409,
+        )
+
     def _reproduce_current(self, *, snapshot) -> RenewedSessionCredential:
+        if snapshot.derivation_key_id is None or snapshot.renewal_token_hash is None:
+            raise DomainError(
+                "DEPENDENCY_TEMPORARILY_UNAVAILABLE",
+                "Session credential derivation state is unavailable",
+                503,
+                retryable=True,
+            )
         pair = self._deriver.derive_pair(
             session_id=snapshot.session_id,
             actor_id=snapshot.actor_id,
@@ -134,6 +193,11 @@ class SessionRenewalService:
             rotation_counter=snapshot.rotation_counter,
         )
 
+    def _access_ttl(self, actor_kind: ActorKind) -> timedelta:
+        if actor_kind is ActorKind.ACCOUNT:
+            return self._account_access_ttl
+        return self._policy.access_ttl
+
     @staticmethod
     def _raise_for_resolution(status: RenewalResolutionStatus) -> None:
         if status is RenewalResolutionStatus.ACTIVE:
@@ -147,3 +211,16 @@ class SessionRenewalService:
                 401,
             )
         raise DomainError("AUTH_RENEWAL_INVALID", "Renewal credential is invalid", 401)
+
+    @staticmethod
+    def _raise_for_bootstrap_resolution(status: SessionBootstrapStatus) -> None:
+        if status in (
+            SessionBootstrapStatus.ACTIVE_LEGACY,
+            SessionBootstrapStatus.ACTIVE_CURRENT,
+        ):
+            return
+        if status is SessionBootstrapStatus.EXPIRED:
+            raise DomainError("AUTH_TOKEN_EXPIRED", "Authentication token expired", 401)
+        if status is SessionBootstrapStatus.REVOKED:
+            raise DomainError("AUTH_TOKEN_REVOKED", "Authentication token revoked", 401)
+        raise DomainError("AUTH_TOKEN_INVALID", "Authentication token invalid", 401)

@@ -15,6 +15,10 @@ from kefe_api.modules.identity.session_renewal import (
     RenewalResolution,
     RenewalResolutionStatus,
     RenewalTokenMatch,
+    SessionBootstrapMutation,
+    SessionBootstrapResolution,
+    SessionBootstrapSnapshot,
+    SessionBootstrapStatus,
     SessionRenewalSnapshot,
     SessionRotationMutation,
 )
@@ -248,6 +252,92 @@ class InMemoryIdentityRepository:
             session.rotation_counter = mutation.next_rotation_counter
             session.token_derivation_key_id = mutation.next_derivation_key_id
             session.renewed_at = mutation.renewed_at
+            return True
+
+    def resolve_bootstrap(
+        self,
+        *,
+        access_token_hash: str,
+        now: datetime,
+    ) -> SessionBootstrapResolution:
+        with self._lock:
+            session = self._find_access_session(
+                token_hash=access_token_hash,
+                now=now,
+            )
+            if session is None:
+                return SessionBootstrapResolution(SessionBootstrapStatus.INVALID)
+            if session.revoked_at is not None:
+                return SessionBootstrapResolution(SessionBootstrapStatus.REVOKED)
+            if session.token_hash == access_token_hash and session.expires_at <= now:
+                return SessionBootstrapResolution(SessionBootstrapStatus.EXPIRED)
+
+            actor_id = self._merged_into.get(session.actor_id, session.actor_id)
+            actor_kind = self._actor_kinds.get(actor_id)
+            if actor_kind is None:
+                return SessionBootstrapResolution(SessionBootstrapStatus.INVALID)
+
+            renewal_fields = (
+                session.renewal_token_hash,
+                session.token_derivation_key_id,
+                session.continuity_absolute_expires_at,
+                session.continuity_inactive_expires_at,
+            )
+            if all(value is None for value in renewal_fields):
+                if session.rotation_counter != 0 or session.token_hash != access_token_hash:
+                    return SessionBootstrapResolution(SessionBootstrapStatus.INVALID)
+                status = SessionBootstrapStatus.ACTIVE_LEGACY
+            elif all(value is not None for value in renewal_fields):
+                status = SessionBootstrapStatus.ACTIVE_CURRENT
+            else:
+                return SessionBootstrapResolution(SessionBootstrapStatus.INVALID)
+
+            return SessionBootstrapResolution(
+                status,
+                SessionBootstrapSnapshot(
+                    session_id=session.session_id,
+                    actor_id=actor_id,
+                    actor_kind=actor_kind,
+                    rotation_counter=session.rotation_counter,
+                    derivation_key_id=session.token_derivation_key_id,
+                    access_token_hash=session.token_hash,
+                    renewal_token_hash=session.renewal_token_hash,
+                    access_expires_at=session.expires_at,
+                    continuity_absolute_expires_at=(session.continuity_absolute_expires_at),
+                    continuity_inactive_expires_at=(session.continuity_inactive_expires_at),
+                ),
+            )
+
+    def bootstrap_session(self, *, mutation: SessionBootstrapMutation) -> bool:
+        with self._lock:
+            session = self._sessions.get(mutation.session_id)
+            if session is None or session.revoked_at is not None:
+                return False
+            if session.token_hash != mutation.expected_access_token_hash:
+                return False
+            if session.expires_at <= mutation.bootstrapped_at:
+                return False
+            if (
+                session.renewal_token_hash is not None
+                or session.token_derivation_key_id is not None
+                or session.continuity_absolute_expires_at is not None
+                or session.continuity_inactive_expires_at is not None
+                or session.rotation_counter != 0
+            ):
+                return False
+
+            session.previous_token_hash = session.token_hash
+            session.previous_token_valid_until = min(
+                mutation.previous_access_valid_until,
+                session.expires_at,
+            )
+            session.token_hash = mutation.next_access_token_hash
+            session.renewal_token_hash = mutation.next_renewal_token_hash
+            session.expires_at = mutation.next_access_expires_at
+            session.token_derivation_key_id = mutation.derivation_key_id
+            session.continuity_absolute_expires_at = mutation.continuity_absolute_expires_at
+            session.continuity_inactive_expires_at = mutation.continuity_inactive_expires_at
+            session.renewed_at = mutation.bootstrapped_at
             return True
 
     def revoke_token(self, *, token_hash: str, now: datetime) -> None:

@@ -109,6 +109,24 @@ def renew_session(request: Request, body: SessionRenewRequest) -> SessionRenewRe
     )
 
 
+@router.post("/session/continuity/bootstrap")
+def bootstrap_session_continuity(
+    request: Request,
+    authorization: AuthorizationDep,
+    service: IdentityServiceDep,
+) -> SessionRenewResponse:
+    access_token = service.require_active_access_token(authorization)
+    credential = _renewal_service(request).bootstrap(access_token=access_token)
+    return SessionRenewResponse(
+        actor_id=credential.actor_id,
+        actor_kind=credential.actor_kind,
+        access_token=credential.access_token,
+        access_expires_at=credential.access_expires_at,
+        renewal_token=credential.renewal_token,
+        rotation_counter=credential.rotation_counter,
+    )
+
+
 @router.delete("/session", status_code=204)
 def revoke_session(
     authorization: AuthorizationDep,

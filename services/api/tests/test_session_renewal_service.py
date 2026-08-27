@@ -12,7 +12,6 @@ from kefe_api.modules.identity.session_renewal import (
 )
 from kefe_api.modules.identity.session_renewal_service import SessionRenewalService
 
-
 _ACTOR_ID = UUID("12345678-1234-4234-8234-1234567890ab")
 _SESSION_ID = UUID("abcdefab-cdef-4def-8def-abcdefabcdef")
 _SECRET = "session-renewal-service-test-secret-0001"
@@ -152,3 +151,72 @@ def test_continuity_deadline_blocks_renewal() -> None:
         service.renew(renewal_token=pair.renewal_token)
 
     assert exc_info.value.code == "AUTH_SESSION_CONTINUITY_EXPIRED"
+
+
+def test_active_legacy_access_bootstraps_and_retry_reproduces_bundle() -> None:
+    now = datetime.now(UTC)
+    policy = SessionContinuityPolicy.from_days(
+        access_ttl_days=30,
+        absolute_lifetime_days=180,
+        inactivity_lifetime_days=60,
+        previous_pair_grace_seconds=60,
+    )
+    deriver = SessionTokenDeriver(
+        active_key_id="primary-v1",
+        active_secret=_SECRET,
+    )
+    legacy_access = "kefe_g_legacy-active-access-token"
+    repository = InMemoryIdentityRepository()
+    repository.create_guest_session(
+        actor_id=_ACTOR_ID,
+        session_id=_SESSION_ID,
+        token_hash=deriver.token_hash(legacy_access),
+        expires_at=now + timedelta(days=7),
+    )
+    service = SessionRenewalService(
+        repository=repository,
+        policy=policy,
+        deriver=deriver,
+    )
+
+    current = service.bootstrap(access_token=legacy_access)
+    retry = service.bootstrap(access_token=legacy_access)
+
+    assert current.actor_id == _ACTOR_ID
+    assert current.actor_kind is ActorKind.GUEST
+    assert current.rotation_counter == 0
+    assert current.access_token != legacy_access
+    assert current.renewal_token.startswith("kefe_r_")
+    assert retry == current
+
+
+def test_expired_legacy_access_cannot_bootstrap() -> None:
+    now = datetime.now(UTC)
+    policy = SessionContinuityPolicy.from_days(
+        access_ttl_days=30,
+        absolute_lifetime_days=180,
+        inactivity_lifetime_days=60,
+        previous_pair_grace_seconds=60,
+    )
+    deriver = SessionTokenDeriver(
+        active_key_id="primary-v1",
+        active_secret=_SECRET,
+    )
+    legacy_access = "kefe_g_expired-legacy-access-token"
+    repository = InMemoryIdentityRepository()
+    repository.create_guest_session(
+        actor_id=_ACTOR_ID,
+        session_id=_SESSION_ID,
+        token_hash=deriver.token_hash(legacy_access),
+        expires_at=now - timedelta(seconds=1),
+    )
+    service = SessionRenewalService(
+        repository=repository,
+        policy=policy,
+        deriver=deriver,
+    )
+
+    with pytest.raises(DomainError) as exc_info:
+        service.bootstrap(access_token=legacy_access)
+
+    assert exc_info.value.code == "AUTH_TOKEN_EXPIRED"

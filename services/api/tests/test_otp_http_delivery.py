@@ -35,6 +35,7 @@ _ENDPOINT = "https://otp.provider.example/v1/deliveries"
 _TOKEN = "managed-provider-bearer-token-01234567890123456789"
 _SECRET_REF = "envref://KEFE_OTP_PROVIDER_CREDENTIAL"
 _REPLAY_SECRET = "managed-production-replay-secret-0123456789012345"
+_SESSION_RENEWAL_SECRET = "managed-production-session-renewal-secret-0123456789"
 _PRODUCTION_DATABASE_URL = "postgresql+psycopg://kefe:secret@db.internal:5432/kefe"
 
 
@@ -44,6 +45,7 @@ def _production_settings(**overrides: object) -> Settings:
         "persistence_backend": "postgres",
         "database_url": _PRODUCTION_DATABASE_URL,
         "account_merge_replay_secret": _REPLAY_SECRET,
+        "session_renewal_secret": _SESSION_RENEWAL_SECRET,
         "otp_delivery_mode": "DISABLED",
         **overrides,
     }
@@ -55,6 +57,7 @@ def _configure_production_runtime(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("KEFE_PERSISTENCE_BACKEND", "postgres")
     monkeypatch.setenv("KEFE_DATABASE_URL", _PRODUCTION_DATABASE_URL)
     monkeypatch.setenv("KEFE_ACCOUNT_MERGE_REPLAY_SECRET", _REPLAY_SECRET)
+    monkeypatch.setenv("KEFE_SESSION_RENEWAL_SECRET", _SESSION_RENEWAL_SECRET)
 
 
 class SequenceTransport:

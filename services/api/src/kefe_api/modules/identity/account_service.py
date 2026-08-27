@@ -206,7 +206,11 @@ class AccountContinuityService:
             account_token_hash=self._hash_secret(candidate_token),
             account_session_expires_at=account_session_expires_at,
             completed_at=now,
-            session_material_factory=self._build_account_session_material,
+            session_material_factory=(
+                self._build_account_session_material
+                if key_reference.derivation_version >= 2
+                else None
+            ),
         )
         self._validate_replay_actor(authorization, replay)
         return self._credential_from_replay(replay, key_reference=key_reference, now=now)
@@ -249,6 +253,12 @@ class AccountContinuityService:
                 "Completed account conversion replay has expired",
                 401,
             )
+        replay_access_token = self._derive_account_token(
+            verification_token_hash=replay.verification_token_hash,
+            source_actor_id=replay.source_actor_id,
+            expires_at=replay.account_session_expires_at,
+            key_reference=key_reference,
+        )
         if replay.account_session_id is not None and replay.account_session_derivation_key_id:
             pair = self._session_deriver.derive_pair(
                 session_id=replay.account_session_id,
@@ -266,15 +276,9 @@ class AccountContinuityService:
                 rotation_counter=pair.rotation_counter,
             )
 
-        access_token = self._derive_account_token(
-            verification_token_hash=replay.verification_token_hash,
-            source_actor_id=replay.source_actor_id,
-            expires_at=replay.account_session_expires_at,
-            key_reference=key_reference,
-        )
         return AccountCredential(
             actor_id=replay.account_actor_id,
-            access_token=access_token,
+            access_token=replay_access_token,
             expires_at=replay.account_session_expires_at,
             merged_from_actor_id=replay.merged_from_actor_id,
         )

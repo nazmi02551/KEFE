@@ -9,7 +9,6 @@ from kefe_api.modules.identity.session_renewal import (
     SessionTokenDeriver,
 )
 
-
 _SESSION_ID = UUID("11111111-1111-4111-8111-111111111111")
 _ACTOR_ID = UUID("22222222-2222-4222-8222-222222222222")
 _SECRET = "session-renewal-test-secret-material-0001"
@@ -80,9 +79,7 @@ def test_token_derivation_is_deterministic_and_domain_separated() -> None:
     assert first == repeated
     assert first.access_token.startswith("kefe_g_")
     assert first.renewal_token.startswith("kefe_r_")
-    assert first.access_token.removeprefix("kefe_g_") != first.renewal_token.removeprefix(
-        "kefe_r_"
-    )
+    assert first.access_token.removeprefix("kefe_g_") != first.renewal_token.removeprefix("kefe_r_")
 
 
 def test_rotation_counter_changes_both_credentials() -> None:

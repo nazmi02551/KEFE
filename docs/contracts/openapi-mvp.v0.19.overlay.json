@@ -12,6 +12,10 @@
             "title": "Actor Id",
             "type": "string"
           },
+          "actor_kind": {
+            "$ref": "#/components/schemas/ActorKind",
+            "default": "ACCOUNT"
+          },
           "expires_at": {
             "format": "date-time",
             "title": "Expires At",
@@ -29,6 +33,22 @@
             ],
             "title": "Merged From Actor Id"
           },
+          "renewal_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Renewal Token"
+          },
+          "rotation_counter": {
+            "default": 0,
+            "title": "Rotation Counter",
+            "type": "integer"
+          },
           "token_type": {
             "default": "Bearer",
             "title": "Token Type",
@@ -42,6 +62,14 @@
         ],
         "title": "AccountCredentialResponse",
         "type": "object"
+      },
+      "ActorKind": {
+        "enum": [
+          "GUEST",
+          "ACCOUNT"
+        ],
+        "title": "ActorKind",
+        "type": "string"
       },
       "CommunityReasonItem": {
         "properties": {
@@ -484,6 +512,65 @@
         ],
         "title": "ReportRequest",
         "type": "object"
+      },
+      "SessionRenewRequest": {
+        "properties": {
+          "renewal_token": {
+            "maxLength": 512,
+            "minLength": 32,
+            "title": "Renewal Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "renewal_token"
+        ],
+        "title": "SessionRenewRequest",
+        "type": "object"
+      },
+      "SessionRenewResponse": {
+        "properties": {
+          "access_expires_at": {
+            "format": "date-time",
+            "title": "Access Expires At",
+            "type": "string"
+          },
+          "access_token": {
+            "title": "Access Token",
+            "type": "string"
+          },
+          "actor_id": {
+            "format": "uuid",
+            "title": "Actor Id",
+            "type": "string"
+          },
+          "actor_kind": {
+            "$ref": "#/components/schemas/ActorKind"
+          },
+          "renewal_token": {
+            "title": "Renewal Token",
+            "type": "string"
+          },
+          "rotation_counter": {
+            "title": "Rotation Counter",
+            "type": "integer"
+          },
+          "token_type": {
+            "default": "Bearer",
+            "title": "Token Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "actor_id",
+          "actor_kind",
+          "access_token",
+          "access_expires_at",
+          "renewal_token",
+          "rotation_counter"
+        ],
+        "title": "SessionRenewResponse",
+        "type": "object"
       }
     }
   },
@@ -784,6 +871,73 @@
         "summary": "Report",
         "tags": [
           "Community Reason"
+        ]
+      }
+    },
+    "/v1/identity/session/continuity/bootstrap": {
+      "post": {
+        "operationId": "bootstrap_session_continuity_v1_identity_session_continuity_bootstrap_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionRenewResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bootstrap Session Continuity",
+        "tags": [
+          "Identity"
+        ]
+      }
+    },
+    "/v1/identity/session/renew": {
+      "post": {
+        "operationId": "renew_session_v1_identity_session_renew_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionRenewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionRenewResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Renew Session",
+        "tags": [
+          "Identity"
         ]
       }
     },

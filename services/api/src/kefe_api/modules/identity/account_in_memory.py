@@ -180,12 +180,18 @@ class InMemoryAccountContinuityRepository:
                 account_actor_id=account_actor_id,
                 merged_from_actor_id=merged_from_actor_id,
                 account_session_expires_at=(
-                    material.access_expires_at if material is not None else account_session_expires_at
+                    material.access_expires_at
+                    if material is not None
+                    else account_session_expires_at
                 ),
                 completed_at=completed_at,
                 account_session_id=material.session_id if material is not None else None,
-                account_session_rotation_counter=(material.rotation_counter if material is not None else 0),
-                account_session_derivation_key_id=(material.derivation_key_id if material is not None else None),
+                account_session_rotation_counter=(
+                    material.rotation_counter if material is not None else 0
+                ),
+                account_session_derivation_key_id=(
+                    material.derivation_key_id if material is not None else None
+                ),
                 continuity_absolute_expires_at=(
                     material.continuity_absolute_expires_at if material is not None else None
                 ),

@@ -7,6 +7,8 @@ from uuid import UUID
 from kefe_api.modules.identity.models import TokenResolution
 from kefe_api.modules.identity.session_renewal import (
     RenewalResolution,
+    SessionBootstrapMutation,
+    SessionBootstrapResolution,
     SessionRotationMutation,
 )
 
@@ -44,6 +46,19 @@ class IdentityRepository(Protocol):
         self,
         *,
         mutation: SessionRotationMutation,
+    ) -> bool: ...
+
+    def resolve_bootstrap(
+        self,
+        *,
+        access_token_hash: str,
+        now: datetime,
+    ) -> SessionBootstrapResolution: ...
+
+    def bootstrap_session(
+        self,
+        *,
+        mutation: SessionBootstrapMutation,
     ) -> bool: ...
 
     def revoke_token(self, *, token_hash: str, now: datetime) -> None: ...

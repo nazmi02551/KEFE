@@ -1,3 +1,7 @@
+import hashlib
+from datetime import UTC, datetime, timedelta
+from uuid import UUID
+
 from fastapi.testclient import TestClient
 
 from kefe_api.main import create_app
@@ -38,3 +42,37 @@ def test_guest_renewal_http_preserves_actor_and_converges_retry() -> None:
     assert retried["rotation_counter"] == current["rotation_counter"]
     assert retried["access_token"] == current["access_token"]
     assert retried["renewal_token"] == current["renewal_token"]
+
+
+def test_active_legacy_access_http_bootstrap_preserves_actor_and_converges() -> None:
+    app = create_app()
+    client = TestClient(app)
+    actor_id = UUID("87654321-4321-4321-8321-ba0987654321")
+    session_id = UUID("12345678-abcd-4abc-8abc-1234567890ab")
+    legacy_access = "kefe_g_http-legacy-access-token"
+    app.state.identity_repository.create_guest_session(
+        actor_id=actor_id,
+        session_id=session_id,
+        token_hash=hashlib.sha256(legacy_access.encode("utf-8")).hexdigest(),
+        expires_at=datetime.now(UTC) + timedelta(days=7),
+    )
+    headers = {"authorization": f"Bearer {legacy_access}"}
+
+    bootstrapped = client.post(
+        "/v1/identity/session/continuity/bootstrap",
+        headers=headers,
+    )
+    retry = client.post(
+        "/v1/identity/session/continuity/bootstrap",
+        headers=headers,
+    )
+
+    assert bootstrapped.status_code == 200
+    current = bootstrapped.json()
+    assert current["actor_id"] == str(actor_id)
+    assert current["actor_kind"] == "GUEST"
+    assert current["rotation_counter"] == 0
+    assert current["access_token"] != legacy_access
+    assert current["renewal_token"].startswith("kefe_r_")
+    assert retry.status_code == 200
+    assert retry.json() == current

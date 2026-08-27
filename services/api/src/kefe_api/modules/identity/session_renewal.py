@@ -23,6 +23,14 @@ class RenewalResolutionStatus(StrEnum):
     CONTINUITY_EXPIRED = "CONTINUITY_EXPIRED"
 
 
+class SessionBootstrapStatus(StrEnum):
+    ACTIVE_LEGACY = "ACTIVE_LEGACY"
+    ACTIVE_CURRENT = "ACTIVE_CURRENT"
+    INVALID = "INVALID"
+    EXPIRED = "EXPIRED"
+    REVOKED = "REVOKED"
+
+
 @dataclass(frozen=True, slots=True)
 class SessionContinuityPolicy:
     access_ttl: timedelta
@@ -104,6 +112,26 @@ class RenewalResolution:
 
 
 @dataclass(frozen=True, slots=True)
+class SessionBootstrapSnapshot:
+    session_id: UUID
+    actor_id: UUID
+    actor_kind: ActorKind
+    rotation_counter: int
+    derivation_key_id: str | None
+    access_token_hash: str
+    renewal_token_hash: str | None
+    access_expires_at: datetime
+    continuity_absolute_expires_at: datetime | None
+    continuity_inactive_expires_at: datetime | None
+
+
+@dataclass(frozen=True, slots=True)
+class SessionBootstrapResolution:
+    status: SessionBootstrapStatus
+    snapshot: SessionBootstrapSnapshot | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class SessionRotationMutation:
     session_id: UUID
     expected_rotation_counter: int
@@ -117,6 +145,20 @@ class SessionRotationMutation:
     next_derivation_key_id: str
     previous_pair_valid_until: datetime
     renewed_at: datetime
+
+
+@dataclass(frozen=True, slots=True)
+class SessionBootstrapMutation:
+    session_id: UUID
+    expected_access_token_hash: str
+    next_access_token_hash: str
+    next_renewal_token_hash: str
+    next_access_expires_at: datetime
+    continuity_absolute_expires_at: datetime
+    continuity_inactive_expires_at: datetime
+    derivation_key_id: str
+    previous_access_valid_until: datetime
+    bootstrapped_at: datetime
 
 
 class SessionTokenDeriver:
@@ -164,9 +206,7 @@ class SessionTokenDeriver:
         if secret is None:
             raise ValueError("unknown session token derivation key id")
         material = (
-            session_id.bytes
-            + actor_id.bytes
-            + rotation_counter.to_bytes(8, "big", signed=False)
+            session_id.bytes + actor_id.bytes + rotation_counter.to_bytes(8, "big", signed=False)
         )
         access = self._derive(
             secret=secret,

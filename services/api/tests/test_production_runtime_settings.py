@@ -10,6 +10,7 @@ _VALID_PRODUCTION = {
     "persistence_backend": "postgres",
     "database_url": "postgresql+psycopg://kefe:secret@db.internal:5432/kefe",
     "account_merge_replay_secret": "production-account-merge-replay-secret-0001",
+    "session_renewal_secret": "production-session-renewal-secret-0000000001",
     "otp_delivery_mode": "DISABLED",
 }
 

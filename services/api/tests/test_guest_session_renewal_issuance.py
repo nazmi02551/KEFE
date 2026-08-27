@@ -1,6 +1,6 @@
 from kefe_api.modules.identity.in_memory import InMemoryIdentityRepository
-from kefe_api.modules.identity.session_renewal import RenewalResolutionStatus
 from kefe_api.modules.identity.service import IdentityService
+from kefe_api.modules.identity.session_renewal import RenewalResolutionStatus
 
 
 def test_guest_creation_persists_matching_renewal_family() -> None:

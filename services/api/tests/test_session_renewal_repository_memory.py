@@ -8,7 +8,6 @@ from kefe_api.modules.identity.session_renewal import (
     SessionRotationMutation,
 )
 
-
 _ACTOR_ID = UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
 _SESSION_ID = UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb")
 

@@ -57,8 +57,8 @@ class IdentityService:
             rotation_counter=0,
         )
         expires_at = now + self._guest_token_ttl
-        absolute_expires_at, inactive_expires_at = (
-            self._continuity_policy.initial_deadlines(now=now)
+        absolute_expires_at, inactive_expires_at = self._continuity_policy.initial_deadlines(
+            now=now
         )
         self._repo.create_guest_session(
             actor_id=actor_id,
@@ -88,6 +88,10 @@ class IdentityService:
         if resolution.status is not TokenStatus.ACTIVE or resolution.principal is None:
             raise DomainError("AUTH_TOKEN_INVALID", "Authentication token invalid", 401)
         return resolution.principal
+
+    def require_active_access_token(self, authorization: str | None) -> str:
+        self.authenticate(authorization)
+        return self._extract_bearer(authorization)
 
     def authenticate_guest_merge(self, authorization: str | None) -> TokenResolution:
         """Resolve active or revoked identity only for exact guest-merge replay validation."""
