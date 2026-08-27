@@ -1,10 +1,11 @@
 # F4 Session Renewal Runtime Foundation — 2026-08-12
 
-Status: IMPLEMENTATION_PARTIAL / CONSUMER_HTTP_CANDIDATE / MOBILE_PENDING / EXACT_HEAD_CI_PENDING
+Status: IMPLEMENTATION_CANDIDATE / CONSUMER_AND_MOBILE_RUNTIME_CANDIDATE / EXACT_HEAD_CI_PENDING
 
 Issue: #364  
 Parent architecture: PR #365 / ADR-0132 / `session-renewal-continuity.v1.json` v1.0.1  
 Implementation PR: #367  
+Convergence branch: `feature/f4-session-renewal-convergence` / PR pending
 Capabilities: CAP-084, CAP-085, CAP-095
 
 ## Implemented in this checkpoint
@@ -29,18 +30,35 @@ Capabilities: CAP-084, CAP-085, CAP-095
 - guest issuance and account merge responses expose additive actor kind, renewal token and rotation counter metadata;
 - focused candidate tests cover policy/derivation, memory CAS/replay, renewal service, guest issuance and guest renewal HTTP retry convergence.
 
+## Added by the convergence checkpoint
+
+- PR #367 history is merged after the exact-green horizontal MVP breadth head rather than silently reimplemented or squashed;
+- active legacy access can call `POST /v1/identity/session/continuity/bootstrap` and receive a rotation-0 bundle for the same actor/session family;
+- bootstrap is compare-and-swap guarded, idempotent during the previous-access grace window and fails closed for expired, revoked or structurally partial sessions;
+- memory and PostgreSQL adapters implement the same bootstrap resolution and mutation boundaries;
+- PostgreSQL candidate tests cover bootstrap across repository restart and concurrent same-renewal-token convergence;
+- the generated MVP OpenAPI overlay includes renewal/bootstrap paths and the additive guest/account credential metadata;
+- mobile secure storage now persists one versioned atomic bundle containing actor id, actor kind, access token, exact server expiry, renewal token and rotation counter;
+- guest issuance and account conversion parse the complete server bundle before replacing the persisted credential;
+- one shared production HTTP client performs 60-second proactive renewal, single-flight convergence and at most one authenticated retry after `AUTH_TOKEN_EXPIRED`;
+- legacy access-only storage bootstraps only through active server proof; no expired legacy identity or silent replacement guest is synthesized;
+- terminal guest, account and legacy failures map to explicit TR/EN continuity or reauthentication messages;
+- Production and Connected Alpha compositions use the renewing client; Preview remains isolated and does not gain connected identity behavior;
+- the account-conversion replay keyring is still checked before a renewal-capable credential is reproduced, while legacy v1 verification remains byte-compatible and does not claim a renewal bundle;
+- existing privacy deletion checks were migrated from split credential persistence to the atomic bundle without weakening actor-bound deletion confirmation;
+- `validate_session_renewal_continuity.py` binds the contract, server, OpenAPI, mobile wiring, localization and tests into the existing API/Mobile workflows; no feature-specific workflow was added.
+
 ## Current consumer boundary
 
-Server identity continuity is now candidate-complete enough to expose renewal HTTP, but the full consumer capability is not complete:
+Repository runtime scope is implemented as a candidate, but capability acceptance remains incomplete:
 
-- active-access legacy continuity bootstrap is still pending;
-- exact OpenAPI snapshot/regeneration is pending;
-- mobile still persists access token and actor id separately;
-- mobile still synthesizes expiry for an already-persisted credential;
-- mobile does not yet persist actor kind, renewal token or rotation counter;
-- mobile proactive/single-flight renewal and explicit continuity failure states remain pending.
+- exact-head API CI, Mobile CI, MVP Beta Gates and Global Readiness are pending;
+- local PostgreSQL tests require the CI service and are not claimed from a skipped local run;
+- Connected Alpha expiry/renewal behavior has not been proven against an externally reachable runtime;
+- no production auth provider, deployed SLO, human reauthentication/continuity usability or store-delivered client evidence exists;
+- the contract and ADR remain architecture candidates, and no CAP lifecycle record is promoted by this branch.
 
-No silent new-guest fallback has been introduced.
+No silent new-guest fallback has been introduced. Preview fixtures and repositories remain outside Production and Connected Alpha compositions.
 
 ## Account conversion invariants now preserved
 
@@ -54,17 +72,15 @@ No silent new-guest fallback has been introduced.
 
 ## Next implementation boundary
 
-1. migrate mobile secure storage to one versioned atomic credential bundle containing actor id, actor kind, access token, exact server access expiry, renewal token and rotation counter;
-2. migrate legacy access-only mobile state only while the access bearer remains valid; never synthesize a recoverable actor after expiry;
-3. add single-flight renewal with proactive skew and one retry after `AUTH_TOKEN_EXPIRED`;
-4. add explicit guest continuity-error and account reauthentication-required states with TR/EN copy;
-5. implement active-access `/v1/identity/session/continuity/bootstrap` for legacy installed clients;
-6. regenerate exact OpenAPI and central contract snapshots;
-7. run exact-head API/Mobile/PostgreSQL core gates once Actions execution is available;
-8. perform Connected Alpha expiry/renewal proof before any CAP lifecycle promotion.
+1. publish the convergence branch as a stacked draft PR above the exact-green horizontal MVP breadth head;
+2. run API CI, Mobile CI, MVP Beta Gates and Global Readiness on one exact head SHA;
+3. repair any exact-head diagnostics without broadening scope;
+4. retain the preview APK only if that final exact head is a meaningful green mobile checkpoint;
+5. perform Connected Alpha expiry/renewal proof against an externally reachable API before any CAP lifecycle promotion;
+6. obtain independent human review and explicit product/governance acceptance before changing CAP-084, CAP-085, CAP-095 or F4 lifecycle status.
 
 ## Verification boundary
 
-No exact-head CI PASS is claimed. The isolated runtime cannot currently provide clone-based execution, and recent stack records showed unavailable Actions execution. Connector readback verifies repository state only; test files are candidate evidence, not execution evidence.
+No exact-head CI PASS is claimed by this document until all required workflow runs are attached to one final head SHA. Local API execution and source validators are development evidence; skipped local PostgreSQL cases and unexecuted local Flutter tests are not PASS evidence.
 
 Human usability, production auth operability, CAP lifecycle promotion and F4 completion remain unclaimed.
