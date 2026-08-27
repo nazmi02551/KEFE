@@ -189,9 +189,7 @@ void main() {
         AppLocalePreference.en,
       );
 
-      final privacyEntry = find.byKey(
-        const ValueKey('settings-privacy-entry'),
-      );
+      final privacyEntry = find.byKey(const ValueKey('settings-privacy-entry'));
       await _revealSettingsEntry(tester, privacyEntry);
       await tester.tap(privacyEntry);
       await tester.pumpAndSettle();

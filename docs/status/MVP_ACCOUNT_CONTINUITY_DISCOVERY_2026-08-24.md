@@ -73,6 +73,13 @@ No post-repair exact-head GitHub Actions PASS is claimed yet. Source comparison
 and focused regression intent are repository evidence only, not executed
 Flutter/CI evidence or human usability approval.
 
+The next exact head `3e88ea7f496f965b8aa69c296fa8309af22078f1`
+reached the Flutter 3.47.1 format gate and reported only two canonical
+single-line wraps in the restored viewport tests. Those exact generated diffs
+are normalized in the next candidate. A behavior-neutral comment in the
+Connected Alpha consolidation validator also makes API CI part of the same-SHA
+evidence run; it changes no API, schema or runtime contract.
+
 ## Non-claims
 
 This slice does not claim:

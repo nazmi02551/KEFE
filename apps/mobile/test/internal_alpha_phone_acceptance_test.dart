@@ -100,9 +100,7 @@ void main() {
         Brightness.dark,
       );
 
-      final privacyEntry = find.byKey(
-        const ValueKey('settings-privacy-entry'),
-      );
+      final privacyEntry = find.byKey(const ValueKey('settings-privacy-entry'));
       await _scrollTo(tester, privacyEntry);
       await tester.tap(privacyEntry);
       await tester.pumpAndSettle();
