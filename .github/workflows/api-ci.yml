@@ -139,6 +139,9 @@ jobs:
       - name: Analytics event spine contract
         working-directory: services/api
         run: python tools/check_analytics_event_spine_contract.py
+      - name: Activation journey projection contract
+        working-directory: services/api
+        run: python tools/check_activation_journey_contract.py
       - name: Ingestion orchestration contract
         working-directory: services/api
         run: python tools/check_ingestion_orchestration_contract.py
@@ -334,6 +337,7 @@ jobs:
           tests/test_consensus_postgres.py
           tests/test_live_raw_collective_result_postgres.py
           tests/test_analytics_event_spine_postgres.py
+          tests/test_activation_journey_postgres.py
           > postgres-test-output.txt 2>&1
       - name: Upload PostgreSQL diagnostics on failure
         if: steps.postgres-tests.outcome == 'failure'
