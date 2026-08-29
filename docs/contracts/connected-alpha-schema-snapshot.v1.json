@@ -1,6 +1,6 @@
 {
   "contract_id": "KEFE-CONNECTED-ALPHA-SCHEMA-SNAPSHOT-001",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "status": "CANDIDATE",
   "wave": "F4",
   "capabilities": [
@@ -15,8 +15,8 @@
   },
   "canonical_chain": {
     "expected_root": "20260727_0001",
-    "expected_head": "20260827_0037",
-    "expected_migration_file_count": 37,
+    "expected_head": "20260829_0038",
+    "expected_migration_file_count": 38,
     "single_root_required": true,
     "single_head_required": true,
     "merge_revision_allowed": false,

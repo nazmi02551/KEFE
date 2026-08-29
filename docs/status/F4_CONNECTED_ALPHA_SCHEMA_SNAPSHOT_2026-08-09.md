@@ -14,8 +14,8 @@ Create a deterministic transport artifact from the canonical Alembic migration a
 
 - migration authority: `services/api/migrations`;
 - root revision: `20260727_0001`;
-- expected head: `20260827_0037`;
-- current migration files: 37;
+- expected head: `20260829_0038`;
+- current migration files: 38;
 - generation mode: Alembic offline SQL;
 - generation command: `alembic upgrade head --sql`;
 - target dialect: PostgreSQL.
@@ -31,6 +31,11 @@ The 2026-08-27 KEFE Today consumer projection extends that chain with
 `20260812_0036 -> 20260827_0037`. It adds only the governed real-event boolean
 to the existing immutable consumer CaseVersion table; it does not apply the
 snapshot to any database.
+
+The 2026-08-29 F5 analytics convergence extends the same authority with
+`20260827_0037 -> 20260829_0038`. It adds the isolated, privacy-safe analytics
+event projection store; it does not apply the snapshot to any database or
+calculate a KPI.
 
 ## Artifact boundary
 

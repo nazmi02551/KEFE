@@ -1,0 +1,193 @@
+{
+  "contract_version": "1.0.0",
+  "updated_at": "2026-08-29",
+  "status": "accepted_runtime_required",
+  "convergence_issue": 378,
+  "source_adr": "docs/adr/0069-server-authoritative-analytics-event-spine.md",
+  "capabilities": ["CAP-114", "CAP-115", "CAP-116", "CAP-117", "CAP-124"],
+  "source_policy": {
+    "server_authoritative_only": true,
+    "transactional_outbox_required": true,
+    "client_ingestion_endpoint_in_scope": false,
+    "unknown_source_event_behavior": "IGNORE"
+  },
+  "event_identity": {
+    "deterministic_over": [
+      "source_event_id",
+      "analytics_event_name",
+      "analytics_event_version"
+    ],
+    "duplicate_delivery_behavior": "IDEMPOTENT_REPLAY",
+    "store_unique_key": [
+      "source_event_id",
+      "analytics_event_name",
+      "analytics_event_version"
+    ]
+  },
+  "typed_provenance": [
+    "actor_id",
+    "session_id",
+    "case_version_id",
+    "contribution_class",
+    "source_event_id",
+    "source_event_name",
+    "source_event_version",
+    "occurred_at",
+    "producer_version"
+  ],
+  "contribution_classes": [
+    "CORE_PRE_RESULT",
+    "EXPOSED",
+    "ADVOCACY_SUPPORT"
+  ],
+  "forbidden_payload_keys": [
+    "response",
+    "responses",
+    "response_body",
+    "private_reason",
+    "reason_text",
+    "reason_tags",
+    "text",
+    "tags",
+    "personality",
+    "ideology",
+    "psychometric",
+    "bias",
+    "causal_inference"
+  ],
+  "definitions": [
+    {
+      "source_event_name": "weigh.started",
+      "source_event_version": 1,
+      "analytics_event_name": "activation.weigh_started",
+      "analytics_event_version": 1,
+      "privacy_class": "PRODUCT_ANALYTICS",
+      "retention_class": "STANDARD_13_MONTHS",
+      "metric_families": ["ACTIVATION"],
+      "required_provenance": ["actor_id", "session_id", "case_version_id"],
+      "allowed_payload_fields": []
+    },
+    {
+      "source_event_name": "weigh.committed",
+      "source_event_version": 1,
+      "analytics_event_name": "activation.weigh_committed",
+      "analytics_event_version": 1,
+      "privacy_class": "PRODUCT_ANALYTICS",
+      "retention_class": "STANDARD_13_MONTHS",
+      "metric_families": ["ACTIVATION", "QUALITY"],
+      "required_provenance": ["actor_id", "session_id", "case_version_id", "contribution_class"],
+      "allowed_payload_fields": ["committed_at", "has_reason"],
+      "fixed_contribution_class": "CORE_PRE_RESULT"
+    },
+    {
+      "source_event_name": "result.revealed",
+      "source_event_version": 1,
+      "analytics_event_name": "activation.result_revealed",
+      "analytics_event_version": 1,
+      "privacy_class": "PRODUCT_ANALYTICS",
+      "retention_class": "STANDARD_13_MONTHS",
+      "metric_families": ["ACTIVATION"],
+      "required_provenance": ["session_id", "case_version_id"],
+      "allowed_payload_fields": ["layer"]
+    },
+    {
+      "source_event_name": "perspective.viewed",
+      "source_event_version": 1,
+      "analytics_event_name": "quality.perspective_viewed",
+      "analytics_event_version": 1,
+      "privacy_class": "PRODUCT_ANALYTICS",
+      "retention_class": "STANDARD_13_MONTHS",
+      "metric_families": ["QUALITY"],
+      "required_provenance": ["session_id", "case_version_id"],
+      "allowed_payload_fields": ["mode", "card_count"]
+    },
+    {
+      "source_event_name": "exposure.recorded",
+      "source_event_version": 1,
+      "analytics_event_name": "quality.exposure_recorded",
+      "analytics_event_version": 1,
+      "privacy_class": "PRODUCT_ANALYTICS",
+      "retention_class": "STANDARD_13_MONTHS",
+      "metric_families": ["QUALITY"],
+      "required_provenance": ["session_id"],
+      "allowed_payload_fields": [
+        "flow_step_code",
+        "resource_category",
+        "exposure_id",
+        "intervention_id"
+      ]
+    },
+    {
+      "source_event_name": "intervention.exposed",
+      "source_event_version": 1,
+      "analytics_event_name": "quality.intervention_exposed",
+      "analytics_event_version": 1,
+      "privacy_class": "PRODUCT_ANALYTICS",
+      "retention_class": "STANDARD_13_MONTHS",
+      "metric_families": ["QUALITY"],
+      "required_provenance": ["session_id"],
+      "allowed_payload_fields": [
+        "flow_step_code",
+        "resource_category",
+        "exposure_id",
+        "intervention_id"
+      ]
+    },
+    {
+      "source_event_name": "decision.revised",
+      "source_event_version": 1,
+      "analytics_event_name": "quality.decision_revised",
+      "analytics_event_version": 1,
+      "privacy_class": "PRODUCT_ANALYTICS",
+      "retention_class": "STANDARD_13_MONTHS",
+      "metric_families": ["QUALITY"],
+      "required_provenance": ["session_id"],
+      "allowed_payload_fields": [
+        "revision_id",
+        "revision_no",
+        "flow_step_code",
+        "delta_id"
+      ]
+    }
+  ],
+  "storage": {
+    "schema": "analytics",
+    "table": "analytics_event",
+    "payload_type": "jsonb",
+    "provider_sdk_in_domain_forbidden": true,
+    "domain_foreign_table_write_forbidden": true
+  },
+  "convergence": {
+    "source_pull_request": 179,
+    "source_exact_green_head": "ea041f18ccbf3bc10e5bec60f3bc07bb67301f99",
+    "canonical_parent_pull_request": 377,
+    "canonical_parent_exact_green_head": "33c681cc00a73b2a405102336f6fe6a1fddd940c",
+    "selective_adoption_only": true,
+    "migration": {
+      "revision": "20260829_0038",
+      "down_revision": "20260827_0037"
+    },
+    "historical_migration_replayed": false
+  },
+  "excluded": [
+    "client analytics endpoint",
+    "third-party analytics SDK",
+    "dashboard or KPI calculation",
+    "cohort or demographic segmentation",
+    "Signal qualification",
+    "billing or entitlement",
+    "research export",
+    "personality, ideology, psychometric, bias or causal inference"
+  ],
+  "verification": {
+    "architecture_fitness_required": true,
+    "unit_tests_required": true,
+    "postgres_integration_required": true,
+    "exact_sha_workflows": [
+      "API CI",
+      "Mobile CI",
+      "MVP Beta Gates",
+      "Global Readiness"
+    ]
+  }
+}
