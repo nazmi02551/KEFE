@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'apps/mobile/**'
+      - 'services/api/**'
+      - 'docs/contracts/**'
       - 'services/api/src/kefe_api/main.py'
       - 'services/api/src/kefe_api/modules/admin_security/feed_item_review.py'
       - 'services/api/src/kefe_api/modules/admin_security/feed_item_review_router.py'
@@ -35,6 +37,8 @@ on:
     branches: [main]
     paths:
       - 'apps/mobile/**'
+      - 'services/api/**'
+      - 'docs/contracts/**'
       - 'services/api/src/kefe_api/main.py'
       - 'services/api/src/kefe_api/modules/admin_security/feed_item_review.py'
       - 'services/api/src/kefe_api/modules/admin_security/feed_item_review_router.py'

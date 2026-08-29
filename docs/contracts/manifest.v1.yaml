@@ -1,6 +1,6 @@
 # OpenAPI 0.18.0 is the exact composition of the stable base snapshot and the reviewed Consensus overlay.
-manifest_version: 1.37.0
-updated_at: '2026-07-30'
+manifest_version: 1.38.0
+updated_at: '2026-08-29'
 policy:
   executable_schema_source: services/api/migrations
   product_authority: approved KEFE documentation ecosystem
@@ -26,6 +26,10 @@ contracts:
     path: docs/contracts/event-envelope.v1.schema.json
     version: '1'
     role: event_envelope
+  - id: analytics-event-spine-slice31
+    path: docs/contracts/analytics-event-spine-slice31.v1.json
+    version: 1.0.0
+    role: server_authoritative_privacy_safe_outbox_analytics_projection
   - id: config-registry
     path: docs/contracts/config-registry.v1.2.0.yaml
     version: 1.2.0
@@ -149,6 +153,10 @@ contracts:
     path: services/api/migrations/versions/20260730_0015_consensus_participation.py
     version: '20260730_0015'
     role: executable_consensus_card_and_participation_persistence
+  - id: analytics-event-spine-migration
+    path: services/api/migrations/versions/20260829_0038_analytics_event_spine.py
+    version: '20260829_0038'
+    role: durable_idempotent_analytics_event_projection_store
   - id: repository-structure
     path: docs/contracts/repository-structure.v1.txt
     version: '1'
@@ -183,3 +191,4 @@ architecture_decisions:
   - docs/adr/0027-first-class-claim-argument-normalized-ingestion.md
   - docs/adr/0028-provider-neutral-ingestion-orchestration-reviewed-proposals.md
   - docs/adr/0035-post-commit-consensus-participation.md
+  - docs/adr/0069-server-authoritative-analytics-event-spine.md
