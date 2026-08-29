@@ -36,3 +36,16 @@ class AnalyticsEvent:
     retention_class: AnalyticsRetentionClass
     metric_families: tuple[str, ...]
     payload: dict[str, Any]
+
+
+@dataclass(frozen=True, slots=True)
+class ActivationJourney:
+    session_id: UUID
+    actor_id: UUID | None
+    case_version_id: UUID
+    started_at: datetime | None
+    started_source_event_id: UUID | None
+    committed_at: datetime | None
+    committed_source_event_id: UUID | None
+    result_revealed_at: datetime | None
+    result_revealed_source_event_id: UUID | None

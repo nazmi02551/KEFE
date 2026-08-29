@@ -157,6 +157,10 @@ contracts:
     path: services/api/migrations/versions/20260829_0038_analytics_event_spine.py
     version: '20260829_0038'
     role: durable_idempotent_analytics_event_projection_store
+  - id: activation-journey-projection-migration
+    path: services/api/migrations/versions/20260829_0039_activation_journey_projection.py
+    version: '20260829_0039'
+    role: reproducible_session_activation_journey_projection
   - id: repository-structure
     path: docs/contracts/repository-structure.v1.txt
     version: '1'
@@ -192,3 +196,4 @@ architecture_decisions:
   - docs/adr/0028-provider-neutral-ingestion-orchestration-reviewed-proposals.md
   - docs/adr/0035-post-commit-consensus-participation.md
   - docs/adr/0069-server-authoritative-analytics-event-spine.md
+  - docs/adr/0135-reproducible-session-activation-journey.md
