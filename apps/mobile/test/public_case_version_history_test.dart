@@ -76,8 +76,16 @@ class UnavailableHistoryFakeRepository extends HistoryFakeRepository {
 Widget historyApp({
   required Locale locale,
   required DecisionRepository repository,
+  Future<List<PublicCaseVersion>> Function()? historyLoader,
 }) => ProviderScope(
-  overrides: [decisionRepositoryProvider.overrideWithValue(repository)],
+  retry: (_, _) => null,
+  overrides: [
+    decisionRepositoryProvider.overrideWithValue(repository),
+    if (historyLoader != null)
+      publicCaseVersionHistoryProvider(
+        caseId,
+      ).overrideWith((ref) => historyLoader()),
+  ],
   child: MaterialApp(
     locale: locale,
     supportedLocales: KefeStrings.supportedLocales,
@@ -168,30 +176,59 @@ void main() {
     },
   );
 
+  test(
+    'history provider delegates through the configured repository',
+    () async {
+      final versions = [
+        PublicCaseVersion(
+          versionId: 'current',
+          versionNo: 2,
+          title: 'Current title',
+          summary: 'Current summary',
+          publishedAt: DateTime.utc(2026, 8, 27),
+          classification: PublicCaseVersionClassification.current,
+        ),
+      ];
+      final repository = HistoryFakeRepository(versions);
+      final container = ProviderContainer(
+        retry: (_, _) => null,
+        overrides: [decisionRepositoryProvider.overrideWithValue(repository)],
+      );
+      addTearDown(container.dispose);
+
+      expect(
+        await container.read(publicCaseVersionHistoryProvider(caseId).future),
+        same(versions),
+      );
+    },
+  );
+
   testWidgets('shows localized current and previous public versions', (
     tester,
   ) async {
+    final versions = [
+      PublicCaseVersion(
+        versionId: 'current',
+        versionNo: 2,
+        title: 'Güncel başlık',
+        summary: 'Güncel özet',
+        publishedAt: DateTime.utc(2026, 8, 27),
+        classification: PublicCaseVersionClassification.current,
+      ),
+      PublicCaseVersion(
+        versionId: 'previous',
+        versionNo: 1,
+        title: 'Önceki başlık',
+        summary: 'Önceki özet',
+        publishedAt: DateTime.utc(2026, 8, 20),
+        classification: PublicCaseVersionClassification.previous,
+      ),
+    ];
     await tester.pumpWidget(
       historyApp(
         locale: const Locale('tr', 'TR'),
-        repository: HistoryFakeRepository([
-          PublicCaseVersion(
-            versionId: 'current',
-            versionNo: 2,
-            title: 'Güncel başlık',
-            summary: 'Güncel özet',
-            publishedAt: DateTime.utc(2026, 8, 27),
-            classification: PublicCaseVersionClassification.current,
-          ),
-          PublicCaseVersion(
-            versionId: 'previous',
-            versionNo: 1,
-            title: 'Önceki başlık',
-            summary: 'Önceki özet',
-            publishedAt: DateTime.utc(2026, 8, 20),
-            classification: PublicCaseVersionClassification.previous,
-          ),
-        ]),
+        repository: HistoryFakeRepository(versions),
+        historyLoader: () async => versions,
       ),
     );
     await tester.pumpAndSettle();

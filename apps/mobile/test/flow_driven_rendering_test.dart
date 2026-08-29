@@ -234,7 +234,11 @@ class RetestFlowRepository
 }
 
 Future<void> tapVisible(WidgetTester tester, Finder finder) async {
-  await tester.ensureVisible(finder);
+  await tester.scrollUntilVisible(
+    finder,
+    300,
+    scrollable: find.byType(Scrollable).first,
+  );
   await tester.pump();
   await tester.tap(finder);
   await tester.pump();
@@ -264,7 +268,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('option-A')), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('option-A')));
+    await tapVisible(tester, find.byKey(const ValueKey('option-A')));
     await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
     await tester.pumpAndSettle();
 
@@ -273,7 +277,7 @@ void main() {
     expect(repository.revealCalls, 0);
     expect(find.byKey(const ValueKey('option-B')), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('option-B')));
+    await tapVisible(tester, find.byKey(const ValueKey('option-B')));
     await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
     await tester.pumpAndSettle();
 
