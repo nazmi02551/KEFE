@@ -1,0 +1,86 @@
+{
+  "contract_version": "1.0.0",
+  "updated_at": "2026-08-29",
+  "status": "implementation_candidate",
+  "issue": 380,
+  "source_adr": "docs/adr/0135-reproducible-session-activation-journey.md",
+  "parent_contract": "docs/contracts/analytics-event-spine-slice31.v1.json",
+  "capabilities": ["CAP-115"],
+  "source": {
+    "server_authoritative_only": true,
+    "stored_analytics_events_only": true,
+    "client_ingestion_allowed": false
+  },
+  "stages": [
+    {
+      "analytics_name": "activation.weigh_started",
+      "analytics_version": 1,
+      "occurred_field": "started_at",
+      "lineage_field": "started_source_event_id"
+    },
+    {
+      "analytics_name": "activation.weigh_committed",
+      "analytics_version": 1,
+      "occurred_field": "committed_at",
+      "lineage_field": "committed_source_event_id"
+    },
+    {
+      "analytics_name": "activation.result_revealed",
+      "analytics_version": 1,
+      "occurred_field": "result_revealed_at",
+      "lineage_field": "result_revealed_source_event_id"
+    }
+  ],
+  "identity": {
+    "key": ["session_id"],
+    "required_consistency": ["session_id", "case_version_id"],
+    "non_null_actor_values_must_agree": true,
+    "conflict_behavior": "FAIL_CLOSED_ATOMIC_ROLLBACK"
+  },
+  "reconstruction": {
+    "order_independent": true,
+    "same_stage_selection": "MIN_OCCURRED_AT_THEN_SOURCE_EVENT_ID",
+    "missing_stage_behavior": "PRESERVE_NULL",
+    "duplicate_delivery_behavior": "IDEMPOTENT_REPLAY"
+  },
+  "persistence": {
+    "event_and_journey_same_operation": true,
+    "postgres_same_transaction": true,
+    "postgres_session_scoped_serialization": true,
+    "migration_backfills_existing_events": true,
+    "backfill_conflict_behavior": "FAIL_CLOSED_MIGRATION_ABORT",
+    "migration": {
+      "revision": "20260829_0039",
+      "down_revision": "20260829_0038"
+    }
+  },
+  "surface": {
+    "public_endpoint": false,
+    "admin_endpoint": false,
+    "mobile_surface": false,
+    "aggregate_output": false
+  },
+  "forbidden_claims": [
+    "MEANINGFUL_WEIGH",
+    "WAU",
+    "FUNNEL_RATE",
+    "FUNNEL_SUCCESS",
+    "ABANDONMENT",
+    "COHORT",
+    "USER_PROFILE",
+    "PERSONALITY",
+    "IDEOLOGY",
+    "PSYCHOMETRIC",
+    "BIAS",
+    "CAUSAL_INFERENCE"
+  ],
+  "non_claims": [
+    "cap114_definition_executable",
+    "activation_kpi_calculated",
+    "aggregate_privacy_threshold_enforced",
+    "warehouse_delivery_operable",
+    "production_observability_proven",
+    "cap115_lifecycle_promoted",
+    "f5_complete"
+  ]
+}
