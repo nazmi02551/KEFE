@@ -1,5 +1,5 @@
 # OpenAPI 0.18.0 is the exact composition of the stable base snapshot and the reviewed Consensus overlay.
-manifest_version: 1.38.0
+manifest_version: 1.39.0
 updated_at: '2026-08-29'
 policy:
   executable_schema_source: services/api/migrations
@@ -30,6 +30,10 @@ contracts:
     path: docs/contracts/analytics-event-spine-slice31.v1.json
     version: 1.0.0
     role: server_authoritative_privacy_safe_outbox_analytics_projection
+  - id: quality-journey-projection
+    path: docs/contracts/quality-journey-projection.v1.json
+    version: 1.0.0
+    role: reproducible_session_quality_observation_projection
   - id: config-registry
     path: docs/contracts/config-registry.v1.2.0.yaml
     version: 1.2.0
@@ -169,6 +173,10 @@ contracts:
     path: services/api/migrations/versions/20260829_0040_analytics_actor_deletion_anonymization.py
     version: '20260829_0040'
     role: historical_deleted_actor_analytics_anonymization
+  - id: quality-journey-projection-migration
+    path: services/api/migrations/versions/20260829_0041_quality_journey_projection.py
+    version: '20260829_0041'
+    role: reproducible_session_quality_journey_projection
   - id: repository-structure
     path: docs/contracts/repository-structure.v1.txt
     version: '1'
@@ -206,3 +214,4 @@ architecture_decisions:
   - docs/adr/0069-server-authoritative-analytics-event-spine.md
   - docs/adr/0135-reproducible-session-activation-journey.md
   - docs/adr/0136-self-service-deletion-of-retained-analytics-identity.md
+  - docs/adr/0137-reproducible-session-quality-journey.md

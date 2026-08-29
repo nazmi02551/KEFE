@@ -1,0 +1,105 @@
+{
+  "contract_version": "1.0.0",
+  "updated_at": "2026-08-29",
+  "status": "implementation_candidate",
+  "issue": 385,
+  "source_adr": "docs/adr/0137-reproducible-session-quality-journey.md",
+  "parent_contract": "docs/contracts/analytics-event-spine-slice31.v1.json",
+  "capabilities": ["CAP-116"],
+  "source": {
+    "server_authoritative_only": true,
+    "stored_analytics_events_only": true,
+    "client_ingestion_allowed": false
+  },
+  "stages": [
+    {
+      "analytics_name": "activation.weigh_committed",
+      "analytics_version": 1,
+      "occurred_field": "committed_at",
+      "lineage_field": "committed_source_event_id"
+    },
+    {
+      "analytics_name": "quality.perspective_viewed",
+      "analytics_version": 1,
+      "occurred_field": "perspective_viewed_at",
+      "lineage_field": "perspective_viewed_source_event_id"
+    },
+    {
+      "analytics_name": "quality.exposure_recorded",
+      "analytics_version": 1,
+      "occurred_field": "exposure_recorded_at",
+      "lineage_field": "exposure_recorded_source_event_id"
+    },
+    {
+      "analytics_name": "quality.intervention_exposed",
+      "analytics_version": 1,
+      "occurred_field": "intervention_exposed_at",
+      "lineage_field": "intervention_exposed_source_event_id"
+    },
+    {
+      "analytics_name": "quality.decision_revised",
+      "analytics_version": 1,
+      "occurred_field": "decision_revised_at",
+      "lineage_field": "decision_revised_source_event_id"
+    }
+  ],
+  "identity": {
+    "key": ["session_id"],
+    "optional_provenance": ["case_version_id"],
+    "non_null_case_version_values_must_agree": true,
+    "actor_id_stored": false,
+    "event_payload_copied": false,
+    "conflict_behavior": "FAIL_CLOSED_ATOMIC_ROLLBACK"
+  },
+  "reconstruction": {
+    "order_independent": true,
+    "same_stage_selection": "MIN_OCCURRED_AT_THEN_SOURCE_EVENT_ID",
+    "missing_stage_behavior": "PRESERVE_NULL",
+    "duplicate_delivery_behavior": "IDEMPOTENT_REPLAY"
+  },
+  "persistence": {
+    "event_and_journey_same_operation": true,
+    "activation_and_quality_projection_same_transaction": true,
+    "postgres_same_transaction": true,
+    "postgres_session_scoped_serialization": true,
+    "migration_backfills_existing_events": true,
+    "backfill_conflict_behavior": "FAIL_CLOSED_MIGRATION_ABORT",
+    "migration": {
+      "revision": "20260829_0041",
+      "down_revision": "20260829_0040"
+    }
+  },
+  "surface": {
+    "public_endpoint": false,
+    "admin_endpoint": false,
+    "mobile_surface": false,
+    "aggregate_output": false
+  },
+  "forbidden_claims": [
+    "QUALITY_SCORE",
+    "DEEP_WEIGH_SUCCESS",
+    "QUALITY_RATE",
+    "SOURCE_QUALITY_RANKING",
+    "PERSPECTIVE_QUALITY_RANKING",
+    "TRUST_SCORE",
+    "CAUSAL_EFFECT",
+    "MEANINGFUL_WEIGH",
+    "WAU",
+    "COHORT",
+    "USER_PROFILE",
+    "PERSONALITY",
+    "IDEOLOGY",
+    "PSYCHOMETRIC",
+    "BIAS",
+    "CAUSAL_INFERENCE"
+  ],
+  "non_claims": [
+    "cap116_metric_definition_executable",
+    "quality_kpi_calculated",
+    "aggregate_privacy_threshold_enforced",
+    "warehouse_delivery_operable",
+    "production_observability_proven",
+    "cap116_lifecycle_promoted",
+    "f5_complete"
+  ]
+}
