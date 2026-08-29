@@ -207,10 +207,10 @@ def main() -> int:
     )
 
     canonical = schema.get("canonical_chain", {})
-    if canonical.get("expected_head") != "20260829_0040":
-        errors.append("schema snapshot head must be 20260829_0040")
-    if canonical.get("expected_migration_file_count") != 40:
-        errors.append("schema snapshot migration count must be 40")
+    if canonical.get("expected_head") != "20260829_0041":
+        errors.append("schema snapshot head must be 20260829_0041")
+    if canonical.get("expected_migration_file_count") != 41:
+        errors.append("schema snapshot migration count must be 41")
 
     if errors:
         print("Analytics actor deletion contract check FAILED")

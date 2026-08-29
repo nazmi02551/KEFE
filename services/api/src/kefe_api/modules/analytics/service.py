@@ -7,7 +7,11 @@ from datetime import datetime
 from typing import Any
 from uuid import NAMESPACE_URL, UUID, uuid5
 
-from kefe_api.modules.analytics.models import ActivationJourney, AnalyticsEvent
+from kefe_api.modules.analytics.models import (
+    ActivationJourney,
+    AnalyticsEvent,
+    QualityJourney,
+)
 from kefe_api.modules.analytics.registry import AnalyticsRegistry
 from kefe_api.modules.events.models import OutboxEvent
 
@@ -40,6 +44,10 @@ class AnalyticsProjectionError(ValueError):
 
 class ActivationJourneyProjectionError(ValueError):
     """Analytics events disagree on session-level activation provenance."""
+
+
+class QualityJourneyProjectionError(ValueError):
+    """Analytics events disagree on session-level quality provenance."""
 
 
 class ActivationJourneyProjector:
@@ -159,6 +167,107 @@ class ActivationJourneyProjector:
         if candidate_key < current_key:
             return candidate_at, candidate_source_event_id
         return current_at, current_source_event_id
+
+
+class QualityJourneyProjector:
+    _STAGES = {
+        ("activation.weigh_committed", 1): (
+            "committed_at",
+            "committed_source_event_id",
+        ),
+        ("quality.perspective_viewed", 1): (
+            "perspective_viewed_at",
+            "perspective_viewed_source_event_id",
+        ),
+        ("quality.exposure_recorded", 1): (
+            "exposure_recorded_at",
+            "exposure_recorded_source_event_id",
+        ),
+        ("quality.intervention_exposed", 1): (
+            "intervention_exposed_at",
+            "intervention_exposed_source_event_id",
+        ),
+        ("quality.decision_revised", 1): (
+            "decision_revised_at",
+            "decision_revised_source_event_id",
+        ),
+    }
+
+    @classmethod
+    def supports(cls, event: AnalyticsEvent) -> bool:
+        return (event.analytics_name, event.analytics_version) in cls._STAGES
+
+    def apply(
+        self,
+        current: QualityJourney | None,
+        event: AnalyticsEvent,
+    ) -> QualityJourney | None:
+        stage = self._STAGES.get((event.analytics_name, event.analytics_version))
+        if stage is None:
+            return current
+
+        if current is None:
+            current = QualityJourney(
+                session_id=event.session_id,
+                case_version_id=event.case_version_id,
+                committed_at=None,
+                committed_source_event_id=None,
+                perspective_viewed_at=None,
+                perspective_viewed_source_event_id=None,
+                exposure_recorded_at=None,
+                exposure_recorded_source_event_id=None,
+                intervention_exposed_at=None,
+                intervention_exposed_source_event_id=None,
+                decision_revised_at=None,
+                decision_revised_source_event_id=None,
+            )
+        else:
+            self._validate_provenance(current, event)
+
+        occurred_field, source_field = stage
+        selected_at, selected_source = ActivationJourneyProjector._earliest_observation(
+            current_at=getattr(current, occurred_field),
+            current_source_event_id=getattr(current, source_field),
+            candidate_at=event.occurred_at,
+            candidate_source_event_id=event.source_event_id,
+        )
+        return replace(
+            current,
+            case_version_id=current.case_version_id or event.case_version_id,
+            **{
+                occurred_field: selected_at,
+                source_field: selected_source,
+            },
+        )
+
+    def rebuild(self, events: Iterable[AnalyticsEvent]) -> QualityJourney | None:
+        journey: QualityJourney | None = None
+        ordered = sorted(
+            events,
+            key=lambda event: (
+                event.occurred_at,
+                str(event.source_event_id),
+                event.analytics_name,
+                event.analytics_version,
+            ),
+        )
+        for event in ordered:
+            journey = self.apply(journey, event)
+        return journey
+
+    @staticmethod
+    def _validate_provenance(
+        current: QualityJourney,
+        event: AnalyticsEvent,
+    ) -> None:
+        if event.session_id != current.session_id:
+            raise QualityJourneyProjectionError("quality session_id conflict")
+        if (
+            current.case_version_id is not None
+            and event.case_version_id is not None
+            and current.case_version_id != event.case_version_id
+        ):
+            raise QualityJourneyProjectionError("quality case_version_id conflict")
 
 
 class AnalyticsEventProjector:

@@ -49,3 +49,19 @@ class ActivationJourney:
     committed_source_event_id: UUID | None
     result_revealed_at: datetime | None
     result_revealed_source_event_id: UUID | None
+
+
+@dataclass(frozen=True, slots=True)
+class QualityJourney:
+    session_id: UUID
+    case_version_id: UUID | None
+    committed_at: datetime | None
+    committed_source_event_id: UUID | None
+    perspective_viewed_at: datetime | None
+    perspective_viewed_source_event_id: UUID | None
+    exposure_recorded_at: datetime | None
+    exposure_recorded_source_event_id: UUID | None
+    intervention_exposed_at: datetime | None
+    intervention_exposed_source_event_id: UUID | None
+    decision_revised_at: datetime | None
+    decision_revised_source_event_id: UUID | None

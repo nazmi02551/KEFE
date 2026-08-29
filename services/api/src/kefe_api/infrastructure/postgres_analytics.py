@@ -10,18 +10,25 @@ from kefe_api.modules.analytics.models import (
     AnalyticsEvent,
     AnalyticsPrivacyClass,
     AnalyticsRetentionClass,
+    QualityJourney,
 )
-from kefe_api.modules.analytics.service import ActivationJourneyProjector
+from kefe_api.modules.analytics.service import (
+    ActivationJourneyProjector,
+    QualityJourneyProjector,
+)
 
 
 class PostgresAnalyticsEventStore:
     def __init__(self, engine: Engine) -> None:
         self._engine = engine
         self._journey_projector = ActivationJourneyProjector()
+        self._quality_journey_projector = QualityJourneyProjector()
 
     def append_once(self, event: AnalyticsEvent) -> bool:
         with self._engine.begin() as connection:
-            if self._journey_projector.supports(event):
+            if self._journey_projector.supports(
+                event
+            ) or self._quality_journey_projector.supports(event):
                 connection.execute(
                     text(
                         "SELECT pg_advisory_xact_lock("
@@ -132,6 +139,89 @@ class PostgresAnalyticsEventStore:
                         ),
                     },
                 )
+            if inserted is not None and self._quality_journey_projector.supports(event):
+                current_row = (
+                    connection.execute(
+                        text(self._quality_journey_select() + " WHERE session_id = :session_id"),
+                        {"session_id": event.session_id},
+                    )
+                    .mappings()
+                    .one_or_none()
+                )
+                current = None if current_row is None else self._quality_journey(current_row)
+                journey = self._quality_journey_projector.apply(current, event)
+                if journey is None:
+                    raise RuntimeError("supported quality event did not produce a journey")
+                connection.execute(
+                    text(
+                        """
+                        INSERT INTO analytics.quality_journey (
+                            session_id, case_version_id,
+                            committed_at, committed_source_event_id,
+                            perspective_viewed_at,
+                            perspective_viewed_source_event_id,
+                            exposure_recorded_at,
+                            exposure_recorded_source_event_id,
+                            intervention_exposed_at,
+                            intervention_exposed_source_event_id,
+                            decision_revised_at,
+                            decision_revised_source_event_id
+                        ) VALUES (
+                            :session_id, :case_version_id,
+                            :committed_at, :committed_source_event_id,
+                            :perspective_viewed_at,
+                            :perspective_viewed_source_event_id,
+                            :exposure_recorded_at,
+                            :exposure_recorded_source_event_id,
+                            :intervention_exposed_at,
+                            :intervention_exposed_source_event_id,
+                            :decision_revised_at,
+                            :decision_revised_source_event_id
+                        )
+                        ON CONFLICT (session_id) DO UPDATE SET
+                            case_version_id = EXCLUDED.case_version_id,
+                            committed_at = EXCLUDED.committed_at,
+                            committed_source_event_id =
+                                EXCLUDED.committed_source_event_id,
+                            perspective_viewed_at = EXCLUDED.perspective_viewed_at,
+                            perspective_viewed_source_event_id =
+                                EXCLUDED.perspective_viewed_source_event_id,
+                            exposure_recorded_at = EXCLUDED.exposure_recorded_at,
+                            exposure_recorded_source_event_id =
+                                EXCLUDED.exposure_recorded_source_event_id,
+                            intervention_exposed_at =
+                                EXCLUDED.intervention_exposed_at,
+                            intervention_exposed_source_event_id =
+                                EXCLUDED.intervention_exposed_source_event_id,
+                            decision_revised_at = EXCLUDED.decision_revised_at,
+                            decision_revised_source_event_id =
+                                EXCLUDED.decision_revised_source_event_id,
+                            updated_at = now()
+                        """
+                    ),
+                    {
+                        "session_id": journey.session_id,
+                        "case_version_id": journey.case_version_id,
+                        "committed_at": journey.committed_at,
+                        "committed_source_event_id": (journey.committed_source_event_id),
+                        "perspective_viewed_at": journey.perspective_viewed_at,
+                        "perspective_viewed_source_event_id": (
+                            journey.perspective_viewed_source_event_id
+                        ),
+                        "exposure_recorded_at": journey.exposure_recorded_at,
+                        "exposure_recorded_source_event_id": (
+                            journey.exposure_recorded_source_event_id
+                        ),
+                        "intervention_exposed_at": journey.intervention_exposed_at,
+                        "intervention_exposed_source_event_id": (
+                            journey.intervention_exposed_source_event_id
+                        ),
+                        "decision_revised_at": journey.decision_revised_at,
+                        "decision_revised_source_event_id": (
+                            journey.decision_revised_source_event_id
+                        ),
+                    },
+                )
         return inserted is not None
 
     def get(self, event_id: UUID) -> AnalyticsEvent | None:
@@ -194,6 +284,18 @@ class PostgresAnalyticsEventStore:
             )
         return None if row is None else self._activation_journey(row)
 
+    def get_quality_journey(self, session_id: UUID) -> QualityJourney | None:
+        with self._engine.connect() as connection:
+            row = (
+                connection.execute(
+                    text(self._quality_journey_select() + " WHERE session_id = :session_id"),
+                    {"session_id": session_id},
+                )
+                .mappings()
+                .one_or_none()
+            )
+        return None if row is None else self._quality_journey(row)
+
     @staticmethod
     def _select() -> str:
         return """
@@ -214,6 +316,19 @@ class PostgresAnalyticsEventStore:
                 committed_at, committed_source_event_id,
                 result_revealed_at, result_revealed_source_event_id
             FROM analytics.activation_journey
+        """
+
+    @staticmethod
+    def _quality_journey_select() -> str:
+        return """
+            SELECT
+                session_id, case_version_id,
+                committed_at, committed_source_event_id,
+                perspective_viewed_at, perspective_viewed_source_event_id,
+                exposure_recorded_at, exposure_recorded_source_event_id,
+                intervention_exposed_at, intervention_exposed_source_event_id,
+                decision_revised_at, decision_revised_source_event_id
+            FROM analytics.quality_journey
         """
 
     @staticmethod
@@ -251,4 +366,21 @@ class PostgresAnalyticsEventStore:
             result_revealed_source_event_id=row[
                 "result_revealed_source_event_id"
             ],
+        )
+
+    @staticmethod
+    def _quality_journey(row) -> QualityJourney:
+        return QualityJourney(
+            session_id=row["session_id"],
+            case_version_id=row["case_version_id"],
+            committed_at=row["committed_at"],
+            committed_source_event_id=row["committed_source_event_id"],
+            perspective_viewed_at=row["perspective_viewed_at"],
+            perspective_viewed_source_event_id=row["perspective_viewed_source_event_id"],
+            exposure_recorded_at=row["exposure_recorded_at"],
+            exposure_recorded_source_event_id=row["exposure_recorded_source_event_id"],
+            intervention_exposed_at=row["intervention_exposed_at"],
+            intervention_exposed_source_event_id=row["intervention_exposed_source_event_id"],
+            decision_revised_at=row["decision_revised_at"],
+            decision_revised_source_event_id=row["decision_revised_source_event_id"],
         )

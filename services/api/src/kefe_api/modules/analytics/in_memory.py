@@ -5,8 +5,15 @@ from dataclasses import replace
 from threading import RLock
 from uuid import UUID
 
-from kefe_api.modules.analytics.models import ActivationJourney, AnalyticsEvent
-from kefe_api.modules.analytics.service import ActivationJourneyProjector
+from kefe_api.modules.analytics.models import (
+    ActivationJourney,
+    AnalyticsEvent,
+    QualityJourney,
+)
+from kefe_api.modules.analytics.service import (
+    ActivationJourneyProjector,
+    QualityJourneyProjector,
+)
 
 
 class InMemoryAnalyticsEventStore:
@@ -15,7 +22,9 @@ class InMemoryAnalyticsEventStore:
         self._by_source: dict[UUID, list[UUID]] = {}
         self._by_session: dict[UUID, list[UUID]] = {}
         self._journeys: dict[UUID, ActivationJourney] = {}
+        self._quality_journeys: dict[UUID, QualityJourney] = {}
         self._journey_projector = ActivationJourneyProjector()
+        self._quality_journey_projector = QualityJourneyProjector()
         self._lock = RLock()
 
     def append_once(self, event: AnalyticsEvent) -> bool:
@@ -26,11 +35,17 @@ class InMemoryAnalyticsEventStore:
                 self._journeys.get(event.session_id),
                 event,
             )
+            next_quality_journey = self._quality_journey_projector.apply(
+                self._quality_journeys.get(event.session_id),
+                event,
+            )
             self._events[event.id] = deepcopy(event)
             self._by_source.setdefault(event.source_event_id, []).append(event.id)
             self._by_session.setdefault(event.session_id, []).append(event.id)
             if next_journey is not None:
                 self._journeys[event.session_id] = deepcopy(next_journey)
+            if next_quality_journey is not None:
+                self._quality_journeys[event.session_id] = deepcopy(next_quality_journey)
             return True
 
     def get(self, event_id: UUID) -> AnalyticsEvent | None:
@@ -55,6 +70,11 @@ class InMemoryAnalyticsEventStore:
     def get_activation_journey(self, session_id: UUID) -> ActivationJourney | None:
         with self._lock:
             journey = self._journeys.get(session_id)
+            return deepcopy(journey) if journey is not None else None
+
+    def get_quality_journey(self, session_id: UUID) -> QualityJourney | None:
+        with self._lock:
+            journey = self._quality_journeys.get(session_id)
             return deepcopy(journey) if journey is not None else None
 
     def anonymize_actor(self, actor_id: UUID) -> tuple[int, int]:

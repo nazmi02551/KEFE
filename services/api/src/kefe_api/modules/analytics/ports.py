@@ -3,7 +3,11 @@ from __future__ import annotations
 from typing import Protocol
 from uuid import UUID
 
-from kefe_api.modules.analytics.models import ActivationJourney, AnalyticsEvent
+from kefe_api.modules.analytics.models import (
+    ActivationJourney,
+    AnalyticsEvent,
+    QualityJourney,
+)
 
 
 class AnalyticsEventStore(Protocol):
@@ -16,6 +20,8 @@ class AnalyticsEventStore(Protocol):
     def list_by_session(self, session_id: UUID) -> tuple[AnalyticsEvent, ...]: ...
 
     def get_activation_journey(self, session_id: UUID) -> ActivationJourney | None: ...
+
+    def get_quality_journey(self, session_id: UUID) -> QualityJourney | None: ...
 
 
 class AnalyticsActorAnonymizer(Protocol):
