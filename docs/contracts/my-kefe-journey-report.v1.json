@@ -1,0 +1,99 @@
+{
+  "contract_version": "1.0.0",
+  "updated_at": "2026-08-29",
+  "status": "implementation_candidate",
+  "issue": 387,
+  "source_adr": "docs/adr/0138-actor-scoped-my-kefe-journey-report.md",
+  "capabilities": ["CAP-120"],
+  "surface": {
+    "method": "GET",
+    "path": "/v1/me/progress",
+    "additive_member": "personal_report",
+    "authentication": "ACTOR_BEARER",
+    "actor_scoped": true,
+    "missing_member_mobile_fallback": "EMPTY_REPORT"
+  },
+  "moments": {
+    "allowed_types": [
+      "INITIAL_COMMIT",
+      "DECISION_UPDATE",
+      "REFLECTION_COMPLETED"
+    ],
+    "returned_fields": [
+      "type",
+      "case_id",
+      "case_version_id",
+      "title",
+      "primary_domain",
+      "occurred_at",
+      "revision_no"
+    ],
+    "revision_no_required_only_for": "DECISION_UPDATE",
+    "limit": 24,
+    "ordering": "OCCURRED_AT_DESC_THEN_INTERNAL_SOURCE_ID_DESC",
+    "source_authorities": {
+      "INITIAL_COMMIT": "decision.weigh_session.committed_at",
+      "DECISION_UPDATE": "decision.decision_revision.revision_no_gt_1",
+      "REFLECTION_COMPLETED": "decision.reflection_completion.completed_at"
+    }
+  },
+  "persistence": {
+    "reconstructed_on_read": true,
+    "new_table": false,
+    "migration_required": false,
+    "analytics_projection_dependency": false,
+    "memory_postgres_parity_required": true,
+    "account_continuity_preserved": true,
+    "self_service_deletion_uses_canonical_record_deletion": true
+  },
+  "mobile": {
+    "route": "/my-kefe/report",
+    "entry_surface": "MY_KEFE",
+    "canonical_case_route": "/case/:caseId",
+    "localized_languages": ["en", "tr"],
+    "light_dark_supported": true,
+    "reduce_motion_safe": true,
+    "accessible_tap_targets": true,
+    "strict_present_member_parsing": true,
+    "preview_fixture_isolated": true,
+    "production_preview_fallback": false
+  },
+  "forbidden_output": [
+    "RAW_RESPONSE",
+    "PRIVATE_REASON",
+    "DECISION_DELTA",
+    "EXPOSURE_METADATA",
+    "INTERVENTION_METADATA",
+    "ACTOR_ID",
+    "SESSION_ID",
+    "REVISION_ID",
+    "REFLECTION_COMPLETION_ID",
+    "SCORE",
+    "RANK",
+    "STREAK",
+    "COHORT",
+    "PERSONALITY",
+    "IDEOLOGY",
+    "PSYCHOMETRIC",
+    "BIAS",
+    "CAUSAL_INFERENCE",
+    "SIGNAL",
+    "IMPACT"
+  ],
+  "preserved_invariants": [
+    "COMMIT_FIRST",
+    "BLIND_FIRST",
+    "IMMUTABLE_PUBLISHED_CASE_VERSION",
+    "GENERIC_CASE_AGNOSTIC_FLOW",
+    "PRODUCT_PREVIEW_PRODUCTION_ISOLATION",
+    "MY_KEFE_OBSERVED_DESCRIPTIVE_ONLY"
+  ],
+  "non_claims": [
+    "cap120_lifecycle_promoted",
+    "chronicle_complete",
+    "analytics_reporting_complete",
+    "f5_complete",
+    "human_usability_proven",
+    "production_deployment_proven"
+  ]
+}
