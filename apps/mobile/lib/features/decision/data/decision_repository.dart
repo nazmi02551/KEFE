@@ -51,7 +51,9 @@ extension PublicCaseHistoryRepositoryAccess on DecisionRepository {
   Future<List<PublicCaseVersion>> fetchPublicCaseHistory(String caseId) {
     final repository = this;
     if (repository is PublicCaseHistoryRepository) {
-      return repository.fetchPublicCaseHistory(caseId);
+      return (repository as PublicCaseHistoryRepository).fetchPublicCaseHistory(
+        caseId,
+      );
     }
     throw const ClientTransportFailure(
       code: 'PUBLIC_CASE_HISTORY_NOT_CONFIGURED',
