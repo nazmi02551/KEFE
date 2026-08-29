@@ -7,6 +7,7 @@ from kefe_api.infrastructure.postgres_account_continuity_renewal import (
     RenewalPostgresAccountContinuityRepository,
 )
 from kefe_api.infrastructure.postgres_admin_security import PostgresAdminSessionStore
+from kefe_api.infrastructure.postgres_analytics import PostgresAnalyticsEventStore
 from kefe_api.infrastructure.postgres_case_media import PostgresCaseMediaRepository
 from kefe_api.infrastructure.postgres_community_reason import PostgresCommunityReasonRepository
 from kefe_api.infrastructure.postgres_consensus import PostgresConsensusRepository
@@ -36,6 +37,8 @@ from kefe_api.infrastructure.postgres_reflection_decision import (
 from kefe_api.infrastructure.postgres_sharing import PostgresShareRepository
 from kefe_api.modules.admin_security.in_memory import InMemoryAdminSessionStore
 from kefe_api.modules.admin_security.ports import AdminSessionStore
+from kefe_api.modules.analytics.in_memory import InMemoryAnalyticsEventStore
+from kefe_api.modules.analytics.ports import AnalyticsEventStore
 from kefe_api.modules.case_media.in_memory import InMemoryCaseMediaRepository
 from kefe_api.modules.case_media.ports import CaseMediaRepository
 from kefe_api.modules.community_reason.in_memory import InMemoryCommunityReasonRepository
@@ -91,6 +94,14 @@ from kefe_api.modules.progress.in_memory import InMemoryProgressRepository
 from kefe_api.modules.progress.ports import ProgressRepository
 from kefe_api.modules.sharing.in_memory import InMemoryShareRepository
 from kefe_api.modules.sharing.ports import ShareRepository
+
+
+def build_analytics_event_store(settings: Settings) -> AnalyticsEventStore:
+    if settings.persistence_backend == "memory":
+        return InMemoryAnalyticsEventStore()
+    if not settings.database_url:
+        raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
+    return PostgresAnalyticsEventStore(build_engine(settings.database_url))
 
 
 def build_decision_repository(settings: Settings) -> DecisionRepository:
@@ -258,6 +269,7 @@ def build_community_reason_repository(settings: Settings) -> CommunityReasonRepo
 
 def build_privacy_repository(
     settings: Settings,
+    analytics_event_store: AnalyticsEventStore,
     decision_repository: DecisionRepository,
     identity_repository: IdentityRepository,
 ) -> PrivacyRepository:
@@ -266,7 +278,10 @@ def build_privacy_repository(
             raise RuntimeError("memory privacy requires in-memory decision repository")
         if not isinstance(identity_repository, InMemoryIdentityRepository):
             raise RuntimeError("memory privacy requires in-memory identity repository")
+        if not isinstance(analytics_event_store, InMemoryAnalyticsEventStore):
+            raise RuntimeError("memory privacy requires in-memory analytics event store")
         return InMemoryPrivacyRepository(
+            analytics_event_store=analytics_event_store,
             decision_repository=decision_repository,
             identity_repository=identity_repository,
         )

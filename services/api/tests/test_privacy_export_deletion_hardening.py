@@ -9,7 +9,37 @@ from uuid import UUID, uuid4
 from fastapi.testclient import TestClient
 
 from kefe_api.main import create_app
-from kefe_api.modules.decision.bootstrap import DEMO_CASE_ID, DEMO_QUESTION_ID
+from kefe_api.modules.analytics.models import (
+    AnalyticsEvent,
+    AnalyticsPrivacyClass,
+    AnalyticsRetentionClass,
+)
+from kefe_api.modules.decision.bootstrap import (
+    DEMO_CASE_ID,
+    DEMO_CASE_VERSION_ID,
+    DEMO_QUESTION_ID,
+)
+
+
+def _analytics_event(*, actor_id: UUID, session_id: UUID) -> AnalyticsEvent:
+    return AnalyticsEvent(
+        id=uuid4(),
+        source_event_id=uuid4(),
+        source_event_name="weigh.started",
+        source_event_version=1,
+        analytics_name="activation.weigh_started",
+        analytics_version=1,
+        occurred_at=datetime(2026, 8, 29, 8, 0, tzinfo=UTC),
+        producer_version="privacy-deletion-test",
+        actor_id=actor_id,
+        session_id=session_id,
+        case_version_id=DEMO_CASE_VERSION_ID,
+        contribution_class=None,
+        privacy_class=AnalyticsPrivacyClass.PRODUCT_ANALYTICS,
+        retention_class=AnalyticsRetentionClass.STANDARD_13_MONTHS,
+        metric_families=("ACTIVATION",),
+        payload={},
+    )
 
 
 def _guest(client: TestClient) -> tuple[dict[str, str], UUID]:
@@ -173,3 +203,48 @@ def test_memory_concurrent_deletion_converges_and_removes_merge_alias() -> None:
     assert len(repository._receipts) == 1
     assert guest_actor_id not in identity._merged_into
     assert account_actor_id not in identity._merged_into.values()
+
+
+def test_memory_deletion_anonymizes_retained_analytics_and_replay_repairs() -> None:
+    app = create_app()
+    identity = app.state.identity_repository
+    analytics = app.state.analytics_event_store
+    privacy = app.state.privacy_repository
+    actor_id = uuid4()
+    first_session_id = uuid4()
+    first_event = _analytics_event(actor_id=actor_id, session_id=first_session_id)
+    identity.create_guest_session(
+        actor_id=actor_id,
+        token_hash="privacy-analytics-actor-token",
+        expires_at=datetime.now(UTC) + timedelta(days=1),
+    )
+    assert analytics.append_once(first_event) is True
+
+    receipt = privacy.delete_actor_data(
+        actor_id=actor_id,
+        actor_kind="GUEST",
+        deleted_at=datetime(2026, 8, 29, 9, 0, tzinfo=UTC),
+    )
+
+    retained_event = analytics.get(first_event.id)
+    retained_journey = analytics.get_activation_journey(first_session_id)
+    assert retained_event is not None and retained_event.actor_id is None
+    assert retained_event.session_id == first_session_id
+    assert retained_event.case_version_id == DEMO_CASE_VERSION_ID
+    assert retained_journey is not None and retained_journey.actor_id is None
+    assert retained_journey.session_id == first_session_id
+
+    second_session_id = uuid4()
+    late_event = _analytics_event(actor_id=actor_id, session_id=second_session_id)
+    assert analytics.append_once(late_event) is True
+    assert analytics.get_activation_journey(second_session_id).actor_id == actor_id
+
+    replay = privacy.delete_actor_data(
+        actor_id=actor_id,
+        actor_kind="GUEST",
+        deleted_at=datetime(2026, 8, 29, 10, 0, tzinfo=UTC),
+    )
+
+    assert replay == receipt
+    assert analytics.get(late_event.id).actor_id is None
+    assert analytics.get_activation_journey(second_session_id).actor_id is None

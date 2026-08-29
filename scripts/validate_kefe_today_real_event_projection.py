@@ -140,8 +140,8 @@ def main() -> None:
     schema_contract = json.loads(
         read("docs/contracts/connected-alpha-schema-snapshot.v1.json")
     )
-    assert schema_contract["canonical_chain"]["expected_head"] == "20260829_0039"
-    assert schema_contract["canonical_chain"]["expected_migration_file_count"] == 39
+    assert schema_contract["canonical_chain"]["expected_head"] == "20260829_0040"
+    assert schema_contract["canonical_chain"]["expected_migration_file_count"] == 40
 
     print("KEFE Today governed real-event projection contract: PASS")
 

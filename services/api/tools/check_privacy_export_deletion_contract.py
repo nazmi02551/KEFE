@@ -12,6 +12,13 @@ ROUTER = (ROOT / "services/api/src/kefe_api/modules/privacy/router.py").read_tex
 MEMORY = (ROOT / "services/api/src/kefe_api/modules/privacy/in_memory.py").read_text()
 IDENTITY_MEMORY = (ROOT / "services/api/src/kefe_api/modules/identity/in_memory.py").read_text()
 POSTGRES = (ROOT / "services/api/src/kefe_api/infrastructure/postgres_privacy.py").read_text()
+ANALYTICS_MEMORY = (
+    ROOT / "services/api/src/kefe_api/modules/analytics/in_memory.py"
+).read_text()
+ANALYTICS_DELETION_MIGRATION = (
+    ROOT
+    / "services/api/migrations/versions/20260829_0040_analytics_actor_deletion_anonymization.py"
+).read_text()
 MIGRATION = (
     ROOT / "services/api/migrations/versions/20260805_0029_privacy_self_service_hardening.py"
 ).read_text()
@@ -20,6 +27,7 @@ MOBILE_BOUNDARY = (
 ).read_text()
 
 assert CONTRACT["source_issue"] == 312
+assert CONTRACT["contract_version"] == "1.0.1"
 assert CONTRACT["parent"]["exact_head"] == "4f31fb894c153b9bc5c90a5a0dc6fce534db04b8"
 assert CONTRACT["primary_capability"] == "CAP-085"
 assert CONTRACT["lifecycle_promotion"] is False
@@ -27,6 +35,7 @@ assert CONTRACT["export"]["schema_version"] == "privacy-export.v2"
 assert CONTRACT["deletion"]["confirmation_format"] == "DELETE:<authenticated_actor_uuid>"
 assert CONTRACT["deletion"]["one_receipt_per_actor"] is True
 assert CONTRACT["export"]["payload_persistence_forbidden"] is True
+assert CONTRACT["deletion"]["existing_receipt_repairs_retained_analytics_identity"] is True
 
 for fragment in (
     "privacy-export.v2",
@@ -57,6 +66,10 @@ assert "WHERE actor_id = :actor_id" in POSTGRES
 assert "DELETE FROM identity.actor_merge" in POSTGRES
 assert "merged_from_actor_id = NULL" in POSTGRES
 assert "PRIVACY_SELF_SERVICE_V2" in POSTGRES
+assert "UPDATE analytics.analytics_event" in POSTGRES
+assert "UPDATE analytics.activation_journey" in POSTGRES
+assert "def anonymize_actor" in ANALYTICS_MEMORY
+assert 'revision = "20260829_0040"' in ANALYTICS_DELETION_MIGRATION
 assert "CREATE UNIQUE INDEX privacy_actor_deletion_receipt_actor_uidx" in MIGRATION
 assert "BEFORE UPDATE OR DELETE" in MIGRATION
 assert "privacy deletion receipts are append-only" in MIGRATION

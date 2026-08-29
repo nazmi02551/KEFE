@@ -1,6 +1,6 @@
 {
-  "contract_version": "1.0.0",
-  "updated_at": "2026-08-05",
+  "contract_version": "1.0.1",
+  "updated_at": "2026-08-29",
   "status": "accepted_implementation_contract",
   "source_issue": 312,
   "capabilities": ["CAP-085", "CAP-126"],
@@ -12,6 +12,13 @@
     "pr": 311,
     "exact_head": "4f31fb894c153b9bc5c90a5a0dc6fce534db04b8"
   },
+  "extensions": [
+    {
+      "issue": 383,
+      "contract": "docs/contracts/analytics-actor-deletion-anonymization.v1.json",
+      "purpose": "RETAINED_ANALYTICS_ACTOR_REFERENCE_ANONYMIZATION"
+    }
+  ],
   "authority": {
     "adr": "docs/adr/0108-deterministic-privacy-export-and-deletion-hardening.md",
     "service": "services/api/src/kefe_api/modules/privacy/service.py",
@@ -90,6 +97,7 @@
     "actor_row_lock_required": true,
     "one_receipt_per_actor": true,
     "existing_receipt_returns_same_receipt": true,
+    "existing_receipt_repairs_retained_analytics_identity": true,
     "concurrent_calls_converge": true,
     "historic_receipts_rewritten": false,
     "response_additive_fields": ["actor_id", "actor_kind"]
@@ -127,7 +135,9 @@
     ],
     "retained_audit_anonymization": [
       "analytics.outbox_event.payload.actor_id_removed",
-      "analytics.outbox_event.payload.actor_deleted_true"
+      "analytics.outbox_event.payload.actor_deleted_true",
+      "analytics.analytics_event.actor_id_set_null",
+      "analytics.activation_journey.actor_id_set_null"
     ],
     "future_table_auto_claim_forbidden": true,
     "catalog_drift_must_fail_contract": true
