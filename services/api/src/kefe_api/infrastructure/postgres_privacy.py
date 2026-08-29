@@ -246,6 +246,7 @@ class PostgresPrivacyRepository:
                 .mappings()
                 .one_or_none()
             )
+            self._anonymize_analytics_actor(connection, actor_id)
             if existing is not None:
                 return self._receipt(existing)
             if actor is None:
@@ -377,6 +378,23 @@ class PostgresPrivacyRepository:
                 aggregate_contributions_anonymized=True,
                 policy_version="PRIVACY_SELF_SERVICE_V2",
             )
+
+    @staticmethod
+    def _anonymize_analytics_actor(connection, actor_id: UUID) -> None:
+        connection.execute(
+            text(
+                "UPDATE analytics.analytics_event "
+                "SET actor_id = NULL WHERE actor_id = :actor_id"
+            ),
+            {"actor_id": actor_id},
+        )
+        connection.execute(
+            text(
+                "UPDATE analytics.activation_journey "
+                "SET actor_id = NULL WHERE actor_id = :actor_id"
+            ),
+            {"actor_id": actor_id},
+        )
 
     @staticmethod
     def _receipt(row: object) -> PrivacyDeletionReceipt:

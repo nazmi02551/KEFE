@@ -6,15 +6,23 @@ on:
       - "services/api/src/kefe_api/modules/privacy/**"
       - "services/api/src/kefe_api/modules/identity/in_memory.py"
       - "services/api/src/kefe_api/infrastructure/postgres_privacy.py"
+      - "services/api/src/kefe_api/infrastructure/persistence.py"
+      - "services/api/src/kefe_api/main.py"
+      - "services/api/src/kefe_api/infrastructure/postgres_analytics.py"
+      - "services/api/src/kefe_api/modules/analytics/**"
       - "services/api/migrations/versions/20260805_0029_privacy_self_service_hardening.py"
+      - "services/api/migrations/versions/20260829_0040_analytics_actor_deletion_anonymization.py"
       - "services/api/tests/test_privacy_export_deletion_hardening.py"
       - "services/api/tests/test_privacy_export_deletion_hardening_postgres.py"
       - "services/api/tests/test_mvp_completion.py"
       - "services/api/tests/test_mvp_completion_postgres.py"
       - "services/api/tools/check_privacy_export_deletion_contract.py"
+      - "services/api/tools/check_analytics_actor_deletion_contract.py"
       - "services/api/tools/export_privacy_self_service_openapi.py"
       - "docs/adr/0108-deterministic-privacy-export-and-deletion-hardening.md"
+      - "docs/adr/0136-self-service-deletion-of-retained-analytics-identity.md"
       - "docs/contracts/privacy-export-deletion-hardening.v1.json"
+      - "docs/contracts/analytics-actor-deletion-anonymization.v1.json"
       - "docs/contracts/openapi-privacy-self-service.v0.19.focused.json"
       - "docs/contracts/openapi-mvp.v0.19.overlay.json"
       - "docs/contracts/openapi-global.v0.20.overlay.json"
@@ -27,15 +35,23 @@ on:
       - "services/api/src/kefe_api/modules/privacy/**"
       - "services/api/src/kefe_api/modules/identity/in_memory.py"
       - "services/api/src/kefe_api/infrastructure/postgres_privacy.py"
+      - "services/api/src/kefe_api/infrastructure/persistence.py"
+      - "services/api/src/kefe_api/main.py"
+      - "services/api/src/kefe_api/infrastructure/postgres_analytics.py"
+      - "services/api/src/kefe_api/modules/analytics/**"
       - "services/api/migrations/versions/20260805_0029_privacy_self_service_hardening.py"
+      - "services/api/migrations/versions/20260829_0040_analytics_actor_deletion_anonymization.py"
       - "services/api/tests/test_privacy_export_deletion_hardening.py"
       - "services/api/tests/test_privacy_export_deletion_hardening_postgres.py"
       - "services/api/tests/test_mvp_completion.py"
       - "services/api/tests/test_mvp_completion_postgres.py"
       - "services/api/tools/check_privacy_export_deletion_contract.py"
+      - "services/api/tools/check_analytics_actor_deletion_contract.py"
       - "services/api/tools/export_privacy_self_service_openapi.py"
       - "docs/adr/0108-deterministic-privacy-export-and-deletion-hardening.md"
+      - "docs/adr/0136-self-service-deletion-of-retained-analytics-identity.md"
       - "docs/contracts/privacy-export-deletion-hardening.v1.json"
+      - "docs/contracts/analytics-actor-deletion-anonymization.v1.json"
       - "docs/contracts/openapi-privacy-self-service.v0.19.focused.json"
       - "docs/contracts/openapi-mvp.v0.19.overlay.json"
       - "docs/contracts/openapi-global.v0.20.overlay.json"
@@ -71,18 +87,27 @@ jobs:
         run: >-
           ruff check
           src/kefe_api/modules/privacy
+          src/kefe_api/modules/analytics
           src/kefe_api/modules/identity/in_memory.py
           src/kefe_api/infrastructure/postgres_privacy.py
+          src/kefe_api/infrastructure/persistence.py
+          src/kefe_api/main.py
+          src/kefe_api/infrastructure/postgres_analytics.py
           migrations/versions/20260805_0029_privacy_self_service_hardening.py
+          migrations/versions/20260829_0040_analytics_actor_deletion_anonymization.py
           tests/test_privacy_export_deletion_hardening.py
           tests/test_privacy_export_deletion_hardening_postgres.py
           tests/test_mvp_completion.py
           tests/test_mvp_completion_postgres.py
           tools/check_privacy_export_deletion_contract.py
+          tools/check_analytics_actor_deletion_contract.py
           tools/export_privacy_self_service_openapi.py
       - name: Executable privacy architecture contract
         working-directory: services/api
         run: python tools/check_privacy_export_deletion_contract.py
+      - name: Retained analytics identity deletion contract
+        working-directory: services/api
+        run: python tools/check_analytics_actor_deletion_contract.py
       - name: Exact focused privacy OpenAPI
         working-directory: services/api
         run: >-

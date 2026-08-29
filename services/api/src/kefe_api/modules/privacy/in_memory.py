@@ -4,6 +4,7 @@ from datetime import datetime
 from threading import RLock
 from uuid import UUID, uuid4
 
+from kefe_api.modules.analytics.ports import AnalyticsActorAnonymizer
 from kefe_api.modules.decision.in_memory import InMemoryDecisionRepository
 from kefe_api.modules.identity.in_memory import InMemoryIdentityRepository
 from kefe_api.modules.privacy.models import PrivacyDeletionReceipt
@@ -13,9 +14,11 @@ class InMemoryPrivacyRepository:
     def __init__(
         self,
         *,
+        analytics_event_store: AnalyticsActorAnonymizer,
         decision_repository: InMemoryDecisionRepository,
         identity_repository: InMemoryIdentityRepository,
     ) -> None:
+        self._analytics = analytics_event_store
         self._decision = decision_repository
         self._identity = identity_repository
         self._receipts: dict[UUID, PrivacyDeletionReceipt] = {}
@@ -77,7 +80,10 @@ class InMemoryPrivacyRepository:
             if existing is not None:
                 if existing.actor_kind != actor_kind:
                     raise ValueError("privacy deletion actor kind conflict")
+                self._analytics.anonymize_actor(actor_id)
                 return existing
+
+            self._analytics.anonymize_actor(actor_id)
 
             session_ids = {
                 session.id

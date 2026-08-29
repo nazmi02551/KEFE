@@ -161,6 +161,14 @@ contracts:
     path: services/api/migrations/versions/20260829_0039_activation_journey_projection.py
     version: '20260829_0039'
     role: reproducible_session_activation_journey_projection
+  - id: analytics-actor-deletion-anonymization
+    path: docs/contracts/analytics-actor-deletion-anonymization.v1.json
+    version: 1.0.0
+    role: retained_analytics_actor_reference_deletion_policy
+  - id: analytics-actor-deletion-anonymization-migration
+    path: services/api/migrations/versions/20260829_0040_analytics_actor_deletion_anonymization.py
+    version: '20260829_0040'
+    role: historical_deleted_actor_analytics_anonymization
   - id: repository-structure
     path: docs/contracts/repository-structure.v1.txt
     version: '1'
@@ -197,3 +205,4 @@ architecture_decisions:
   - docs/adr/0035-post-commit-consensus-participation.md
   - docs/adr/0069-server-authoritative-analytics-event-spine.md
   - docs/adr/0135-reproducible-session-activation-journey.md
+  - docs/adr/0136-self-service-deletion-of-retained-analytics-identity.md

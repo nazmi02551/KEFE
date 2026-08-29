@@ -1,0 +1,92 @@
+{
+  "contract_version": "1.0.0",
+  "updated_at": "2026-08-29",
+  "status": "implementation_candidate",
+  "issue": 383,
+  "source_adr": "docs/adr/0136-self-service-deletion-of-retained-analytics-identity.md",
+  "parent_contracts": [
+    "docs/contracts/privacy-export-deletion-hardening.v1.json",
+    "docs/contracts/analytics-event-spine-slice31.v1.json",
+    "docs/contracts/activation-journey-projection.v1.json"
+  ],
+  "capabilities": ["CAP-085", "CAP-115"],
+  "primary_capability": "CAP-085",
+  "lifecycle_promotion": false,
+  "retained_actor_reference_inventory": [
+    {
+      "table": "analytics.analytics_event",
+      "column": "actor_id",
+      "deletion_action": "SET_NULL",
+      "row_action": "RETAIN"
+    },
+    {
+      "table": "analytics.activation_journey",
+      "column": "actor_id",
+      "deletion_action": "SET_NULL",
+      "row_action": "RETAIN"
+    }
+  ],
+  "deletion": {
+    "postgres_same_transaction": true,
+    "memory_same_deletion_lock": true,
+    "existing_receipt_repairs_before_return": true,
+    "existing_receipt_identity_preserved": true,
+    "new_receipt_policy_version": "PRIVACY_SELF_SERVICE_V2",
+    "future_table_auto_claim_forbidden": true,
+    "catalog_drift_must_fail_contract": true
+  },
+  "historical_repair": {
+    "migration_revision": "20260829_0040",
+    "down_revision": "20260829_0039",
+    "subjects": [
+      "identity.actor.state=DELETED",
+      "privacy.actor_deletion_receipt.actor_id"
+    ],
+    "action": "SET_RETAINED_ANALYTICS_ACTOR_ID_NULL",
+    "downgrade": "INTENTIONAL_NO_OP_IDENTITY_NOT_RECONSTRUCTED"
+  },
+  "preserved_lineage": [
+    "analytics_event_row",
+    "activation_journey_row",
+    "session_id",
+    "case_version_id",
+    "source_event_id",
+    "stage_timestamps",
+    "contribution_class",
+    "privacy_class",
+    "retention_class"
+  ],
+  "surface": {
+    "privacy_export_expanded": false,
+    "public_endpoint": false,
+    "admin_endpoint": false,
+    "mobile_runtime_changed": false,
+    "aggregate_output": false
+  },
+  "forbidden_claims": [
+    "MEANINGFUL_WEIGH",
+    "WAU",
+    "FUNNEL_RATE",
+    "COHORT",
+    "USER_PROFILE",
+    "PERSONALITY",
+    "IDEOLOGY",
+    "PSYCHOMETRIC",
+    "BIAS",
+    "NORMATIVE",
+    "CAUSAL_INFERENCE",
+    "LEGAL_CERTIFICATION",
+    "PRODUCTION_DEPLOYMENT",
+    "F4_COMPLETE",
+    "F5_COMPLETE"
+  ],
+  "verification": {
+    "contract_checker": "services/api/tools/check_analytics_actor_deletion_contract.py",
+    "memory_deletion_and_replay": true,
+    "postgres_transaction_restart_and_replay": true,
+    "exact_actor_column_catalog": true,
+    "migration_chain_and_offline_snapshot": true,
+    "exact_head_api_mobile_mvp_global": true,
+    "apk_required": false
+  }
+}

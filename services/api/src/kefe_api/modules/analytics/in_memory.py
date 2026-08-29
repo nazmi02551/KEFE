@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from dataclasses import replace
 from threading import RLock
 from uuid import UUID
 
@@ -55,3 +56,18 @@ class InMemoryAnalyticsEventStore:
         with self._lock:
             journey = self._journeys.get(session_id)
             return deepcopy(journey) if journey is not None else None
+
+    def anonymize_actor(self, actor_id: UUID) -> tuple[int, int]:
+        with self._lock:
+            event_count = 0
+            for event_id, event in tuple(self._events.items()):
+                if event.actor_id == actor_id:
+                    self._events[event_id] = replace(event, actor_id=None)
+                    event_count += 1
+
+            journey_count = 0
+            for session_id, journey in tuple(self._journeys.items()):
+                if journey.actor_id == actor_id:
+                    self._journeys[session_id] = replace(journey, actor_id=None)
+                    journey_count += 1
+            return event_count, journey_count

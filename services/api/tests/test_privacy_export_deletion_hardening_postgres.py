@@ -3,16 +3,28 @@ from __future__ import annotations
 import os
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
+from pathlib import Path
 from uuid import UUID, uuid4
 
 import pytest
+from alembic import command
+from alembic.config import Config
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import DBAPIError
 
 from kefe_api.core.settings import get_settings
 from kefe_api.main import create_app
-from kefe_api.modules.decision.bootstrap import DEMO_CASE_ID, DEMO_QUESTION_ID
+from kefe_api.modules.analytics.models import (
+    AnalyticsEvent,
+    AnalyticsPrivacyClass,
+    AnalyticsRetentionClass,
+)
+from kefe_api.modules.decision.bootstrap import (
+    DEMO_CASE_ID,
+    DEMO_CASE_VERSION_ID,
+    DEMO_QUESTION_ID,
+)
 
 pytestmark = pytest.mark.skipif(
     os.getenv("KEFE_RUN_POSTGRES_TESTS") != "1",
@@ -38,6 +50,31 @@ EXPECTED_ACTOR_FOREIGN_KEYS = {
     ("identity", "guest_merge_replay", "source_actor_id"),
     ("sharing", "share_record", "actor_id"),
 }
+EXPECTED_RETAINED_ANALYTICS_ACTOR_COLUMNS = {
+    ("analytics_event", "actor_id", "YES", "uuid"),
+    ("activation_journey", "actor_id", "YES", "uuid"),
+}
+
+
+def _analytics_event(*, actor_id: UUID, session_id: UUID) -> AnalyticsEvent:
+    return AnalyticsEvent(
+        id=uuid4(),
+        source_event_id=uuid4(),
+        source_event_name="weigh.started",
+        source_event_version=1,
+        analytics_name="activation.weigh_started",
+        analytics_version=1,
+        occurred_at=datetime(2026, 8, 29, 8, 0, tzinfo=UTC),
+        producer_version="privacy-deletion-postgres-test",
+        actor_id=actor_id,
+        session_id=session_id,
+        case_version_id=DEMO_CASE_VERSION_ID,
+        contribution_class=None,
+        privacy_class=AnalyticsPrivacyClass.PRODUCT_ANALYTICS,
+        retention_class=AnalyticsRetentionClass.STANDARD_13_MONTHS,
+        metric_families=("ACTIVATION",),
+        payload={},
+    )
 
 
 def _app(monkeypatch: pytest.MonkeyPatch):
@@ -84,7 +121,9 @@ def test_postgres_export_restart_and_concurrent_one_receipt_deletion(
     database_url = os.environ["KEFE_DATABASE_URL"]
     app, client = _app(monkeypatch)
     headers, actor_id = _guest(client)
-    _commit(client, headers)
+    session_id = UUID(_commit(client, headers))
+    analytics_event = _analytics_event(actor_id=actor_id, session_id=session_id)
+    assert app.state.analytics_event_store.append_once(analytics_event) is True
 
     first = client.get("/v1/me/privacy-export", headers=headers)
     assert first.status_code == 200
@@ -162,6 +201,42 @@ def test_postgres_export_restart_and_concurrent_one_receipt_deletion(
             ).scalar_one()
             == "DELETED"
         )
+        assert (
+            connection.execute(
+                text(
+                    "SELECT count(*) FROM analytics.analytics_event "
+                    "WHERE id = :event_id AND actor_id IS NULL"
+                ),
+                {"event_id": analytics_event.id},
+            ).scalar_one()
+            == 1
+        )
+        assert (
+            connection.execute(
+                text(
+                    "SELECT count(*) FROM analytics.activation_journey "
+                    "WHERE session_id = :session_id AND actor_id IS NULL"
+                ),
+                {"session_id": session_id},
+            ).scalar_one()
+            == 1
+        )
+
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "UPDATE analytics.analytics_event SET actor_id = :actor_id "
+                "WHERE id = :event_id"
+            ),
+            {"actor_id": actor_id, "event_id": analytics_event.id},
+        )
+        connection.execute(
+            text(
+                "UPDATE analytics.activation_journey SET actor_id = :actor_id "
+                "WHERE session_id = :session_id"
+            ),
+            {"actor_id": actor_id, "session_id": session_id},
+        )
 
     third_app = create_app()
     replay = third_app.state.privacy_repository.delete_actor_data(
@@ -170,6 +245,28 @@ def test_postgres_export_restart_and_concurrent_one_receipt_deletion(
         deleted_at=datetime(2026, 8, 5, 11, 0, tzinfo=UTC),
     )
     assert replay == receipts[0]
+
+    with engine.connect() as connection:
+        assert (
+            connection.execute(
+                text(
+                    "SELECT actor_id FROM analytics.analytics_event "
+                    "WHERE id = :event_id"
+                ),
+                {"event_id": analytics_event.id},
+            ).scalar_one_or_none()
+            is None
+        )
+        assert (
+            connection.execute(
+                text(
+                    "SELECT actor_id FROM analytics.activation_journey "
+                    "WHERE session_id = :session_id"
+                ),
+                {"session_id": session_id},
+            ).scalar_one_or_none()
+            is None
+        )
 
     with pytest.raises(DBAPIError), engine.begin() as connection:
         connection.execute(
@@ -214,3 +311,139 @@ def test_postgres_actor_reference_catalog_is_explicit(
         ).all()
     assert {tuple(row) for row in rows} == EXPECTED_ACTOR_FOREIGN_KEYS
     get_settings.cache_clear()
+
+
+def test_postgres_retained_analytics_actor_column_catalog_is_explicit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    database_url = os.environ["KEFE_DATABASE_URL"]
+    _app(monkeypatch)
+    engine = create_engine(database_url)
+    with engine.connect() as connection:
+        rows = connection.execute(
+            text(
+                """
+                SELECT table_name, column_name, is_nullable, data_type
+                FROM information_schema.columns
+                WHERE table_schema = 'analytics'
+                  AND column_name = 'actor_id'
+                ORDER BY table_name, column_name
+                """
+            )
+        ).all()
+    assert {tuple(row) for row in rows} == EXPECTED_RETAINED_ANALYTICS_ACTOR_COLUMNS
+    get_settings.cache_clear()
+
+
+def test_postgres_0040_backfills_preexisting_deleted_actor_references(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    database_url = os.environ["KEFE_DATABASE_URL"]
+    _app(monkeypatch)
+    engine = create_engine(database_url)
+    actor_id = uuid4()
+    session_id = uuid4()
+    event_id = uuid4()
+    source_event_id = uuid4()
+    config = Config(str(Path(__file__).resolve().parents[1] / "alembic.ini"))
+
+    command.downgrade(config, "20260829_0039")
+    try:
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    "INSERT INTO identity.actor (id, actor_kind, state) "
+                    "VALUES (:actor_id, 'GUEST', 'DELETED')"
+                ),
+                {"actor_id": actor_id},
+            )
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO analytics.analytics_event (
+                        id, source_event_id, source_event_name, source_event_version,
+                        analytics_name, analytics_version, occurred_at, producer_version,
+                        actor_id, session_id, case_version_id, contribution_class,
+                        privacy_class, retention_class, metric_families, payload
+                    ) VALUES (
+                        :event_id, :source_event_id, 'weigh.started', 1,
+                        'activation.weigh_started', 1, :occurred_at, '0040-backfill-test',
+                        :actor_id, :session_id, :case_version_id, NULL,
+                        'PRODUCT_ANALYTICS', 'STANDARD_13_MONTHS', '[]'::jsonb, '{}'::jsonb
+                    )
+                    """
+                ),
+                {
+                    "event_id": event_id,
+                    "source_event_id": source_event_id,
+                    "occurred_at": datetime(2026, 8, 29, 8, 0, tzinfo=UTC),
+                    "actor_id": actor_id,
+                    "session_id": session_id,
+                    "case_version_id": DEMO_CASE_VERSION_ID,
+                },
+            )
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO analytics.activation_journey (
+                        session_id, actor_id, case_version_id,
+                        started_at, started_source_event_id
+                    ) VALUES (
+                        :session_id, :actor_id, :case_version_id,
+                        :started_at, :source_event_id
+                    )
+                    """
+                ),
+                {
+                    "session_id": session_id,
+                    "actor_id": actor_id,
+                    "case_version_id": DEMO_CASE_VERSION_ID,
+                    "started_at": datetime(2026, 8, 29, 8, 0, tzinfo=UTC),
+                    "source_event_id": source_event_id,
+                },
+            )
+
+        command.upgrade(config, "head")
+
+        with engine.connect() as connection:
+            event = connection.execute(
+                text(
+                    "SELECT actor_id, session_id, case_version_id "
+                    "FROM analytics.analytics_event WHERE id = :event_id"
+                ),
+                {"event_id": event_id},
+            ).one()
+            journey = connection.execute(
+                text(
+                    "SELECT actor_id, session_id, case_version_id, started_source_event_id "
+                    "FROM analytics.activation_journey WHERE session_id = :session_id"
+                ),
+                {"session_id": session_id},
+            ).one()
+        assert tuple(event) == (None, session_id, DEMO_CASE_VERSION_ID)
+        assert tuple(journey) == (
+            None,
+            session_id,
+            DEMO_CASE_VERSION_ID,
+            source_event_id,
+        )
+    finally:
+        command.upgrade(config, "head")
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    "DELETE FROM analytics.activation_journey "
+                    "WHERE session_id = :session_id"
+                ),
+                {"session_id": session_id},
+            )
+            connection.execute(
+                text("DELETE FROM analytics.analytics_event WHERE id = :event_id"),
+                {"event_id": event_id},
+            )
+            connection.execute(
+                text("DELETE FROM identity.actor WHERE id = :actor_id"),
+                {"actor_id": actor_id},
+            )
+        engine.dispose()
+        get_settings.cache_clear()

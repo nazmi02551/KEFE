@@ -9,6 +9,7 @@ from kefe_api.infrastructure.editorial_pipeline import build_editorial_pipeline
 from kefe_api.infrastructure.persistence import (
     build_account_continuity_repository,
     build_admin_session_store,
+    build_analytics_event_store,
     build_case_media_repository,
     build_community_reason_repository,
     build_consensus_repository,
@@ -195,8 +196,10 @@ def create_app() -> FastAPI:
     progress_repository = build_progress_repository(settings, decision_repository)
     share_repository = build_share_repository(settings)
     community_reason_repository = build_community_reason_repository(settings)
+    analytics_event_store = build_analytics_event_store(settings)
     privacy_repository = build_privacy_repository(
         settings,
+        analytics_event_store,
         decision_repository,
         identity_repository,
     )
@@ -318,6 +321,7 @@ def create_app() -> FastAPI:
         repository=community_reason_repository,
         decision_repository=decision_repository,
     )
+    app.state.analytics_event_store = analytics_event_store
     app.state.privacy_repository = privacy_repository
     app.state.privacy_service = PrivacyService(privacy_repository)
     app.state.content_authoring_repository = content_authoring_repository
