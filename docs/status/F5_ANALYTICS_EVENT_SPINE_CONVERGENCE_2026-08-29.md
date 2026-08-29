@@ -40,3 +40,16 @@ promotion.
 No mobile runtime changes are included. The normal CI Preview artifact remains
 build evidence; this bounded backend convergence does not warrant an APK
 handoff.
+
+## Candidate repair
+
+Initial remote head `8434682ca798ddff65ad441477660327b62b1a45`
+passed API lint/unit, Mobile, MVP and Global gates, but the API PostgreSQL
+downgrade drill proved that `analytics` is a shared pre-existing schema. The
+candidate migration incorrectly attempted to drop that schema after dropping
+its own table, which PostgreSQL rejected because `result_snapshot` and
+`outbox_event` still depend on it.
+
+The repair makes `0038` own only `analytics.analytics_event`: downgrade drops
+that table and preserves the shared schema. No projection/runtime behavior is
+changed. Exact-head CI must run again on the repaired SHA.

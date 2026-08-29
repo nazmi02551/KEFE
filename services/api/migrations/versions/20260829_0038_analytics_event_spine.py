@@ -70,4 +70,3 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.execute("DROP TABLE IF EXISTS analytics.analytics_event")
-    op.execute("DROP SCHEMA IF EXISTS analytics")

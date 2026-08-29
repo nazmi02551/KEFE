@@ -139,9 +139,10 @@ def main() -> int:
             label="analytics runtime",
         )
     )
+    migration_source = MIGRATION.read_text(encoding="utf-8")
     errors.extend(
         _require(
-            MIGRATION.read_text(encoding="utf-8"),
+            migration_source,
             (
                 'revision = "20260829_0038"',
                 'down_revision = "20260827_0037"',
@@ -152,6 +153,8 @@ def main() -> int:
             label="analytics migration",
         )
     )
+    if "DROP SCHEMA" in migration_source:
+        errors.append("analytics migration must not drop the shared analytics schema")
     errors.extend(
         _require(
             WORKER.read_text(encoding="utf-8"),
