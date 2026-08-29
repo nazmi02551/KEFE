@@ -73,6 +73,21 @@ def test_postgres_progress_is_actor_scoped_and_low_claim(
         assert journey["recent_journeys"][0]["decision_update_count"] == 0
         assert journey["recent_journeys"][0]["reflection_completed"] is False
 
+        report = body["personal_report"]
+        assert [item["type"] for item in report["moments"]] == ["INITIAL_COMMIT"]
+        assert report["moments"][0]["case_id"] == str(DEMO_CASE_ID)
+        assert report["moments"][0]["revision_no"] is None
+
+        other = client.post("/v1/identity/guest")
+        assert other.status_code == 201
+        other_headers = {
+            "Authorization": f"Bearer {other.json()['access_token']}"
+        }
+        assert client.get(
+            "/v1/me/progress",
+            headers=other_headers,
+        ).json()["personal_report"] == {"moments": []}
+
         serialized = response.text.lower()
         for forbidden in (
             "private_reason",

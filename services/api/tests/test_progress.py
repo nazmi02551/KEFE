@@ -65,6 +65,7 @@ def test_empty_progress_is_low_claim_and_guest_safe() -> None:
         "domain_activity": [],
         "recent_journeys": [],
     }
+    assert body["personal_report"] == {"moments": []}
     serialized = response.text.lower()
     for forbidden in (
         "token",
@@ -119,5 +120,26 @@ def test_committed_decision_unlocks_offer_and_descriptive_journey() -> None:
     assert item["reflection_completed"] is False
     assert item["initial_committed_at"] == recent["committed_at"]
     assert item["latest_decision_at"] == recent["committed_at"]
+    assert body["personal_report"] == {
+        "moments": [
+            {
+                "type": "INITIAL_COMMIT",
+                "case_id": str(DEMO_CASE_ID),
+                "case_version_id": recent["case_version_id"],
+                "title": recent["title"],
+                "primary_domain": "DAILY_LIFE",
+                "occurred_at": recent["committed_at"],
+                "revision_no": None,
+            }
+        ]
+    }
     assert body["methodology"]["journey_semantics"] == "OBSERVED_PRODUCT_HISTORY_ONLY"
     assert body["methodology"]["causal_claims"] == "NONE"
+    assert body["methodology"]["personal_report_semantics"] == (
+        "OBSERVED_MOMENTS_ONLY"
+    )
+
+    other_headers = _guest(client)
+    other = client.get("/v1/me/progress", headers=other_headers)
+    assert other.status_code == 200
+    assert other.json()["personal_report"] == {"moments": []}

@@ -8,6 +8,9 @@ from kefe_api.modules.decision.in_memory import InMemoryDecisionRepository
 from kefe_api.modules.progress.models import (
     DecisionJourneySnapshot,
     DomainActivity,
+    PersonalJourneyReport,
+    PersonalReportMoment,
+    PersonalReportMomentType,
     ProgressSnapshot,
     RecentCompletedCase,
     RecentDecisionJourney,
@@ -130,6 +133,71 @@ class InMemoryProgressRepository:
             reflection_completion_count=reflection_completion_count,
             domain_activity=domain_activity,
             recent_journeys=tuple(recent),
+        )
+
+    def get_personal_report(
+        self,
+        actor_id: UUID,
+        *,
+        moment_limit: int,
+    ) -> PersonalJourneyReport:
+        list_revisions = getattr(self._decision_repository, "list_decision_revisions", None)
+        list_reflections = getattr(
+            self._decision_repository,
+            "list_reflection_completions",
+            None,
+        )
+        moments: list[PersonalReportMoment] = []
+
+        for session in self._committed_sessions(actor_id):
+            case = self._decision_repository.get_case_version(session.case_version_id)
+            if case is None or session.committed_at is None:
+                continue
+            common = {
+                "case_id": case.case_id,
+                "case_version_id": case.id,
+                "title": case.title,
+                "primary_domain": case.primary_domain,
+            }
+            moments.append(
+                PersonalReportMoment(
+                    moment_type=PersonalReportMomentType.INITIAL_COMMIT,
+                    source_id=session.id,
+                    occurred_at=session.committed_at,
+                    **common,
+                )
+            )
+            if list_revisions:
+                for revision in list_revisions(session.id):
+                    if revision.revision_no <= 1:
+                        continue
+                    moments.append(
+                        PersonalReportMoment(
+                            moment_type=PersonalReportMomentType.DECISION_UPDATE,
+                            source_id=revision.id,
+                            occurred_at=revision.committed_at,
+                            revision_no=revision.revision_no,
+                            **common,
+                        )
+                    )
+            if list_reflections:
+                for completion in list_reflections(session.id):
+                    moments.append(
+                        PersonalReportMoment(
+                            moment_type=PersonalReportMomentType.REFLECTION_COMPLETED,
+                            source_id=completion.id,
+                            occurred_at=completion.completed_at,
+                            **common,
+                        )
+                    )
+
+        moments.sort(
+            key=lambda item: (item.occurred_at, item.source_id.hex),
+            reverse=True,
+        )
+        return PersonalJourneyReport(
+            actor_id=actor_id,
+            moments=tuple(moments[:moment_limit]),
         )
 
     def _committed_sessions(self, actor_id: UUID):

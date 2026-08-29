@@ -2556,6 +2556,9 @@
             "title": "Methodology",
             "type": "object"
           },
+          "personal_report": {
+            "$ref": "#/components/schemas/PersonalReportResponse"
+          },
           "progress": {
             "$ref": "#/components/schemas/ProgressResponse"
           }
@@ -2564,6 +2567,7 @@
           "account_offer",
           "progress",
           "journey",
+          "personal_report",
           "methodology"
         ],
         "title": "ProgressEnvelopeResponse",
@@ -3554,6 +3558,72 @@
           "items"
         ],
         "title": "PublicCaseVersionListResponse",
+        "type": "object"
+      },
+      "PersonalReportMomentResponse": {
+        "properties": {
+          "case_id": {
+            "title": "Case Id",
+            "type": "string"
+          },
+          "case_version_id": {
+            "title": "Case Version Id",
+            "type": "string"
+          },
+          "occurred_at": {
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "primary_domain": {
+            "title": "Primary Domain",
+            "type": "string"
+          },
+          "revision_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revision No"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "case_id",
+          "case_version_id",
+          "title",
+          "primary_domain",
+          "occurred_at",
+          "revision_no"
+        ],
+        "title": "PersonalReportMomentResponse",
+        "type": "object"
+      },
+      "PersonalReportResponse": {
+        "properties": {
+          "moments": {
+            "items": {
+              "$ref": "#/components/schemas/PersonalReportMomentResponse"
+            },
+            "title": "Moments",
+            "type": "array"
+          }
+        },
+        "required": [
+          "moments"
+        ],
+        "title": "PersonalReportResponse",
         "type": "object"
       }
     },

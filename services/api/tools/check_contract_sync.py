@@ -159,7 +159,22 @@ def _openapi_errors() -> list[str]:
             "participation",
             "aggregate",
         },
-        "ProgressEnvelopeResponse": {"account_offer", "progress", "journey", "methodology"},
+        "ProgressEnvelopeResponse": {
+            "account_offer",
+            "progress",
+            "journey",
+            "personal_report",
+            "methodology",
+        },
+        "PersonalReportMomentResponse": {
+            "type",
+            "case_id",
+            "case_version_id",
+            "title",
+            "primary_domain",
+            "occurred_at",
+            "revision_no",
+        },
     }
     for schema, required in field_contracts.items():
         missing = _missing_fields(schemas, schema, required)
@@ -181,6 +196,34 @@ def _openapi_errors() -> list[str]:
     leaked = sorted(forbidden_progress & progress.keys())
     if leaked:
         errors.append("ProgressResponse leaks forbidden fields: " + ", ".join(leaked))
+
+    personal_report = schemas.get("PersonalReportMomentResponse", {}).get(
+        "properties", {}
+    )
+    personal_report_leaks = sorted(
+        {
+            "actor_id",
+            "session_id",
+            "revision_id",
+            "reflection_completion_id",
+            "raw_response",
+            "private_reason",
+            "decision_delta",
+            "exposure_metadata",
+            "intervention_metadata",
+            "personality",
+            "ideology",
+            "psychometric",
+            "score",
+            "rank",
+        }
+        & personal_report.keys()
+    )
+    if personal_report_leaks:
+        errors.append(
+            "PersonalReportMomentResponse leaks forbidden fields: "
+            + ", ".join(personal_report_leaks)
+        )
 
     community = schemas.get("CommunityReasonItem", {}).get("properties", {})
     community_leaks = sorted(

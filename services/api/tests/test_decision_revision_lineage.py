@@ -14,6 +14,7 @@ from kefe_api.modules.decision.reflection_service import ReflectionService
 from kefe_api.modules.decision.service import DecisionService
 from kefe_api.modules.flow_runtime.models import FlowExecutionSupport, FlowStepRuntimeState
 from kefe_api.modules.flow_runtime.service import FlowRuntimeService
+from kefe_api.modules.progress.in_memory import InMemoryProgressRepository
 
 
 def _fixture():
@@ -188,6 +189,25 @@ def test_principle_context_retest_builds_generic_revision_and_reflection_lineage
         session_id=session.id,
         flow_step_code="REFLECTION",
     ).completed is True
+
+    report = InMemoryProgressRepository(repository).get_personal_report(
+        actor_id,
+        moment_limit=24,
+    )
+    assert [item.moment_type.value for item in report.moments] == [
+        "REFLECTION_COMPLETED",
+        "DECISION_UPDATE",
+        "INITIAL_COMMIT",
+    ]
+    assert report.moments[1].revision_no == 2
+    assert all(item.case_id == session.case_id for item in report.moments)
+    assert all(item.case_version_id == session.case_version_id for item in report.moments)
+
+    foreign = InMemoryProgressRepository(repository).get_personal_report(
+        uuid4(),
+        moment_limit=24,
+    )
+    assert foreign.moments == ()
 
 
 def test_lineage_is_actor_scoped() -> None:

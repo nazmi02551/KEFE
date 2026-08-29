@@ -64,10 +64,25 @@ class JourneyResponse(BaseModel):
     recent_journeys: list[RecentJourneyResponse]
 
 
+class PersonalReportMomentResponse(BaseModel):
+    type: str
+    case_id: str
+    case_version_id: str
+    title: str
+    primary_domain: str
+    occurred_at: str
+    revision_no: int | None
+
+
+class PersonalReportResponse(BaseModel):
+    moments: list[PersonalReportMomentResponse]
+
+
 class ProgressEnvelopeResponse(BaseModel):
     account_offer: AccountOfferResponse
     progress: ProgressResponse
     journey: JourneyResponse
+    personal_report: PersonalReportResponse
     methodology: dict[str, str]
 
 
@@ -85,6 +100,7 @@ def get_progress(
 ) -> ProgressEnvelopeResponse:
     snapshot = service.get_progress(principal.actor_id)
     journey = service.get_journey(principal.actor_id)
+    personal_report = service.get_personal_report(principal.actor_id)
     guest = principal.actor_kind is ActorKind.GUEST
     return ProgressEnvelopeResponse(
         account_offer=AccountOfferResponse(
@@ -139,11 +155,26 @@ def get_progress(
                 for item in journey.recent_journeys
             ],
         ),
+        personal_report=PersonalReportResponse(
+            moments=[
+                PersonalReportMomentResponse(
+                    type=item.moment_type.value,
+                    case_id=str(item.case_id),
+                    case_version_id=str(item.case_version_id),
+                    title=item.title,
+                    primary_domain=item.primary_domain,
+                    occurred_at=item.occurred_at.isoformat(),
+                    revision_no=item.revision_no,
+                )
+                for item in personal_report.moments
+            ]
+        ),
         methodology={
             "sample_scope": "CURRENT_ACTOR_COMMITTED_HISTORY",
             "readiness_note": "PRESENTATION_ONLY_NOT_RESEARCH_VALIDATED",
             "journey_semantics": "OBSERVED_PRODUCT_HISTORY_ONLY",
             "causal_claims": "NONE",
             "advanced_insights": "DEFERRED",
+            "personal_report_semantics": "OBSERVED_MOMENTS_ONLY",
         },
     )

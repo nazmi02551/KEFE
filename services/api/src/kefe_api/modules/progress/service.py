@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from kefe_api.modules.progress.models import DecisionJourneySnapshot, ProgressSnapshot
+from kefe_api.modules.progress.models import (
+    DecisionJourneySnapshot,
+    PersonalJourneyReport,
+    ProgressSnapshot,
+)
 from kefe_api.modules.progress.ports import ProgressRepository
 
 
@@ -19,3 +23,6 @@ class ProgressService:
             recent_limit=5,
             domain_limit=12,
         )
+
+    def get_personal_report(self, actor_id: UUID) -> PersonalJourneyReport:
+        return self._repository.get_personal_report(actor_id, moment_limit=24)
