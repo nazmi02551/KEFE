@@ -63,6 +63,112 @@ def test_postgres_explore_lists_published_cases(monkeypatch: pytest.MonkeyPatch)
         get_settings.cache_clear()
 
 
+def test_postgres_public_case_history_is_bounded_to_public_versions(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    database_url = os.environ["KEFE_DATABASE_URL"]
+    case_id = uuid4()
+    previous_id = uuid4()
+    current_id = uuid4()
+    draft_id = uuid4()
+    withdrawn_id = uuid4()
+    engine = create_engine(database_url)
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                """
+                INSERT INTO content.case_item (
+                    id, slug, base_format_code, primary_domain_code,
+                    lifecycle_state, content_risk
+                ) VALUES (
+                    :case_id, :slug, 'DILEMMA', 'DAILY_LIFE', 'PUBLISHED', 'L0'
+                )
+                """
+            ),
+            {"case_id": case_id, "slug": f"history-{case_id}"},
+        )
+        for version_id, version_no, status, title in (
+            (previous_id, 1, "SUPERSEDED", "Previous public title"),
+            (current_id, 2, "PUBLISHED", "Current public title"),
+            (draft_id, 3, "DRAFT", "Private draft title"),
+            (withdrawn_id, 4, "WITHDRAWN", "Withdrawn title"),
+        ):
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO content.case_version (
+                        id, case_id, version_no, status, title, summary,
+                        accepts_weighs, published_at, base_format_code,
+                        primary_domain_code, content_risk
+                    ) VALUES (
+                        :id, :case_id, :version_no, :status, :title, :summary,
+                        :accepts_weighs, now(), 'DILEMMA', 'DAILY_LIFE', 'L0'
+                    )
+                    """
+                ),
+                {
+                    "id": version_id,
+                    "case_id": case_id,
+                    "version_no": version_no,
+                    "status": status,
+                    "title": title,
+                    "summary": f"Summary {version_no}",
+                    "accepts_weighs": status == "PUBLISHED",
+                },
+            )
+
+    client = _postgres_client(monkeypatch)
+    try:
+        response = client.get(f"/v1/cases/{case_id}/history")
+        assert response.status_code == 200
+        assert [item["case_version_id"] for item in response.json()["items"]] == [
+            str(current_id),
+            str(previous_id),
+        ]
+        assert [item["classification"] for item in response.json()["items"]] == [
+            "CURRENT",
+            "PREVIOUS",
+        ]
+        assert "Private draft title" not in response.text
+        assert "Withdrawn title" not in response.text
+
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    UPDATE content.case_version
+                    SET status = 'WITHDRAWN', accepts_weighs = false
+                    WHERE id = :current_id
+                    """
+                ),
+                {"current_id": current_id},
+            )
+            connection.execute(
+                text(
+                    """
+                    UPDATE content.case_item
+                    SET lifecycle_state = 'WITHDRAWN'
+                    WHERE id = :case_id
+                    """
+                ),
+                {"case_id": case_id},
+            )
+        withdrawn = client.get(f"/v1/cases/{case_id}/history")
+        assert withdrawn.status_code == 404
+        assert withdrawn.json()["code"] == "CASE_NOT_FOUND"
+    finally:
+        with engine.begin() as connection:
+            connection.execute(
+                text("DELETE FROM content.case_version WHERE case_id = :case_id"),
+                {"case_id": case_id},
+            )
+            connection.execute(
+                text("DELETE FROM content.case_item WHERE id = :case_id"),
+                {"case_id": case_id},
+            )
+        get_settings.cache_clear()
+
+
 def test_postgres_case_weigh_commit_reveal_and_outbox(monkeypatch: pytest.MonkeyPatch) -> None:
     database_url = os.environ["KEFE_DATABASE_URL"]
     client = _postgres_client(monkeypatch)

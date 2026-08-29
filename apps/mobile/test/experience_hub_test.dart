@@ -222,8 +222,9 @@ void main() {
     await tester.tap(action);
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
-    expect(find.text('Son koltuk kime verilmeli?'), findsOneWidget);
+    final caseTitle = find.byKey(const ValueKey('case-title'));
+    expect(caseTitle, findsOneWidget);
+    expect(tester.widget<Text>(caseTitle).data, 'Son koltuk kime verilmeli?');
     await revealCaseControl(
       tester,
       find.byKey(const ValueKey('commit-button')),
@@ -303,10 +304,11 @@ void main() {
     await tester.tap(action);
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('case-title')), findsOneWidget);
+    final caseTitle = find.byKey(const ValueKey('case-title'));
+    expect(caseTitle, findsOneWidget);
     expect(
-      find.text('Bu pozisyonda penaltı kararı doğru muydu?'),
-      findsOneWidget,
+      tester.widget<Text>(caseTitle).data,
+      'Bu pozisyonda penaltı kararı doğru muydu?',
     );
     await revealCaseControl(
       tester,

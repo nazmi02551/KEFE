@@ -11,6 +11,7 @@ import '../../onboarding/application/onboarding_controller.dart';
 import '../application/decision_controller.dart';
 import '../domain/decision_models.dart';
 import 'case_hero_header.dart';
+import 'case_version_history_section.dart';
 import 'perspective_section.dart';
 import 'question_input.dart';
 import 'reason_input.dart';
@@ -177,6 +178,7 @@ class _FlowStepSection extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     return _ExposureAwareContextStep(
+      caseId: state.caseData!.id,
       caseVersionId: state.caseData!.versionId,
       stepCode: step.code,
       shouldRecordExposure:
@@ -289,12 +291,14 @@ class _FlowStepSection extends ConsumerWidget {
 
 class _ExposureAwareContextStep extends StatefulWidget {
   const _ExposureAwareContextStep({
+    required this.caseId,
     required this.caseVersionId,
     required this.stepCode,
     required this.shouldRecordExposure,
     required this.onExposed,
   });
 
+  final String caseId;
   final String caseVersionId;
   final String stepCode;
   final bool shouldRecordExposure;
@@ -338,6 +342,8 @@ class _ExposureAwareContextStepState extends State<_ExposureAwareContextStep> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ContextSection(caseVersionId: widget.caseVersionId),
+        const SizedBox(height: 16),
+        CaseVersionHistorySection(caseId: widget.caseId),
         const SizedBox(height: 24),
       ],
     );

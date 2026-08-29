@@ -17,6 +17,7 @@ class HttpReflectionDecisionRepository
         DecisionRepository,
         FlowRuntimeRepository,
         DecisionLineageRepository,
+        PublicCaseHistoryRepository,
         ReflectionRepository,
         PerspectiveRepository,
         ContextRepository {
@@ -50,6 +51,10 @@ class HttpReflectionDecisionRepository
 
   @override
   Future<DecisionCase> fetchCase(String caseId) => _delegate.fetchCase(caseId);
+
+  @override
+  Future<List<PublicCaseVersion>> fetchPublicCaseHistory(String caseId) =>
+      _delegate.fetchPublicCaseHistory(caseId);
 
   @override
   Future<CaseContextSnapshot> fetchContext(String caseVersionId) =>

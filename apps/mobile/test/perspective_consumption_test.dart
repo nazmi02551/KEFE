@@ -189,7 +189,11 @@ Future<void> pumpPerspectiveCase(
 }
 
 Future<void> makeVisible(WidgetTester tester, Finder finder) async {
-  await tester.ensureVisible(finder);
+  await tester.scrollUntilVisible(
+    finder,
+    300,
+    scrollable: find.byType(Scrollable).first,
+  );
   await tester.pump(const Duration(milliseconds: 100));
 }
 
@@ -200,8 +204,7 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
 }
 
 Future<void> commitChoice(WidgetTester tester) async {
-  await tester.tap(find.byKey(const ValueKey('option-A')));
-  await tester.pump();
+  await tapVisible(tester, find.byKey(const ValueKey('option-A')));
   await tapVisible(tester, find.byKey(const ValueKey('commit-button')));
   await tester.pumpAndSettle();
 }
@@ -286,7 +289,7 @@ void main() {
       final repository = PerspectiveFakeRepository();
       await pumpPerspectiveCase(tester, repository);
 
-      await tester.tap(find.byKey(const ValueKey('option-A')));
+      await tapVisible(tester, find.byKey(const ValueKey('option-A')));
       final reason = find.byKey(const ValueKey('reason-text'));
       await makeVisible(tester, reason);
       await tester.enterText(reason, 'Bu yalnızca benim özel gerekçem.');

@@ -9,6 +9,8 @@ from kefe_api.modules.decision.models import (
     CaseLocalization,
     CaseVersion,
     FlowStep,
+    PublicCaseVersion,
+    PublicCaseVersionClassification,
     Question,
     ResolvedFlow,
 )
@@ -36,6 +38,58 @@ class PostgresExploreDecisionRepository(PostgresDecisionRepository):
 
         cases = [self.get_case_version(version_id) for version_id in version_ids]
         return tuple(case for case in cases if case is not None)
+
+    def list_public_case_versions(
+        self,
+        case_id: UUID,
+        *,
+        limit: int,
+    ) -> tuple[PublicCaseVersion, ...]:
+        with self._engine.connect() as connection:
+            rows = connection.execute(
+                text(
+                    """
+                    SELECT
+                        cv.id,
+                        cv.case_id,
+                        cv.version_no,
+                        cv.title,
+                        cv.summary,
+                        cv.published_at,
+                        cv.status
+                    FROM content.case_version cv
+                    JOIN content.case_item ci ON ci.id = cv.case_id
+                    WHERE cv.case_id = :case_id
+                      AND ci.lifecycle_state = 'PUBLISHED'
+                      AND cv.status IN ('PUBLISHED', 'SUPERSEDED')
+                      AND EXISTS (
+                          SELECT 1
+                          FROM content.case_version current_version
+                          WHERE current_version.case_id = cv.case_id
+                            AND current_version.status = 'PUBLISHED'
+                      )
+                    ORDER BY cv.version_no DESC
+                    LIMIT :limit
+                    """
+                ),
+                {"case_id": case_id, "limit": limit},
+            ).mappings().all()
+        return tuple(
+            PublicCaseVersion(
+                case_id=row["case_id"],
+                case_version_id=row["id"],
+                version_no=row["version_no"],
+                title=row["title"],
+                summary=row["summary"],
+                published_at=row["published_at"],
+                classification=(
+                    PublicCaseVersionClassification.CURRENT
+                    if row["status"] == "PUBLISHED"
+                    else PublicCaseVersionClassification.PREVIOUS
+                ),
+            )
+            for row in rows
+        )
 
     def get_case_version(self, version_id: UUID) -> CaseVersion | None:
         with self._engine.connect() as connection:

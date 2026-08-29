@@ -72,6 +72,39 @@ def test_case_exposes_typed_question_contract_without_results() -> None:
     assert confidence["response_schema"] == {"min": 1, "max": 10, "step": 1}
 
 
+def test_public_case_history_exposes_only_current_public_version() -> None:
+    client = TestClient(create_app())
+    response = client.get(f"/v1/cases/{DEMO_CASE_ID}/history")
+    assert response.status_code == 200
+    assert response.json() == {
+        "case_id": str(DEMO_CASE_ID),
+        "items": [
+            {
+                "case_version_id": "22222222-2222-4222-8222-222222222222",
+                "version_no": 1,
+                "title": "Son koltuk kime verilmeli?",
+                "summary": "İki makul ihtiyaç arasında sınırlı bir kaynağı tart.",
+                "published_at": None,
+                "classification": "CURRENT",
+            }
+        ],
+    }
+    assert "actor_ref" not in response.text
+    assert "rationale" not in response.text
+
+
+def test_public_case_history_is_bounded_and_unknown_case_fails_closed() -> None:
+    client = TestClient(create_app())
+    invalid_limit = client.get(f"/v1/cases/{DEMO_CASE_ID}/history?limit=21")
+    assert invalid_limit.status_code == 422
+
+    missing = client.get(
+        "/v1/cases/99999999-9999-4999-8999-999999999999/history"
+    )
+    assert missing.status_code == 404
+    assert missing.json()["code"] == "CASE_NOT_FOUND"
+
+
 def test_guest_identity_is_required_for_decision_writes() -> None:
     client = TestClient(create_app())
     response = client.post(f"/v1/cases/{DEMO_CASE_ID}/weigh-sessions")

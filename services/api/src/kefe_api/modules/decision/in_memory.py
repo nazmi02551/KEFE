@@ -24,6 +24,8 @@ from kefe_api.modules.decision.models import (
     DraftUpdateStatus,
     PerspectiveSnapshot,
     PrivateReason,
+    PublicCaseVersion,
+    PublicCaseVersionClassification,
     ReasonModerationState,
     ReasonUpdateAttempt,
     RevealSnapshot,
@@ -65,6 +67,38 @@ class InMemoryDecisionRepository:
             ]
             current.sort(key=lambda case: (case.content_risk, case.title, str(case.case_id)))
             return tuple(current[:limit])
+
+    def list_public_case_versions(
+        self,
+        case_id: UUID,
+        *,
+        limit: int,
+    ) -> tuple[PublicCaseVersion, ...]:
+        with self._lock:
+            current_id = self._current_by_case.get(case_id)
+            if current_id is None:
+                return ()
+            versions = sorted(
+                (case for case in self._cases.values() if case.case_id == case_id),
+                key=lambda case: case.version_no,
+                reverse=True,
+            )
+            return tuple(
+                PublicCaseVersion(
+                    case_id=case.case_id,
+                    case_version_id=case.id,
+                    version_no=case.version_no,
+                    title=case.title,
+                    summary=case.summary,
+                    published_at=None,
+                    classification=(
+                        PublicCaseVersionClassification.CURRENT
+                        if case.id == current_id
+                        else PublicCaseVersionClassification.PREVIOUS
+                    ),
+                )
+                for case in versions[:limit]
+            )
 
     def get_current_case_version(self, case_id: UUID) -> CaseVersion | None:
         with self._lock:

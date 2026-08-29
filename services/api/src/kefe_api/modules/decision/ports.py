@@ -17,6 +17,7 @@ from kefe_api.modules.decision.models import (
     CommitAttempt,
     DraftUpdateAttempt,
     PerspectiveSnapshot,
+    PublicCaseVersion,
     ReasonUpdateAttempt,
     RevealSnapshot,
     WeighSession,
@@ -29,6 +30,13 @@ from kefe_api.modules.decision.reflection_models import (
 
 class DecisionRepository(Protocol):
     def list_current_cases(self, *, limit: int) -> tuple[CaseVersion, ...]: ...
+
+    def list_public_case_versions(
+        self,
+        case_id: UUID,
+        *,
+        limit: int,
+    ) -> tuple[PublicCaseVersion, ...]: ...
 
     def get_current_case_version(self, case_id: UUID) -> CaseVersion | None: ...
 

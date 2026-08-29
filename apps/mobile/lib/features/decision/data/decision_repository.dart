@@ -43,6 +43,24 @@ abstract interface class FlowRuntimeRepository {
   Future<FlowRuntimeSnapshot> fetchFlowRuntime(String sessionId);
 }
 
+abstract interface class PublicCaseHistoryRepository {
+  Future<List<PublicCaseVersion>> fetchPublicCaseHistory(String caseId);
+}
+
+extension PublicCaseHistoryRepositoryAccess on DecisionRepository {
+  Future<List<PublicCaseVersion>> fetchPublicCaseHistory(String caseId) {
+    final repository = this;
+    if (repository is PublicCaseHistoryRepository) {
+      return (repository as PublicCaseHistoryRepository).fetchPublicCaseHistory(
+        caseId,
+      );
+    }
+    throw const ClientTransportFailure(
+      code: 'PUBLIC_CASE_HISTORY_NOT_CONFIGURED',
+    );
+  }
+}
+
 abstract interface class DecisionLineageRepository {
   Future<void> recordFlowStepExposure({
     required String sessionId,
