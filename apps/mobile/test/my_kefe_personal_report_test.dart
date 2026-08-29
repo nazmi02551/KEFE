@@ -201,7 +201,7 @@ void main() {
       final reportScrollable = find.descendant(
         of: report,
         matching: find.byType(Scrollable),
-      );
+      ).first;
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('my-kefe-report-no-inference')),
         260,
@@ -242,7 +242,7 @@ void main() {
     final reportScrollable = find.descendant(
       of: report,
       matching: find.byType(Scrollable),
-    );
+    ).first;
     await tester.scrollUntilVisible(
       find.textContaining('Reflection completed'),
       220,
