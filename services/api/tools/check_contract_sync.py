@@ -197,9 +197,7 @@ def _openapi_errors() -> list[str]:
     if leaked:
         errors.append("ProgressResponse leaks forbidden fields: " + ", ".join(leaked))
 
-    personal_report = schemas.get("PersonalReportMomentResponse", {}).get(
-        "properties", {}
-    )
+    personal_report = schemas.get("PersonalReportMomentResponse", {}).get("properties", {})
     personal_report_leaks = sorted(
         {
             "actor_id",

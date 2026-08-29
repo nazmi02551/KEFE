@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/design/kefe_surface.dart';
 import '../../../core/design/kefe_visual_system.dart';
+import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_content_localizer.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../application/progress_controller.dart';
@@ -113,10 +114,7 @@ class _ReportHero extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                KefeEyebrow(
-                  strings.reportEyebrow,
-                  icon: Icons.route_rounded,
-                ),
+                KefeEyebrow(strings.reportEyebrow, icon: Icons.route_rounded),
                 const SizedBox(height: 10),
                 Text(
                   strings.reportHeroTitle,
@@ -148,7 +146,10 @@ class _ReportHero extends StatelessWidget {
                 color: visual.goldSoft.withValues(alpha: 0.32),
               ),
             ),
-            child: Icon(Icons.history_toggle_off_rounded, color: visual.goldSoft),
+            child: Icon(
+              Icons.history_toggle_off_rounded,
+              color: visual.goldSoft,
+            ),
           ),
         ],
       ),

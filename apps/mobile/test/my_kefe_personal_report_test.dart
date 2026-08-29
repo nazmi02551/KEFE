@@ -46,9 +46,7 @@ Map<String, Object?> _progressBody({Object? personalReport = _missing}) => {
     'recent_journeys': <Object?>[],
   },
   if (!identical(personalReport, _missing)) 'personal_report': personalReport,
-  'methodology': {
-    'journey_semantics': 'OBSERVED_PRODUCT_HISTORY_ONLY',
-  },
+  'methodology': {'journey_semantics': 'OBSERVED_PRODUCT_HISTORY_ONLY'},
 };
 
 const _missing = Object();
@@ -191,7 +189,10 @@ void main() {
         find.byKey(const ValueKey('my-kefe-personal-report')),
         findsOneWidget,
       );
-      expect(find.text('Karar anların, tek bir zaman çizgisinde.'), findsOneWidget);
+      expect(
+        find.text('Karar anların, tek bir zaman çizgisinde.'),
+        findsOneWidget,
+      );
       expect(
         find.byKey(const ValueKey('my-kefe-report-preview-notice')),
         findsOneWidget,
