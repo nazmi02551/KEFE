@@ -64,6 +64,25 @@ extension ProgressStrings on KefeStrings {
   String get journeyNoUpdate => _progressText('journey.no_update');
   String get journeyReflectionPending =>
       _progressText('journey.reflection_pending');
+  String get reportEntryEyebrow => _progressText('report.entry.eyebrow');
+  String get reportEntryTitle => _progressText('report.entry.title');
+  String get reportEntryBody => _progressText('report.entry.body');
+  String get reportEntryAction => _progressText('report.entry.action');
+  String get reportTitle => _progressText('report.title');
+  String get reportEyebrow => _progressText('report.eyebrow');
+  String get reportHeroTitle => _progressText('report.hero_title');
+  String get reportHeroSubtitle => _progressText('report.hero_subtitle');
+  String get reportPreviewNotice => _progressText('report.preview_notice');
+  String get reportSnapshot => _progressText('report.snapshot');
+  String get reportDateRange => _progressText('report.date_range');
+  String get reportMoments => _progressText('report.moments');
+  String get reportEmpty => _progressText('report.empty');
+  String get reportInitialCommit => _progressText('report.initial_commit');
+  String get reportDecisionUpdate => _progressText('report.decision_update');
+  String get reportReflectionCompleted =>
+      _progressText('report.reflection_completed');
+  String get reportOpenCase => _progressText('report.open_case');
+  String get reportNonInference => _progressText('report.non_inference');
 
   String journeyWeighCount(int count) =>
       _progressText('journey.weigh_count', placeholders: {'count': count});
@@ -72,6 +91,12 @@ extension ProgressStrings on KefeStrings {
     count == 1 ? 'journey.update_count.one' : 'journey.update_count.many',
     placeholders: {'count': count},
   );
+
+  String reportEntryCount(int count) =>
+      _progressText('report.entry.count', placeholders: {'count': count});
+
+  String reportRevision(int count) =>
+      _progressText('report.revision', placeholders: {'count': count});
 
   String get accountOfferTitle => _progressText('account.offer.title');
   String get accountOfferBody => _progressText('account.offer.body');

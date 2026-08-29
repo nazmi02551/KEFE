@@ -16,6 +16,7 @@ import '../features/explore/presentation/experience_hub_screen.dart';
 import '../features/onboarding/presentation/onboarding_experience_screen.dart';
 import '../features/privacy/presentation/privacy_screen.dart';
 import '../features/progress/presentation/my_kefe_journey_screen.dart';
+import '../features/progress/presentation/my_kefe_personal_report_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../features/sharing/presentation/public_share_screen.dart';
 import '../features/weigh/presentation/weigh_hub_screen.dart';
@@ -78,6 +79,10 @@ class _KefeAppState extends ConsumerState<KefeApp> {
           ),
           child: const MyKefeJourneyScreen(embedded: true),
         ),
+      ),
+      GoRoute(
+        path: '/my-kefe/report',
+        builder: (context, state) => const MyKefePersonalReportScreen(),
       ),
       GoRoute(
         path: '/experiences',

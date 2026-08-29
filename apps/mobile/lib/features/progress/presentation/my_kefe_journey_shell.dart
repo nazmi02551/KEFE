@@ -95,6 +95,11 @@ class _MyKefeJourneyScreenState extends ConsumerState<MyKefeJourneyScreen> {
       if (preview) const SizedBox(height: 14),
       _Overview(progress: progress, journey: journey, strings: strings),
       const SizedBox(height: 18),
+      _ReportEntry(
+        momentCount: envelope.personalReport.moments.length,
+        strings: strings,
+      ),
+      const SizedBox(height: 18),
       _NextStep(journey: journey, strings: strings),
       if (journey.domainActivity.isNotEmpty) ...[
         const SizedBox(height: 18),
