@@ -54,3 +54,12 @@ this backend projection does not warrant an APK handoff.
 No local PostgreSQL service is configured in this environment. The new
 service-backed atomicity/backfill test and downgrade/upgrade drill therefore
 remain exact-head CI evidence, not a local PASS claim.
+
+## Candidate repair
+
+Initial remote head `672667c9f00f70f4f0cc52d36835c275398118c6`
+reached CI but API and Mobile stopped at the same early KEFE Today static
+validator. That validator still pinned the previous canonical schema head
+`0038` and migration count 38. The candidate correctly advances the schema to
+`0039` / 39, so the validator contract is updated to the new exact chain. No
+runtime, projection, migration SQL or mobile behavior changes in this repair.
