@@ -13,6 +13,10 @@ import 'package:kefe_mobile/features/decision/domain/decision_models.dart';
 const caseVersionId = '22222222-2222-4222-8222-222222222222';
 
 class ContextFakeRepository implements DecisionRepository, ContextRepository {
+  ContextFakeRepository({this.includePublishedAt = true});
+
+  final bool includePublishedAt;
+
   @override
   Future<CaseContextSnapshot> fetchContext(String caseVersionId) async {
     return CaseContextSnapshot(
@@ -37,14 +41,16 @@ class ContextFakeRepository implements DecisionRepository, ContextRepository {
           sourceIds: ['source-1'],
         ),
       ],
-      sources: const [
+      sources: [
         CaseContextSource(
           id: 'source-1',
           title: 'Senaryo notu',
           publisher: 'KEFE Editorial',
           sourceKind: 'EDITORIAL',
           url: null,
-          publishedAt: null,
+          publishedAt: includePublishedAt
+              ? DateTime.utc(2026, 8, 30, 9, 45)
+              : null,
         ),
       ],
     );
@@ -123,11 +129,49 @@ void main() {
       expect(find.byKey(const ValueKey('context-section')), findsOneWidget);
       expect(find.text('Temel bağlam.'), findsOneWidget);
       expect(find.text('Doğrulandı'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('context-information-status-guide')),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Bilgi durumları ne anlama geliyor?'),
+        findsOneWidget,
+      );
+      expect(
+        find.text(
+          'Durum bilgi bloğuna aittir; bağlı kaynağı ayrıca doğrulamaz.',
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(
+        find.byKey(const ValueKey('context-information-status-guide')),
+      );
+      await tester.pumpAndSettle();
+      for (final status in const [
+        'verified',
+        'claimed',
+        'disputed',
+        'unknown',
+      ]) {
+        expect(
+          find.byKey(ValueKey('context-information-status-$status')),
+          findsOneWidget,
+        );
+      }
+      expect(
+        find.text(
+          'Bu blok bir iddia sunar; doğrulanmış olarak işaretlenmez.',
+        ),
+        findsOneWidget,
+      );
       expect(find.text('Ek bağlam.'), findsNothing);
       expect(find.byKey(const ValueKey('context-details')), findsOneWidget);
       expect(find.byKey(const ValueKey('context-sources')), findsOneWidget);
 
-      await tester.tap(find.byKey(const ValueKey('context-details')));
+      final details = find.byKey(const ValueKey('context-details'));
+      await tester.ensureVisible(details);
+      await tester.tap(details);
       await tester.pumpAndSettle();
       expect(find.text('Ek bağlam.'), findsOneWidget);
       expect(find.text('Bilinmiyor'), findsOneWidget);
@@ -143,6 +187,13 @@ void main() {
       expect(find.text('Senaryo notu'), findsOneWidget);
       expect(
         find.text('Kaynak kaydı · KEFE Editorial · Editoryal kaynak'),
+        findsOneWidget,
+      );
+      expect(find.text('Yayın tarihi: 2026-08-30'), findsOneWidget);
+      expect(
+        find.byKey(
+          const ValueKey('context-source-published-source-1'),
+        ),
         findsOneWidget,
       );
       expect(find.byIcon(Icons.verified_outlined), findsNothing);
@@ -194,6 +245,10 @@ void main() {
     );
     expect(find.text('Temel bağlam.'), findsOneWidget);
     expect(find.text('Doğrulandı'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('context-information-status-guide')),
+      findsOneWidget,
+    );
     expect(find.text('Ek bağlam.'), findsNothing);
     expect(find.text('Senaryo notu'), findsNothing);
 
@@ -214,12 +269,119 @@ void main() {
       find.text('Kaynak kaydı · KEFE Editorial · Editoryal kaynak'),
       findsOneWidget,
     );
+    expect(find.text('Yayın tarihi: 2026-08-30'), findsOneWidget);
     expect(find.byIcon(Icons.verified_outlined), findsNothing);
     expect(find.byIcon(Icons.link_rounded), findsWidgets);
 
     await tester.tap(find.byKey(const ValueKey('context-journey-back')));
     await tester.pumpAndSettle();
     expect(find.text('Ek bağlam.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'status guide supports English dark theme and enlarged text',
+    (tester) async {
+      tester.platformDispatcher.localeTestValue = const Locale('en', 'US');
+      addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            decisionRepositoryProvider.overrideWithValue(
+              ContextFakeRepository(),
+            ),
+          ],
+          child: MaterialApp(
+            locale: const Locale('en', 'US'),
+            theme: ThemeData.dark(),
+            supportedLocales: KefeStrings.supportedLocales,
+            localizationsDelegates: const [
+              KefeStringsDelegate(),
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: const MediaQuery(
+              data: MediaQueryData(
+                size: Size(320, 640),
+                textScaler: TextScaler.linear(1.6),
+              ),
+              child: Scaffold(
+                body: SingleChildScrollView(
+                  child: ContextSection(caseVersionId: caseVersionId),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('What do these information states mean?'),
+        findsOneWidget,
+      );
+      expect(
+        find.text(
+          'A state belongs to the information block; it does not independently verify a linked source.',
+        ),
+        findsOneWidget,
+      );
+      final guide = find.byKey(
+        const ValueKey('context-information-status-guide'),
+      );
+      await tester.ensureVisible(guide);
+      await tester.tap(guide);
+      await tester.pumpAndSettle();
+      expect(
+        find.text(
+          'The current record does not establish a state for this information block.',
+        ),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('source preview omits publication date when absent', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          decisionRepositoryProvider.overrideWithValue(
+            ContextFakeRepository(includePublishedAt: false),
+          ),
+        ],
+        child: MaterialApp(
+          locale: const Locale('en', 'US'),
+          supportedLocales: KefeStrings.supportedLocales,
+          localizationsDelegates: const [
+            KefeStringsDelegate(),
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: const Scaffold(
+            body: SingleChildScrollView(
+              child: ContextSection(caseVersionId: caseVersionId),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final sources = find.byKey(const ValueKey('context-sources'));
+    await tester.ensureVisible(sources);
+    await tester.tap(sources);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('context-source-published-source-1')),
+      findsNothing,
+    );
+    expect(find.textContaining('Published:'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }
