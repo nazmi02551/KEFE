@@ -81,10 +81,17 @@ class PostgresOtpDeliveryHealthRepository:
                 },
             )
 
+        # Concurrent delivery completions may commit out of observed-time order.
+        # Evaluate against the newest durable event so escalation cannot be missed.
+        with self._engine.connect() as connection:
+            latest_observed_at = connection.execute(
+                text("SELECT max(observed_at) FROM identity.otp_delivery_event")
+            ).scalar_one()
+        evaluation_as_of = latest_observed_at or event.observed_at
         facts = self.read_facts(
-            window_started_at=event.observed_at - self._health_policy.window,
-            as_of=event.observed_at,
-            prune_before=event.observed_at - self._health_policy.retention,
+            window_started_at=evaluation_as_of - self._health_policy.window,
+            as_of=evaluation_as_of,
+            prune_before=evaluation_as_of - self._health_policy.retention,
         )
         snapshot = _snapshot_from_facts(facts, self._health_policy)
         if snapshot.signal in (
