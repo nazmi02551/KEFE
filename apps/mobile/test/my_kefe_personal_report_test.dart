@@ -198,10 +198,9 @@ void main() {
         findsOneWidget,
       );
       final report = find.byKey(const ValueKey('my-kefe-personal-report'));
-      final reportScrollable = find.descendant(
-        of: report,
-        matching: find.byType(Scrollable),
-      ).first;
+      final reportScrollable = find
+          .descendant(of: report, matching: find.byType(Scrollable))
+          .first;
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('my-kefe-report-no-inference')),
         260,
@@ -239,17 +238,23 @@ void main() {
     );
     expect(find.text('Journey snapshot'), findsOneWidget);
     final report = find.byKey(const ValueKey('my-kefe-personal-report'));
-    final reportScrollable = find.descendant(
-      of: report,
-      matching: find.byType(Scrollable),
-    ).first;
+    final reportScrollable = find
+        .descendant(of: report, matching: find.byType(Scrollable))
+        .first;
+    final reflection = find.byKey(const ValueKey('my-kefe-report-moment-0'));
     await tester.scrollUntilVisible(
-      find.textContaining('Reflection completed'),
+      reflection,
       220,
       scrollable: reportScrollable,
     );
     await tester.pumpAndSettle();
-    expect(find.textContaining('Reflection completed'), findsWidgets);
+    expect(
+      find.descendant(
+        of: reflection,
+        matching: find.textContaining('Reflection completed'),
+      ),
+      findsWidgets,
+    );
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('my-kefe-report-no-inference')),
       240,
