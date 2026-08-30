@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
@@ -13,6 +14,16 @@ pytestmark = pytest.mark.skipif(
     os.getenv("KEFE_RUN_POSTGRES_TESTS") != "1",
     reason="PostgreSQL integration tests are opt-in",
 )
+
+
+@pytest.fixture(autouse=True)
+def _isolated_outbox() -> Iterator[None]:
+    engine = create_engine(os.environ["KEFE_DATABASE_URL"])
+    with engine.begin() as connection:
+        connection.execute(text("DELETE FROM analytics.outbox_event"))
+    yield
+    with engine.begin() as connection:
+        connection.execute(text("DELETE FROM analytics.outbox_event"))
 
 
 def _insert_event(database_url: str) -> str:
