@@ -42,6 +42,121 @@ class _StatusSummary extends StatelessWidget {
   }
 }
 
+class _InformationStatusGuide extends StatelessWidget {
+  const _InformationStatusGuide();
+
+  static const _statuses = ['VERIFIED', 'CLAIMED', 'DISPUTED', 'UNKNOWN'];
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          key: const ValueKey('context-information-status-guide'),
+          tilePadding: const EdgeInsets.symmetric(horizontal: 4),
+          childrenPadding: const EdgeInsets.only(top: 6, bottom: 4),
+          iconColor: visual.rules,
+          collapsedIconColor: visual.mutedForeground,
+          title: Text(
+            strings.contextInformationStatusGuideTitle,
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              strings.contextInformationStatusGuideHelper,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: visual.mutedForeground,
+                height: 1.38,
+              ),
+            ),
+          ),
+          children: [
+            for (final status in _statuses)
+              _InformationStatusGuideRow(status: status),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InformationStatusGuideRow extends StatelessWidget {
+  const _InformationStatusGuideRow({required this.status});
+
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
+    final label = strings.contextClaimStatus(status);
+    final description = strings.contextInformationStatusDescription(status);
+    final color = _statusColor(context, status);
+    return Semantics(
+      key: ValueKey('context-information-status-${status.toLowerCase()}'),
+      container: true,
+      label: '$label. $description',
+      child: ExcludeSemantics(
+        child: Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: visual.surfaceSunken,
+            borderRadius: BorderRadius.circular(13),
+            border: Border.all(color: visual.border),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                margin: const EdgeInsets.only(top: 5),
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      description,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: visual.mutedForeground,
+                        height: 1.38,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ContextBlockTile extends StatelessWidget {
   const _ContextBlockTile({
     required this.block,
@@ -193,6 +308,7 @@ class _ContextSourceTile extends StatelessWidget {
     );
     final sourceKind = strings.contextSourceKind(source.sourceKind);
     final host = source.url?.host.trim() ?? '';
+    final publishedAt = source.publishedAt;
 
     return Semantics(
       container: true,
@@ -220,6 +336,16 @@ class _ContextSourceTile extends StatelessWidget {
               '${strings.contextJourneySourceReference} · $publisher · $sourceKind',
               style: TextStyle(color: visual.mutedForeground),
             ),
+            if (publishedAt != null) ...[
+              const SizedBox(height: 3),
+              Text(
+                strings.contextJourneySourcePublished(publishedAt),
+                key: ValueKey('context-source-published-${source.id}'),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: visual.mutedForeground),
+              ),
+            ],
             if (host.isNotEmpty) ...[
               const SizedBox(height: 3),
               Text(

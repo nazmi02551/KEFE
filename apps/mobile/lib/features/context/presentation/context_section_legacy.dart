@@ -179,6 +179,8 @@ class _ContextContent extends ConsumerWidget {
                 ),
             ],
           ),
+          const SizedBox(height: 6),
+          const _InformationStatusGuide(),
         ],
         const SizedBox(height: 18),
         for (final block in snapshot.essentialBlocks) ...[
