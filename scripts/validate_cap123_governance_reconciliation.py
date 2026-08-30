@@ -252,8 +252,11 @@ def validate_portfolio(contract: dict[str, Any]) -> None:
         require(phrase in governance, f"portfolio governance: {phrase}")
 
     validator = load_text(PORTFOLIO_VALIDATOR_PATH)
-    require("IMPLEMENTED_PARTIAL" in validator, "partial lifecycle catalog")
-    require("IMPLEMENTED_VERIFIED" in validator, "verified lifecycle catalog")
+    require("IMPLEMENTED" in validator, "implemented lifecycle validation")
+
+    portfolio = load_text(PORTFOLIO_PATH)
+    require("\tIMPLEMENTED_PARTIAL\t" in portfolio, "partial lifecycle catalog")
+    require("\tIMPLEMENTED_VERIFIED\t" in portfolio, "verified lifecycle catalog")
 
 
 def validate_parent_evidence() -> None:

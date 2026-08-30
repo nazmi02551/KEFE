@@ -93,6 +93,49 @@ class MyKefeRecentJourney {
   final bool reflectionCompleted;
 }
 
+enum MyKefeReportMomentType {
+  initialCommit,
+  decisionUpdate,
+  reflectionCompleted;
+
+  static MyKefeReportMomentType parse(String value) => switch (value) {
+    'INITIAL_COMMIT' => MyKefeReportMomentType.initialCommit,
+    'DECISION_UPDATE' => MyKefeReportMomentType.decisionUpdate,
+    'REFLECTION_COMPLETED' => MyKefeReportMomentType.reflectionCompleted,
+    _ => throw FormatException('Unsupported personal report moment: $value'),
+  };
+}
+
+@immutable
+class MyKefeReportMoment {
+  const MyKefeReportMoment({
+    required this.type,
+    required this.caseId,
+    required this.caseVersionId,
+    required this.title,
+    required this.primaryDomain,
+    required this.occurredAt,
+    this.revisionNo,
+  });
+
+  final MyKefeReportMomentType type;
+  final String caseId;
+  final String caseVersionId;
+  final String title;
+  final String primaryDomain;
+  final DateTime occurredAt;
+  final int? revisionNo;
+}
+
+@immutable
+class MyKefePersonalReport {
+  const MyKefePersonalReport({required this.moments});
+
+  const MyKefePersonalReport.empty() : moments = const [];
+
+  final List<MyKefeReportMoment> moments;
+}
+
 @immutable
 class MyKefeJourney {
   const MyKefeJourney({
@@ -131,10 +174,12 @@ class ProgressEnvelope {
     required this.progress,
     required this.methodology,
     this.journey = const MyKefeJourney.empty(),
+    this.personalReport = const MyKefePersonalReport.empty(),
   });
 
   final AccountOffer accountOffer;
   final MyKefeProgress progress;
   final MyKefeJourney journey;
+  final MyKefePersonalReport personalReport;
   final Map<String, String> methodology;
 }

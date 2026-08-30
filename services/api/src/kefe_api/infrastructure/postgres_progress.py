@@ -7,6 +7,9 @@ from sqlalchemy import Engine, text
 from kefe_api.modules.progress.models import (
     DecisionJourneySnapshot,
     DomainActivity,
+    PersonalJourneyReport,
+    PersonalReportMoment,
+    PersonalReportMomentType,
     ProgressSnapshot,
     RecentCompletedCase,
     RecentDecisionJourney,
@@ -212,5 +215,96 @@ class PostgresProgressRepository:
                     reflection_completed=row["reflection_completed"],
                 )
                 for row in journey_rows
+            ),
+        )
+
+    def get_personal_report(
+        self,
+        actor_id: UUID,
+        *,
+        moment_limit: int,
+    ) -> PersonalJourneyReport:
+        with self._engine.connect() as connection:
+            rows = connection.execute(
+                text(
+                    """
+                    WITH moments AS (
+                        SELECT
+                            ws.id AS source_id,
+                            'INITIAL_COMMIT' AS moment_type,
+                            ws.case_id,
+                            ws.case_version_id,
+                            cv.title,
+                            ci.primary_domain_code,
+                            ws.committed_at AS occurred_at,
+                            NULL::integer AS revision_no
+                        FROM decision.weigh_session ws
+                        JOIN content.case_item ci ON ci.id = ws.case_id
+                        JOIN content.case_version cv ON cv.id = ws.case_version_id
+                        WHERE ws.actor_id = :actor_id
+                          AND ws.state = 'COMMITTED'
+
+                        UNION ALL
+
+                        SELECT
+                            dr.id AS source_id,
+                            'DECISION_UPDATE' AS moment_type,
+                            ws.case_id,
+                            ws.case_version_id,
+                            cv.title,
+                            ci.primary_domain_code,
+                            dr.committed_at AS occurred_at,
+                            dr.revision_no
+                        FROM decision.decision_revision dr
+                        JOIN decision.weigh_session ws ON ws.id = dr.session_id
+                        JOIN content.case_item ci ON ci.id = ws.case_id
+                        JOIN content.case_version cv ON cv.id = ws.case_version_id
+                        WHERE ws.actor_id = :actor_id
+                          AND dr.actor_id = :actor_id
+                          AND ws.state = 'COMMITTED'
+                          AND dr.revision_no > 1
+
+                        UNION ALL
+
+                        SELECT
+                            rc.id AS source_id,
+                            'REFLECTION_COMPLETED' AS moment_type,
+                            ws.case_id,
+                            ws.case_version_id,
+                            cv.title,
+                            ci.primary_domain_code,
+                            rc.completed_at AS occurred_at,
+                            NULL::integer AS revision_no
+                        FROM decision.reflection_completion rc
+                        JOIN decision.weigh_session ws ON ws.id = rc.session_id
+                        JOIN content.case_item ci ON ci.id = ws.case_id
+                        JOIN content.case_version cv ON cv.id = ws.case_version_id
+                        WHERE ws.actor_id = :actor_id
+                          AND rc.actor_id = :actor_id
+                          AND ws.state = 'COMMITTED'
+                    )
+                    SELECT *
+                    FROM moments
+                    ORDER BY occurred_at DESC, source_id DESC
+                    LIMIT :moment_limit
+                    """
+                ),
+                {"actor_id": actor_id, "moment_limit": moment_limit},
+            ).mappings().all()
+
+        return PersonalJourneyReport(
+            actor_id=actor_id,
+            moments=tuple(
+                PersonalReportMoment(
+                    moment_type=PersonalReportMomentType(row["moment_type"]),
+                    source_id=row["source_id"],
+                    case_id=row["case_id"],
+                    case_version_id=row["case_version_id"],
+                    title=row["title"],
+                    primary_domain=row["primary_domain_code"],
+                    occurred_at=row["occurred_at"],
+                    revision_no=row["revision_no"],
+                )
+                for row in rows
             ),
         )

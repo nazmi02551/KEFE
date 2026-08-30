@@ -118,7 +118,7 @@ CAP-116	quality-metrics	Deep Weigh/source/perspective/revision quality metrics	A
 CAP-117	trust-safety-metrics	Trust, integrity and safety metrics	ANALYTICS_REPORTING	ARCHITECTURE_ACCEPTED	Phase 2	P0	KEFE-AED-001|KEFE-TIM-001			canonical	
 CAP-118	growth-attribution	Privacy-safe growth/referral attribution	ANALYTICS_REPORTING	ARCHITECTURE_ACCEPTED	Phase 5	P1	KEFE-AED-001|KEFE-CGD-001|KEFE-SEC-001			canonical	
 CAP-119	premium-funnel	Premium funnel and subscription metrics	ANALYTICS_REPORTING	ROADMAP_ACCEPTED	Post-PMF	P1	KEFE-AED-001|KEFE-CGD-001			canonical	
-CAP-120	user-personal-reports	My KEFE/Chronicle/Wrapped personal reports	ANALYTICS_REPORTING	ROADMAP_ACCEPTED	Phase 4/5	P1	KEFE-PB-001|KEFE-AED-001			canonical	
+CAP-120	user-personal-reports	My KEFE/Chronicle/Wrapped personal reports	ANALYTICS_REPORTING	ROADMAP_ACCEPTED	Phase 4/5	P1	KEFE-PB-001|KEFE-AED-001		Issue#387|ADR-0138|my-kefe-journey-report.v1	canonical	exact-head core CI, phone artifact, human review; no lifecycle promotion
 CAP-121	institutional-reports	Aggregate institutional reports	ANALYTICS_REPORTING	ROADMAP_ACCEPTED	Phase 8	P1	KEFE-CGD-001|KEFE-RM-001			canonical	
 CAP-122	research-reports	Study and reproducibility reports	ANALYTICS_REPORTING	ROADMAP_ACCEPTED	Phase 7	P1	KEFE-RM-001|KEFE-AED-001			canonical	
 CAP-123	admin-operational-reports	Admin operational/trust/editorial reports	ANALYTICS_REPORTING	ROADMAP_ACCEPTED	Phase 2+	P1	KEFE-ADM-001|KEFE-AED-001			canonical	

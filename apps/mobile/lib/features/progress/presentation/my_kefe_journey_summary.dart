@@ -192,6 +192,65 @@ class _NextStep extends StatelessWidget {
   }
 }
 
+class _ReportEntry extends StatelessWidget {
+  const _ReportEntry({required this.momentCount, required this.strings});
+
+  final int momentCount;
+  final KefeStrings strings;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return KefeSurface(
+      key: const ValueKey('my-kefe-report-entry'),
+      tone: KefeSurfaceTone.premium,
+      accent: visual.rules,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          KefeEyebrow(
+            strings.reportEntryEyebrow,
+            icon: Icons.route_rounded,
+            color: visual.rules,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            strings.reportEntryTitle,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: visual.onSurfaceStrong,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            strings.reportEntryBody,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: visual.onSurfaceStrong.withValues(alpha: 0.76),
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            strings.reportEntryCount(momentCount),
+            key: const ValueKey('my-kefe-report-moment-count'),
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: visual.goldSoft,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 14),
+          FilledButton.icon(
+            key: const ValueKey('my-kefe-report-action'),
+            onPressed: () => context.push('/my-kefe/report'),
+            icon: const Icon(Icons.arrow_forward_rounded),
+            label: Text(strings.reportEntryAction),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _Metric extends StatelessWidget {
   const _Metric({
     required this.value,

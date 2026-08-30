@@ -71,10 +71,86 @@ class HttpProgressRepository implements ProgressRepository {
             .toList(growable: false),
       ),
       journey: _journey(body['journey']),
+      personalReport: body.containsKey('personal_report')
+          ? _personalReport(body['personal_report'])
+          : const MyKefePersonalReport.empty(),
       methodology: methodology.map(
         (key, value) => MapEntry(key, value.toString()),
       ),
     );
+  }
+
+  MyKefePersonalReport _personalReport(Object? raw) {
+    if (raw is! Map) {
+      throw const FormatException('Personal report must be an object');
+    }
+    final map = raw.cast<String, Object?>();
+    final momentsRaw = map['moments'];
+    if (momentsRaw is! List) {
+      throw const FormatException('Personal report moments must be a list');
+    }
+    final moments = momentsRaw
+        .map((rawMoment) {
+          if (rawMoment is! Map) {
+            throw const FormatException(
+              'Personal report moment must be an object',
+            );
+          }
+          final item = rawMoment.cast<String, Object?>();
+          final typeRaw = item['type'];
+          final caseId = item['case_id'];
+          final caseVersionId = item['case_version_id'];
+          final title = item['title'];
+          final primaryDomain = item['primary_domain'];
+          final occurredAtRaw = item['occurred_at'];
+          if (typeRaw is! String ||
+              caseId is! String ||
+              caseId.isEmpty ||
+              caseVersionId is! String ||
+              caseVersionId.isEmpty ||
+              title is! String ||
+              title.isEmpty ||
+              primaryDomain is! String ||
+              primaryDomain.isEmpty ||
+              occurredAtRaw is! String ||
+              occurredAtRaw.isEmpty) {
+            throw const FormatException('Personal report moment is incomplete');
+          }
+          final type = MyKefeReportMomentType.parse(typeRaw);
+          final revisionNo = item['revision_no'];
+          if (type == MyKefeReportMomentType.decisionUpdate) {
+            if (revisionNo is! int || revisionNo <= 1) {
+              throw const FormatException(
+                'Decision update requires a later revision number',
+              );
+            }
+          } else if (revisionNo != null) {
+            throw const FormatException(
+              'Only decision updates may include a revision number',
+            );
+          }
+          return MyKefeReportMoment(
+            type: type,
+            caseId: caseId,
+            caseVersionId: caseVersionId,
+            title: title,
+            primaryDomain: primaryDomain,
+            occurredAt: DateTime.parse(occurredAtRaw),
+            revisionNo: revisionNo as int?,
+          );
+        })
+        .toList(growable: false);
+    for (var index = 1; index < moments.length; index++) {
+      if (moments[index].occurredAt.isAfter(moments[index - 1].occurredAt)) {
+        throw const FormatException(
+          'Personal report moments must be newest first',
+        );
+      }
+    }
+    if (moments.length > 24) {
+      throw const FormatException('Personal report exceeds its bounded limit');
+    }
+    return MyKefePersonalReport(moments: moments);
   }
 
   MyKefeJourney _journey(Object? raw) {

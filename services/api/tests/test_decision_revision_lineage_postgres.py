@@ -202,6 +202,20 @@ def test_postgres_principle_context_retest_persists_revision_delta_and_reflectio
         assert recent["decision_update_count"] == 1
         assert recent["reflection_completed"] is True
         assert recent["latest_decision_at"] > recent["initial_committed_at"]
+        report = progress.json()["personal_report"]
+        assert [item["type"] for item in report["moments"]] == [
+            "REFLECTION_COMPLETED",
+            "DECISION_UPDATE",
+            "INITIAL_COMMIT",
+        ]
+        assert report["moments"][0]["revision_no"] is None
+        assert report["moments"][1]["revision_no"] == 2
+        assert report["moments"][2]["revision_no"] is None
+        assert all(item["case_id"] == str(case_id) for item in report["moments"])
+        assert all(
+            item["case_version_id"] == str(published.id)
+            for item in report["moments"]
+        )
         serialized = progress.text.lower()
         for forbidden in (
             "response_snapshot",
@@ -212,6 +226,9 @@ def test_postgres_principle_context_retest_persists_revision_delta_and_reflectio
             "personality",
             "ideology",
             "psychometric",
+            "session_id",
+            "revision_id",
+            "reflection_completion_id",
         ):
             assert forbidden not in serialized
     finally:

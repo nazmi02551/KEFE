@@ -11,6 +11,12 @@ class ProgressReadiness(StrEnum):
     FORMING = "FORMING"
 
 
+class PersonalReportMomentType(StrEnum):
+    INITIAL_COMMIT = "INITIAL_COMMIT"
+    DECISION_UPDATE = "DECISION_UPDATE"
+    REFLECTION_COMPLETED = "REFLECTION_COMPLETED"
+
+
 @dataclass(frozen=True, slots=True)
 class RecentCompletedCase:
     case_id: UUID
@@ -79,3 +85,25 @@ class DecisionJourneySnapshot:
             domain_activity=(),
             recent_journeys=(),
         )
+
+
+@dataclass(frozen=True, slots=True)
+class PersonalReportMoment:
+    moment_type: PersonalReportMomentType
+    source_id: UUID
+    case_id: UUID
+    case_version_id: UUID
+    title: str
+    primary_domain: str
+    occurred_at: datetime
+    revision_no: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class PersonalJourneyReport:
+    actor_id: UUID
+    moments: tuple[PersonalReportMoment, ...]
+
+    @classmethod
+    def empty(cls, actor_id: UUID) -> PersonalJourneyReport:
+        return cls(actor_id=actor_id, moments=())

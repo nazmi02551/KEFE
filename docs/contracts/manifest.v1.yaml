@@ -1,5 +1,5 @@
 # OpenAPI 0.18.0 is the exact composition of the stable base snapshot and the reviewed Consensus overlay.
-manifest_version: 1.39.0
+manifest_version: 1.40.0
 updated_at: '2026-08-29'
 policy:
   executable_schema_source: services/api/migrations
@@ -34,6 +34,10 @@ contracts:
     path: docs/contracts/quality-journey-projection.v1.json
     version: 1.0.0
     role: reproducible_session_quality_observation_projection
+  - id: my-kefe-journey-report
+    path: docs/contracts/my-kefe-journey-report.v1.json
+    version: 1.0.0
+    role: actor_scoped_observed_personal_journey_report
   - id: config-registry
     path: docs/contracts/config-registry.v1.2.0.yaml
     version: 1.2.0
@@ -215,3 +219,4 @@ architecture_decisions:
   - docs/adr/0135-reproducible-session-activation-journey.md
   - docs/adr/0136-self-service-deletion-of-retained-analytics-identity.md
   - docs/adr/0137-reproducible-session-quality-journey.md
+  - docs/adr/0138-actor-scoped-my-kefe-journey-report.md
