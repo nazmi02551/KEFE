@@ -1,0 +1,76 @@
+{
+  "contract_version": "1.0.0",
+  "updated_at": "2026-08-30",
+  "status": "implementation_candidate",
+  "issue": 389,
+  "source_adr": "docs/adr/0139-saved-case-lifecycle-updates.md",
+  "capabilities": ["CAP-079"],
+  "parent": {
+    "pull_request": 388,
+    "exact_head": "9e4f5bcf24fd75dd0897529d5c5ea66486f08ae2"
+  },
+  "surface": {
+    "owner": "ACTIVITY",
+    "saved_case_route": "/case/:caseId",
+    "production_preview_shared": true,
+    "foreground_only": true,
+    "background_polling": false
+  },
+  "detection": {
+    "saved_identity": ["case_id", "case_version_id"],
+    "catalog_authority": "SUCCESSFUL_CURRENT_EXPLORE_COLLECTION",
+    "updated_when": "EXACT_CASE_ID_MATCH_AND_CASE_VERSION_ID_DIFFERS",
+    "catalog_loading": "UNKNOWN_NO_UPDATE_CLAIM",
+    "catalog_failure": "UNKNOWN_NO_UPDATE_CLAIM",
+    "catalog_absence": "UNKNOWN_NO_REMOVAL_OR_UPDATE_CLAIM",
+    "importance_or_reason_inference": false
+  },
+  "acknowledgement": {
+    "trigger": "OPEN_UPDATED_CASE",
+    "replace_snapshot_from": "CURRENT_CATALOG_SUMMARY",
+    "preserve_fields": ["saved_at"],
+    "route_unchanged": true,
+    "notification_history_persisted": false
+  },
+  "persistence": {
+    "storage": "DEVICE_LOCAL_SHARED_PREFERENCES",
+    "key": "kefe.saved_cases.v1",
+    "format_change": false,
+    "migration_required": false,
+    "backward_compatible": true,
+    "account_sync": false,
+    "cross_device_restore": false
+  },
+  "mobile": {
+    "header_update_count": true,
+    "per_case_update_marker": true,
+    "localized_languages": ["en", "tr"],
+    "light_dark_supported": true,
+    "compact_phone_supported": true,
+    "enlarged_text_supported": true,
+    "accessible_semantics": true,
+    "pull_to_refresh_sources": ["PROGRESS", "SAVED_CASES", "EXPLORE_CATALOG"]
+  },
+  "forbidden": [
+    "SERVER_SAVED_CASE_SYNC",
+    "ACCOUNT_MIGRATION",
+    "PUSH_NOTIFICATION",
+    "EMAIL_NOTIFICATION",
+    "NOTIFICATION_INBOX",
+    "BACKGROUND_POLLING",
+    "RECOMMENDATION",
+    "RANKING",
+    "SOCIAL_GRAPH",
+    "TARGETING",
+    "PRIVATE_REASON_STORAGE",
+    "PERSONALITY_INFERENCE",
+    "IDEOLOGY_INFERENCE",
+    "API_CHANGE",
+    "DATABASE_SCHEMA_CHANGE"
+  ],
+  "lifecycle": {
+    "cap_079_after_slice": "IMPLEMENTED_PARTIAL",
+    "human_usability_proven": false,
+    "production_notification_delivery_proven": false
+  }
+}

@@ -56,6 +56,9 @@ void main() {
     expect(tr.savedCasesSubtitle, 'Daha sonra tartmak için ayırdığın vakalar.');
     expect(en.savedCasesEmpty, 'You have not saved a Case yet.');
     expect(tr.savedCasesOpen, 'Vakayı aç');
+    expect(tr.savedCasesUpdated, 'Vaka güncellendi');
+    expect(en.savedCasesOpenUpdated, 'Open current Case');
+    expect(en.savedCasesUpdateCount(2), '2 saved Cases updated');
     expect(en.savedCasesRemove, 'Remove from saved');
     expect(tr.savedCasesSave, 'Daha sonra için kaydet');
     expect(en.exploreSearchHint, 'Search Case title or summary');
