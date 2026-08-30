@@ -7,9 +7,11 @@ import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_content_localizer.dart';
 import '../../../core/localization/kefe_strings.dart';
+import '../../explore/application/explore_controller.dart';
 import '../../progress/application/progress_controller.dart';
 import '../../progress/domain/progress_models.dart';
 import '../../progress/presentation/progress_async_state_surface.dart';
+import '../../saved_cases/application/saved_cases_controller.dart';
 import '../../saved_cases/presentation/saved_cases_section.dart';
 
 class ActivityScreen extends ConsumerStatefulWidget {
@@ -37,14 +39,20 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
     final body = SafeArea(
       bottom: false,
       child: RefreshIndicator(
-        onRefresh: ref.read(progressControllerProvider.notifier).load,
+        onRefresh: () async {
+          await Future.wait([
+            ref.read(progressControllerProvider.notifier).load(),
+            ref.read(savedCasesControllerProvider.notifier).load(),
+            ref.read(exploreControllerProvider.notifier).load(),
+          ]);
+        },
         child: ListView(
           key: const ValueKey('activity-screen'),
           padding: const EdgeInsets.fromLTRB(18, 14, 18, 30),
           children: [
             _ActivityHero(strings: strings),
             const SizedBox(height: 18),
-            const SavedCasesSection(visible: true),
+            const SavedCasesSection(visible: true, lifecycleUpdates: true),
             const SizedBox(height: 18),
             ...switch (state.uiState) {
               ProgressUiState.idle || ProgressUiState.loading => [

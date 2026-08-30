@@ -77,4 +77,19 @@ class SavedCasesController extends Notifier<SavedCasesState> {
       await load();
     }
   }
+
+  Future<void> acknowledgeCurrentVersion(DecisionCaseSummary summary) async {
+    final next = [...state.items];
+    final index = next.indexWhere((item) => item.caseId == summary.id);
+    if (index < 0 || next[index].caseVersionId == summary.versionId) return;
+
+    final savedAt = next[index].savedAt;
+    next[index] = SavedCase.fromSummary(summary, savedAt: savedAt);
+    state = SavedCasesState(uiState: SavedCasesUiState.ready, items: next);
+    try {
+      await _store.writeAll(next);
+    } on Object {
+      await load();
+    }
+  }
 }

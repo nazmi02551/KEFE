@@ -16,8 +16,14 @@ extension SavedCaseStrings on KefeStrings {
   String get savedCasesRetry => _savedCaseText('saved.retry');
   String get savedCasesEmpty => _savedCaseText('saved.empty');
   String get savedCasesOpen => _savedCaseText('saved.open');
+  String get savedCasesOpenUpdated => _savedCaseText('saved.open_updated');
   String get savedCasesRemove => _savedCaseText('saved.remove');
   String get savedCasesSave => _savedCaseText('saved.save');
+  String get savedCasesUpdated => _savedCaseText('saved.updated');
+  String get savedCasesUpdatedHint => _savedCaseText('saved.updated_hint');
+  String savedCasesUpdateCount(int count) => _savedCaseText(
+    count == 1 ? 'saved.update_count.one' : 'saved.update_count.many',
+  ).replaceAll('{count}', '$count');
   String get exploreSearchHint => _savedCaseText('explore.search_hint');
   String get exploreAllDomains => _savedCaseText('explore.all_domains');
   String get exploreSavedOnly => _savedCaseText('explore.saved_only');
