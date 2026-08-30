@@ -1,0 +1,78 @@
+{
+  "contract_id": "KEFE-PRIVACY-SAFE-MOBILE-EXPORT-SUMMARY-001",
+  "version": "1.0.0",
+  "status": "CANDIDATE",
+  "issue": 397,
+  "capabilities": ["CAP-085"],
+  "parent_exact_head": "6758c8ae9396c62bb58e8eb0223e665a35cf6779",
+  "source": {
+    "endpoint": "GET /v1/me/privacy-export",
+    "accepted_schema_version": "privacy-export.v2",
+    "manifest_fields": [
+      "dataset_counts",
+      "total_records",
+      "empty_datasets"
+    ],
+    "product_data_recount_forbidden": true,
+    "api_changed": false,
+    "openapi_changed": false,
+    "database_changed": false
+  },
+  "validation": {
+    "dataset_keys_must_be_non_empty_strings": true,
+    "dataset_counts_must_be_non_negative_integers": true,
+    "total_records_must_be_non_negative_integer": true,
+    "total_records_must_equal_dataset_count_sum": true,
+    "empty_datasets_must_be_unique_strings": true,
+    "empty_datasets_must_equal_zero_count_dataset_keys": true,
+    "invalid_or_legacy_manifest_summary": "UNAVAILABLE"
+  },
+  "presentation": {
+    "visible_values": [
+      "total_records",
+      "non_empty_dataset_count"
+    ],
+    "raw_dataset_keys_visible": false,
+    "actor_id_visible": false,
+    "actor_kind_visible": false,
+    "generated_at_visible": false,
+    "data_sha256_visible": false,
+    "retention_visible": false,
+    "product_data_visible": false,
+    "complete_json_clipboard_copy_preserved": true,
+    "generic_copy_confirmation_preserved": true,
+    "locales": ["tr", "en"],
+    "stable_widget_keys": [
+      "privacy-export-summary",
+      "privacy-export-record-count",
+      "privacy-export-group-count"
+    ]
+  },
+  "isolation": {
+    "product_preview_repository_changed": false,
+    "preview_v2_manifest_claimed": false,
+    "deletion_flow_changed": false,
+    "credential_flow_changed": false
+  },
+  "methodology": {
+    "analytics_result_added": false,
+    "completeness_claim_added": false,
+    "legal_certification_added": false,
+    "ranking_added": false,
+    "recommendation_added": false,
+    "signal_in_scope": false,
+    "impact_in_scope": false,
+    "personal_inference_added": false
+  },
+  "required_exact_head_workflows": [
+    "API CI",
+    "Mobile CI",
+    "MVP Beta Gates",
+    "Global Readiness"
+  ],
+  "lifecycle": {
+    "capability_promotion": false,
+    "current_status_update": false,
+    "human_review_required": true
+  }
+}
