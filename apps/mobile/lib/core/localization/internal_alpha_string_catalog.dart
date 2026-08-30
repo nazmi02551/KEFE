@@ -95,6 +95,14 @@ abstract final class InternalAlphaStringCatalog {
       'community.receipt_allowed':
           'Your contribution was added to Community Reasons.',
       'community.unavailable': 'Community data unavailable · {code}',
+      'community.patterns_eyebrow': 'DESCRIPTIVE PATTERNS',
+      'community.patterns_title': 'What shaped the published reasons',
+      'community.patterns_sample': 'Across {count} published reasons',
+      'community.patterns_value': '{count} / {sample}',
+      'community.patterns_semantics':
+          '{label}: {count} of {sample} published reasons',
+      'community.patterns_note':
+          'One contribution can carry several tags, so rows do not add up to 100%. This is descriptive—not a popularity or truth ranking.',
       'community.published': 'Published reasons',
       'community.resonates': 'Resonates',
       'community.useful': 'Useful',
@@ -258,6 +266,14 @@ abstract final class InternalAlphaStringCatalog {
           'Katkın alındı. Metin moderasyon sonrası görünür olabilir.',
       'community.receipt_allowed': 'Katkın topluluk gerekçelerine eklendi.',
       'community.unavailable': 'Topluluk verisi kullanılamıyor · {code}',
+      'community.patterns_eyebrow': 'BETİMLEYİCİ ÖRÜNTÜLER',
+      'community.patterns_title': 'Yayınlanan gerekçelerde neler öne çıktı',
+      'community.patterns_sample': 'Yayınlanmış {count} gerekçede',
+      'community.patterns_value': '{count} / {sample}',
+      'community.patterns_semantics':
+          '{label}: yayınlanmış {sample} gerekçenin {count} tanesinde',
+      'community.patterns_note':
+          "Bir katkı birden fazla etiket taşıyabilir; bu yüzden satırlar %100'e tamamlanmaz. Bu yalnız betimleyicidir; popülerlik veya doğruluk sıralaması değildir.",
       'community.published': 'Yayınlanan gerekçeler',
       'community.resonates': 'Bende yankılandı',
       'community.useful': 'Faydalı',

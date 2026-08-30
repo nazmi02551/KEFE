@@ -61,6 +61,7 @@ jobs:
         working-directory: services/api
         run: >-
           ruff format
+          tests/test_community_reason_pattern_distribution_postgres.py
           tests/test_consensus_postgres.py
           tests/test_mvp_completion_postgres.py
           tools/check_contract_sync.py
@@ -70,6 +71,7 @@ jobs:
         with:
           name: mvp-api-normalized-source
           path: |
+            services/api/tests/test_community_reason_pattern_distribution_postgres.py
             services/api/tests/test_consensus_postgres.py
             services/api/tests/test_mvp_completion_postgres.py
             services/api/tools/check_contract_sync.py
@@ -79,6 +81,7 @@ jobs:
         working-directory: services/api
         run: >-
           git diff --exit-code --
+          tests/test_community_reason_pattern_distribution_postgres.py
           tests/test_consensus_postgres.py
           tests/test_mvp_completion_postgres.py
           tools/check_contract_sync.py
@@ -175,7 +178,11 @@ jobs:
         env:
           KEFE_DATABASE_URL: postgresql+psycopg://kefe:kefe@localhost:5432/kefe
           KEFE_RUN_POSTGRES_TESTS: '1'
-        run: pytest tests/test_mvp_completion_postgres.py tests/test_consensus_postgres.py
+        run: >-
+          pytest
+          tests/test_community_reason_pattern_distribution_postgres.py
+          tests/test_mvp_completion_postgres.py
+          tests/test_consensus_postgres.py
 
   mobile:
     runs-on: ubuntu-latest

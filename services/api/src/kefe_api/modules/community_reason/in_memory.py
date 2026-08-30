@@ -62,10 +62,13 @@ class InMemoryCommunityReasonRepository:
             if reason.case_version_id == case_version_id and reason.publicly_readable
         ]
         public.sort(key=lambda item: (item.created_at, str(item.id)), reverse=True)
-        tag_counts: Counter[str] = Counter()
+        tag_counts = Counter(
+            tag
+            for reason in public
+            for tag in set(reason.tags)
+        )
         rendered: list[PublicCommunityReason] = []
         for reason in public[:limit]:
-            tag_counts.update(set(reason.tags))
             reactions = Counter(
                 reaction.value
                 for (reason_id, _), reaction in self._reactions.items()

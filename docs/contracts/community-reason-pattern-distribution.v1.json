@@ -1,0 +1,75 @@
+{
+  "contract_version": "1.0.0",
+  "updated_at": "2026-08-30",
+  "status": "implementation_candidate",
+  "issue": 391,
+  "source_adr": "docs/adr/0140-bounded-community-reason-patterns.md",
+  "capabilities": ["CAP-032"],
+  "parent": {
+    "pull_request": 390,
+    "exact_head": "448379b3f6521e821192d6dbf322012b5a41493b"
+  },
+  "eligibility": {
+    "surface": "POST_COMMIT_COMMUNITY_REASONS",
+    "committed_actor_owned_session_required": true,
+    "case_version_binding": "EXACT_IMMUTABLE_CASE_VERSION",
+    "public_moderation_states": ["NOT_REQUIRED", "ALLOWED"],
+    "pending_or_blocked_counted": false,
+    "pre_commit_exposure": false
+  },
+  "aggregate": {
+    "population": "ALL_CURRENTLY_PUBLICLY_READABLE_REASONS_FOR_CASE_VERSION",
+    "sample_size_population_matches_counts": true,
+    "returned_items_window_independent": true,
+    "one_count_per_distinct_tag_per_contribution": true,
+    "multi_tag_non_exclusive": true,
+    "sum_may_exceed_sample_size": true,
+    "ordering": ["COUNT_DESC", "RAW_TAG_CODE_ASC"],
+    "database_migration_required": false,
+    "response_shape_changed": false
+  },
+  "transport_validation": {
+    "sample_size": "INTEGER_GTE_ZERO",
+    "tag_code": "NON_EMPTY_STRING",
+    "tag_count": "INTEGER_GT_ZERO_LTE_SAMPLE_SIZE",
+    "zero_sample_requires_empty_counts": true,
+    "malformed_response": "INVALID_COMMUNITY_REASON_RESPONSE"
+  },
+  "presentation": {
+    "owner": "COMMUNITY_REASON_SECTION",
+    "production_preview_shared": true,
+    "exact_count_and_sample_visible": true,
+    "determinate_bar": true,
+    "exclusive_percentage_or_pie": false,
+    "multi_tag_explanation_required": true,
+    "localized_languages": ["en", "tr"],
+    "light_dark_supported": true,
+    "compact_phone_supported": true,
+    "enlarged_text_supported": true,
+    "accessible_semantics": true,
+    "continuous_animation": false
+  },
+  "forbidden": [
+    "POPULARITY_RANKING",
+    "TRUTH_RANKING",
+    "IMPORTANCE_RANKING",
+    "QUALITY_RANKING",
+    "REPRESENTATIVENESS_CLAIM",
+    "RECOMMENDATION",
+    "AUTHOR_IDENTITY",
+    "DEMOGRAPHIC_BREAKDOWN",
+    "PERSONALITY_INFERENCE",
+    "IDEOLOGY_INFERENCE",
+    "PSYCHOMETRIC_INFERENCE",
+    "BIAS_INFERENCE",
+    "CAUSAL_INFERENCE",
+    "SIGNAL_ELIGIBILITY_CLAIM",
+    "IMPACT_CLAIM"
+  ],
+  "lifecycle": {
+    "cap_032_after_slice": "IMPLEMENTED_PARTIAL",
+    "human_usability_proven": false,
+    "editorial_methodology_acceptance_proven": false,
+    "production_release_proven": false
+  }
+}
