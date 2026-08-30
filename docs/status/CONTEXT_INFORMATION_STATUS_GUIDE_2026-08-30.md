@@ -3,7 +3,7 @@
 Status: IMPLEMENTATION CANDIDATE / EXACT-HEAD CI PENDING / NO CAPABILITY PROMOTION
 
 Issue: #395  
-Pull request: pending  
+Pull request: #396  
 Capabilities: CAP-069, CAP-070 (`IMPLEMENTED_PARTIAL`)  
 Stack base: PR #394 exact-green head
 `826f6efdf7cd3a07d980f95e2c53fe78b4ef99f6`

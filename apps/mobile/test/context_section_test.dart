@@ -133,10 +133,7 @@ void main() {
         find.byKey(const ValueKey('context-information-status-guide')),
         findsOneWidget,
       );
-      expect(
-        find.text('Bilgi durumları ne anlama geliyor?'),
-        findsOneWidget,
-      );
+      expect(find.text('Bilgi durumları ne anlama geliyor?'), findsOneWidget);
       expect(
         find.text(
           'Durum bilgi bloğuna aittir; bağlı kaynağı ayrıca doğrulamaz.',
@@ -160,9 +157,7 @@ void main() {
         );
       }
       expect(
-        find.text(
-          'Bu blok bir iddia sunar; doğrulanmış olarak işaretlenmez.',
-        ),
+        find.text('Bu blok bir iddia sunar; doğrulanmış olarak işaretlenmez.'),
         findsOneWidget,
       );
       expect(find.text('Ek bağlam.'), findsNothing);
@@ -174,7 +169,10 @@ void main() {
       await tester.tap(details);
       await tester.pumpAndSettle();
       expect(find.text('Ek bağlam.'), findsOneWidget);
-      expect(find.text('Bilinmiyor'), findsOneWidget);
+      expect(
+        find.descendant(of: details, matching: find.text('Bilinmiyor')),
+        findsOneWidget,
+      );
 
       final sources = find.byKey(const ValueKey('context-sources'));
       await tester.ensureVisible(sources);
@@ -191,9 +189,7 @@ void main() {
       );
       expect(find.text('Yayın tarihi: 2026-08-30'), findsOneWidget);
       expect(
-        find.byKey(
-          const ValueKey('context-source-published-source-1'),
-        ),
+        find.byKey(const ValueKey('context-source-published-source-1')),
         findsOneWidget,
       );
       expect(find.byIcon(Icons.verified_outlined), findsNothing);
@@ -279,70 +275,64 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets(
-    'status guide supports English dark theme and enlarged text',
-    (tester) async {
-      tester.platformDispatcher.localeTestValue = const Locale('en', 'US');
-      addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+  testWidgets('status guide supports English dark theme and enlarged text', (
+    tester,
+  ) async {
+    tester.platformDispatcher.localeTestValue = const Locale('en', 'US');
+    addTearDown(tester.platformDispatcher.clearLocaleTestValue);
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            decisionRepositoryProvider.overrideWithValue(
-              ContextFakeRepository(),
-            ),
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          decisionRepositoryProvider.overrideWithValue(ContextFakeRepository()),
+        ],
+        child: MaterialApp(
+          locale: const Locale('en', 'US'),
+          theme: ThemeData.dark(),
+          supportedLocales: KefeStrings.supportedLocales,
+          localizationsDelegates: const [
+            KefeStringsDelegate(),
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
           ],
-          child: MaterialApp(
-            locale: const Locale('en', 'US'),
-            theme: ThemeData.dark(),
-            supportedLocales: KefeStrings.supportedLocales,
-            localizationsDelegates: const [
-              KefeStringsDelegate(),
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            home: const MediaQuery(
-              data: MediaQueryData(
-                size: Size(320, 640),
-                textScaler: TextScaler.linear(1.6),
-              ),
-              child: Scaffold(
-                body: SingleChildScrollView(
-                  child: ContextSection(caseVersionId: caseVersionId),
-                ),
+          home: const MediaQuery(
+            data: MediaQueryData(
+              size: Size(320, 640),
+              textScaler: TextScaler.linear(1.6),
+            ),
+            child: Scaffold(
+              body: SingleChildScrollView(
+                child: ContextSection(caseVersionId: caseVersionId),
               ),
             ),
           ),
         ),
-      );
-      await tester.pumpAndSettle();
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(
-        find.text('What do these information states mean?'),
-        findsOneWidget,
-      );
-      expect(
-        find.text(
-          'A state belongs to the information block; it does not independently verify a linked source.',
-        ),
-        findsOneWidget,
-      );
-      final guide = find.byKey(
-        const ValueKey('context-information-status-guide'),
-      );
-      await tester.ensureVisible(guide);
-      await tester.tap(guide);
-      await tester.pumpAndSettle();
-      expect(
-        find.text(
-          'The current record does not establish a state for this information block.',
-        ),
-        findsOneWidget,
-      );
-      expect(tester.takeException(), isNull);
-    },
-  );
+    expect(find.text('What do these information states mean?'), findsOneWidget);
+    expect(
+      find.text(
+        'A state belongs to the information block; it does not independently verify a linked source.',
+      ),
+      findsOneWidget,
+    );
+    final guide = find.byKey(
+      const ValueKey('context-information-status-guide'),
+    );
+    await tester.ensureVisible(guide);
+    await tester.tap(guide);
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+        'The current record does not establish a state for this information block.',
+      ),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('source preview omits publication date when absent', (
     tester,
