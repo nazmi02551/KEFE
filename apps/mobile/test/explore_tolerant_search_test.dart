@@ -6,11 +6,10 @@ import 'package:kefe_mobile/features/explore/domain/explore_search.dart';
 
 void main() {
   test('contract keeps search local, ordered and non-personalized', () {
-    final file = File(
-      '../../docs/contracts/explore-tolerant-search.v1.json',
-    );
+    final file = File('../../docs/contracts/explore-tolerant-search.v1.json');
     expect(file.existsSync(), isTrue);
-    final contract = jsonDecode(file.readAsStringSync()) as Map<String, Object?>;
+    final contract =
+        jsonDecode(file.readAsStringSync()) as Map<String, Object?>;
     final scope = contract['scope']! as Map<String, Object?>;
     final matching = contract['matching']! as Map<String, Object?>;
 
