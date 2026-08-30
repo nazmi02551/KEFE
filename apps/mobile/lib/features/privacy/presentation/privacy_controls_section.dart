@@ -10,6 +10,7 @@ import '../../../core/design/kefe_visual_system.dart';
 import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../application/privacy_controller.dart';
+import '../application/privacy_export_summary.dart';
 
 class PrivacyControlsSection extends ConsumerWidget {
   const PrivacyControlsSection({super.key});
@@ -88,6 +89,7 @@ class PrivacyControlsSection extends ConsumerWidget {
                     ).convert(data);
                     await Clipboard.setData(ClipboardData(text: text));
                     if (!context.mounted) return;
+                    final summary = PrivacyExportSummary.tryParse(data);
                     showDialog<void>(
                       context: context,
                       builder: (dialogContext) => AlertDialog(
@@ -96,7 +98,56 @@ class PrivacyControlsSection extends ConsumerWidget {
                           color: visual.gold,
                         ),
                         title: Text(strings.privacyExportReady),
-                        content: Text(strings.privacyExportCopied),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (summary != null) ...[
+                              KefeSurface(
+                                key: const ValueKey(
+                                  'privacy-export-summary',
+                                ),
+                                tone: KefeSurfaceTone.sunken,
+                                padding: const EdgeInsets.all(14),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      strings.privacyExportSummaryTitle,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      key: const ValueKey(
+                                        'privacy-export-record-count',
+                                      ),
+                                      strings.privacyExportRecordCount(
+                                        summary.totalRecords,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      key: const ValueKey(
+                                        'privacy-export-group-count',
+                                      ),
+                                      strings.privacyExportGroupCount(
+                                        summary.nonEmptyDatasetCount,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                            ],
+                            Text(strings.privacyExportCopied),
+                          ],
+                        ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(dialogContext),
