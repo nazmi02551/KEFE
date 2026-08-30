@@ -52,6 +52,16 @@ class _CommunityReasonSectionState
     final visual = context.kefeVisual;
     final state = ref.watch(communityReasonControllerProvider);
     final controller = ref.read(communityReasonControllerProvider.notifier);
+    final snapshot = state.snapshot;
+    final patterns = <MapEntry<String, int>>[
+      if (snapshot != null && snapshot.sampleSize > 0)
+        ...snapshot.tagPatternCounts.entries.where(
+          (entry) => entry.value > 0 && entry.value <= snapshot.sampleSize,
+        ),
+    ]..sort((left, right) {
+      final countOrder = right.value.compareTo(left.value);
+      return countOrder != 0 ? countOrder : left.key.compareTo(right.key);
+    });
     final decision = ref.watch(decisionControllerProvider);
     final reasonPolicy = _reasonPolicy(decision);
     final tags = reasonPolicy.$1;
@@ -72,26 +82,11 @@ class _CommunityReasonSectionState
             text: strings.communityPrivateNote,
             accent: visual.rules,
           ),
-          if (state.snapshot != null &&
-              state.snapshot!.tagPatternCounts.isNotEmpty) ...[
+          if (patterns.isNotEmpty) ...[
             const SizedBox(height: 16),
-            KefeSurface(
-              tone: KefeSurfaceTone.sunken,
-              accent: visual.rules,
-              padding: const EdgeInsets.all(13),
-              borderRadius: 17,
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: state.snapshot!.tagPatternCounts.entries
-                    .map(
-                      (entry) => _PatternChip(
-                        label:
-                            '${strings.reasonTagLabel(entry.key)} · ${entry.value}',
-                      ),
-                    )
-                    .toList(growable: false),
-              ),
+            _CommunityPatternSummary(
+              patterns: patterns,
+              sampleSize: snapshot!.sampleSize,
             ),
           ],
           const SizedBox(height: 18),
@@ -341,6 +336,161 @@ class _CommunityHeader extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _CommunityPatternSummary extends StatelessWidget {
+  const _CommunityPatternSummary({
+    required this.patterns,
+    required this.sampleSize,
+  });
+
+  final List<MapEntry<String, int>> patterns;
+  final int sampleSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
+    return KefeSurface(
+      key: const ValueKey('community-reason-patterns'),
+      tone: KefeSurfaceTone.sunken,
+      accent: visual.rules,
+      padding: const EdgeInsets.all(15),
+      borderRadius: 19,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            strings.communityPatternsEyebrow,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: visual.rules,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.7,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            strings.communityPatternsTitle,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            strings.communityPatternsSample(sampleSize),
+            key: const ValueKey('community-reason-pattern-sample'),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: visual.mutedForeground,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 14),
+          for (final pattern in patterns) ...[
+            _CommunityPatternRow(
+              tag: pattern.key,
+              count: pattern.value,
+              sampleSize: sampleSize,
+            ),
+            if (pattern != patterns.last) const SizedBox(height: 12),
+          ],
+          const SizedBox(height: 14),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.info_outline_rounded, size: 18, color: visual.gold),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  strings.communityPatternsNote,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: visual.mutedForeground,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CommunityPatternRow extends StatelessWidget {
+  const _CommunityPatternRow({
+    required this.tag,
+    required this.count,
+    required this.sampleSize,
+  });
+
+  final String tag;
+  final int count;
+  final int sampleSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
+    final label = strings.reasonTagLabel(tag);
+    final ratio = (count / sampleSize).clamp(0.0, 1.0).toDouble();
+    return Semantics(
+      key: ValueKey('community-reason-pattern-$tag'),
+      container: true,
+      label: strings.communityPatternsSemantics(label, count, sampleSize),
+      child: ExcludeSemantics(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  strings.communityPatternsValue(count, sampleSize),
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: visual.mutedForeground,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 7),
+            Container(
+              height: 8,
+              decoration: BoxDecoration(
+                color: visual.rules.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(
+                  color: visual.rules.withValues(alpha: 0.18),
+                ),
+              ),
+              clipBehavior: Clip.antiAlias,
+              alignment: AlignmentDirectional.centerStart,
+              child: FractionallySizedBox(
+                widthFactor: ratio,
+                heightFactor: 1,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [visual.rules, visual.empathy],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

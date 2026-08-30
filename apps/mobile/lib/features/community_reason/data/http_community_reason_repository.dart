@@ -68,11 +68,11 @@ class HttpCommunityReasonRepository implements CommunityReasonRepository {
           ),
         )
         .toList(growable: false);
+    final (sampleSize, tagPatternCounts) = _patternAggregate(body);
     return CommunityReasonSnapshot(
       items: items,
-      tagPatternCounts: (body['tag_pattern_counts'] as Map<String, Object?>)
-          .map((key, value) => MapEntry(key, value as int)),
-      sampleSize: body['sample_size'] as int,
+      tagPatternCounts: tagPatternCounts,
+      sampleSize: sampleSize,
       methodologyNote: body['methodology_note'] as String,
     );
   }
@@ -136,5 +136,36 @@ class HttpCommunityReasonRepository implements CommunityReasonRepository {
       decoded['code'] as String? ?? 'UNKNOWN_API_ERROR',
       response.statusCode,
     );
+  }
+
+  (int, Map<String, int>) _patternAggregate(Map<String, Object?> body) {
+    final sampleSize = body['sample_size'];
+    final rawCounts = body['tag_pattern_counts'];
+    if (sampleSize is! int ||
+        sampleSize < 0 ||
+        rawCounts is! Map<String, Object?>) {
+      throw const ClientTransportFailure(
+        code: 'INVALID_COMMUNITY_REASON_RESPONSE',
+      );
+    }
+    final counts = <String, int>{};
+    for (final entry in rawCounts.entries) {
+      final count = entry.value;
+      if (entry.key.trim().isEmpty ||
+          count is! int ||
+          count <= 0 ||
+          count > sampleSize) {
+        throw const ClientTransportFailure(
+          code: 'INVALID_COMMUNITY_REASON_RESPONSE',
+        );
+      }
+      counts[entry.key] = count;
+    }
+    if (sampleSize == 0 && counts.isNotEmpty) {
+      throw const ClientTransportFailure(
+        code: 'INVALID_COMMUNITY_REASON_RESPONSE',
+      );
+    }
+    return (sampleSize, Map.unmodifiable(counts));
   }
 }

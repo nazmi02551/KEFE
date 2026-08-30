@@ -172,7 +172,7 @@
             "type": "array"
           },
           "methodology_note": {
-            "default": "Descriptive post-Commit Community Reasons; reactions do not rank truth or Signal eligibility.",
+            "default": "Descriptive post-Commit patterns across all currently readable contributions; tags are non-exclusive and do not rank truth or Signal eligibility.",
             "title": "Methodology Note",
             "type": "string"
           },
