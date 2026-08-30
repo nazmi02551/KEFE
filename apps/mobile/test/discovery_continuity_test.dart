@@ -59,6 +59,20 @@ void main() {
 
     await tester.enterText(
       find.byKey(const ValueKey('explore-search-field')),
+      'kamusal yasam seffaflik',
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(
+        const ValueKey('explore-case-11111111-1111-4111-8111-111111111114'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('1 vaka bulundu'), findsOneWidget);
+
+    await tester.enterText(
+      find.byKey(const ValueKey('explore-search-field')),
       'son koltuk',
     );
     await tester.pumpAndSettle();

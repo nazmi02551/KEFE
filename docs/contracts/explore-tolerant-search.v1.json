@@ -1,0 +1,62 @@
+{
+  "contract_id": "KEFE-EXPLORE-TOLERANT-SEARCH-001",
+  "version": "1.0.0",
+  "capability": "CAP-078",
+  "scope": {
+    "catalog": "CURRENTLY_FETCHED_CANONICAL_EXPLORE_ITEMS",
+    "execution": "ON_DEVICE_EPHEMERAL",
+    "preserve_catalog_order": true,
+    "remote_search": false,
+    "persistence": false,
+    "analytics_event": false
+  },
+  "normalization": {
+    "case_insensitive": true,
+    "character_map": {
+      "I|İ|ı|i": "i",
+      "Ç|ç": "c",
+      "Ğ|ğ": "g",
+      "Ö|ö": "o",
+      "Ş|ş": "s",
+      "Ü|ü": "u",
+      "U+0307": ""
+    },
+    "trim_whitespace": true,
+    "collapse_whitespace": true,
+    "fuzzy_distance": false,
+    "stemming": false,
+    "synonyms": false
+  },
+  "matching": {
+    "token_operator": "AND",
+    "fields": ["title", "summary", "localized_domain_label"],
+    "domain_filter": "EXACT_AND_CONJUNCTIVE",
+    "saved_filter": "DEVICE_LOCAL_AND_CONJUNCTIVE",
+    "ranking": false,
+    "recommendation": false,
+    "personalization": false
+  },
+  "accessibility": {
+    "localized_result_count_visible": true,
+    "result_count_live_region": true,
+    "zero_results_announced": true,
+    "locales": ["tr", "en"],
+    "themes": ["light", "dark"],
+    "enlarged_text_required": true,
+    "reduce_motion_preserved": true
+  },
+  "compatibility": {
+    "api_changed": false,
+    "openapi_changed": false,
+    "database_migration": false,
+    "preview_production_fallback": false
+  },
+  "forbidden_claims": [
+    "popularity",
+    "trending",
+    "relevance_score",
+    "recommendation",
+    "behavioral_profile",
+    "user_inference"
+  ]
+}

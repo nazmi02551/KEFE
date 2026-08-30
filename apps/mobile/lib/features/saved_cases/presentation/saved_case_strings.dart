@@ -30,4 +30,7 @@ extension SavedCaseStrings on KefeStrings {
   String get exploreClearFilters => _savedCaseText('explore.clear_filters');
   String get exploreNoResults => _savedCaseText('explore.no_results');
   String get exploreDiscoveryLabel => _savedCaseText('explore.discovery_label');
+  String exploreResultCount(int count) => _savedCaseText(
+    count == 1 ? 'explore.result_count.one' : 'explore.result_count.many',
+  ).replaceAll('{count}', '$count');
 }
