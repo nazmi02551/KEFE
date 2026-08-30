@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from collections import Counter
 from datetime import datetime
 from types import MappingProxyType
 from uuid import UUID
@@ -154,6 +153,24 @@ class PostgresCommunityReasonRepository:
                 ),
                 {"case_version_id": case_version_id},
             ).scalar_one()
+            tag_rows = (
+                connection.execute(
+                    text(
+                        """
+                    SELECT tag.value AS tag_code, count(DISTINCT r.id) AS count
+                    FROM community.reason r
+                    CROSS JOIN LATERAL jsonb_array_elements_text(r.tags) AS tag(value)
+                    WHERE r.case_version_id = :case_version_id
+                      AND r.moderation_state IN ('NOT_REQUIRED','ALLOWED')
+                    GROUP BY tag.value
+                    ORDER BY tag.value ASC
+                    """
+                    ),
+                    {"case_version_id": case_version_id},
+                )
+                .mappings()
+                .all()
+            )
             reaction_rows = (
                 connection.execute(
                     text(
@@ -175,11 +192,10 @@ class PostgresCommunityReasonRepository:
         reactions: dict[UUID, dict[str, int]] = {}
         for row in reaction_rows:
             reactions.setdefault(row["reason_id"], {})[row["reaction_code"]] = int(row["count"])
-        tag_counts: Counter[str] = Counter()
+        tag_counts = {row["tag_code"]: int(row["count"]) for row in tag_rows}
         items: list[PublicCommunityReason] = []
         for row in rows:
             tags = tuple(row["tags"])
-            tag_counts.update(set(tags))
             items.append(
                 PublicCommunityReason(
                     id=row["id"],
@@ -191,7 +207,7 @@ class PostgresCommunityReasonRepository:
             )
         return CommunityReasonSnapshot(
             reasons=tuple(items),
-            tag_pattern_counts=MappingProxyType(dict(tag_counts)),
+            tag_pattern_counts=MappingProxyType(tag_counts),
             sample_size=int(total),
         )
 
