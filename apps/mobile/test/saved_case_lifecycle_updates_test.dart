@@ -38,10 +38,7 @@ void main() {
       contract['detection']['updated_when'],
       'EXACT_CASE_ID_MATCH_AND_CASE_VERSION_ID_DIFFERS',
     );
-    expect(
-      contract['detection']['catalog_failure'],
-      'UNKNOWN_NO_UPDATE_CLAIM',
-    );
+    expect(contract['detection']['catalog_failure'], 'UNKNOWN_NO_UPDATE_CLAIM');
     expect(contract['acknowledgement']['trigger'], 'OPEN_UPDATED_CASE');
     expect(contract['persistence']['format_change'], isFalse);
     expect(contract['persistence']['migration_required'], isFalse);
@@ -95,9 +92,7 @@ void main() {
     );
     expect(
       find.byKey(
-        const ValueKey(
-          'saved-case-update-${PreviewDecisionRepository.caseId}',
-        ),
+        const ValueKey('saved-case-update-${PreviewDecisionRepository.caseId}'),
       ),
       findsOneWidget,
     );
@@ -105,9 +100,7 @@ void main() {
     expect(find.text('Güncel vakayı aç'), findsOneWidget);
 
     final open = find.byKey(
-      const ValueKey(
-        'open-saved-case-${PreviewDecisionRepository.caseId}',
-      ),
+      const ValueKey('open-saved-case-${PreviewDecisionRepository.caseId}'),
     );
     await tester.ensureVisible(open);
     await tester.tap(open);
@@ -171,9 +164,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final marker = find.byKey(
-      const ValueKey(
-        'saved-case-update-${PreviewDecisionRepository.caseId}',
-      ),
+      const ValueKey('saved-case-update-${PreviewDecisionRepository.caseId}'),
     );
     await tester.ensureVisible(marker);
     expect(marker, findsOneWidget);
@@ -199,20 +190,14 @@ Future<void> _pump(
         builder: (_, _) => const Scaffold(
           body: SingleChildScrollView(
             padding: EdgeInsets.all(16),
-            child: SavedCasesSection(
-              visible: true,
-              lifecycleUpdates: true,
-            ),
+            child: SavedCasesSection(visible: true, lifecycleUpdates: true),
           ),
         ),
       ),
       GoRoute(
         path: '/case/:caseId',
         builder: (_, _) => const Scaffold(
-          body: Text(
-            'opened',
-            key: ValueKey('opened-current-saved-case'),
-          ),
+          body: Text('opened', key: ValueKey('opened-current-saved-case')),
         ),
       ),
     ],

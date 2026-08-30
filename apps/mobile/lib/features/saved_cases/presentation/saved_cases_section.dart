@@ -41,7 +41,9 @@ class _SavedCasesSectionState extends ConsumerState<SavedCasesSection> {
     super.didUpdateWidget(oldWidget);
     final becameVisible = !oldWidget.visible && widget.visible;
     final enabledUpdates =
-        !oldWidget.lifecycleUpdates && widget.lifecycleUpdates && widget.visible;
+        !oldWidget.lifecycleUpdates &&
+        widget.lifecycleUpdates &&
+        widget.visible;
     if (becameVisible || enabledUpdates) {
       Future.microtask(_load);
     }
