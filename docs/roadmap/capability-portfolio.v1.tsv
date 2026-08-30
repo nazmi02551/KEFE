@@ -67,8 +67,8 @@ CAP-065	editorial-quality-gate	Editorial quality and risk review	CONTENT_ADMIN	I
 CAP-066	moderation-ops	Reason/content moderation operations	CONTENT_ADMIN	ROADMAP_ACCEPTED	Phase 2	P0	KEFE-ADM-001|KEFE-SEC-001			canonical	
 CAP-067	verified-expert-contribution	Verified scoped expert contribution	CONTENT_ADMIN	ROADMAP_ACCEPTED	Phase 3	P1	KEFE-ADM-001|KEFE-TIM-001			canonical	
 CAP-068	case-objection	Vaka itiraz / challenge mechanism	CONTENT_ADMIN	PROPOSAL_REVIEW	Phase 3	P1	KEFE-ADM-001|KEFE-ETG-001|KEFE-TIM-001			conversation_proposal	
-CAP-069	source-micro-preview	Source micro-preview	TRUST	IMPLEMENTED_PARTIAL	Phase 2	P1	KEFE-ETG-001|KEFE-DS-001			canonical	
-CAP-070	consumer-information-status	Consumer information-status badges	TRUST	IMPLEMENTED_PARTIAL	Phase 2	P0	KEFE-TIM-001|KEFE-DS-001			canonical	
+CAP-069	source-micro-preview	Source micro-preview	TRUST	IMPLEMENTED_PARTIAL	Phase 2	P1	KEFE-ETG-001|KEFE-DS-001		ADR-0130|ADR-0142 candidate	canonical	exact-head CI and human review
+CAP-070	consumer-information-status	Consumer information-status badges	TRUST	IMPLEMENTED_PARTIAL	Phase 2	P0	KEFE-TIM-001|KEFE-DS-001		ADR-0130|ADR-0142 candidate	canonical	exact-head CI and human review
 CAP-071	source-diversity-indicator	Source Diversity Indicator	TRUST	PROPOSAL_REVIEW	Phase 3	P1	KEFE-TIM-001|KEFE-ETG-001			conversation_proposal	
 CAP-072	correction-history	Case/source correction and version history	TRUST	ROADMAP_ACCEPTED	Phase 2	P1	KEFE-ETG-001|KEFE-ADM-001			canonical	
 CAP-073	bot-anomaly-integrity	Bot, anomaly and coordinated manipulation detection	TRUST	IMPLEMENTED_PARTIAL	Phase 2	P0	KEFE-TIM-001|KEFE-SEC-001			canonical	
