@@ -25,6 +25,8 @@ abstract final class SavedCaseStringCatalog {
       'explore.clear_filters': 'Clear filters',
       'explore.no_results': 'No Cases match this search and filter.',
       'explore.discovery_label': 'Discover Cases',
+      'explore.result_count.one': '{count} Case found',
+      'explore.result_count.many': '{count} Cases found',
     },
     'tr': {
       'saved.title': 'Kaydettiklerin',
@@ -49,6 +51,8 @@ abstract final class SavedCaseStringCatalog {
       'explore.clear_filters': 'Filtreleri temizle',
       'explore.no_results': 'Bu arama ve filtrelerle eşleşen vaka yok.',
       'explore.discovery_label': 'Vakaları keşfet',
+      'explore.result_count.one': '{count} vaka bulundu',
+      'explore.result_count.many': '{count} vaka bulundu',
     },
   };
 }

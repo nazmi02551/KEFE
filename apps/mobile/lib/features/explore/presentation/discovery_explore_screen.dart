@@ -12,6 +12,7 @@ import '../../media_presentation/presentation/case_media_surface.dart';
 import '../../saved_cases/application/saved_cases_controller.dart';
 import '../../saved_cases/presentation/saved_case_strings.dart';
 import '../application/explore_controller.dart';
+import '../domain/explore_search.dart';
 
 class DiscoveryExploreScreen extends ConsumerStatefulWidget {
   const DiscoveryExploreScreen({this.embedded = false, super.key});
@@ -54,6 +55,7 @@ class _DiscoveryExploreScreenState
     final filtered = _filter(
       explore.items,
       saved.items.map((item) => item.caseId).toSet(),
+      strings,
     );
     final domains = explore.items.map((item) => item.domain).toSet().toList()
       ..sort();
@@ -92,6 +94,8 @@ class _DiscoveryExploreScreenState
                         setState(() => _savedOnly = value),
                     onClear: _clearFilters,
                   ),
+                  const SizedBox(height: 12),
+                  _ExploreResultStatus(count: filtered.length),
                   const SizedBox(height: 20),
                   if (explore.items.isEmpty)
                     _ExploreEmpty(message: strings.exploreMoreComing)
@@ -135,19 +139,49 @@ class _DiscoveryExploreScreenState
   List<DecisionCaseSummary> _filter(
     List<DecisionCaseSummary> items,
     Set<String> savedIds,
+    KefeStrings strings,
   ) {
-    final query = _queryController.text.trim().toLowerCase();
     return items
         .where((item) {
-          final matchesQuery =
-              query.isEmpty ||
-              item.title.toLowerCase().contains(query) ||
-              item.summary.toLowerCase().contains(query);
+          final matchesQuery = matchesExploreSearchQuery(
+            query: _queryController.text,
+            fields: [
+              item.title,
+              item.summary,
+              strings.domainLabel(item.domain),
+            ],
+          );
           final matchesDomain = _domain == null || item.domain == _domain;
           final matchesSaved = !_savedOnly || savedIds.contains(item.id);
           return matchesQuery && matchesDomain && matchesSaved;
         })
         .toList(growable: false);
+  }
+}
+
+class _ExploreResultStatus extends StatelessWidget {
+  const _ExploreResultStatus({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = KefeStrings.of(context).exploreResultCount(count);
+    final visual = context.kefeVisual;
+    return Semantics(
+      key: const ValueKey('explore-result-status'),
+      liveRegion: true,
+      label: label,
+      child: ExcludeSemantics(
+        child: Text(
+          label,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: visual.mutedForeground,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
   }
 }
 
