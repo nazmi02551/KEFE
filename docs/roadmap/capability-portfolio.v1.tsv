@@ -76,7 +76,7 @@ CAP-074	open-methodology-page	Open methodology page per result/Signal	TRUST	PROP
 CAP-075	case-quality-checklist	Case quality checklist instead of magic score	TRUST	PROPOSAL_REVIEW	Phase 2	P1	KEFE-CQB-001|KEFE-ADM-001			conversation_proposal	
 CAP-076	radar-live	Live Radar	CONSUMER_GROWTH	IMPLEMENTED_PARTIAL	Phase 3	P1	KEFE-PB-001|KEFE-AED-001			canonical	
 CAP-077	user-controlled-discovery	User-controlled discovery profile	CONSUMER_GROWTH	PROPOSAL_REVIEW	Phase 3	P1	KEFE-PB-001|KEFE-SEC-001			conversation_proposal	
-CAP-078	search-filter	Search and filtering	CONSUMER_GROWTH	ROADMAP_ACCEPTED	Phase 2	P1	KEFE-PB-001|KEFE-DS-001			canonical	
+CAP-078	search-filter	Search and filtering	CONSUMER_GROWTH	ROADMAP_ACCEPTED	Phase 2	P1	KEFE-PB-001|KEFE-DS-001		ADR-0141|Issue #393 candidate	canonical	Exact-head review; remote search, ranking and personalization remain separate
 CAP-079	saved-follow-notifications	Save/follow and case lifecycle notifications	CONSUMER_GROWTH	IMPLEMENTED_PARTIAL	Phase 2	P1	KEFE-PB-001|KEFE-CGD-001		ADR-0034|ADR-0066|ADR-0139|PR #390 candidate	canonical	Exact-head review; server sync and push remain separate
 CAP-080	my-kefe	My KEFE descriptive history	CONSUMER_GROWTH	IMPLEMENTED_VERIFIED	Phase 1	P0	KEFE-PB-001|KEFE-DGS-001		Slice 26 / PR #160|Slice 27 / PR #163|Slice 30 runtime e41cea5fc7bccb4bbe085b48cd15ea5a2fead082	canonical	
 CAP-081	kefe-chronicle	KEFE Chronicle	CONSUMER_GROWTH	ROADMAP_HIGH	Phase 4	P1	KEFE-PB-001|KEFE-DGS-001			canonical	
