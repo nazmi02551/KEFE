@@ -77,6 +77,20 @@ extension InternalAlphaStrings on KefeStrings {
   String get privacyBody => _iaText('privacy.body');
   String get privacyExportReady => _iaText('privacy.export_ready');
   String get privacyExportCopied => _iaText('privacy.export_copied');
+  String get privacyExportSummaryTitle =>
+      _iaText('privacy.export_summary_title');
+  String privacyExportRecordCount(int count) => _iaText(
+    count == 1
+        ? 'privacy.export_record_count.one'
+        : 'privacy.export_record_count.many',
+    placeholders: {'count': count},
+  );
+  String privacyExportGroupCount(int count) => _iaText(
+    count == 1
+        ? 'privacy.export_group_count.one'
+        : 'privacy.export_group_count.many',
+    placeholders: {'count': count},
+  );
   String get privacyDone => _iaText('privacy.done');
   String get privacyExport => _iaText('privacy.export');
   String get privacyDelete => _iaText('privacy.delete');

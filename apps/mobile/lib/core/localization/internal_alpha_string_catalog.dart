@@ -58,6 +58,11 @@ abstract final class InternalAlphaStringCatalog {
       'privacy.export_ready': 'Your data copy is ready',
       'privacy.export_copied':
           'Machine-readable JSON was copied to the clipboard. Security tokens and other users’ data are excluded.',
+      'privacy.export_summary_title': 'Included in this copy',
+      'privacy.export_record_count.one': '{count} record included',
+      'privacy.export_record_count.many': '{count} records included',
+      'privacy.export_group_count.one': '1 data group contains records',
+      'privacy.export_group_count.many': '{count} data groups contain records',
       'privacy.done': 'Done',
       'privacy.export': 'Export my data',
       'privacy.delete': 'Delete my data',
@@ -229,6 +234,11 @@ abstract final class InternalAlphaStringCatalog {
       'privacy.export_ready': 'Veri kopyan hazır',
       'privacy.export_copied':
           'Makine-okunur JSON panoya kopyalandı. Güvenlik tokenları ve başka kullanıcıların verileri bu dışa aktarıma dahil değildir.',
+      'privacy.export_summary_title': 'Bu kopyaya dahil olanlar',
+      'privacy.export_record_count.one': '{count} kayıt dahil',
+      'privacy.export_record_count.many': '{count} kayıt dahil',
+      'privacy.export_group_count.one': '1 veri grubunda kayıt var',
+      'privacy.export_group_count.many': '{count} veri grubunda kayıt var',
       'privacy.done': 'Tamam',
       'privacy.export': 'Verilerimi dışa aktar',
       'privacy.delete': 'Verilerimi sil',
