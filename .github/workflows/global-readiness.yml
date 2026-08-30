@@ -92,7 +92,12 @@ jobs:
           python -m kefe_api.infrastructure.seed_context_demo
           python -m kefe_api.infrastructure.seed_beta_catalog
       - name: Existing PostgreSQL MVP regression
-        run: pytest -q tests/test_mvp_completion_postgres.py tests/test_progress_postgres.py tests/test_consensus_postgres.py
+        run: >-
+          pytest -q
+          tests/test_community_reason_pattern_distribution_postgres.py
+          tests/test_mvp_completion_postgres.py
+          tests/test_progress_postgres.py
+          tests/test_consensus_postgres.py
 
   phone-candidate:
     runs-on: ubuntu-latest

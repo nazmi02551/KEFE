@@ -53,15 +53,16 @@ class _CommunityReasonSectionState
     final state = ref.watch(communityReasonControllerProvider);
     final controller = ref.read(communityReasonControllerProvider.notifier);
     final snapshot = state.snapshot;
-    final patterns = <MapEntry<String, int>>[
-      if (snapshot != null && snapshot.sampleSize > 0)
-        ...snapshot.tagPatternCounts.entries.where(
-          (entry) => entry.value > 0 && entry.value <= snapshot.sampleSize,
-        ),
-    ]..sort((left, right) {
-      final countOrder = right.value.compareTo(left.value);
-      return countOrder != 0 ? countOrder : left.key.compareTo(right.key);
-    });
+    final patterns =
+        <MapEntry<String, int>>[
+          if (snapshot != null && snapshot.sampleSize > 0)
+            ...snapshot.tagPatternCounts.entries.where(
+              (entry) => entry.value > 0 && entry.value <= snapshot.sampleSize,
+            ),
+        ]..sort((left, right) {
+          final countOrder = right.value.compareTo(left.value);
+          return countOrder != 0 ? countOrder : left.key.compareTo(right.key);
+        });
     final decision = ref.watch(decisionControllerProvider);
     final reasonPolicy = _reasonPolicy(decision);
     final tags = reasonPolicy.$1;
@@ -448,9 +449,9 @@ class _CommunityPatternRow extends StatelessWidget {
                 Expanded(
                   child: Text(
                     label,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -470,9 +471,7 @@ class _CommunityPatternRow extends StatelessWidget {
               decoration: BoxDecoration(
                 color: visual.rules.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(
-                  color: visual.rules.withValues(alpha: 0.18),
-                ),
+                border: Border.all(color: visual.rules.withValues(alpha: 0.18)),
               ),
               clipBehavior: Clip.antiAlias,
               alignment: AlignmentDirectional.centerStart,

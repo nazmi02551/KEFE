@@ -119,10 +119,8 @@ extension InternalAlphaStrings on KefeStrings {
       _iaText('community.unavailable', placeholders: {'code': code});
   String get communityPatternsEyebrow => _iaText('community.patterns_eyebrow');
   String get communityPatternsTitle => _iaText('community.patterns_title');
-  String communityPatternsSample(int count) => _iaText(
-    'community.patterns_sample',
-    placeholders: {'count': count},
-  );
+  String communityPatternsSample(int count) =>
+      _iaText('community.patterns_sample', placeholders: {'count': count});
   String communityPatternsValue(int count, int sample) => _iaText(
     'community.patterns_value',
     placeholders: {'count': count, 'sample': sample},

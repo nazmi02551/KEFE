@@ -19,11 +19,7 @@ import 'package:kefe_mobile/features/decision/data/http_decision_repository.dart
 
 const _validBody = <String, Object?>{
   'items': <Object?>[],
-  'tag_pattern_counts': <String, Object?>{
-    'RULES': 2,
-    'NEED': 3,
-    'FAIRNESS': 3,
-  },
+  'tag_pattern_counts': <String, Object?>{'RULES': 2, 'NEED': 3, 'FAIRNESS': 3},
   'sample_size': 5,
   'methodology_note': 'Descriptive post-Commit Community Reasons.',
 };
@@ -34,7 +30,8 @@ void main() {
       '../../docs/contracts/community-reason-pattern-distribution.v1.json',
     );
     expect(file.existsSync(), isTrue);
-    final contract = jsonDecode(file.readAsStringSync()) as Map<String, Object?>;
+    final contract =
+        jsonDecode(file.readAsStringSync()) as Map<String, Object?>;
     final eligibility = contract['eligibility']! as Map<String, Object?>;
     final aggregate = contract['aggregate']! as Map<String, Object?>;
     final presentation = contract['presentation']! as Map<String, Object?>;
@@ -51,18 +48,17 @@ void main() {
     expect(forbidden, containsAll(['TRUTH_RANKING', 'IDEOLOGY_INFERENCE']));
   });
 
-  test('HTTP parser accepts internally consistent pattern aggregates', () async {
-    final repository = await _httpRepository(_validBody);
+  test(
+    'HTTP parser accepts internally consistent pattern aggregates',
+    () async {
+      final repository = await _httpRepository(_validBody);
 
-    final snapshot = await repository.fetch('session-1');
+      final snapshot = await repository.fetch('session-1');
 
-    expect(snapshot.sampleSize, 5);
-    expect(snapshot.tagPatternCounts, {
-      'RULES': 2,
-      'NEED': 3,
-      'FAIRNESS': 3,
-    });
-  });
+      expect(snapshot.sampleSize, 5);
+      expect(snapshot.tagPatternCounts, {'RULES': 2, 'NEED': 3, 'FAIRNESS': 3});
+    },
+  );
 
   for (final invalid in <Map<String, Object?>>[
     {..._validBody, 'sample_size': -1},
@@ -104,7 +100,6 @@ void main() {
       'pattern summary is ordered and accessible in ${configuration.locale.languageCode}',
       (tester) async {
         final semantics = tester.ensureSemantics();
-        addTearDown(semantics.dispose);
         await _pumpSummary(
           tester,
           locale: configuration.locale,
@@ -129,8 +124,14 @@ void main() {
         expect(fairness, findsOneWidget);
         expect(need, findsOneWidget);
         expect(rules, findsOneWidget);
-        expect(tester.getTopLeft(fairness).dy, lessThan(tester.getTopLeft(need).dy));
-        expect(tester.getTopLeft(need).dy, lessThan(tester.getTopLeft(rules).dy));
+        expect(
+          tester.getTopLeft(fairness).dy,
+          lessThan(tester.getTopLeft(need).dy),
+        );
+        expect(
+          tester.getTopLeft(need).dy,
+          lessThan(tester.getTopLeft(rules).dy),
+        );
         expect(find.text('3 / 5'), findsNWidgets(2));
         expect(find.text('2 / 5'), findsOneWidget);
         expect(
@@ -140,6 +141,7 @@ void main() {
               : contains('3 of 5 published reasons'),
         );
         expect(tester.takeException(), isNull);
+        semantics.dispose();
       },
     );
   }
@@ -237,7 +239,10 @@ class _PatternRepository implements CommunityReasonRepository {
   }) async => throw UnimplementedError();
 
   @override
-  Future<void> react({required String reasonId, required String reaction}) async {
+  Future<void> react({
+    required String reasonId,
+    required String reaction,
+  }) async {
     throw UnimplementedError();
   }
 
