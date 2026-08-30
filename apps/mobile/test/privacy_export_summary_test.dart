@@ -83,8 +83,9 @@ void main() {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(SystemChannels.platform, (call) async {
               if (call.method == 'Clipboard.setData') {
-                clipboardText = (call.arguments as Map<Object?, Object?>)['text']
-                    as String?;
+                clipboardText =
+                    (call.arguments as Map<Object?, Object?>)['text']
+                        as String?;
               }
               return null;
             });
@@ -94,11 +95,7 @@ void main() {
               .defaultBinaryMessenger
               .setMockMethodCallHandler(SystemChannels.platform, null),
         );
-        await _pumpPrivacy(
-          tester,
-          locale: locale,
-          export: validExport(),
-        );
+        await _pumpPrivacy(tester, locale: locale, export: validExport());
 
         await tester.tap(find.byKey(const ValueKey('privacy-export')));
         await tester.pumpAndSettle();
@@ -138,7 +135,8 @@ void main() {
           findsNothing,
         );
         expect(clipboardText, isNotNull);
-        final clipboardJson = jsonDecode(clipboardText!) as Map<String, Object?>;
+        final clipboardJson =
+            jsonDecode(clipboardText!) as Map<String, Object?>;
         expect(clipboardJson['actor_id'], actorId);
         expect(clipboardJson['product_data'], isNotNull);
       },
@@ -149,11 +147,12 @@ void main() {
     tester,
   ) async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform, (call) async => null);
+        .setMockMethodCallHandler(
+          SystemChannels.platform,
+          (call) async => null,
+        );
     addTearDown(
-      () => TestDefaultBinaryMessengerBinding
-          .instance
-          .defaultBinaryMessenger
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(SystemChannels.platform, null),
     );
     final export = validExport();
@@ -168,20 +167,19 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('privacy-export')));
     await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(const ValueKey('privacy-export-summary')),
-      findsNothing,
-    );
+    expect(find.byKey(const ValueKey('privacy-export-summary')), findsNothing);
     expect(find.text('Your data copy is ready'), findsOneWidget);
     expect(find.textContaining('copied to the clipboard'), findsOneWidget);
   });
 
   test('repository contract keeps the presentation and isolation boundary', () {
-    final contract = jsonDecode(
-      File(
-        '../../docs/contracts/privacy-safe-mobile-export-summary.v1.json',
-      ).readAsStringSync(),
-    ) as Map<String, Object?>;
+    final contract =
+        jsonDecode(
+              File(
+                '../../docs/contracts/privacy-safe-mobile-export-summary.v1.json',
+              ).readAsStringSync(),
+            )
+            as Map<String, Object?>;
     final presentation = contract['presentation']! as Map<String, Object?>;
     final isolation = contract['isolation']! as Map<String, Object?>;
     final source = File(

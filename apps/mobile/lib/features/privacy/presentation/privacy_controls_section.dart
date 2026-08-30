@@ -104,14 +104,11 @@ class PrivacyControlsSection extends ConsumerWidget {
                           children: [
                             if (summary != null) ...[
                               KefeSurface(
-                                key: const ValueKey(
-                                  'privacy-export-summary',
-                                ),
+                                key: const ValueKey('privacy-export-summary'),
                                 tone: KefeSurfaceTone.sunken,
                                 padding: const EdgeInsets.all(14),
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       strings.privacyExportSummaryTitle,

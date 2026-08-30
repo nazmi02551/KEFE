@@ -27,10 +27,7 @@ class PrivacyExportSummary {
     for (final entry in rawCounts.entries) {
       final key = entry.key;
       final count = entry.value;
-      if (key is! String ||
-          key.trim().isEmpty ||
-          count is! int ||
-          count < 0) {
+      if (key is! String || key.trim().isEmpty || count is! int || count < 0) {
         return null;
       }
       counts[key] = count;

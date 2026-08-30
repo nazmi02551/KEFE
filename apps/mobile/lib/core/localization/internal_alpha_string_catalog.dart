@@ -62,8 +62,7 @@ abstract final class InternalAlphaStringCatalog {
       'privacy.export_record_count.one': '{count} record included',
       'privacy.export_record_count.many': '{count} records included',
       'privacy.export_group_count.one': '1 data group contains records',
-      'privacy.export_group_count.many':
-          '{count} data groups contain records',
+      'privacy.export_group_count.many': '{count} data groups contain records',
       'privacy.done': 'Done',
       'privacy.export': 'Export my data',
       'privacy.delete': 'Delete my data',
