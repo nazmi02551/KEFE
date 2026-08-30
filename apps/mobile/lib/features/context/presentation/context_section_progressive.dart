@@ -178,7 +178,9 @@ class _ProgressiveContextContentState
                 ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 6),
+          const _InformationStatusGuide(),
+          const SizedBox(height: 10),
         ],
         for (final block in widget.snapshot.essentialBlocks) ...[
           _ContextBlockTile(

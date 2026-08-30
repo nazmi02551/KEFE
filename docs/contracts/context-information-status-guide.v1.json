@@ -1,0 +1,60 @@
+{
+  "contract_id": "KEFE-CONTEXT-INFORMATION-STATUS-GUIDE-001",
+  "version": "1.0.0",
+  "status": "CANDIDATE",
+  "issue": 395,
+  "capabilities": ["CAP-069", "CAP-070"],
+  "parent_exact_head": "826f6efdf7cd3a07d980f95e2c53fe78b4ef99f6",
+  "information_status": {
+    "scope": "CONTEXT_BLOCK",
+    "values": ["VERIFIED", "CLAIMED", "DISPUTED", "UNKNOWN"],
+    "guide_collapsed_by_default": true,
+    "all_values_explained": true,
+    "linked_source_status_inferred": false,
+    "truth_score_added": false,
+    "confidence_score_added": false,
+    "editorial_methodology_changed": false
+  },
+  "source_preview": {
+    "published_at_rendered_when_present": true,
+    "published_at_omitted_when_absent": true,
+    "published_at_is_provenance_only": true,
+    "publisher_is_verification_signal": false,
+    "source_kind_is_verification_signal": false,
+    "url_host_is_verification_signal": false,
+    "external_url_launch_added": false
+  },
+  "presentation": {
+    "shared_guide_required": true,
+    "legacy_and_progressive_share_guide": true,
+    "shared_source_tile_preserved": true,
+    "locales": ["tr", "en"],
+    "themes": ["light", "dark"],
+    "compact_phone_required": true,
+    "enlarged_text_required": true,
+    "color_only_status_forbidden": true,
+    "stable_semantics_required": true
+  },
+  "architecture": {
+    "api_changed": false,
+    "openapi_changed": false,
+    "database_changed": false,
+    "migration_required": false,
+    "ranking_added": false,
+    "recommendation_added": false,
+    "signal_in_scope": false,
+    "impact_in_scope": false,
+    "new_feature_workflow_allowed": false
+  },
+  "required_exact_head_workflows": [
+    "API CI",
+    "Mobile CI",
+    "MVP Beta Gates",
+    "Global Readiness"
+  ],
+  "lifecycle": {
+    "capability_promotion": false,
+    "current_status_update": false,
+    "human_review_required": true
+  }
+}
