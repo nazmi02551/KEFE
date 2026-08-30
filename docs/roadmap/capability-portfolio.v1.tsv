@@ -30,7 +30,7 @@ CAP-028	kefe-retro	KEFE Retro / historical decision simulation	CASE_COMPOSITION	
 CAP-029	observe-mode	Observe / Sadece Oku	CASE_COMPOSITION	ACCEPTED_CANDIDATE	Post-MVP	P2	KEFE-PB-001|KEFE-DS-001			canonical	
 CAP-030	ugc-personal-dilemmas	UGC Personal Dilemmas	CASE_COMPOSITION	ROADMAP_HIGH	Phase 5	P2	KEFE-PB-001|KEFE-ETG-001|KEFE-SEC-001			canonical	
 CAP-031	collective-result	Post-Commit Collective Result	WE	IMPLEMENTED_VERIFIED	Phase 1	P0	KEFE-MPD-001|KEFE-TIM-001		post-Commit Reveal runtime|Slice 23 / PR #149|active runtime	canonical	
-CAP-032	reason-distribution	Reason distribution	WE	IMPLEMENTED_PARTIAL	Phase 2	P1	KEFE-PB-001|KEFE-AED-001			canonical	
+CAP-032	reason-distribution	Reason distribution	WE	IMPLEMENTED_PARTIAL	Phase 2	P1	KEFE-PB-001|KEFE-AED-001		ADR-0036|ADR-0053|ADR-0140|Issue #391 candidate	canonical	Exact-head API/Mobile/MVP/Global review; trends, segmentation and Signal qualification remain separate
 CAP-033	argument-clustering	Argument pattern clustering	WE	ARCHITECTURE_ACCEPTED	Phase 4	P1	KEFE-PB-001|KEFE-AIA-001|KEFE-DGS-001		ADR-0027	canonical	
 CAP-034	bridge-arguments	Bridge arguments / Ortak Zemin	WE	PROPOSAL_REVIEW	Phase 4	P0	KEFE-PB-001|KEFE-AIA-001|KEFE-TIM-001			conversation_proposal	Neutrality, provenance and editorial review contract.
 CAP-035	perspective-landscape	Near/Opposing/Bridge/Alternative Context perspectives	WE	IMPLEMENTED_VERIFIED	Phase 2	P0	KEFE-PB-001|KEFE-DS-001		Slice 20	canonical	
