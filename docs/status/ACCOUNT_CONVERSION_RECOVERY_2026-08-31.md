@@ -1,6 +1,6 @@
 # Account conversion validation and recovery — 2026-08-31
 
-Status: IMPLEMENTATION CANDIDATE / EXACT-HEAD CI PENDING / NO CAPABILITY
+Status: IMPLEMENTATION CANDIDATE / EXACT-HEAD CI PASS / NO CAPABILITY
 PROMOTION
 
 Issue: #401  
@@ -8,6 +8,8 @@ Capabilities: CAP-084 (`IMPLEMENTED_PARTIAL`), CAP-095
 (`ONGOING_MANDATORY`)  
 Stack base: PR #400 exact-green head
 `df4ebd2d40eff1b36f567f0b09fee60bea26f50f`
+Implementation checkpoint: PR #402 head
+`9c39e70e55096dadf68492890208c5769f83de48`
 
 ADR: ADR-0145  
 Contract: `docs/contracts/account-conversion-validation-recovery.v1.json`
@@ -42,7 +44,7 @@ and database semantics are unchanged.
 Controller coverage checks same-challenge recovery, terminal challenge reset,
 transport uncertainty and local code validation. Turkish/English widget tests
 check button states, localized recovery, corrected-code completion and Preview
-behavior. Full mobile regression evidence remains required.
+behavior.
 
 Local evidence before publication:
 
@@ -51,11 +53,21 @@ Local evidence before publication:
 - complete API test suite: PASS (PostgreSQL-dependent tests skipped locally);
 - account/session/Connected Alpha static contracts: PASS;
 - capability portfolio and machine-readable contract validation: PASS;
-- Flutter format, analyzer and tests: exact-head CI pending because the exact
-  Flutter SDK is unavailable in the local workspace.
+- Flutter format, analyzer, full mobile regressions and Android compile/artifact
+  boundaries: PASS in exact-head CI.
 
-API CI, Mobile CI, MVP Beta Gates and Global Readiness must pass on one exact PR
-head before this candidate is called PASS.
+Exact-head evidence on
+`9c39e70e55096dadf68492890208c5769f83de48`:
+
+- API CI, run `33358601212`: PASS;
+- Mobile CI, run `33358601194`: PASS;
+- MVP Beta Gates, run `33358601216`: PASS;
+- Global Readiness, run `33358601219`: PASS;
+- Capability Portfolio, Foundation Completion, Full Vision Delivery
+  Convergence, Operational Readiness Evidence and CAP-123 Governance
+  Reconciliation: PASS on the same head.
+
+No APK is distributed for this small recovery slice.
 
 ## Lifecycle
 
