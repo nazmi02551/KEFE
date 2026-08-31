@@ -10,6 +10,7 @@ from uuid import NAMESPACE_URL, UUID, uuid5
 from kefe_api.modules.analytics.models import (
     ActivationJourney,
     AnalyticsEvent,
+    MeaningfulWeighMetric,
     QualityJourney,
 )
 from kefe_api.modules.analytics.registry import AnalyticsRegistry
@@ -378,3 +379,30 @@ class AnalyticsEventProjector:
             raise AnalyticsProjectionError(
                 "missing required analytics provenance: " + ", ".join(missing)
             )
+
+
+class MeaningfulWeighsAggregator:
+    @staticmethod
+    def calculate(
+        journeys: Iterable[ActivationJourney],
+        *,
+        window_start: datetime,
+        window_end: datetime,
+    ) -> MeaningfulWeighMetric:
+        meaningful_sessions = [
+            j
+            for j in journeys
+            if j.committed_at is not None and window_start <= j.committed_at <= window_end
+        ]
+
+        distinct_actors = {j.actor_id for j in meaningful_sessions if j.actor_id is not None}
+        distinct_cases = {j.case_version_id for j in meaningful_sessions}
+
+        return MeaningfulWeighMetric(
+            window_start=window_start,
+            window_end=window_end,
+            meaningful_weigh_count=len(meaningful_sessions),
+            weekly_active_weighers=len(distinct_actors),
+            distinct_cases_weighed=len(distinct_cases),
+        )
+

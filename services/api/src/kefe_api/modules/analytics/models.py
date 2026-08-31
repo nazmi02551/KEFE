@@ -65,3 +65,12 @@ class QualityJourney:
     intervention_exposed_source_event_id: UUID | None
     decision_revised_at: datetime | None
     decision_revised_source_event_id: UUID | None
+
+
+@dataclass(frozen=True, slots=True)
+class MeaningfulWeighMetric:
+    window_start: datetime
+    window_end: datetime
+    meaningful_weigh_count: int
+    weekly_active_weighers: int
+    distinct_cases_weighed: int
