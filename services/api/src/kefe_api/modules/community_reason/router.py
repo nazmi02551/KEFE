@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response
 from pydantic import BaseModel, Field
 
 from kefe_api.modules.community_reason.models import ReasonReaction, ReasonReportCode
@@ -106,21 +106,23 @@ def read_reasons(
     )
 
 
-@router.put("/community-reasons/{reason_id}/reaction", status_code=204)
+@router.put("/community-reasons/{reason_id}/reaction", status_code=204, response_class=Response)
 def react(
     reason_id: UUID,
     body: ReactionRequest,
     principal: PrincipalDep,
     service: CommunityReasonServiceDep,
-) -> None:
+) -> Response:
     service.react(actor_id=principal.actor_id, reason_id=reason_id, reaction=body.reaction)
+    return Response(status_code=204)
 
 
-@router.post("/community-reasons/{reason_id}/reports", status_code=204)
+@router.post("/community-reasons/{reason_id}/reports", status_code=204, response_class=Response)
 def report(
     reason_id: UUID,
     body: ReportRequest,
     principal: PrincipalDep,
     service: CommunityReasonServiceDep,
-) -> None:
+) -> Response:
     service.report(actor_id=principal.actor_id, reason_id=reason_id, report_code=body.code)
+    return Response(status_code=204)

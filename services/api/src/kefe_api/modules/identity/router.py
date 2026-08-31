@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from uuid import UUID
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Response
 from pydantic import BaseModel, Field
 
 from kefe_api.core.settings import get_settings
@@ -127,10 +127,11 @@ def bootstrap_session_continuity(
     )
 
 
-@router.delete("/session", status_code=204)
+@router.delete("/session", status_code=204, response_class=Response)
 def revoke_session(
     authorization: AuthorizationDep,
     service: IdentityServiceDep,
-) -> None:
+) -> Response:
     service.authenticate(authorization)
     service.revoke(authorization)
+    return Response(status_code=204)

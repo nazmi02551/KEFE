@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response
 from pydantic import BaseModel
 
 from kefe_api.modules.identity.dependencies import PrincipalDep
@@ -77,10 +77,11 @@ def read_share(token: str, service: ShareServiceDep) -> PublicShareResponse:
     )
 
 
-@router.delete("/shares/{share_id}", status_code=204)
+@router.delete("/shares/{share_id}", status_code=204, response_class=Response)
 def revoke_share(
     share_id: UUID,
     principal: PrincipalDep,
     service: ShareServiceDep,
-) -> None:
+) -> Response:
     service.revoke(actor_id=principal.actor_id, share_id=share_id)
+    return Response(status_code=204)
