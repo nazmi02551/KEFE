@@ -1,3 +1,4 @@
+import '../../decision/data/http_decision_repository.dart';
 import 'account_repository.dart';
 
 /// Internal Product Preview adapter only. This never represents real OTP delivery.
@@ -25,7 +26,7 @@ class PreviewAccountRepository implements AccountRepository {
     required String code,
   }) async {
     if (challengeId != _challengeId || code != testCode) {
-      throw StateError('PREVIEW_OTP_INVALID');
+      throw ApiFailure('AUTH_OTP_INVALID', 422);
     }
     return OtpVerification(
       token: 'preview-verification-token',
@@ -38,7 +39,7 @@ class PreviewAccountRepository implements AccountRepository {
     required String verificationToken,
   }) async {
     if (verificationToken != 'preview-verification-token') {
-      throw StateError('PREVIEW_VERIFICATION_INVALID');
+      throw ApiFailure('AUTH_VERIFICATION_INVALID', 422);
     }
     return const AccountConversion(
       actorId: 'preview-account-actor',

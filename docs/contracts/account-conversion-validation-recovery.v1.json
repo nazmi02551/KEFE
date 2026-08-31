@@ -1,0 +1,82 @@
+{
+  "contract_id": "KEFE-ACCOUNT-CONVERSION-VALIDATION-RECOVERY-001",
+  "version": "1.0.0",
+  "status": "CANDIDATE",
+  "issue": 401,
+  "capabilities": ["CAP-084", "CAP-095"],
+  "parent_exact_head": "df4ebd2d40eff1b36f567f0b09fee60bea26f50f",
+  "local_validation": {
+    "trimmed_identifier_required_before_request": true,
+    "identifier_format_inferred_by_client": false,
+    "otp_length": 6,
+    "otp_digits_only": true,
+    "server_validation_authoritative": true,
+    "silent_noop_action_enabled": false
+  },
+  "same_challenge_recovery": {
+    "error_codes": ["AUTH_OTP_INVALID"],
+    "ui_step": "ENTER_CODE",
+    "challenge_preserved": true,
+    "code_may_be_corrected": true,
+    "editing_clears_stale_error": true
+  },
+  "new_challenge_required": {
+    "error_codes": [
+      "AUTH_OTP_EXPIRED",
+      "AUTH_OTP_CHALLENGE_USED",
+      "AUTH_OTP_CHALLENGE_NOT_FOUND",
+      "AUTH_OTP_ATTEMPTS_EXCEEDED",
+      "AUTH_VERIFICATION_INVALID",
+      "AUTH_MERGE_REPLAY_MISMATCH"
+    ],
+    "verification_or_merge_transport_failure": true,
+    "ui_step": "ENTER_IDENTIFIER",
+    "challenge_cleared": true,
+    "identifier_preserved": true
+  },
+  "presentation": {
+    "locales": ["tr", "en"],
+    "raw_error_code_visible": false,
+    "identifier_visible_in_error": false,
+    "challenge_id_visible": false,
+    "verification_token_visible": false,
+    "actor_id_visible": false,
+    "stable_widget_keys": [
+      "account-request-otp",
+      "account-otp-code",
+      "account-verify-merge",
+      "account-error",
+      "account-error-retry"
+    ]
+  },
+  "preview": {
+    "incorrect_code_error": "AUTH_OTP_INVALID",
+    "uncaught_state_error_allowed": false,
+    "production_delivery_claimed": false,
+    "production_provider_operability_claimed": false
+  },
+  "preserved": {
+    "optional_guest_continuation": true,
+    "channels": ["EMAIL", "SMS"],
+    "guest_history_merge_changed": false,
+    "credential_rotation_changed": false,
+    "credential_bundle_replacement_changed": false,
+    "api_changed": false,
+    "openapi_changed": false,
+    "database_changed": false,
+    "production_preview_isolation": true
+  },
+  "required_exact_head_workflows": [
+    "API CI",
+    "Mobile CI",
+    "MVP Beta Gates",
+    "Global Readiness"
+  ],
+  "lifecycle": {
+    "cap084_promotion": false,
+    "cap095_promotion": false,
+    "current_status_update": false,
+    "human_review_required": true,
+    "external_provider_evidence_required_separately": true
+  }
+}

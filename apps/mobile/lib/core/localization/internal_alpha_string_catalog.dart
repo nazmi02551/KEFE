@@ -26,7 +26,21 @@ abstract final class InternalAlphaStringCatalog {
           'Account verified. Your existing weigh history is preserved.',
       'account.return_my_kefe': 'Return to My KEFE',
       'account.protect_action': 'Protect my history',
-      'account.failure': 'Could not complete · {code}',
+      'account.failure': "We couldn't complete this right now. Try again.",
+      'account.otp_invalid':
+          "That code wasn't correct. Check the six digits and try again.",
+      'account.otp_expired':
+          'That code can no longer be used. Request a new code.',
+      'account.otp_attempts_exceeded':
+          'Too many incorrect attempts. Request a new code.',
+      'account.otp_delivery_unavailable':
+          "We couldn't send a code right now. Try again.",
+      'account.otp_delivery_rejected':
+          "We couldn't send a code to that destination. Check it and try again.",
+      'account.rate_limited':
+          'Too many requests. Wait a little before trying again.',
+      'account.verification_restart':
+          "We couldn't safely finish with that verification. Request a new code.",
       'activity.eyebrow': 'ACTIVITY',
       'activity.title': 'Return to your decisions.',
       'activity.subtitle':
@@ -209,7 +223,21 @@ abstract final class InternalAlphaStringCatalog {
           'Hesabın doğrulandı. Mevcut tartım geçmişin korunuyor.',
       'account.return_my_kefe': 'My KEFE’ye dön',
       'account.protect_action': 'Geçmişimi koru',
-      'account.failure': 'İşlem tamamlanamadı · {code}',
+      'account.failure': 'İşlem şu anda tamamlanamadı. Tekrar dene.',
+      'account.otp_invalid':
+          'Bu kod doğru değil. Altı haneyi kontrol edip tekrar dene.',
+      'account.otp_expired':
+          'Bu kod artık kullanılamaz. Yeni bir kod iste.',
+      'account.otp_attempts_exceeded':
+          'Çok fazla hatalı deneme yapıldı. Yeni bir kod iste.',
+      'account.otp_delivery_unavailable':
+          'Kod şu anda gönderilemedi. Tekrar dene.',
+      'account.otp_delivery_rejected':
+          'Bu adrese kod gönderilemedi. Bilgiyi kontrol edip tekrar dene.',
+      'account.rate_limited':
+          'Çok fazla istek yapıldı. Biraz bekleyip tekrar dene.',
+      'account.verification_restart':
+          'Bu doğrulamayla işlem güvenle tamamlanamadı. Yeni bir kod iste.',
       'activity.eyebrow': 'AKTİVİTE',
       'activity.title': 'Kararlarına geri dön.',
       'activity.subtitle':

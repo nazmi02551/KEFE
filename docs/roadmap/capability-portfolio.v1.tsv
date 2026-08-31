@@ -82,7 +82,7 @@ CAP-080	my-kefe	My KEFE descriptive history	CONSUMER_GROWTH	IMPLEMENTED_VERIFIED
 CAP-081	kefe-chronicle	KEFE Chronicle	CONSUMER_GROWTH	ROADMAP_HIGH	Phase 4	P1	KEFE-PB-001|KEFE-DGS-001			canonical	
 CAP-082	kefe-wrapped	KEFE Wrapped	CONSUMER_GROWTH	ROADMAP_ACCEPTED	Phase 5	P1	KEFE-PB-001|KEFE-CGD-001			canonical	
 CAP-083	kefe-values	KEFE Values opt-in self profile	CONSUMER_GROWTH	VALIDATION_REQUIRED	Phase 9	P2	KEFE-PB-001|KEFE-RM-001|KEFE-SEC-001			canonical	
-CAP-084	guest-account-conversion	Guest-to-account conversion and data merge	CONSUMER_GROWTH	IMPLEMENTED_PARTIAL	Phase 1	P0	KEFE-PB-001|KEFE-SEC-001			canonical	
+CAP-084	guest-account-conversion	Guest-to-account conversion and data merge	CONSUMER_GROWTH	IMPLEMENTED_PARTIAL	Phase 1	P0	KEFE-PB-001|KEFE-SEC-001		ADR-0109|ADR-0110|ADR-0111|ADR-0112|ADR-0132|ADR-0145|Issue #401 candidate	canonical	Exact-head review; production provider and capability governance remain separate
 CAP-085	data-export-delete	User data export and deletion	CONSUMER_GROWTH	ROADMAP_ACCEPTED	Phase 2	P0	KEFE-SEC-001|KEFE-ENG-001		ADR-0108|ADR-0131|ADR-0136|ADR-0143|ADR-0144|Issues #397/#399 candidates	canonical	Exact-head review; legal and capability governance remain separate
 CAP-086	kefe-circle	KEFE Circle / Birlikte Tart	CONSUMER_GROWTH	ROADMAP_HIGH	Phase 5	P2	KEFE-PB-001|KEFE-SEC-001			canonical	
 CAP-087	kefe-rooms	KEFE Rooms	CONSUMER_GROWTH	ROADMAP_ACCEPTED	Phase 5+	P2	KEFE-PB-001|KEFE-SEC-001			canonical	
