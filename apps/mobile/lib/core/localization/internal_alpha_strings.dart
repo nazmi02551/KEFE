@@ -104,6 +104,15 @@ extension InternalAlphaStrings on KefeStrings {
   String get privacyDeleteBody => _iaText('privacy.delete_body');
   String get privacyCancel => _iaText('privacy.cancel');
   String get privacyDeletePermanently => _iaText('privacy.delete_permanently');
+  String get privacyDeleteCompleteTitle =>
+      _iaText('privacy.delete_complete_title');
+  String get privacyDeleteCompleteBody =>
+      _iaText('privacy.delete_complete_body');
+  String get privacyDeletePreviewCompleteTitle =>
+      _iaText('privacy.delete_preview_complete_title');
+  String get privacyDeletePreviewCompleteBody =>
+      _iaText('privacy.delete_preview_complete_body');
+  String get privacyDeleteContinue => _iaText('privacy.delete_continue');
 
   String get shareTitle => _iaText('share.title');
   String get shareCaseOnlyNote => _iaText('share.case_only_note');

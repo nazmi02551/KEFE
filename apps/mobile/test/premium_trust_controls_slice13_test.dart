@@ -299,7 +299,7 @@ void main() {
     expect(privacySource, contains("ValueKey('privacy-export')"));
     expect(privacySource, contains("ValueKey('privacy-delete')"));
     expect(privacySource, contains("ValueKey('privacy-delete-confirmation')"));
-    expect(privacySource, contains("typed.text.trim() == 'DELETE'"));
+    expect(privacySource, contains("typed.trim() == 'DELETE'"));
     expect(privacySource, contains("context.go('/welcome')"));
 
     final accountSource = File(

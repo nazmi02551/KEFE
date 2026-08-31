@@ -71,6 +71,13 @@ abstract final class InternalAlphaStringCatalog {
       'privacy.delete_body': 'This cannot be undone. Type DELETE to continue.',
       'privacy.cancel': 'Cancel',
       'privacy.delete_permanently': 'Delete permanently',
+      'privacy.delete_complete_title': 'Your data has been deleted',
+      'privacy.delete_complete_body':
+          'Private product data linked to this identity was deleted. Aggregate contributions were anonymized.',
+      'privacy.delete_preview_complete_title': 'Preview data reset',
+      'privacy.delete_preview_complete_body':
+          'Product Preview sample data was reset. No production account or live data was deleted.',
+      'privacy.delete_continue': 'Continue',
       'share.title': 'Share this case',
       'share.case_only_note':
           'MVP sharing is case-only. Your decision, confidence, and private reason are never included in the link.',
@@ -248,6 +255,13 @@ abstract final class InternalAlphaStringCatalog {
           'Bu işlem geri alınamaz. Devam etmek için DELETE yaz.',
       'privacy.cancel': 'Vazgeç',
       'privacy.delete_permanently': 'Kalıcı olarak sil',
+      'privacy.delete_complete_title': 'Verilerin silindi',
+      'privacy.delete_complete_body':
+          'Bu kimliğe bağlı özel ürün verileri silindi. Toplu katkılar anonimleştirildi.',
+      'privacy.delete_preview_complete_title': 'Önizleme verileri sıfırlandı',
+      'privacy.delete_preview_complete_body':
+          'Product Preview örnek verileri sıfırlandı. Hiçbir üretim hesabı veya canlı veri silinmedi.',
+      'privacy.delete_continue': 'Devam et',
       'share.title': 'Bu vakayı paylaş',
       'share.case_only_note':
           'MVP paylaşımı yalnız vakayı içerir. Kararın, güven puanın ve özel gerekçen bağlantıya eklenmez.',

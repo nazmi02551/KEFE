@@ -209,7 +209,7 @@ class PrivacyControlsSection extends ConsumerWidget {
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
     final strings = KefeStrings.of(context);
     final visual = context.kefeVisual;
-    final typed = TextEditingController();
+    var typed = '';
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -226,8 +226,8 @@ class PrivacyControlsSection extends ConsumerWidget {
             const SizedBox(height: 14),
             TextField(
               key: const ValueKey('privacy-delete-confirmation'),
-              controller: typed,
               autocorrect: false,
+              onChanged: (value) => typed = value,
               decoration: InputDecoration(
                 labelText: 'DELETE',
                 prefixIcon: Icon(
@@ -249,17 +249,57 @@ class PrivacyControlsSection extends ConsumerWidget {
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
             onPressed: () =>
-                Navigator.pop(dialogContext, typed.text.trim() == 'DELETE'),
+                Navigator.pop(dialogContext, typed.trim() == 'DELETE'),
             child: Text(strings.privacyDeletePermanently),
           ),
         ],
       ),
     );
-    typed.dispose();
     if (confirmed != true || !context.mounted) return;
     final deleted = await ref.read(privacyControllerProvider.notifier).delete();
-    if (deleted && context.mounted) {
+    if (!deleted || !context.mounted) return;
+    final receipt = ref.read(privacyControllerProvider).deletion;
+    if (receipt == null) return;
+    await _showDeletionComplete(
+      context,
+      isProductPreview: receipt.isProductPreview,
+    );
+    if (context.mounted) {
       context.go('/welcome');
     }
+  }
+
+  Future<void> _showDeletionComplete(
+    BuildContext context, {
+    required bool isProductPreview,
+  }) {
+    final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
+    final title = isProductPreview
+        ? strings.privacyDeletePreviewCompleteTitle
+        : strings.privacyDeleteCompleteTitle;
+    final body = isProductPreview
+        ? strings.privacyDeletePreviewCompleteBody
+        : strings.privacyDeleteCompleteBody;
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          key: const ValueKey('privacy-delete-complete'),
+          icon: Icon(Icons.check_circle_outline_rounded, color: visual.gold),
+          title: Text(title),
+          content: Text(body),
+          actions: [
+            FilledButton(
+              key: const ValueKey('privacy-delete-continue'),
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(strings.privacyDeleteContinue),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
