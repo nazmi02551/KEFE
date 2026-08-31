@@ -289,10 +289,7 @@ class PrivacyControlsSection extends ConsumerWidget {
         canPop: false,
         child: AlertDialog(
           key: const ValueKey('privacy-delete-complete'),
-          icon: Icon(
-            Icons.check_circle_outline_rounded,
-            color: visual.gold,
-          ),
+          icon: Icon(Icons.check_circle_outline_rounded, color: visual.gold),
           title: Text(title),
           content: Text(body),
           actions: [

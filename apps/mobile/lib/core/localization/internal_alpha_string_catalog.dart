@@ -258,8 +258,7 @@ abstract final class InternalAlphaStringCatalog {
       'privacy.delete_complete_title': 'Verilerin silindi',
       'privacy.delete_complete_body':
           'Bu kimliğe bağlı özel ürün verileri silindi. Toplu katkılar anonimleştirildi.',
-      'privacy.delete_preview_complete_title':
-          'Önizleme verileri sıfırlandı',
+      'privacy.delete_preview_complete_title': 'Önizleme verileri sıfırlandı',
       'privacy.delete_preview_complete_body':
           'Product Preview örnek verileri sıfırlandı. Hiçbir üretim hesabı veya canlı veri silinmedi.',
       'privacy.delete_continue': 'Devam et',

@@ -77,9 +77,7 @@ void main() {
           findsOneWidget,
         );
 
-        await tester.tap(
-          find.byKey(const ValueKey('privacy-delete-continue')),
-        );
+        await tester.tap(find.byKey(const ValueKey('privacy-delete-continue')));
         await tester.pumpAndSettle();
         expect(find.byKey(const ValueKey('welcome-sentinel')), findsOneWidget);
       },
@@ -120,10 +118,7 @@ void main() {
 
     await _confirmDeletion(tester, const Locale('en', 'US'));
 
-    expect(
-      find.byKey(const ValueKey('privacy-delete-complete')),
-      findsNothing,
-    );
+    expect(find.byKey(const ValueKey('privacy-delete-complete')), findsNothing);
     expect(find.byKey(const ValueKey('welcome-sentinel')), findsNothing);
     expect(find.byKey(const ValueKey('privacy-error-surface')), findsOneWidget);
   });
@@ -139,8 +134,7 @@ void main() {
     final trigger = contract['trigger']! as Map<String, Object?>;
     final production =
         contract['production_presentation']! as Map<String, Object?>;
-    final preview =
-        contract['preview_presentation']! as Map<String, Object?>;
+    final preview = contract['preview_presentation']! as Map<String, Object?>;
     final interaction = contract['interaction']! as Map<String, Object?>;
     final preserved = contract['preserved']! as Map<String, Object?>;
     final presentationSource = File(
@@ -178,9 +172,7 @@ Future<void> _confirmDeletion(WidgetTester tester, Locale locale) async {
   );
   await tester.tap(
     find.text(
-      locale.languageCode == 'tr'
-          ? 'Kalıcı olarak sil'
-          : 'Delete permanently',
+      locale.languageCode == 'tr' ? 'Kalıcı olarak sil' : 'Delete permanently',
     ),
   );
   await tester.pumpAndSettle();
@@ -194,18 +186,12 @@ Future<void> _pumpPrivacy(
   final router = GoRouter(
     initialLocation: '/privacy',
     routes: [
-      GoRoute(
-        path: '/privacy',
-        builder: (_, _) => const PrivacyScreen(),
-      ),
+      GoRoute(path: '/privacy', builder: (_, _) => const PrivacyScreen()),
       GoRoute(
         path: '/welcome',
         builder: (_, _) => const Scaffold(
           body: Center(
-            child: Text(
-              'welcome',
-              key: ValueKey('welcome-sentinel'),
-            ),
+            child: Text('welcome', key: ValueKey('welcome-sentinel')),
           ),
         ),
       ),
