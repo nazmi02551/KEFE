@@ -43,11 +43,12 @@ class AccountState {
     bool? mergedExistingHistory,
     String? errorCode,
     bool clearError = false,
+    bool clearChallenge = false,
   }) => AccountState(
     uiState: uiState ?? this.uiState,
     channel: channel ?? this.channel,
     identifier: identifier ?? this.identifier,
-    challenge: challenge ?? this.challenge,
+    challenge: clearChallenge ? null : challenge ?? this.challenge,
     actorId: actorId ?? this.actorId,
     mergedExistingHistory: mergedExistingHistory ?? this.mergedExistingHistory,
     errorCode: clearError ? null : errorCode ?? this.errorCode,
@@ -111,12 +112,15 @@ class AccountController extends Notifier<AccountState> {
 
   Future<void> verifyAndMerge(String code) async {
     final challenge = state.challenge;
-    if (challenge == null || code.trim().length != 6) return;
+    final normalizedCode = code.trim();
+    if (challenge == null || !RegExp(r'^\d{6}$').hasMatch(normalizedCode)) {
+      return;
+    }
     state = state.copyWith(uiState: AccountUiState.verifying, clearError: true);
     try {
       final verification = await _repository.verifyOtp(
         challengeId: challenge.id,
-        code: code.trim(),
+        code: normalizedCode,
       );
       final conversion = await _repository.mergeGuest(
         verificationToken: verification.token,
@@ -128,19 +132,37 @@ class AccountController extends Notifier<AccountState> {
         clearError: true,
       );
     } on ApiFailure catch (error) {
-      state = state.copyWith(
-        uiState: AccountUiState.error,
-        errorCode: error.code,
-      );
+      _recoverFromVerificationFailure(error.code);
     } on ClientTransportFailure catch (error) {
-      state = state.copyWith(
-        uiState: AccountUiState.error,
-        errorCode: error.code,
-      );
+      _recoverFromVerificationFailure(error.code);
     }
   }
 
+  void clearError() {
+    if (state.errorCode == null ||
+        state.uiState == AccountUiState.requesting ||
+        state.uiState == AccountUiState.verifying) {
+      return;
+    }
+    state = state.copyWith(clearError: true);
+  }
+
   void retry() {
+    if (state.uiState == AccountUiState.enterCode && state.challenge != null) {
+      clearError();
+      return;
+    }
     state = AccountState(channel: state.channel, identifier: state.identifier);
+  }
+
+  void _recoverFromVerificationFailure(String code) {
+    final retrySameChallenge = code == 'AUTH_OTP_INVALID';
+    state = state.copyWith(
+      uiState: retrySameChallenge
+          ? AccountUiState.enterCode
+          : AccountUiState.error,
+      errorCode: code,
+      clearChallenge: !retrySameChallenge,
+    );
   }
 }

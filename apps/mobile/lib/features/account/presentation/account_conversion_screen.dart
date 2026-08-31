@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -20,6 +21,7 @@ class _AccountConversionScreenState
     extends ConsumerState<AccountConversionScreen> {
   final _identifier = TextEditingController();
   final _code = TextEditingController();
+  bool _otpComplete = false;
 
   @override
   void dispose() {
@@ -148,9 +150,11 @@ class _AccountConversionScreenState
                     const SizedBox(height: 16),
                     FilledButton.icon(
                       key: const ValueKey('account-request-otp'),
-                      onPressed: state.uiState == AccountUiState.requesting
+                      onPressed:
+                          state.uiState == AccountUiState.requesting ||
+                              state.identifier.trim().isEmpty
                           ? null
-                          : controller.requestOtp,
+                          : () => _requestOtp(controller),
                       icon: state.uiState == AccountUiState.requesting
                           ? const Icon(Icons.hourglass_top_rounded)
                           : const Icon(Icons.arrow_forward_rounded),
@@ -194,17 +198,28 @@ class _AccountConversionScreenState
                     TextField(
                       key: const ValueKey('account-otp-code'),
                       controller: _code,
+                      enabled: state.uiState != AccountUiState.verifying,
                       keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       maxLength: 6,
                       autofillHints: const [AutofillHints.oneTimeCode],
                       decoration: InputDecoration(
                         labelText: strings.accountVerificationCode,
                         prefixIcon: const Icon(Icons.pin_outlined),
                       ),
+                      onChanged: (value) {
+                        final complete = value.length == 6;
+                        if (_otpComplete != complete) {
+                          setState(() => _otpComplete = complete);
+                        }
+                        controller.clearError();
+                      },
                     ),
                     FilledButton.icon(
                       key: const ValueKey('account-verify-merge'),
-                      onPressed: state.uiState == AccountUiState.verifying
+                      onPressed:
+                          state.uiState == AccountUiState.verifying ||
+                              !_otpComplete
                           ? null
                           : () => controller.verifyAndMerge(_code.text),
                       icon: state.uiState == AccountUiState.verifying
@@ -275,6 +290,7 @@ class _AccountConversionScreenState
                     ),
                     const SizedBox(height: 10),
                     OutlinedButton(
+                      key: const ValueKey('account-error-retry'),
                       onPressed: controller.retry,
                       child: Text(strings.retry),
                     ),
@@ -293,6 +309,12 @@ class _AccountConversionScreenState
         ),
       ),
     );
+  }
+
+  Future<void> _requestOtp(AccountController controller) async {
+    _code.clear();
+    if (_otpComplete) setState(() => _otpComplete = false);
+    await controller.requestOtp();
   }
 }
 
