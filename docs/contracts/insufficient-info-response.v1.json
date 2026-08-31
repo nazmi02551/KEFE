@@ -1,0 +1,21 @@
+{
+  "contract_id": "KEFE-INSUFFICIENT-INFO-RESPONSE-001",
+  "version": "1.0.0",
+  "status": "CANDIDATE",
+  "issue": 403,
+  "capabilities": ["CAP-011"],
+  "parent_exact_head": "091e632900000000000000000000000000000000",
+  "canonical_response_codes": {
+    "insufficient_information": "OPT_OUT_INSUFFICIENT_INFO",
+    "missing_options": "OPT_OUT_MISSING_OPTIONS"
+  },
+  "validation_rules": {
+    "single_choice_accepts_canonical_opt_outs": true,
+    "preserves_reason_capture": true,
+    "preserves_commit_first_isolation": true
+  },
+  "localization_keys": {
+    "insufficient_info_title": "decision_opt_out_insufficient_info",
+    "missing_options_title": "decision_opt_out_missing_options"
+  }
+}
