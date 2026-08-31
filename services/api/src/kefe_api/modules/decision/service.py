@@ -7,6 +7,7 @@ from uuid import UUID, uuid4
 
 from kefe_api.core.errors import DomainError
 from kefe_api.modules.decision.models import (
+    CANONICAL_OPT_OUT_RESPONSES,
     CommitStatus,
     DraftUpdateStatus,
     PerspectiveMode,
@@ -332,6 +333,8 @@ class DecisionService:
     @staticmethod
     def _is_valid_response(question: Question, value: Any) -> bool:
         if question.response_type == "SINGLE_CHOICE":
+            if value in CANONICAL_OPT_OUT_RESPONSES:
+                return True
             return isinstance(value, str) and value in question.options
 
         if question.response_type == "CONFIDENCE":

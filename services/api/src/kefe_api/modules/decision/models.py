@@ -64,6 +64,12 @@ class CommitStatus(StrEnum):
     IDEMPOTENCY_KEY_REUSED = "IDEMPOTENCY_KEY_REUSED"
 
 
+CANONICAL_OPT_OUT_RESPONSES = frozenset({
+    "OPT_OUT_INSUFFICIENT_INFO",
+    "OPT_OUT_MISSING_OPTIONS",
+})
+
+
 @dataclass(frozen=True, slots=True)
 class Question:
     id: UUID

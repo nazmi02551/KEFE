@@ -11,7 +11,13 @@ from kefe_api.modules.decision.lineage_models import (
     RevisionCommitStatus,
     RevisionDraft,
 )
-from kefe_api.modules.decision.models import CaseVersion, FlowStep, Question, WeighState
+from kefe_api.modules.decision.models import (
+    CANONICAL_OPT_OUT_RESPONSES,
+    CaseVersion,
+    FlowStep,
+    Question,
+    WeighState,
+)
 from kefe_api.modules.decision.ports import DecisionRepository
 from kefe_api.modules.flow_runtime.models import FlowStepRuntimeState
 from kefe_api.modules.flow_runtime.service import FlowRuntimeService
@@ -440,6 +446,8 @@ class DecisionLineageService:
     @staticmethod
     def _is_valid_response(question: Question, value: Any) -> bool:
         if question.response_type == "SINGLE_CHOICE":
+            if value in CANONICAL_OPT_OUT_RESPONSES:
+                return True
             return isinstance(value, str) and value in question.options
         if question.response_type == "CONFIDENCE":
             if isinstance(value, bool) or not isinstance(value, (int, float)):
