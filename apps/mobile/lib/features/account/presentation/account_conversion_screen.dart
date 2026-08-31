@@ -200,9 +200,7 @@ class _AccountConversionScreenState
                       controller: _code,
                       enabled: state.uiState != AccountUiState.verifying,
                       keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       maxLength: 6,
                       autofillHints: const [AutofillHints.oneTimeCode],
                       decoration: InputDecoration(

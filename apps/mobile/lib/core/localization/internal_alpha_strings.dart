@@ -46,15 +46,14 @@ extension InternalAlphaStrings on KefeStrings {
     'AUTH_OTP_EXPIRED' ||
     'AUTH_OTP_CHALLENGE_USED' ||
     'AUTH_OTP_CHALLENGE_NOT_FOUND' => _iaText('account.otp_expired'),
-    'AUTH_OTP_ATTEMPTS_EXCEEDED' =>
-      _iaText('account.otp_attempts_exceeded'),
-    'AUTH_OTP_DELIVERY_UNAVAILABLE' =>
-      _iaText('account.otp_delivery_unavailable'),
-    'AUTH_OTP_DELIVERY_REJECTED' =>
-      _iaText('account.otp_delivery_rejected'),
+    'AUTH_OTP_ATTEMPTS_EXCEEDED' => _iaText('account.otp_attempts_exceeded'),
+    'AUTH_OTP_DELIVERY_UNAVAILABLE' => _iaText(
+      'account.otp_delivery_unavailable',
+    ),
+    'AUTH_OTP_DELIVERY_REJECTED' => _iaText('account.otp_delivery_rejected'),
     'AUTH_RATE_LIMITED' => _iaText('account.rate_limited'),
-    'AUTH_VERIFICATION_INVALID' || 'AUTH_MERGE_REPLAY_MISMATCH' =>
-      _iaText('account.verification_restart'),
+    'AUTH_VERIFICATION_INVALID' ||
+    'AUTH_MERGE_REPLAY_MISMATCH' => _iaText('account.verification_restart'),
     'AUTH_GUEST_CONTINUITY_REQUIRED' ||
     'AUTH_ACCOUNT_REAUTHENTICATION_REQUIRED' ||
     'AUTH_LEGACY_CONTINUITY_REQUIRED' => messageForCode(code),

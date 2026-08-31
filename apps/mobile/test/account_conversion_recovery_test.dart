@@ -191,7 +191,10 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('account-verify-merge')));
         await tester.pumpAndSettle();
 
-        expect(find.byKey(const ValueKey('account-code-surface')), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('account-code-surface')),
+          findsOneWidget,
+        );
         expect(find.byKey(const ValueKey('account-error')), findsOneWidget);
         expect(find.textContaining('AUTH_OTP_INVALID'), findsNothing);
         expect(
@@ -236,6 +239,8 @@ void main() {
       find.byKey(const ValueKey('account-identifier')),
       'preview@example.test',
     );
+    await tester.pump();
+    expect(_button(tester, 'account-request-otp').onPressed, isNotNull);
     await tester.tap(find.byKey(const ValueKey('account-request-otp')));
     await tester.pumpAndSettle();
     await tester.enterText(
@@ -282,8 +287,7 @@ void main() {
             )
             as Map<String, Object?>;
     final local = contract['local_validation']! as Map<String, Object?>;
-    final same =
-        contract['same_challenge_recovery']! as Map<String, Object?>;
+    final same = contract['same_challenge_recovery']! as Map<String, Object?>;
     final fresh = contract['new_challenge_required']! as Map<String, Object?>;
     final presentation = contract['presentation']! as Map<String, Object?>;
     final preview = contract['preview']! as Map<String, Object?>;

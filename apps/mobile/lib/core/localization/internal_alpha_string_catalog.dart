@@ -226,8 +226,7 @@ abstract final class InternalAlphaStringCatalog {
       'account.failure': 'İşlem şu anda tamamlanamadı. Tekrar dene.',
       'account.otp_invalid':
           'Bu kod doğru değil. Altı haneyi kontrol edip tekrar dene.',
-      'account.otp_expired':
-          'Bu kod artık kullanılamaz. Yeni bir kod iste.',
+      'account.otp_expired': 'Bu kod artık kullanılamaz. Yeni bir kod iste.',
       'account.otp_attempts_exceeded':
           'Çok fazla hatalı deneme yapıldı. Yeni bir kod iste.',
       'account.otp_delivery_unavailable':

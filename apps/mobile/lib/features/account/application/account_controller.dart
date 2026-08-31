@@ -113,8 +113,7 @@ class AccountController extends Notifier<AccountState> {
   Future<void> verifyAndMerge(String code) async {
     final challenge = state.challenge;
     final normalizedCode = code.trim();
-    if (challenge == null ||
-        !RegExp(r'^\d{6}$').hasMatch(normalizedCode)) {
+    if (challenge == null || !RegExp(r'^\d{6}$').hasMatch(normalizedCode)) {
       return;
     }
     state = state.copyWith(uiState: AccountUiState.verifying, clearError: true);
