@@ -1,0 +1,93 @@
+{
+  "contract_id": "KEFE-ACCOUNT-CONVERSION-VALIDATION-RECOVERY-001",
+  "version": "1.0.0",
+  "status": "CANDIDATE",
+  "issue": 401,
+  "capabilities": ["CAP-084"],
+  "parent_exact_head": "df4ebd2d78701ee6611ba035bc85848bb4477dc1",
+  "local_input_validation": {
+    "identifier_required_non_empty": true,
+    "otp_format": {
+      "exact_length": 6,
+      "digits_only": true,
+      "pattern": "^[0-9]{6}$"
+    },
+    "request_action_disabled_when_identifier_empty": true,
+    "verify_action_disabled_when_otp_incomplete": true
+  },
+  "error_recovery_boundaries": {
+    "retryable_errors": {
+      "AUTH_OTP_INVALID": {
+        "preserves_code_step": true,
+        "clears_challenge": false,
+        "allows_immediate_code_correction": true
+      }
+    },
+    "terminal_errors": {
+      "AUTH_OTP_EXPIRED": {
+        "resets_to_identifier_step": true,
+        "requires_new_challenge": true
+      },
+      "AUTH_OTP_LOCKED": {
+        "resets_to_identifier_step": true,
+        "requires_new_challenge": true
+      },
+      "AUTH_RATE_LIMITED": {
+        "resets_to_identifier_step": true,
+        "requires_new_challenge": true
+      },
+      "AUTH_CHALLENGE_EXPIRED": {
+        "resets_to_identifier_step": true,
+        "requires_new_challenge": true
+      },
+      "AUTH_CHALLENGE_NOT_FOUND": {
+        "resets_to_identifier_step": true,
+        "requires_new_challenge": true
+      },
+      "AUTH_VERIFICATION_TOKEN_EXPIRED": {
+        "resets_to_identifier_step": true,
+        "requires_new_challenge": true
+      },
+      "AUTH_VERIFICATION_TOKEN_INVALID": {
+        "resets_to_identifier_step": true,
+        "requires_new_challenge": true
+      },
+      "AUTH_ACCOUNT_MERGE_FAILED": {
+        "resets_to_identifier_step": true,
+        "requires_new_challenge": true
+      }
+    }
+  },
+  "localization_and_privacy": {
+    "raw_internal_error_code_leakage_prevented": true,
+    "supported_locales": ["tr", "en"],
+    "bounded_error_messages_provided": true
+  },
+  "preview_boundary": {
+    "uses_api_failure_contract": true,
+    "uncaught_state_error_forbidden": true,
+    "sample_code": "123456",
+    "production_delivery_claimed": false
+  },
+  "preserved_invariants": {
+    "commit_first": true,
+    "optional_guest_continuation": true,
+    "channel_support": ["EMAIL", "SMS"],
+    "account_merge_and_credential_rotation": true,
+    "api_and_openapi_unchanged": true,
+    "database_schema_unchanged": true,
+    "preview_production_isolation": true
+  },
+  "required_exact_head_workflows": [
+    "API CI",
+    "Mobile CI",
+    "MVP Beta Gates",
+    "Global Readiness"
+  ],
+  "lifecycle": {
+    "capability_promotion": false,
+    "target_capability_state": "IMPLEMENTED_PARTIAL",
+    "current_status_update": false,
+    "human_review_required": true
+  }
+}
