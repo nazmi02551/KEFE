@@ -247,6 +247,8 @@ void main() {
       find.byKey(const ValueKey('account-otp-code')),
       '000000',
     );
+    await tester.pump();
+    expect(_button(tester, 'account-verify-merge').onPressed, isNotNull);
     await tester.ensureVisible(
       find.byKey(const ValueKey('account-verify-merge')),
     );
