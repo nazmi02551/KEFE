@@ -27,6 +27,21 @@ abstract final class InternalAlphaStringCatalog {
       'account.return_my_kefe': 'Return to My KEFE',
       'account.protect_action': 'Protect my history',
       'account.failure': 'Could not complete · {code}',
+      'account.error_otp_invalid':
+          'The verification code is incorrect. Please check the code and try again.',
+      'account.error_otp_expired':
+          'The verification code has expired. Please request a new code.',
+      'account.error_otp_locked':
+          'Too many verification attempts. Please try again later or request a new code.',
+      'account.error_challenge_expired':
+          'The verification session has expired. Please request a new code.',
+      'account.error_merge_failed':
+          'Could not merge your account history. Please request a new verification code.',
+      'account.error_delivery_unavailable':
+          'Verification code delivery is temporarily unavailable. Please try again later.',
+      'account.error_generic':
+          'Verification could not be completed. Please try again.',
+      'account.restart_challenge': 'Change destination or request new code',
       'activity.eyebrow': 'ACTIVITY',
       'activity.title': 'Return to your decisions.',
       'activity.subtitle':
@@ -210,6 +225,21 @@ abstract final class InternalAlphaStringCatalog {
       'account.return_my_kefe': 'My KEFE’ye dön',
       'account.protect_action': 'Geçmişimi koru',
       'account.failure': 'İşlem tamamlanamadı · {code}',
+      'account.error_otp_invalid':
+          'Doğrulama kodu hatalı. Lütfen kodu kontrol edip tekrar dene.',
+      'account.error_otp_expired':
+          'Doğrulama kodunun süresi doldu. Lütfen yeni bir kod iste.',
+      'account.error_otp_locked':
+          'Çok fazla deneme yapıldı. Lütfen daha sonra tekrar dene veya yeni bir kod iste.',
+      'account.error_challenge_expired':
+          'Doğrulama oturumunun süresi doldu. Lütfen yeni bir kod iste.',
+      'account.error_merge_failed':
+          'Hesap geçmişi birleştirilemedi. Lütfen yeni bir doğrulama kodu iste.',
+      'account.error_delivery_unavailable':
+          'Doğrulama kodu iletimi geçici olarak kullanılamıyor. Lütfen daha sonra tekrar dene.',
+      'account.error_generic':
+          'Doğrulama işlemi tamamlanamadı. Lütfen tekrar dene.',
+      'account.restart_challenge': 'Hedefi değiştir veya yeni kod iste',
       'activity.eyebrow': 'AKTİVİTE',
       'activity.title': 'Kararlarına geri dön.',
       'activity.subtitle':

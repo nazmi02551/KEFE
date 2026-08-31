@@ -41,11 +41,22 @@ extension InternalAlphaStrings on KefeStrings {
   String get accountPreserved => _iaText('account.preserved');
   String get accountReturnMyKefe => _iaText('account.return_my_kefe');
   String get accountProtectAction => _iaText('account.protect_action');
+  String get accountRestartChallenge => _iaText('account.restart_challenge');
   String accountFailure(String code) => switch (code) {
+    'AUTH_OTP_INVALID' => _iaText('account.error_otp_invalid'),
+    'AUTH_OTP_EXPIRED' => _iaText('account.error_otp_expired'),
+    'AUTH_OTP_LOCKED' || 'AUTH_RATE_LIMITED' => _iaText('account.error_otp_locked'),
+    'AUTH_CHALLENGE_EXPIRED' ||
+    'AUTH_CHALLENGE_NOT_FOUND' => _iaText('account.error_challenge_expired'),
+    'AUTH_VERIFICATION_TOKEN_EXPIRED' ||
+    'AUTH_VERIFICATION_TOKEN_INVALID' ||
+    'AUTH_ACCOUNT_MERGE_FAILED' => _iaText('account.error_merge_failed'),
+    'AUTH_OTP_DELIVERY_UNAVAILABLE' ||
+    'AUTH_OTP_DELIVERY_REJECTED' => _iaText('account.error_delivery_unavailable'),
     'AUTH_GUEST_CONTINUITY_REQUIRED' ||
     'AUTH_ACCOUNT_REAUTHENTICATION_REQUIRED' ||
     'AUTH_LEGACY_CONTINUITY_REQUIRED' => messageForCode(code),
-    _ => _iaText('account.failure', placeholders: {'code': code}),
+    _ => _iaText('account.error_generic'),
   };
 
   String get activityEyebrow => _iaText('activity.eyebrow');

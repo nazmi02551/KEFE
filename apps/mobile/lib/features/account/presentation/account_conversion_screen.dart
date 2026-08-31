@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -38,10 +39,13 @@ class _AccountConversionScreenState
     final showIdentifier =
         state.uiState == AccountUiState.enterIdentifier ||
         state.uiState == AccountUiState.requesting ||
-        state.uiState == AccountUiState.error;
+        (state.uiState == AccountUiState.error && state.challenge == null);
     final showCode =
         state.uiState == AccountUiState.enterCode ||
         state.uiState == AccountUiState.verifying;
+
+    final canRequest = state.canRequestOtp;
+    final canVerify = state.canVerifyCode(_code.text);
 
     return Scaffold(
       appBar: AppBar(
@@ -120,8 +124,8 @@ class _AccountConversionScreenState
                       selected: {state.channel},
                       onSelectionChanged:
                           state.uiState == AccountUiState.requesting
-                          ? null
-                          : (value) => controller.setChannel(value.first),
+                              ? null
+                              : (value) => controller.setChannel(value.first),
                     ),
                     const SizedBox(height: 16),
                     TextField(
@@ -143,14 +147,20 @@ class _AccountConversionScreenState
                               : Icons.phone_outlined,
                         ),
                       ),
-                      onChanged: controller.setIdentifier,
+                      onChanged: (val) {
+                        controller.setIdentifier(val);
+                        setState(() {});
+                      },
                     ),
                     const SizedBox(height: 16),
                     FilledButton.icon(
                       key: const ValueKey('account-request-otp'),
-                      onPressed: state.uiState == AccountUiState.requesting
-                          ? null
-                          : controller.requestOtp,
+                      onPressed: canRequest
+                          ? () {
+                              _code.clear();
+                              controller.requestOtp();
+                            }
+                          : null,
                       icon: state.uiState == AccountUiState.requesting
                           ? const Icon(Icons.hourglass_top_rounded)
                           : const Icon(Icons.arrow_forward_rounded),
@@ -196,21 +206,62 @@ class _AccountConversionScreenState
                       controller: _code,
                       keyboardType: TextInputType.number,
                       maxLength: 6,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(6),
+                      ],
                       autofillHints: const [AutofillHints.oneTimeCode],
                       decoration: InputDecoration(
                         labelText: strings.accountVerificationCode,
                         prefixIcon: const Icon(Icons.pin_outlined),
                       ),
+                      onChanged: (val) => setState(() {}),
                     ),
+                    if (state.errorCode != null &&
+                        state.uiState == AccountUiState.enterCode) ...[
+                      const SizedBox(height: 12),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.error_outline_rounded,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              strings.accountFailure(state.errorCode!),
+                              key: const ValueKey('account-error'),
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     FilledButton.icon(
                       key: const ValueKey('account-verify-merge'),
-                      onPressed: state.uiState == AccountUiState.verifying
-                          ? null
-                          : () => controller.verifyAndMerge(_code.text),
+                      onPressed: canVerify
+                          ? () => controller.verifyAndMerge(_code.text)
+                          : null,
                       icon: state.uiState == AccountUiState.verifying
                           ? const Icon(Icons.hourglass_top_rounded)
                           : const Icon(Icons.verified_user_outlined),
                       label: Text(strings.accountConvert),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      key: const ValueKey('account-restart-challenge'),
+                      onPressed: () {
+                        _code.clear();
+                        controller.restartChallenge();
+                      },
+                      child: Text(strings.accountRestartChallenge),
                     ),
                   ],
                 ),
@@ -245,7 +296,8 @@ class _AccountConversionScreenState
                 ),
               ),
             ],
-            if (state.errorCode != null) ...[
+            if (state.errorCode != null &&
+                state.uiState == AccountUiState.error) ...[
               const SizedBox(height: 16),
               KefeSurface(
                 key: const ValueKey('account-error-surface'),

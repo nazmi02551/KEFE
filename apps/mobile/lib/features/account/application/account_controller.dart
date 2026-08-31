@@ -34,6 +34,16 @@ class AccountState {
   final bool mergedExistingHistory;
   final String? errorCode;
 
+  bool get canRequestOtp =>
+      identifier.trim().isNotEmpty && uiState != AccountUiState.requesting;
+
+  bool canVerifyCode(String code) {
+    final clean = code.trim();
+    return clean.length == 6 &&
+        RegExp(r'^[0-9]{6}$').hasMatch(clean) &&
+        uiState != AccountUiState.verifying;
+  }
+
   AccountState copyWith({
     AccountUiState? uiState,
     String? channel,
@@ -81,7 +91,8 @@ class AccountController extends Notifier<AccountState> {
   }
 
   Future<void> requestOtp() async {
-    if (state.identifier.trim().isEmpty) return;
+    final cleanIdentifier = state.identifier.trim();
+    if (cleanIdentifier.isEmpty) return;
     state = state.copyWith(
       uiState: AccountUiState.requesting,
       clearError: true,
@@ -89,7 +100,7 @@ class AccountController extends Notifier<AccountState> {
     try {
       final challenge = await _repository.requestOtp(
         channel: state.channel,
-        identifier: state.identifier.trim(),
+        identifier: cleanIdentifier,
       );
       state = state.copyWith(
         uiState: AccountUiState.enterCode,
@@ -111,12 +122,17 @@ class AccountController extends Notifier<AccountState> {
 
   Future<void> verifyAndMerge(String code) async {
     final challenge = state.challenge;
-    if (challenge == null || code.trim().length != 6) return;
+    final cleanCode = code.trim();
+    if (challenge == null ||
+        cleanCode.length != 6 ||
+        !RegExp(r'^[0-9]{6}$').hasMatch(cleanCode)) {
+      return;
+    }
     state = state.copyWith(uiState: AccountUiState.verifying, clearError: true);
     try {
       final verification = await _repository.verifyOtp(
         challengeId: challenge.id,
-        code: code.trim(),
+        code: cleanCode,
       );
       final conversion = await _repository.mergeGuest(
         verificationToken: verification.token,
@@ -128,10 +144,18 @@ class AccountController extends Notifier<AccountState> {
         clearError: true,
       );
     } on ApiFailure catch (error) {
-      state = state.copyWith(
-        uiState: AccountUiState.error,
-        errorCode: error.code,
-      );
+      if (error.code == 'AUTH_OTP_INVALID') {
+        state = state.copyWith(
+          uiState: AccountUiState.enterCode,
+          errorCode: error.code,
+        );
+      } else {
+        state = state.copyWith(
+          uiState: AccountUiState.error,
+          errorCode: error.code,
+          challenge: null,
+        );
+      }
     } on ClientTransportFailure catch (error) {
       state = state.copyWith(
         uiState: AccountUiState.error,
@@ -141,6 +165,14 @@ class AccountController extends Notifier<AccountState> {
   }
 
   void retry() {
+    if (state.uiState == AccountUiState.enterCode) {
+      state = state.copyWith(clearError: true);
+    } else {
+      state = AccountState(channel: state.channel, identifier: state.identifier);
+    }
+  }
+
+  void restartChallenge() {
     state = AccountState(channel: state.channel, identifier: state.identifier);
   }
 }
