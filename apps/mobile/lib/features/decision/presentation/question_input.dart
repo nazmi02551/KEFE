@@ -238,6 +238,11 @@ class _BalanceChoiceInput extends StatelessWidget {
             ),
           ],
         ),
+        _AlternativeResponseFooter(
+          value: value,
+          enabled: enabled,
+          onChanged: onChanged,
+        ),
       ],
     );
   }
@@ -448,6 +453,11 @@ class _SingleChoiceInput extends StatelessWidget {
           ),
           const SizedBox(height: 10),
         ],
+        _AlternativeResponseFooter(
+          value: value,
+          enabled: enabled,
+          onChanged: onChanged,
+        ),
       ],
     );
   }
@@ -595,4 +605,154 @@ String _localizedOption(
     locale: locale,
     fallback: rawOption,
   );
+}
+
+class _AlternativeResponseFooter extends StatelessWidget {
+  const _AlternativeResponseFooter({
+    required this.value,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final Object? value;
+  final bool enabled;
+  final ValueChanged<Object> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
+    final isInsufficientInfo = value == 'OPT_OUT_INSUFFICIENT_INFO';
+    final isMissingOptions = value == 'OPT_OUT_MISSING_OPTIONS';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: Divider(
+                color: visual.border.withValues(alpha: 0.6),
+                thickness: 0.8,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                strings.decisionOptOutTitle,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                  color: visual.mutedForeground,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Divider(
+                color: visual.border.withValues(alpha: 0.6),
+                thickness: 0.8,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _OptOutButton(
+                key: const ValueKey('option-OPT_OUT_INSUFFICIENT_INFO'),
+                icon: Icons.help_outline_rounded,
+                label: strings.decisionOptOutInsufficientInfo,
+                selected: isInsufficientInfo,
+                enabled: enabled,
+                onTap: () => onChanged('OPT_OUT_INSUFFICIENT_INFO'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _OptOutButton(
+                key: const ValueKey('option-OPT_OUT_MISSING_OPTIONS'),
+                icon: Icons.alt_route_rounded,
+                label: strings.decisionOptOutMissingOptions,
+                selected: isMissingOptions,
+                enabled: enabled,
+                onTap: () => onChanged('OPT_OUT_MISSING_OPTIONS'),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _OptOutButton extends StatelessWidget {
+  const _OptOutButton({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.enabled,
+    required this.onTap,
+    super.key,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    final color = selected ? visual.gold : visual.mutedForeground;
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      enabled: enabled,
+      label: label,
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          decoration: BoxDecoration(
+            color: selected
+                ? visual.gold.withValues(alpha: visual.isDark ? 0.16 : 0.09)
+                : visual.surfaceSunken.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: selected
+                  ? visual.gold.withValues(alpha: 0.75)
+                  : visual.border.withValues(alpha: 0.6),
+              width: selected ? 1.4 : 1.0,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: color),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                  color: selected ? visual.foreground : visual.mutedForeground,
+                  height: 1.15,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

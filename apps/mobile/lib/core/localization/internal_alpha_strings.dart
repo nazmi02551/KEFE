@@ -277,5 +277,10 @@ extension InternalAlphaStrings on KefeStrings {
   String get perspectiveEyebrow => _iaText('perspective.eyebrow');
   String get questionConfidence => _iaText('question.confidence');
   String get questionDecision => _iaText('question.decision');
+  String get decisionOptOutInsufficientInfo =>
+      _iaText('decision.opt_out_insufficient_info');
+  String get decisionOptOutMissingOptions =>
+      _iaText('decision.opt_out_missing_options');
+  String get decisionOptOutTitle => _iaText('decision.opt_out_title');
   String get reasonsEyebrow => _iaText('reasons.eyebrow');
 }

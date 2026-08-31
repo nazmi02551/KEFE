@@ -198,6 +198,9 @@ abstract final class InternalAlphaStringCatalog {
       'perspective.eyebrow': 'COUNTER VIEWS',
       'question.confidence': 'CONFIDENCE',
       'question.decision': 'DECISION',
+      'decision.opt_out_insufficient_info': 'Not enough information / Don’t know',
+      'decision.opt_out_missing_options': 'Options are missing / Incomplete choices',
+      'decision.opt_out_title': 'ALTERNATIVE RESPONSES',
       'reasons.eyebrow': 'REASONS',
     },
     'tr': {
@@ -396,6 +399,9 @@ abstract final class InternalAlphaStringCatalog {
       'perspective.eyebrow': 'KARŞI GÖRÜŞLER',
       'question.confidence': 'EMİNLİK',
       'question.decision': 'KARAR',
+      'decision.opt_out_insufficient_info': 'Yeterli bilgim yok / Bilmiyorum',
+      'decision.opt_out_missing_options': 'Seçenekler eksik / Farklı bir durum var',
+      'decision.opt_out_title': 'ALTERNATİF YANITLAR',
       'reasons.eyebrow': 'GEREKÇELER',
     },
   };
