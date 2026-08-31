@@ -258,8 +258,52 @@ class PrivacyControlsSection extends ConsumerWidget {
     typed.dispose();
     if (confirmed != true || !context.mounted) return;
     final deleted = await ref.read(privacyControllerProvider.notifier).delete();
-    if (deleted && context.mounted) {
+    if (!deleted || !context.mounted) return;
+    final receipt = ref.read(privacyControllerProvider).deletion;
+    if (receipt == null) return;
+    await _showDeletionComplete(
+      context,
+      isProductPreview: receipt.isProductPreview,
+    );
+    if (context.mounted) {
       context.go('/welcome');
     }
+  }
+
+  Future<void> _showDeletionComplete(
+    BuildContext context, {
+    required bool isProductPreview,
+  }) {
+    final strings = KefeStrings.of(context);
+    final visual = context.kefeVisual;
+    final title = isProductPreview
+        ? strings.privacyDeletePreviewCompleteTitle
+        : strings.privacyDeleteCompleteTitle;
+    final body = isProductPreview
+        ? strings.privacyDeletePreviewCompleteBody
+        : strings.privacyDeleteCompleteBody;
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          key: const ValueKey('privacy-delete-complete'),
+          icon: Icon(
+            Icons.check_circle_outline_rounded,
+            color: visual.gold,
+          ),
+          title: Text(title),
+          content: Text(body),
+          actions: [
+            FilledButton(
+              key: const ValueKey('privacy-delete-continue'),
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(strings.privacyDeleteContinue),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

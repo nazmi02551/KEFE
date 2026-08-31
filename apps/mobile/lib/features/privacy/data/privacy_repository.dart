@@ -9,9 +9,11 @@ class PrivacyDeletionReceipt {
     required this.receiptId,
     required this.deletedAt,
     required this.policyVersion,
+    this.isProductPreview = false,
   });
 
   final String receiptId;
   final DateTime deletedAt;
   final String policyVersion;
+  final bool isProductPreview;
 }

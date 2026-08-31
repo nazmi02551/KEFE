@@ -23,6 +23,7 @@ class PreviewPrivacyRepository implements PrivacyRepository {
       receiptId: 'preview-deletion-receipt',
       deletedAt: DateTime.now().toUtc(),
       policyVersion: 'PRODUCT_PREVIEW_ONLY',
+      isProductPreview: true,
     );
   }
 }

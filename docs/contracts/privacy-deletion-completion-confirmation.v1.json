@@ -1,0 +1,73 @@
+{
+  "contract_id": "KEFE-PRIVACY-DELETION-COMPLETION-CONFIRMATION-001",
+  "version": "1.0.0",
+  "status": "CANDIDATE",
+  "issue": 399,
+  "capabilities": ["CAP-085"],
+  "parent_exact_head": "61928c36489feede0cd550ab64d4db98b7be27e6",
+  "trigger": {
+    "valid_repository_receipt_required": true,
+    "cancelled_deletion_shows_completion": false,
+    "failed_deletion_shows_completion": false,
+    "failed_deletion_navigates": false
+  },
+  "production_presentation": {
+    "private_product_data_deleted_visible": true,
+    "aggregate_contributions_anonymized_visible": true,
+    "receipt_id_visible": false,
+    "actor_id_visible": false,
+    "deletion_timestamp_visible": false,
+    "policy_version_visible": false,
+    "credential_visible": false
+  },
+  "preview_presentation": {
+    "typed_receipt_provenance_required": true,
+    "policy_string_inference_allowed": false,
+    "sample_data_reset_visible": true,
+    "production_account_deletion_claimed": false,
+    "live_data_deletion_claimed": false
+  },
+  "interaction": {
+    "barrier_dismissible": false,
+    "system_back_dismissible": false,
+    "explicit_continue_required": true,
+    "successful_final_route": "/welcome",
+    "stable_widget_keys": [
+      "privacy-delete-complete",
+      "privacy-delete-continue"
+    ],
+    "locales": ["tr", "en"]
+  },
+  "preserved": {
+    "exact_delete_token": "DELETE",
+    "actor_bound_server_confirmation": true,
+    "receipt_validation_fail_closed": true,
+    "credentials_clear_only_after_valid_receipt": true,
+    "privacy_feature_gate_changed": false,
+    "api_changed": false,
+    "openapi_changed": false,
+    "database_changed": false,
+    "production_preview_isolation": true
+  },
+  "methodology": {
+    "legal_certification_added": false,
+    "retention_proof_added": false,
+    "analytics_added": false,
+    "personal_inference_added": false,
+    "ranking_added": false,
+    "recommendation_added": false,
+    "signal_in_scope": false,
+    "impact_in_scope": false
+  },
+  "required_exact_head_workflows": [
+    "API CI",
+    "Mobile CI",
+    "MVP Beta Gates",
+    "Global Readiness"
+  ],
+  "lifecycle": {
+    "capability_promotion": false,
+    "current_status_update": false,
+    "human_review_required": true
+  }
+}
