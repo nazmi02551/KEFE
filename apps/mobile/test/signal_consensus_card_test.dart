@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kefe_mobile/core/localization/internal_alpha_strings.dart';
 import 'package:kefe_mobile/core/localization/kefe_strings.dart';
 import 'package:kefe_mobile/features/signal/domain/signal_consensus_card_models.dart';
 

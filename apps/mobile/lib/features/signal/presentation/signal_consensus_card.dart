@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/design/kefe_surface.dart';
 import '../../../core/design/kefe_visual_system.dart';
-import '../../../core/localization/internal_alpha_strings.dart';
 import '../../../core/localization/kefe_strings.dart';
 import '../domain/signal_consensus_card_models.dart';
 

@@ -372,6 +372,7 @@ class _Domains extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _ConstitutionalCockpitAssuranceCard extends StatelessWidget {
   const _ConstitutionalCockpitAssuranceCard({required this.strings});
 
