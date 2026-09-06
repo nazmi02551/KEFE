@@ -637,15 +637,19 @@ class _AlternativeResponseFooter extends StatelessWidget {
                 thickness: 0.8,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                strings.decisionOptOutTitle,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
-                  color: visual.mutedForeground,
+            Flexible(
+              flex: 3,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  strings.decisionOptOutTitle,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
+                    color: visual.mutedForeground,
+                  ),
                 ),
               ),
             ),

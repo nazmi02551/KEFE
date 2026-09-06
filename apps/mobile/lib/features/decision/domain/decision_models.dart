@@ -265,18 +265,37 @@ class FlowRuntimeSnapshot {
 }
 
 @immutable
+class StakeholderGapSegment {
+  const StakeholderGapSegment({
+    required this.segmentKey,
+    required this.label,
+    required this.distributions,
+    required this.gapPoints,
+    required this.sampleSize,
+  });
+
+  final String segmentKey;
+  final String label;
+  final Map<String, double> distributions;
+  final int gapPoints;
+  final int sampleSize;
+}
+
+@immutable
 class RevealResult {
   const RevealResult({
     required this.layer,
     required this.sampleSize,
     required this.confidence,
     required this.values,
+    this.stakeholderGaps = const [],
   });
 
   final String layer;
   final int sampleSize;
   final String confidence;
   final Map<String, double> values;
+  final List<StakeholderGapSegment> stakeholderGaps;
 }
 
 enum PerspectiveUiState {

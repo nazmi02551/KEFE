@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobile/core/localization/internal_alpha_strings.dart';
-import 'package:mobile/core/localization/kefe_strings.dart';
+import 'package:kefe_mobile/core/localization/internal_alpha_strings.dart';
+import 'package:kefe_mobile/core/localization/kefe_strings.dart';
 
 void main() {
   group('Insufficient information and missing options response contract & structure (CAP-011)', () {

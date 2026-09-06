@@ -181,6 +181,25 @@ class KefeStrings {
     ),
     _ => genericError,
   };
+
+  bool get isTr => locale.languageCode == 'tr';
+
+  String get signalCardEyebrow => _text('signal.card_eyebrow');
+  String get signalCardTierGold => _text('signal.tier_gold');
+  String get signalCardTierSilver => _text('signal.tier_silver');
+  String get signalCardTierBronze => _text('signal.tier_bronze');
+  String signalCardAgreementBadge(int pct, int count) =>
+      _text('signal.agreement_badge', placeholders: {'pct': pct, 'count': count});
+
+  String get institutionEyebrow => _text('institution.eyebrow');
+  String get institutionVerifiedBadge => _text('institution.verified_badge');
+  String institutionMilestoneLabel(String date) =>
+      _text('institution.milestone_label', placeholders: {'date': date});
+  String get institutionTypeAcknowledge => _text('institution.type_acknowledge');
+  String get institutionTypeCommitment => _text('institution.type_commitment');
+  String get institutionTypePolicyChange => _text('institution.type_policy_change');
+  String get institutionTypeClarification => _text('institution.type_clarification');
+  String get institutionTypeDecline => _text('institution.type_decline');
 }
 
 class KefeStringsDelegate extends LocalizationsDelegate<KefeStrings> {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+typedef KefeVisualSystem = KefeVisualTheme;
+
 @immutable
 class KefeVisualTheme extends ThemeExtension<KefeVisualTheme> {
   const KefeVisualTheme({

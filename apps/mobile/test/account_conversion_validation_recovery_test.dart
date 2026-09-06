@@ -1,12 +1,13 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobile/core/localization/internal_alpha_strings.dart';
-import 'package:mobile/core/localization/kefe_strings.dart';
-import 'package:mobile/features/account/application/account_controller.dart';
-import 'package:mobile/features/account/data/account_repository.dart';
-import 'package:mobile/features/account/data/preview_account_repository.dart';
-import 'package:mobile/features/decision/data/http_decision_repository.dart';
+import 'package:kefe_mobile/core/localization/internal_alpha_strings.dart';
+import 'package:kefe_mobile/core/localization/kefe_strings.dart';
+import 'package:kefe_mobile/features/account/application/account_controller.dart';
+import 'package:kefe_mobile/features/account/data/account_repository.dart';
+import 'package:kefe_mobile/features/account/data/preview_account_repository.dart';
+import 'package:kefe_mobile/features/decision/data/http_decision_repository.dart';
 
 class FakeAccountRepository implements AccountRepository {
   OtpChallenge? requestedChallenge;

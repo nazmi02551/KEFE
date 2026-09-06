@@ -6,6 +6,11 @@ class PreviewPrivacyRepository implements PrivacyRepository {
   @override
   Future<Map<String, Object?>> export() async {
     return {
+      'schema_version': 'kefe.privacy.export.v1',
+      'manifest': {
+        'generated_at': DateTime.now().toUtc().toIso8601String(),
+        'record_count': 0,
+      },
       'preview': true,
       'deleted': _deleted,
       'retention': {'mode': 'PRODUCT_PREVIEW_SAMPLE_ONLY'},

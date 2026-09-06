@@ -91,14 +91,15 @@ void main() {
         if (entity is! File || !entity.path.endsWith('.dart')) continue;
         final source = entity.readAsStringSync();
 
+        final normalizedPath = entity.path.replaceAll(r'\', '/');
         if (source.contains('locale.languageCode')) {
-          directLanguageFiles.add(entity.path);
+          directLanguageFiles.add(normalizedPath);
         }
         if (source.contains('_isTurkish') ||
             source.contains('_iaTr') ||
             source.contains('_savedCaseIsTurkish') ||
             source.contains('bool get _tr')) {
-          forbiddenHelperFiles.add(entity.path);
+          forbiddenHelperFiles.add(normalizedPath);
         }
       }
 
