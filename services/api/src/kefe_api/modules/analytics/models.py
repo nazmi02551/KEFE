@@ -74,3 +74,31 @@ class MeaningfulWeighMetric:
     meaningful_weigh_count: int
     weekly_active_weighers: int
     distinct_cases_weighed: int
+
+
+@dataclass(frozen=True, slots=True)
+class FunnelStageMetric:
+    stage_name: str
+    stage_count: int
+    conversion_from_start_rate: float
+    drop_off_from_previous_rate: float
+
+
+@dataclass(frozen=True, slots=True)
+class ActivationFunnelMetric:
+    window_start: datetime
+    window_end: datetime
+    total_sessions: int
+    stages: tuple[FunnelStageMetric, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class PerspectiveResilienceMetric:
+    window_start: datetime
+    window_end: datetime
+    total_exposed_sessions: int
+    stable_decisions_count: int
+    shifted_decisions_count: int
+    resilience_index: float
+    attitude_shift_rate: float
+

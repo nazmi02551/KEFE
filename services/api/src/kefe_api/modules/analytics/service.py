@@ -8,9 +8,12 @@ from typing import Any
 from uuid import NAMESPACE_URL, UUID, uuid5
 
 from kefe_api.modules.analytics.models import (
+    ActivationFunnelMetric,
     ActivationJourney,
     AnalyticsEvent,
+    FunnelStageMetric,
     MeaningfulWeighMetric,
+    PerspectiveResilienceMetric,
     QualityJourney,
 )
 from kefe_api.modules.analytics.registry import AnalyticsRegistry
@@ -405,4 +408,99 @@ class MeaningfulWeighsAggregator:
             weekly_active_weighers=len(distinct_actors),
             distinct_cases_weighed=len(distinct_cases),
         )
+
+
+class ActivationFunnelCalculator:
+    @staticmethod
+    def calculate(
+        activation_journeys: Iterable[ActivationJourney],
+        quality_journeys: Iterable[QualityJourney],
+        *,
+        window_start: datetime,
+        window_end: datetime,
+    ) -> ActivationFunnelMetric:
+        journeys_list = list(activation_journeys)
+        total_sessions = len(journeys_list)
+
+        quality_by_session = {q.session_id: q for q in quality_journeys}
+
+        c_started = sum(1 for j in journeys_list if j.started_at is not None)
+        c_committed = sum(1 for j in journeys_list if j.committed_at is not None)
+        c_revealed = sum(1 for j in journeys_list if j.result_revealed_at is not None)
+
+        c_perspective = 0
+        c_revised = 0
+        for j in journeys_list:
+            q = quality_by_session.get(j.session_id)
+            if q is not None:
+                if q.perspective_viewed_at is not None:
+                    c_perspective += 1
+                if q.decision_revised_at is not None:
+                    c_revised += 1
+
+        stage_specs = [
+            ("WEIGH_STARTED", c_started),
+            ("DECISION_COMMITTED", c_committed),
+            ("RESULT_REVEALED", c_revealed),
+            ("PERSPECTIVE_VIEWED", c_perspective),
+            ("DECISION_REVISED", c_revised),
+        ]
+
+        stage_metrics: list[FunnelStageMetric] = []
+        prev_count = None
+        for name, count in stage_specs:
+            conv_rate = round(count / total_sessions, 4) if total_sessions > 0 else 0.0
+            if prev_count is None or prev_count == 0:
+                drop_off = 0.0
+            else:
+                drop_off = round((prev_count - count) / prev_count, 4)
+            stage_metrics.append(
+                FunnelStageMetric(
+                    stage_name=name,
+                    stage_count=count,
+                    conversion_from_start_rate=conv_rate,
+                    drop_off_from_previous_rate=drop_off,
+                )
+            )
+            prev_count = count
+
+        return ActivationFunnelMetric(
+            window_start=window_start,
+            window_end=window_end,
+            total_sessions=total_sessions,
+            stages=tuple(stage_metrics),
+        )
+
+
+class PerspectiveResilienceCalculator:
+    @staticmethod
+    def calculate(
+        quality_journeys: Iterable[QualityJourney],
+        *,
+        window_start: datetime,
+        window_end: datetime,
+    ) -> PerspectiveResilienceMetric:
+        exposed = [
+            q
+            for q in quality_journeys
+            if q.perspective_viewed_at is not None
+            and window_start <= q.perspective_viewed_at <= window_end
+        ]
+        total_exposed = len(exposed)
+        shifted = sum(1 for q in exposed if q.decision_revised_at is not None)
+        stable = sum(1 for q in exposed if q.decision_revised_at is None)
+
+        resilience_index = round(stable / total_exposed, 4) if total_exposed > 0 else 0.0
+        attitude_shift_rate = round(shifted / total_exposed, 4) if total_exposed > 0 else 0.0
+
+        return PerspectiveResilienceMetric(
+            window_start=window_start,
+            window_end=window_end,
+            total_exposed_sessions=total_exposed,
+            stable_decisions_count=stable,
+            shifted_decisions_count=shifted,
+            resilience_index=resilience_index,
+            attitude_shift_rate=attitude_shift_rate,
+        )
+
 
