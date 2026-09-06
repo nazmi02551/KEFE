@@ -371,3 +371,192 @@ class _Domains extends StatelessWidget {
     );
   }
 }
+
+class _ConstitutionalCockpitAssuranceCard extends StatelessWidget {
+  const _ConstitutionalCockpitAssuranceCard({required this.strings});
+
+  final KefeStrings strings;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    final isTr = strings.isTr;
+
+    return KefeSurface(
+      key: const ValueKey('my-kefe-constitutional-cockpit'),
+      tone: KefeSurfaceTone.premium,
+      accent: visual.rules,
+      padding: const EdgeInsets.all(18),
+      borderRadius: 22,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: visual.rules.withValues(alpha: visual.isDark ? 0.20 : 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: visual.rules.withValues(alpha: 0.35)),
+                ),
+                child: Icon(Icons.verified_user_outlined, color: visual.rules, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    KefeEyebrow(
+                      isTr ? 'ANAYASAL VE BİLİŞSEL GÜVENCELER' : 'CONSTITUTIONAL ASSURANCES',
+                      color: visual.rules,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      isTr ? 'Kişisel Müzakere Kasası' : 'Personal Deliberation Vault',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.2,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _AssuranceItem(
+            icon: Icons.receipt_long_outlined,
+            accent: visual.burgundy,
+            title: isTr ? 'Kriptografik Karar Makbuzu (CAP-012)' : 'Cryptographic Decision Receipt (CAP-012)',
+            description: isTr
+                ? 'Kararlarınız yerel SHA-256 bütünlük özetiyle mühürlenir; profil oluşturulamaz ve anonimdir.'
+                : 'Decisions are sealed with local SHA-256 digests; privacy-first and tamper-evident.',
+            status: isTr ? 'Aktif' : 'Active',
+          ),
+          const SizedBox(height: 12),
+          _AssuranceItem(
+            icon: Icons.psychology_alt_outlined,
+            accent: visual.empathy,
+            title: isTr ? 'Bilişsel Esneklik & Derinlik (CAP-174)' : 'Epistemic Flexibility & Depth (CAP-174)',
+            description: isTr
+                ? '"Ne Fikrimi Değiştirir?" sorgulamasıyla kendi düşünce koşullarınızı betimsel olarak kaydedebilirsiniz.'
+                : 'Records the conditions you describe that would inform your perspective post-deliberation.',
+            status: isTr ? 'Betimsel' : 'Descriptive',
+          ),
+          const SizedBox(height: 12),
+          _AssuranceItem(
+            icon: Icons.battery_charging_full_rounded,
+            accent: visual.goldSoft,
+            title: isTr ? 'Zihinsel Yorgunluk Kalkanı (CAP-190)' : 'Decision Fatigue Guard (CAP-190)',
+            description: isTr
+                ? 'Optimal tempo gözetilir; aceleci veya manipülatif karar döngüleri engellenir.'
+                : 'Protects from cognitive fatigue with healthy pacing and mindful intervals.',
+            status: isTr ? 'Dinlenmiş & Berrak' : 'Optimal Pacing',
+          ),
+          const SizedBox(height: 12),
+          _AssuranceItem(
+            icon: Icons.account_balance_outlined,
+            accent: visual.rules,
+            title: isTr ? 'Doğrulanmış Kurumsal Yanıt (CAP-192)' : 'Verified Institution Response (CAP-192)',
+            description: isTr
+                ? 'Müzakere edilen konular resmi kurum taahhütlerine ve mevzuat etki odasına bağlanır.'
+                : 'Connects collective deliberation to verified institutional commitments.',
+            status: isTr ? 'Bağlantılı' : 'Linked',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AssuranceItem extends StatelessWidget {
+  const _AssuranceItem({
+    required this.icon,
+    required this.accent,
+    required this.title,
+    required this.description,
+    required this.status,
+  });
+
+  final IconData icon;
+  final Color accent;
+  final String title;
+  final String description;
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = context.kefeVisual;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: visual.surfaceSunken,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: visual.border),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: visual.isDark ? 0.20 : 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 17, color: accent),
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w800,
+                          color: visual.onSurfaceStrong,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: accent.withValues(alpha: 0.3)),
+                      ),
+                      child: Text(
+                        status,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: accent,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: visual.mutedForeground,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

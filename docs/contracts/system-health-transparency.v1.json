@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SystemHealthTransparencyContract",
+  "version": "v1",
+  "contract_id": "KEFE-SYS-HEALTH-001",
+  "capability_id": "CAP-088",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_downtime_obfuscation": true,
+    "independent_telemetry_resilience": true
+  },
+  "type": "object",
+  "required": [
+    "subsystem_id",
+    "subsystem_name",
+    "status",
+    "p99_latency_ms",
+    "uptime_percentage_30d",
+    "active_incident_summary"
+  ],
+  "properties": {
+    "subsystem_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "subsystem_name": {
+      "type": "string",
+      "minLength": 3
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "OPERATIONAL_OPTIMAL",
+        "DEGRADED_PERFORMANCE",
+        "INCIDENT_ACTIVE"
+      ]
+    },
+    "p99_latency_ms": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "uptime_percentage_30d": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 100.0
+    },
+    "active_incident_summary": {
+      "type": "string"
+    }
+  }
+}

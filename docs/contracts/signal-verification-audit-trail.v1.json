@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SignalVerificationAuditTrailContract",
+  "version": "v1",
+  "contract_id": "KEFE-SIGNAL-VERIFICATION-AUDIT-001",
+  "capability_id": "CAP-048",
+  "status": "ACCEPTED",
+  "invariants": {
+    "append_only_immutable": true,
+    "sha256_hash_chained": true,
+    "public_verifiability": true
+  },
+  "type": "object",
+  "required": [
+    "audit_id",
+    "signal_id",
+    "case_version_id",
+    "event_type",
+    "actor_ref",
+    "evidence_snapshot",
+    "occurred_at",
+    "entry_hash"
+  ],
+  "properties": {
+    "audit_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "signal_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "THRESHOLD_CROSSED",
+        "EDITORIAL_CERTIFIED",
+        "METRIC_REFRESHED",
+        "AUTHORITY_REVOKED"
+      ]
+    },
+    "actor_ref": {
+      "type": "string"
+    },
+    "evidence_snapshot": {
+      "type": "object"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "entry_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

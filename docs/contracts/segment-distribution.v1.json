@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kefe.org/schemas/segment-distribution.v1.json",
+  "title": "PrivacySafeSegmentDistribution",
+  "description": "KEFE-SEGMENT-DISTRIBUTION-001: Privacy-safe demographic and contextual segment distribution contract enforcing k-anonymity (n >= 30) and zero individual profiling.",
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "minimum_sample_threshold",
+    "overall_sample_size",
+    "segments",
+    "privacy_guarantees",
+    "generated_at"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string"
+    },
+    "minimum_sample_threshold": {
+      "type": "integer",
+      "minimum": 30
+    },
+    "overall_sample_size": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "cohort_type",
+          "cohort_label",
+          "sample_size",
+          "is_suppressed",
+          "option_shares"
+        ],
+        "properties": {
+          "cohort_type": {
+            "type": "string",
+            "enum": [
+              "AGE_COHORT",
+              "URBAN_RURAL_COHORT",
+              "EXPERIENCE_LEVEL",
+              "REGIONAL_COHORT",
+              "STAKEHOLDER_ROLE"
+            ]
+          },
+          "cohort_label": {
+            "type": "string"
+          },
+          "sample_size": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "is_suppressed": {
+            "type": "boolean"
+          },
+          "suppression_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "option_shares": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0
+            }
+          },
+          "primary_choice": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "entropy_score": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          }
+        }
+      }
+    },
+    "privacy_guarantees": {
+      "type": "object",
+      "required": [
+        "k_anonymity_threshold",
+        "no_individual_profiling",
+        "differential_privacy_noise_applied"
+      ],
+      "properties": {
+        "k_anonymity_threshold": {
+          "type": "integer",
+          "minimum": 30
+        },
+        "no_individual_profiling": {
+          "type": "boolean",
+          "const": true
+        },
+        "differential_privacy_noise_applied": {
+          "type": "boolean"
+        }
+      }
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

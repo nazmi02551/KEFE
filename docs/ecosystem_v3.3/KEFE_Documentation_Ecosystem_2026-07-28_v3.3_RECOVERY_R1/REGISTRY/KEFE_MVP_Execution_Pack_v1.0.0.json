@@ -1,0 +1,280 @@
+{
+  "artifact": "KEFE MVP Execution Pack",
+  "version": "1.0.0",
+  "generated_at": "2026-07-27",
+  "source_document": {
+    "document_id": "KEFE-MVP-001",
+    "version": "1.2.0"
+  },
+  "golden_path": [
+    "APP-001",
+    "EXP-001",
+    "CAS-001",
+    "WGH-001",
+    "RVL-001",
+    "PER-001",
+    "MYK-001",
+    "SHR-001"
+  ],
+  "first_run_prefix": [
+    "APP-001",
+    "ONB-001"
+  ],
+  "post_reveal_optional": [
+    "AUT-001",
+    "ACT-001"
+  ],
+  "screens": [
+    {
+      "id": "APP-001",
+      "name": "Bootstrap / Launch",
+      "capability": "Client Platform",
+      "goal": "Uygulamayı güvenli ve hızlı başlatmak; doğru locale/theme/config/session ile kullanıcıyı hedef giriş noktasına yönlendirmek.",
+      "entry": "Cold start, warm start, push, share deep link.",
+      "components": "Brand splash (kısa), bootstrap progress yalnız gerekirse, retry/degraded state.",
+      "actions": "Sessiz session restore; config/cache doğrulama; deep-link resolve.",
+      "api": "POST /v1/guest-sessions (ilk guest gerektiğinde); GET /v1/shares/{token} (deep link).",
+      "events": "app/session telemetry; share.opened deep linkte.",
+      "states": "BOOTSTRAPPING, READY, DEGRADED, BLOCKED_MIN_VERSION, ERROR_RETRYABLE.",
+      "accept": "Core config erişilemezse signed defaults ile güvenli degrade; debug/admin özellikleri prod build’de yok; startup regresyonu telemetry ile ölçülür."
+    },
+    {
+      "id": "ONB-001",
+      "name": "First-run Value Promise",
+      "capability": "Growth/Product",
+      "goal": "Ürünü uzun anlatmadan Commit First değerini deneyim öncesi anlaşılır kılmak.",
+      "entry": "İlk kurulum / onboarding_completed=false.",
+      "components": "Vaat 1, vaat 2, skip/continue, accessibility labels.",
+      "actions": "Demo Case’e geç; onboarding completed kaydı.",
+      "api": "Zorunlu network çağrısı yok; demo fallback paketlenebilir.",
+      "events": "Core product event zorunlu değildir; yalnız client onboarding completion telemetry (PII/karar içeriği yok).",
+      "states": "READY, OFFLINE_FALLBACK.",
+      "accept": "En fazla iki kısa vaat; sonuç preview yok; locale değişiminde layout kırılmaz; screen reader sırası doğal."
+    },
+    {
+      "id": "EXP-001",
+      "name": "Explore",
+      "capability": "Discovery",
+      "goal": "Kullanıcının güvenli, çeşitli ve ilgili bir Case bulmasını sağlamak.",
+      "entry": "Ana sekme Explore; onboarding sonrası; share dışı normal giriş.",
+      "components": "Hero Case, önerilen Case kartları, kategori/topic chip, Search girişi; Radar ayrı tab değildir.",
+      "actions": "Case aç; ilgilenmiyorum; gerekirse cache refresh.",
+      "api": "GET /v1/feed.",
+      "events": "case.impression, case.opened.",
+      "states": "LOADING, READY, EMPTY, OFFLINE_STALE, ERROR_RETRYABLE.",
+      "accept": "Commit sonucu kartta görünmez; cursor/lazy rendering; stale içerik freshness metadata taşır; aynı ideolojik çizgiye kilitlenmez."
+    },
+    {
+      "id": "CAS-001",
+      "name": "Case Detail",
+      "capability": "Content",
+      "goal": "Kullanıcının karar vermeden önce yeterli bağlamı görmesini sağlamak.",
+      "entry": "Explore, deep link, Activity.",
+      "components": "40-80 kelime özet, Issue, 1-3 kritik bilgi, expand context, source/claim yalnız gerektiğinde, Tart CTA.",
+      "actions": "Context aç; source aç; Weigh başlat.",
+      "api": "GET /v1/cases/{caseId}; POST /v1/cases/{caseId}/weigh-sessions.",
+      "events": "case.opened, case.viewed, context.expanded, source.opened, weigh.started.",
+      "states": "LOADING, READY, STALE_VERSION, OFFLINE_STALE, SAFETY_BLOCKED, ERROR_RETRYABLE.",
+      "accept": "Commit öncesi sonuç/popüler gerekçe/uzman dağılımı yok; yeni version varsa commit başlamadan yenilenir; L0 core 5 saniyede anlaşılabilir."
+    },
+    {
+      "id": "WGH-001",
+      "name": "Weigh Composer",
+      "capability": "Weighing",
+      "goal": "1 ana karar ve gerektiğinde 1 destek boyutunu düşük bilişsel yükle toplamak.",
+      "entry": "CAS-001 veya Quick Weigh.",
+      "components": "Question control, semantic endpoint labels, optional confidence/enough-information, primary CTA commit.primary.",
+      "actions": "Draft değiştir; geri dön; “Kararımı Ver” ile commit.",
+      "api": "PUT /v1/weigh-sessions/{id}/responses; POST /v1/weigh-sessions/{id}/commit.",
+      "events": "response.changed, weigh.committed, weigh.commit_failed.",
+      "states": "NOT_STARTED → DRAFT → READY_TO_COMMIT → COMMITTING → COMMITTED; ayrıca ABANDONED, EXPIRED, BLOCKED_BY_VERSION, COMMIT_FAILED_RETRYABLE, COMMIT_FAILED_FINAL.",
+      "accept": "Idempotency aynı commit’i çoğaltmaz; server onayı olmadan COMMITTED gösterilmez; stale version CASE_VERSION_STALE ile güvenli dönüş yapar; ilk 3 kullanım helper “Kararını kilitle ve sonucu gör.”"
+    },
+    {
+      "id": "RVL-001",
+      "name": "Reveal",
+      "capability": "Results",
+      "goal": "Commit sonrası KEFE’nin ana değer anını tek güçlü içgörü ile göstermek.",
+      "entry": "Başarılı WGH-001 commit.",
+      "components": "Kullanıcı kararı, hero insight, distribution, n/tarih/güven, methodology link, Perspective CTA, Share CTA.",
+      "actions": "Perspective aç; methodology aç; share oluştur; My KEFE progress gör.",
+      "api": "GET /v1/weigh-sessions/{id}/reveal.",
+      "events": "result.revealed.",
+      "states": "LOADING, READY_TRUSTED, INSUFFICIENT_SAMPLE, DELAYED_INTEGRITY, ERROR_RETRYABLE.",
+      "accept": "Başarılı commit olmadan 403 REVEAL_NOT_AUTHORIZED; varsayılan Trusted; n yetersizse strong insight yok; ilk görünümde metrik duvarı yok."
+    },
+    {
+      "id": "AUT-001",
+      "name": "Account Offer",
+      "capability": "Identity",
+      "goal": "İlk Reveal değerinden sonra guest kullanıcıya geçmişini korumayı şeffaf biçimde teklif etmek.",
+      "entry": "İlk guest Reveal sonrası; tekrar zorlanmaz.",
+      "components": "Değer açıklaması, hesap aç / guest devam, privacy link.",
+      "actions": "OTP başlat; guest devam; merge consent.",
+      "api": "POST /v1/auth/otp/request; POST /v1/auth/otp/verify; POST /v1/auth/guest-merge.",
+      "events": "auth/merge telemetry; kişisel karar içeriği attribution’a gönderilmez.",
+      "states": "OFFERED, OTP_PENDING, VERIFIED, MERGE_CONFIRM, MERGED, SKIPPED, ERROR_RETRYABLE.",
+      "accept": "Account Reveal ön koşulu değildir; merge açık rıza ister; unclaimed history 30 gün politikasını açıklar; dark pattern yok."
+    },
+    {
+      "id": "PER-001",
+      "name": "Perspective / Reason",
+      "capability": "Arguments",
+      "goal": "Kullanıcının kendi görüşüne yakın ve karşı güçlü gerekçeleri, popülerlik yarışına dönüşmeden görmesini sağlamak.",
+      "entry": "RVL-001 CTA; Case revisit sonrası committed kullanıcı.",
+      "components": "En fazla 4 güçlü kart: yakın, karşı, Bridge, alternatif bağlam; optional Reason Composer.",
+      "actions": "Reason oku; reaction ver; reason yaz/önizle/gönder; report.",
+      "api": "GET /v1/cases/{caseId}/perspectives; POST /v1/cases/{caseId}/reasons; POST /v1/reasons/{id}/reactions; POST /v1/reports.",
+      "events": "argument.read, argument.created, argument.reacted, report.created.",
+      "states": "LOADING, READY, CLUSTER_PENDING, DEGRADED_CURATED, REASON_PENDING_MODERATION, ERROR_RETRYABLE.",
+      "accept": "AI down olsa curated/fallback perspective çalışır; ham yorum duvarı yok; reason optional; AI metni kullanıcı onayı olmadan değiştirmez."
+    },
+    {
+      "id": "MYK-001",
+      "name": "My KEFE Progress",
+      "capability": "Personal Insights",
+      "goal": "Yetersiz veride kişilik hükmü vermeden kullanıcıya ilerlemesinin oluştuğunu göstermek.",
+      "entry": "Reveal sonrası CTA veya ana My KEFE sekmesi.",
+      "components": "Meaningful weigh count, domain progress, source/perspective progress; eligibility açıklaması.",
+      "actions": "Activity’ye git; yeni Case keşfet.",
+      "api": "GET /v1/me/insights.",
+      "events": "Core product event zorunlu değildir; yalnız ekran performans/usage telemetry (PII/karar içeriği yok).",
+      "states": "EMPTY_FORMING, PROGRESS_READY, PARTIAL_INSIGHTS, ERROR_RETRYABLE.",
+      "accept": "Tek global skor eşiği yok; “Sen busun” dili yok; zaman penceresi gereken insight’ta görünür; guest için local/basic progress mümkündür."
+    },
+    {
+      "id": "ACT-001",
+      "name": "Activity",
+      "capability": "Personal Insights",
+      "goal": "Geçmiş committed kararları ve yeni bilgi sonrası yeniden tartma fırsatlarını yönetmek.",
+      "entry": "Activity sekmesi / push.",
+      "components": "Karar geçmişi, CaseVersion update, “Kararım aynı / Yeniden tart”, share comparisons.",
+      "actions": "Case aç; revision başlat; aynı kararı koru.",
+      "api": "GET /v1/me/activity; POST /v1/weigh-sessions/{id}/revisions.",
+      "events": "decision.changed revision commit sonrası; case.opened.",
+      "states": "EMPTY, READY, UPDATE_AVAILABLE, ERROR_RETRYABLE.",
+      "accept": "Eski karar silinmez; değişen bilgi açıkça gösterilir; revision yeni session’dır; başlangıç revision zinciri lineerdir."
+    },
+    {
+      "id": "SHR-001",
+      "name": "Share Preview / Deep Link",
+      "capability": "Sharing",
+      "goal": "Kullanıcının içgörüyü paylaşmasını sağlarken alıcının kararını sosyal etkiden korumak.",
+      "entry": "RVL-001 / MYK-001 uygun paylaşım CTA.",
+      "components": "Safe card preview, channel chooser, deep link.",
+      "actions": "Share payload oluştur; native share sheet aç.",
+      "api": "POST /v1/shares; alıcı için GET /v1/shares/{token}.",
+      "events": "share.created, share.opened.",
+      "states": "PREVIEW, CREATED, SHARE_SHEET, ERROR_RETRYABLE.",
+      "accept": "Alıcı commit etmeden gönderen cevabı/sonuç görünmez; hassas profil/siyasi etiket/küçük cohort karta girmez; mağdur/şüpheli görseli yok."
+    }
+  ],
+  "core_tests": [
+    {
+      "id": "GP-E2E-001",
+      "scenario": "Guest happy path",
+      "expected": "Guest → Case → Weigh → Commit → Reveal tamamlanır; hesap zorunlu değildir."
+    },
+    {
+      "id": "GP-E2E-002",
+      "scenario": "Commit First",
+      "expected": "Commit öncesi topluluk/uzman/popüler reason hiçbir giriş yolunda görünmez."
+    },
+    {
+      "id": "GP-E2E-003",
+      "scenario": "Idempotent commit",
+      "expected": "Aynı Idempotency-Key tekrarında tek committed session oluşur."
+    },
+    {
+      "id": "GP-E2E-004",
+      "scenario": "Unknown commit result",
+      "expected": "Network timeout sonrası retry aynı kararı çoğaltmaz; Reveal ancak server confirmed commit ile açılır."
+    },
+    {
+      "id": "GP-E2E-005",
+      "scenario": "Stale CaseVersion",
+      "expected": "Commit sırasında stale version 409 verir; kullanıcı güncel Case’e alınır."
+    },
+    {
+      "id": "GP-E2E-006",
+      "scenario": "Insufficient sample",
+      "expected": "Reveal güçlü karşılaştırma üretmez; güvenli insufficient-state gösterir."
+    },
+    {
+      "id": "GP-E2E-007",
+      "scenario": "Perspective fallback",
+      "expected": "AI/clustering unavailable iken curated/degraded perspective kullanılabilir."
+    },
+    {
+      "id": "GP-E2E-008",
+      "scenario": "Reason safety",
+      "expected": "PII/hakaret/tehdit riskli reason Publish olmadan pending/review olur."
+    },
+    {
+      "id": "GP-E2E-009",
+      "scenario": "Guest merge",
+      "expected": "OTP sonrası açık rızayla guest history account’a bağlanır; skip mümkündür."
+    },
+    {
+      "id": "GP-E2E-010",
+      "scenario": "Share lock",
+      "expected": "Alıcı commit etmeden gönderen cevabı ve topluluk sonucu görünmez."
+    },
+    {
+      "id": "GP-E2E-011",
+      "scenario": "Offline draft",
+      "expected": "Draft cihazda korunur; offline commit başarı sayılmaz."
+    },
+    {
+      "id": "GP-E2E-012",
+      "scenario": "Theme/locale",
+      "expected": "TR/EN-ready copy, Light/Dark/System ve large-text ile core path taşma/clipping yapmaz."
+    },
+    {
+      "id": "GP-E2E-013",
+      "scenario": "Screen reader",
+      "expected": "Case → Weigh → Commit → Reveal semantik sırası ve label’lar tamamdır."
+    },
+    {
+      "id": "GP-E2E-014",
+      "scenario": "Revision",
+      "expected": "Committed karar yerinde değişmez; revision yeni session ve decision.changed üretir."
+    },
+    {
+      "id": "GP-E2E-015",
+      "scenario": "Privacy",
+      "expected": "Analytics/attribution eventlerinde telefon/PII ve karar içeriği sızmaz."
+    },
+    {
+      "id": "GP-E2E-016",
+      "scenario": "Degraded cache",
+      "expected": "Redis/cache arızasında correctness korunur; performans degrade olabilir."
+    },
+    {
+      "id": "GP-E2E-017",
+      "scenario": "Performance",
+      "expected": "Commit/feed/reveal p95 gate ölçülür; kritik N+1 yoktur."
+    },
+    {
+      "id": "GP-E2E-018",
+      "scenario": "Deep link",
+      "expected": "Share token → Case; result locked; commit sonrası uygun compare açılır."
+    }
+  ],
+  "release_budgets": {
+    "read_api_availability_monthly": ">=99.9%",
+    "commit_p95_ms": "<500",
+    "feed_p95_ms": "<700",
+    "cached_reveal_p95_ms": "<800",
+    "n_plus_one": "prohibited on critical endpoints"
+  },
+  "invariants": [
+    "commit_first",
+    "immutable_case_version",
+    "committed_decision_revision_not_update",
+    "trusted_sample_default",
+    "server_authoritative_commit",
+    "guest_retention_30d",
+    "offline_draft_7d"
+  ]
+}

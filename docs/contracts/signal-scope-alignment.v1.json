@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_id": "KEFE-SIGNAL-SCOPE-001",
+  "version": "1.0.0",
+  "title": "Signal Scope Alignment Contract",
+  "status": "ACCEPTED",
+  "owner": "KEFE-TIM-001|KEFE-RM-001",
+  "capability": "CAP-046",
+  "description": "Governs the strict alignment of civic signals to their defined jurisdictional, geographic, demographic, and temporal scope, preventing silent or invalid broadening beyond the measured decision boundary.",
+  "invariants": [
+    "SIGNAL_DOES_NOT_SILENTLY_BROADEN: A signal's authority is bounded strictly to its measured jurisdiction, geographic boundary, and target population.",
+    "JURISDICTIONAL_INTEGRITY: Municipal or regional signals cannot be represented as national or transnational mandates.",
+    "TEMPORAL_VALIDITY_BOUNDING: Signals possess explicit validity windows beyond which they must be re-tested or archived.",
+    "REPRESENTATION_SCOPE_VERIFICATION: Participant cohort demographics must demonstrably match the governed target population scope.",
+    "CRYPTOGRAPHIC_SCOPE_SEAL: Scope boundary definitions and alignment scores must be sealed with a SHA-256 digest."
+  ],
+  "definitions": {
+    "JurisdictionLevel": {
+      "type": "string",
+      "enum": ["MUNICIPAL", "REGIONAL", "NATIONAL", "TRANSNATIONAL"]
+    },
+    "AlignmentStatus": {
+      "type": "string",
+      "enum": ["STRICTLY_ALIGNED", "OVERBROAD_WARNING", "MISMATCH_DISQUALIFIED"]
+    },
+    "ScopeDimension": {
+      "type": "object",
+      "required": ["dimension", "declared_scope", "sample_scope", "alignment_score", "is_valid"],
+      "properties": {
+        "dimension": { "type": "string" },
+        "declared_scope": { "type": "string" },
+        "sample_scope": { "type": "string" },
+        "alignment_score": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "is_valid": { "type": "boolean" }
+      }
+    }
+  },
+  "type": "object",
+  "required": [
+    "signal_id",
+    "case_version_id",
+    "jurisdiction_level",
+    "target_population",
+    "geographic_scope",
+    "alignment_status",
+    "overall_alignment_score",
+    "dimensions",
+    "validity_window_days",
+    "certified_at",
+    "scope_seal_hash"
+  ],
+  "properties": {
+    "signal_id": { "type": "string", "format": "uuid" },
+    "case_version_id": { "type": "string", "format": "uuid" },
+    "jurisdiction_level": { "$ref": "#/definitions/JurisdictionLevel" },
+    "target_population": { "type": "string" },
+    "geographic_scope": { "type": "string" },
+    "alignment_status": { "$ref": "#/definitions/AlignmentStatus" },
+    "overall_alignment_score": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+    "dimensions": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/ScopeDimension" },
+      "minItems": 3
+    },
+    "validity_window_days": { "type": "integer", "minimum": 1 },
+    "certified_at": { "type": "string", "format": "date-time" },
+    "scope_seal_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

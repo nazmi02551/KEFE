@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CaseSearchFilterContract",
+  "version": "v1",
+  "contract_id": "KEFE-CASE-SEARCH-FILTER-001",
+  "capability_id": "CAP-078",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_algorithmic_polarization": true,
+    "deterministic_neutral_ranking": true,
+    "unbiased_filtering": true
+  },
+  "type": "object",
+  "required": [
+    "query",
+    "total_matched",
+    "results"
+  ],
+  "properties": {
+    "query": {
+      "type": "string"
+    },
+    "selected_domain": {
+      "type": ["string", "null"]
+    },
+    "selected_tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "total_matched": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "case_version_id",
+          "title",
+          "domain",
+          "tags",
+          "status"
+        ],
+        "properties": {
+          "case_version_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

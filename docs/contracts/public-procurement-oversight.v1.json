@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PublicProcurementOversightContract",
+  "version": "v1",
+  "contract_id": "KEFE-PROCURE-001",
+  "capability_id": "CAP-105",
+  "status": "ACCEPTED",
+  "invariants": {
+    "open_ledger_linking_mandated": true,
+    "sole_source_audit_tolerance_enforced": true
+  },
+  "type": "object",
+  "required": [
+    "tender_id",
+    "contracting_authority",
+    "integrity_level",
+    "awarded_amount_try",
+    "cost_overrun_pct",
+    "active_civic_auditors_count"
+  ],
+  "properties": {
+    "tender_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "contracting_authority": {
+      "type": "string",
+      "minLength": 3
+    },
+    "integrity_level": {
+      "type": "string",
+      "enum": [
+        "OPEN_COMPETITIVE_VERIFIED",
+        "ANOMALOUS_SOLE_SOURCE_REVIEW",
+        "CRITICAL_OVERRUN_ALERT"
+      ]
+    },
+    "awarded_amount_try": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "cost_overrun_pct": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "active_civic_auditors_count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ConflictInterestLobbyingRadarContract",
+  "version": "v1",
+  "contract_id": "KEFE-LOBBY-RADAR-001",
+  "capability_id": "CAP-104",
+  "status": "ACCEPTED",
+  "invariants": {
+    "open_disclosure_mandated": true,
+    "zero_hidden_commercial_ties": true
+  },
+  "type": "object",
+  "required": [
+    "radar_id",
+    "organization_id",
+    "exposure_level",
+    "transparency_index",
+    "declared_funding_amount_usd",
+    "primary_benefactor_sector"
+  ],
+  "properties": {
+    "radar_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "organization_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "exposure_level": {
+      "type": "string",
+      "enum": [
+        "CLEAN_INDEPENDENT_DISCLOSURE",
+        "DECLARED_STAKEHOLDER_FINANCING",
+        "HIGH_CONFLICT_EXPOSURE_ALERT"
+      ]
+    },
+    "transparency_index": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "declared_funding_amount_usd": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "primary_benefactor_sector": {
+      "type": "string",
+      "minLength": 3
+    }
+  }
+}

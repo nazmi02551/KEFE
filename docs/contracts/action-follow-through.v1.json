@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ActionFollowThroughContract",
+  "version": "v1",
+  "contract_id": "KEFE-ACTION-FOLLOW-THROUGH-001",
+  "capability_id": "CAP-051",
+  "status": "ACCEPTED",
+  "invariants": {
+    "neutral_platform_posture": true,
+    "verifiable_evidence_required": true,
+    "traceable_milestone_dates": true
+  },
+  "type": "object",
+  "required": [
+    "action_id",
+    "case_version_id",
+    "title",
+    "status",
+    "progress_percentage",
+    "created_at"
+  ],
+  "properties": {
+    "action_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "institution_response_id": {
+      "type": ["string", "null"],
+      "format": "uuid"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 200
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 2000
+    },
+    "status": {
+      "type": "string",
+      "enum": ["PROPOSED", "IN_PROGRESS", "VERIFIED_COMPLETE", "STALLED"]
+    },
+    "progress_percentage": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "target_completion_date": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "evidence_summary": {
+      "type": ["string", "null"]
+    },
+    "evidence_url": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

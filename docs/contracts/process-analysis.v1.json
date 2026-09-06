@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ProcessAnalysisContract",
+  "version": "v1",
+  "contract_id": "KEFE-PROCESS-ANALYSIS-001",
+  "capability_id": "CAP-021",
+  "status": "ACCEPTED",
+  "invariants": {
+    "procedural_transparency_first": true,
+    "non_normative_procedural_evaluation": true,
+    "deterministic_step_tracking": true
+  },
+  "type": "object",
+  "required": [
+    "analysis_id",
+    "case_version_id",
+    "current_stage",
+    "procedural_integrity_score",
+    "transparency_level",
+    "public_participation_status",
+    "oversight_body",
+    "stages"
+  ],
+  "properties": {
+    "analysis_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "current_stage": {
+      "type": "string",
+      "enum": [
+        "CONSULTATION",
+        "DRAFTING",
+        "LEGAL_REVIEW",
+        "PUBLIC_HEARING",
+        "DECISION_ENACTED",
+        "POST_IMPLEMENTATION_AUDIT"
+      ]
+    },
+    "procedural_integrity_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "transparency_level": {
+      "type": "string",
+      "enum": [
+        "HIGH",
+        "MODERATE",
+        "RESTRICTED",
+        "OPAQUE"
+      ]
+    },
+    "public_participation_status": {
+      "type": "string",
+      "enum": [
+        "OPEN_CONSULTATION",
+        "INVITED_STAKEHOLDERS_ONLY",
+        "FORMAL_NOTICE_ONLY",
+        "EXECUTIVE_BYPASS"
+      ]
+    },
+    "oversight_body": {
+      "type": "string",
+      "minLength": 3
+    },
+    "procedural_bottleneck": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "stage_key",
+          "stage_title",
+          "is_completed",
+          "duration_days",
+          "has_public_input"
+        ],
+        "properties": {
+          "stage_key": {
+            "type": "string"
+          },
+          "stage_title": {
+            "type": "string"
+          },
+          "is_completed": {
+            "type": "boolean"
+          },
+          "duration_days": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "has_public_input": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LowBandwidthMeshSyncContract",
+  "version": "v1",
+  "contract_id": "KEFE-MESH-SYNC-001",
+  "capability_id": "CAP-084",
+  "status": "ACCEPTED",
+  "invariants": {
+    "anti_replay_nonce_enforced": true,
+    "delay_tolerant_compression_supported": true
+  },
+  "type": "object",
+  "required": [
+    "bundle_id",
+    "network_channel",
+    "queued_receipts_count",
+    "compressed_payload_bytes",
+    "sync_compression_ratio",
+    "is_replay_guarded"
+  ],
+  "properties": {
+    "bundle_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "network_channel": {
+      "type": "string",
+      "enum": [
+        "PEER_BLUETOOTH_DIRECT_MESH",
+        "COMPRESSED_DELAY_TOLERANT_BUNDLE",
+        "FULL_BROADBAND_RECONCILED"
+      ]
+    },
+    "queued_receipts_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "compressed_payload_bytes": {
+      "type": "integer",
+      "minimum": 64
+    },
+    "sync_compression_ratio": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "is_replay_guarded": {
+      "type": "boolean"
+    }
+  }
+}

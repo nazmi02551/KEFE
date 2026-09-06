@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RoleFlipReweighContract",
+  "version": "v1",
+  "contract_id": "KEFE-ROLE-FLIP-001",
+  "capability_id": "CAP-007",
+  "status": "ACCEPTED",
+  "invariants": {
+    "role_flip_is_perspective_taking_only": true,
+    "descriptive_delta_preserved": true,
+    "no_coercive_conformity": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "initial_role",
+    "flipped_role",
+    "flipped_scenario_prompt",
+    "perspective_shift_score"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "initial_role": {
+      "type": "string",
+      "minLength": 3
+    },
+    "flipped_role": {
+      "type": "string",
+      "minLength": 3
+    },
+    "flipped_scenario_prompt": {
+      "type": "string",
+      "minLength": 10
+    },
+    "perspective_shift_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    }
+  }
+}

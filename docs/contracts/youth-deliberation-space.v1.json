@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "YouthDeliberationSpaceContract",
+  "version": "v1",
+  "contract_id": "KEFE-YOUTH-SPACE-001",
+  "capability_id": "CAP-032",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_commercial_ad_targeting": true,
+    "enhanced_moderation_guard": true
+  },
+  "type": "object",
+  "required": [
+    "space_id",
+    "space_name",
+    "focus_area",
+    "institution_or_community",
+    "active_student_count",
+    "consensus_action_count"
+  ],
+  "properties": {
+    "space_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "space_name": {
+      "type": "string",
+      "minLength": 5
+    },
+    "focus_area": {
+      "type": "string",
+      "enum": [
+        "CAMPUS_AND_EDUCATION_POLICY",
+        "CLIMATE_AND_INTERGENERATIONAL",
+        "DIGITAL_RIGHTS_AND_AI",
+        "CIVIC_ENTREPRENEURSHIP"
+      ]
+    },
+    "institution_or_community": {
+      "type": "string",
+      "minLength": 3
+    },
+    "active_student_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "consensus_action_count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

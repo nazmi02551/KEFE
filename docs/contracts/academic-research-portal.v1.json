@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AcademicResearchPortalContract",
+  "version": "v1",
+  "contract_id": "KEFE-ACAD-PORTAL-001",
+  "capability_id": "CAP-036",
+  "status": "ACCEPTED",
+  "invariants": {
+    "differential_privacy_guaranteed": true,
+    "zero_individual_reidentification": true
+  },
+  "type": "object",
+  "required": [
+    "dataset_id",
+    "dataset_title",
+    "corpus_type",
+    "record_count",
+    "differential_privacy_epsilon",
+    "doi_identifier"
+  ],
+  "properties": {
+    "dataset_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "dataset_title": {
+      "type": "string",
+      "minLength": 5
+    },
+    "corpus_type": {
+      "type": "string",
+      "enum": [
+        "DELIBERATIVE_POLARIZATION_DATASET",
+        "ETHICAL_TRADE_OFF_CORPUS",
+        "ARGUMENT_GRAPH_TOPOLOGY",
+        "POLICY_OUTCOME_BENCHMARK"
+      ]
+    },
+    "record_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "differential_privacy_epsilon": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "doi_identifier": {
+      "type": "string",
+      "minLength": 7
+    }
+  }
+}

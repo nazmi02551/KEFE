@@ -1,0 +1,1143 @@
+openapi: 3.1.0
+info:
+  title: KEFE Consumer API
+  version: 1.0.0
+  description: MVP Golden Path contract. Provider-neutral REST API.
+servers:
+- url: https://api.kefe.example/v1
+  description: logical v1 base; environment overrides via configuration
+tags:
+- name: Auth
+- name: Feed
+- name: Cases
+- name: Weigh
+- name: Results
+- name: Perspectives
+- name: Me
+- name: Sharing
+- name: Reports
+paths:
+  /auth/otp/request:
+    post:
+      summary: Request OTP
+      tags:
+      - Auth
+      responses:
+        '202':
+          description: Accepted
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - challenge_id
+                properties:
+                  challenge_id:
+                    type: string
+        '400': &id001
+          description: Problem Details
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429': *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpRequest'
+  /auth/otp/verify:
+    post:
+      summary: Verify OTP
+      tags:
+      - Auth
+      responses:
+        '200':
+          description: OK
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSession'
+        '400': *id001
+        '429': *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpVerify'
+  /auth/guest-merge:
+    post:
+      summary: Merge guest history into verified actor
+      tags:
+      - Auth
+      responses:
+        '200':
+          description: OK
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  merged:
+                    type: boolean
+        '409': *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GuestMergeRequest'
+      security:
+      - bearerAuth: []
+  /feed:
+    get:
+      summary: Get Explore feed
+      tags:
+      - Feed
+      responses:
+        '200':
+          description: OK
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedResponse'
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: cursor
+        in: query
+        schema:
+          type: string
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 20
+  /cases/{caseId}:
+    get:
+      summary: Get commit-safe case detail
+      tags:
+      - Cases
+      responses:
+        '200':
+          description: OK
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseDetail'
+        '404': *id001
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+  /cases/{caseId}/weigh-sessions:
+    post:
+      summary: Start a weigh session
+      tags:
+      - Weigh
+      responses:
+        '201':
+          description: Created
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeighSession'
+        '409': *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWeighSessionRequest'
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+  /weigh-sessions/{sessionId}/responses:
+    put:
+      summary: Update draft responses
+      tags:
+      - Weigh
+      responses:
+        '200':
+          description: OK
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeighSession'
+        '409': *id001
+        '422': *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateResponsesRequest'
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+  /weigh-sessions/{sessionId}/commit:
+    post:
+      summary: Atomically commit first decision
+      tags:
+      - Weigh
+      responses:
+        '200':
+          description: OK
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommitResponse'
+        '409': *id001
+        '422': *id001
+        '503': *id001
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+  /weigh-sessions/{sessionId}/reveal:
+    get:
+      summary: Reveal trusted result after confirmed commit
+      tags:
+      - Results
+      responses:
+        '200':
+          description: OK
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reveal'
+        '403': *id001
+        '409': *id001
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+  /cases/{caseId}/perspectives:
+    get:
+      summary: Get perspective cards
+      tags:
+      - Perspectives
+      responses:
+        '200':
+          description: OK
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Perspectives'
+        '403': *id001
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+  /cases/{caseId}/reasons:
+    post:
+      summary: Submit a reason
+      tags:
+      - Perspectives
+      responses:
+        '202':
+          description: Accepted
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reason'
+        '422': *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReasonRequest'
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+  /reasons/{reasonId}/reactions:
+    post:
+      summary: React to a reason
+      tags:
+      - Perspectives
+      responses:
+        '201':
+          description: Created
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accepted:
+                    type: boolean
+        '422': *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReactionRequest'
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: reasonId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+  /me/insights:
+    get:
+      summary: Get progressive My KEFE insights
+      tags:
+      - Me
+      responses:
+        '200':
+          description: OK
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyInsights'
+      security:
+      - bearerAuth: []
+  /me/activity:
+    get:
+      summary: Get decision history and update invitations
+      tags:
+      - Me
+      responses:
+        '200':
+          description: OK
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: cursor
+        in: query
+        schema:
+          type: string
+  /weigh-sessions/{sessionId}/revisions:
+    post:
+      summary: Start a revision from a committed decision
+      tags:
+      - Weigh
+      responses:
+        '201':
+          description: Created
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeighSession'
+        '409': *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRevisionRequest'
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+  /shares:
+    post:
+      summary: Create privacy-safe share payload
+      tags:
+      - Sharing
+      responses:
+        '201':
+          description: Created
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SharePayload'
+        '422': *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShareCreateRequest'
+      security:
+      - bearerAuth: []
+  /shares/{token}:
+    get:
+      summary: Resolve a share deep-link without revealing sender result before commit
+      tags:
+      - Sharing
+      responses:
+        '200':
+          description: OK
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  case:
+                    $ref: '#/components/schemas/CaseCard'
+                  sender_result_locked:
+                    type: boolean
+                    const: true
+        '404': *id001
+      parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+  /reports:
+    post:
+      summary: Report content or UGC
+      tags:
+      - Reports
+      responses:
+        '202':
+          description: Accepted
+          headers:
+            Trace-Id:
+              $ref: '#/components/headers/Trace-Id'
+            Request-Version:
+              $ref: '#/components/headers/Request-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accepted:
+                    type: boolean
+        '422': *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportRequest'
+      security:
+      - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque-or-JWT
+  schemas:
+    Problem:
+      type: object
+      required:
+      - type
+      - title
+      - status
+      - code
+      - trace_id
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        code:
+          type: string
+        trace_id:
+          type: string
+        retryable:
+          type: boolean
+          default: false
+        meta:
+          type: object
+          additionalProperties: true
+    CaseCard:
+      type: object
+      required:
+      - case_id
+      - case_version_id
+      - title
+      - base_format
+      - primary_domain
+      - content_risk
+      properties:
+        case_id:
+          type: string
+          format: uuid
+        case_version_id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        base_format:
+          type: string
+        primary_domain:
+          type: string
+        content_risk:
+          type: string
+          enum:
+          - L0
+          - L1
+          - L2
+          - L3
+        political_risk:
+          type:
+          - string
+          - 'null'
+          enum:
+          - P0
+          - P1
+          - P2
+          - P3
+          - P4
+          - null
+        badges:
+          type: array
+          items:
+            type: string
+    FeedResponse:
+      type: object
+      required:
+      - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseCard'
+        next_cursor:
+          type:
+          - string
+          - 'null'
+    QuestionOption:
+      type: object
+      required:
+      - code
+      - label
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+        sort_order:
+          type: integer
+    Question:
+      type: object
+      required:
+      - question_version_id
+      - prompt
+      - response_type
+      properties:
+        question_version_id:
+          type: string
+          format: uuid
+        prompt:
+          type: string
+        response_type:
+          type: string
+        dimension_code:
+          type:
+          - string
+          - 'null'
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionOption'
+        response_schema:
+          type: object
+          additionalProperties: true
+    CaseDetail:
+      type: object
+      required:
+      - case_id
+      - case_version_id
+      - title
+      - summary
+      - questions
+      properties:
+        case_id:
+          type: string
+          format: uuid
+        case_version_id:
+          type: string
+          format: uuid
+        version_no:
+          type: integer
+        title:
+          type: string
+        summary:
+          type: string
+        context:
+          type: object
+          additionalProperties: true
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+        sources:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        claims:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        accepts_weighs:
+          type: boolean
+    CreateWeighSessionRequest:
+      type: object
+      required:
+      - case_version_id
+      - journey_stage
+      - depth
+      - entry_point
+      properties:
+        case_version_id:
+          type: string
+          format: uuid
+        journey_stage:
+          type: string
+          enum:
+          - V0
+          - V1
+          - V2
+          - V3_PLUS
+        depth:
+          type: string
+          enum:
+          - QUICK
+          - STANDARD
+          - DEEP
+        entry_point:
+          type: string
+    WeighSession:
+      type: object
+      required:
+      - session_id
+      - case_version_id
+      - state
+      - journey_stage
+      - depth
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        case_version_id:
+          type: string
+          format: uuid
+        state:
+          type: string
+        journey_stage:
+          type: string
+        depth:
+          type: string
+        expires_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+    ResponseInput:
+      type: object
+      required:
+      - question_version_id
+      - response_type
+      - value
+      properties:
+        question_version_id:
+          type: string
+          format: uuid
+        response_type:
+          type: string
+        value: {}
+    UpdateResponsesRequest:
+      type: object
+      required:
+      - responses
+      properties:
+        responses:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ResponseInput'
+    CommitResponse:
+      type: object
+      required:
+      - session_id
+      - state
+      - committed_at
+      - reveal_available
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        state:
+          const: COMMITTED
+        committed_at:
+          type: string
+          format: date-time
+        reveal_available:
+          type: boolean
+          const: true
+    Reveal:
+      type: object
+      required:
+      - session_id
+      - status
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+          - READY_TRUSTED
+          - INSUFFICIENT_SAMPLE
+          - DELAYED_INTEGRITY
+        hero_insight:
+          type:
+          - string
+          - 'null'
+        sample_layer:
+          type: string
+          enum:
+          - TRUSTED
+        n:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+        confidence_label:
+          type:
+          - string
+          - 'null'
+          enum:
+          - INSUFFICIENT
+          - LOW
+          - MEDIUM
+          - HIGH
+          - null
+        distribution:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+        methodology_version:
+          type:
+          - string
+          - 'null'
+        window_start:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        window_end:
+          type:
+          - string
+          - 'null'
+          format: date-time
+    Reason:
+      type: object
+      required:
+      - reason_id
+      - body
+      - moderation_state
+      properties:
+        reason_id:
+          type: string
+          format: uuid
+        body:
+          type: string
+        stance_relation:
+          type:
+          - string
+          - 'null'
+        moderation_state:
+          type: string
+        cluster_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+    Perspectives:
+      type: object
+      required:
+      - status
+      - items
+      properties:
+        status:
+          type: string
+          enum:
+          - READY
+          - CLUSTER_PENDING
+          - DEGRADED_CURATED
+        items:
+          type: array
+          maxItems: 4
+          items:
+            $ref: '#/components/schemas/Reason'
+    CreateReasonRequest:
+      type: object
+      required:
+      - body
+      - session_id
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        session_id:
+          type: string
+          format: uuid
+    ReactionRequest:
+      type: object
+      required:
+      - reaction_type
+      properties:
+        reaction_type:
+          type: string
+          enum:
+          - PERSUASIVE
+          - NEW_PERSPECTIVE
+          - STRONG_REASON
+          - INFLUENCE
+        influence:
+          type:
+          - string
+          - 'null'
+          enum:
+          - NONE
+          - A_LITTLE
+          - A_LOT
+          - CHANGED_DECISION
+          - null
+    MyInsights:
+      type: object
+      required:
+      - state
+      - meaningful_weigh_count
+      properties:
+        state:
+          type: string
+          enum:
+          - EMPTY_FORMING
+          - PROGRESS_READY
+          - PARTIAL_INSIGHTS
+        meaningful_weigh_count:
+          type: integer
+          minimum: 0
+        domain_progress:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        insights:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    ActivityItem:
+      type: object
+      required:
+      - session_id
+      - case_id
+      - case_version_id
+      - committed_at
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        case_id:
+          type: string
+          format: uuid
+        case_version_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        committed_at:
+          type: string
+          format: date-time
+        update_available:
+          type: boolean
+    Activity:
+      type: object
+      required:
+      - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivityItem'
+        next_cursor:
+          type:
+          - string
+          - 'null'
+    CreateRevisionRequest:
+      type: object
+      required:
+      - trigger
+      properties:
+        trigger:
+          type: string
+          enum:
+          - NEW_INFORMATION
+          - PERSPECTIVE
+          - TEMPORAL_RETEST
+          - USER_INITIATED
+          - IDENTITY_REVEAL
+          - OUTCOME_REVEAL
+        target_case_version_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+    ShareCreateRequest:
+      type: object
+      required:
+      - session_id
+      - template_id
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        template_id:
+          type: string
+        channel:
+          type:
+          - string
+          - 'null'
+    SharePayload:
+      type: object
+      required:
+      - share_id
+      - token
+      - deep_link
+      - receiver_result_locked
+      properties:
+        share_id:
+          type: string
+          format: uuid
+        token:
+          type: string
+        deep_link:
+          type: string
+          format: uri
+        receiver_result_locked:
+          type: boolean
+          const: true
+    OtpRequest:
+      type: object
+      required:
+      - phone_e164
+      - locale
+      properties:
+        phone_e164:
+          type: string
+        locale:
+          type: string
+    OtpVerify:
+      type: object
+      required:
+      - challenge_id
+      - code
+      properties:
+        challenge_id:
+          type: string
+        code:
+          type: string
+    AuthSession:
+      type: object
+      required:
+      - actor_id
+      - access_token
+      properties:
+        actor_id:
+          type: string
+          format: uuid
+        access_token:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+        verification_state:
+          type: string
+    GuestMergeRequest:
+      type: object
+      required:
+      - guest_actor_id
+      - merge_consent
+      properties:
+        guest_actor_id:
+          type: string
+          format: uuid
+        merge_consent:
+          type: boolean
+          const: true
+    ReportRequest:
+      type: object
+      required:
+      - target_type
+      - target_id
+      - category
+      properties:
+        target_type:
+          type: string
+        target_id:
+          type: string
+        category:
+          type: string
+        note:
+          type:
+          - string
+          - 'null'
+          maxLength: 1000
+  headers:
+    Trace-Id:
+      description: Correlation trace identifier
+      schema:
+        type: string
+    Request-Version:
+      description: Server contract revision
+      schema:
+        type: string

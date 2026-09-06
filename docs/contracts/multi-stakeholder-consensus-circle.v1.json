@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MultiStakeholderConsensusCircleContract",
+  "version": "v1",
+  "contract_id": "KEFE-CONS-CIRCLE-001",
+  "capability_id": "CAP-047",
+  "status": "ACCEPTED",
+  "invariants": {
+    "positive_sum_stakeholder_equity": true,
+    "mutual_concession_transparency": true
+  },
+  "type": "object",
+  "required": [
+    "circle_id",
+    "pact_title",
+    "state",
+    "stakeholder_groups_count",
+    "mutual_concession_score",
+    "synthesis_covenant_summary"
+  ],
+  "properties": {
+    "circle_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "pact_title": {
+      "type": "string",
+      "minLength": 5
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "STAKEHOLDER_DIAMETRIC_IMPASSE",
+        "INTERMEDIATE_CONCESSION_BARGAINING",
+        "SYNTHESIS_PACT_RATIFIED"
+      ]
+    },
+    "stakeholder_groups_count": {
+      "type": "integer",
+      "minimum": 2
+    },
+    "mutual_concession_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "synthesis_covenant_summary": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}

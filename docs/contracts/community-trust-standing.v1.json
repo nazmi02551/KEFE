@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CommunityTrustStandingContract",
+  "version": "v1",
+  "contract_id": "KEFE-TRUST-STANDING-001",
+  "capability_id": "CAP-070",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_ideological_profiling": true,
+    "behavioral_integrity_evaluation_only": true
+  },
+  "type": "object",
+  "required": [
+    "user_pseudonym_id",
+    "trust_score",
+    "standing_tier",
+    "bridge_argument_count",
+    "verified_weigh_count",
+    "infraction_count"
+  ],
+  "properties": {
+    "user_pseudonym_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "trust_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "standing_tier": {
+      "type": "string",
+      "enum": [
+        "EXEMPLARY_CONTRIBUTOR",
+        "ESTABLISHED_PARTICIPANT",
+        "ACTIVE_EXPLORER",
+        "RESTRICTED_OR_PROBATIONARY"
+      ]
+    },
+    "bridge_argument_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "verified_weigh_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "infraction_count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

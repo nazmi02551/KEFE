@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_id": "KEFE-SIGNAL-HEALTH-001",
+  "version": "1.0.0",
+  "title": "Signal Health Card Contract",
+  "status": "ACCEPTED",
+  "owner": "KEFE-TIM-001|KEFE-DS-001|KEFE-AED-001",
+  "capability": "CAP-044",
+  "description": "Governs the verifiable multi-dimensional statistical and epistemic health audit of collective deliberation signals before they qualify for institutional presentation or public policy consideration.",
+  "invariants": [
+    "COLLECTIVE_RESULT_IS_NOT_AUTOMATICALLY_SIGNAL: Raw vote aggregates do not constitute Signal without passing minimum integrity and diversity thresholds.",
+    "MINIMUM_SAMPLE_SIZE_GATE: A minimum core participant count (n >= 100) is mandatory for any statistical qualification.",
+    "BOT_ANOMALY_RESISTANCE: Astroturfing and coordinated inauthentic behavior must score >= 0.85 integrity.",
+    "DELIBERATION_DEPTH_REQUIREMENT: Epistemic depth requires reflection time and reason-articulation over knee-jerk voting.",
+    "TEMPORAL_VALIDITY_ENFORCEMENT: Decayed or stale signals must degrade to ARCHIVED status after their half-life boundary."
+  ],
+  "definitions": {
+    "SignalQualificationStatus": {
+      "type": "string",
+      "enum": [
+        "QUALIFIED_SIGNAL",
+        "PROVISIONAL_TREND",
+        "UNQUALIFIED_NOISE"
+      ]
+    },
+    "SignalHealthDimension": {
+      "type": "object",
+      "required": ["dimension_id", "title_tr", "title_en", "score", "threshold", "is_passed", "detail"],
+      "properties": {
+        "dimension_id": {
+          "type": "string"
+        },
+        "title_tr": {
+          "type": "string"
+        },
+        "title_en": {
+          "type": "string"
+        },
+        "score": {
+          "type": "number"
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "is_passed": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "signal_id",
+    "case_version_id",
+    "overall_qualification",
+    "overall_health_score",
+    "sample_size",
+    "dimensions",
+    "certified_at",
+    "methodology_hash"
+  ],
+  "properties": {
+    "signal_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "overall_qualification": {
+      "$ref": "#/definitions/SignalQualificationStatus"
+    },
+    "overall_health_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 100.0
+    },
+    "sample_size": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "dimensions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/SignalHealthDimension"
+      }
+    },
+    "certified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "methodology_hash": {
+      "type": "string"
+    }
+  }
+}

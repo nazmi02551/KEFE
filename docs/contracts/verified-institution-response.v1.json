@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VerifiedInstitutionResponseContract",
+  "version": "v1",
+  "contract_id": "KEFE-INST-RESPONSE-001",
+  "capability_id": "CAP-049",
+  "status": "ACCEPTED",
+  "invariants": {
+    "cryptographic_verification_enforced": true,
+    "collective_signal_unaltered": true,
+    "immutable_response_record": true
+  },
+  "type": "object",
+  "required": [
+    "response_id",
+    "signal_id",
+    "institution_name",
+    "institution_type",
+    "response_body",
+    "verification_fingerprint",
+    "responded_at_utc"
+  ],
+  "properties": {
+    "response_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "signal_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "institution_name": {
+      "type": "string",
+      "minLength": 3
+    },
+    "institution_type": {
+      "type": "string",
+      "enum": [
+        "OFFICIAL_GOVERNMENT",
+        "MUNICIPAL_LOCAL",
+        "CORPORATE_ENTERPRISE",
+        "CIVIL_SOCIETY"
+      ]
+    },
+    "response_body": {
+      "type": "string",
+      "minLength": 10
+    },
+    "verification_fingerprint": {
+      "type": "string",
+      "minLength": 16
+    },
+    "responded_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

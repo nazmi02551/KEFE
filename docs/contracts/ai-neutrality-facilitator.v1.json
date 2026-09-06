@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AiNeutralityFacilitatorContract",
+  "version": "v1",
+  "contract_id": "KEFE-AI-FACILITATE-001",
+  "capability_id": "CAP-093",
+  "status": "ACCEPTED",
+  "invariants": {
+    "strict_socratic_neutrality_preserved": true,
+    "zero_outcome_endorsement": true
+  },
+  "type": "object",
+  "required": [
+    "intervention_id",
+    "deliberation_room_id",
+    "mode",
+    "neutrality_index",
+    "deescalation_efficacy_score",
+    "facilitation_prompt_text"
+  ],
+  "properties": {
+    "intervention_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "deliberation_room_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "SOCRATIC_INQUIRY_PROMPT",
+        "NONVIOLENT_REFRAMING_SYNTHESIS",
+        "COMMON_GROUND_SURFACING"
+      ]
+    },
+    "neutrality_index": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "deescalation_efficacy_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "facilitation_prompt_text": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}

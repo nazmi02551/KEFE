@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ContextLensContract",
+  "version": "v1",
+  "contract_id": "KEFE-CONTEXT-LENS-001",
+  "capability_id": "CAP-097",
+  "status": "ACCEPTED",
+  "invariants": {
+    "non_normative_neutrality": true,
+    "verifiable_sources_required": true,
+    "multi_pillar_balanced_coverage": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "pillars"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "pillars": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "pillar_type",
+          "title",
+          "content",
+          "source_citation"
+        ],
+        "properties": {
+          "pillar_type": {
+            "type": "string",
+            "enum": [
+              "LEGAL_FRAMEWORK",
+              "HISTORICAL_CONTEXT",
+              "SCIENTIFIC_DATA",
+              "COMPARATIVE_PRACTICE"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string",
+            "minLength": 20
+          },
+          "source_citation": {
+            "type": "string"
+          },
+          "source_url": {
+            "type": ["string", "null"],
+            "format": "uri"
+          }
+        }
+      }
+    }
+  }
+}

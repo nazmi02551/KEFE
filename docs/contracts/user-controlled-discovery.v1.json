@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_id": "KEFE-USER-DISCOVERY-001",
+  "version": "1.0.0",
+  "title": "User-Controlled Discovery Profile Contract",
+  "status": "ACCEPTED",
+  "owner": "KEFE-PB-001|KEFE-SEC-001",
+  "capability": "CAP-077",
+  "description": "Governs transparent user-controlled discovery preferences, ensuring discovery is strictly bounded by explicit user configuration rather than engagement-maximizing behavioral surveillance algorithms.",
+  "invariants": [
+    "NO_ENGAGEMENT_MAXIMIZATION: Discovery feeds never optimize for dopamine, outrage, or time-on-app.",
+    "EXPLICIT_USER_AGENCY: Case visibility weights are exclusively configured by the user.",
+    "SURVEILLANCE_FREE: User discovery settings are not linked to third-party tracking or behavioral monetization.",
+    "DIVERSITY_BOOST_ACCESSIBLE: Users can explicitly dial counter-viewpoint and cross-domain diversification to prevent algorithmic echo chambers."
+  ],
+  "definitions": {
+    "DomainPreference": {
+      "type": "string",
+      "enum": [
+        "CIVIC",
+        "TECHNOLOGY",
+        "BIOETHICS",
+        "ENVIRONMENT",
+        "JUSTICE",
+        "ECONOMIC"
+      ]
+    },
+    "ComplexityLevel": {
+      "type": "string",
+      "enum": ["INTRODUCTORY", "BALANCED", "DEEP_DELIBERATION"]
+    },
+    "FreshnessPreference": {
+      "type": "string",
+      "enum": ["CURRENT_EVENTS", "BALANCED", "TIMELESS_FOUNDATIONS"]
+    },
+    "RealEventPreference": {
+      "type": "string",
+      "enum": ["REAL_EVENTS_FIRST", "BALANCED", "HYPOTHETICALS_FIRST"]
+    }
+  },
+  "required": [
+    "user_id",
+    "preferred_domains",
+    "complexity_level",
+    "freshness_preference",
+    "real_event_preference",
+    "diversification_boost",
+    "updated_at"
+  ],
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "preferred_domains": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/DomainPreference"
+      }
+    },
+    "complexity_level": {
+      "$ref": "#/definitions/ComplexityLevel"
+    },
+    "freshness_preference": {
+      "$ref": "#/definitions/FreshnessPreference"
+    },
+    "real_event_preference": {
+      "$ref": "#/definitions/RealEventPreference"
+    },
+    "diversification_boost": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

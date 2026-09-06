@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SignalHalfLifeContract",
+  "version": "v1",
+  "contract_id": "KEFE-SIGNAL-HALF-LIFE-001",
+  "capability_id": "CAP-045",
+  "status": "ACCEPTED",
+  "invariants": {
+    "no_eternal_signal_authority": true,
+    "exponential_decay_supported": true,
+    "retest_trigger_deterministic": true
+  },
+  "type": "object",
+  "required": [
+    "signal_id",
+    "case_version_id",
+    "half_life_days",
+    "age_days",
+    "remaining_weight",
+    "freshness_state"
+  ],
+  "properties": {
+    "signal_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "half_life_days": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "age_days": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "remaining_weight": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "freshness_state": {
+      "type": "string",
+      "enum": [
+        "FRESH",
+        "STABLE",
+        "DEPRECATING",
+        "EXPIRED_NEEDS_RETEST"
+      ]
+    }
+  }
+}

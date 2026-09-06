@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MediaMonopolyDiversityScannerContract",
+  "version": "v1",
+  "contract_id": "KEFE-MEDIA-001",
+  "capability_id": "CAP-111",
+  "status": "ACCEPTED",
+  "invariants": {
+    "ownership_hhi_concentration_scoring": true,
+    "independent_pluralism_baseline_tracking": true
+  },
+  "type": "object",
+  "required": [
+    "scanner_id",
+    "topic_cluster",
+    "pluralism_level",
+    "source_diversity_index",
+    "independent_outlets_count"
+  ],
+  "properties": {
+    "scanner_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "topic_cluster": {
+      "type": "string",
+      "minLength": 4
+    },
+    "pluralism_level": {
+      "type": "string",
+      "enum": [
+        "PLURALISTIC_INDEPENDENT_DIVERSE",
+        "CORPORATE_CONGLOMERATE_CONCENTRATION",
+        "STATE_CONTROLLED_MONOPOLY_ALERT"
+      ]
+    },
+    "source_diversity_index": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "independent_outlets_count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

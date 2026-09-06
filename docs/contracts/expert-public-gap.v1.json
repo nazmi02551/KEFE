@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kefe.org/schemas/expert-public-gap.v1.json",
+  "title": "ExpertPublicGapAnalysis",
+  "description": "KEFE-EXPERT-PUBLIC-GAP-001: Epistemic divergence and alignment analysis between certified domain experts and broad civic public deliberation.",
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "expert_sample_size",
+    "public_sample_size",
+    "expert_distribution",
+    "public_distribution",
+    "gap_magnitude_points",
+    "gap_classification",
+    "key_divergence_drivers",
+    "epistemic_bridges",
+    "generated_at"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string"
+    },
+    "expert_sample_size": {
+      "type": "integer",
+      "minimum": 30
+    },
+    "public_sample_size": {
+      "type": "integer",
+      "minimum": 100
+    },
+    "expert_distribution": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0.0,
+        "maximum": 1.0
+      }
+    },
+    "public_distribution": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0.0,
+        "maximum": 1.0
+      }
+    },
+    "gap_magnitude_points": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "gap_classification": {
+      "type": "string",
+      "enum": [
+        "CONVERGENT",
+        "TECHNICAL_TRANSLATION_GAP",
+        "NORMATIVE_VALUE_DIVERGENCE",
+        "TRUST_DEFICIT_SKEPTICISM"
+      ]
+    },
+    "key_divergence_drivers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "epistemic_bridges": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

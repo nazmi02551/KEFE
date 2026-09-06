@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_id": "KEFE-SIGNAL-QUALIFICATION-001",
+  "version": "1.0.0",
+  "title": "Methodology-Qualified Signal Engine Contract",
+  "status": "ACCEPTED",
+  "owner": "KEFE-MPD-001|KEFE-TIM-001|KEFE-RM-001",
+  "capability": "CAP-042",
+  "description": "Governs the deterministic multi-gate qualification pipeline transforming raw collective results into certified, methodology-qualified civic signals suitable for institutional and public policy delivery.",
+  "invariants": [
+    "COLLECTIVE_RESULT_IS_NOT_AUTOMATICALLY_SIGNAL: Raw vote tallies or majority opinions never constitute public Signal without passing core deliberative and integrity gates.",
+    "TIERED_CONFIDENCE_STRUCTURE: Signals must be strictly classified into GOLD_STANDARD (n >= 500), SILVER_VALIDATED (n >= 250), BRONZE_OBSERVED (n >= 100), or UNQUALIFIED.",
+    "CORE_PRE_RESULT_CONTRIBUTION_ONLY: Only blind pre-result commitments qualify for signal generation to prevent outcome contagion.",
+    "ASTROTURFING_AND_SYBIL_DEFENSE: Coordinated brigading score must be >= 0.80 to ensure organic civic participation.",
+    "CRYPTOGRAPHIC_METHODOLOGY_HASH: Every qualification certificate must produce a deterministic sha256 audit hash over its evaluation record."
+  ],
+  "definitions": {
+    "QualificationStatus": {
+      "type": "string",
+      "enum": ["QUALIFIED", "PROVISIONAL", "DISQUALIFIED"]
+    },
+    "QualificationTier": {
+      "type": "string",
+      "enum": ["GOLD_STANDARD", "SILVER_VALIDATED", "BRONZE_OBSERVED", "UNQUALIFIED"]
+    },
+    "QualificationCriterion": {
+      "type": "object",
+      "required": ["criterion_id", "name_tr", "name_en", "score", "threshold", "is_passed", "audit_note"],
+      "properties": {
+        "criterion_id": { "type": "string" },
+        "name_tr": { "type": "string" },
+        "name_en": { "type": "string" },
+        "score": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "threshold": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "is_passed": { "type": "boolean" },
+        "audit_note": { "type": "string" }
+      }
+    }
+  },
+  "type": "object",
+  "required": [
+    "signal_id",
+    "case_version_id",
+    "case_title",
+    "qualification_status",
+    "qualification_tier",
+    "overall_score",
+    "sample_size",
+    "criteria",
+    "eligible_channels",
+    "certified_at",
+    "qualification_audit_hash"
+  ],
+  "properties": {
+    "signal_id": { "type": "string", "format": "uuid" },
+    "case_version_id": { "type": "string", "format": "uuid" },
+    "case_title": { "type": "string" },
+    "qualification_status": { "$ref": "#/definitions/QualificationStatus" },
+    "qualification_tier": { "$ref": "#/definitions/QualificationTier" },
+    "overall_score": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+    "sample_size": { "type": "integer", "minimum": 0 },
+    "criteria": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/QualificationCriterion" },
+      "minItems": 5
+    },
+    "eligible_channels": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "certified_at": { "type": "string", "format": "date-time" },
+    "qualification_audit_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

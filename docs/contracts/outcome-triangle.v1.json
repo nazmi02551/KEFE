@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OutcomeTriangleContract",
+  "version": "v1",
+  "contract_id": "KEFE-OUTCOME-TRIANGLE-001",
+  "capability_id": "CAP-102",
+  "status": "ACCEPTED",
+  "invariants": {
+    "barycentric_sum_1": true,
+    "non_reductionist_archetypes": true,
+    "no_moral_hierarchy": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "option_code",
+    "rules_weight",
+    "empathy_weight",
+    "utility_weight",
+    "dominant_archetype"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "option_code": {
+      "type": "string"
+    },
+    "rules_weight": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "empathy_weight": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "utility_weight": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "dominant_archetype": {
+      "type": "string",
+      "enum": [
+        "RIGHTS_CENTRIC",
+        "EMPATHY_CENTRIC",
+        "UTILITY_CENTRIC",
+        "TRI_BALANCED_HARMONY"
+      ]
+    }
+  }
+}

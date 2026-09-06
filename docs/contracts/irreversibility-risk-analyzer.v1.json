@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IrreversibilityRiskAnalyzerContract",
+  "version": "v1",
+  "contract_id": "KEFE-IRREVERSIBILITY-001",
+  "capability_id": "CAP-021",
+  "status": "ACCEPTED",
+  "invariants": {
+    "precautionary_principle_enforced": true,
+    "hysteresis_cost_audited": true,
+    "irreversibility_warning_badge": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "option_code",
+    "reversibility_class",
+    "precautionary_risk_score",
+    "unwind_time_months",
+    "unwind_cost_factor",
+    "risk_summary"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "option_code": {
+      "type": "string"
+    },
+    "reversibility_class": {
+      "type": "string",
+      "enum": [
+        "FULLY_REVERSIBLE",
+        "CONDITIONALLY_REVERSIBLE",
+        "SUBSTANTIALLY_IRREVERSIBLE",
+        "PERMANENTLY_IRREVERSIBLE"
+      ]
+    },
+    "precautionary_risk_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "unwind_time_months": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "unwind_cost_factor": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "risk_summary": {
+      "type": "string",
+      "minLength": 5
+    }
+  }
+}

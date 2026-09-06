@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "JudicialIndependenceConsistencyContract",
+  "version": "v1",
+  "contract_id": "KEFE-JUDICIAL-001",
+  "capability_id": "CAP-109",
+  "status": "ACCEPTED",
+  "invariants": {
+    "jurisprudential_variance_scoring": true,
+    "constitutional_precedent_fidelity_tracking": true
+  },
+  "type": "object",
+  "required": [
+    "chamber_id",
+    "court_jurisdiction",
+    "case_category",
+    "consistency_status",
+    "precedent_fidelity_score",
+    "evaluated_precedent_cases_count"
+  ],
+  "properties": {
+    "chamber_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "court_jurisdiction": {
+      "type": "string",
+      "minLength": 3
+    },
+    "case_category": {
+      "type": "string",
+      "minLength": 4
+    },
+    "consistency_status": {
+      "type": "string",
+      "enum": [
+        "PRECEDENT_ALIGNED_CONSISTENT",
+        "DISCRETIONARY_DEVIATION_NOTICED",
+        "EXECUTIVE_INTERFERENCE_SUSPECTED"
+      ]
+    },
+    "precedent_fidelity_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "evaluated_precedent_cases_count": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}

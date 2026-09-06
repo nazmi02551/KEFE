@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FairnessNormativeModelsContract",
+  "version": "v1",
+  "contract_id": "KEFE-NORMATIVE-MODELS-001",
+  "capability_id": "CAP-019",
+  "status": "ACCEPTED",
+  "invariants": {
+    "four_philosophical_traditions": true,
+    "normalized_scoring_zero_to_one": true,
+    "pluralistic_ethical_comparisons": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "option_code",
+    "utilitarian_score",
+    "deontological_score",
+    "rawlsian_score",
+    "virtue_score",
+    "dominant_philosophy"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "option_code": {
+      "type": "string"
+    },
+    "utilitarian_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "deontological_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "rawlsian_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "virtue_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "dominant_philosophy": {
+      "type": "string",
+      "enum": [
+        "UTILITARIAN_MAX_WELFARE",
+        "DEONTOLOGICAL_CATEGORICAL_RIGHTS",
+        "RAWLSIAN_MAXIMIN_EQUITY",
+        "VIRTUE_ETHICS_CHARACTER"
+      ]
+    }
+  }
+}

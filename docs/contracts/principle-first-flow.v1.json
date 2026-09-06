@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PrincipleFirstDecisionFlowContract",
+  "version": "v1",
+  "contract_id": "KEFE-PRINCIPLE-FIRST-001",
+  "capability_id": "CAP-006",
+  "status": "ACCEPTED",
+  "invariants": {
+    "principle_commitment_precedes_case": true,
+    "consistency_measurement_descriptive_only": true,
+    "no_psychometric_labeling": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "primary_principle",
+    "secondary_principle",
+    "consistency_score",
+    "reflection_prompt"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "primary_principle": {
+      "type": "string",
+      "enum": [
+        "INDIVIDUAL_LIBERTY",
+        "COLLECTIVE_WELLBEING",
+        "PROCEDURAL_JUSTICE",
+        "EMPATHY_COMPASSION"
+      ]
+    },
+    "secondary_principle": {
+      "type": "string",
+      "enum": [
+        "INDIVIDUAL_LIBERTY",
+        "COLLECTIVE_WELLBEING",
+        "PROCEDURAL_JUSTICE",
+        "EMPATHY_COMPASSION"
+      ]
+    },
+    "consistency_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "reflection_prompt": {
+      "type": "string",
+      "minLength": 5
+    }
+  }
+}

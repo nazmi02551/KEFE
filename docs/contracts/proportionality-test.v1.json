@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ProportionalityTestContract",
+  "version": "v1",
+  "contract_id": "KEFE-PROPORTIONALITY-001",
+  "capability_id": "CAP-025",
+  "status": "ACCEPTED",
+  "invariants": {
+    "tripartite_proportionality_prongs": true,
+    "least_intrusive_means_audited": true,
+    "constitutional_balancing_quantified": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "option_code",
+    "composite_proportionality_score",
+    "outcome",
+    "suitability_score",
+    "necessity_least_intrusive_score",
+    "strict_proportionality_score",
+    "summary"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "option_code": {
+      "type": "string"
+    },
+    "composite_proportionality_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "PROPORTIONAL_VALID",
+        "EXCESSIVELY_BURDENSOME",
+        "DISPROPORTIONATE_INVALID"
+      ]
+    },
+    "suitability_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "necessity_least_intrusive_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "strict_proportionality_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}

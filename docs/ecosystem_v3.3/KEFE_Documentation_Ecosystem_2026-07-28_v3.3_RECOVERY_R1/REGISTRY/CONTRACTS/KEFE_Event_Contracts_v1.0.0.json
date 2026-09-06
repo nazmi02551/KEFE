@@ -1,0 +1,511 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KEFE Event Contract Registry v1.0.0",
+  "registry_version": "1.0.0",
+  "envelope": {
+    "type": "object",
+    "required": [
+      "event_id",
+      "event_name",
+      "event_version",
+      "occurred_at",
+      "producer_version",
+      "payload"
+    ],
+    "properties": {
+      "event_id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "event_name": {
+        "type": "string"
+      },
+      "event_version": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "occurred_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "producer_version": {
+        "type": "string"
+      },
+      "trace_id": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "actor_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "format": "uuid"
+      },
+      "session_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "format": "uuid"
+      },
+      "payload": {
+        "type": "object"
+      }
+    },
+    "additionalProperties": false
+  },
+  "events": {
+    "case.impression": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "case_id",
+          "version_id",
+          "placement",
+          "rank"
+        ],
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "placement": {
+            "type": "string"
+          },
+          "rank": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "case.opened": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "case_id",
+          "version_id",
+          "entry_point"
+        ],
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entry_point": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "case.viewed": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "case_id",
+          "version_id",
+          "qualified_dwell_ms"
+        ],
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualified_dwell_ms": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "context.expanded": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "case_id",
+          "version_id",
+          "section",
+          "depth"
+        ],
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "section": {
+            "type": "string"
+          },
+          "depth": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "source.opened": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "case_id",
+          "version_id",
+          "source_id"
+        ],
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "weigh.started": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "case_version_id",
+          "journey_stage",
+          "depth"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "case_version_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "journey_stage": {
+            "type": "string"
+          },
+          "depth": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "response.changed": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "question_version_id",
+          "response_type"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "question_version_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "response_type": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "weigh.committed": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "case_version_id",
+          "journey_stage",
+          "depth"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "case_version_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "journey_stage": {
+            "type": "string"
+          },
+          "depth": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "weigh.commit_failed": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "error_code",
+          "retryable"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "retryable": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "result.revealed": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "snapshot_id",
+          "sample_layer"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "snapshot_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sample_layer": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "argument.created": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "reason_id",
+          "case_version_id",
+          "moderation_state"
+        ],
+        "properties": {
+          "reason_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "case_version_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "moderation_state": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "argument.read": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "case_version_id",
+          "stance_relation"
+        ],
+        "properties": {
+          "case_version_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stance_relation": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "argument.reacted": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "reason_id",
+          "reaction_type"
+        ],
+        "properties": {
+          "reason_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reaction_type": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "decision.changed": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "from_session",
+          "to_session",
+          "trigger"
+        ],
+        "properties": {
+          "from_session": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "to_session": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trigger": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "share.created": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "share_id",
+          "template_id"
+        ],
+        "properties": {
+          "share_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "template_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "share.opened": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "share_id",
+          "receiver_state"
+        ],
+        "properties": {
+          "share_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiver_state": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "report.created": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "target_type",
+          "target_id",
+          "category"
+        ],
+        "properties": {
+          "target_type": {
+            "type": "string"
+          },
+          "target_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "category": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "case.version_published": {
+      "event_version": 1,
+      "payload_schema": {
+        "type": "object",
+        "required": [
+          "case_id",
+          "version_id",
+          "version_no"
+        ],
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version_no": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  }
+}

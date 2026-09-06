@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UnintendedConsequencesContract",
+  "version": "v1",
+  "contract_id": "KEFE-UNINTENDED-CONSEQUENCES-001",
+  "capability_id": "CAP-022",
+  "status": "ACCEPTED",
+  "invariants": {
+    "second_order_systemic_modeling": true,
+    "perverse_incentive_taxonomy": true,
+    "mitigation_feasibility_quantified": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "option_code",
+    "overall_systemic_risk",
+    "consequences"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "option_code": {
+      "type": "string"
+    },
+    "overall_systemic_risk": {
+      "type": "string",
+      "enum": ["LOW_DRIFT", "MODERATE_IMPACT", "SEVERE_PARADOX"]
+    },
+    "consequences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "consequence_type",
+          "severity",
+          "mitigation_feasibility",
+          "description"
+        ],
+        "properties": {
+          "consequence_type": {
+            "type": "string",
+            "enum": [
+              "PERVERSE_INCENTIVE",
+              "MARKET_DISTORTION",
+              "BEHAVIORAL_REBOUND",
+              "SYSTEMIC_DISPLACEMENT"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["LOW_DRIFT", "MODERATE_IMPACT", "SEVERE_PARADOX"]
+          },
+          "mitigation_feasibility": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "description": {
+            "type": "string",
+            "minLength": 5
+          }
+        }
+      }
+    }
+  }
+}

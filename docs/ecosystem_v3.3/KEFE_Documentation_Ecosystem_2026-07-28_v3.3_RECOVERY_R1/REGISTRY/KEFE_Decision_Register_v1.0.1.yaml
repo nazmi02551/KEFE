@@ -1,0 +1,369 @@
+register_version: 1.0.1
+generated_at: '2026-07-28'
+open_decisions: []
+rule: A decision stays open only when external evidence is intrinsically required.
+  Otherwise use Accepted/Rejected/Provisional Default with reversal condition.
+governance_decisions:
+- id: DEC-2026-0001
+  status: Accepted
+  decision: KEFE Master Product Document tek normatif ürün kaynağıdır.
+  scope: governance
+- id: DEC-2026-0002
+  status: Accepted
+  decision: Aynı belge kimliği ve sürümüyle iki APPROVED içerik bulunamaz.
+  scope: governance
+- id: DEC-2026-0003
+  status: Accepted
+  decision: 34 sayfalık önceki Master v1.0 taslağı SUPERSEDED / LEGACY olarak arşivlenecektir.
+  scope: governance
+- id: DEC-2026-0004
+  status: Accepted
+  decision: Son kullanıcı sonucunu gizleme ilkesi Commit First olarak adlandırılır;
+    BLIND_FIRST yalnız modifier’dır.
+  scope: governance
+- id: DEC-2026-0005
+  status: Accepted
+  decision: İlk dört ana belge senkronize edilmeden yeni uzman belge üretimine geçilmez.
+  scope: governance
+- id: DEC-2026-0006
+  status: Accepted
+  decision: Provider independence, ports/adapters ve controlled replaceability bağlayıcıdır.
+  scope: governance
+- id: DEC-2026-0007
+  status: Accepted
+  decision: Configuration-Driven Architecture ve Single Definition Principle bağlayıcıdır.
+  scope: governance
+- id: DEC-2026-0008
+  status: Accepted
+  decision: Client/UI kalite standardı design system, theme/locale, adaptive UI, accessibility
+    ve performansı kapsar.
+  scope: governance
+- id: DEC-2026-0009
+  status: Accepted
+  decision: Premium erişim merkezi entitlement üzerinden yönetilir; billing provider
+    domain değildir.
+  scope: governance
+- id: DEC-2026-0010
+  status: Accepted
+  decision: Growth/dağıtım privacy-trust guardrail ve release-time compliance gate’e
+    tabidir.
+  scope: governance
+- id: DEC-2026-0011
+  status: Accepted
+  decision: KEFE-GOV §4 + Document Manifest tek canonical belge registry’sidir.
+  scope: governance
+- id: DEC-2026-0012
+  status: Accepted
+  decision: 18 resmî belgenin ilk aktif baseline seti tamamlandı; PLANNED belge kalmadı.
+  scope: governance
+- id: DEC-2026-0013
+  status: Accepted
+  decision: Open product decisions are converted to accepted/provisional defaults
+    before MVP implementation unless external evidence is intrinsically required.
+  scope: governance
+- id: DEC-2026-0014
+  status: Accepted
+  decision: Product Bible Roadmap Capability Register is the canonical lifecycle registry
+    for deferred/test/future features.
+  scope: governance
+- id: DEC-2026-0015
+  status: Accepted
+  decision: Case & Scenario Library maintains broad example coverage across all 16
+    core domains and maps legacy categories instead of silently dropping them.
+  scope: governance
+product_decisions:
+- heading: 57.1 Ana navigasyon
+  id: PROD-2026-001
+  status: Accepted
+  decision: '4 sekme: Explore, Weigh, Activity, My KEFE. Search Explore içinde; Atlas/Radar
+    ayrı ana sekme değil.'
+  scope: product
+- heading: 57.2 Commit CTA
+  id: PROD-2026-002
+  status: Accepted
+  decision: 'TR ana CTA: “Kararımı Ver”. Semantic key commit.primary; ilk 3 kullanımda
+    “Kararını kilitle ve sonucu gör.” yardımcı metni. Marka ritüeli animasyon/terazi
+    ile taşınır; “KEFEYİ BIRAK” kullanılmaz.'
+  scope: product
+- heading: 57.3 Quick Weigh Reveal
+  id: PROD-2026-003
+  status: Accepted
+  decision: Quick Weigh commit sonrası Reveal hemen açılır; Deep Weigh ve Perspective
+    Reveal’dan sonra önerilir. Quick/Deep veri katmanları ayrı işaretlenir.
+  scope: product
+- heading: 57.4 North Star
+  id: PROD-2026-004
+  status: Accepted
+  decision: Meaningful Weighs / WAU ana North Star; MAU ve retention ikincil bağlam
+    metrikleridir.
+  scope: product
+- heading: 57.5 Guest karar retention
+  id: PROD-2026-005
+  status: Accepted
+  decision: Hesaba bağlanmamış guest kararları 30 gün tutulur; hesap açılırsa açık
+    rızayla birleştirilir. 30 gün sonunda otomatik silinir.
+  scope: product
+- heading: 57.6 MVP CALL payı
+  id: PROD-2026-006
+  status: Accepted
+  decision: CALL, MVP canlı içerik havuzunun en fazla %15’i; beta başlangıcında 20
+    DILEMMA + 4 CALL. Library’de daha geniş pilot havuz tutulur.
+  scope: product
+- heading: 57.7 İlk ülke genişleme sırası
+  id: PROD-2026-007
+  status: Accepted
+  decision: Türkiye beta → Almanya → Birleşik Krallık → ABD. İngilizce global içerik
+    altyapısı ilk günden hazır; sıra legal/ops readiness gate ile değişebilir.
+  scope: product
+- heading: 57.8 Values fazı
+  id: PROD-2026-008
+  status: Accepted
+  decision: Values Self Profile PMF sonrasında Intelligence/Global fazında opt-in
+    açılır; MVP’de yok.
+  scope: product
+- heading: 57.9 Values bilimsel doğrulama
+  id: PROD-2026-009
+  status: Accepted
+  decision: Literatür ve construct map → uzman review → cognitive interview → pilot
+    → EFA/CFA → reliability → test-retest → cross-country measurement invariance →
+    preregistered validation. Başarısız eksen ürün skoru olarak yayımlanmaz.
+  scope: product
+- heading: 57.10 Atlas güven eşiği
+  id: PROD-2026-010
+  status: Accepted
+  decision: 'Trusted n<100: consumer ülke sonucu yayımlanmaz; 100–499: Orta; ≥500:
+    Yüksek adayı. Yüksek etiketi ayrıca integrity, comparability ve zaman tazeliği
+    kapılarını geçmelidir.'
+  scope: product
+- heading: 57.11 Raw vs Trusted UI
+  id: PROD-2026-011
+  status: Accepted
+  decision: Varsayılan analitik sonuç Trusted Sample’dır. Raw yalnız şeffaflık detayında
+    “toplam etkileşim / analize uygun” olarak gösterilir; headline’da yan yana yarışmaz.
+  scope: product
+- heading: 57.12 Balanced Sample koşulları
+  id: PROD-2026-012
+  status: Accepted
+  decision: Yalnız açık population frame/benchmark, predeclared weighting variables,
+    effective n≥800, kritik weighting hücresi≥50, weight trimming ve balance diagnostics
+    geçerse Balanced yayımlanır. Metodoloji ve design effect gösterilir.
+  scope: product
+- heading: 57.13 P3 sonuç gecikmesi
+  id: PROD-2026-013
+  status: Accepted
+  decision: P3’te gerçek zamanlı sonuç yok. En az 60 dakikalık batch + integrity review;
+    seçim döneminde gerektiğinde pencere kapanışına/kurala göre daha uzun gecikme.
+    Kill switch mümkün.
+  scope: product
+- heading: 57.14 P2+ hukuk onayı
+  id: PROD-2026-014
+  status: Accepted
+  decision: P3/P4 her zaman hukuk/civic review. P2’de devam eden dava, tanımlanabilir
+    kişi hakkında hukuki iddia, tedbir/suç isnadı veya yargı süreci varsa zorunlu;
+    soyut politika P2 değilse gerekmez.
+  scope: product
+- heading: 57.15 Civic LAB rızası
+  id: PROD-2026-015
+  status: Accepted
+  decision: Siyasi kimlik, sosyal etki, framing veya randomizasyon kullanıcı kararını
+    araştırma amacıyla manipüle ediyorsa ayrı study consent zorunlu. Sıradan ürün
+    A/B testi bu kapsama girmez.
+  scope: product
+- heading: 57.16 Uzman doğrulama
+  id: PROD-2026-016
+  status: Accepted
+  decision: Country-specific credential registry + manuel doğrulama + expertise scope
+    + jurisdiction + validity/expiry. Uzmanlık etiketi konu bazlıdır; periyodik yeniden
+    doğrulama gerekir.
+  scope: product
+- heading: 57.17 KEFE+ zamanı
+  id: PROD-2026-017
+  status: Accepted
+  decision: İlk public beta ve PMF doğrulaması sırasında paywall yok; entitlement
+    altyapısı hazır. KEFE+ yalnız PMF gate sonrası açılır.
+  scope: product
+- heading: 57.18 Decision Graph consent
+  id: PROD-2026-018
+  status: Accepted
+  decision: Core operasyonel graph pseudonymous ve gerekli ürün işleme kapsamında;
+    kişisel gelişmiş içgörü için ayrı opt-in preference, Research/secondary use için
+    ayrı explicit study/data consent. Siyasi mikro hedefleme yasak.
+  scope: product
+- heading: 57.19 UI taxonomy derinliği
+  id: PROD-2026-019
+  status: Accepted
+  decision: 'Consumer UI aynı anda en fazla 2 seviye gösterir: kullanıcı-dostu üst
+    kategori + topic; bir kartta 1 primary + en fazla 2 yardımcı topic chip. Backend
+    hiyerarşisi daha derin olabilir.'
+  scope: product
+- heading: 57.20 MVP sosyal gerekçeler
+  id: PROD-2026-020
+  status: Accepted
+  decision: Açık yorum duvarı yok. Moderasyondan geçmiş, pseudonymous ve cluster/curation
+    üzerinden kontrollü görünürlük; ham public stream yok.
+  scope: product
+- heading: 57.21 KEFE+ PMF gate
+  id: PROD-2026-021
+  status: Accepted
+  decision: En az 8 haftalık beta; activated cohort 4-week retention ≥25%, Meaningful
+    Weighs/WAU ≥3 ve trust/safety guardrail’lerinde gerileme yoksa ilk premium testi
+    açılabilir.
+  scope: product
+- heading: 57.22 Ödeme kanalları
+  id: PROD-2026-022
+  status: Accepted
+  decision: iOS/Android’de ilk premium sürümde native store billing + server-side
+    verification. Web checkout account-linking ve release-time store/legal gate tamamlandıktan
+    sonra ikinci adım.
+  scope: product
+- heading: 57.23 Trial/pricing ethics
+  id: PROD-2026-023
+  status: Accepted
+  decision: Tek açık trial, otomatik yenileme/fiyat/süre önceden görünür; dark pattern
+    yok; iptal satın alma kadar ulaşılabilir; deneyler hassas karar profiline göre
+    fiyat ayrımı yapmaz.
+  scope: product
+- heading: 57.24 Marketing attribution retention
+  id: PROD-2026-024
+  status: Accepted
+  decision: Karar/Values/political data attribution’a gönderilmez. Campaign/referral/store
+    token gibi minimum veri; raw attribution varsayılan max 90 gün, sonra aggregate
+    veya silme; consent/jurisdiction daha kısa süre gerektirebilir.
+  scope: product
+- heading: 57.25 Remote config altyapısı
+  id: PROD-2026-025
+  status: Accepted
+  decision: 'Provider-independent ConfigPort. Başlangıç canonical config: backend
+    DB registry + Redis/cache + signed client defaults; managed remote-config yalnız
+    adapter olabilir.'
+  scope: product
+- heading: 57.26 Flutter state & design-system paketleme
+  id: PROD-2026-026
+  status: Accepted
+  decision: Feature-first architecture; Riverpod state standardı; UI/server/application
+    state ayrımı. Tek paylaşılan `kefe_design_system` paketi semantic tokens/components
+    içerir.
+  scope: product
+- heading: 57.27 Backend performance release gates
+  id: PROD-2026-027
+  status: Accepted
+  decision: Read API availability ≥99.9%; commit p95<500ms; feed p95<700ms; cached
+    reveal p95<800ms; critical endpointlerde N+1 yasak ve query count budget izlenir.
+    Beta verisi hedefi sıkılaştırabilir, gevşetme ADR gerektirir.
+  scope: product
+engineering_decisions:
+- heading: 48.1 Cloud / managed services
+  id: ENG-2026-001
+  status: Accepted
+  decision: Hiçbir cloud sağlayıcı normatif değildir. IaC + ports/adapters ile managed
+    PostgreSQL, Redis ve S3-compatible storage kullanılır. İlk sağlayıcı procurement/compliance/cost
+    kararıdır; çıkış/export planı olmayan servis kabul edilmez.
+  scope: engineering
+- heading: 48.2 Flutter state management
+  id: ENG-2026-002
+  status: Accepted
+  decision: Riverpod standardı. UI state, application/feature state ve server state
+    ayrılır; domain logic widget/provider içine gömülmez.
+  scope: engineering
+- heading: 48.3 BFF
+  id: ENG-2026-003
+  status: Accepted
+  decision: MVP’de BFF consumer-api modülüdür, ayrı process değildir. Trafik/organizasyon
+    sınırı gerektirirse contract korunarak ayrılır.
+  scope: engineering
+- heading: 48.4 OTP / auth provider
+  id: ENG-2026-004
+  status: Accepted
+  decision: AuthPort üzerinden country-configurable OTP adapter. İlk beta bir primary
+    provider ile çalışabilir; ikinci ülke açılmadan en az bir fallback adapter veya
+    alternative auth path hazır olmalıdır. Provider SDK domain’e giremez.
+  scope: engineering
+- heading: 48.5 Device attestation
+  id: ENG-2026-005
+  status: Accepted
+  decision: iOS App Attest / DeviceCheck ve Android Play Integrity adapter’ları risk
+    sinyali olarak kullanılır. L0 read path’i sadece attestation başarısız diye bloke
+    edilmez; yüksek riskli mutation ve abuse enforcement daha sıkıdır.
+  scope: engineering
+- heading: 48.6 Analytics warehouse
+  id: ENG-2026-006
+  status: Accepted
+  decision: MVP’de ayrı warehouse yok; transactional outbox + append-only analytics
+    store/object archive. Günlük event hacmi ~10M’i aşar, analitik sorgular OLTP’yi
+    etkiler veya araştırma sorguları ayrışma gerektirirse columnar warehouse ADR ile
+    açılır.
+  scope: engineering
+- heading: 48.7 Search extraction
+  id: ENG-2026-007
+  status: Accepted
+  decision: PostgreSQL FTS başlangıçtır. Multilingual relevance/fuzzy/vector-hybrid
+    gereksinimi veya representative load’da p95 >300 ms olduğunda OpenSearch benzeri
+    SearchPort adapter’ı devreye alınır.
+  scope: engineering
+- heading: 48.8 Result confidence
+  id: ENG-2026-008
+  status: Accepted
+  decision: Formül Engineering içinde hard-code edilmez; KEFE-TIM versioned MethodologyPolicy
+    tarafından belirlenir. Client yalnız label + methodology_version tüketir.
+  scope: engineering
+- heading: 48.9 Reason clustering cadence
+  id: ENG-2026-009
+  status: Accepted
+  decision: MVP’de 5 dakikalık micro-batch; yeni reason hemen moderation kuyruğuna
+    girer, cluster görünümü eventual consistency kabul eder. Near-real-time yalnız
+    ölçülmüş ürün değeri varsa.
+  scope: engineering
+- heading: 48.10 Identity Vault
+  id: ENG-2026-010
+  status: Accepted
+  decision: Public beta itibarıyla ayrı database logical unit + credentials + encryption
+    key; aynı managed cluster mümkün. Core opaque actor_id dışında identity bilmez.
+  scope: engineering
+- heading: 48.11 Guest retention
+  id: ENG-2026-011
+  status: Accepted
+  decision: Unclaimed guest kararları 30 gün; uncommitted offline draft 7 gün.
+  scope: engineering
+- heading: 48.12 Consumer sample layer
+  id: ENG-2026-012
+  status: Accepted
+  decision: Trusted Sample. Raw yalnız transparency detail.
+  scope: engineering
+- heading: 48.13 Identifier standard
+  id: ENG-2026-013
+  status: Accepted
+  decision: Server-side UUIDv7 tercih edilir; public opaque ids guessable sequence
+    değildir. Provider/kütüphane değişebilir, ID contract değişmez.
+  scope: engineering
+- heading: 48.14 Audit tamper evidence
+  id: ENG-2026-014
+  status: Accepted
+  decision: Append-only audit table + entry hash chain + periyodik immutable/WORM-capable
+    object export. Kritik admin action’lar delete/update edilemez; düzeltme compensating
+    record ile yapılır.
+  scope: engineering
+- heading: 48.15 Mobile offline encryption
+  id: ENG-2026-015
+  status: Accepted
+  decision: Encrypted local database, key OS secure enclave/keystore abstraction’da.
+    Offline cache PII içermez; logout/delete ile key ve cache temizlenir.
+  scope: engineering
+- heading: 48.16 Notifications
+  id: ENG-2026-016
+  status: Accepted
+  decision: NotificationPort; iOS/Android native push adapter’ları, locale/template
+    registry ve idempotent delivery. Provider failure core loop’u düşürmez.
+  scope: engineering
+- heading: 48.17 Admin workflow engine
+  id: ENG-2026-017
+  status: Accepted
+  decision: MVP’de domain-specific lightweight custom state machine. Harici workflow
+    ürünü ancak süreç çeşitliliği/operasyon hacmi bunu gerekçelendirirse adapter olarak
+    eklenir.
+  scope: engineering
+- heading: 48.18 Reverse ETL
+  id: ENG-2026-018
+  status: Accepted
+  decision: MVP/consumer fazında yok. Business Platform fazında privacy-approved aggregate
+    use case oluşmadan reverse ETL kurulmaz.
+  scope: engineering

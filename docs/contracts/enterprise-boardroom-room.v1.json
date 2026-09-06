@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EnterpriseBoardroomRoomContract",
+  "version": "v1",
+  "contract_id": "KEFE-BOARDROOM-ROOM-001",
+  "capability_id": "CAP-035",
+  "status": "ACCEPTED",
+  "invariants": {
+    "enterprise_airgap_isolation": true,
+    "fiduciary_audit_trail_enforced": true
+  },
+  "type": "object",
+  "required": [
+    "room_id",
+    "organization_name",
+    "dilemma_scope",
+    "board_member_count",
+    "fiduciary_consensus_ratio",
+    "esg_alignment_score"
+  ],
+  "properties": {
+    "room_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "organization_name": {
+      "type": "string",
+      "minLength": 3
+    },
+    "dilemma_scope": {
+      "type": "string",
+      "enum": [
+        "ESG_AND_SUSTAINABILITY",
+        "CAPITAL_ALLOCATION_AND_MA",
+        "EXECUTIVE_COMPENSATION",
+        "CRISIS_MANAGEMENT"
+      ]
+    },
+    "board_member_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "fiduciary_consensus_ratio": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "esg_alignment_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    }
+  }
+}

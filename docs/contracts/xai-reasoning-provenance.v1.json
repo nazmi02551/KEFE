@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "XaiReasoningProvenanceContract",
+  "version": "v1",
+  "contract_id": "KEFE-XAI-PROV-001",
+  "capability_id": "CAP-095",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_black_box_opacity": true,
+    "complete_causal_step_derivation": true
+  },
+  "type": "object",
+  "required": [
+    "provenance_id",
+    "target_synthesis_id",
+    "transparency_tier",
+    "causal_steps_count",
+    "axiomatic_grounding_score",
+    "root_axiom_summary"
+  ],
+  "properties": {
+    "provenance_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "target_synthesis_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "transparency_tier": {
+      "type": "string",
+      "enum": [
+        "FULL_AXIOMATIC_PROVENANCE",
+        "SIMPLIFIED_CAUSAL_TREE",
+        "EVIDENTIARY_WEIGHT_DECOMPOSITION"
+      ]
+    },
+    "causal_steps_count": {
+      "type": "integer",
+      "minimum": 2
+    },
+    "axiomatic_grounding_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "root_axiom_summary": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}

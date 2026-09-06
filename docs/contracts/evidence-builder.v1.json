@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EvidenceBuilderContract",
+  "version": "v1",
+  "contract_id": "KEFE-EVIDENCE-BUILDER-001",
+  "capability_id": "CAP-098",
+  "status": "ACCEPTED",
+  "invariants": {
+    "verifiable_source_ref_required": true,
+    "audit_trail_provenance": true,
+    "no_paywalled_restriction_on_metadata": true
+  },
+  "type": "object",
+  "required": [
+    "evidence_id",
+    "case_version_id",
+    "category",
+    "title",
+    "publisher",
+    "verification_status",
+    "created_at"
+  ],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reason_id": {
+      "type": ["string", "null"],
+      "format": "uuid"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "ACADEMIC_PEER_REVIEWED",
+        "OFFICIAL_GOVERNMENT_STAT",
+        "INVESTIGATIVE_JOURNALISM",
+        "INSTITUTIONAL_REPORT"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 300
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "source_url": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "doi_or_doc_ref": {
+      "type": ["string", "null"]
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "UNVERIFIED",
+        "COMMUNITY_VERIFIED",
+        "EXPERT_AUDITED"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

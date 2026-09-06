@@ -1,0 +1,60 @@
+﻿Original Section,Original Title,v1.2.0 Location,Status,Note
+1,BELGENİN AMACI,§1,PRESERVED,Canonical concept retained.
+2,ÜRÜNÜN KİMLİĞİ,§2,PRESERVED,Canonical concept retained.
+3,MARKA MİMARİSİ,§3,PRESERVED,Canonical concept retained.
+4,TEMEL ÜRÜN FELSEFESİ,§4,PRESERVED,Canonical concept retained.
+5,TEMEL DAVRANIŞ DÖNGÜSÜ,§5,PRESERVED,Canonical concept retained.
+6,COMMIT FIRST İLKESİ,§6,PRESERVED,Canonical concept retained.
+7,KARAR YOLCULUĞU,§7,PRESERVED,Canonical concept retained.
+8,İÇERİK MİMARİSİ,§8,PRESERVED,Canonical concept retained.
+9,DOMAIN TAKSONOMİSİ,§9,PRESERVED,Canonical concept retained.
+10,BASE FORMATLAR,§10,PRESERVED,Canonical concept retained.
+11,EXPERIENCE MODIFIERS,§11,PRESERVED,Canonical concept retained.
+12,SORU VE ETKİLEŞİM TİPLERİ,§12,PRESERVED,Canonical concept retained.
+13,UNIVERSAL DECISION DIMENSIONS,§13,PRESERVED,Canonical concept retained.
+14,EVENT → ISSUE → QUESTION İLKESİ,§14,PRESERVED,Canonical concept retained.
+15,GERÇEK KİŞİLER VE DEVAM EDEN DAVALAR,§15,PRESERVED,Canonical concept retained.
+16,BİLGİ VE CLAIM STATÜLERİ,§16,PRESERVED,Canonical concept retained.
+17,CASE VERSIONING,§17,PRESERVED,Canonical concept retained.
+18,KEFE’NİN ÖZGÜN METRİKLERİ,§18,PRESERVED,Canonical concept retained.
+19,SONUÇ VE REVEAL TASARIMI,§19,PRESERVED,Canonical concept retained.
+20,QUICK WEIGH VE DEEP WEIGH,§20,PRESERVED,Canonical concept retained.
+21,GEREKÇE SİSTEMİ,§21,PRESERVED,Canonical concept retained.
+22,AI ARGUMENT INTELLIGENCE,§22,PRESERVED,Canonical concept retained.
+23,KEFE CIVIC,§23,PRESERVED,Canonical concept retained.
+24,HASSAS İÇERİK SİSTEMİ,§24,PRESERVED,Canonical concept retained.
+25,OLAY KABUL TESTİ,§25,PRESERVED,Canonical concept retained.
+26,KEFE VALUES,§26,PRESERVED,Canonical concept retained.
+27,BENİM KEFEM,§27,PRESERVED,Canonical concept retained.
+28,KEFE WRAPPED,§28,PRESERVED,Canonical concept retained.
+29,KEFE ATLAS,§29,PRESERVED,Canonical concept retained.
+30,GLOBAL VE COUNTRY LAYER,§30,PRESERVED,Canonical concept retained.
+31,KEFE RADAR,§31,PRESERVED,Canonical concept retained.
+32,KEFE’YE KOY,§32,PRESERVED,Canonical concept retained.
+33,SOSYAL VE TOPLULUK MODELİ,§33,PRESERVED,Canonical concept retained.
+34,RECOMMENDATION ENGINE,§34,PRESERVED,Canonical concept retained.
+35,GAMIFICATION,§35,PRESERVED,Canonical concept retained.
+36,SONUÇ KATMANLARI VE METODOLOJİ,§36,PRESERVED,Canonical concept retained.
+37,COHORT VE MAHREMİYET,§37,PRESERVED,Canonical concept retained.
+38,KİMLİK VE VERİ MİMARİSİ,§38,PRESERVED,Canonical concept retained.
+39,OY GÜVENİ VE MANİPÜLASYON,§39,PRESERVED,Canonical concept retained.
+40,MODERASYON,§40,PRESERVED,Canonical concept retained.
+41,AI PRENSİPLERİ,§41,PRESERVED,Canonical concept retained.
+42,UZMAN SİSTEMİ,§42,PRESERVED,Canonical concept retained.
+43,TEKNİK MİMARİ YÖNÜ,§43,PRESERVED / EXPANDED,"Expanded with modern architecture, commercial/distribution, client/UI principles."
+44,EVENT-DRIVEN TEMEL,§44,PRESERVED,Canonical concept retained.
+45,ADMIN STUDIO,§45,PRESERVED,Canonical concept retained.
+46,ANALYTICS VE NORTH STAR,§46,PRESERVED,Canonical concept retained.
+47,GELİR MODELİ,§47,PRESERVED / EXPANDED,"Expanded with modern architecture, commercial/distribution, client/UI principles."
+48,MVP,§48,PRESERVED / EXPANDED,MVP plus roadmap capability and rejected-ideas recovery.
+49,ONBOARDING,§49,PRESERVED,Canonical concept retained.
+50,NAVİGASYON,§50,PRESERVED,Canonical concept retained.
+51,TASARIM SİSTEMİ İLKELERİ,§51,PRESERVED / EXPANDED,"Expanded with modern architecture, commercial/distribution, client/UI principles."
+52,ÜRÜN KİŞİLİĞİ,§52,PRESERVED,Canonical concept retained.
+53,ÜRÜNÜN BAŞARI TANIMI,§53,PRESERVED,Canonical concept retained.
+54,SAVUNULABİLİR AVANTAJ: DECISION GRAPH,§54,PRESERVED,Canonical concept retained.
+55,BAĞLAYICI ÜRÜN İLKELERİ,§55,PRESERVED,Canonical concept retained.
+56,RESMÎ DOKÜMAN EKOSİSTEMİ,§56,PRESERVED / REFACTORED,Registry duplication removed; KEFE-GOV §4 + manifest is canonical.
+57,AÇIK KARARLAR,§57 KAPATILAN ÜRÜN KARARLARI,SUPERSEDED BY CLOSED DECISIONS,Former open decisions resolved in §57; evidence-dependent items become gates.
+58,KARAR GÜNLÜĞÜ,§58,PRESERVED / EXPANDED,Decision log includes newer architecture/commercial/product decisions.
+59,TEK CÜMLELİK GÜNCEL ÜRÜN TANIMI,§59,PRESERVED,Canonical concept retained.

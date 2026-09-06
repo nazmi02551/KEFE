@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CrossCaseSimilarityContract",
+  "version": "v1",
+  "contract_id": "KEFE-CROSS-SIM-001",
+  "capability_id": "CAP-101",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_partisan_categorization": true,
+    "vector_cosine_metric_enforced": true
+  },
+  "type": "object",
+  "required": [
+    "source_case_id",
+    "target_case_id",
+    "target_case_title",
+    "similarity_score",
+    "alignment_tier",
+    "shared_tension_summary"
+  ],
+  "properties": {
+    "source_case_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "target_case_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "target_case_title": {
+      "type": "string",
+      "minLength": 5
+    },
+    "similarity_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "alignment_tier": {
+      "type": "string",
+      "enum": [
+        "HIGH_TOPOLOGICAL_ANALOGUE",
+        "PARTIAL_DOMAIN_OVERLAP",
+        "DISTANT_PRECEDENT"
+      ]
+    },
+    "shared_tension_summary": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}

@@ -1,0 +1,25 @@
+KEFE DOCUMENTATION AUDIT - v3.3_RECOVERY_R1
+Date: 2026-07-28
+
+Official logical documents: 18
+Active DOCX files: 18
+Active PDF files: 18
+Total active PDF pages: 265
+Canonical Master: KEFE-MPD v1.2.0
+Governance: KEFE-GOV v1.4.0
+Manifest: v1.4.0
+Open product decisions: 0
+Planned official documents: 0
+A11Y findings: high=0, medium=39, low=0
+Validation: PASS
+
+Checks performed:
+- Manifest active file existence
+- JSON/YAML parse
+- Decision register open-decision gate
+- PDF readability/page-count sanity
+- DOCX accessibility audit; no high-severity findings
+- DOCX render/visual QA for changed documents; v3.4 active set rendered from final DOCX sources
+- PDF generation from corresponding DOCX sources
+- SHA-256 package registry generated from final bytes
+- v3.3 is a semantic recovery build; byte identity with the lost original v3.3 ZIP is explicitly not claimed.

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CounterPerspectiveResilienceContract",
+  "version": "v1",
+  "contract_id": "KEFE-COUNTER-PERSPECTIVE-RESILIENCE-001",
+  "capability_id": "CAP-116",
+  "status": "ACCEPTED",
+  "invariants": {
+    "no_psychometric_profiling": true,
+    "no_ideological_inference": true,
+    "aggregated_deltas_only": true
+  },
+  "type": "object",
+  "required": [
+    "window_start",
+    "window_end",
+    "total_exposed_sessions",
+    "stable_decisions_count",
+    "shifted_decisions_count",
+    "resilience_index",
+    "attitude_shift_rate"
+  ],
+  "properties": {
+    "window_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "window_end": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "total_exposed_sessions": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "stable_decisions_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "shifted_decisions_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "resilience_index": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "attitude_shift_rate": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    }
+  }
+}

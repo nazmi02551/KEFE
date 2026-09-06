@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CaseCorrectionHistoryContract",
+  "version": "v1",
+  "contract_id": "KEFE-CASE-CORRECTION-001",
+  "capability_id": "CAP-072",
+  "status": "ACCEPTED",
+  "invariants": {
+    "immutable_append_only_log": true,
+    "editorial_rationale_mandatory": true,
+    "diff_preservation": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "corrections"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "corrections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "correction_id",
+          "correction_type",
+          "severity",
+          "summary",
+          "editorial_rationale",
+          "timestamp"
+        ],
+        "properties": {
+          "correction_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "correction_type": {
+            "type": "string",
+            "enum": [
+              "FACTUAL_UPDATE",
+              "CLARIFICATION",
+              "SOURCE_EXPANSION",
+              "TYPO_FIX",
+              "LEGAL_STATUS_UPDATE"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["MINOR", "MATERIAL", "SUBSTANTIAL"]
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 5
+          },
+          "editorial_rationale": {
+            "type": "string",
+            "minLength": 10
+          },
+          "previous_text": {
+            "type": ["string", "null"]
+          },
+          "corrected_text": {
+            "type": ["string", "null"]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}

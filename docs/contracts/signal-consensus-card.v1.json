@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SignalConsensusCardContract",
+  "version": "v1",
+  "contract_id": "KEFE-SIGNAL-CONSENSUS-CARD-001",
+  "capability_id": "CAP-016",
+  "status": "ACCEPTED",
+  "invariants": {
+    "verified_signal_only": true,
+    "confidence_tier_required": true,
+    "non_coercive_disclaimer": true
+  },
+  "type": "object",
+  "required": [
+    "signal_id",
+    "case_version_id",
+    "case_title",
+    "consensus_statement",
+    "agreement_percentage",
+    "sample_size",
+    "confidence_tier",
+    "certified_at"
+  ],
+  "properties": {
+    "signal_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "case_title": {
+      "type": "string"
+    },
+    "consensus_statement": {
+      "type": "string"
+    },
+    "agreement_percentage": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 100.0
+    },
+    "sample_size": {
+      "type": "integer",
+      "minimum": 100
+    },
+    "confidence_tier": {
+      "type": "string",
+      "enum": ["GOLD", "SILVER", "BRONZE"]
+    },
+    "certified_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

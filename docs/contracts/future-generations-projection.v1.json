@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FutureGenerationsProjectionContract",
+  "version": "v1",
+  "contract_id": "KEFE-FUTURE-GEN-001",
+  "capability_id": "CAP-020",
+  "status": "ACCEPTED",
+  "invariants": {
+    "intergenerational_justice_modeled": true,
+    "multi_decade_horizon_coverage": true,
+    "zero_present_bias_discounting": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "option_code",
+    "net_intergenerational_score",
+    "projections"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "option_code": {
+      "type": "string"
+    },
+    "net_intergenerational_score": {
+      "type": "number",
+      "minimum": -1.0,
+      "maximum": 1.0
+    },
+    "projections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "horizon",
+          "impact_score",
+          "summary"
+        ],
+        "properties": {
+          "horizon": {
+            "type": "string",
+            "enum": [
+              "HORIZON_5_YEARS",
+              "HORIZON_20_YEARS",
+              "HORIZON_50_YEARS",
+              "HORIZON_100_YEARS"
+            ]
+          },
+          "impact_score": {
+            "type": "number",
+            "minimum": -1.0,
+            "maximum": 1.0
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 5
+          }
+        }
+      }
+    }
+  }
+}

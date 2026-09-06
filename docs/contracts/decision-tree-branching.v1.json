@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DecisionTreeBranchingContract",
+  "version": "v1",
+  "contract_id": "KEFE-TREE-BRANCH-001",
+  "capability_id": "CAP-099",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_dangling_nodes": true,
+    "branch_probabilities_sum_unity": true
+  },
+  "type": "object",
+  "required": [
+    "tree_id",
+    "root_case_id",
+    "node_label",
+    "node_type",
+    "branch_probability",
+    "projected_impact_summary"
+  ],
+  "properties": {
+    "tree_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "root_case_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "node_label": {
+      "type": "string",
+      "minLength": 5
+    },
+    "node_type": {
+      "type": "string",
+      "enum": [
+        "PRIMARY_DECISION_FORK",
+        "CONTINGENCY_BRANCH",
+        "TERMINAL_OUTCOME_LEAF"
+      ]
+    },
+    "branch_probability": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "projected_impact_summary": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}

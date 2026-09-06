@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ImpactVerificationContract",
+  "version": "v1",
+  "contract_id": "KEFE-IMPACT-VERIFY-001",
+  "capability_id": "CAP-054",
+  "status": "ACCEPTED",
+  "invariants": {
+    "multi_party_audit_supported": true,
+    "immutable_outcome_verdict": true
+  },
+  "type": "object",
+  "required": [
+    "verification_id",
+    "action_id",
+    "outcome_verdict",
+    "resolution_score",
+    "auditor_consensus_count",
+    "verification_notes"
+  ],
+  "properties": {
+    "verification_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "action_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "outcome_verdict": {
+      "type": "string",
+      "enum": [
+        "FULL_RESOLUTION",
+        "SUBSTANTIAL_PROGRESS",
+        "PARTIAL_SYMBOLIC_ONLY",
+        "REJECTED_NON_COMPLIANT"
+      ]
+    },
+    "resolution_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "auditor_consensus_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "verification_notes": {
+      "type": "string",
+      "minLength": 5
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BudgetTradeoffSimulatorContract",
+  "version": "v1",
+  "contract_id": "KEFE-DECIDE-BUDGET-001",
+  "capability_id": "CAP-027",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_sum_or_bounded_budget_enforced": true,
+    "opportunity_cost_quantified": true
+  },
+  "type": "object",
+  "required": [
+    "tradeoff_id",
+    "case_version_id",
+    "healthcare_pct",
+    "education_pct",
+    "infrastructure_pct",
+    "green_transition_pct",
+    "unallocated_pct",
+    "tradeoff_profile"
+  ],
+  "properties": {
+    "tradeoff_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "healthcare_pct": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "education_pct": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "infrastructure_pct": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "green_transition_pct": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "unallocated_pct": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "tradeoff_profile": {
+      "type": "string",
+      "enum": [
+        "HEALTH_EDUCATION_PRIORITY",
+        "INFRASTRUCTURE_GROWTH",
+        "ECOLOGICAL_TRANSITION",
+        "BALANCED_ALLOCATION"
+      ]
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ActivationFunnelContract",
+  "version": "v1",
+  "contract_id": "KEFE-ACTIVATION-FUNNEL-001",
+  "capability_id": "CAP-115",
+  "status": "ACCEPTED",
+  "invariants": {
+    "no_raw_response_leakage": true,
+    "no_psychometric_inference": true,
+    "strict_stage_sequence": true
+  },
+  "type": "object",
+  "required": [
+    "window_start",
+    "window_end",
+    "total_sessions",
+    "stages"
+  ],
+  "properties": {
+    "window_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "window_end": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "total_sessions": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "stage_name",
+          "stage_count",
+          "conversion_from_start_rate",
+          "drop_off_from_previous_rate"
+        ],
+        "properties": {
+          "stage_name": {
+            "type": "string"
+          },
+          "stage_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "conversion_from_start_rate": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "drop_off_from_previous_rate": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          }
+        }
+      }
+    }
+  }
+}

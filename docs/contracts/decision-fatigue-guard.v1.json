@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DecisionFatigueGuardContract",
+  "version": "v1",
+  "contract_id": "KEFE-FATIGUE-GUARD-001",
+  "capability_id": "CAP-014",
+  "status": "ACCEPTED",
+  "invariants": {
+    "no_hard_coercive_lockout": true,
+    "mindful_reflection_promoted": true,
+    "epistemic_quality_protected": true
+  },
+  "type": "object",
+  "required": [
+    "session_id",
+    "consecutive_weigh_count",
+    "session_duration_minutes",
+    "pacing_status",
+    "gentle_recommendation_prompt"
+  ],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "consecutive_weigh_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "session_duration_minutes": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "pacing_status": {
+      "type": "string",
+      "enum": [
+        "OPTIMAL_PACING",
+        "PACING_RECOMMENDED",
+        "REST_INTERVAL_ACTIVE"
+      ]
+    },
+    "gentle_recommendation_prompt": {
+      "type": "string",
+      "minLength": 5
+    }
+  }
+}

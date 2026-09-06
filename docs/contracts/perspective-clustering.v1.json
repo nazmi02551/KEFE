@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PerspectiveClusteringContract",
+  "version": "v1",
+  "contract_id": "KEFE-PERSPECTIVE-CLUSTERING-001",
+  "capability_id": "CAP-033",
+  "status": "ACCEPTED",
+  "invariants": {
+    "balanced_representation": true,
+    "no_echo_chamber_amplification": true,
+    "privacy_preserved_reasons": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "total_arguments_clustered",
+    "clusters"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "total_arguments_clustered": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "clusters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "cluster_id",
+          "archetype",
+          "core_thesis",
+          "argument_count",
+          "support_percentage"
+        ],
+        "properties": {
+          "cluster_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "archetype": {
+            "type": "string",
+            "enum": [
+              "NEAR_CONSENSUS",
+              "OPPOSING_PRINCIPLE",
+              "BRIDGE_SYNTHESIS",
+              "ALTERNATIVE_PARADIGM"
+            ]
+          },
+          "core_thesis": {
+            "type": "string"
+          },
+          "argument_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "support_percentage": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 100.0
+          }
+        }
+      }
+    }
+  }
+}

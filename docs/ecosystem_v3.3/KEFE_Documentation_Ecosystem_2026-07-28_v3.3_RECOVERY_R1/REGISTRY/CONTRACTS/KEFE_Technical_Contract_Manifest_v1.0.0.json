@@ -1,0 +1,57 @@
+{
+  "contract_pack_version": "1.0.0",
+  "generated_at": "2026-07-27",
+  "normative_engineering_document": "KEFE-ENG-001 v0.5.0",
+  "artifacts": [
+    {
+      "id": "ERD",
+      "file": "KEFE_Core_ERD_v1.0.0.mmd",
+      "role": "logical entity relationship contract"
+    },
+    {
+      "id": "SQL",
+      "file": "KEFE_PostgreSQL_Schema_v1.0.0.sql",
+      "role": "initial PostgreSQL schema contract"
+    },
+    {
+      "id": "OPENAPI",
+      "file": "KEFE_OpenAPI_v1.0.0.yaml",
+      "role": "MVP consumer API contract"
+    },
+    {
+      "id": "EVENTS",
+      "file": "KEFE_Event_Contracts_v1.0.0.json",
+      "role": "event registry and payload contracts"
+    },
+    {
+      "id": "EVENT_ENVELOPE",
+      "file": "KEFE_Event_Envelope_v1.schema.json",
+      "role": "event envelope JSON Schema"
+    },
+    {
+      "id": "CONFIG",
+      "file": "KEFE_Config_Registry_v1.0.0.yaml",
+      "role": "typed configuration registry"
+    },
+    {
+      "id": "CONFIG_JSON",
+      "file": "KEFE_Config_Registry_v1.0.0.json",
+      "role": "machine-readable mirror of config registry"
+    },
+    {
+      "id": "ERRORS",
+      "file": "KEFE_Error_Code_Registry_v1.0.0.yaml",
+      "role": "stable API error code registry"
+    },
+    {
+      "id": "REPO",
+      "file": "KEFE_Repository_Structure_v1.0.0.txt",
+      "role": "repository/package boundary contract"
+    },
+    {
+      "id": "ERD_PNG",
+      "file": "KEFE_Core_ERD_v1.0.0.png",
+      "role": "rendered visual derivative of Core ERD"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ArgumentStrengthValidityContract",
+  "version": "v1",
+  "contract_id": "KEFE-ARGUMENT-STRENGTH-001",
+  "capability_id": "CAP-041",
+  "status": "ACCEPTED",
+  "invariants": {
+    "tri_dimensional_soundness": true,
+    "popularity_independent_scoring": true,
+    "transparent_epistemic_audit": true
+  },
+  "type": "object",
+  "required": [
+    "argument_id",
+    "empirical_foundation_score",
+    "logical_consistency_score",
+    "representative_balance_score",
+    "composite_strength_score",
+    "strength_tier"
+  ],
+  "properties": {
+    "argument_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "empirical_foundation_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "logical_consistency_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "representative_balance_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "composite_strength_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "strength_tier": {
+      "type": "string",
+      "enum": [
+        "TIER_A_ROBUST",
+        "TIER_B_PLAUSIBLE",
+        "TIER_C_WEAK_RHETORICAL"
+      ]
+    }
+  }
+}

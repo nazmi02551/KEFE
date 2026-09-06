@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_id": "KEFE-IMPACT-TARGET-001",
+  "version": "1.0.0",
+  "title": "Signal Target Registry Contract",
+  "status": "ACCEPTED",
+  "owner": "KEFE-MPD-001|KEFE-ADM-001",
+  "capability": "CAP-048",
+  "description": "Governs the formal registry and jurisdictional binding of qualified civic signals to legitimate institutional, regulatory, and municipal decision-making bodies.",
+  "invariants": [
+    "DESIGNATED_INSTITUTIONAL_TARGET: Qualified civic signals bound for impact must register at least one verified institutional target.",
+    "JURISDICTIONAL_SCOPE_MATCH: The target authority's official mandate must align with the signal's measured jurisdiction.",
+    "NON_COERCIVE_NOTIFICATION: Target dispatch is transparent, publicly verifiable, and non-partisan.",
+    "LIFECYCLE_ACCOUNTABILITY: Target engagement transitions through strictly auditable states from proposed to acknowledged or action-pledged.",
+    "CRYPTOGRAPHIC_DISPATCH_RECORD: Target registrations and transmission proofs are sealed with SHA-256 digests."
+  ],
+  "definitions": {
+    "TargetType": {
+      "type": "string",
+      "enum": [
+        "MUNICIPAL_GOVERNMENT",
+        "MINISTRY_DEPARTMENT",
+        "REGULATORY_BODY",
+        "PUBLIC_UTILITY",
+        "CORPORATE_ENTITY",
+        "CIVIC_OMBUDSMAN"
+      ]
+    },
+    "DispatchStatus": {
+      "type": "string",
+      "enum": [
+        "PROPOSED_TARGET",
+        "VERIFIED_TARGET",
+        "DISPATCHED",
+        "ACKNOWLEDGED",
+        "ACTION_PLEDGED",
+        "DECLINED_JURISDICTION"
+      ]
+    },
+    "SignalTargetItem": {
+      "type": "object",
+      "required": [
+        "target_id",
+        "target_name",
+        "target_type",
+        "jurisdiction_level",
+        "official_contact_channel",
+        "dispatch_status",
+        "response_due_days"
+      ],
+      "properties": {
+        "target_id": { "type": "string", "format": "uuid" },
+        "target_name": { "type": "string" },
+        "target_type": { "$ref": "#/definitions/TargetType" },
+        "jurisdiction_level": { "type": "string" },
+        "official_contact_channel": { "type": "string" },
+        "dispatch_status": { "$ref": "#/definitions/DispatchStatus" },
+        "dispatched_at": { "type": ["string", "null"], "format": "date-time" },
+        "acknowledged_at": { "type": ["string", "null"], "format": "date-time" },
+        "response_due_days": { "type": "integer", "minimum": 1 }
+      }
+    }
+  },
+  "type": "object",
+  "required": [
+    "signal_id",
+    "case_version_id",
+    "primary_target_id",
+    "targets",
+    "certified_at",
+    "registry_proof_hash"
+  ],
+  "properties": {
+    "signal_id": { "type": "string", "format": "uuid" },
+    "case_version_id": { "type": "string", "format": "uuid" },
+    "primary_target_id": { "type": "string", "format": "uuid" },
+    "targets": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/SignalTargetItem" },
+      "minItems": 1
+    },
+    "certified_at": { "type": "string", "format": "date-time" },
+    "registry_proof_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

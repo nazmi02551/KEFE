@@ -1,0 +1,169 @@
+manifest_version: 1.4.0
+generated_at: '2026-07-28'
+canonical_product_source:
+  document_id: KEFE-MPD-001
+  version: 1.2.0
+  file: KEFE_Master_Product_Document_v1.2.0_Approved_Canonical.docx
+canonical_document_registry:
+  document_id: KEFE-GOV-001
+  version: 1.4.0
+  file: KEFE_Dokumantasyon_Yonetisimi_v1.4.0_Approved.docx
+source_policy: DOCX is the transitional editable source for this release; PDF is generated
+  publication output. Target state is Git-hosted structured source + manifest with
+  generated DOCX/PDF.
+active_logical_documents: 18
+expected_active_files: 36
+planned_documents_remaining: 0
+historical_recovery_audit: PASSED
+case_scenario_library_seed_count: 352
+open_product_decisions: 0
+documents:
+- document_id: KEFE-AIA-001
+  title_file_stem: KEFE_AI_Architecture_v1.1.0_Approved_Baseline
+  version: 1.1.0
+  status: Approved Baseline
+  owner: AI / Engineering
+  normative_authority: KEFE-MPD v1.2.0 + KEFE-ENG v0.6.0
+  docx: KEFE_AI_Architecture_v1.1.0_Approved_Baseline.docx
+  pdf: KEFE_AI_Architecture_v1.1.0_Approved_Baseline.pdf
+- document_id: KEFE-ADM-001
+  title_file_stem: KEFE_Admin_Studio_Specification_v1.2.0_Approved_Baseline
+  version: 1.2.0
+  status: Approved Baseline
+  owner: Operations / Product
+  normative_authority: KEFE-MPD v1.2.0 + KEFE-PB v1.4.0 + KEFE-ENG v0.6.0
+  docx: KEFE_Admin_Studio_Specification_v1.2.0_Approved_Baseline.docx
+  pdf: KEFE_Admin_Studio_Specification_v1.2.0_Approved_Baseline.pdf
+- document_id: KEFE-AED-001
+  title_file_stem: KEFE_Analytics_Event_Dictionary_v1.1.0_Approved_Baseline
+  version: 1.1.0
+  status: Approved Baseline
+  owner: Data / Analytics
+  normative_authority: KEFE-MPD v1.2.0 + KEFE-ENG v0.6.0
+  docx: KEFE_Analytics_Event_Dictionary_v1.1.0_Approved_Baseline.docx
+  pdf: KEFE_Analytics_Event_Dictionary_v1.1.0_Approved_Baseline.pdf
+- document_id: KEFE-CSL-001
+  title_file_stem: KEFE_Case_Scenario_Library_v1.1.0_Living_Catalog
+  version: 1.1.0
+  status: Living Catalog
+  owner: Editorial / Product
+  normative_authority: KEFE-MPD v1.2.0 + KEFE-CQB v1.1.0 + KEFE-ETG v1.1.0
+  docx: KEFE_Case_Scenario_Library_v1.1.0_Living_Catalog.docx
+  pdf: KEFE_Case_Scenario_Library_v1.1.0_Living_Catalog.pdf
+- document_id: KEFE-CIV-001
+  title_file_stem: KEFE_Civic_Integrity_Political_Content_Standard_v1.1.0_Approved_Baseline
+  version: 1.1.0
+  status: Approved Baseline
+  owner: Civic / Trust
+  normative_authority: KEFE-MPD v1.2.0 + KEFE-TIM v1.1.0
+  docx: KEFE_Civic_Integrity_Political_Content_Standard_v1.1.0_Approved_Baseline.docx
+  pdf: KEFE_Civic_Integrity_Political_Content_Standard_v1.1.0_Approved_Baseline.pdf
+- document_id: KEFE-CGD-001
+  title_file_stem: KEFE_Commercial_Growth_Distribution_Standard_v1.1.0_Approved_Baseline
+  version: 1.1.0
+  status: Approved Baseline
+  owner: Product / Growth / Engineering
+  normative_authority: KEFE-MPD v1.2.0 + KEFE-PB v1.4.0 + KEFE-ENG v0.6.0
+  docx: KEFE_Commercial_Growth_Distribution_Standard_v1.1.0_Approved_Baseline.docx
+  pdf: KEFE_Commercial_Growth_Distribution_Standard_v1.1.0_Approved_Baseline.pdf
+- document_id: KEFE-CQB-001
+  title_file_stem: KEFE_Content_Question_Design_Bible_v1.1.0_Approved_Baseline
+  version: 1.1.0
+  status: Approved Baseline
+  owner: Editorial / Product
+  normative_authority: KEFE-MPD v1.2.0 + KEFE-PB v1.4.0
+  docx: KEFE_Content_Question_Design_Bible_v1.1.0_Approved_Baseline.docx
+  pdf: KEFE_Content_Question_Design_Bible_v1.1.0_Approved_Baseline.pdf
+- document_id: KEFE-DGS-001
+  title_file_stem: KEFE_Decision_Graph_Specification_v1.1.0_Approved_Baseline
+  version: 1.1.0
+  status: Approved Baseline
+  owner: Data / Product
+  normative_authority: KEFE-MPD v1.2.0 + KEFE-ENG v0.6.0
+  docx: KEFE_Decision_Graph_Specification_v1.1.0_Approved_Baseline.docx
+  pdf: KEFE_Decision_Graph_Specification_v1.1.0_Approved_Baseline.pdf
+- document_id: KEFE-DS-001
+  title_file_stem: KEFE_Design_System_v1.1.0_Approved_Baseline
+  version: 1.1.0
+  status: Approved Baseline
+  owner: Design / Client Engineering
+  normative_authority: KEFE-MPD v1.2.0 + KEFE-PB v1.4.0
+  docx: KEFE_Design_System_v1.1.0_Approved_Baseline.docx
+  pdf: KEFE_Design_System_v1.1.0_Approved_Baseline.pdf
+- document_id: KEFE-GOV-001
+  title_file_stem: KEFE_Dokumantasyon_Yonetisimi_v1.4.0_Approved
+  version: 1.4.0
+  status: Approved
+  owner: Product Strategy
+  normative_authority: KEFE Master Product Document v1.2.0
+  docx: KEFE_Dokumantasyon_Yonetisimi_v1.4.0_Approved.docx
+  pdf: KEFE_Dokumantasyon_Yonetisimi_v1.4.0_Approved.pdf
+- document_id: KEFE-ETG-001
+  title_file_stem: KEFE_Editorial_Transformation_Guide_v1.1.0_Approved_Baseline
+  version: 1.1.0
+  status: Approved Baseline
+  owner: Editorial
+  normative_authority: KEFE-MPD v1.2.0 + KEFE-CQB v1.1.0
+  docx: KEFE_Editorial_Transformation_Guide_v1.1.0_Approved_Baseline.docx
+  pdf: KEFE_Editorial_Transformation_Guide_v1.1.0_Approved_Baseline.pdf
+- document_id: KEFE-ENG-001
+  title_file_stem: KEFE_Engineering_Blueprint_v0.6.0_Implementation_Contract_Baseline
+  version: 0.6.0
+  status: Implementation Contract Baseline
+  owner: Chief Architect / Engineering
+  normative_authority: KEFE Master Product Document v1.2.0 Canonical + Product Bible
+    v1.4.0
+  docx: KEFE_Engineering_Blueprint_v0.6.0_Implementation_Contract_Baseline.docx
+  pdf: KEFE_Engineering_Blueprint_v0.6.0_Implementation_Contract_Baseline.pdf
+- document_id: KEFE-MVP-001
+  title_file_stem: KEFE_MVP_Delivery_Plan_v1.2.0_Approved_Execution_Baseline
+  version: 1.2.0
+  status: Approved Execution Baseline
+  owner: Delivery / Product / Engineering
+  normative_authority: KEFE-MPD v1.2.0 + KEFE-PB v1.4.0 + KEFE-ENG v0.6.0
+  docx: KEFE_MVP_Delivery_Plan_v1.2.0_Approved_Execution_Baseline.docx
+  pdf: KEFE_MVP_Delivery_Plan_v1.2.0_Approved_Execution_Baseline.pdf
+- document_id: KEFE-MPD-001
+  title_file_stem: KEFE_Master_Product_Document_v1.2.0_Approved_Canonical
+  version: 1.2.0
+  status: Onaylı ana ürün kaynağı / Single Source of Truth
+  owner: Product
+  normative_authority: ''
+  docx: KEFE_Master_Product_Document_v1.2.0_Approved_Canonical.docx
+  pdf: KEFE_Master_Product_Document_v1.2.0_Approved_Canonical.pdf
+- document_id: KEFE-PB-001
+  title_file_stem: KEFE_Product_Bible_v1.4.0_Working_Baseline
+  version: 1.4.0
+  status: Working Baseline
+  owner: Chief Product / Product Architecture
+  normative_authority: KEFE Master Product Document v1.2.0 Canonical
+  docx: KEFE_Product_Bible_v1.4.0_Working_Baseline.docx
+  pdf: KEFE_Product_Bible_v1.4.0_Working_Baseline.pdf
+- document_id: KEFE-RM-001
+  title_file_stem: KEFE_Research_Methodology_v1.1.0_Approved_Baseline
+  version: 1.1.0
+  status: Approved Baseline
+  owner: Research / Methodology
+  normative_authority: KEFE-MPD v1.2.0 + KEFE-TIM v1.1.0
+  docx: KEFE_Research_Methodology_v1.1.0_Approved_Baseline.docx
+  pdf: KEFE_Research_Methodology_v1.1.0_Approved_Baseline.pdf
+- document_id: KEFE-SEC-001
+  title_file_stem: KEFE_Security_Privacy_Model_v1.2.0_Approved_Baseline
+  version: 1.2.0
+  status: Approved Baseline
+  owner: Security / Privacy
+  normative_authority: KEFE-MPD v1.2.0 + KEFE-ENG v0.6.0
+  docx: KEFE_Security_Privacy_Model_v1.2.0_Approved_Baseline.docx
+  pdf: KEFE_Security_Privacy_Model_v1.2.0_Approved_Baseline.pdf
+- document_id: KEFE-TIM-001
+  title_file_stem: KEFE_Trust_Integrity_Methodology_Standard_v1.1.0_Approved_Baseline
+  version: 1.1.0
+  status: Approved Baseline
+  owner: Trust / Research
+  normative_authority: KEFE-MPD v1.2.0
+  docx: KEFE_Trust_Integrity_Methodology_Standard_v1.1.0_Approved_Baseline.docx
+  pdf: KEFE_Trust_Integrity_Methodology_Standard_v1.1.0_Approved_Baseline.pdf
+derived_execution_artifact: REGISTRY/KEFE_MVP_Execution_Pack_v1.0.0.json
+derived_technical_contract_manifest: REGISTRY/CONTRACTS/KEFE_Technical_Contract_Manifest_v1.0.0.json
+package_baseline: v3.3 RECOVERY_R1
+recovery_build: true

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TemporalOpinionFlowContract",
+  "version": "v1",
+  "contract_id": "KEFE-OPINION-FLOW-001",
+  "capability_id": "CAP-100",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_individual_movement_tracking": true,
+    "aggregate_bulk_percentages_only": true
+  },
+  "type": "object",
+  "required": [
+    "flow_id",
+    "case_version_id",
+    "epoch_type",
+    "option_a_share",
+    "option_b_share",
+    "undecided_bridge_share",
+    "migration_rate"
+  ],
+  "properties": {
+    "flow_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "epoch_type": {
+      "type": "string",
+      "enum": [
+        "INITIAL_BLIND_RESONANCE",
+        "MID_DELIBERATION_SHIFT",
+        "MATURED_CONSENSUS_STATE"
+      ]
+    },
+    "option_a_share": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "option_b_share": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "undecided_bridge_share": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "migration_rate": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    }
+  }
+}

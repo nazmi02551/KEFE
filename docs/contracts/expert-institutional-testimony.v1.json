@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ExpertInstitutionalTestimonyContract",
+  "version": "v1",
+  "contract_id": "KEFE-EXPERT-TESTIMONY-001",
+  "capability_id": "CAP-044",
+  "status": "ACCEPTED",
+  "invariants": {
+    "testimony_archetype_segregation": true,
+    "coi_transparency_enforced": true,
+    "non_astroturfing_guarantee": true
+  },
+  "type": "object",
+  "required": [
+    "testimony_id",
+    "source_name",
+    "archetype",
+    "conflict_of_interest_score",
+    "epistemic_authority_tier",
+    "testimony_statement"
+  ],
+  "properties": {
+    "testimony_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "source_name": {
+      "type": "string",
+      "minLength": 3
+    },
+    "archetype": {
+      "type": "string",
+      "enum": [
+        "INDEPENDENT_ACADEMIC_EXPERT",
+        "GOVERNMENTAL_REGULATORY_BODY",
+        "INDUSTRY_CORPORATE_STAKEHOLDER",
+        "CIVIL_SOCIETY_ADVOCATE"
+      ]
+    },
+    "conflict_of_interest_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "epistemic_authority_tier": {
+      "type": "string",
+      "enum": [
+        "HIGH_PEER_REVIEWED",
+        "OFFICIAL_REGULATORY",
+        "PARTISAN_SPECIAL_INTEREST"
+      ]
+    },
+    "testimony_statement": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}

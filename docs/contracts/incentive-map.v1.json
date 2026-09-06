@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IncentiveMapContract",
+  "version": "v1",
+  "contract_id": "KEFE-INCENTIVE-MAP-001",
+  "capability_id": "CAP-022",
+  "status": "ACCEPTED",
+  "invariants": {
+    "economic_incentive_neutrality": true,
+    "perverse_incentive_explicit_flag": true,
+    "structural_alignment_scoring": true
+  },
+  "type": "object",
+  "required": [
+    "map_id",
+    "case_version_id",
+    "alignment_index",
+    "perverse_incentive_risk",
+    "primary_driver",
+    "mitigation_mechanism",
+    "incentive_nodes"
+  ],
+  "properties": {
+    "map_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "alignment_index": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "perverse_incentive_risk": {
+      "type": "string",
+      "enum": [
+        "LOW",
+        "MODERATE",
+        "HIGH",
+        "CRITICAL"
+      ]
+    },
+    "primary_driver": {
+      "type": "string",
+      "minLength": 3
+    },
+    "mitigation_mechanism": {
+      "type": "string",
+      "minLength": 3
+    },
+    "incentive_nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "stakeholder_group",
+          "core_incentive",
+          "incentive_type",
+          "alignment_status",
+          "intensity_score"
+        ],
+        "properties": {
+          "stakeholder_group": {
+            "type": "string"
+          },
+          "core_incentive": {
+            "type": "string"
+          },
+          "incentive_type": {
+            "type": "string",
+            "enum": [
+              "FINANCIAL_PROFIT",
+              "POLITICAL_ELECTORAL",
+              "BUREAUCRATIC_RISK_AVERSION",
+              "CIVIC_PUBLIC_WELFARE"
+            ]
+          },
+          "alignment_status": {
+            "type": "string",
+            "enum": [
+              "ALIGNED",
+              "MISALIGNED",
+              "PERVERSE"
+            ]
+          },
+          "intensity_score": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "unintended_behavior": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

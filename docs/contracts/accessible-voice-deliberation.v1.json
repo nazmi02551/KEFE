@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AccessibleVoiceDeliberationContract",
+  "version": "v1",
+  "contract_id": "KEFE-ACC-VOICE-001",
+  "capability_id": "CAP-082",
+  "status": "ACCEPTED",
+  "invariants": {
+    "acoustic_voiceprint_anonymization_enforced": true,
+    "wcag_aaa_speech_nav_supported": true
+  },
+  "type": "object",
+  "required": [
+    "session_id",
+    "mode",
+    "audio_duration_seconds",
+    "speech_confidence_score",
+    "is_voiceprint_stripped",
+    "transcript_preview"
+  ],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "AUDIO_BRIEFING_READOUT",
+        "ANONYMIZED_VOICE_DICTATION",
+        "SPEECH_CONFIRMED_VOTE"
+      ]
+    },
+    "audio_duration_seconds": {
+      "type": "number",
+      "minimum": 1.0,
+      "maximum": 600.0
+    },
+    "speech_confidence_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "is_voiceprint_stripped": {
+      "type": "boolean"
+    },
+    "transcript_preview": {
+      "type": "string",
+      "minLength": 3
+    }
+  }
+}

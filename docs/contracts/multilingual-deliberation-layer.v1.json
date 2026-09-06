@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MultilingualDeliberationLayerContract",
+  "version": "v1",
+  "contract_id": "KEFE-MULTI-LOC-001",
+  "capability_id": "CAP-080",
+  "status": "ACCEPTED",
+  "invariants": {
+    "raw_domain_values_immutable": true,
+    "semantic_nuance_preservation": true
+  },
+  "type": "object",
+  "required": [
+    "translation_id",
+    "source_locale",
+    "target_locale",
+    "fidelity_tier",
+    "semantic_similarity_score",
+    "translated_text"
+  ],
+  "properties": {
+    "translation_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "source_locale": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 5
+    },
+    "target_locale": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 5
+    },
+    "fidelity_tier": {
+      "type": "string",
+      "enum": [
+        "HIGH_FIDELITY_CERTIFIED",
+        "COMMUNITY_VERIFIED",
+        "MACHINE_RAW_PREVIEW"
+      ]
+    },
+    "semantic_similarity_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "translated_text": {
+      "type": "string",
+      "minLength": 3
+    }
+  }
+}

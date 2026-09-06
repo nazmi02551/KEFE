@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BridgeArgumentsContract",
+  "version": "v1",
+  "contract_id": "KEFE-BRIDGE-ARGUMENTS-001",
+  "capability_id": "CAP-034",
+  "status": "ACCEPTED",
+  "invariants": {
+    "no_artificial_compromise": true,
+    "verifiable_cross_group_resonance": true,
+    "provenance_tracked": true
+  },
+  "type": "object",
+  "required": [
+    "bridge_id",
+    "case_version_id",
+    "synthesis_thesis",
+    "connecting_values",
+    "cross_group_support_rate",
+    "created_at"
+  ],
+  "properties": {
+    "bridge_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "synthesis_thesis": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 1000
+    },
+    "connecting_values": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "cross_group_support_rate": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "sample_size": {
+      "type": "integer",
+      "minimum": 30
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

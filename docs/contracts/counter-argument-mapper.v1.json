@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CounterArgumentMapperContract",
+  "version": "v1",
+  "contract_id": "KEFE-COUNTER-ARGUMENT-001",
+  "capability_id": "CAP-043",
+  "status": "ACCEPTED",
+  "invariants": {
+    "dialectical_graph_pairing": true,
+    "refutation_type_taxonomy": true,
+    "non_coercive_discourse_mapping": true
+  },
+  "type": "object",
+  "required": [
+    "refutation_id",
+    "source_argument_id",
+    "target_argument_id",
+    "refutation_type",
+    "refutation_strength",
+    "rebuttal_thesis"
+  ],
+  "properties": {
+    "refutation_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "source_argument_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "target_argument_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "refutation_type": {
+      "type": "string",
+      "enum": [
+        "DIRECT_EMPIRICAL_REBUTTAL",
+        "LOGICAL_INVALIDATION",
+        "VALUE_HIERARCHY_CHALLENGE",
+        "BOUNDARY_QUALIFICATION"
+      ]
+    },
+    "refutation_strength": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "rebuttal_thesis": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}

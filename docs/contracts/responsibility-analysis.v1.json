@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ResponsibilityAnalysisContract",
+  "version": "v1",
+  "contract_id": "KEFE-RESPONSIBILITY-ANALYSIS-001",
+  "capability_id": "CAP-020",
+  "status": "ACCEPTED",
+  "invariants": {
+    "non_normative_duty_attribution": true,
+    "actor_proportionality_sum_constraint": true,
+    "institutional_accountability_traceable": true
+  },
+  "type": "object",
+  "required": [
+    "analysis_id",
+    "case_version_id",
+    "clarity_score",
+    "has_accountability_gap",
+    "legal_redress_channel",
+    "actor_allocations"
+  ],
+  "properties": {
+    "analysis_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "clarity_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "has_accountability_gap": {
+      "type": "boolean"
+    },
+    "legal_redress_channel": {
+      "type": "string",
+      "minLength": 3
+    },
+    "gap_explanation": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "actor_allocations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "actor_key",
+          "actor_name",
+          "responsibility_share",
+          "duty_nature",
+          "jurisdiction_scope"
+        ],
+        "properties": {
+          "actor_key": {
+            "type": "string"
+          },
+          "actor_name": {
+            "type": "string"
+          },
+          "responsibility_share": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "duty_nature": {
+            "type": "string",
+            "enum": [
+              "LEGAL_LIABILITY",
+              "REGULATORY_OVERSIGHT",
+              "OPERATIONAL_EXECUTION",
+              "FIDUCIARY_ETHICAL_DUTY"
+            ]
+          },
+          "jurisdiction_scope": {
+            "type": "string"
+          },
+          "accountability_mechanism": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

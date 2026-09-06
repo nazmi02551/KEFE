@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VulnerableGroupsShieldContract",
+  "version": "v1",
+  "contract_id": "KEFE-VULNERABLE-SHIELD-001",
+  "capability_id": "CAP-026",
+  "status": "ACCEPTED",
+  "invariants": {
+    "vulnerable_cohort_taxonomy": true,
+    "rawlsian_maximin_floor_modeled": true,
+    "asymmetric_burden_safeguards": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "option_code",
+    "overall_protection_status",
+    "safety_net_floor_score",
+    "cohort_evaluations"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "option_code": {
+      "type": "string"
+    },
+    "overall_protection_status": {
+      "type": "string",
+      "enum": [
+        "STRONG_PROTECTIVE_FLOOR",
+        "NEUTRAL_NO_DISPROPORTION",
+        "SEVERE_DISPROPORTIONATE_BURDEN"
+      ]
+    },
+    "safety_net_floor_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "cohort_evaluations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "cohort",
+          "impact_score",
+          "assessment"
+        ],
+        "properties": {
+          "cohort": {
+            "type": "string",
+            "enum": [
+              "CHILDREN_YOUTH",
+              "ELDERLY_GERIATRIC",
+              "LOW_INCOME_IMPOVERISHED",
+              "PERSONS_WITH_DISABILITIES",
+              "MINORITY_MARGINALIZED"
+            ]
+          },
+          "impact_score": {
+            "type": "number",
+            "minimum": -1.0,
+            "maximum": 1.0
+          },
+          "assessment": {
+            "type": "string",
+            "minLength": 5
+          }
+        }
+      }
+    }
+  }
+}

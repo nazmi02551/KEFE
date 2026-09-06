@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IntergenerationalJusticeProxyContract",
+  "version": "v1",
+  "contract_id": "KEFE-FUTURE-001",
+  "capability_id": "CAP-112",
+  "status": "ACCEPTED",
+  "invariants": {
+    "fifty_year_horizon_modeling_enforced": true,
+    "planetary_boundary_threshold_tracking": true
+  },
+  "type": "object",
+  "required": [
+    "proxy_id",
+    "policy_domain",
+    "impact_status",
+    "stewardship_equity_index",
+    "planetary_boundary_headroom_score"
+  ],
+  "properties": {
+    "proxy_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "policy_domain": {
+      "type": "string",
+      "minLength": 3
+    },
+    "impact_status": {
+      "type": "string",
+      "enum": [
+        "REGENERATIVE_FUTURE_STEWARDSHIP",
+        "TRANSITIONAL_BURDEN_MONITORED",
+        "INTERGENERATIONAL_DEBT_DEPLETION"
+      ]
+    },
+    "stewardship_equity_index": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "planetary_boundary_headroom_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    }
+  }
+}

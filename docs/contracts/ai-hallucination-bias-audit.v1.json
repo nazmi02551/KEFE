@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AiHallucinationBiasAuditContract",
+  "version": "v1",
+  "contract_id": "KEFE-AI-AUDIT-001",
+  "capability_id": "CAP-091",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_unverified_hallucination_tolerance": true,
+    "balanced_neutrality_enforced": true
+  },
+  "type": "object",
+  "required": [
+    "audit_id",
+    "target_artifact_id",
+    "status",
+    "grounding_confidence_score",
+    "bias_asymmetry_index",
+    "audit_findings_summary"
+  ],
+  "properties": {
+    "audit_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "target_artifact_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "AUDIT_VERIFIED_GROUNDED",
+        "POTENTIAL_HALLUCINATION_FLAG",
+        "ASYMMETRIC_BIAS_SKEW"
+      ]
+    },
+    "grounding_confidence_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "bias_asymmetry_index": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "audit_findings_summary": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}

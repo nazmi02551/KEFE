@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UserDataExportAndDeletionContract",
+  "version": "v1",
+  "contract_id": "KEFE-USER-DATA-EXPORT-DELETION-001",
+  "capability_id": "CAP-085",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_residual_private_identifiers": true,
+    "aggregate_anonymization_preserved": true,
+    "sha256_export_checksum_required": true
+  },
+  "type": "object",
+  "required": [
+    "schema_version",
+    "actor_id",
+    "manifest",
+    "data_sha256"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "manifest": {
+      "type": "object",
+      "required": ["dataset_counts", "total_records"],
+      "properties": {
+        "dataset_counts": {
+          "type": "object"
+        },
+        "total_records": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "data_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

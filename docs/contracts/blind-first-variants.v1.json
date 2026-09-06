@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BlindFirstVariantsContract",
+  "version": "v1",
+  "contract_id": "KEFE-BLIND-VARIANTS-001",
+  "capability_id": "CAP-005",
+  "status": "ACCEPTED",
+  "invariants": {
+    "veil_of_ignorance_enforced": true,
+    "pre_commit_isolation_maintained": true,
+    "blind_taxonomy_supported": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "blind_mode",
+    "blinded_prompt",
+    "real_identity_revealed",
+    "neutrality_score"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "blind_mode": {
+      "type": "string",
+      "enum": [
+        "ACTOR_BLIND",
+        "SOURCE_BLIND",
+        "OUTCOME_BLIND"
+      ]
+    },
+    "blinded_prompt": {
+      "type": "string",
+      "minLength": 10
+    },
+    "real_identity_revealed": {
+      "type": "string",
+      "minLength": 5
+    },
+    "neutrality_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    }
+  }
+}

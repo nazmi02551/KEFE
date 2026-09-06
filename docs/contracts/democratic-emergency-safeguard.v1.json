@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DemocraticEmergencySafeguardContract",
+  "version": "v1",
+  "contract_id": "KEFE-EMERGENCY-001",
+  "capability_id": "CAP-113",
+  "status": "ACCEPTED",
+  "invariants": {
+    "cryptographic_sunset_enforcement": true,
+    "non_derogable_rights_immunity_check": true
+  },
+  "type": "object",
+  "required": [
+    "decree_id",
+    "emergency_jurisdiction",
+    "safeguard_status",
+    "proportionality_score",
+    "remaining_sunset_days"
+  ],
+  "properties": {
+    "decree_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "emergency_jurisdiction": {
+      "type": "string",
+      "minLength": 3
+    },
+    "safeguard_status": {
+      "type": "string",
+      "enum": [
+        "PROPORTIONATE_SUNSET_BOUNDED",
+        "SUNSET_EXPIRATION_APPROACHING",
+        "AUTHORITARIAN_CREEP_VIOLATION"
+      ]
+    },
+    "proportionality_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "remaining_sunset_days": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

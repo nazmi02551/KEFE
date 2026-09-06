@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CivicLiteracyWorkshopContract",
+  "version": "v1",
+  "contract_id": "KEFE-CIVIC-WORKSHOP-001",
+  "capability_id": "CAP-031",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_psychological_profiling": true,
+    "pedagogical_feedback_enforced": true
+  },
+  "type": "object",
+  "required": [
+    "workshop_id",
+    "module_type",
+    "module_title",
+    "total_drills",
+    "completed_drills",
+    "comprehension_score"
+  ],
+  "properties": {
+    "workshop_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "module_type": {
+      "type": "string",
+      "enum": [
+        "FALLACY_SPOTTING",
+        "ETHICAL_FRAMEWORKS",
+        "EVIDENCE_EVALUATION",
+        "BRIDGE_SYNTHESIS"
+      ]
+    },
+    "module_title": {
+      "type": "string",
+      "minLength": 5
+    },
+    "total_drills": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "completed_drills": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "comprehension_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    }
+  }
+}

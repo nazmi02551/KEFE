@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ThresholdSensitivityAnalysisContract",
+  "version": "v1",
+  "contract_id": "KEFE-THRESHOLD-SENSITIVITY-001",
+  "capability_id": "CAP-018",
+  "status": "ACCEPTED",
+  "invariants": {
+    "monotonic_continuum_support": true,
+    "tipping_point_identified": true,
+    "privacy_preserved_curve": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "parameter_name",
+    "unit",
+    "tipping_point_threshold",
+    "curve_points"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "parameter_name": {
+      "type": "string"
+    },
+    "unit": {
+      "type": "string"
+    },
+    "tipping_point_threshold": {
+      "type": "number"
+    },
+    "curve_points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "parameter_value",
+          "acceptance_rate"
+        ],
+        "properties": {
+          "parameter_value": {
+            "type": "number"
+          },
+          "acceptance_rate": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          }
+        }
+      }
+    }
+  }
+}

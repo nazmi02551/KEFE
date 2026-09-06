@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AccessibilityThemeMotionContract",
+  "version": "v1",
+  "contract_id": "KEFE-ACCESSIBILITY-THEME-MOTION-001",
+  "capability_id": "CAP-077",
+  "status": "ACCEPTED",
+  "invariants": {
+    "wcag_aa_minimum_contrast": true,
+    "strict_reduce_motion_honored": true,
+    "low_end_device_60fps": true
+  },
+  "type": "object",
+  "required": [
+    "theme_mode",
+    "canvas_color",
+    "surface_color",
+    "foreground_color",
+    "contrast_ratio_text",
+    "reduce_motion_supported"
+  ],
+  "properties": {
+    "theme_mode": {
+      "type": "string",
+      "enum": ["DARK", "LIGHT"]
+    },
+    "canvas_color": {
+      "type": "string",
+      "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$"
+    },
+    "surface_color": {
+      "type": "string",
+      "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$"
+    },
+    "foreground_color": {
+      "type": "string",
+      "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$"
+    },
+    "contrast_ratio_text": {
+      "type": "number",
+      "minimum": 4.5
+    },
+    "reduce_motion_supported": {
+      "type": "boolean"
+    }
+  }
+}

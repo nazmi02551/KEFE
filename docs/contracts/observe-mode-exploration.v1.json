@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ObserveModeExplorationContract",
+  "version": "v1",
+  "contract_id": "KEFE-OBSERVE-MODE-001",
+  "capability_id": "CAP-029",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_signal_tally_leakage": true,
+    "non_binding_exploration_enforced": true
+  },
+  "type": "object",
+  "required": [
+    "session_id",
+    "case_version_id",
+    "exploration_mode",
+    "is_binding_vote",
+    "viewed_argument_count",
+    "viewed_evidence_count"
+  ],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "exploration_mode": {
+      "type": "string",
+      "enum": [
+        "OBSERVE_ONLY",
+        "STUDY_AND_LEARN",
+        "TRANSITION_TO_WEIGH"
+      ]
+    },
+    "is_binding_vote": {
+      "type": "boolean",
+      "const": false
+    },
+    "viewed_argument_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "viewed_evidence_count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

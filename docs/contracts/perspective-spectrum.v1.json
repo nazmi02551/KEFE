@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PerspectiveSpectrumContract",
+  "version": "v1",
+  "contract_id": "KEFE-PERSPECT-SPEC-001",
+  "capability_id": "CAP-103",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_psychological_profiling": true,
+    "value_anchors_normalized": true
+  },
+  "type": "object",
+  "required": [
+    "spectrum_id",
+    "case_version_id",
+    "primary_value_hue",
+    "argument_resonance_count",
+    "cross_value_bridge_ratio",
+    "core_moral_intuition"
+  ],
+  "properties": {
+    "spectrum_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "primary_value_hue": {
+      "type": "string",
+      "enum": [
+        "SECURITY_AND_ORDER",
+        "AUTONOMY_AND_LIBERTY",
+        "EQUALITY_AND_CARE",
+        "INNOVATION_AND_PROGRESS",
+        "TRADITION_AND_HERITAGE"
+      ]
+    },
+    "argument_resonance_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cross_value_bridge_ratio": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "core_moral_intuition": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}

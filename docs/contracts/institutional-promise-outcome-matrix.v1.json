@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "InstitutionalPromiseOutcomeMatrixContract",
+  "version": "v1",
+  "contract_id": "KEFE-PROMISE-001",
+  "capability_id": "CAP-108",
+  "status": "ACCEPTED",
+  "invariants": {
+    "empirical_proof_verification_mandated": true,
+    "historical_fidelity_score_tracking": true
+  },
+  "type": "object",
+  "required": [
+    "matrix_id",
+    "institution_name",
+    "promise_title",
+    "realization_status",
+    "milestone_completion_pct",
+    "empirical_evidence_artifacts_count"
+  ],
+  "properties": {
+    "matrix_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "institution_name": {
+      "type": "string",
+      "minLength": 3
+    },
+    "promise_title": {
+      "type": "string",
+      "minLength": 6
+    },
+    "realization_status": {
+      "type": "string",
+      "enum": [
+        "PROMISE_DELIVERED_VERIFIED",
+        "IN_PROGRESS_ON_TRACK",
+        "PROMISE_BROKEN_DEFAULT"
+      ]
+    },
+    "milestone_completion_pct": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "empirical_evidence_artifacts_count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

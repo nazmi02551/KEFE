@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MerkleAuditProofContract",
+  "version": "v1",
+  "contract_id": "KEFE-MERKLE-AUDIT-001",
+  "capability_id": "CAP-089",
+  "status": "ACCEPTED",
+  "invariants": {
+    "client_side_merkle_verification": true,
+    "sha256_hash_chains_enforced": true
+  },
+  "type": "object",
+  "required": [
+    "leaf_id",
+    "root_epoch_id",
+    "merkle_root_hash",
+    "proof_depth",
+    "status",
+    "verified_timestamp"
+  ],
+  "properties": {
+    "leaf_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "root_epoch_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "merkle_root_hash": {
+      "type": "string",
+      "minLength": 32
+    },
+    "proof_depth": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "INCLUSION_VERIFIED",
+        "CONSISTENCY_PROVEN",
+        "PROOF_CHALLENGED_TAMPERED"
+      ]
+    },
+    "verified_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

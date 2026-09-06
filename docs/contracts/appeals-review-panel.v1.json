@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AppealsReviewPanelContract",
+  "version": "v1",
+  "contract_id": "KEFE-APPEAL-PANEL-001",
+  "capability_id": "CAP-069",
+  "status": "ACCEPTED",
+  "invariants": {
+    "independent_panel_triage_enforced": true,
+    "supermajority_verdict_rule": true
+  },
+  "type": "object",
+  "required": [
+    "appeal_id",
+    "target_resource_id",
+    "appeal_verdict",
+    "panelist_count",
+    "favor_ratio",
+    "resolution_summary"
+  ],
+  "properties": {
+    "appeal_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "target_resource_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "appeal_verdict": {
+      "type": "string",
+      "enum": [
+        "OVERTURNED_RESTORED",
+        "UPHELD_VIOLATION_CONFIRMED",
+        "PARTIAL_REVISION_PERMITTED"
+      ]
+    },
+    "panelist_count": {
+      "type": "integer",
+      "minimum": 3
+    },
+    "favor_ratio": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "resolution_summary": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}

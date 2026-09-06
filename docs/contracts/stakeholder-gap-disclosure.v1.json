@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StakeholderGapDisclosureContract",
+  "version": "v1",
+  "contract_id": "KEFE-STAKEHOLDER-GAP-DISCLOSURE-001",
+  "capability_id": "CAP-038",
+  "status": "ACCEPTED",
+  "invariants": {
+    "post_commit_only": true,
+    "min_segment_sample_size": 30,
+    "no_psychometric_inference": true
+  },
+  "type": "object",
+  "required": [
+    "segment_key",
+    "distributions",
+    "gap_points",
+    "sample_size"
+  ],
+  "properties": {
+    "segment_key": {
+      "type": "string",
+      "enum": ["DIRECTLY_AFFECTED", "GENERAL_PUBLIC", "DOMAIN_PRACTITIONERS", "REGIONAL_COMMUNITY"]
+    },
+    "distributions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0.0,
+        "maximum": 1.0
+      }
+    },
+    "gap_points": {
+      "type": "integer"
+    },
+    "sample_size": {
+      "type": "integer",
+      "minimum": 30
+    }
+  }
+}

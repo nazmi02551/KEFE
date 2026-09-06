@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_id": "KEFE-SIGNAL-VERSIONING-001",
+  "version": "1.0.0",
+  "title": "MethodologyVersion-Pinned Signal History Contract",
+  "status": "ACCEPTED",
+  "owner": "KEFE-TIM-001|KEFE-DGS-001",
+  "capability": "CAP-047",
+  "description": "Governs the immutable, append-only versioning of civic signals pinned to explicit calculation methodologies, ensuring mathematical accountability and preventing retroactive rewriting of historical consensus.",
+  "invariants": [
+    "METHODOLOGY_VERSION_PINNING: Every calculated signal is permanently pinned to an immutable calculation methodology version.",
+    "APPEND_ONLY_SIGNAL_HISTORY: Historical signal records cannot be mutated, retroactively recalculated, or destroyed; methodology improvements append new versioned snapshots.",
+    "CRYPTOGRAPHIC_PROVENANCE_CHAIN: Each signal version references the hash of its predecessor, creating a tamper-evident audit trail.",
+    "METHODOLOGY_MIGRATION_TRANSPARENCY: Any difference in outcome produced by an upgraded methodology must be explicitly presented as a methodology delta rather than public opinion drift.",
+    "IMMUTABLE_CONSENSUS_BASELINE: Historical institutional or civic actions reference the exact signal version active at the time of commitment."
+  ],
+  "definitions": {
+    "MethodologyTier": {
+      "type": "string",
+      "enum": ["MAJOR", "MINOR", "PATCH"]
+    },
+    "SignalSnapshot": {
+      "type": "object",
+      "required": [
+        "snapshot_id",
+        "methodology_version",
+        "methodology_name",
+        "sample_size",
+        "confidence_score",
+        "consensus_distribution",
+        "calculated_at",
+        "parent_snapshot_hash",
+        "snapshot_hash"
+      ],
+      "properties": {
+        "snapshot_id": { "type": "string", "format": "uuid" },
+        "methodology_version": { "type": "string", "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+.*$" },
+        "methodology_name": { "type": "string" },
+        "sample_size": { "type": "integer", "minimum": 0 },
+        "confidence_score": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "consensus_distribution": {
+          "type": "object",
+          "additionalProperties": { "type": "number" }
+        },
+        "calculated_at": { "type": "string", "format": "date-time" },
+        "parent_snapshot_hash": { "type": ["string", "null"] },
+        "snapshot_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "MethodologyDelta": {
+      "type": "object",
+      "required": [
+        "from_version",
+        "to_version",
+        "distribution_shift",
+        "confidence_delta",
+        "notes"
+      ],
+      "properties": {
+        "from_version": { "type": "string" },
+        "to_version": { "type": "string" },
+        "distribution_shift": { "type": "number" },
+        "confidence_delta": { "type": "number" },
+        "notes": { "type": "string" }
+      }
+    }
+  },
+  "type": "object",
+  "required": [
+    "signal_id",
+    "case_version_id",
+    "current_version",
+    "current_methodology_hash",
+    "snapshots",
+    "latest_delta",
+    "audit_chain_valid",
+    "certified_at"
+  ],
+  "properties": {
+    "signal_id": { "type": "string", "format": "uuid" },
+    "case_version_id": { "type": "string", "format": "uuid" },
+    "current_version": { "type": "string" },
+    "current_methodology_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "snapshots": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/SignalSnapshot" },
+      "minItems": 1
+    },
+    "latest_delta": {
+      "type": ["object", "null"],
+      "$ref": "#/definitions/MethodologyDelta"
+    },
+    "audit_chain_valid": { "type": "boolean" },
+    "certified_at": { "type": "string", "format": "date-time" }
+  }
+}

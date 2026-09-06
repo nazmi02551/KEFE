@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ConsensusDivergenceClassificationContract",
+  "version": "v1",
+  "contract_id": "KEFE-CONSENSUS-DIVERGENCE-001",
+  "capability_id": "CAP-039",
+  "status": "ACCEPTED",
+  "invariants": {
+    "purely_descriptive_classification": true,
+    "deterministic_thresholds": true,
+    "no_normative_judgment": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "distribution",
+    "classification",
+    "leading_share",
+    "margin_of_divergence"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "distribution": {
+      "type": "object"
+    },
+    "classification": {
+      "type": "string",
+      "enum": [
+        "BROAD_CONSENSUS",
+        "BIPOLAR_DIVERGENCE",
+        "FRAGMENTED_PLURALITY",
+        "LEANING_MAJORITY"
+      ]
+    },
+    "leading_share": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "margin_of_divergence": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    }
+  }
+}

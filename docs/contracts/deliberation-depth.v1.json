@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DeliberationDepthContract",
+  "version": "v1",
+  "contract_id": "KEFE-DELIB-DEPTH-001",
+  "capability_id": "CAP-118",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_ideological_bias": true,
+    "rigor_and_reflection_quantified": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "deliberation_depth_score",
+    "depth_level",
+    "arguments_inspected_count",
+    "evidence_items_verified_count",
+    "counter_views_explored_count"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "deliberation_depth_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "depth_level": {
+      "type": "string",
+      "enum": [
+        "PROFOUND_DELIBERATION",
+        "STRUCTURED_REFLECTION",
+        "SUPERFICIAL_SKIMMING"
+      ]
+    },
+    "arguments_inspected_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "evidence_items_verified_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "counter_views_explored_count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

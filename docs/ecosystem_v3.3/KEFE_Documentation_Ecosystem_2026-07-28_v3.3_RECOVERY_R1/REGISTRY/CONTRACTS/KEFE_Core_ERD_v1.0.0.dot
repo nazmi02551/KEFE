@@ -1,0 +1,64 @@
+digraph KEFE {
+  graph [rankdir=LR, bgcolor="white", pad="0.3", nodesep="0.35", ranksep="0.55"];
+  node [shape=box, style="rounded", fontname="DejaVu Sans", fontsize=10];
+  edge [fontname="DejaVu Sans", fontsize=8];
+  subgraph cluster_0 { label="Taxonomy"; color="#bbbbbb"; style="rounded";
+    DOMAIN [label="DOMAIN"];
+    TOPIC [label="TOPIC"];
+    BASE_FORMAT [label="BASE_FORMAT"];
+    MODIFIER [label="MODIFIER"];
+  }
+  subgraph cluster_1 { label="Content"; color="#bbbbbb"; style="rounded";
+    EVENT [label="EVENT"];
+    SCENARIO [label="SCENARIO"];
+    CASE [label="CASE"];
+    CASE_VERSION [label="CASE_VERSION"];
+    ISSUE [label="ISSUE"];
+    QUESTION [label="QUESTION"];
+    QUESTION_VERSION [label="QUESTION_VERSION"];
+  }
+  subgraph cluster_2 { label="Decision"; color="#bbbbbb"; style="rounded";
+    ACTOR [label="ACTOR"];
+    WEIGH_SESSION [label="WEIGH_SESSION"];
+    RESPONSE [label="RESPONSE"];
+    EXPOSURE [label="EXPOSURE"];
+    DECISION_REVISION [label="DECISION_REVISION"];
+  }
+  subgraph cluster_3 { label="Trust/Results"; color="#bbbbbb"; style="rounded";
+    SOURCE [label="SOURCE"];
+    CLAIM [label="CLAIM"];
+    SAMPLE_DEFINITION [label="SAMPLE_DEFINITION"];
+    METHODOLOGY_VERSION [label="METHODOLOGY_VERSION"];
+    RESULT_SNAPSHOT [label="RESULT_SNAPSHOT"];
+  }
+  subgraph cluster_4 { label="Social/Integrity"; color="#bbbbbb"; style="rounded";
+    REASON [label="REASON"];
+    REASON_REACTION [label="REASON_REACTION"];
+    REASON_CLUSTER [label="REASON_CLUSTER"];
+    INTEGRITY_ASSESSMENT [label="INTEGRITY_ASSESSMENT"];
+  }
+  DOMAIN -> TOPIC [label="contains"];
+  BASE_FORMAT -> CASE [label="shapes"];
+  EVENT -> CASE [label="source"];
+  SCENARIO -> CASE [label="source"];
+  CASE -> CASE_VERSION [label="versions"];
+  CASE_VERSION -> ISSUE [label="contains"];
+  ISSUE -> QUESTION [label="contains"];
+  QUESTION -> QUESTION_VERSION [label="versions"];
+  ACTOR -> WEIGH_SESSION [label="starts"];
+  CASE_VERSION -> WEIGH_SESSION [label="shown in"];
+  WEIGH_SESSION -> RESPONSE [label="answers"];
+  QUESTION_VERSION -> RESPONSE [label="typed by"];
+  WEIGH_SESSION -> EXPOSURE [label="records"];
+  WEIGH_SESSION -> DECISION_REVISION [label="links"];
+  CASE_VERSION -> CLAIM [label="contains"];
+  SOURCE -> CLAIM [label="supports"];
+  CASE_VERSION -> RESULT_SNAPSHOT [label="aggregates"];
+  QUESTION_VERSION -> RESULT_SNAPSHOT [label="aggregates"];
+  SAMPLE_DEFINITION -> RESULT_SNAPSHOT [label="qualifies"];
+  METHODOLOGY_VERSION -> RESULT_SNAPSHOT [label="computes"];
+  CASE_VERSION -> REASON [label="context"];
+  REASON -> REASON_REACTION [label="receives"];
+  REASON -> REASON_CLUSTER [label="clustered"];
+  WEIGH_SESSION -> INTEGRITY_ASSESSMENT [label="assessed"];
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TemporalRetestDriftContract",
+  "version": "v1",
+  "contract_id": "KEFE-TEMPORAL-DRIFT-001",
+  "capability_id": "CAP-013",
+  "status": "ACCEPTED",
+  "invariants": {
+    "blind_retest_pre_reveal": true,
+    "descriptive_drift_only": true,
+    "no_inconsistency_shaming": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "initial_option_code",
+    "retest_option_code",
+    "time_elapsed_days",
+    "is_shifted",
+    "drift_nature"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "initial_option_code": {
+      "type": "string"
+    },
+    "retest_option_code": {
+      "type": "string"
+    },
+    "time_elapsed_days": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "is_shifted": {
+      "type": "boolean"
+    },
+    "confidence_delta": {
+      "type": "number",
+      "minimum": -1.0,
+      "maximum": 1.0
+    },
+    "drift_nature": {
+      "type": "string",
+      "enum": [
+        "STABLE_CONVICTION",
+        "MATURED_REVISION",
+        "EXPLORATORY_SHIFT",
+        "REINFORCED_CERTAINTY"
+      ]
+    }
+  }
+}

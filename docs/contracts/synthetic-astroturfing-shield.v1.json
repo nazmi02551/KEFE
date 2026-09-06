@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SyntheticAstroturfingShieldContract",
+  "version": "v1",
+  "contract_id": "KEFE-BOT-SHIELD-001",
+  "capability_id": "CAP-092",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_sybil_metric_poisoning": true,
+    "proof_of_humanity_entropy_enforced": true
+  },
+  "type": "object",
+  "required": [
+    "cluster_id",
+    "target_case_id",
+    "defense_state",
+    "synthetic_probability_score",
+    "quarantined_bot_payloads_count",
+    "semantic_entropy_index"
+  ],
+  "properties": {
+    "cluster_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "target_case_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "defense_state": {
+      "type": "string",
+      "enum": [
+        "ORGANIC_CITIZEN_AUTHENTIC",
+        "SUSPECTED_BOT_COORDINATION",
+        "ISOLATED_QUARANTINE_SWARM"
+      ]
+    },
+    "synthetic_probability_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "quarantined_bot_payloads_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "semantic_entropy_index": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    }
+  }
+}

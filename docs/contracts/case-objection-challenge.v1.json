@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CaseObjectionChallengeContract",
+  "version": "v1",
+  "contract_id": "KEFE-CASE-OBJECTION-001",
+  "capability_id": "CAP-068",
+  "status": "ACCEPTED",
+  "invariants": {
+    "structured_challenge_taxonomy": true,
+    "evidence_backed_auditing": true,
+    "transparent_resolution_lifecycle": true
+  },
+  "type": "object",
+  "required": [
+    "objection_id",
+    "case_version_id",
+    "reason_category",
+    "statement",
+    "status",
+    "created_at"
+  ],
+  "properties": {
+    "objection_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reason_category": {
+      "type": "string",
+      "enum": [
+        "EDITORIAL_BIAS_FRAMING",
+        "FACTUAL_INACCURACY",
+        "EXCLUDED_STAKEHOLDER",
+        "AMBIGUOUS_OPTIONS",
+        "DEPRECIATED_CONTEXT"
+      ]
+    },
+    "statement": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 2000
+    },
+    "supporting_evidence_url": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "SUBMITTED",
+        "UNDER_REVIEW",
+        "ACCEPTED_CORRECTION_FILED",
+        "REJECTED_WITH_REASON"
+      ]
+    },
+    "resolution_note": {
+      "type": ["string", "null"]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

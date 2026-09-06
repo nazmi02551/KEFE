@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SourceDiversityIndicatorContract",
+  "version": "v1",
+  "contract_id": "KEFE-SOURCE-DIVERSITY-001",
+  "capability_id": "CAP-071",
+  "status": "ACCEPTED",
+  "invariants": {
+    "plurality_taxonomy_enforced": true,
+    "non_monopolistic_sources": true,
+    "audit_trail_verifiable": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "total_sources",
+    "diversity_level",
+    "category_breakdown"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "total_sources": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "diversity_level": {
+      "type": "string",
+      "enum": [
+        "HIGH_DIVERSITY",
+        "BALANCED_DIVERSITY",
+        "LIMITED_DIVERSITY"
+      ]
+    },
+    "category_breakdown": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "category",
+          "count",
+          "percentage"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "ACADEMIC_SCIENTIFIC",
+              "OFFICIAL_GOVERNMENT",
+              "CIVIC_INDEPENDENT",
+              "MAINSTREAM_JOURNALISM",
+              "TECHNICAL_INDUSTRY"
+            ]
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "percentage": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 100.0
+          }
+        }
+      }
+    }
+  }
+}

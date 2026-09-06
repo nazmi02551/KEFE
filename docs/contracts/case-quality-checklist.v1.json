@@ -1,0 +1,70 @@
+{
+  "contract_id": "KEFE-CASE-QUALITY-CHECKLIST-001",
+  "version": "1.0.0",
+  "status": "CANDIDATE",
+  "capabilities": ["CAP-075"],
+  "rules": {
+    "replaces_magic_score": true,
+    "no_composite_scalar_ranking": true,
+    "binary_or_tier_audit_status": true,
+    "publicly_inspectable": true
+  },
+  "dimensions": [
+    {
+      "id": "BALANCED_OPTIONS",
+      "name_tr": "Dengeli Seçenekler",
+      "name_en": "Balanced Options",
+      "criterion_tr": "Seçenekler kutuplaştırıcı veya kukla argüman olmaksızın gerçek normatif gerilimi temsil eder.",
+      "criterion_en": "Options represent genuine normative tension without strawman framing."
+    },
+    {
+      "id": "NEUTRAL_PROVENANCE",
+      "name_tr": "Tarafsız Kaynak Kökeni",
+      "name_en": "Neutral Provenance",
+      "criterion_tr": "Metin yönlendirici veya manipülatif dil içermez; tarafsız olgular sunulur.",
+      "criterion_en": "Text contains no leading or manipulative phrasing; neutral facts are presented."
+    },
+    {
+      "id": "DISCLOSED_STAKEHOLDERS",
+      "name_tr": "Açıklanmış Paydaşlar",
+      "name_en": "Disclosed Stakeholders",
+      "criterion_tr": "Karardan etkilenen tüm doğrudan ve dolaylı paydaşlar açıkça belirtilmiştir.",
+      "criterion_en": "All directly and indirectly impacted stakeholders are explicitly stated."
+    },
+    {
+      "id": "VERIFIED_SOURCES",
+      "name_tr": "Doğrulanmış Kaynaklar",
+      "name_en": "Verified Sources",
+      "criterion_tr": "En az iki bağımsız ve doğrulanabilir birincil veya ikincil kaynak bağlanmıştır.",
+      "criterion_en": "At least two independent and verifiable external sources are linked."
+    },
+    {
+      "id": "ACCESSIBLE_READABILITY",
+      "name_tr": "Erişilebilir Okunabilirlik",
+      "name_en": "Accessible Readability",
+      "criterion_tr": "Metin halkın genel erişimine uygun, duru ve teknik jargondan arındırılmıştır.",
+      "criterion_en": "Language is plain, accessible, and free of unnecessary technical jargon."
+    },
+    {
+      "id": "PRINCIPLE_INTEGRITY",
+      "name_tr": "İlkesel Tutarlılık",
+      "name_en": "Principle Integrity",
+      "criterion_tr": "Vaka temel hak, anayasal güvence veya kamu yararı ilkeleriyle uyumludur.",
+      "criterion_en": "Case aligns with fundamental rights, constitutional principles, or public interest."
+    },
+    {
+      "id": "REASON_PROMPT_EQUITY",
+      "name_tr": "Eşit Gerekçe İstemi",
+      "name_en": "Reason Prompt Equity",
+      "criterion_tr": "Gerekçe yakalama soruları belirli bir sonuca doğru yönlendirme veya telkin yapmaz.",
+      "criterion_en": "Pre-commit reason prompts do not nudge or prime toward a particular choice."
+    },
+    {
+      "id": "METHODOLOGY_TRANSPARENCY",
+      "name_tr": "Metodolojik Şeffaflık",
+      "name_en": "Methodology Transparency",
+      "criterion_tr": "Denetim adımları ve editör onay imzaları açıkça doğrulanabilir ve şeffaftır.",
+      "criterion_en": "Audit criteria and editorial review checkpoints are cryptographically verifiable."
+    }
+  ]
+}

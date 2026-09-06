@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CitizenJuryChamberContract",
+  "version": "v1",
+  "contract_id": "KEFE-JURY-CHAMBER-001",
+  "capability_id": "CAP-046",
+  "status": "ACCEPTED",
+  "invariants": {
+    "stratified_demographic_sortition": true,
+    "supermajority_verdict_threshold_enforced": true
+  },
+  "type": "object",
+  "required": [
+    "jury_id",
+    "dilemma_title",
+    "stage",
+    "juror_count",
+    "expert_witnesses_count",
+    "verdict_consensus_rate"
+  ],
+  "properties": {
+    "jury_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "dilemma_title": {
+      "type": "string",
+      "minLength": 5
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "STRATIFIED_PANEL_ASSEMBLY",
+        "EXPERT_HEARINGS_IN_SESSION",
+        "CONSENSUS_VERDICT_EMITTED"
+      ]
+    },
+    "juror_count": {
+      "type": "integer",
+      "minimum": 12
+    },
+    "expert_witnesses_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "verdict_consensus_rate": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DynamicAgendaThresholdingContract",
+  "version": "v1",
+  "contract_id": "KEFE-AGENDA-THRESH-001",
+  "capability_id": "CAP-073",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_algorithmic_rage_amplification": true,
+    "cross_demographic_velocity_enforced": true
+  },
+  "type": "object",
+  "required": [
+    "topic_id",
+    "topic_title",
+    "priority_tier",
+    "resonance_velocity_index",
+    "viewpoint_diversity_entropy",
+    "is_featured_on_national_ballot"
+  ],
+  "properties": {
+    "topic_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "topic_title": {
+      "type": "string",
+      "minLength": 5
+    },
+    "priority_tier": {
+      "type": "string",
+      "enum": [
+        "NATIONAL_URGENCY_SPIKE",
+        "REGIONAL_EMERGENT_TOPIC",
+        "MONITORED_INCUBATION"
+      ]
+    },
+    "resonance_velocity_index": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "viewpoint_diversity_entropy": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "is_featured_on_national_ballot": {
+      "type": "boolean"
+    }
+  }
+}

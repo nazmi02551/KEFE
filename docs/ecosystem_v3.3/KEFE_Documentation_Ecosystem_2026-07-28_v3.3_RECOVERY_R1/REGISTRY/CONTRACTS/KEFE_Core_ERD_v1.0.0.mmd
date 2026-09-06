@@ -1,0 +1,51 @@
+erDiagram
+    ACTOR ||--o| ACCOUNT_REF : "may link"
+    ACTOR ||--o{ WEIGH_SESSION : starts
+    ACTOR ||--o{ REASON : writes
+    ACTOR ||--o{ REASON_REACTION : reacts
+    ACTOR ||--o{ DECISION_REVISION : owns
+
+    DOMAIN ||--o{ CASE_DOMAIN : classifies
+    TOPIC ||--o{ CASE_TOPIC : classifies
+    DOMAIN ||--o{ TOPIC : contains
+    BASE_FORMAT ||--o{ CASE : shapes
+    CASE ||--o{ CASE_MODIFIER : uses
+    MODIFIER ||--o{ CASE_MODIFIER : modifies
+
+    EVENT ||--o{ CASE : source_for
+    SCENARIO ||--o{ CASE : source_for
+    CASE ||--o{ CASE_VERSION : versions
+    CASE_VERSION ||--o{ ISSUE : contains
+    ISSUE ||--o{ QUESTION : contains
+    QUESTION ||--o{ QUESTION_VERSION : versions
+    QUESTION_VERSION ||--o{ QUESTION_OPTION : offers
+
+    CASE_VERSION ||--o{ WEIGH_SESSION : shown_in
+    WEIGH_SESSION ||--o{ RESPONSE : answers
+    QUESTION_VERSION ||--o{ RESPONSE : answered_by
+    WEIGH_SESSION ||--o{ EXPOSURE : records
+    WEIGH_SESSION ||--o{ DECISION_REVISION : from
+    WEIGH_SESSION ||--o{ DECISION_REVISION : to
+
+    CASE_VERSION ||--o{ CLAIM : contains
+    CLAIM ||--o{ CLAIM_SOURCE : supported_by
+    SOURCE ||--o{ CLAIM_SOURCE : supports
+
+    CASE_VERSION ||--o{ RESULT_SNAPSHOT : aggregates
+    QUESTION_VERSION ||--o{ RESULT_SNAPSHOT : aggregates
+    SAMPLE_DEFINITION ||--o{ RESULT_SNAPSHOT : qualifies
+    METHODOLOGY_VERSION ||--o{ RESULT_SNAPSHOT : computes
+
+    WEIGH_SESSION ||--o{ INTEGRITY_ASSESSMENT : assessed
+    INTEGRITY_ASSESSMENT ||--o{ INTEGRITY_SIGNAL : has
+
+    CASE_VERSION ||--o{ REASON : contextualizes
+    REASON ||--o{ REASON_REACTION : receives
+    REASON ||--o{ REASON_CLUSTER_MEMBER : member
+    REASON_CLUSTER ||--o{ REASON_CLUSTER_MEMBER : groups
+
+    EXPERIMENT ||--o{ ASSIGNMENT : assigns
+    ACTOR ||--o{ ASSIGNMENT : receives
+
+    OUTBOX_EVENT }o--|| ACTOR : correlates
+    AUDIT_LOG }o--|| ACTOR : actor_ref

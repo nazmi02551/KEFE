@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StakeholderImpactMatrixContract",
+  "version": "v1",
+  "contract_id": "KEFE-STAKEHOLDER-IMPACT-001",
+  "capability_id": "CAP-023",
+  "status": "ACCEPTED",
+  "invariants": {
+    "multi_stakeholder_mapping": true,
+    "equity_balance_assessed": true,
+    "neutral_impact_taxonomy": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "option_code",
+    "impact_items"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "option_code": {
+      "type": "string"
+    },
+    "impact_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "stakeholder_group",
+          "impact_type",
+          "impact_score",
+          "description"
+        ],
+        "properties": {
+          "stakeholder_group": {
+            "type": "string",
+            "enum": [
+              "DIRECT_USERS",
+              "WORKERS",
+              "VULNERABLE_GROUPS",
+              "TAXPAYERS",
+              "FUTURE_GENERATIONS"
+            ]
+          },
+          "impact_type": {
+            "type": "string",
+            "enum": [
+              "BENEFIT",
+              "BURDEN",
+              "NEUTRAL",
+              "PROTECTION"
+            ]
+          },
+          "impact_score": {
+            "type": "integer",
+            "minimum": -5,
+            "maximum": 5
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

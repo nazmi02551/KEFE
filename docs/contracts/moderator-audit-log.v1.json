@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ModeratorAuditLogContract",
+  "version": "v1",
+  "contract_id": "KEFE-MOD-AUDIT-001",
+  "capability_id": "CAP-067",
+  "status": "ACCEPTED",
+  "invariants": {
+    "immutable_audit_chain": true,
+    "policy_rule_reference_enforced": true
+  },
+  "type": "object",
+  "required": [
+    "audit_id",
+    "target_resource_id",
+    "moderator_id",
+    "action_type",
+    "policy_rule_reference",
+    "justification_text",
+    "action_hash",
+    "created_at_utc"
+  ],
+  "properties": {
+    "audit_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "target_resource_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "moderator_id": {
+      "type": "string",
+      "minLength": 3
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "REASON_REMOVED_POLICY_BREACH",
+        "FLAG_DISMISSED_VALID",
+        "CASE_VERSION_FREEZE",
+        "USER_WARNING_ISSUED"
+      ]
+    },
+    "policy_rule_reference": {
+      "type": "string",
+      "minLength": 3
+    },
+    "justification_text": {
+      "type": "string",
+      "minLength": 10
+    },
+    "action_hash": {
+      "type": "string",
+      "minLength": 16
+    },
+    "created_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

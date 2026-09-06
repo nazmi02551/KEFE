@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RevolvingDoorMonitorContract",
+  "version": "v1",
+  "contract_id": "KEFE-REVOLVE-001",
+  "capability_id": "CAP-106",
+  "status": "ACCEPTED",
+  "invariants": {
+    "cooling_off_tracking_mandated": true,
+    "regulatory_capture_transparency_enforced": true
+  },
+  "type": "object",
+  "required": [
+    "transition_id",
+    "official_name_anonymized",
+    "status",
+    "cooling_off_months_observed",
+    "capture_risk_score",
+    "regulatory_agency_source"
+  ],
+  "properties": {
+    "transition_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "official_name_anonymized": {
+      "type": "string",
+      "minLength": 4
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "COOLING_OFF_COMPLIANT",
+        "RAPID_REGULATORY_TRANSITION_ALERT",
+        "PROVEN_CAPTURE_VULNERABILITY"
+      ]
+    },
+    "cooling_off_months_observed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "capture_risk_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "regulatory_agency_source": {
+      "type": "string",
+      "minLength": 3
+    }
+  }
+}

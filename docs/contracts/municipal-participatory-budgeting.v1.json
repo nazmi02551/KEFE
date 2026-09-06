@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MunicipalParticipatoryBudgetingContract",
+  "version": "v1",
+  "contract_id": "KEFE-MUN-BUDGET-001",
+  "capability_id": "CAP-033",
+  "status": "ACCEPTED",
+  "invariants": {
+    "total_allocation_within_envelope": true,
+    "quadratic_voting_supported": true
+  },
+  "type": "object",
+  "required": [
+    "project_id",
+    "municipality_name",
+    "project_domain",
+    "requested_budget_try",
+    "citizen_votes_count",
+    "civic_approval_rate"
+  ],
+  "properties": {
+    "project_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "municipality_name": {
+      "type": "string",
+      "minLength": 3
+    },
+    "project_domain": {
+      "type": "string",
+      "enum": [
+        "PARKS_AND_GREEN_SPACES",
+        "PUBLIC_TRANSIT_AND_MOBILITY",
+        "EDUCATION_AND_YOUTH_CENTERS",
+        "DISASTER_RESILIENCE_AND_SAFETY"
+      ]
+    },
+    "requested_budget_try": {
+      "type": "integer",
+      "minimum": 1000
+    },
+    "citizen_votes_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "civic_approval_rate": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    }
+  }
+}

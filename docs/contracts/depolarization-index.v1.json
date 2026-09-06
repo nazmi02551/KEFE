@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DepolarizationIndexContract",
+  "version": "v1",
+  "contract_id": "KEFE-DEPOLAR-INDEX-001",
+  "capability_id": "CAP-117",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_individual_profiling": true,
+    "aggregate_opinion_distance_metric": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "pre_deliberation_distance",
+    "post_deliberation_distance",
+    "depolarization_score",
+    "bridge_efficacy_state"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "pre_deliberation_distance": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "post_deliberation_distance": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "depolarization_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "bridge_efficacy_state": {
+      "type": "string",
+      "enum": [
+        "HIGH_DEPOLARIZATION",
+        "MODERATE_BRIDGE_RESONANCE",
+        "PERSISTENT_POLARIZATION"
+      ]
+    }
+  }
+}

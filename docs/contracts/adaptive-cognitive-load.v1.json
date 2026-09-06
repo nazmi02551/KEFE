@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AdaptiveCognitiveLoadContract",
+  "version": "v1",
+  "contract_id": "KEFE-COG-LOAD-001",
+  "capability_id": "CAP-083",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_counter_argument_concealment": true,
+    "blind_first_parity_preserved": true
+  },
+  "type": "object",
+  "required": [
+    "profile_id",
+    "density_mode",
+    "reading_time_reduction_pct",
+    "comprehension_retention_index",
+    "is_fatigue_mitigation_active"
+  ],
+  "properties": {
+    "profile_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "density_mode": {
+      "type": "string",
+      "enum": [
+        "STREAMLINED_ESSENTIALS",
+        "BALANCED_DELIBERATIVE",
+        "SCHOLARLY_EXHAUSTIVE"
+      ]
+    },
+    "reading_time_reduction_pct": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "comprehension_retention_index": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "is_fatigue_mitigation_active": {
+      "type": "boolean"
+    }
+  }
+}

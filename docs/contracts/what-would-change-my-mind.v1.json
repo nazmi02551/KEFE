@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WhatWouldChangeMyMindContract",
+  "version": "v1",
+  "contract_id": "KEFE-CHANGE-MIND-001",
+  "capability_id": "CAP-010",
+  "status": "ACCEPTED",
+  "invariants": {
+    "non_judgmental_inquiry": true,
+    "counterfactual_framing_valid": true,
+    "epistemic_humility_fostered": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "selected_conditions",
+    "flexibility_class"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "selected_conditions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "condition_type",
+          "description"
+        ],
+        "properties": {
+          "condition_type": {
+            "type": "string",
+            "enum": [
+              "EMPIRICAL_DATA_THRESHOLD",
+              "VULNERABILITY_PROTECTION",
+              "ECONOMIC_SUSTAINABILITY",
+              "MORAL_IMPASSE_EMPATHY",
+              "UNCONDITIONAL_STANCE"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 5
+          }
+        }
+      }
+    },
+    "custom_falsification_note": {
+      "type": ["string", "null"]
+    },
+    "flexibility_class": {
+      "type": "string",
+      "enum": [
+        "CONDITIONALLY_FLEXIBLE",
+        "HIGHLY_EPISTEMIC_OPEN",
+        "CATEGORICAL_ABSOLUTE"
+      ]
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kefe.org/schemas/stakeholder-distribution.v1.json",
+  "title": "StakeholderDistribution",
+  "description": "KEFE-STAKEHOLDER-DISTRIBUTION-001: Multi-stakeholder deliberative distribution contract mapping participation, option breakdown, cohesion, and divergence across distinct societal and institutional roles.",
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "total_stakeholders_represented",
+    "active_categories_count",
+    "stakeholder_distributions",
+    "pluralism_score",
+    "generated_at"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string"
+    },
+    "total_stakeholders_represented": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "active_categories_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "pluralism_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "stakeholder_distributions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "category",
+          "name",
+          "participant_count",
+          "sample_share",
+          "option_shares",
+          "primary_choice",
+          "cohesion_index",
+          "divergence_from_overall_points"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "DIRECTLY_IMPACTED",
+              "FRONTLINE_PRACTITIONERS",
+              "COMMERCIAL_ENTERPRISES",
+              "REGULATORY_OVERSIGHT",
+              "CIVIC_COMMUNITY"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "participant_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sample_share": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "option_shares": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0
+            }
+          },
+          "primary_choice": {
+            "type": "string"
+          },
+          "cohesion_index": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "divergence_from_overall_points": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

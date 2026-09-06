@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CommunityDilemmaProposalsContract",
+  "version": "v1",
+  "contract_id": "KEFE-COMMUNITY-UGC-001",
+  "capability_id": "CAP-030",
+  "status": "ACCEPTED",
+  "invariants": {
+    "editorial_neutrality_enforced": true,
+    "transparent_rejection_reasoning": true
+  },
+  "type": "object",
+  "required": [
+    "proposal_id",
+    "proposed_title",
+    "proposed_context",
+    "curation_state",
+    "neutrality_score",
+    "supporter_count"
+  ],
+  "properties": {
+    "proposal_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "proposed_title": {
+      "type": "string",
+      "minLength": 5
+    },
+    "proposed_context": {
+      "type": "string",
+      "minLength": 10
+    },
+    "curation_state": {
+      "type": "string",
+      "enum": [
+        "DRAFT_SUBMITTED",
+        "COMMUNITY_PEER_REVIEW",
+        "EDITORIAL_APPROVED",
+        "REJECTED_WITH_REASON"
+      ]
+    },
+    "neutrality_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "supporter_count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

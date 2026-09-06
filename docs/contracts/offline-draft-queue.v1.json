@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OfflineDraftQueueContract",
+  "version": "v1",
+  "contract_id": "KEFE-OFFLINE-DRAFT-QUEUE-001",
+  "capability_id": "CAP-078",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_draft_loss": true,
+    "strict_idempotency": true,
+    "local_sandbox_storage_only": true
+  },
+  "type": "object",
+  "required": [
+    "queue_id",
+    "session_id",
+    "case_version_id",
+    "idempotency_key",
+    "responses",
+    "status",
+    "queued_at",
+    "retry_count"
+  ],
+  "properties": {
+    "queue_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "session_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 8
+    },
+    "responses": {
+      "type": "object"
+    },
+    "reason_text": {
+      "type": ["string", "null"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["PENDING", "SYNCING", "COMPLETED", "FAILED"]
+    },
+    "queued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "retry_count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

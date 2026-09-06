@@ -1,0 +1,9 @@
+KEFE v3.3 RECOVERY PROVENANCE
+Date: 2026-07-28
+Original artifact name: KEFE_Documentation_Ecosystem_2026-07-28_v3.3_CURRENT.zip
+Original binary: unavailable in current runtime; byte-identical recovery is NOT claimed.
+Recovery source baseline: KEFE_Documentation_Ecosystem_2026-07-27_v3.2_CURRENT.zip
+Source baseline SHA-256: 3af400c28a9849f0714bf1e4656a5cb4b0b625164f05183caff75984ac5bc223
+Durable semantic evidence: GitHub PR #40 secured Admin HTTP milestone; PR #42 v3.3 publication baseline; docs/status/CURRENT.md.
+Expected v3.3 versions: MPD 1.2.0; GOV 1.4.0; PB 1.4.0; ENG 0.6.0; MVP 1.2.0; ADM 1.2.0; SEC 1.2.0.
+Recovery purpose: restore a semantically equivalent publication baseline with explicit provenance.

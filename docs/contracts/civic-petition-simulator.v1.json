@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CivicPetitionSimulatorContract",
+  "version": "v1",
+  "contract_id": "KEFE-PETITION-SIM-001",
+  "capability_id": "CAP-079",
+  "status": "ACCEPTED",
+  "invariants": {
+    "balanced_impact_projection_modeled": true,
+    "statutory_compliance_checked": true
+  },
+  "type": "object",
+  "required": [
+    "petition_id",
+    "bill_title",
+    "stage",
+    "signatures_count",
+    "signature_target_threshold",
+    "projected_net_benefit_score"
+  ],
+  "properties": {
+    "petition_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "bill_title": {
+      "type": "string",
+      "minLength": 5
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "DRAFT_IMPACT_SIMULATION",
+        "SIGNATURE_GATHERING_CAMPAIGN",
+        "SUBMITTED_TO_PARLIAMENT"
+      ]
+    },
+    "signatures_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "signature_target_threshold": {
+      "type": "integer",
+      "minimum": 1000
+    },
+    "projected_net_benefit_score": {
+      "type": "number",
+      "minimum": -1.0,
+      "maximum": 1.0
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MultiLlmConsensusContract",
+  "version": "v1",
+  "contract_id": "KEFE-MULTI-LLM-001",
+  "capability_id": "CAP-094",
+  "status": "ACCEPTED",
+  "invariants": {
+    "heterogeneous_ensemble_diversity_enforced": true,
+    "zero_single_provider_truth_authority": true
+  },
+  "type": "object",
+  "required": [
+    "consensus_id",
+    "prompt_context_hash",
+    "agreement_level",
+    "models_evaluated_count",
+    "semantic_convergence_score",
+    "synthesized_consensus_output"
+  ],
+  "properties": {
+    "consensus_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "prompt_context_hash": {
+      "type": "string",
+      "minLength": 8
+    },
+    "agreement_level": {
+      "type": "string",
+      "enum": [
+        "UNANIMOUS_CROSS_MODEL_CONSENSUS",
+        "MAJORITY_CONVERGENT_SYNTHESIS",
+        "MODEL_DIVERGENCE_REVIEW_REQUIRED"
+      ]
+    },
+    "models_evaluated_count": {
+      "type": "integer",
+      "minimum": 3
+    },
+    "semantic_convergence_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "synthesized_consensus_output": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}

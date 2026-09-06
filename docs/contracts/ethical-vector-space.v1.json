@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EthicalVectorSpaceContract",
+  "version": "v1",
+  "contract_id": "KEFE-ETH-VECTOR-001",
+  "capability_id": "CAP-096",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_ideological_reductionism": true,
+    "vector_coordinates_normalized": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "utilitarian_weight",
+    "deontological_weight",
+    "communitarian_weight",
+    "intergenerational_weight",
+    "dominant_attractor"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "utilitarian_weight": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "deontological_weight": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "communitarian_weight": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "intergenerational_weight": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "dominant_attractor": {
+      "type": "string",
+      "enum": [
+        "UTILITARIAN_WELFARE",
+        "DEONTOLOGICAL_RIGHTS",
+        "COMMUNITARIAN_SOLIDARITY",
+        "INTERGENERATIONAL_CARE"
+      ]
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PrivacyBudgetMonitorContract",
+  "version": "v1",
+  "contract_id": "KEFE-PRIV-BUDGET-001",
+  "capability_id": "CAP-090",
+  "status": "ACCEPTED",
+  "invariants": {
+    "differential_privacy_strict_bound": true,
+    "automatic_query_throttling_enforced": true
+  },
+  "type": "object",
+  "required": [
+    "monitor_id",
+    "total_epsilon_budget",
+    "consumed_epsilon",
+    "delta_parameter",
+    "budget_state",
+    "queries_executed_count"
+  ],
+  "properties": {
+    "monitor_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "total_epsilon_budget": {
+      "type": "number",
+      "minimum": 0.1,
+      "maximum": 10.0
+    },
+    "consumed_epsilon": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 10.0
+    },
+    "delta_parameter": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 0.01
+    },
+    "budget_state": {
+      "type": "string",
+      "enum": [
+        "BUDGET_HEALTHY_AMPLE",
+        "BUDGET_APPROACHING_LIMIT",
+        "BUDGET_EXHAUSTED_THROTTLED"
+      ]
+    },
+    "queries_executed_count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

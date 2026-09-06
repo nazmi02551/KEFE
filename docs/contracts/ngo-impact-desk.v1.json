@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NgoImpactDeskContract",
+  "version": "v1",
+  "contract_id": "KEFE-NGO-DESK-001",
+  "capability_id": "CAP-037",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_dark_money_foreign_funding_masking": true,
+    "verifiable_advocacy_trail_enforced": true
+  },
+  "type": "object",
+  "required": [
+    "campaign_id",
+    "ngo_name",
+    "advocacy_domain",
+    "citizen_endorsement_count",
+    "institutional_reforms_achieved",
+    "advocacy_efficacy_score"
+  ],
+  "properties": {
+    "campaign_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "ngo_name": {
+      "type": "string",
+      "minLength": 3
+    },
+    "advocacy_domain": {
+      "type": "string",
+      "enum": [
+        "HUMAN_RIGHTS_AND_JUSTICE",
+        "ENVIRONMENT_AND_CLIMATE",
+        "PUBLIC_HEALTH_AND_SAFETY",
+        "TRANSPARENCY_AND_ANTI_CORRUPTION"
+      ]
+    },
+    "citizen_endorsement_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "institutional_reforms_achieved": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "advocacy_efficacy_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    }
+  }
+}

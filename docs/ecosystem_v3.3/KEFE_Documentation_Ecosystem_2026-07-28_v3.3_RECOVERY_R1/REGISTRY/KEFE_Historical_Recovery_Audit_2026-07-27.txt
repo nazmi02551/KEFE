@@ -1,0 +1,66 @@
+KEFE HISTORICAL RECOVERY AUDIT
+Date: 27 Temmuz 2026
+Status: PASSED
+
+1. PURPOSE
+Superseded KEFE documents and prior product discussions were compared against the v3 active ecosystem so accepted, test, roadmap, rejected and example content would not silently disappear.
+
+2. ORIGINAL 59-SECTION MASTER COVERAGE
+- Sections 1-55: preserved in KEFE Master Product Document v1.2.0, with architecture/commercial/UI additions where relevant.
+- Section 56: refactored to Single Definition Principle; KEFE-GOV §4 + machine-readable manifest is the canonical registry.
+- Section 57: former open decisions are closed in §57 as Accepted/provisional defaults with evidence/reversal gates.
+- Section 58: decision log expanded.
+- Section 59: one-sentence product definition preserved.
+Result: no original 59-section product concept was intentionally dropped.
+
+3. RECOVERED ROADMAP / FUTURE FEATURES
+- KEFE Circle / Birlikte Tart
+- KEFE Chronicle
+- Temporal Retest
+- Context Lens
+- Evidence Builder
+- KEFE Education / Classroom
+- KEFE Live
+- Outcome Triangle
+- Perspective Coach
+- AI Devil’s Advocate
+- KEFE Debate / Sparring
+- Observe / Sadece Oku
+- UGC Personal Dilemmas
+- Standards Council
+- Decision Fatigue
+- Global index candidates
+
+4. RECOVERED REJECTED / GUARDRAIL IDEAS
+- Bahis/kumar entegrasyonu
+- “En doğru hakem” ligi / fikir doğruluğu yarışması
+- Çoğunluk/uzmanla aynı düşünmeye ödül
+- Kalıcı kişilik/önyargı teşhisi
+- Global source trust score
+- Siyasi kimliği oy öncesi öne çıkarma / mikro hedefleme
+- Gizli advertorial/sponsorlu Case
+- Uzman gerçeğini premium paywall ile satma
+- Her consumer akışında zorunlu reason/confidence
+- Normal Sports CALL’da zorunlu blind
+- Tersine Tartımın consumer core’da kullanılması
+
+5. TAXONOMY RECOVERY
+Legacy domains were not silently deleted:
+- Consumer & Commerce -> Economy & Money primary; Daily Life may be secondary/topic.
+- Gaming & Digital Entertainment -> Culture & Media primary; Technology & AI may be secondary/topic.
+- History -> RETRO format/lens across substantive domains rather than core domain.
+- Ethics & Philosophy -> DILEMMA/LAB collection/tag across substantive domains rather than core domain.
+The canonical core remains 16 domains.
+
+6. CONTENT EXAMPLE COVERAGE
+Case & Scenario Library v1.1.0 now contains 352 example Case seeds across all 16 core domains plus cross-domain examples. Seeds are idea/pattern inputs, not automatically publishable real Cases.
+
+7. RESTORED DESIGN / PRODUCT PRINCIPLES
+- 5 seconds / 30 seconds / 5 minutes depth budget.
+- 1 Thumb Rule.
+- Quick/Deep data separation.
+- Decision Fatigue guardrail.
+- Validation-only global index candidates.
+
+8. OPEN DECISIONS
+Product and technical defaults required for MVP are closed. Topics intrinsically dependent on external evidence (legal/store rules, trademark clearance, empirical thresholds) are represented as release/evidence gates rather than undefined TBDs.

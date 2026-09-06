@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DivergenceAnatomyContract",
+  "version": "v1",
+  "contract_id": "KEFE-DIVERGENCE-ANATOMY-001",
+  "capability_id": "CAP-040",
+  "status": "ACCEPTED",
+  "invariants": {
+    "neutral_causal_taxonomy": true,
+    "percentage_sum_100": true,
+    "no_psychological_profiling": true
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "primary_driver",
+    "drivers"
+  ],
+  "properties": {
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "primary_driver": {
+      "type": "string",
+      "enum": [
+        "NORMATIVE_VALUE_WEIGHT",
+        "FACTUAL_PROBABILITY_ASSESSMENT",
+        "PROCEDURAL_GOVERNANCE",
+        "TIME_HORIZON"
+      ]
+    },
+    "drivers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "driver_type",
+          "share_percentage",
+          "explanation"
+        ],
+        "properties": {
+          "driver_type": {
+            "type": "string",
+            "enum": [
+              "NORMATIVE_VALUE_WEIGHT",
+              "FACTUAL_PROBABILITY_ASSESSMENT",
+              "PROCEDURAL_GOVERNANCE",
+              "TIME_HORIZON"
+            ]
+          },
+          "share_percentage": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 100.0
+          },
+          "explanation": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

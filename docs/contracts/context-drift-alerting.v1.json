@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ContextDriftAlertingContract",
+  "version": "v1",
+  "contract_id": "KEFE-CONTEXT-DRIFT-ALERTING-001",
+  "capability_id": "CAP-076",
+  "status": "ACCEPTED",
+  "invariants": {
+    "non_normative_summary": true,
+    "historical_snapshot_preservation": true,
+    "pre_commit_visibility": true
+  },
+  "type": "object",
+  "required": [
+    "notice_id",
+    "case_version_id",
+    "drift_type",
+    "effective_date",
+    "summary",
+    "recommended_action",
+    "created_at"
+  ],
+  "properties": {
+    "notice_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "drift_type": {
+      "type": "string",
+      "enum": [
+        "LEGAL_REFORM",
+        "FACTUAL_UPDATE",
+        "ASSUMPTION_CHANGED",
+        "SUPERSEDED_BASELINE"
+      ]
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 1000
+    },
+    "recommended_action": {
+      "type": "string",
+      "enum": [
+        "CONTINUE_WITH_AWARENESS",
+        "REVIEW_AMENDMENT",
+        "CASE_SUPERSEDED"
+      ]
+    },
+    "source_reference_url": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

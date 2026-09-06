@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EncryptedBackupLifecycleContract",
+  "version": "v1",
+  "contract_id": "KEFE-ENC-BACKUP-001",
+  "capability_id": "CAP-086",
+  "status": "ACCEPTED",
+  "invariants": {
+    "zero_plaintext_key_transmission": true,
+    "client_side_argon2_kdf": true
+  },
+  "type": "object",
+  "required": [
+    "backup_id",
+    "vault_identity_hash",
+    "status",
+    "encrypted_payload_bytes",
+    "key_derivation_algorithm",
+    "integrity_digest"
+  ],
+  "properties": {
+    "backup_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "vault_identity_hash": {
+      "type": "string",
+      "minLength": 16
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "BACKUP_STAGED",
+        "ENCRYPTED_VAULT_SYNCED",
+        "RESTORE_VERIFIED"
+      ]
+    },
+    "encrypted_payload_bytes": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "key_derivation_algorithm": {
+      "type": "string",
+      "enum": [
+        "ARGON2ID_AES_256_GCM",
+        "PBKDF2_HMAC_SHA512"
+      ]
+    },
+    "integrity_digest": {
+      "type": "string",
+      "minLength": 32
+    }
+  }
+}

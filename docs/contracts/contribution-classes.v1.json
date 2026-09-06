@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_id": "KEFE-CONTRIBUTION-CLASSES-001",
+  "version": "1.0.0",
+  "title": "Contribution Classes Separation Contract",
+  "status": "ACCEPTED",
+  "owner": "KEFE-TIM-001|KEFE-RM-001",
+  "capability": "CAP-043",
+  "description": "Governs the strict statistical and architectural separation of participant contributions across CORE_PRE_RESULT, EXPOSED, and ADVOCACY_SUPPORT classes, guaranteeing zero result contamination in civic signal generation.",
+  "invariants": [
+    "CONTRIBUTION_CLASSES_NEVER_SILENTLY_MIXED: Core pre-result deliberative inputs must never be combined with post-result or advocacy cohorts in official signal outputs.",
+    "BLIND_FIRST_ISOLATION: Only CORE_PRE_RESULT contributions can generate authoritative consensus signals.",
+    "SHIFT_OF_MIND_TRANSPARENCY: EXPOSED contributions are preserved and analyzed solely for cognitive shift-of-mind research, never for primary sentiment.",
+    "ADVOCACY_MOBILIZATION_SEGREGATION: ADVOCACY_SUPPORT contributions represent directed civic mobilization and must never simulate organic public deliberation.",
+    "CRYPTOGRAPHIC_ISOLATION_PROOF: A deterministic SHA-256 isolation proof hash must accompany every class breakdown to verify audit integrity."
+  ],
+  "definitions": {
+    "ContributionClassSummary": {
+      "type": "object",
+      "required": ["class_id", "name_tr", "name_en", "count", "percentage", "is_signal_eligible", "description"],
+      "properties": {
+        "class_id": { "type": "string", "enum": ["CORE_PRE_RESULT", "EXPOSED", "ADVOCACY_SUPPORT"] },
+        "name_tr": { "type": "string" },
+        "name_en": { "type": "string" },
+        "count": { "type": "integer", "minimum": 0 },
+        "percentage": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+        "is_signal_eligible": { "type": "boolean" },
+        "description": { "type": "string" }
+      }
+    }
+  },
+  "type": "object",
+  "required": [
+    "case_version_id",
+    "total_contributions",
+    "classes",
+    "contamination_risk_index",
+    "isolation_audit_status",
+    "certified_at",
+    "isolation_proof_hash"
+  ],
+  "properties": {
+    "case_version_id": { "type": "string", "format": "uuid" },
+    "total_contributions": { "type": "integer", "minimum": 0 },
+    "classes": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/ContributionClassSummary" },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "contamination_risk_index": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+    "isolation_audit_status": { "type": "string", "enum": ["ENFORCED", "BREACH_DETECTED"] },
+    "certified_at": { "type": "string", "format": "date-time" },
+    "isolation_proof_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

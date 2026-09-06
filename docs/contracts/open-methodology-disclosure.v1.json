@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OpenMethodologyDisclosureContract",
+  "version": "v1",
+  "contract_id": "KEFE-OPEN-METHODOLOGY-DISCLOSURE-001",
+  "capability_id": "CAP-074",
+  "status": "ACCEPTED",
+  "invariants": {
+    "always_accessible": true,
+    "immutable_provenance": true,
+    "no_psychometric_claims": true
+  },
+  "type": "object",
+  "required": [
+    "engine_version",
+    "layer",
+    "sample_size",
+    "confidence",
+    "safeguards"
+  ],
+  "properties": {
+    "engine_version": {
+      "type": "string",
+      "example": "v1.0"
+    },
+    "layer": {
+      "type": "string",
+      "enum": ["TRUSTED", "RAW", "DEGRADED"]
+    },
+    "sample_size": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["HIGH", "MEDIUM", "LOW", "INSUFFICIENT"]
+    },
+    "safeguards": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

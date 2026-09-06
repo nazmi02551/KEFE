@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SignalDecayAndFreshnessContract",
+  "version": "v1",
+  "contract_id": "KEFE-SIGNAL-DECAY-FRESHNESS-001",
+  "capability_id": "CAP-075",
+  "status": "ACCEPTED",
+  "invariants": {
+    "deterministic_half_life": true,
+    "automatic_reactivation": true,
+    "archived_authority_revocation": true
+  },
+  "type": "object",
+  "required": [
+    "signal_id",
+    "case_version_id",
+    "latest_activity_at",
+    "half_life_days",
+    "freshness_score",
+    "freshness_tier"
+  ],
+  "properties": {
+    "signal_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "latest_activity_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "half_life_days": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "freshness_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "freshness_tier": {
+      "type": "string",
+      "enum": ["FRESH", "STABLE", "DECAYING", "ARCHIVED"]
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HistoricalRetrospectiveContract",
+  "version": "v1",
+  "contract_id": "KEFE-RETRO-SIM-001",
+  "capability_id": "CAP-028",
+  "status": "ACCEPTED",
+  "invariants": {
+    "blind_first_temporal_isolation": true,
+    "empirical_consequence_documented": true
+  },
+  "type": "object",
+  "required": [
+    "retrospective_id",
+    "case_version_id",
+    "historical_era",
+    "historical_year",
+    "historical_event_name",
+    "actual_historical_decision",
+    "historical_consequence_summary"
+  ],
+  "properties": {
+    "retrospective_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "historical_era": {
+      "type": "string",
+      "enum": [
+        "ANCIENT_CLASSICAL",
+        "INDUSTRIAL_ERA",
+        "TWENTIETH_CENTURY",
+        "CONTEMPORARY_CRISIS"
+      ]
+    },
+    "historical_year": {
+      "type": "integer"
+    },
+    "historical_event_name": {
+      "type": "string",
+      "minLength": 4
+    },
+    "actual_historical_decision": {
+      "type": "string",
+      "minLength": 4
+    },
+    "historical_consequence_summary": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}

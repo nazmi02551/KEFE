@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CrossCulturalNormFrameworkContract",
+  "version": "v1",
+  "contract_id": "KEFE-CULT-NORM-001",
+  "capability_id": "CAP-081",
+  "status": "ACCEPTED",
+  "invariants": {
+    "universal_rights_baseline_unabridged": true,
+    "cultural_pluralism_respected": true
+  },
+  "type": "object",
+  "required": [
+    "framework_id",
+    "region_identifier",
+    "primary_dimension",
+    "cultural_alignment_score",
+    "universal_baseline_compliance",
+    "norm_synthesis_summary"
+  ],
+  "properties": {
+    "framework_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "region_identifier": {
+      "type": "string",
+      "minLength": 2
+    },
+    "primary_dimension": {
+      "type": "string",
+      "enum": [
+        "COMMUNITY_SOLIDARITY_AND_MUTUALITY",
+        "INDIVIDUAL_AUTONOMY_AND_LIBERTY",
+        "INTERGENERATIONAL_STEWARDSHIP",
+        "PROCEDURAL_JUSTICE_AND_EQUITY"
+      ]
+    },
+    "cultural_alignment_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "universal_baseline_compliance": {
+      "type": "boolean"
+    },
+    "norm_synthesis_summary": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}

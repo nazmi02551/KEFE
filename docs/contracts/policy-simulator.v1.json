@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PolicySimulatorContract",
+  "version": "v1",
+  "contract_id": "KEFE-POLICY-SIM-001",
+  "capability_id": "CAP-017",
+  "status": "ACCEPTED",
+  "invariants": {
+    "deterministic_knob_calculation": true,
+    "multi_axis_externality_projection": true
+  },
+  "type": "object",
+  "required": [
+    "simulation_id",
+    "case_version_id",
+    "policy_knob_name",
+    "knob_value",
+    "fiscal_score",
+    "social_score",
+    "environmental_score",
+    "equilibrium_state"
+  ],
+  "properties": {
+    "simulation_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "case_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "policy_knob_name": {
+      "type": "string",
+      "minLength": 3
+    },
+    "knob_value": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 100.0
+    },
+    "fiscal_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "social_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "environmental_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "equilibrium_state": {
+      "type": "string",
+      "enum": [
+        "OPTIMAL_BALANCE",
+        "HIGH_DEFICIT_RISK",
+        "SEVERE_SOCIAL_IMPACT",
+        "ENVIRONMENTAL_DEGRADATION"
+      ]
+    }
+  }
+}
