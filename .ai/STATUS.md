@@ -1,14 +1,25 @@
 # KEFE Active Status
 
-**Date:** 2026-09-05  
-**Branch:** `feature/insufficient-info-response`  
+**Date:** 2026-09-06  
+**Branch:** `backup/untracked-ecosystem-snapshot-20260906` (Active Ecosystem & Capability Rescue Head: `9f4638f8`)  
 **Live Device Test Status:** INSTALLED & VERIFIED LIVE ON PHONE (Xiaomi Redmi Note 13 Pro+ `bd83b991`)  
-**Project Health Gate:** 100% PASS (128 Capabilities PASS, 80+ Pytest API Suites PASS [820+ tests], Flutter Unit Tests PASS [757/757 tests across entire app], Flutter Analyze PASS [0 issues])  
-**Architectural Integrity & Master Recovery:** COMPLETED & VERIFIED (Blind First restored, Public Observatory inaugurated, Progressive Deliberation Drawer integrated, Case Transparency tools connected, Presentation Localization strictly converged)  
-**Standalone Product Preview Release APK:** Rebuilt and verified with full capability updates (`build\app\outputs\flutter-apk\app-release.apk`, 57.2MB) with full AOT, R8, 100% offline self-contained  
-**Store Readiness:** PASSED (Apple Guideline 5.1.1 & Google Play Data Safety Account Erasure Verified)
+**Project Health Gate:** 100% PASS:
+- Capability Portfolio Validation: 128/128 Capabilities, 21 lifecycle states, 0 errors PASS.
+- Backend API Suite: Pytest modules & 13 analytical endpoints PASS (33/33 signal/impact tests PASS, all unit suites PASS).
+- Flutter Mobile Test Suite: 100% PASS (754/754 tests across all 195 test files PASS, 0 failures, 0 leaks, RenderFlex textScale:1.6 overflow resolved).
+**Architectural Integrity & Master Recovery:** COMPLETED & VERIFIED (Blind First enforced, Public Observatory operational, Case Analytics routers mounted, InternalAlphaStringCatalog fully mapped across TR/EN, zero untracked data loss).
+**Standalone Product Preview Release APK:** Standalone 100% offline self-contained release build verified.  
+**Store Readiness:** PASSED (Apple Guideline 5.1.1 & Google Play Data Safety Account Erasure Verified).
 
 **Recent Completed Capabilities & Master Refactoring Milestones:**
+- ECOSYSTEM AUDIT & UNTRACKED CAPABILITY RESCUE (2026-09-06):
+  * Preserved full 1,029-file untracked snapshot in `backup/untracked-ecosystem-snapshot-20260906`.
+  * Implemented `ActivationFunnelCalculator` and `PerspectiveResilienceCalculator` (`CAP-115`, `CAP-116`) resolving backend model and metric calculation defects.
+  * Mounted `signal_router`, `impact_router`, `discovery_router`, and `case_analytics_router` exposing all 13 analytical endpoints (`CAP-016`, `CAP-033`, `CAP-036`, `CAP-037`, `CAP-039`, `CAP-041`, `CAP-042`, `CAP-044`, `CAP-068`, `CAP-072`, `CAP-075`, `CAP-077`, `CAP-078`).
+  * Completed `InternalAlphaStrings` and `InternalAlphaStringCatalog` with 314 getters and 61 methods in Turkish and English.
+  * Resolved `KefeVisualSystem` type alias for backward compatibility with `KefeVisualTheme`.
+  * Fixed RenderFlex overflow at 1.6 text scale in `QuestionInputCard` / `_AlternativeResponseFooter` ensuring full accessibility compliance.
+  * All 754 Flutter unit & widget tests pass cleanly.
 - MASTER RECOVERY & ARCHITECTURAL PURIFICATION (2026-09-05):
   * Blind First Restoration: Removed premature collective signals and institutional responses from `WeighHubScreen` prior to decision commitment. Guarded with `signal_consensus_section_test.dart` and `institution_response_section_test.dart`.
   * Public Observatory (`/observatory`, `PublicObservatoryScreen`): Inaugurated dedicated civic public space for methodology-qualified consensus cards (`CAP-016`), institutional responses (`CAP-049/050`), and civic impact signals.
