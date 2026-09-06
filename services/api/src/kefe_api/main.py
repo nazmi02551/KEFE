@@ -101,6 +101,9 @@ from kefe_api.modules.content_configuration.publication_resolver import (
 from kefe_api.modules.content_configuration.service import ContentConfigurationService
 from kefe_api.modules.context.router import router as context_router
 from kefe_api.modules.context.service import ContextService
+from kefe_api.modules.decision.case_analytics_router import (
+    case_analytics_router,
+)
 from kefe_api.modules.decision.lineage_aware_service import LineageAwareDecisionService
 from kefe_api.modules.decision.lineage_router import router as decision_lineage_router
 from kefe_api.modules.decision.lineage_service import DecisionLineageService
@@ -135,12 +138,15 @@ from kefe_api.modules.identity.otp_provider_receipts_router import (
 )
 from kefe_api.modules.identity.router import router as identity_router
 from kefe_api.modules.identity.service import IdentityService
+from kefe_api.modules.discovery.router import discovery_router
+from kefe_api.modules.impact.router import impact_router
 from kefe_api.modules.privacy.router import router as privacy_router
 from kefe_api.modules.privacy.service import PrivacyService
 from kefe_api.modules.progress.router import router as progress_router
 from kefe_api.modules.progress.service import ProgressService
 from kefe_api.modules.sharing.router import router as sharing_router
 from kefe_api.modules.sharing.service import ShareService
+from kefe_api.modules.signal.router import signal_router
 
 
 def _api_at_least(version: str, major: int, minor: int) -> bool:
@@ -393,12 +399,16 @@ def create_app() -> FastAPI:
     app.include_router(otp_provider_receipts_router)
     app.include_router(context_router)
     app.include_router(decision_router)
+    app.include_router(case_analytics_router)
     if _api_at_least(settings.api_version, 0, 20):
         app.include_router(global_discovery_router)
     app.include_router(consensus_router)
     app.include_router(community_reason_router)
     app.include_router(sharing_router)
     app.include_router(privacy_router)
+    app.include_router(signal_router)
+    app.include_router(impact_router)
+    app.include_router(discovery_router)
     app.include_router(decision_lineage_router)
     app.include_router(reflection_router)
     app.include_router(flow_runtime_router)
