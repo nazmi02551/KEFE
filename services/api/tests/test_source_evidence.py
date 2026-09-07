@@ -97,6 +97,13 @@ def test_in_memory_store_fails_closed_on_injected_digest_collision() -> None:
         (BODY, "application/json; charset=utf-8", AT),
         (BODY, "application/json", datetime(2026, 8, 2, 20, 20)),
     ],
+    ids=[
+        "bytearray_body",
+        "oversized_body",
+        "uppercase_media",
+        "media_with_charset",
+        "naive_datetime",
+    ],
 )
 def test_invalid_evidence_inputs_fail_before_storage(
     body,

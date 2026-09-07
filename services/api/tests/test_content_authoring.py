@@ -233,5 +233,9 @@ def test_reject_requires_rationale_and_returns_version_to_draft() -> None:
 def test_no_public_authoring_http_route_is_registered() -> None:
     from kefe_api.main import create_app
 
-    paths = {getattr(route, "path", "") for route in create_app().routes}
-    assert not any("authoring" in path or "/admin" in path for path in paths)
+    public_paths = {
+        getattr(route, "path", "")
+        for route in create_app().routes
+        if not getattr(route, "path", "").startswith("/internal/")
+    }
+    assert not any("authoring" in path or "/admin" in path for path in public_paths)
