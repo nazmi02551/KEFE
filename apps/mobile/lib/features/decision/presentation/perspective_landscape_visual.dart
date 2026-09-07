@@ -36,7 +36,7 @@ class PerspectiveLandscapeVisual extends StatelessWidget {
           children: [
             SizedBox(
               key: const ValueKey('perspective-landscape-canvas'),
-              height: compact ? 176 : 226,
+              height: compact ? 144 : 164,
               child: RepaintBoundary(
                 child: CustomPaint(
                   painter: _PerspectiveLandscapePainter(

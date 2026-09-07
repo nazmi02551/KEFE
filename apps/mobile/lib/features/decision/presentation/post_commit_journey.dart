@@ -90,59 +90,52 @@ class _PostCommitJourneyState extends ConsumerState<PostCommitJourney> {
           key: const ValueKey('post-commit-stage-header'),
           tone: KefeSurfaceTone.sunken,
           accent: _accentForStage(visual, stage.kind),
-          padding: const EdgeInsets.all(15),
-          borderRadius: 17,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          borderRadius: 16,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: _accentForStage(
-                    visual,
-                    stage.kind,
-                  ).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(13),
-                ),
-                child: Icon(
-                  _iconForStage(stage.kind),
-                  color: _accentForStage(visual, stage.kind),
-                  size: 21,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    KefeEyebrow(
-                      strings.postCommitJourneyProgress(_stageIndex + 1, total),
-                      color: _accentForStage(visual, stage.kind),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
+              Row(
+                children: [
+                  Icon(
+                    _iconForStage(stage.kind),
+                    color: _accentForStage(visual, stage.kind),
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
                       strings.postCommitJourneyTitle(stage.kind.name),
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: visual.onSurfaceStrong,
                         fontWeight: FontWeight.w900,
-                        height: 1.18,
                       ),
                     ),
-                    const SizedBox(height: 5),
-                    Text(
-                      strings.postCommitJourneyHelper(stage.kind.name),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: visual.mutedForeground,
-                        height: 1.4,
-                      ),
+                  ),
+                  Text(
+                    strings.decisionJourneyProgress(_stageIndex + 1, total),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: _accentForStage(visual, stage.kind),
+                      fontWeight: FontWeight.w900,
                     ),
-                  ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(99),
+                child: LinearProgressIndicator(
+                  key: const ValueKey('post-commit-journey-progress'),
+                  value: (_stageIndex + 1) / total,
+                  minHeight: 5,
+                  backgroundColor: visual.border.withValues(alpha: 0.45),
+                  color: _accentForStage(visual, stage.kind),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         AnimatedSwitcher(
           duration: KefeMotion.resolve(
             context,
@@ -153,7 +146,7 @@ class _PostCommitJourneyState extends ConsumerState<PostCommitJourney> {
             child: _stageContent(stage.kind),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         _PostCommitNavigation(
           canGoBack: _stageIndex > 0,
           canGoForward: _stageIndex < total - 1,
@@ -241,6 +234,7 @@ class _PostCommitNavigation extends StatelessWidget {
         if (canGoBack && canGoForward) const SizedBox(width: 10),
         if (canGoForward)
           Expanded(
+            flex: canGoBack ? 2 : 1,
             child: FilledButton.icon(
               key: const ValueKey('post-commit-next'),
               onPressed: onForward,

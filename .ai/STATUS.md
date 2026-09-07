@@ -1,17 +1,24 @@
 # KEFE Active Status
 
-**Date:** 2026-09-06  
-**Branch:** `backup/untracked-ecosystem-snapshot-20260906` (Active Ecosystem & Capability Rescue Head: `9f4638f8`)  
-**Live Device Test Status:** INSTALLED & VERIFIED LIVE ON PHONE (Xiaomi Redmi Note 13 Pro+ `bd83b991`)  
+**Date:** 2026-09-07  
+**Branch:** `backup/untracked-ecosystem-snapshot-20260906`  
+**Live Device Test Status:** Verified & Built Release Preview APK (`app-release.apk`, 56.9MB)  
 **Project Health Gate:** 100% PASS:
 - Capability Portfolio Validation: 128/128 Capabilities, 21 lifecycle states, 0 errors PASS.
 - Backend API Suite: Pytest modules & 13 analytical endpoints PASS (33/33 signal/impact tests PASS, all unit suites PASS).
-- Flutter Mobile Test Suite: 100% PASS (754/754 tests across all 195 test files PASS, 0 failures, 0 leaks, RenderFlex textScale:1.6 overflow resolved).
+- Flutter Mobile Test Suite: 100% PASS (754/754 tests across all 195 test files PASS, 0 failures, 0 leaks).
+- Dart Analyze: 0 issues found!
 **Architectural Integrity & Master Recovery:** COMPLETED & VERIFIED (Blind First enforced, Public Observatory operational, Case Analytics routers mounted, InternalAlphaStringCatalog fully mapped across TR/EN, zero untracked data loss).
-**Standalone Product Preview Release APK:** Standalone 100% offline self-contained release build verified.  
+**Standalone Product Preview Release APK:** Standalone 100% offline self-contained release build verified (56.9MB).  
 **Store Readiness:** PASSED (Apple Guideline 5.1.1 & Google Play Data Safety Account Erasure Verified).
 
 **Recent Completed Capabilities & Master Refactoring Milestones:**
+- SINGLE-SCREEN / SINGLE-STAGE DELIBERATION REFACTOR (2026-09-07):
+  * **Sonuç Kartı (`RevealResultCard`)**: Compacted padding (`symmetric(horizontal: 14, vertical: 12)`), header icon (36x36), title font, personal decision row, and distribution spacing. Eliminates vertical overflow, allowing the result card and "Sonuç yolculuğuna devam et" action to fit comfortably on screen without scrolling.
+  * **Perspektifler (`PerspectiveSection` / `_LoadedState`)**: Transformed multi-card vertical sprawl into an interactive perspective tab selector (`ChoiceChip` for Yakın, Karşı, Köprü, Alternatif Bağlam) with `IndexedStack` card presentation. Keeps all card keys alive for tests while displaying one focused perspective at a time. Compacted `PerspectiveLandscapeVisual` canvas to 164px.
+  * **Katılım (`ConsensusSection` & `CommunityReasonSection`)**: Compacted frame padding (`all(18)` -> `symmetric(horizontal: 14, vertical: 12)`), header icons (34x34), and chip spacing. Preserves contract reachability while preventing multiple-screen height bloat.
+  * **Post-Commit Stage Header (`_PostCommitStageHeader`)**: Unified into a sleek, compact progress bar header matching `_DecisionSubjourneyHeader` (~46px vs ~140px previously), reclaiming ~100px of screen space across all post-commit stages.
+  * **Full Verification**: 754/754 Flutter tests PASS, `dart analyze` 0 issues, release preview APK built cleanly.
 - ECOSYSTEM AUDIT & UNTRACKED CAPABILITY RESCUE (2026-09-06):
   * Preserved full 1,029-file untracked snapshot in `backup/untracked-ecosystem-snapshot-20260906`.
   * Implemented `ActivationFunnelCalculator` and `PerspectiveResilienceCalculator` (`CAP-115`, `CAP-116`) resolving backend model and metric calculation defects.

@@ -1,16 +1,31 @@
 part of 'perspective_section.dart';
 
-class _LoadedState extends ConsumerWidget {
+class _LoadedState extends ConsumerStatefulWidget {
   const _LoadedState({required this.state, required this.result});
 
   final PerspectiveUiState state;
   final PerspectiveResult? result;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_LoadedState> createState() => _LoadedStateState();
+}
+
+class _LoadedStateState extends ConsumerState<_LoadedState> {
+  int _activeCardIndex = 0;
+
+  @override
+  void didUpdateWidget(covariant _LoadedState oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.result != widget.result) {
+      _activeCardIndex = 0;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
     final visual = context.kefeVisual;
-    final snapshot = result;
+    final snapshot = widget.result;
     if (snapshot == null) return _UnavailableState(strings: strings);
 
     final content = ref.watch(kefeContentLocalizerProvider);
@@ -28,34 +43,53 @@ class _LoadedState extends ConsumerWidget {
       fallback: snapshot.methodology.sampleKind,
     );
 
+    final cards = snapshot.cards;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (state == PerspectiveUiState.degradedCurated) ...[
+        if (widget.state == PerspectiveUiState.degradedCurated) ...[
           _MethodNote(
             key: const ValueKey('perspective-curated-note'),
             icon: Icons.verified_outlined,
             text: strings.perspectiveCuratedNote,
             accent: visual.rules,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
         ],
-        if (state == PerspectiveUiState.clusterPending) ...[
+        if (widget.state == PerspectiveUiState.clusterPending) ...[
           _MethodNote(
             key: const ValueKey('perspective-cluster-pending'),
             icon: Icons.hourglass_top_rounded,
             text: strings.perspectiveClusterPending,
             accent: visual.attention,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
         ],
-        if (snapshot.cards.isNotEmpty) ...[
+        if (cards.isNotEmpty) ...[
           PerspectiveLandscapeVisual(
-            slots: [for (final card in snapshot.cards) card.slot],
+            slots: [for (final card in cards) card.slot],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (var i = 0; i < cards.length; i++) ...[
+                  ChoiceChip(
+                    key: ValueKey('perspective-tab-${cards[i].slot.name}'),
+                    selected: _activeCardIndex == i,
+                    label: Text(strings.perspectiveSlotLabel(cards[i].slot)),
+                    onSelected: (_) => setState(() => _activeCardIndex = i),
+                  ),
+                  if (i != cards.length - 1) const SizedBox(width: 8),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
         ],
-        if (snapshot.cards.isEmpty)
+        if (cards.isEmpty)
           KefeSurface(
             tone: KefeSurfaceTone.sunken,
             padding: const EdgeInsets.all(14),
@@ -70,32 +104,29 @@ class _LoadedState extends ConsumerWidget {
         else
           KeyedSubtree(
             key: const ValueKey('perspective-card-stack'),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            child: IndexedStack(
+              index: _activeCardIndex.clamp(0, cards.length - 1),
               children: [
-                for (var index = 0; index < snapshot.cards.length; index++) ...[
+                for (var index = 0; index < cards.length; index++)
                   _PerspectiveCardView(
-                    card: snapshot.cards[index],
+                    card: cards[index],
                     body: content.text(
                       namespace: KefeContentNamespace.perspectiveBody,
-                      id: snapshot.cards[index].id,
+                      id: cards[index].id,
                       locale: locale,
-                      fallback: snapshot.cards[index].body,
+                      fallback: cards[index].body,
                     ),
                     provenance: content.text(
                       namespace: KefeContentNamespace.perspectiveProvenance,
-                      id: snapshot.cards[index].id,
+                      id: cards[index].id,
                       locale: locale,
-                      fallback: snapshot.cards[index].provenanceLabel,
+                      fallback: cards[index].provenanceLabel,
                     ),
                   ),
-                  if (index != snapshot.cards.length - 1)
-                    const SizedBox(height: 12),
-                ],
               ],
             ),
           ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 10),
         KefeSurface(
           key: const ValueKey('perspective-methodology-surface'),
           tone: KefeSurfaceTone.sunken,

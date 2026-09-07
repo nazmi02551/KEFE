@@ -46,20 +46,20 @@ class RevealResultCard extends ConsumerWidget {
     return KefeSurface(
       key: const ValueKey('reveal-card'),
       tone: KefeSurfaceTone.raised,
-      padding: const EdgeInsets.all(20),
-      borderRadius: 26,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      borderRadius: 22,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _RevealHeader(strings: strings),
           if (selectedOption != null) ...[
-            const SizedBox(height: 18),
+            const SizedBox(height: 10),
             _PersonalDecision(
               label: optionLabel(selectedOption!),
               accent: _accentForRawOption(visual, entries, selectedOption!),
             ),
           ],
-          const SizedBox(height: 22),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -74,12 +74,12 @@ class RevealResultCard extends ConsumerWidget {
               ),
               Icon(
                 Icons.groups_2_outlined,
-                size: 18,
+                size: 16,
                 color: visual.mutedForeground,
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 8),
           for (var index = 0; index < entries.length; index++) ...[
             _RevealDistributionRow(
               rawLabel: entries[index].key,
@@ -88,20 +88,20 @@ class RevealResultCard extends ConsumerWidget {
               color: _distributionColor(visual, index),
               selected: entries[index].key == selectedOption,
             ),
-            if (index != entries.length - 1) const SizedBox(height: 14),
+            if (index != entries.length - 1) const SizedBox(height: 8),
           ],
           if (showGapInsight &&
               selectedShare != null &&
               topEntry != null &&
               gapPoints != null) ...[
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
             _GapInsight(
               selectedIsTop: topEntry.key == selectedOption,
               selectedPercent: (selectedShare * 100).round(),
               gapPoints: gapPoints,
             ),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           _MethodologyNote(reveal: reveal),
         ],
       ),
@@ -118,31 +118,31 @@ class _RevealHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          width: 46,
-          height: 46,
+          width: 36,
+          height: 36,
           decoration: BoxDecoration(
             color: visual.subtleGoldSurface,
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(11),
             border: Border.all(color: visual.gold.withValues(alpha: 0.20)),
           ),
-          child: Icon(Icons.insights_rounded, color: visual.goldSoft),
+          child: Icon(Icons.insights_rounded, color: visual.goldSoft, size: 20),
         ),
-        const SizedBox(width: 13),
+        const SizedBox(width: 10),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               KefeEyebrow(strings.resultEyebrow),
-              const SizedBox(height: 5),
+              const SizedBox(height: 2),
               Text(
                 strings.revealTitle,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w900,
-                  height: 1.12,
-                  letterSpacing: -0.35,
+                  height: 1.15,
+                  letterSpacing: -0.2,
                 ),
               ),
             ],
@@ -165,7 +165,7 @@ class _PersonalDecision extends StatelessWidget {
     final visual = context.kefeVisual;
     return Container(
       key: const ValueKey('reveal-personal-decision'),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -175,14 +175,14 @@ class _PersonalDecision extends StatelessWidget {
             accent.withValues(alpha: visual.isDark ? 0.11 : 0.06),
           ],
         ),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: visual.gold.withValues(alpha: 0.30)),
       ),
       child: Row(
         children: [
           Container(
-            width: 38,
-            height: 38,
+            width: 30,
+            height: 30,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: visual.gold.withValues(alpha: 0.12),
@@ -190,10 +190,10 @@ class _PersonalDecision extends StatelessWidget {
             child: Icon(
               Icons.person_outline_rounded,
               color: visual.goldSoft,
-              size: 21,
+              size: 17,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,15 +203,14 @@ class _PersonalDecision extends StatelessWidget {
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: visual.goldSoft,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 0.45,
+                    letterSpacing: 0.3,
                   ),
                 ),
-                const SizedBox(height: 4),
                 Text(
                   label,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w900,
-                    height: 1.16,
+                    height: 1.15,
                   ),
                 ),
               ],
@@ -255,12 +254,12 @@ class _RevealDistributionRow extends StatelessWidget {
       selected: selected,
       child: Container(
         key: ValueKey(('reveal-option', rawLabel)),
-        padding: const EdgeInsets.fromLTRB(13, 12, 13, 13),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
         decoration: BoxDecoration(
           color: selected
               ? color.withValues(alpha: visual.isDark ? 0.09 : 0.055)
               : visual.surfaceSunken,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected ? color.withValues(alpha: 0.38) : visual.border,
           ),
@@ -272,18 +271,18 @@ class _RevealDistributionRow extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    width: 8,
-                    height: 8,
+                    width: 7,
+                    height: 7,
                     decoration: BoxDecoration(
                       color: color,
                       shape: BoxShape.circle,
                     ),
                   ),
-                  const SizedBox(width: 9),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       displayLabel,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: selected
                             ? FontWeight.w900
                             : FontWeight.w700,
@@ -293,8 +292,8 @@ class _RevealDistributionRow extends StatelessWidget {
                   if (selected) ...[
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
+                        horizontal: 7,
+                        vertical: 3,
                       ),
                       decoration: BoxDecoration(
                         color: visual.subtleGoldSurface,
@@ -305,25 +304,26 @@ class _RevealDistributionRow extends StatelessWidget {
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: visual.goldSoft,
                           fontWeight: FontWeight.w900,
+                          fontSize: 10,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 9),
+                    const SizedBox(width: 7),
                   ],
                   Text(
                     '$percent%',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: color,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 7),
               LayoutBuilder(
                 builder: (context, constraints) {
                   return Container(
-                    height: 9,
+                    height: 7,
                     decoration: BoxDecoration(
                       color: visual.surface,
                       borderRadius: BorderRadius.circular(99),
@@ -390,15 +390,15 @@ class _GapInsight extends StatelessWidget {
     return KefeSurface(
       key: const ValueKey('reveal-gap-insight'),
       tone: KefeSurfaceTone.premium,
-      padding: const EdgeInsets.all(17),
-      borderRadius: 19,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      borderRadius: 16,
       accent: accent,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 32,
+            height: 32,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: accent.withValues(alpha: 0.13),
@@ -409,20 +409,21 @@ class _GapInsight extends StatelessWidget {
                   ? Icons.balance_rounded
                   : Icons.compare_arrows_rounded,
               color: accent,
+              size: 17,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 KefeEyebrow(strings.kefeGap, color: visual.goldSoft),
-                const SizedBox(height: 6),
+                const SizedBox(height: 3),
                 Text(
                   message,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: visual.onSurfaceStrong.withValues(alpha: 0.86),
-                    height: 1.46,
+                    height: 1.35,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -446,20 +447,20 @@ class _MethodologyNote extends StatelessWidget {
     final visual = context.kefeVisual;
     return Container(
       key: const ValueKey('reveal-methodology'),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
         color: visual.surfaceSunken,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: visual.border.withValues(alpha: 0.72)),
       ),
       child: Row(
         children: [
           Icon(
             Icons.verified_user_outlined,
-            size: 17,
+            size: 15,
             color: visual.mutedForeground,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 7),
           Expanded(
             child: Text(
               strings.resultMethodologyForLayer(
@@ -467,9 +468,9 @@ class _MethodologyNote extends StatelessWidget {
                 sampleSize: reveal.sampleSize,
                 confidence: reveal.confidence,
               ),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: visual.mutedForeground,
-                height: 1.35,
+                height: 1.3,
               ),
             ),
           ),

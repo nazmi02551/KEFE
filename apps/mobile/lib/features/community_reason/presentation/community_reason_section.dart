@@ -72,35 +72,36 @@ class _CommunityReasonSectionState
       key: const ValueKey('community-reason-section'),
       tone: KefeSurfaceTone.raised,
       accent: visual.empathy,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      borderRadius: 18,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _CommunityHeader(title: strings.communityTitle),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           _ContextNote(
             icon: Icons.shield_outlined,
             text: strings.communityPrivateNote,
             accent: visual.rules,
           ),
           if (patterns.isNotEmpty) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             _CommunityPatternSummary(
               patterns: patterns,
               sampleSize: snapshot!.sampleSize,
             ),
           ],
-          const SizedBox(height: 18),
+          const SizedBox(height: 12),
           Text(
             strings.communityPublishHeading,
             style: Theme.of(
               context,
             ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: 6,
+            runSpacing: 6,
             children: [
               for (final tag in tags)
                 FilterChip(
@@ -112,7 +113,7 @@ class _CommunityReasonSectionState
                 ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           TextField(
             key: const ValueKey('community-reason-text'),
             controller: _textController,
@@ -314,23 +315,23 @@ class _CommunityHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          width: 44,
-          height: 44,
+          width: 34,
+          height: 34,
           decoration: BoxDecoration(
             color: visual.subtleEmpathySurface,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(color: visual.empathy.withValues(alpha: 0.22)),
           ),
-          child: Icon(Icons.people_alt_outlined, color: visual.empathy),
+          child: Icon(Icons.people_alt_outlined, color: visual.empathy, size: 18),
         ),
-        const SizedBox(width: 13),
+        const SizedBox(width: 10),
         Expanded(
           child: Text(
             title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w900,
               height: 1.15,
             ),

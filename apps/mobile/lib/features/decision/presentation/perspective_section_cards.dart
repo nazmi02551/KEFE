@@ -65,7 +65,7 @@ class _PerspectiveCardView extends StatelessWidget {
       label: label,
       child: Container(
         key: ValueKey('perspective-card-${card.slot.name}'),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -76,14 +76,14 @@ class _PerspectiveCardView extends StatelessWidget {
             ],
           ),
           border: Border.all(color: visual.color.withValues(alpha: 0.28)),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
               color: visual.color.withValues(
                 alpha: theme.isDark ? 0.06 : 0.035,
               ),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -94,22 +94,22 @@ class _PerspectiveCardView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  width: 34,
-                  height: 34,
+                  width: 30,
+                  height: 30,
                   decoration: BoxDecoration(
                     color: visual.color.withValues(alpha: 0.13),
-                    borderRadius: BorderRadius.circular(11),
+                    borderRadius: BorderRadius.circular(9),
                     border: Border.all(
                       color: visual.color.withValues(alpha: 0.22),
                     ),
                   ),
-                  child: Icon(visual.icon, size: 18, color: visual.color),
+                  child: Icon(visual.icon, size: 16, color: visual.color),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     label,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: visual.color,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0.2,
@@ -118,17 +118,17 @@ class _PerspectiveCardView extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 13),
+            const SizedBox(height: 9),
             Text(
               body,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                height: 1.5,
+                height: 1.42,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 13),
+            const SizedBox(height: 9),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
               decoration: BoxDecoration(
                 color: theme.surfaceSunken.withValues(alpha: 0.72),
                 borderRadius: BorderRadius.circular(12),

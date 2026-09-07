@@ -137,29 +137,29 @@ class _ConsensusParticipationCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const _ConsensusHeader(),
-          const SizedBox(height: 14),
+          const SizedBox(height: 8),
           _IntegrityBadge(text: strings.consensusExposed),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           Text(
             card.proposition,
             key: const ValueKey('consensus-proposition'),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w900,
-              height: 1.22,
+              height: 1.2,
             ),
           ),
-          const SizedBox(height: 9),
+          const SizedBox(height: 6),
           Text(
             strings.consensusPrompt,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: visual.mutedForeground,
-              height: 1.4,
+              height: 1.35,
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 10),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: 6,
+            runSpacing: 6,
             children: [
               for (final stance in card.stanceCodes)
                 ChoiceChip(
@@ -173,17 +173,17 @@ class _ConsensusParticipationCard extends ConsumerWidget {
             ],
           ),
           if (card.reasonTagCodes.isNotEmpty) ...[
-            const SizedBox(height: 18),
+            const SizedBox(height: 10),
             Text(
               strings.consensusReasonLimit(card.maxReasonTags),
               style: Theme.of(
                 context,
-              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
-            const SizedBox(height: 9),
+            const SizedBox(height: 6),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: 6,
+              runSpacing: 6,
               children: [
                 for (final tag in card.reasonTagCodes)
                   FilterChip(
@@ -197,7 +197,7 @@ class _ConsensusParticipationCard extends ConsumerWidget {
               ],
             ),
           ],
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
           FilledButton.icon(
             key: const ValueKey('consensus-submit'),
             onPressed: state.canSubmit && !submitting
@@ -318,7 +318,8 @@ class _ConsensusFrame extends StatelessWidget {
     return KefeSurface(
       tone: KefeSurfaceTone.raised,
       accent: visual.gold,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      borderRadius: 18,
       child: child,
     );
   }
@@ -332,28 +333,28 @@ class _ConsensusHeader extends StatelessWidget {
     final strings = KefeStrings.of(context);
     final visual = context.kefeVisual;
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          width: 44,
-          height: 44,
+          width: 34,
+          height: 34,
           decoration: BoxDecoration(
             color: visual.subtleGoldSurface,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(color: visual.gold.withValues(alpha: 0.24)),
           ),
-          child: Icon(Icons.hub_outlined, color: visual.goldSoft),
+          child: Icon(Icons.hub_outlined, color: visual.goldSoft, size: 18),
         ),
-        const SizedBox(width: 13),
+        const SizedBox(width: 10),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               KefeEyebrow(strings.consensusEyebrow, color: visual.goldSoft),
-              const SizedBox(height: 3),
+              const SizedBox(height: 2),
               Text(
                 strings.consensusCardTitle,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w900,
                   height: 1.15,
                 ),
