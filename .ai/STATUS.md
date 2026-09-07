@@ -13,6 +13,10 @@
 **Store Readiness:** PASSED (Apple Guideline 5.1.1 & Google Play Data Safety Account Erasure Verified).
 
 **Recent Completed Capabilities & Master Refactoring Milestones:**
+- COMPREHENSIVE ECOSYSTEM VERIFICATION & HARDENING (2026-09-07):
+  * **Backend API Test Suite (100% PASS)**: All 824 tests passed (0 failures, 0 errors). Scoped authoring route test in `test_content_authoring.py` to isolate public routes from internal admin routes; added explicit test IDs to `test_source_evidence.py` preventing Windows MAX_PATH collisions.
+  * **Admin Studio Ecosystem Verification (100% PASS)**: Executed full 5-gate pipeline in `@kefe/admin-studio`: all 8 executable contracts PASS, `eslint` PASS (0 warnings, 0 errors), `tsc --noEmit` PASS, unit/integration tests PASS (56/56 tests passed), and Next.js 16 production build PASS. Created cross-platform test runner `tools/run_tests.mjs` and normalized CRLF line endings in `check_case_builder_contract.mjs`.
+  * **Bağlam / Context Stage Ergonomics**: Positioned `_ContextAdvancePanel` ("Tartıma Başla") immediately following `ContextSection` and before `CaseVersionHistorySection`, eliminating unnecessary scrolling before entering decision making. Verified with `progressive_decision_experience_test.dart` and `dart analyze` (0 issues).
 - SINGLE-SCREEN / SINGLE-STAGE DELIBERATION REFACTOR (2026-09-07):
   * **Sonuç Kartı (`RevealResultCard`)**: Compacted padding (`symmetric(horizontal: 14, vertical: 12)`), header icon (36x36), title font, personal decision row, and distribution spacing. Eliminates vertical overflow, allowing the result card and "Sonuç yolculuğuna devam et" action to fit comfortably on screen without scrolling.
   * **Perspektifler (`PerspectiveSection` / `_LoadedState`)**: Transformed multi-card vertical sprawl into an interactive perspective tab selector (`ChoiceChip` for Yakın, Karşı, Köprü, Alternatif Bağlam) with `IndexedStack` card presentation. Keeps all card keys alive for tests while displaying one focused perspective at a time. Compacted `PerspectiveLandscapeVisual` canvas to 164px.
