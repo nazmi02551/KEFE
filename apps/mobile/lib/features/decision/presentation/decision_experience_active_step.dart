@@ -58,15 +58,15 @@ class _ActiveFlowStep extends ConsumerWidget {
           caseVersionId: state.caseData!.versionId,
           progressive: true,
         ),
-        const SizedBox(height: 16),
-        CaseVersionHistorySection(caseId: state.caseData!.id),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         _ContextAdvancePanel(
           enabled: !state.offlineDraft && !state.submitting,
           onContinue: () => ref
               .read(decisionControllerProvider.notifier)
               .recordContextExposure(step.code),
         ),
+        const SizedBox(height: 14),
+        CaseVersionHistorySection(caseId: state.caseData!.id),
       ],
     );
   }
