@@ -104,10 +104,10 @@ class _LoadedStateState extends ConsumerState<_LoadedState> {
         else
           KeyedSubtree(
             key: const ValueKey('perspective-card-stack'),
-            child: IndexedStack(
-              index: _activeCardIndex.clamp(0, cards.length - 1),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (var index = 0; index < cards.length; index++)
+                for (var index = 0; index < cards.length; index++) ...[
                   _PerspectiveCardView(
                     card: cards[index],
                     body: content.text(
@@ -123,6 +123,8 @@ class _LoadedStateState extends ConsumerState<_LoadedState> {
                       fallback: cards[index].provenanceLabel,
                     ),
                   ),
+                  if (index != cards.length - 1) const SizedBox(height: 10),
+                ],
               ],
             ),
           ),

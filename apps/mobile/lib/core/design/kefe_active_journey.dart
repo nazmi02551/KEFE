@@ -12,6 +12,7 @@ class KefeActiveJourney extends StatelessWidget {
     required this.child,
     this.icon = Icons.route_rounded,
     this.subtitle,
+    this.compact = false,
     super.key,
   });
 
@@ -22,6 +23,7 @@ class KefeActiveJourney extends StatelessWidget {
   final Widget child;
   final IconData icon;
   final String? subtitle;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -33,11 +35,66 @@ class KefeActiveJourney extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          KefeSurface(
-            tone: KefeSurfaceTone.premium,
-            accent: visual.gold,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            borderRadius: 22,
+          if (compact)
+            KefeSurface(
+              tone: KefeSurfaceTone.premium,
+              accent: visual.gold,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              borderRadius: 16,
+              child: Row(
+                children: [
+                  Icon(icon, color: visual.goldSoft, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        KefeEyebrow(eyebrow, color: visual.goldSoft),
+                        Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: visual.onSurfaceStrong,
+                                fontWeight: FontWeight.w900,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: visual.gold.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(99),
+                      border: Border.all(
+                        color: visual.gold.withValues(alpha: 0.28),
+                      ),
+                    ),
+                    child: Text(
+                      progressLabel,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: visual.goldSoft,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            KefeSurface(
+              tone: KefeSurfaceTone.premium,
+              accent: visual.gold,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              borderRadius: 22,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

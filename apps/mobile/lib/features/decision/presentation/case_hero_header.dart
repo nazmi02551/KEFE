@@ -14,11 +14,13 @@ class CaseHeroHeader extends ConsumerWidget {
   const CaseHeroHeader({
     required this.caseData,
     required this.flowRuntime,
+    this.compact = false,
     super.key,
   });
 
   final DecisionCase caseData;
   final FlowRuntimeSnapshot flowRuntime;
+  final bool compact;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -37,6 +39,65 @@ class CaseHeroHeader extends ConsumerWidget {
       locale: strings.locale,
       fallback: caseData.summary,
     );
+
+    if (compact) {
+      return KefeSurface(
+        tone: KefeSurfaceTone.sunken,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        borderRadius: 16,
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: visual.rules.withValues(
+                  alpha: visual.isDark ? 0.14 : 0.09,
+                ),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: visual.rules.withValues(alpha: 0.28)),
+              ),
+              child: Icon(
+                _domainIcon(caseData.domain),
+                color: visual.rules,
+                size: 17,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                title,
+                key: const ValueKey('case-title'),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: visual.onSurfaceStrong,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.2,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: visual.gold.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(99),
+                border: Border.all(color: visual.gold.withValues(alpha: 0.28)),
+              ),
+              child: Text(
+                strings.domainName(caseData.domain),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: visual.goldSoft,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 10,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return KefeSurface(
       tone: KefeSurfaceTone.premium,
