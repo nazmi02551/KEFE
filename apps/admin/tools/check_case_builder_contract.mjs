@@ -12,26 +12,27 @@ const contract = JSON.parse(
     "utf8"
   )
 );
-const component = fs.readFileSync(
-  path.join(appRoot, "src/components/case-builder-workspace.tsx"),
-  "utf8"
-);
-const client = fs.readFileSync(
-  path.join(appRoot, "src/lib/admin-api.ts"),
-  "utf8"
-);
-const helpers = fs.readFileSync(
-  path.join(appRoot, "src/lib/case-builder.ts"),
-  "utf8"
-);
-const route = fs.readFileSync(
-  path.join(appRoot, "app/case-builder/page.tsx"),
-  "utf8"
-);
-const css = fs.readFileSync(
-  path.join(appRoot, "src/components/case-builder-workspace.module.css"),
-  "utf8"
-);
+const component = fs
+  .readFileSync(
+    path.join(appRoot, "src/components/case-builder-workspace.tsx"),
+    "utf8"
+  )
+  .replace(/\r\n/g, "\n");
+const client = fs
+  .readFileSync(path.join(appRoot, "src/lib/admin-api.ts"), "utf8")
+  .replace(/\r\n/g, "\n");
+const helpers = fs
+  .readFileSync(path.join(appRoot, "src/lib/case-builder.ts"), "utf8")
+  .replace(/\r\n/g, "\n");
+const route = fs
+  .readFileSync(path.join(appRoot, "app/case-builder/page.tsx"), "utf8")
+  .replace(/\r\n/g, "\n");
+const css = fs
+  .readFileSync(
+    path.join(appRoot, "src/components/case-builder-workspace.module.css"),
+    "utf8"
+  )
+  .replace(/\r\n/g, "\n");
 
 const problems = [];
 
