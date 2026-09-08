@@ -28,6 +28,35 @@
 
 ---
 
+## 0. Canonical Documentation Authority Baseline (Source of Truth)
+
+The absolute constitutional, architectural, and product authority of KEFE is anchored in:
+📂 `docs/ecosystem_v3.3/KEFE_Documentation_Ecosystem_2026-07-28_v3.3_RECOVERY_R1/ACTIVE/`
+
+Any new agent, model, or session MUST recognize these 18 Canonical Baseline Documents as the highest product authority:
+1. `KEFE_Master_Product_Document_v1.2.0_Approved_Canonical`
+2. `KEFE_Product_Bible_v1.4.0_Working_Baseline`
+3. `KEFE_Engineering_Blueprint_v0.6.0_Implementation_Contract_Baseline`
+4. `KEFE_AI_Architecture_v1.1.0_Approved_Baseline`
+5. `KEFE_Admin_Studio_Specification_v1.2.0_Approved_Baseline`
+6. `KEFE_Design_System_v1.1.0_Approved_Baseline`
+7. `KEFE_Content_Question_Design_Bible_v1.1.0_Approved_Baseline`
+8. `KEFE_Trust_Integrity_Methodology_Standard_v1.1.0_Approved_Baseline`
+9. `KEFE_Security_Privacy_Model_v1.2.0_Approved_Baseline`
+10. `KEFE_MVP_Delivery_Plan_v1.2.0_Approved_Execution_Baseline`
+11. `KEFE_Analytics_Event_Dictionary_v1.1.0_Approved_Baseline`
+12. `KEFE_Case_Scenario_Library_v1.1.0_Living_Catalog`
+13. `KEFE_Civic_Integrity_Political_Content_Standard_v1.1.0_Approved_Baseline`
+14. `KEFE_Commercial_Growth_Distribution_Standard_v1.1.0_Approved_Baseline`
+15. `KEFE_Decision_Graph_Specification_v1.1.0_Approved_Baseline`
+16. `KEFE_Dokumantasyon_Yonetisimi_v1.4.0_Approved`
+17. `KEFE_Editorial_Transformation_Guide_v1.1.0_Approved_Baseline`
+18. `KEFE_Research_Methodology_v1.1.0_Approved_Baseline`
+
+All architectural invariants, ADRs, UX designs, backend contracts, and domain models derive from this authoritative baseline.
+
+---
+
 ## 1. Executive Summary of Implemented Slices
 
 1. **CAP-011 (Insufficient Info / Missing Options Response)**:

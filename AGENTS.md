@@ -20,7 +20,7 @@ Chat history is supplementary context only; it is never the engineering source o
 ## 2. Authority order
 
 Use this order when sources appear inconsistent:
-1. accepted constitutional/product authority in the published documentation baseline;
+1. accepted constitutional/product authority in the published documentation baseline (`docs/ecosystem_v3.3/KEFE_Documentation_Ecosystem_2026-07-28_v3.3_RECOVERY_R1/ACTIVE/`, which contains the 18 Canonical Baseline Documents including Master Product Document, Product Bible, Engineering Blueprint, AI Architecture, Admin Studio Spec, Design System, etc.);
 2. accepted ADRs and executable contracts for active implementation boundaries;
 3. live GitHub code, migrations, tests and CI evidence;
 4. `docs/status/CURRENT.md` continuation summary;
