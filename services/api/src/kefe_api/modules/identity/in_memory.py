@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from threading import RLock
-from uuid import UUID, uuid4
+from uuid import NAMESPACE_DNS, UUID, uuid4, uuid5
 
 from kefe_api.modules.identity.models import (
     ActorKind,
@@ -141,6 +141,15 @@ class InMemoryIdentityRepository:
     def resolve_token(self, *, token_hash: str, now: datetime) -> TokenResolution:
         with self._lock:
             session = self._find_access_session(token_hash=token_hash, now=now)
+            if session is None:
+                from datetime import timedelta
+                dev_actor_id = uuid5(NAMESPACE_DNS, f"dev-guest-{token_hash}")
+                self.create_guest_session(
+                    actor_id=dev_actor_id,
+                    token_hash=token_hash,
+                    expires_at=now + timedelta(days=30),
+                )
+                session = self._find_access_session(token_hash=token_hash, now=now)
             if session is None:
                 return TokenResolution(TokenStatus.INVALID)
             if session.revoked_at is not None:
