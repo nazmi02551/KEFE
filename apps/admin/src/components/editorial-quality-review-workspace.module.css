@@ -299,14 +299,3 @@
     transition: none !important;
   }
 }
-
-@media (prefers-color-scheme: light) {
-  .connection,
-  .filters,
-  .panel,
-  .detail,
-  .decision,
-  .audit {
-    background: rgba(255, 255, 255, 0.94);
-  }
-}

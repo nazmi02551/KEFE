@@ -1,8 +1,8 @@
 .shell {
   min-height: 100vh;
   padding: 32px;
-  background: #f4f6f8;
-  color: #17202a;
+  background: var(--bg);
+  color: var(--text);
 }
 
 .hero,
@@ -10,10 +10,10 @@
 .boundary {
   max-width: 1180px;
   margin: 0 auto 20px;
-  border: 1px solid #d8dee5;
+  border: 1.5px solid var(--line);
   border-radius: 18px;
-  background: #ffffff;
-  box-shadow: 0 10px 30px rgba(20, 30, 40, 0.06);
+  background: var(--surface);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
 .hero {
@@ -26,6 +26,7 @@
 .hero h1,
 .panel h2 {
   margin: 4px 0 10px;
+  color: var(--text);
 }
 
 .hero p,
@@ -33,14 +34,16 @@
 .boundary p {
   max-width: 780px;
   line-height: 1.55;
+  color: var(--muted);
 }
 
 .eyebrow {
   margin: 0;
-  color: #526273;
-  font-size: 0.76rem;
+  color: var(--gold);
+  font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .links {
@@ -51,11 +54,19 @@
 }
 
 .links a {
-  padding: 9px 12px;
-  border: 1px solid #c9d1da;
+  padding: 9px 14px;
+  border: 1.5px solid var(--line);
   border-radius: 999px;
-  color: inherit;
+  background: var(--surface-strong);
+  color: var(--text);
+  font-weight: 600;
   text-decoration: none;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.links a:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
 }
 
 .panel,
@@ -87,17 +98,25 @@
   gap: 7px;
   margin: 12px 0;
   font-weight: 700;
+  color: var(--text);
 }
 
 .panel input,
 .panel select {
   min-width: 0;
   padding: 11px 13px;
-  border: 1px solid #bbc5cf;
+  border: 1.5px solid var(--line);
   border-radius: 10px;
-  background: #ffffff;
-  color: inherit;
+  background: var(--surface-strong);
+  color: var(--text);
   font: inherit;
+}
+
+.panel input:focus,
+.panel select:focus {
+  border-color: var(--cyan);
+  outline: 2px solid var(--cyan);
+  outline-offset: 1px;
 }
 
 .checkLabel {
@@ -118,14 +137,19 @@
 }
 
 .actions button {
-  padding: 11px 16px;
-  border: 0;
+  padding: 11px 18px;
+  border: 1.5px solid var(--line-strong);
   border-radius: 10px;
-  background: #17202a;
-  color: #ffffff;
+  background: var(--surface-strong);
+  color: var(--text);
   font: inherit;
   font-weight: 750;
   cursor: pointer;
+}
+
+.actions button:hover:not(:disabled) {
+  border-color: var(--cyan);
+  color: var(--cyan);
 }
 
 .actions button:disabled {
@@ -136,10 +160,11 @@
 .status {
   overflow-wrap: anywhere;
   font-weight: 700;
+  color: var(--text);
 }
 
 .error {
-  color: #8d1b13;
+  color: var(--danger);
   font-weight: 750;
 }
 
@@ -152,21 +177,24 @@
   grid-template-columns: minmax(110px, 0.35fr) 1fr;
   gap: 12px;
   padding: 9px 0;
-  border-top: 1px solid #e5e9ee;
+  border-top: 1.5px solid var(--line);
 }
 
 .details dt {
   font-weight: 800;
+  color: var(--muted);
 }
 
 .details dd {
   margin: 0;
   overflow-wrap: anywhere;
+  color: var(--text);
 }
 
 .auditList {
   padding-left: 20px;
   line-height: 1.7;
+  color: var(--text);
 }
 
 .auditList li {
@@ -175,7 +203,7 @@
 
 .auditList span {
   display: block;
-  color: #526273;
+  color: var(--muted);
   font-size: 0.9rem;
 }
 
@@ -191,7 +219,7 @@
 .tableWrap th,
 .tableWrap td {
   padding: 12px;
-  border-bottom: 1px solid #e5e9ee;
+  border-bottom: 1.5px solid var(--line);
   text-align: left;
 }
 
@@ -199,10 +227,16 @@
   font-size: 0.84rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  color: var(--text);
+  background: var(--surface-strong);
+}
+
+.tableWrap td {
+  color: var(--text);
 }
 
 .boundary {
-  border-left: 6px solid #17202a;
+  border-left: 6px solid var(--gold);
 }
 
 @media (max-width: 880px) {
