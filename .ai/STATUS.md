@@ -1,10 +1,10 @@
 # KEFE Active Status
 
-**Date:** 2026-09-07  
+**Date:** 2026-09-08  
 **Branch:** `backup/untracked-ecosystem-snapshot-20260906`  
-**Live Device Test Status:** Verified & Built Release Preview APK (`app-release.apk`, 56.9MB)  
+**Live Device & Emulator Test Status:** Verified & Built Release Preview APK (`app-release.apk`, 56.9MB), verified live on Android Emulator `emulator-5554` (API 36).  
 **Project Health Gate:** 100% PASS:
-- Capability Portfolio Validation: 128/128 Capabilities, 21 lifecycle states, 0 errors PASS.
+- Capability Portfolio Validation: 128/128 Capabilities, 21 lifecycle states, 0 errors PASS (`CAP-004` & `CAP-032` advanced to `IMPLEMENTED_VERIFIED`).
 - Backend API Suite: Pytest modules & 13 analytical endpoints PASS (33/33 signal/impact tests PASS, all unit suites PASS).
 - Flutter Mobile Test Suite: 100% PASS (754/754 tests across all 195 test files PASS, 0 failures, 0 leaks).
 - Dart Analyze: 0 issues found!
@@ -13,6 +13,11 @@
 **Store Readiness:** PASSED (Apple Guideline 5.1.1 & Google Play Data Safety Account Erasure Verified).
 
 **Recent Completed Capabilities & Master Refactoring Milestones:**
+- SYSTEMATIC LIGHT-MODE CONTRAST HARDENING & CAPABILITY PORTFOLIO ADVANCEMENT (2026-09-08):
+  * **Capability Portfolio Promotion**: Advanced `CAP-004` (Decision confidence capture) and `CAP-032` (Reason distribution) to `IMPLEMENTED_VERIFIED` backed by ADR-0006/0007/0008, vertical slice integration, and API/Mobile test suites. Portfolio validator verified 128 capabilities with zero errors.
+  * **Global KefeSurfaceTone.premium Contrast Hardening**: Ensured that all text and icon elements rendered on dark navy gradient `KefeSurfaceTone.premium` surfaces strictly use `visual.onPremium` (or alpha variants) rather than `visual.onSurfaceStrong`. Fixed across: `CaseHeroHeader`, `_JourneyCaseHeader`, `_CaseHeader`, `_FirstUseCompletion`, `DiscoveryExploreScreen`, `WeighHubScreen`, `PublicShareScreen`, `ActivityScreen`, `OnboardingGateScreen`, `MyKefeJourneySummary`, `MyKefePersonalReportScreen`, `PerspectiveLandscapeVisual`, and `RevealResultCard`.
+  * **Live Android Emulator Verification**: Verified live on `emulator-5554` (Android 16 / API 36). Confirmed crystal-clear high-contrast text on Onboarding and Case Screen (`/case/demo-v1`), active choice selection (A/B), and button activation.
+  * **Ecosystem Verification**: Full `scripts/project_health.py` 100% PASS across Portfolio, Pytest, Flutter unit tests (229/229), and Dart analyze (0 issues).
 - COMPREHENSIVE ECOSYSTEM VERIFICATION & HARDENING (2026-09-07):
   * **Backend API Test Suite (100% PASS)**: All 824 tests passed (0 failures, 0 errors). Scoped authoring route test in `test_content_authoring.py` to isolate public routes from internal admin routes; added explicit test IDs to `test_source_evidence.py` preventing Windows MAX_PATH collisions.
   * **Admin Studio Ecosystem Verification (100% PASS)**: Executed full 5-gate pipeline in `@kefe/admin-studio`: all 8 executable contracts PASS, `eslint` PASS (0 warnings, 0 errors), `tsc --noEmit` PASS, unit/integration tests PASS (56/56 tests passed), and Next.js 16 production build PASS. Created cross-platform test runner `tools/run_tests.mjs` and normalized CRLF line endings in `check_case_builder_contract.mjs`.

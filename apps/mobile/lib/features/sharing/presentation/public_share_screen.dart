@@ -169,13 +169,13 @@ class _PublicShareReady extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.balance_rounded, color: visual.onSurfaceStrong),
+                  Icon(Icons.balance_rounded, color: visual.onPremium),
                   const SizedBox(width: 9),
                   Expanded(
                     child: Text(
                       strings.publicShareEyebrow,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: visual.onSurfaceStrong,
+                        color: visual.onPremium,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -187,7 +187,7 @@ class _PublicShareReady extends StatelessWidget {
                 share.title,
                 key: const ValueKey('public-share-title'),
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: visual.onSurfaceStrong,
+                  color: visual.onPremium,
                   fontWeight: FontWeight.w900,
                   height: 1.15,
                 ),
@@ -196,7 +196,7 @@ class _PublicShareReady extends StatelessWidget {
               Text(
                 share.summary,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: visual.onSurfaceStrong.withValues(alpha: 0.88),
+                  color: visual.onPremium.withValues(alpha: 0.88),
                   height: 1.45,
                 ),
               ),

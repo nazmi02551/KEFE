@@ -26,7 +26,7 @@ class _Header extends StatelessWidget {
                 Text(
                   strings.journeyTitle,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: visual.onSurfaceStrong,
+                    color: visual.onPremium,
                     fontWeight: FontWeight.w900,
                     height: 1.08,
                   ),
@@ -35,7 +35,7 @@ class _Header extends StatelessWidget {
                 Text(
                   strings.journeySubtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: visual.onSurfaceStrong.withValues(alpha: 0.76),
+                    color: visual.onPremium.withValues(alpha: 0.84),
                     height: 1.45,
                   ),
                 ),
@@ -84,7 +84,7 @@ class _Overview extends StatelessWidget {
           Text(
             strings.progressReadiness(progress.readiness),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: visual.onSurfaceStrong.withValues(alpha: 0.82),
+              color: visual.onPremium.withValues(alpha: 0.84),
               height: 1.4,
             ),
           ),
@@ -217,7 +217,7 @@ class _ReportEntry extends StatelessWidget {
           Text(
             strings.reportEntryTitle,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: visual.onSurfaceStrong,
+              color: visual.onPremium,
               fontWeight: FontWeight.w900,
             ),
           ),
@@ -225,7 +225,7 @@ class _ReportEntry extends StatelessWidget {
           Text(
             strings.reportEntryBody,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: visual.onSurfaceStrong.withValues(alpha: 0.76),
+              color: visual.onPremium.withValues(alpha: 0.84),
               height: 1.45,
             ),
           ),
@@ -274,10 +274,10 @@ class _Metric extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: 108),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 11),
         decoration: BoxDecoration(
-          color: visual.onSurfaceStrong.withValues(alpha: 0.06),
+          color: visual.onPremium.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(17),
           border: Border.all(
-            color: visual.onSurfaceStrong.withValues(alpha: 0.12),
+            color: visual.onPremium.withValues(alpha: 0.16),
           ),
         ),
         child: Column(
@@ -288,7 +288,7 @@ class _Metric extends StatelessWidget {
             Text(
               '$value',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: visual.onSurfaceStrong,
+                color: visual.onPremium,
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -298,7 +298,7 @@ class _Metric extends StatelessWidget {
               maxLines: 2,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: visual.onSurfaceStrong.withValues(alpha: 0.70),
+                color: visual.onPremium.withValues(alpha: 0.74),
               ),
             ),
           ],

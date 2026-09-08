@@ -43,7 +43,7 @@ class _JourneyCaseHeader extends StatelessWidget {
                   caseData.title,
                   key: const ValueKey('case-title'),
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: visual.onSurfaceStrong,
+                    color: visual.onPremium,
                     fontWeight: FontWeight.w900,
                     height: 1.14,
                     letterSpacing: -0.35,
@@ -56,7 +56,7 @@ class _JourneyCaseHeader extends StatelessWidget {
           Text(
             caseData.summary,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: visual.onSurfaceStrong.withValues(alpha: 0.74),
+              color: visual.onPremium.withValues(alpha: 0.84),
               height: 1.46,
             ),
           ),
@@ -375,7 +375,7 @@ class _JourneyFirstUseCompletion extends StatelessWidget {
                 child: Text(
                   strings.firstRevealHelper,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: visual.onSurfaceStrong,
+                    color: visual.onPremium,
                     fontWeight: FontWeight.w800,
                     height: 1.35,
                   ),

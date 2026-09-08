@@ -119,7 +119,7 @@ class _ReportHero extends StatelessWidget {
                 Text(
                   strings.reportHeroTitle,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: visual.onSurfaceStrong,
+                    color: visual.onPremium,
                     fontWeight: FontWeight.w900,
                     height: 1.12,
                   ),
@@ -128,7 +128,7 @@ class _ReportHero extends StatelessWidget {
                 Text(
                   strings.reportHeroSubtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: visual.onSurfaceStrong.withValues(alpha: 0.76),
+                    color: visual.onPremium.withValues(alpha: 0.84),
                     height: 1.45,
                   ),
                 ),

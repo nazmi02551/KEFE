@@ -324,7 +324,7 @@ class _PromisePage extends StatelessWidget {
                   Text(
                     data.title,
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      color: visual.onSurfaceStrong,
+                      color: visual.onPremium,
                       fontWeight: FontWeight.w900,
                       height: 1.08,
                       letterSpacing: -0.7,
@@ -334,7 +334,7 @@ class _PromisePage extends StatelessWidget {
                   Text(
                     data.body,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: visual.onSurfaceStrong.withValues(alpha: 0.78),
+                      color: visual.onPremium.withValues(alpha: 0.84),
                       height: 1.5,
                     ),
                   ),

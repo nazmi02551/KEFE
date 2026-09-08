@@ -100,9 +100,9 @@ class _RadarRankingCard extends StatelessWidget {
     final visual = context.kefeVisual;
     final accent = _accentForDomain(visual, item.domainCode);
     final featured = item.rank == 1;
-    final foreground = featured ? visual.onSurfaceStrong : visual.foreground;
+    final foreground = featured ? visual.onPremium : visual.foreground;
     final muted = featured
-        ? visual.onSurfaceStrong.withValues(alpha: 0.68)
+        ? visual.onPremium.withValues(alpha: 0.84)
         : visual.mutedForeground;
 
     return Semantics(

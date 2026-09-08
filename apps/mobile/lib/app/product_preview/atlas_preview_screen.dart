@@ -200,7 +200,7 @@ class _SelectedCaseHeader extends StatelessWidget {
                 selectedCaseTitle,
                 key: const ValueKey('atlas-selected-case-title'),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: visual.onSurfaceStrong,
+                  color: visual.onPremium,
                   fontWeight: FontWeight.w900,
                   height: 1.25,
                 ),
@@ -292,7 +292,7 @@ class _AtlasContinuum extends StatelessWidget {
             Text(
               '0',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: visual.onSurfaceStrong.withValues(alpha: 0.70),
+                color: visual.onPremium.withValues(alpha: 0.74),
               ),
             ),
             Expanded(
@@ -300,14 +300,14 @@ class _AtlasContinuum extends StatelessWidget {
                 strings.scaleHelper,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: visual.onSurfaceStrong.withValues(alpha: 0.62),
+                  color: visual.onPremium.withValues(alpha: 0.70),
                 ),
               ),
             ),
             Text(
               '10',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: visual.onSurfaceStrong.withValues(alpha: 0.70),
+                color: visual.onPremium.withValues(alpha: 0.74),
               ),
             ),
           ],

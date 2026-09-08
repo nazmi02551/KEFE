@@ -84,7 +84,7 @@ class KefeActiveJourney extends StatelessWidget {
                       Text(
                         title,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: visual.onSurfaceStrong,
+                          color: visual.onPremium,
                           fontWeight: FontWeight.w900,
                           height: 1.16,
                         ),
@@ -95,8 +95,8 @@ class KefeActiveJourney extends StatelessWidget {
                           subtitle!,
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: visual.onSurfaceStrong.withValues(
-                                  alpha: 0.72,
+                                color: visual.onPremium.withValues(
+                                  alpha: 0.84,
                                 ),
                                 height: 1.4,
                               ),

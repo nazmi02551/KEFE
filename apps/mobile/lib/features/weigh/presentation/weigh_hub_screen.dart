@@ -197,7 +197,7 @@ class _FeaturedWeigh extends StatelessWidget {
           Text(
             title,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: visual.onSurfaceStrong,
+              color: visual.onPremium,
               fontWeight: FontWeight.w900,
               height: 1.14,
               letterSpacing: -0.4,
@@ -207,7 +207,7 @@ class _FeaturedWeigh extends StatelessWidget {
           Text(
             summary,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: visual.onSurfaceStrong.withValues(alpha: 0.74),
+              color: visual.onPremium.withValues(alpha: 0.84),
               height: 1.46,
             ),
           ),

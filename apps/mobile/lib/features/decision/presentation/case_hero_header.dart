@@ -138,7 +138,7 @@ class CaseHeroHeader extends ConsumerWidget {
             title,
             key: const ValueKey('case-title'),
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: visual.onSurfaceStrong,
+              color: visual.onPremium,
               fontWeight: FontWeight.w900,
               height: 1.12,
               letterSpacing: -0.35,
@@ -148,7 +148,7 @@ class CaseHeroHeader extends ConsumerWidget {
           Text(
             summary,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: visual.onSurfaceStrong.withValues(alpha: 0.72),
+              color: visual.onPremium.withValues(alpha: 0.84),
               height: 1.48,
             ),
           ),
@@ -199,7 +199,7 @@ class _FlowProgressRail extends StatelessWidget {
             Text(
               _progressText(steps, strings),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: visual.onSurfaceStrong.withValues(alpha: 0.62),
+                color: visual.onPremium.withValues(alpha: 0.72),
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -373,7 +373,7 @@ class _MetaPill extends StatelessWidget {
     emphasized: true,
   ),
   FlowStepRuntimeState.blocked => (
-    color: visual.onSurfaceStrong.withValues(alpha: 0.36),
+    color: visual.onPremium.withValues(alpha: 0.36),
     icon: Icons.lock_outline_rounded,
     emphasized: false,
   ),

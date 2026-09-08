@@ -422,7 +422,7 @@ class _GapInsight extends StatelessWidget {
                 Text(
                   message,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: visual.onSurfaceStrong.withValues(alpha: 0.86),
+                    color: visual.onPremium.withValues(alpha: 0.88),
                     height: 1.35,
                     fontWeight: FontWeight.w600,
                   ),

@@ -116,7 +116,7 @@ class _SlotLegend extends StatelessWidget {
                     maxLines: enlargedText ? 2 : 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: visual.onSurfaceStrong,
+                      color: visual.onPremium,
                       fontWeight: FontWeight.w800,
                     ),
                   ),

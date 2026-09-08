@@ -432,7 +432,7 @@ class _FeaturedCaseCard extends StatelessWidget {
                 Text(
                   item.title,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: visual.onSurfaceStrong,
+                    color: visual.onPremium,
                     fontWeight: FontWeight.w900,
                     height: 1.18,
                     letterSpacing: -0.3,
@@ -444,7 +444,7 @@ class _FeaturedCaseCard extends StatelessWidget {
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: visual.onSurfaceStrong.withValues(alpha: 0.74),
+                    color: visual.onPremium.withValues(alpha: 0.84),
                     height: 1.42,
                   ),
                 ),

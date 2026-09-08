@@ -275,7 +275,7 @@ class _AccountConversionScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Icon(Icons.verified_outlined, size: 46),
+                    Icon(Icons.verified_outlined, size: 46, color: visual.success),
                     const SizedBox(height: 14),
                     Text(
                       state.mergedExistingHistory
@@ -284,7 +284,7 @@ class _AccountConversionScreenState
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w900,
-                        color: visual.onSurfaceStrong,
+                        color: visual.onPremium,
                       ),
                     ),
                     const SizedBox(height: 18),

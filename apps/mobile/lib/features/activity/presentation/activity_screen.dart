@@ -162,7 +162,7 @@ class _ActivityHero extends StatelessWidget {
                 Text(
                   strings.activityTitle,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: visual.onSurfaceStrong,
+                    color: visual.onPremium,
                     fontWeight: FontWeight.w900,
                     height: 1.08,
                   ),
@@ -171,7 +171,7 @@ class _ActivityHero extends StatelessWidget {
                 Text(
                   strings.activitySubtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: visual.onSurfaceStrong.withValues(alpha: 0.76),
+                    color: visual.onPremium.withValues(alpha: 0.84),
                     height: 1.45,
                   ),
                 ),

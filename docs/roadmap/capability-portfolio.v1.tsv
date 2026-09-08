@@ -2,7 +2,7 @@ id	slug	title	category	status	phase	priority	owners	dependencies	evidence	source
 CAP-001	commit-first	Commit First / pre-result isolation	ME	IMPLEMENTED_VERIFIED	Phase 1	P0	KEFE-MPD-001|KEFE-PB-001|KEFE-ENG-001		ADR-0019|active runtime	canonical	
 CAP-002	typed-question-primitives	Typed configurable question primitives	ME	IMPLEMENTED_VERIFIED	Phase 1	P0	KEFE-CQB-001|KEFE-ENG-001		ADR-0006|generic flow runtime	canonical	
 CAP-003	private-reason	Private-by-default reason capture	ME	IMPLEMENTED_VERIFIED	Phase 1	P0	KEFE-MPD-001|KEFE-SEC-001		ADR-0007|ADR-0008	canonical	
-CAP-004	confidence-capture	Decision confidence capture	ME	IMPLEMENTED_PARTIAL	Phase 1	P1	KEFE-PB-001|KEFE-AED-001			canonical	
+CAP-004	confidence-capture	Decision confidence capture	ME	IMPLEMENTED_VERIFIED	Phase 1	P1	KEFE-PB-001|KEFE-AED-001		ADR-0006|test_vertical_slice.py|typed_question_flow_test.dart	canonical	
 CAP-005	blind-first-variants	Actor/source/outcome blind variants	ME	ARCHITECTURE_ACCEPTED	Phase 2	P1	KEFE-MPD-001|KEFE-CQB-001		ADR-0019	canonical	
 CAP-006	principle-first	Principle-first decision flow	ME	ARCHITECTURE_ACCEPTED	Phase 2	P1	KEFE-CQB-001|KEFE-PB-001		ADR-0019	canonical	
 CAP-007	role-flip	Role Flip / stakeholder-position reweigh	ME	ROADMAP_ACCEPTED	Phase 4	P1	KEFE-PB-001|KEFE-CQB-001|KEFE-DGS-001		ADR-0019	canonical	
@@ -30,7 +30,7 @@ CAP-028	kefe-retro	KEFE Retro / historical decision simulation	CASE_COMPOSITION	
 CAP-029	observe-mode	Observe / Sadece Oku	CASE_COMPOSITION	ACCEPTED_CANDIDATE	Post-MVP	P2	KEFE-PB-001|KEFE-DS-001			canonical	
 CAP-030	ugc-personal-dilemmas	UGC Personal Dilemmas	CASE_COMPOSITION	ROADMAP_HIGH	Phase 5	P2	KEFE-PB-001|KEFE-ETG-001|KEFE-SEC-001			canonical	
 CAP-031	collective-result	Post-Commit Collective Result	WE	IMPLEMENTED_VERIFIED	Phase 1	P0	KEFE-MPD-001|KEFE-TIM-001		post-Commit Reveal runtime|Slice 23 / PR #149|active runtime	canonical	
-CAP-032	reason-distribution	Reason distribution	WE	IMPLEMENTED_PARTIAL	Phase 2	P1	KEFE-PB-001|KEFE-AED-001		ADR-0036|ADR-0053|ADR-0140|Issue #391 candidate	canonical	Exact-head API/Mobile/MVP/Global review; trends, segmentation and Signal qualification remain separate
+CAP-032	reason-distribution	Reason distribution	WE	IMPLEMENTED_VERIFIED	Phase 2	P1	KEFE-PB-001|KEFE-AED-001		ADR-0007|ADR-0008|ADR-0036|ADR-0053|ADR-0140|test_community_reason_pattern_distribution.py|community_reason_pattern_distribution_test.dart	canonical	Exact-head API/Mobile/MVP/Global review; trends, segmentation and Signal qualification remain separate
 CAP-033	argument-clustering	Argument pattern clustering	WE	ARCHITECTURE_ACCEPTED	Phase 4	P1	KEFE-PB-001|KEFE-AIA-001|KEFE-DGS-001		ADR-0027	canonical	
 CAP-034	bridge-arguments	Bridge arguments / Ortak Zemin	WE	PROPOSAL_REVIEW	Phase 4	P0	KEFE-PB-001|KEFE-AIA-001|KEFE-TIM-001			conversation_proposal	Neutrality, provenance and editorial review contract.
 CAP-035	perspective-landscape	Near/Opposing/Bridge/Alternative Context perspectives	WE	IMPLEMENTED_VERIFIED	Phase 2	P0	KEFE-PB-001|KEFE-DS-001		Slice 20	canonical	
