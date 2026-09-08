@@ -55,10 +55,10 @@
 .warning,
 .emptyState,
 .jsonCard {
-  border: 1px solid var(--line);
+  border: 1.5px solid var(--line);
   border-radius: 1.15rem;
-  background: rgba(17, 21, 32, 0.94);
-  box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, 0.17);
+  background: var(--surface);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.12);
 }
 
 .connection {

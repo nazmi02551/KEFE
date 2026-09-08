@@ -56,9 +56,9 @@
 .detail,
 .decision,
 .audit {
-  border: 1px solid var(--line);
+  border: 1.5px solid var(--line);
   border-radius: 1.1rem;
-  background: rgba(17, 21, 32, 0.94);
+  background: var(--surface);
   padding: 1.2rem;
 }
 
