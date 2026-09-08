@@ -53,7 +53,7 @@ class KefeVisualTheme extends ThemeExtension<KefeVisualTheme> {
     surfaceRaised: Color(0xFFFBFCFF),
     surfaceSunken: Color(0xFFF0F3F8),
     surfaceStrong: Color(0xFF0A1728),
-    onSurfaceStrong: Color(0xFFF8FAFC),
+    onSurfaceStrong: Color(0xFF0F172A),
     foreground: Color(0xFF101827),
     mutedForeground: Color(0xFF67778B),
     border: Color(0xFFD9E1EC),
@@ -93,6 +93,8 @@ class KefeVisualTheme extends ThemeExtension<KefeVisualTheme> {
   List<Color> get premiumGradient => isDark
       ? const [Color(0xFF102B4B), Color(0xFF0A1626), Color(0xFF381D29)]
       : const [Color(0xFF122F51), Color(0xFF0B1728), Color(0xFF45202D)];
+
+  Color get onPremium => const Color(0xFFF8FAFC);
 
   List<Color> get balanceGradient => isDark
       ? [

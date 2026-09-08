@@ -40,7 +40,8 @@ class QuestionInputCard extends ConsumerWidget {
     return KefeSurface(
       key: ValueKey('question-${question.id}'),
       tone: KefeSurfaceTone.raised,
-      padding: const EdgeInsets.all(19),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      borderRadius: 18,
       accent: accent,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -49,20 +50,20 @@ class QuestionInputCard extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
                   color: accent.withValues(alpha: visual.isDark ? 0.14 : 0.09),
-                  borderRadius: BorderRadius.circular(13),
+                  borderRadius: BorderRadius.circular(11),
                   border: Border.all(color: accent.withValues(alpha: 0.18)),
                 ),
                 child: Icon(
                   isConfidence ? Icons.speed_rounded : Icons.balance_outlined,
                   color: accent,
-                  size: 21,
+                  size: 19,
                 ),
               ),
-              const SizedBox(width: 13),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,10 +74,10 @@ class QuestionInputCard extends ConsumerWidget {
                           : strings.questionDecision,
                       color: accent,
                     ),
-                    const SizedBox(height: 7),
+                    const SizedBox(height: 4),
                     Text(
                       prompt,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w900,
                         height: 1.20,
                         letterSpacing: -0.25,
@@ -85,9 +86,9 @@ class QuestionInputCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: visual.surfaceSunken,
                   borderRadius: BorderRadius.circular(99),
@@ -107,7 +108,7 @@ class QuestionInputCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
           _QuestionInput(
             question: question,
             value: value,
@@ -209,9 +210,9 @@ class _BalanceChoiceInput extends StatelessWidget {
           leftLabel: leftLabel,
           rightLabel: rightLabel,
           selectedIndex: effectiveIndex,
-          compact: MediaQuery.sizeOf(context).height < 700,
+          compact: true,
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 10),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -225,7 +226,7 @@ class _BalanceChoiceInput extends StatelessWidget {
                 onTap: () => onChanged(leftRaw),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             Expanded(
               child: _BalanceOptionTile(
                 rawOption: rightRaw,
@@ -280,17 +281,17 @@ class _BalanceOptionTile extends StatelessWidget {
       child: InkWell(
         key: ValueKey('option-$rawOption'),
         onTap: enabled ? onTap : null,
-        borderRadius: BorderRadius.circular(17),
+        borderRadius: BorderRadius.circular(15),
         child: AnimatedContainer(
           duration: duration,
           curve: Curves.easeOutCubic,
-          constraints: const BoxConstraints(minHeight: 90),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          constraints: const BoxConstraints(minHeight: 56),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
             color: selected
                 ? color.withValues(alpha: visual.isDark ? 0.18 : 0.10)
                 : visual.surfaceSunken,
-            borderRadius: BorderRadius.circular(17),
+            borderRadius: BorderRadius.circular(15),
             border: Border.all(
               color: selected ? color.withValues(alpha: 0.82) : visual.border,
               width: selected ? 1.7 : 1,
@@ -310,8 +311,8 @@ class _BalanceOptionTile extends StatelessWidget {
             children: [
               AnimatedContainer(
                 duration: duration,
-                width: 27,
-                height: 27,
+                width: 22,
+                height: 22,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: selected ? color : Colors.transparent,
@@ -323,21 +324,21 @@ class _BalanceOptionTile extends StatelessWidget {
                 child: selected
                     ? Icon(
                         Icons.check_rounded,
-                        size: 18,
+                        size: 15,
                         color: visual.isDark
                             ? const Color(0xFF07111F)
                             : Colors.white,
                       )
                     : null,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 6),
               ExcludeSemantics(
                 child: Text(
                   label,
                   textAlign: TextAlign.center,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: selected ? color : visual.foreground,
                     fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
                     height: 1.22,

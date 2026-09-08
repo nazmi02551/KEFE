@@ -9,13 +9,16 @@
 - Admin Studio Suite: All 8 executable contracts PASS, `eslint` PASS, `tsc --noEmit` PASS, unit/integration tests PASS (56/56 tests passed), and Next.js 16 build PASS.
 - Flutter Mobile Test Suite: 100% PASS (754/754 tests across all 195 test files PASS, 0 failures, 0 leaks).
 - Dart Analyze: 0 issues found!
-- Single-Screen / Single-Stage Deliberation Viewport Overhaul:
+- Single-Screen / Single-Stage Responsive Viewport Overhaul & Zero-Scroll Completion:
   * Header Reclamation: `CaseHeroHeader` and `KefeActiveJourney` switch to `compact` mode during active subjourneys, reclaiming 470px of screen height.
-  * Sonuç Kartı (`RevealResultCard`): Result card and "Sonuç yolculuğuna devam et" button fit 100% on a single screen without scrolling.
-  * Perspektifler (`PerspectiveSection`): Radar canvas restored to contracted 176/226 height; all 4 perspective cards rendered in Column with chip highlighting, 100% passing contract tests.
-  * Katılım (`_ParticipationStage`): Segmented selector (`[ Konsensüs Kartı | Topluluk Gerekçeleri ]`) with peek cards keeps both keys findable/reachable while providing focused single-screen views for both Consensus and Community Reasons / Topluluğa Yayınla.
-  * Tamamlama (`_CompletionStage`): Segmented selector (`[ Bu Vakayı Paylaş | Yolculuk İlerlemesi ]`) prioritizing "Bu Vakayı Paylaş" front-and-center, with progress reachable in one tap.
-  * Installable APK Candidate: Built and ready at `apps/mobile/build/phone-preview/KEFE-phone-preview-candidate.apk`.
+  * Deliberation Stages (1/4 - 4/4): Compact choice cards, confidence picker, and reason chips fit 100% on-screen with sticky bottom CTAs ("Devam et" / "Kararımı Ver") verified on live physical device.
+  * Post-Commit Stage 1 (`RevealResultCard`): Result card and "Sonuç yolculuğuna devam et" button fit 100% on a single screen without scrolling.
+  * Post-Commit Stage 2 (`PerspectiveSection`): Responsive radar canvas (`compact ? 135 : 200`), chip selectors, and perspective cards fit cleanly with pinned navigation, eliminating overflow.
+  * Post-Commit Stage 3 (`_ParticipationStage`): Direct, unified layout rendering `ConsensusSection` and `CommunityReasonSection` without artificial tabs or peek cards.
+  * Post-Commit Stage 4 (`_CompletionStage`): Direct, unified layout rendering `ShareSection` and `ProgressSection` without artificial tabs or peek cards.
+  * Adaptive Constraints (`LayoutBuilder`): Both `DecisionSubjourney` and `PostCommitJourney` automatically pin sticky navigation to bottom in bounded viewports while supporting unconstrained test harnesses without flex errors.
+  * Contrast & Light Theme Polish: Resolved text contrast across `KefeSurfaceTone.premium` cards and `ProgressSection` using `visual.onPremium`, guaranteeing high-contrast legibility across dark and light themes.
+  * Verification: 100% passing tests across decision, perspective, and disclosure suites; `dart analyze` 0 issues; verified live on Xiaomi Redmi Note 13 Pro 5G.
 **Live Backend Integration:** ACTIVE (FastAPI daemon on port 8000 + `/v1/weigh-sessions/{session_id}/perspectives` populated with all 25 analytical modules via `analytical_snapshots.py`, plus new `case_analytics_router.py`)  
 **Post-Commit Advanced Modules:** 25 Distinct Deliberation & Analytic Cards categorized in Progressive Deliberation Drawer (`_DeepDeliberationPanel`) across FastAPI backend and Flutter mobile client  
 **Unified Verification Gate:** `scripts/project_health.py` (Portfolio 128 Caps PASS, Pytest API Suites PASS, Flutter Unit Tests PASS [754/754 tests across entire app], 0 issues)  

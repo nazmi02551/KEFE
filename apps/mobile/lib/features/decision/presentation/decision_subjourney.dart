@@ -171,48 +171,62 @@ class _DecisionSubjourneyState extends ConsumerState<DecisionSubjourney> {
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
     final stage = _activeStage;
-    return Column(
-      key: const ValueKey('decision-subjourney'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _DecisionSubjourneyHeader(
-          stage: stage,
-          current: _activeIndex + 1,
-          total: _stages.length,
-        ),
-        const SizedBox(height: 14),
-        AnimatedSwitcher(
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasBoundedHeight = constraints.maxHeight.isFinite;
+        final content = AnimatedSwitcher(
           duration: KefeMotion.resolve(
             context,
             const Duration(milliseconds: 220),
           ),
           child: KeyedSubtree(
             key: ValueKey('decision-substage-${stage.id}'),
-            child: switch (stage.kind) {
-              DecisionSubjourneyStageKind.question => _questionStage(stage),
-              DecisionSubjourneyStageKind.reason => _reasonStage(),
-              DecisionSubjourneyStageKind.review => _reviewStage(),
-            },
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: switch (stage.kind) {
+                DecisionSubjourneyStageKind.question => _questionStage(stage),
+                DecisionSubjourneyStageKind.reason => _reasonStage(),
+                DecisionSubjourneyStageKind.review => _reviewStage(),
+              },
+            ),
           ),
-        ),
-        const SizedBox(height: 14),
-        if (stage.kind != DecisionSubjourneyStageKind.review)
-          _DecisionSubjourneyNavigation(
-            showBack: _activeIndex > 0,
-            onBack: _back,
-            onNext: stage.kind == DecisionSubjourneyStageKind.question
-                ? _questionCanContinue(stage.question!)
-                      ? _nextQuestion
-                      : null
-                : _next,
-            nextLabel:
-                stage.kind == DecisionSubjourneyStageKind.question &&
-                    !stage.question!.required &&
-                    !widget.responses.containsKey(stage.question!.id)
-                ? strings.decisionJourneySkip
-                : strings.decisionJourneyNext,
-          ),
-      ],
+        );
+
+        return Column(
+          key: const ValueKey('decision-subjourney'),
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _DecisionSubjourneyHeader(
+              stage: stage,
+              current: _activeIndex + 1,
+              total: _stages.length,
+            ),
+            const SizedBox(height: 8),
+            if (hasBoundedHeight) Expanded(child: content) else content,
+            const SizedBox(height: 8),
+            if (stage.kind != DecisionSubjourneyStageKind.review)
+              SafeArea(
+                top: false,
+                child: _DecisionSubjourneyNavigation(
+                  showBack: _activeIndex > 0,
+                  onBack: _back,
+                  onNext: stage.kind == DecisionSubjourneyStageKind.question
+                      ? _questionCanContinue(stage.question!)
+                            ? _nextQuestion
+                            : null
+                      : _next,
+                  nextLabel:
+                      stage.kind == DecisionSubjourneyStageKind.question &&
+                          !stage.question!.required &&
+                          !widget.responses.containsKey(stage.question!.id)
+                      ? strings.decisionJourneySkip
+                      : strings.decisionJourneyNext,
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 
@@ -284,19 +298,19 @@ class _DecisionSubjourneyHeader extends StatelessWidget {
       key: const ValueKey('decision-subjourney-header'),
       tone: KefeSurfaceTone.sunken,
       accent: visual.gold,
-      padding: const EdgeInsets.all(15),
-      borderRadius: 19,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+      borderRadius: 16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              Icon(icon, color: visual.goldSoft, size: 21),
-              const SizedBox(width: 10),
+              Icon(icon, color: visual.goldSoft, size: 18),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     color: visual.onSurfaceStrong,
                     fontWeight: FontWeight.w900,
                   ),
@@ -304,20 +318,20 @@ class _DecisionSubjourneyHeader extends StatelessWidget {
               ),
               Text(
                 strings.decisionJourneyProgress(current, total),
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: visual.goldSoft,
                   fontWeight: FontWeight.w900,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           ClipRRect(
             borderRadius: BorderRadius.circular(99),
             child: LinearProgressIndicator(
               key: const ValueKey('decision-subjourney-progress'),
               value: current / total,
-              minHeight: 6,
+              minHeight: 5,
               backgroundColor: visual.border.withValues(alpha: 0.45),
               color: visual.gold,
             ),

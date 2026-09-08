@@ -80,7 +80,7 @@ class _ProgressReady extends ConsumerWidget {
               Text(
                 strings.progressReadiness(progress.readiness),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: visual.onSurfaceStrong.withValues(alpha: 0.82),
+                  color: visual.onPremium.withValues(alpha: 0.88),
                   height: 1.4,
                 ),
               ),
@@ -117,7 +117,7 @@ class _ProgressReady extends ConsumerWidget {
                 Text(
                   strings.progressRecent,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: visual.onSurfaceStrong,
+                    color: visual.onPremium,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -143,8 +143,8 @@ class _ProgressReady extends ConsumerWidget {
                             '${localizer.text(namespace: KefeContentNamespace.caseTitle, id: item.caseId, locale: locale, fallback: item.title)} · ${strings.domainName(item.primaryDomain)}',
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
-                                  color: visual.onSurfaceStrong.withValues(
-                                    alpha: 0.78,
+                                  color: visual.onPremium.withValues(
+                                    alpha: 0.85,
                                   ),
                                 ),
                           ),
@@ -157,16 +157,16 @@ class _ProgressReady extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: visual.onSurfaceStrong.withValues(alpha: 0.06),
+                  color: visual.onPremium.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: visual.onSurfaceStrong.withValues(alpha: 0.10),
+                    color: visual.onPremium.withValues(alpha: 0.15),
                   ),
                 ),
                 child: Text(
                   strings.progressMethodology,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: visual.onSurfaceStrong.withValues(alpha: 0.72),
+                    color: visual.onPremium.withValues(alpha: 0.80),
                     height: 1.4,
                   ),
                 ),
@@ -267,10 +267,10 @@ class _ProgressMetric extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: 96),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
         decoration: BoxDecoration(
-          color: visual.onSurfaceStrong.withValues(alpha: 0.06),
+          color: visual.onPremium.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: visual.onSurfaceStrong.withValues(alpha: 0.11),
+            color: visual.onPremium.withValues(alpha: 0.14),
           ),
         ),
         child: Column(
@@ -285,7 +285,7 @@ class _ProgressMetric extends StatelessWidget {
             Text(
               '$value',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: visual.onSurfaceStrong,
+                color: visual.onPremium,
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -295,7 +295,7 @@ class _ProgressMetric extends StatelessWidget {
               maxLines: 2,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: visual.onSurfaceStrong.withValues(alpha: 0.70),
+                color: visual.onPremium.withValues(alpha: 0.78),
               ),
             ),
           ],

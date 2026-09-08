@@ -128,24 +128,73 @@ class _ProgressiveDecisionContentState
     final inInteractiveSubjourney = activeStep != null &&
         activeStep.primitiveCode != 'CONTEXT';
 
+    if (inInteractiveSubjourney) {
+      return Container(
+        key: const ValueKey('progressive-decision-journey'),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (productPreviewVisual)
+              CaseHeroHeader(
+                caseData: caseData,
+                flowRuntime: runtime,
+                compact: true,
+              )
+            else
+              _JourneyCaseHeader(caseData: caseData),
+            const SizedBox(height: 8),
+            Expanded(
+              child: KefeActiveJourney(
+                stageId: activeStep.code,
+                eyebrow: strings.activeJourneyEyebrow,
+                title: strings.activeJourneyTitle(
+                  activeStep.primitiveCode,
+                  repeatedDecision:
+                      DecisionJourneyStageResolver.isRepeatedDecision(
+                    runtime,
+                    activeStep,
+                  ),
+                ),
+                subtitle: strings.activeJourneyHelper,
+                progressLabel: strings.activeJourneyProgress(
+                  DecisionJourneyStageResolver.ordinal(
+                    runtime,
+                    activeStep,
+                  ),
+                  runtime.steps.length,
+                ),
+                icon: _iconForPrimitive(activeStep.primitiveCode),
+                compact: true,
+                child: _ActiveFlowStep(
+                  key: ValueKey('active-flow-step-${activeStep.code}'),
+                  step: activeStep,
+                  state: state,
+                  firstUse: widget.firstUse,
+                ),
+              ),
+            ),
+            if (state.errorCode != null) ...[
+              const SizedBox(height: 6),
+              _JourneyStatusSurface(
+                message: strings.messageForCode(state.errorCode),
+                offlineDraft: state.offlineDraft,
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
     return ListView(
       key: const ValueKey('progressive-decision-journey'),
-      padding: EdgeInsets.fromLTRB(
-        16,
-        inInteractiveSubjourney ? 10 : 20,
-        16,
-        20,
-      ),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
       children: [
         if (productPreviewVisual)
-          CaseHeroHeader(
-            caseData: caseData,
-            flowRuntime: runtime,
-            compact: inInteractiveSubjourney,
-          )
+          CaseHeroHeader(caseData: caseData, flowRuntime: runtime)
         else
           _JourneyCaseHeader(caseData: caseData),
-        SizedBox(height: inInteractiveSubjourney ? 10 : 20),
+        const SizedBox(height: 20),
         if (activeStep == null)
           _JourneyMessageSurface(
             key: const ValueKey('active-journey-unavailable'),
@@ -168,7 +217,7 @@ class _ProgressiveDecisionContentState
               runtime.steps.length,
             ),
             icon: _iconForPrimitive(activeStep.primitiveCode),
-            compact: inInteractiveSubjourney,
+            compact: false,
             child: _ActiveFlowStep(
               key: ValueKey('active-flow-step-${activeStep.code}'),
               step: activeStep,

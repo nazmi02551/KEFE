@@ -17,7 +17,7 @@ class PerspectiveLandscapeVisual extends StatelessWidget {
     final visual = context.kefeVisual;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final mediaSize = MediaQuery.sizeOf(context);
-    final compact = mediaSize.width < 340 || mediaSize.height < 700;
+    final compact = mediaSize.width < 500 || mediaSize.height < 780;
     final presentSlots = _uniqueSlots(slots);
 
     return ExcludeSemantics(
@@ -36,7 +36,7 @@ class PerspectiveLandscapeVisual extends StatelessWidget {
           children: [
             SizedBox(
               key: const ValueKey('perspective-landscape-canvas'),
-              height: compact ? 176 : 226,
+              height: compact ? 135 : 200,
               child: RepaintBoundary(
                 child: CustomPaint(
                   painter: _PerspectiveLandscapePainter(

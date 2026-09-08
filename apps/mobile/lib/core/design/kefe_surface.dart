@@ -34,11 +34,12 @@ class KefeSurface extends StatelessWidget {
     };
     final resolvedAccent = accent ?? visual.gold;
     final radius = BorderRadius.circular(borderRadius);
+    final onSurface = premium ? visual.onPremium : visual.onSurfaceStrong;
     final content = premium
         ? DefaultTextStyle.merge(
-            style: TextStyle(color: visual.onSurfaceStrong),
+            style: TextStyle(color: onSurface),
             child: IconTheme.merge(
-              data: IconThemeData(color: visual.onSurfaceStrong),
+              data: IconThemeData(color: onSurface),
               child: child,
             ),
           )
