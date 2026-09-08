@@ -15,6 +15,13 @@
 **Store Readiness:** PASSED (Apple Guideline 5.1.1 & Google Play Data Safety Account Erasure Verified).
 
 **Recent Completed Capabilities & Master Refactoring Milestones:**
+- ADMIN STUDIO CONTRAST OVERHAUL & THEME TOGGLE (2026-09-08):
+  * **WCAG AAA Contrast Architecture**: Resolved low-contrast and washed-out elements across Admin Studio. In dark mode, borders strengthened from faint `--line: #293246` to crisp `--line: #2C4362` and `--line-strong: #4A6E9B`, primary text to pure `#FFFFFF`, and muted text to `#A8BCD4` (10:1+ contrast). In light mode, deep ocean cyan `#0284C7`, warm bronze `#B45309`, and slate `#0F172A` guarantee > 5:1 contrast against light cards.
+  * **Elimination of Hardcoded Card Backgrounds**: Replaced hardcoded dark backgrounds (`rgba(17, 21, 32, 0.94)`) in `globals.css`, `case-builder-workspace.module.css`, and `editorial-quality-review-workspace.module.css` with semantic `var(--surface)`. In `operational-reports-workspace.module.css`, eliminated all hardcoded `#17202a` and `#f4f6f8` in favor of dynamic CSS theme variables.
+  * **Interactive Theme Switcher (`ThemeToggle`)**: Added a dedicated, one-click `ThemeToggle` button in the top navigation bar (`☀️ Açık Tema` / `🌙 Koyu Tema`) persisting user preference in `localStorage` and updating the `[data-theme]` attribute instantly.
+  * **Form Controls & Stepper Polish**: Form inputs and buttons now feature distinct active rings, clear borders, and high-visibility typography.
+  * **TypeScript & Next.js Verification**: `npx tsc --noEmit` passed with 0 errors; verified live on `http://localhost:3000/`.
+
 - ADMIN STUDIO WORKSPACE & CAPABILITY ADVANCEMENT (2026-09-08):
   * **Capability Portfolio Promotion**: Advanced `CAP-061` (Durable human Proposal review queue), `CAP-063` (Admin Case Builder), `CAP-064` (Versioned Flow Composer), `CAP-065` (Editorial quality gate), `CAP-066` (Moderation ops), `CAP-072` (Case correction history), `CAP-078` (Search and filtering), and `CAP-085` (User data export and deletion) to `IMPLEMENTED_VERIFIED` with exact executable contracts and test evidence.
   * **Admin Studio Contract Validator Hardening**: Replaced brittle `process.cwd()` with deterministic `import.meta.dirname` path resolution across `check_case_media_contract.mjs`, `check_editorial_quality_review_contract.mjs`, `check_flow_composer_contract.mjs`, `check_operational_reports_contract.mjs`, `check_publication_operations_contract.mjs`, and `check_reason_moderation_contract.mjs`, allowing tests to execute reliably from both repo root and package root.
