@@ -2,12 +2,13 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
-const root = process.cwd();
+const root = path.resolve(import.meta.dirname, "..");
+const repositoryRoot = path.resolve(root, "../..");
 const contract = JSON.parse(
   fs.readFileSync(
     path.resolve(
-      root,
-      "../../docs/contracts/admin-operational-reports-snapshot.v1.json"
+      repositoryRoot,
+      "docs/contracts/admin-operational-reports-snapshot.v1.json"
     ),
     "utf8"
   )

@@ -2,10 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
-const root = process.cwd();
+const root = path.resolve(import.meta.dirname, "..");
+const repositoryRoot = path.resolve(root, "../..");
 const contractPath = path.resolve(
-  root,
-  "../../docs/contracts/admin-community-reason-moderation-operations.v1.json"
+  repositoryRoot,
+  "docs/contracts/admin-community-reason-moderation-operations.v1.json"
 );
 const componentPath = path.resolve(
   root,

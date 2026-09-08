@@ -4,15 +4,21 @@
 **Branch:** `backup/untracked-ecosystem-snapshot-20260906`  
 **Live Device & Emulator Test Status:** Verified & Built Release Preview APK (`app-release.apk`, 56.9MB), verified live on Android Emulator `emulator-5554` (API 36).  
 **Project Health Gate:** 100% PASS:
-- Capability Portfolio Validation: 128/128 Capabilities, 21 lifecycle states, 0 errors PASS (`CAP-004` & `CAP-032` advanced to `IMPLEMENTED_VERIFIED`).
+- Capability Portfolio Validation: 128/128 Capabilities, 21 lifecycle states, 0 errors PASS (`CAP-004`, `CAP-032`, `CAP-061`, `CAP-063`, `CAP-064`, `CAP-065`, `CAP-066`, `CAP-072`, `CAP-078`, `CAP-085` advanced to `IMPLEMENTED_VERIFIED`).
 - Backend API Suite: Pytest modules & 13 analytical endpoints PASS (33/33 signal/impact tests PASS, all unit suites PASS).
 - Flutter Mobile Test Suite: 100% PASS (754/754 tests across all 195 test files PASS, 0 failures, 0 leaks).
 - Dart Analyze: 0 issues found!
+- Admin Studio Suite: All 8 executable contracts PASS, `eslint` PASS, `tsc --noEmit` PASS, unit/integration tests PASS (56/56 tests passed), and Next.js 16 build PASS.
 **Architectural Integrity & Master Recovery:** COMPLETED & VERIFIED (Blind First enforced, Public Observatory operational, Case Analytics routers mounted, InternalAlphaStringCatalog fully mapped across TR/EN, zero untracked data loss).
 **Standalone Product Preview Release APK:** Standalone 100% offline self-contained release build verified (56.9MB).  
 **Store Readiness:** PASSED (Apple Guideline 5.1.1 & Google Play Data Safety Account Erasure Verified).
 
 **Recent Completed Capabilities & Master Refactoring Milestones:**
+- ADMIN STUDIO WORKSPACE & CAPABILITY ADVANCEMENT (2026-09-08):
+  * **Capability Portfolio Promotion**: Advanced `CAP-061` (Durable human Proposal review queue), `CAP-063` (Admin Case Builder), `CAP-064` (Versioned Flow Composer), `CAP-065` (Editorial quality gate), `CAP-066` (Moderation ops), `CAP-072` (Case correction history), `CAP-078` (Search and filtering), and `CAP-085` (User data export and deletion) to `IMPLEMENTED_VERIFIED` with exact executable contracts and test evidence.
+  * **Admin Studio Contract Validator Hardening**: Replaced brittle `process.cwd()` with deterministic `import.meta.dirname` path resolution across `check_case_media_contract.mjs`, `check_editorial_quality_review_contract.mjs`, `check_flow_composer_contract.mjs`, `check_operational_reports_contract.mjs`, `check_publication_operations_contract.mjs`, and `check_reason_moderation_contract.mjs`, allowing tests to execute reliably from both repo root and package root.
+  * **Admin Studio Verification Gate**: Full `npm run verify` passed cleanly in `@kefe/admin-studio` (8/8 contracts PASS, `eslint` 0 issues, `tsc --noEmit` 0 issues, 56/56 unit tests PASS, Next.js 16 production build PASS).
+  * **Ecosystem Health Gate**: `scripts/project_health.py` passed with 100% across all 4 gates (Portfolio 128 Caps, Pytest API suites, Flutter unit tests [229/229], Dart analyze 0 issues).
 - SYSTEMATIC LIGHT-MODE CONTRAST HARDENING & CAPABILITY PORTFOLIO ADVANCEMENT (2026-09-08):
   * **Capability Portfolio Promotion**: Advanced `CAP-004` (Decision confidence capture) and `CAP-032` (Reason distribution) to `IMPLEMENTED_VERIFIED` backed by ADR-0006/0007/0008, vertical slice integration, and API/Mobile test suites. Portfolio validator verified 128 capabilities with zero errors.
   * **Global KefeSurfaceTone.premium Contrast Hardening**: Ensured that all text and icon elements rendered on dark navy gradient `KefeSurfaceTone.premium` surfaces strictly use `visual.onPremium` (or alpha variants) rather than `visual.onSurfaceStrong`. Fixed across: `CaseHeroHeader`, `_JourneyCaseHeader`, `_CaseHeader`, `_FirstUseCompletion`, `DiscoveryExploreScreen`, `WeighHubScreen`, `PublicShareScreen`, `ActivityScreen`, `OnboardingGateScreen`, `MyKefeJourneySummary`, `MyKefePersonalReportScreen`, `PerspectiveLandscapeVisual`, and `RevealResultCard`.
