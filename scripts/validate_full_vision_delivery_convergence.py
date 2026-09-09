@@ -85,8 +85,9 @@ def main() -> int:
     if contract.get("source_adr") != "docs/adr/0096-full-vision-delivery-convergence.md":
         errors.append("convergence contract must reference ADR-0096")
     authority = contract.get("authority")
-    if not isinstance(authority, dict) or authority.get("delivery_registry") != str(REGISTRY_PATH):
+    if not isinstance(authority, dict) or authority.get("delivery_registry") not in (str(REGISTRY_PATH), REGISTRY_PATH.as_posix()):
         errors.append("convergence contract must bind the delivery registry path")
+
 
     allowed_states = set(contract.get("allowed_line_states") or [])
     required_states = {

@@ -72,12 +72,11 @@ def validate_contract(contract: dict[str, Any]) -> None:
     require(contract["foundation_wave"] == "F4", "F4 binding")
     require(contract["capability_id"] == "CAP-123", "CAP-123 binding")
     require(
-        contract["portfolio_path"] == str(PORTFOLIO_PATH),
+        contract["portfolio_path"] in (str(PORTFOLIO_PATH), PORTFOLIO_PATH.as_posix()),
         "portfolio path",
     )
     require(
-        contract["portfolio_governance_path"]
-        == str(PORTFOLIO_GOVERNANCE_PATH),
+        contract["portfolio_governance_path"] in (str(PORTFOLIO_GOVERNANCE_PATH), PORTFOLIO_GOVERNANCE_PATH.as_posix()),
         "portfolio governance path",
     )
 
@@ -88,8 +87,7 @@ def validate_contract(contract: dict[str, Any]) -> None:
         "product register authority",
     )
     require(
-        authority["repository_authority_record"]
-        == str(PORTFOLIO_GOVERNANCE_PATH),
+        authority["repository_authority_record"] in (str(PORTFOLIO_GOVERNANCE_PATH), PORTFOLIO_GOVERNANCE_PATH.as_posix()),
         "repository authority record",
     )
     require(
