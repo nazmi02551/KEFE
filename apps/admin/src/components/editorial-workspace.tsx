@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
 
 import {
@@ -885,6 +886,25 @@ export function EditorialWorkspace() {
               <p>Projection: {projectionResult.projection_record_id}</p>
               <p>Replay: {projectionResult.replayed ? "Evet" : "Hayır"}</p>
               <strong>Bu ekranda yayınlama yetkisi yoktur.</strong>
+              <div style={{ marginTop: "1rem" }}>
+                <Link
+                  href={`/case-builder?version=${encodeURIComponent(projectionResult.authoring_case_version_id)}`}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    padding: "0.6rem 1.1rem",
+                    background: "var(--gold)",
+                    color: "#080B11",
+                    borderRadius: "8px",
+                    fontWeight: 700,
+                    fontSize: "0.85rem",
+                    textDecoration: "none"
+                  }}
+                >
+                  Vaka Oluşturucuda Aç ve Düzenle →
+                </Link>
+              </div>
             </div>
           ) : null}
         </section>

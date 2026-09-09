@@ -97,7 +97,7 @@ The executable foundation program contains waves F0 through F7.
 
 - **F0 — delivery-line and contract convergence:** `COMPLETE_VERIFIED`. The runtime line now carries AGENTS, the 128-capability register, foundation program, canonical registry, validators and exact continuation state. One canonical integration target is enforced.
 - **F1 — provider-neutral content supply and reviewed Proposal runtime:** `IN_PROGRESS`. Typed human Feed Item/Source Brief review is canonical. Provider/evidence/scheduler primitives have strong candidate evidence, but the competing public-feed models are unresolved and no real production feed is authorized.
-- **F2 — Editorial Projection into existing Content Authoring:** partial candidate/domain work exists; the complete integrated human operation is not finished.
+- **F2 — Editorial Projection into existing Content Authoring:** `COMPLETE_VERIFIED` in code (`ADR-0099`, contract `canonical-candidate-bundle-projection.v1.json`, `CAP-062` promoted to `IMPLEMENTED_VERIFIED`). Human editorial review and authoring draft projection verified via `test_canonical_candidate_bundle_projection_http.py`.
 - **F3 — Admin authoring, review, moderation, media and operational reporting:** typed review APIs are canonical, but Admin Studio, Case Builder, Flow Composer, moderation, media operations and reporting remain incomplete.
 - **F4 — identity, privacy, reachability and production readiness:** pending. Real OTP/auth operation, export/delete, production reachability, deployed observability/SLO and rollback evidence remain incomplete.
 - **F5 — analytics, reporting, experimentation and FinOps:** pending as a reproducible platform.
