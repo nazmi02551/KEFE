@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import styles from "@/src/components/case-builder-workspace.module.css";
@@ -520,6 +521,27 @@ export function CaseBuilderWorkspace({
             >
               Ayrı komutla incelemeye gönder
             </button>
+            {version.state === "IN_REVIEW" ? (
+              <div style={{ marginTop: "1rem" }}>
+                <Link
+                  href={`/content-review?version=${encodeURIComponent(version.id)}`}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    padding: "0.6rem 1.1rem",
+                    background: "var(--gold)",
+                    color: "#080B11",
+                    borderRadius: "8px",
+                    fontWeight: 700,
+                    fontSize: "0.85rem",
+                    textDecoration: "none"
+                  }}
+                >
+                  Editoryal Kalite İncelemesine Git →
+                </Link>
+              </div>
+            ) : null}
           </section>
 
           {audit.length > 0 ? (

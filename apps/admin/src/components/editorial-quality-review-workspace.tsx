@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import styles from "@/src/components/editorial-quality-review-workspace.module.css";
@@ -32,7 +33,11 @@ function pretty(value: unknown): string {
   return JSON.stringify(value, null, 2);
 }
 
-export function EditorialQualityReviewWorkspace() {
+export function EditorialQualityReviewWorkspace({
+  initialVersionId = ""
+}: {
+  initialVersionId?: string;
+} = {}) {
   const configuredBase = process.env.NEXT_PUBLIC_KEFE_API_BASE_URL ?? "";
   const [apiBaseUrl, setApiBaseUrl] = useState(configuredBase);
   const [csrfToken, setCsrfToken] = useState("");
@@ -43,7 +48,7 @@ export function EditorialQualityReviewWorkspace() {
   const [offset, setOffset] = useState(0);
   const [nextOffset, setNextOffset] = useState<number | null>(null);
   const [queue, setQueue] = useState<EditorialReviewQueueItem[]>([]);
-  const [selectedVersionId, setSelectedVersionId] = useState("");
+  const [selectedVersionId, setSelectedVersionId] = useState(initialVersionId);
   const [detail, setDetail] = useState<EditorialReviewDetail | null>(null);
   const [completedModes, setCompletedModes] = useState<string[]>([]);
   const [approveConfirmed, setApproveConfirmed] = useState(false);
@@ -452,9 +457,32 @@ export function EditorialQualityReviewWorkspace() {
             {!detail ? (
               <p className={styles.empty}>Karar için önce salt okunur ayrıntıyı yükleyin.</p>
             ) : detail.version.state !== "IN_REVIEW" ? (
-              <p className={styles.empty}>
-                Karar tamamlandı: {detail.version.state}. Publish burada sunulmaz.
-              </p>
+              <div>
+                <p className={styles.empty}>
+                  Karar tamamlandı: {detail.version.state}. Publish burada sunulmaz.
+                </p>
+                {detail.version.state === "APPROVED" ? (
+                  <div style={{ marginTop: "1rem" }}>
+                    <Link
+                      href={`/publication-operations?version=${encodeURIComponent(detail.version.id)}`}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        padding: "0.6rem 1.1rem",
+                        background: "var(--gold)",
+                        color: "#080B11",
+                        borderRadius: "8px",
+                        fontWeight: 700,
+                        fontSize: "0.85rem",
+                        textDecoration: "none"
+                      }}
+                    >
+                      Yayın Operasyonlarında Aç →
+                    </Link>
+                  </div>
+                ) : null}
+              </div>
             ) : (
               <div className={styles.decisionGrid}>
                 <div className={styles.actionBox}>
