@@ -21,7 +21,7 @@
   color: var(--text);
 }
 
-.hero p {
+.hero p:not(.eyebrow) {
   max-width: 65ch;
   color: var(--muted);
   line-height: 1.6;
@@ -29,9 +29,10 @@
   margin: 0;
 }
 
+.hero .eyebrow,
 .eyebrow {
   margin-bottom: 0.45rem;
-  color: var(--gold);
+  color: var(--coral);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.1em;

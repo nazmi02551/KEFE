@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
 import styles from "./admin-studio-header.module.css";
 
@@ -17,15 +17,24 @@ const navItems = [
   { href: "/case-media", label: "Medya" },
 ] as const;
 
+function subscribeTheme(callback: () => void) {
+  window.addEventListener("storage", callback);
+  return () => window.removeEventListener("storage", callback);
+}
+
+function getThemeSnapshot(): "dark" | "light" {
+  if (typeof window === "undefined") return "dark";
+  const saved = localStorage.getItem("kefe-admin-theme");
+  return saved === "light" ? "light" : "dark";
+}
+
+function getThemeServerSnapshot(): "dark" | "light" {
+  return "dark";
+}
+
 export function AdminStudioHeader() {
   const pathname = usePathname();
-  const [theme, setTheme] = useState<"dark" | "light">(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("kefe-admin-theme") as "dark" | "light" | null;
-      if (saved === "light" || saved === "dark") return saved;
-    }
-    return "dark";
-  });
+  const theme = useSyncExternalStore(subscribeTheme, getThemeSnapshot, getThemeServerSnapshot);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -33,8 +42,8 @@ export function AdminStudioHeader() {
 
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
     localStorage.setItem("kefe-admin-theme", next);
+    window.dispatchEvent(new Event("storage"));
   };
 
   return (
@@ -71,6 +80,7 @@ export function AdminStudioHeader() {
             onClick={toggleTheme}
             className={styles.themeBtn}
             title="Temayı değiştir (Koyu / Açık)"
+            suppressHydrationWarning
           >
             {theme === "dark" ? "☀️ Açık Tema" : "🌙 Koyu Tema"}
           </button>

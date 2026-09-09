@@ -288,8 +288,8 @@ export function EditorialWorkspace() {
     <main className="appShell">
       <header className="hero">
         <div>
-          <p className="eyebrow">KEFE · Admin Studio</p>
-          <h1>Editoryal operasyon çalışma alanı</h1>
+          <p className="eyebrow">KEFE · Admin Studio · Operasyon</p>
+          <h1>Editoryal Operasyon Merkezi</h1>
           <p className="heroCopy">
             İnceleme, aday paket ve DRAFT projeksiyonu birbirinden ayrı insan
             komutlarıdır. Bu ekran hiçbir eylemi otomatik çalıştırmaz.

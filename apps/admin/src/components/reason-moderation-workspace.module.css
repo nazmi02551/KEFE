@@ -29,9 +29,10 @@
   margin: 0;
 }
 
+.hero .eyebrow,
 .eyebrow {
   margin: 0 0 0.45rem;
-  color: var(--gold);
+  color: var(--coral);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.1em;
