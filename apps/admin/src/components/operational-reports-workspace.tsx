@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 
 import styles from "@/src/components/operational-reports-workspace.module.css";
@@ -57,18 +56,19 @@ export function OperationalReportsWorkspace() {
     <main className={styles.shell}>
       <header className={styles.hero}>
         <div>
-          <p className={styles.eyebrow}>CAP-123 · READ-ONLY</p>
+          <p className={styles.eyebrow}>KEFE · Admin Studio · CAP-123 · READ-ONLY</p>
           <h1>Admin Operational Reports</h1>
           <p>
             Mevcut otoritelerden üretilen, aggregate-only operasyonel snapshot.
             Bu yüzey analytics deposu, izleme sistemi veya üretim SLO kanıtı değildir.
           </p>
         </div>
-        <nav aria-label="İlgili Admin çalışma alanları" className={styles.links}>
-          <Link href="/case-builder">Case Builder</Link>
-          <Link href="/publication-operations">Publication Operations</Link>
-          <Link href="/reason-moderation">Reason Moderation</Link>
-        </nav>
+        <aside className={styles.boundary}>
+          <strong>Aggregate-only privacy boundary</strong>
+          <span>
+            Şeffaf reason codes ve görünür eşikler ile operasyonel durumu izler; kişisel veri taşımaz.
+          </span>
+        </aside>
       </header>
 
       <section className={styles.connection} aria-labelledby="connection-heading">

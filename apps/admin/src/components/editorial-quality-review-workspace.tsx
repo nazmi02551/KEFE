@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import styles from "@/src/components/editorial-quality-review-workspace.module.css";
@@ -208,15 +207,10 @@ export function EditorialQualityReviewWorkspace() {
 
   return (
     <main className={styles.shell}>
-      <div className={styles.topbar}>
-        <Link href="/">← Editorial Operations</Link>
-        <Link href="/case-builder">Case Builder →</Link>
-      </div>
-
       <header className={styles.hero}>
         <div>
-          <p className="eyebrow">CAP-065 · Editorial Quality Gate</p>
-          <h1>İçeriği değiştir­meden bağımsız kalite incelemesi</h1>
+          <p className={styles.eyebrow}>KEFE · Admin Studio · CAP-065</p>
+          <h1>Editoryal Kalite İncelemesi</h1>
           <p>
             Bu çalışma alanı yalnız <strong>IN_REVIEW</strong> CaseVersion’ları okur.
             Onay, exact review-mode attestasyonu ve maker-checker ayrımıyla yapılır;

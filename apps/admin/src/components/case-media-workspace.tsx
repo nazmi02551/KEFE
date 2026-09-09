@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 
 import styles from "@/src/components/case-media-workspace.module.css";
@@ -145,18 +144,19 @@ export function CaseMediaWorkspace() {
     <main className={styles.shell}>
       <header className={styles.hero}>
         <div>
-          <p className={styles.eyebrow}>CAP-094 · PROVIDER-NEUTRAL</p>
+          <p className={styles.eyebrow}>KEFE · Admin Studio · CAP-034 · PROVIDER-NEUTRAL</p>
           <h1>Case Media Registry</h1>
           <p>
             Immutable metadata and explicit CaseVersion bindings. This workspace does not
             upload files, generate signed URLs or certify CDN availability.
           </p>
         </div>
-        <nav aria-label="Related Admin workspaces" className={styles.links}>
-          <Link href="/case-builder">Case Builder</Link>
-          <Link href="/publication-operations">Publication Operations</Link>
-          <Link href="/operational-reports">Operational Reports</Link>
-        </nav>
+        <aside className={styles.boundary}>
+          <strong>Fail-closed production boundary</strong>
+          <span>
+            Register immutable metadata. Autoplay is always false. Dosya yüklemesi veya signed URL üretilmez.
+          </span>
+        </aside>
       </header>
 
       <section className={styles.panel} aria-labelledby="connection-heading">

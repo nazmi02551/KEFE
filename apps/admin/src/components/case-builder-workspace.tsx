@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 
 import styles from "@/src/components/case-builder-workspace.module.css";
 import { AdminApiClient, AdminApiError } from "@/src/lib/admin-api";
@@ -209,15 +208,18 @@ export function CaseBuilderWorkspace({
       <header className={styles.hero}>
         <div>
           <p className={styles.eyebrow}>KEFE · Admin Studio · CAP-063</p>
-          <h1>Case Builder</h1>
+          <h1>Vaka Oluşturucu (Case Builder)</h1>
           <p>
             Mevcut Content Authoring DRAFT'ını düzenler. Kaydetme ve incelemeye
             gönderme birbirinden ayrı insan komutlarıdır.
           </p>
         </div>
-        <Link className={styles.backLink} href="/">
-          Editoryal operasyonlara dön
-        </Link>
+        <aside className={styles.boundary}>
+          <strong>DRAFT Sürüm Yetkisi</strong>
+          <span>
+            Yalnız DRAFT sürümleri düzenler. Kaydetme ve incelemeye gönderme ayrı komutlardır.
+          </span>
+        </aside>
       </header>
 
       <section className={styles.connection} aria-labelledby="builder-connection-title">

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import styles from "@/src/components/publication-operations-workspace.module.css";
@@ -233,24 +232,21 @@ export function PublicationOperationsWorkspace({
     <main className={styles.shell}>
       <header className={styles.hero}>
         <div>
-          <p className={styles.eyebrow}>KEFE · Admin Studio · CAP-065</p>
-          <h1>Publication Operations</h1>
+          <p className={styles.eyebrow}>KEFE · Admin Studio · CAP-066</p>
+          <h1>Yayın Operasyonları (Publication Operations)</h1>
           <p>
             Onaylı içerikleri yayın öncesi inceler, advisory preflight çalıştırır ve
             ayrı publisher aktörüyle açık publish veya rationale-bound withdraw
             komutu verir.
           </p>
         </div>
-        <Link className={styles.backLink} href="/">
-          Editoryal operasyonlara dön
-        </Link>
+        <aside className={styles.boundary} aria-label="Yetki ve kapsam sınırı">
+          <strong>İstekler otomatik başlamaz</strong>
+          <span>
+            Preflight rezervasyon değildir; publish güncel doğrulama ve Flow çözümlemesini tekrar çalıştırır.
+          </span>
+        </aside>
       </header>
-
-      <section className={styles.boundary} aria-label="Yetki ve kapsam sınırı">
-        <strong>İstekler otomatik başlamaz.</strong> Preflight rezervasyon değildir;
-        publish güncel doğrulama ve Flow çözümlemesini tekrar çalıştırır. Bu yüzey
-        içerik düzenlemez, onaylamaz veya Content Configuration yayımlamaz.
-      </section>
 
       <section className={styles.connection}>
         <div>

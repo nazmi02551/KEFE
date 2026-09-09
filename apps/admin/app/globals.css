@@ -160,17 +160,28 @@ p {
 }
 
 h1 {
-  max-width: 18ch;
-  margin-bottom: 0.85rem;
-  font-size: clamp(2rem, 5vw, 4.2rem);
-  letter-spacing: -0.05em;
-  line-height: 0.98;
+  margin-bottom: 0.65rem;
+  font-size: clamp(1.65rem, 2.8vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
   color: var(--text);
 }
 
 h2 {
   margin-bottom: 0.45rem;
-  font-size: clamp(1.35rem, 2.6vw, 2rem);
+  font-size: clamp(1.2rem, 2vw, 1.45rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+h3 {
+  margin-bottom: 0.4rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.4;
   color: var(--text);
 }
 
@@ -202,32 +213,32 @@ summary {
 }
 
 .appShell {
-  width: min(1180px, calc(100% - 2rem));
+  width: min(1280px, calc(100% - 2.5rem));
   margin: 0 auto;
-  padding: 1.5rem 0 5rem;
+  padding: 1.5rem 0 4rem;
 }
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(16rem, 24rem);
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
   gap: 1.5rem;
-  align-items: end;
-  padding: clamp(1.3rem, 4vw, 2.5rem) 0 1.5rem;
+  align-items: start;
+  padding: 1rem 0 1.5rem;
 }
 
 .heroCopy {
   max-width: 65ch;
   color: var(--muted);
-  line-height: 1.65;
-  font-size: 1.05rem;
+  line-height: 1.6;
+  font-size: 0.95rem;
 }
 
 .eyebrow {
-  margin-bottom: 0.55rem;
+  margin-bottom: 0.45rem;
   color: var(--gold);
-  font-size: 0.82rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -235,22 +246,29 @@ summary {
 .connectionPanel,
 .workspaceCard {
   border: 1.5px solid var(--line);
-  border-radius: 1.2rem;
+  border-radius: 0.85rem;
   background: var(--surface);
-  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.12);
 }
 
 .securityCard {
   display: grid;
-  gap: 0.55rem;
-  padding: 1.25rem;
-  border-left: 5px solid var(--gold);
+  gap: 0.4rem;
+  padding: 1rem 1.25rem;
+  border-left: 4px solid var(--gold);
   background: var(--surface);
+}
+
+.securityCard strong {
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 600;
 }
 
 .securityCard span {
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
   font-weight: 500;
 }
 

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import styles from "@/src/components/flow-composer-workspace.module.css";
@@ -261,25 +260,21 @@ export function FlowComposerWorkspace({
       <header className={styles.hero}>
         <div>
           <p className={styles.eyebrow}>KEFE · Admin Studio · CAP-064</p>
-          <h1>Flow Composer</h1>
+          <h1>Akış Bestecisi (Flow Composer)</h1>
           <p>
             Generic Flow şablonlarını mevcut Content Configuration DRAFT içinde
             düzenler. Kaydetme hiçbir configuration yayınlamaz ve consumer runtime’ı
             değiştirmez.
           </p>
         </div>
-        <Link className={styles.backLink} href="/">
-          Editoryal operasyonlara dön
-        </Link>
+        <aside className={styles.boundary} aria-label="Flow Composer sınırı">
+          <strong>DRAFT-only sınır</strong>
+          <span>
+            Primitive ve Capability katalogları salt okunur. Yalnız flow_templates
+            gönderilir; diğer configuration alanları sunucuda korunur.
+          </span>
+        </aside>
       </header>
-
-      <section className={styles.boundary} aria-label="Flow Composer sınırı">
-        <strong>DRAFT-only sınır</strong>
-        <span>
-          Primitive ve Capability katalogları salt okunur. Yalnız flow_templates
-          gönderilir; diğer configuration alanları sunucuda korunur.
-        </span>
-      </section>
 
       <section className={styles.connection} aria-labelledby="connection-title">
         <div>

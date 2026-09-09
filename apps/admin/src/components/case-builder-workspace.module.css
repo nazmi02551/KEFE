@@ -1,50 +1,75 @@
 .shell {
-  width: min(1280px, calc(100% - 2rem));
+  width: min(1280px, calc(100% - 2.5rem));
   margin: 0 auto;
-  padding: 2rem 0 5rem;
+  padding: 1.5rem 0 4rem;
 }
 
 .hero {
-  display: flex;
-  gap: 2rem;
-  align-items: flex-end;
-  justify-content: space-between;
-  padding: 1.5rem 0 2rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+  gap: 1.5rem;
+  align-items: start;
+  margin-bottom: 1.75rem;
 }
 
 .hero h1 {
-  margin-bottom: 0.7rem;
+  margin: 0 0 0.65rem;
+  font-size: clamp(1.65rem, 2.8vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--text);
 }
 
 .hero p {
-  max-width: 70ch;
+  max-width: 65ch;
   color: var(--muted);
   line-height: 1.6;
+  font-size: 0.95rem;
+  margin: 0;
 }
 
 .eyebrow {
   margin-bottom: 0.45rem;
   color: var(--gold);
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.11em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-.backLink {
-  display: inline-flex;
-  min-height: 2.75rem;
-  align-items: center;
+.boundary {
   border: 1px solid var(--line);
-  border-radius: 0.8rem;
-  padding: 0.7rem 1rem;
-  color: var(--cyan);
-  text-decoration: none;
+  border-left: 4px solid var(--gold);
+  border-radius: 0.85rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
-.backLink:hover,
-.backLink:focus-visible {
-  border-color: var(--cyan);
+.boundary strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.boundary span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.connection input:focus-visible,
+.card input:focus-visible,
+.card textarea:focus-visible,
+.actions button:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
 }
 
 .connection,

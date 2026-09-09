@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import styles from "@/src/components/reason-moderation-workspace.module.css";
@@ -203,17 +202,20 @@ export function ReasonModerationWorkspace({
     <main className={styles.shell}>
       <header className={styles.hero}>
         <div>
-          <p className={styles.eyebrow}>CAP-066 · Admin Studio</p>
-          <h1>Community Reason Moderation</h1>
+          <p className={styles.eyebrow}>KEFE · Admin Studio · CAP-066</p>
+          <h1>Topluluk Gerekçe Moderasyonu</h1>
           <p>
             PENDING ve yeni raporlanmış nedenleri privacy-safe aggregate bağlamla
             inceleyin. Hiçbir işlem otomatik başlamaz; her okuma ve karar ayrı bir
             komuttur.
           </p>
         </div>
-        <Link className={styles.backLink} href="/">
-          Admin Studio’ya dön
-        </Link>
+        <aside className={styles.boundary} aria-label="Moderasyon sınırı">
+          <strong>Gizlilik ve Denetim Sınırı</strong>
+          <span>
+            Bireysel kullanıcı kimliği anonimleştirilir. Her karar gerekçeli olarak denetim günlüğüne işlenir.
+          </span>
+        </aside>
       </header>
 
       <section className={styles.securityPanel} aria-labelledby="security-title">
