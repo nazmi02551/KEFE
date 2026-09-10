@@ -375,6 +375,8 @@ jobs:
           tests/test_public_provider_capture_postgres.py
           tests/test_session_renewal_postgres.py
           tests/test_source_brief_ingestion_http_postgres.py
+          tests/test_signal_postgres.py
+          tests/test_signal_dispatch_target_postgres.py
           > postgres-test-output.txt 2>&1
       - name: Upload PostgreSQL diagnostics on failure
         if: steps.postgres-tests.outcome == 'failure'
