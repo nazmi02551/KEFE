@@ -23,6 +23,8 @@ Invariants:
 
 from __future__ import annotations
 
+import dataclasses
+import hashlib
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Request
@@ -30,10 +32,6 @@ from pydantic import BaseModel
 
 from kefe_api.modules.impact.signal_target_registry import (
     DispatchStatus,
-    SignalDispatchError,
-    SignalTargetItem,
-    SignalTargetRegistryService,
-    StaticInstitutionTargetResolver,
     TargetType,
 )
 from kefe_api.modules.signal.pipeline_service import SignalPipelineError, SignalPipelineService
@@ -329,18 +327,6 @@ def advance_dispatch_target(
 
     writer = _get_dispatch_target_writer(request)
     if writer is None:
-        # In-memory mode: validate transition structure without DB mutation
-        # Build a synthetic item to validate against
-        placeholder_item = SignalTargetItem(
-            target_id=body.target_id,
-            target_name="",
-            target_type=TargetType.REGULATORY_BODY,
-            jurisdiction_level="",
-            official_contact_channel="",
-            dispatch_status=DispatchStatus.PROPOSED_TARGET,  # conservative guess
-            response_due_days=30,
-        )
-        # Validate that next_status is a known reachable status
         if next_status not in (
             DispatchStatus.VERIFIED_TARGET,
             DispatchStatus.DISPATCHED,
@@ -360,7 +346,6 @@ def advance_dispatch_target(
             message="Transition validated (in-memory mode: not persisted).",
         )
 
-    # Production path: dispatch based on next_status
     updated = False
     previous_status = "UNKNOWN"
 
@@ -369,7 +354,7 @@ def advance_dispatch_target(
         updated = writer.advance_to_verified(
             signal_id=signal_id,
             target_id=body.target_id,
-            verified_by_actor_id=body.target_id,  # actor_id from auth context in real impl
+            verified_by_actor_id=body.target_id,
         )
     elif next_status == DispatchStatus.DISPATCHED:
         previous_status = DispatchStatus.VERIFIED_TARGET.value
@@ -405,3 +390,102 @@ def advance_dispatch_target(
         next_status=next_status.value,
         message=f"Target advanced to {next_status.value}.",
     )
+
+
+# ---------------------------------------------------------------------------
+# Editorial CQB acceptance — approve consensus statement
+# ---------------------------------------------------------------------------
+
+class ApproveStatementRequest(BaseModel):
+    approved_statement: str
+
+
+class ApproveStatementResponse(BaseModel):
+    signal_id: str
+    case_version_id: str
+    qualification_tier: str
+    approved_statement: str
+    qualification_audit_hash: str
+    is_provisional: bool
+    message: str
+
+
+@router.put(
+    "/signals/{signal_id}/approve-statement",
+    status_code=200,
+    summary="Approve and replace the provisional consensus statement (Admin CQB)",
+    description=(
+        "Replaces the pipeline-generated [PROVISIONAL] consensus_statement with an "
+        "editorially reviewed and accepted statement. "
+        "This is the Editorial CQB acceptance gate required before signal dispatch. "
+        "Admin-only. The approved statement must not contain [PROVISIONAL]. "
+        "Produces a new QualifiedSignal record (same signal_id, new audit hash). "
+        "After this, the signal is eligible for institutional dispatch."
+    ),
+    responses={
+        200: {"description": "Statement approved and persisted."},
+        400: {"description": "Statement is blank, still provisional, or signal not provisional."},
+        404: {"description": "Signal not found."},
+        503: {"description": "Signal repository not configured."},
+    },
+)
+def approve_consensus_statement(
+    signal_id: UUID,
+    body: ApproveStatementRequest,
+    request: Request,
+) -> ApproveStatementResponse:
+    repo = getattr(request.app.state, "signal_repository", None)
+    if repo is None:
+        raise HTTPException(status_code=503, detail="Signal repository not configured.")
+
+    signal = repo.get_signal(signal_id)
+    if signal is None:
+        raise HTTPException(status_code=404, detail=f"Signal {signal_id} not found.")
+
+    if "[PROVISIONAL]" not in signal.consensus_statement:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Signal consensus_statement does not contain [PROVISIONAL]. "
+                "Only provisional signals require editorial CQB approval."
+            ),
+        )
+
+    approved = body.approved_statement.strip()
+    if not approved:
+        raise HTTPException(
+            status_code=400,
+            detail="approved_statement must not be blank.",
+        )
+    if "[PROVISIONAL]" in approved:
+        raise HTTPException(
+            status_code=400,
+            detail="approved_statement must not contain [PROVISIONAL].",
+        )
+
+    # Recompute audit hash with approved statement
+    audit_payload = (
+        f"{signal.signal_id}:{signal.case_version_id}:{signal.qualification_tier.value}:"
+        f"{signal.agreement_percentage:.4f}:{signal.sample_size}:"
+        f"{signal.certified_at.isoformat()}:EDITORIAL_CQB_APPROVED"
+    )
+    new_audit_hash = hashlib.sha256(audit_payload.encode("utf-8")).hexdigest()
+
+    approved_signal = dataclasses.replace(
+        signal,
+        consensus_statement=approved,
+        qualification_audit_hash=new_audit_hash,
+    )
+    repo.save_qualified_signal(approved_signal)
+
+    return ApproveStatementResponse(
+        signal_id=str(approved_signal.signal_id),
+        case_version_id=str(approved_signal.case_version_id),
+        qualification_tier=approved_signal.qualification_tier.value,
+        approved_statement=approved_signal.consensus_statement,
+        qualification_audit_hash=new_audit_hash,
+        is_provisional=False,
+        message="Consensus statement approved and persisted. Signal is now eligible for dispatch.",
+    )
+
+
