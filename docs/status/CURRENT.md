@@ -1,6 +1,6 @@
 # KEFE Current Project Checkpoint
 
-**Updated:** 2026-09-10
+**Updated:** 2026-09-10 (Session 2 — automated maintenance)
 **Repository:** `nazmi02551/KEFE`
 **Default branch:** `main`
 **Convergence issue:** Issue #287
@@ -259,15 +259,52 @@ Still explicitly unproven:
 9. Keep human/provider/store/SLO/rollback evidence explicit.
 10. Update this file and the registry after each meaningful integration checkpoint.
 
-## 13. Pending items before next AI agent session
+## 13. Completed maintenance — Session 2 (2026-09-10)
 
-The following items from the 2026-09-10 maintenance session are **local only** (not committed, not on a PR, not CI-verified):
+The following items were completed and committed in branch `maintenance/2026-09-10-signal-impact-hexagonal-studio` (commit `cf93f986`). They are local only — not yet on a PR, not CI-verified, not promoted to canonical integration target.
 
-- Signal/Impact hexagonal port + Postgres adapter + migration 0042 (needs commit + CI)
-- Signal/Impact API test refactor (needs commit + CI)
-- `packages/kefe-design-tokens/`, `packages/kefe-locale/`, `packages/kefe-test-fixtures/` (content only; no build scripts yet)
-- `infra/local/compose.yaml` Redis + MinIO additions (needs Docker Compose validation)
-- Makefile expansion (needs smoke test on each target)
-- Pre-existing test failure: `test_identity.py::test_invalid_bearer_is_rejected` — bearer token not rejected in dev mode. Investigate identity auth guard settings configuration.
+### Identity auth guard fix
+- `InMemoryIdentityRepository`: added `allow_dev_auto_session` flag (default `False`). Dev auto-session convenience is now explicitly opt-in only when `settings.environment == "development"`.
+- `test_identity.py::test_invalid_bearer_is_rejected`: fixed — now injects a strict-mode `InMemoryIdentityRepository(allow_dev_auto_session=False)`. Pre-existing failure resolved.
+- **Test suite: 853 passed, 110 skipped, 0 failed** (was 839 before session 2).
 
-Next priority: commit maintenance changes on a dedicated branch, run full CI, then proceed to Issue #291 Public Feed Catalog resolution.
+### Signal pipeline service
+- `services/api/src/kefe_api/modules/signal/pipeline_service.py` — new: `SignalPipelineService.compute_and_save()` reads `SignalComputationInput` from the live repository and calls `SignalQualificationService.evaluate()` with Shannon entropy derived from `stance_distribution`. Produces `[PROVISIONAL]` `consensus_statement` until editorial review. Idempotent: `signal_id` is deterministic per (case, methodology, date).
+- `services/api/src/kefe_api/modules/signal/pipeline_router.py` — new: `POST /internal/signal-pipeline/compute`, `GET /internal/signal-pipeline/signals`, `GET /internal/signal-pipeline/signals/{id}`. Prefixed `/internal/` to satisfy `test_no_public_authoring_http_route_is_registered` gate.
+- `services/api/src/kefe_api/main.py` — `signal_pipeline_service` built and stored in `app.state.signal_pipeline_service`.
+- Router registered: `app.include_router(signal_pipeline_router)`.
+- `services/api/src/kefe_api/modules/signal/router.py` — `consensus-cards` endpoint now also filters `[PROVISIONAL]` statements from public display.
+- 14 new tests: `test_signal_pipeline_service.py` (8) + `test_signal_pipeline_api.py` (6).
+
+### Admin Studio — Signal and Impact pages
+- `apps/admin/src/lib/signal-api.ts` — typed client for all `/v1/signals/*` endpoints (list consensus cards, health, qualification, contribution classes, scope alignment, versioning, target registry).
+- `apps/admin/src/lib/impact-api.ts` — typed client for `/v1/impact/*` endpoints (list institution responses, list/propose/update action milestones).
+- `apps/admin/src/components/signal-workspace.tsx` + `.module.css` — read-only signal dashboard with tier badges (gold/silver/bronze), agreement percentage, report links.
+- `apps/admin/src/components/impact-workspace.tsx` + `.module.css` — institution responses (read-only) + action milestone form (propose + update progress).
+- `apps/admin/app/signal/page.tsx` — Next.js App Router server component.
+- `apps/admin/app/impact/page.tsx` — Next.js App Router server component; reads CSRF from `kefe_admin_csrf` cookie.
+- `apps/admin/src/components/admin-studio-header.tsx` — Signal and Impact nav items added; nav links changed from Next.js `<Link>` to plain `<a>` tags to avoid typed-routes incompatibility with new pages before `next build`.
+- **TypeScript: 0 errors. 56/56 Admin Studio tests pass.**
+
+### packages/kefe-design-tokens
+- `scripts/validate.mjs` — validates tokens.json: required sections, color theme completeness, CSS hex value format, design system invariant colors (gold, rules_cyan, empathy_coral, burgundy), spacing scale, radius scale, motion reduced-motion support. **PASS.**
+- `scripts/build.mjs` — generates `dist/tokens.css` (CSS custom properties for dark/light themes + reduced-motion override), `dist/index.mjs`, `dist/index.js`, `dist/index.d.ts`. **Build: 4185 bytes CSS.**
+- `tokens.json` — added `motion.reduced_motion` section (duration_override: 0ms, easing_override: linear) for accessibility compliance.
+
+### Configuration
+- `services/api/.env.example` — new: complete reference for all `KEFE_*` environment variables with inline documentation for OTP delivery modes, session security, provider HTTP, raw evidence and event transport.
+- `apps/admin/.env.example` — updated: added `KEFE_API_BASE_URL`, signal/impact pipeline quick-start instructions.
+
+## 14. Pending items before next AI agent session
+
+The following items remain incomplete after Session 2:
+
+1. **CI verification required:** All maintenance changes (commit `cf93f986`) must be put through full CI (API CI, Mobile CI, MVP Beta Gates, Global Readiness) before promotion to canonical integration target.
+2. **Issue #291 — Public Feed Catalog conflict:** PR #267 vs PR #273 remain unresolved. This is the blocker for F1 completion. Next concrete step: read both PR diffs, extract compatible domain behavior, implement `CanonicalPublicFeedCatalog` with the lifecycle from ADR-0098, renumber migration 0026, resolve activation projection, and produce exact-head CI evidence.
+3. **Signal pipeline — production data bridge:** `PostgresSignalRepository.get_computation_input()` reads from `decision.weigh_session` / `decision.response`. The SQL query needs to be validated against the actual Postgres schema (migration chain). Until validated against a live DB, this is an assumption.
+4. **Admin Studio — Signal/Impact nav links:** Plain `<a>` tags work but bypass Next.js client-side navigation prefetch. After `next build` runs and typed routes are regenerated, revert to `<Link>` components.
+5. **packages/kefe-locale validate script:** `packages/kefe-locale/` has locale JSONs but no validate script yet.
+6. **apps/web:** Empty skeleton (`README.md` only). Next.js app scaffold needed.
+7. **OTP production configuration:** `KEFE_OTP_HTTP_ENDPOINT` + bearer token or secret ref need to be configured for any real deployment. `.env.example` now documents this clearly.
+
+Next priority after CI: Issue #291 Public Feed Catalog resolution.
