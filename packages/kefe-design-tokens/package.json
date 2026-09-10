@@ -1,0 +1,24 @@
+{
+  "name": "@kefe/design-tokens",
+  "version": "1.0.0",
+  "description": "KEFE canonical semantic design tokens — dark-first premium visual system.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./css": "./dist/tokens.css",
+    "./json": "./tokens.json"
+  },
+  "files": ["dist", "tokens.json"],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "validate": "node scripts/validate.mjs"
+  },
+  "keywords": ["kefe", "design-tokens", "design-system"],
+  "license": "UNLICENSED",
+  "private": true
+}
