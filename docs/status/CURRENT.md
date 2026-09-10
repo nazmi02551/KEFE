@@ -259,7 +259,7 @@ Still explicitly unproven:
 9. Keep human/provider/store/SLO/rollback evidence explicit.
 10. Update this file and the registry after each meaningful integration checkpoint.
 
-## 13. Completed maintenance — Session 2 (2026-09-10)
+## 13. Completed maintenance — Session 2 (2026-09-10, branch: maintenance/2026-09-10-signal-impact-hexagonal-studio)
 
 The following items were completed and committed in branch `maintenance/2026-09-10-signal-impact-hexagonal-studio` (commit `cf93f986`). They are local only — not yet on a PR, not CI-verified, not promoted to canonical integration target.
 
@@ -295,16 +295,32 @@ The following items were completed and committed in branch `maintenance/2026-09-
 - `services/api/.env.example` — new: complete reference for all `KEFE_*` environment variables with inline documentation for OTP delivery modes, session security, provider HTTP, raw evidence and event transport.
 - `apps/admin/.env.example` — updated: added `KEFE_API_BASE_URL`, signal/impact pipeline quick-start instructions.
 
+### Canonical Public Feed Catalog (Issue #291 — F1 blocker)
+
+ADR-0098 lifecycle implemented and all memory tests passing. Compatible behavior adopted from PR #267 and PR #273; duplicate migration identifiers and competing aggregates excluded per ADR-0098.
+
+**Changes (commit `ad50e5a9`):**
+- `modules/knowledge/canonical_public_feed_catalog.py` — `CanonicalPublicFeedCatalogService`: DRAFT → preflight → APPROVED → activation (ACTIVE/PAUSED/RETIRED). Full maker-checker, SOURCE_MANAGE/APPROVE/ACTIVATE step-up, configuration hash, immutable version identity. FIX: all `authorize()` calls now pass `now=self._clock()`.
+- `modules/knowledge/public_feed_runtime.py` — `CanonicalPublicFeedRuntimeProfileRegistry`: resolves adoption/capture profiles; restart rehydration skips RETIRED projections and does not create provider capabilities or schedule rows.
+- `infrastructure/canonical_public_feed_composition.py` — factory wiring catalog service + runtime profiles + Postgres repository.
+- `infrastructure/canonical_public_feed_runtime.py` — runtime profile resolution from persisted activation state.
+- `infrastructure/postgres_canonical_public_feed_catalog.py` — `PostgresPublicFeedCatalogRepository` with upsert-safe definition storage, activation projection persistence, audit append.
+- `modules/admin_security/canonical_public_feed_router.py` — Admin API under `/internal/admin/v1/public-feed-catalog/*` (already wired in `main.py` under API 0.24 gate).
+- Migration `20260804_0026_canonical_public_feed_catalog.py` — already present from earlier branch work. Down-revision: `20260803_0025`.
+- 10 tests adopted: all passing.
+
+**PR #267 and PR #273 status:** Compatible behavior extracted. Their duplicate `20260803_0026` migrations NOT adopted. They may now be formally marked superseded after CI.
+
 ## 14. Pending items before next AI agent session
 
 The following items remain incomplete after Session 2:
 
-1. **CI verification required:** All maintenance changes (commit `cf93f986`) must be put through full CI (API CI, Mobile CI, MVP Beta Gates, Global Readiness) before promotion to canonical integration target.
-2. **Issue #291 — Public Feed Catalog conflict:** PR #267 vs PR #273 remain unresolved. This is the blocker for F1 completion. Next concrete step: read both PR diffs, extract compatible domain behavior, implement `CanonicalPublicFeedCatalog` with the lifecycle from ADR-0098, renumber migration 0026, resolve activation projection, and produce exact-head CI evidence.
-3. **Signal pipeline — production data bridge:** `PostgresSignalRepository.get_computation_input()` reads from `decision.weigh_session` / `decision.response`. The SQL query needs to be validated against the actual Postgres schema (migration chain). Until validated against a live DB, this is an assumption.
-4. **Admin Studio — Signal/Impact nav links:** Plain `<a>` tags work but bypass Next.js client-side navigation prefetch. After `next build` runs and typed routes are regenerated, revert to `<Link>` components.
-5. **packages/kefe-locale validate script:** `packages/kefe-locale/` has locale JSONs but no validate script yet.
-6. **apps/web:** Empty skeleton (`README.md` only). Next.js app scaffold needed.
-7. **OTP production configuration:** `KEFE_OTP_HTTP_ENDPOINT` + bearer token or secret ref need to be configured for any real deployment. `.env.example` now documents this clearly.
+1. **CI verification required (HIGHEST PRIORITY):** All maintenance changes on branch `maintenance/2026-09-10-signal-impact-hexagonal-studio` (5 commits through `90ba5430`) must pass full CI (API CI, Mobile CI, MVP Beta Gates, Global Readiness) before promotion to canonical integration target. The branch must be rebased onto or merged with PR #290 (`140960ac`) as the parent.
+2. **Signal pipeline — Postgres data bridge validation:** `PostgresSignalRepository.get_computation_input()` reads from `decision.weigh_session` / `decision.response` using CORE_PRE_RESULT filter. SQL query must be validated against the actual Postgres schema in a live DB test (`test_signal_*_postgres.py`).
+3. **Admin Studio — Signal/Impact nav links:** Plain `<a>` tags in `admin-studio-header.tsx` bypass Next.js client-side routing. After `next build` completes with typed routes, revert to `<Link>` components.
+4. **apps/web:** Empty skeleton (`README.md` only). Next.js app scaffold needed.
+5. **OTP production provider:** `KEFE_OTP_HTTP_ENDPOINT` + bearer token must be configured for any real deployment. `.env.example` documents this clearly; no code changes required.
+6. **PR #267 / PR #273:** Formally close/supersede these PRs after canonical feed catalog CI passes. Their migration identifiers must not enter canonical line.
+7. **F3 completion:** Admin Studio Case Builder, Flow Composer, CQB/risk gates, moderation, media and operational reporting remain incomplete relative to full F3 vision.
 
-Next priority after CI: Issue #291 Public Feed Catalog resolution.
+Next priority for next agent session: Open a PR from `maintenance/2026-09-10-signal-impact-hexagonal-studio` → `main` (or rebase onto PR #290), run full CI, verify all gates, then supersede PR #267 and #273.
