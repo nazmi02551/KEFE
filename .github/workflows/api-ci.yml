@@ -351,6 +351,30 @@ jobs:
           tests/test_activation_journey_postgres.py
           tests/test_quality_journey_postgres.py
           tests/test_privacy_export_deletion_hardening_postgres.py
+          tests/test_canonical_public_feed_catalog_postgres.py
+          tests/test_canonical_public_feed_http_postgres.py
+          tests/test_admin_case_builder_http_postgres.py
+          tests/test_admin_case_media_http_postgres.py
+          tests/test_admin_community_reason_moderation_http_postgres.py
+          tests/test_admin_editorial_quality_review_http_postgres.py
+          tests/test_admin_feed_item_review_http_postgres.py
+          tests/test_admin_flow_composer_http_postgres.py
+          tests/test_admin_operational_reports_http_postgres.py
+          tests/test_admin_publication_operations_http_postgres.py
+          tests/test_admin_source_brief_review_http_postgres.py
+          tests/test_canonical_candidate_bundle_projection_http_postgres.py
+          tests/test_guest_merge_key_rotation_postgres.py
+          tests/test_guest_merge_replay_postgres.py
+          tests/test_mvp_completion_postgres.py
+          tests/test_otp_delivery_alert_candidates_postgres.py
+          tests/test_otp_delivery_health_postgres.py
+          tests/test_otp_provider_receipts_postgres.py
+          tests/test_otp_request_abuse_guard_postgres.py
+          tests/test_provider_admission_control_postgres.py
+          tests/test_provider_secret_execution_postgres.py
+          tests/test_public_provider_capture_postgres.py
+          tests/test_session_renewal_postgres.py
+          tests/test_source_brief_ingestion_http_postgres.py
           > postgres-test-output.txt 2>&1
       - name: Upload PostgreSQL diagnostics on failure
         if: steps.postgres-tests.outcome == 'failure'
