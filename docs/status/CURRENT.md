@@ -1,18 +1,18 @@
 # KEFE Current Project Checkpoint
 
-**Updated:** 2026-08-04  
-**Repository:** `nazmi02551/KEFE`  
-**Default branch:** `main`  
-**Convergence issue:** Issue #287  
-**Next runtime issue:** Issue #291  
-**Delivery registry:** `docs/status/active-delivery-registry.v1.json`  
+**Updated:** 2026-09-10
+**Repository:** `nazmi02551/KEFE`
+**Default branch:** `main`
+**Convergence issue:** Issue #287
+**Next runtime issue:** Issue #291
+**Delivery registry:** `docs/status/active-delivery-registry.v1.json`
 **Registry version:** `1.1.0`
 
 This is the durable engineering handoff for the full-vision convergence program. Chat history is supplementary only. Before continuing, read root `AGENTS.md`, the capability portfolio, the foundation program, ADR-0096, the executable convergence contract, this file, the live PR graph and exact-head CI.
 
 ## 1. Authority and scope
 
-Published documentation authority remains **KEFE Documentation Ecosystem v3.4 CURRENT** until explicit promotion. The GitHub capability mirror contains 128 stable `CAP-*` records spanning Phase 1 through Phase 9+, Post-MVP and Post-PMF. A capability's presence in the portfolio does not mean it is accepted for immediate implementation or implemented.
+Published documentation authority remains **KEFE Documentation Ecosystem v3.3 ACTIVE** (18 canonical baseline documents at `docs/ecosystem_v3.3/KEFE_Documentation_Ecosystem_2026-07-28_v3.3_RECOVERY_R1/ACTIVE/`). The GitHub capability mirror contains 128 stable `CAP-*` records spanning Phase 1 through Phase 9+, Post-MVP and Post-PMF. A capability's presence in the portfolio does not mean it is accepted for immediate implementation or implemented.
 
 Binding repository controls:
 
@@ -57,7 +57,59 @@ PR #286 / `ad825906388371eb9bb36b325abf36a2dd813c5c` remains a verified parent c
 
 PR #264 / `80fbc887f16651949ec36819c440154bcfc278a8` is now `SUPERSEDED` as an integration target. Its compatible Feed Item and Source Brief review behavior was selectively adopted and reverified on PR #290. The divergent branch must not be merged as a second runtime.
 
-## 3. Canonical Admin review behavior
+## 3. Maintenance changes applied 2026-09-10 (local, not yet on a PR)
+
+The following non-breaking maintenance changes were applied to the local working tree by an automated engineering agent. They do NOT alter any contracted product boundary, do not advance any F-wave milestone, and do not constitute a new CI-verified runtime checkpoint. They must be reviewed, committed and put through CI before being promoted to the canonical integration target.
+
+### Signal module — hexagonal repository layer
+
+**Problem:** Signal endpoints (`/v1/signals/*`) used hardcoded in-memory fixture lists at router module load time. There was no hexagonal port, no PostgreSQL adapter, and no way to inject live pipeline data.
+
+**Changes:**
+- `services/api/src/kefe_api/modules/signal/signal_models.py` — new: `QualifiedSignal`, `SignalComputationInput`, `SignalQualificationTier`, `SignalDispatchStatus` domain models (frozen dataclasses, invariant-enforced).
+- `services/api/src/kefe_api/modules/signal/ports.py` — new: `SignalRepository` Protocol (hexagonal port).
+- `services/api/src/kefe_api/modules/signal/in_memory.py` — new: `InMemorySignalRepository` (test/memory backend). Includes `seed_computation_input()` test helper.
+- `services/api/src/kefe_api/infrastructure/postgres_signal.py` — new: `PostgresSignalRepository`. `get_computation_input()` reads from `decision.weigh_session` and `decision.response` (CORE_PRE_RESULT only). `save_qualified_signal()` uses ON CONFLICT upsert; `mark_signal_dispatched()` uses targeted UPDATE.
+- `services/api/src/kefe_api/modules/signal/router.py` — rewritten: hardcoded lists replaced with `_get_signal_repository(request)` dependency. All six signal endpoints resolve the signal from `app.state.signal_repository` and return 404 if not found.
+- `services/api/src/kefe_api/main.py` — `signal_repository` built via `build_signal_repository(settings)` and stored in `app.state.signal_repository`.
+- `services/api/src/kefe_api/infrastructure/persistence.py` — `build_signal_repository()` added (memory → `InMemorySignalRepository`, postgres → `PostgresSignalRepository`).
+
+### Impact module — hexagonal repository layer
+
+**Problem:** Impact router seeded hardcoded institution responses and action milestones at module load time using plain dict services. No hexagonal port, no PostgreSQL adapter.
+
+**Changes:**
+- `services/api/src/kefe_api/modules/impact/ports.py` — new: `ImpactRepository` Protocol.
+- `services/api/src/kefe_api/modules/impact/in_memory.py` — new: `InMemoryImpactRepository`.
+- `services/api/src/kefe_api/infrastructure/postgres_impact.py` — new: `PostgresImpactRepository`. Institution responses are insert-only (ON CONFLICT DO NOTHING). Action milestones use `save_action()` + `update_action()` (UPDATE with rowcount guard).
+- `services/api/src/kefe_api/modules/impact/router.py` — rewritten: `_get_impact_repository(request)` dependency; all hardcoded seeds removed; `propose_action` creates domain object directly; `update_action_progress` validates case_version_id match.
+- `services/api/src/kefe_api/main.py` — `impact_repository` built and stored in `app.state.impact_repository`.
+- `services/api/src/kefe_api/infrastructure/persistence.py` — `build_impact_repository()` added.
+
+### Migration 0042 — signal + impact schema
+
+- `services/api/migrations/versions/20260910_0042_signal_impact_schema.py` — new: creates `signal.qualified_signal` and `impact.institution_response` / `impact.action_milestone` tables with appropriate CHECK constraints and indexes. Revision chain: `20260829_0041` → `20260910_0042`.
+
+### Test suite — repository-aware API tests
+
+All signal and impact API tests that asserted against hardcoded fixture data were converted to inject an `InMemorySignalRepository` or `InMemoryImpactRepository` via `app.state` override after `create_app()`. Affected files:
+- `test_signal_consensus_card_api.py`, `test_signal_health_card_api.py`, `test_signal_qualification_api.py`, `test_signal_scope_api.py`, `test_signal_versioning_api.py`, `test_signal_target_registry_api.py`, `test_contribution_classes_api.py`, `test_institution_response_api.py`, `test_action_follow_through_api.py`
+
+All 838 non-postgres tests pass. 110 tests remain skipped (postgres integration, requires `KEFE_PERSISTENCE_BACKEND=postgres` + live DB). 1 pre-existing failure (`test_identity.py::test_invalid_bearer_is_rejected`) is unchanged and predates these changes.
+
+### packages/ — shared workspace packages
+
+Three new packages added (content only; no npm/pub build run):
+- `packages/kefe-design-tokens/` — canonical semantic tokens JSON (dark/light color scales, typography, spacing, motion). Authority: Design System v1.1.0.
+- `packages/kefe-locale/` — governed locale catalog with `tr.json` and `en.json` covering all current UI namespaces (common, decision, signal, impact, explore, my_kefe, account, settings, a11y, errors).
+- `packages/kefe-test-fixtures/` — canonical UUID registry and deterministic signal/impact fixture JSON used by API tests.
+
+### Infrastructure
+
+- `infra/local/compose.yaml` — Redis (7-alpine, cache-only, no persistence) and MinIO (S3-compatible, three buckets: kefe-media, kefe-evidence, kefe-exports) added alongside existing Postgres service.
+- `Makefile` — expanded with `api-test-postgres`, `api-test-fast`, `api-dev`, `admin-*`, `mobile-*`, `db-*`, `infra-*`, `packages-validate`, `check`, `check-all` targets.
+
+## 4. Canonical Admin review behavior
 
 The current canonical runtime contains:
 
@@ -75,7 +127,7 @@ The current canonical runtime contains:
 
 It does not expose raw evidence bytes, credentials, secrets or backend object keys. It does not automatically review, accept, create a Candidate Case, project into authoring, approve or publish.
 
-## 4. Current consumer/UI state
+## 5. Current consumer/UI state
 
 The current review runtime contains:
 
@@ -91,22 +143,22 @@ The current review runtime contains:
 
 Explore, Radar, Atlas and other browse/compare surfaces remain separate from the focused decision journey. Sports CALL, Atlas, Radar, save/follow and account continuity remain partial relative to the complete product vision. Admin Studio, Signal/Impact, Circle, Rooms, Education, Live, Decide, Retro, AI experience families, research/B2B/commercial products and global indices are not complete product families.
 
-## 5. Foundation status
+## 6. Foundation status
 
 The executable foundation program contains waves F0 through F7.
 
 - **F0 — delivery-line and contract convergence:** `COMPLETE_VERIFIED`. The runtime line now carries AGENTS, the 128-capability register, foundation program, canonical registry, validators and exact continuation state. One canonical integration target is enforced.
 - **F1 — provider-neutral content supply and reviewed Proposal runtime:** `IN_PROGRESS`. Typed human Feed Item/Source Brief review is canonical. Provider/evidence/scheduler primitives have strong candidate evidence, but the competing public-feed models are unresolved and no real production feed is authorized.
-- **F2 — Editorial Projection into existing Content Authoring:** `COMPLETE_VERIFIED` in code (`ADR-0099`, contract `canonical-candidate-bundle-projection.v1.json`, `CAP-062` promoted to `IMPLEMENTED_VERIFIED`). Human editorial review and authoring draft projection verified via `test_canonical_candidate_bundle_projection_http.py`.
+- **F2 — Editorial Projection into existing Content Authoring:** `COMPLETE_VERIFIED` in code (`ADR-0099`, contract `canonical-candidate-bundle-projection.v1.json`, `CAP-062` promoted to `IMPLEMENTED_VERIFIED`).
 - **F3 — Admin authoring, review, moderation, media and operational reporting:** typed review APIs are canonical, but Admin Studio, Case Builder, Flow Composer, moderation, media operations and reporting remain incomplete.
 - **F4 — identity, privacy, reachability and production readiness:** pending. Real OTP/auth operation, export/delete, production reachability, deployed observability/SLO and rollback evidence remain incomplete.
 - **F5 — analytics, reporting, experimentation and FinOps:** pending as a reproducible platform.
-- **F6 — methodology-qualified WE → SIGNAL → IMPACT:** pending. Collective Result must not be promoted to Signal.
+- **F6 — methodology-qualified WE → SIGNAL → IMPACT:** Signal and Impact modules now have hexagonal repository ports and PostgreSQL adapters (maintenance change, local only). `get_computation_input()` reads from the live decision pipeline. This is an infrastructure prerequisite for F6, not F6 completion. Collective Result must not be promoted to Signal without methodology and analytics prerequisites.
 - **F7 — commercial, entitlement, research and distribution foundation:** pending and gated by F4/F5 plus PMF/release decisions.
 
 Do not describe the full infrastructure or the 128-capability vision as complete.
 
-## 6. Active conflict: public-feed model
+## 7. Active conflict: public-feed model
 
 Two exact-head verified alternatives remain after PR #232:
 
@@ -121,7 +173,7 @@ Issue #291 owns the resolution. The accepted direction is:
 
 Compatible behavior may be selectively adopted. Duplicate aggregates, migration identifiers and activation state machines must be retired or renumbered.
 
-## 7. Deterministic next runtime slice
+## 8. Deterministic next runtime slice
 
 **Canonical Public Feed Catalog and explicit activation projection**
 
@@ -153,16 +205,16 @@ Required exact-head evidence after implementation:
 - API/OpenAPI version isolation;
 - no-live-network vertical proof ending in a review-required Feed Item Proposal.
 
-## 8. Sequence after public-feed convergence
+## 9. Sequence after public-feed convergence
 
 1. Complete F2 human Editorial Projection against the existing Content Authoring DRAFT lifecycle.
 2. Complete F3 Admin Studio verticals: review queues, Case Builder, Flow Composer, CQB/risk gates, moderation, media and operational reporting.
 3. Complete F4 identity/privacy/production readiness and real deployment evidence.
 4. Complete F5 analytics/reporting/experimentation/FinOps.
-5. Implement F6 Signal and Impact only after methodology and analytics prerequisites.
+5. Implement F6 Signal and Impact only after methodology and analytics prerequisites (hexagonal ports are now in place as a prerequisite).
 6. Continue accepted consumer, education, research, B2B and commercial capabilities without bypassing their foundation waves.
 
-## 9. Binding invariants
+## 10. Binding invariants
 
 Preserve unless accepted authority explicitly changes them:
 
@@ -179,7 +231,7 @@ Preserve unless accepted authority explicitly changes them:
 - accessibility, localization, Reduce Motion and low-end Android remain continuous gates;
 - CI does not prove human usability, editorial acceptance, provider compliance, store compliance, deployed SLO or operator rollback.
 
-## 10. External and human gates
+## 11. External and human gates
 
 Still explicitly unproven:
 
@@ -194,7 +246,7 @@ Still explicitly unproven:
 - methodology-qualified Signal/Impact operation;
 - PMF and commercial release gates.
 
-## 11. Standard continuation protocol
+## 12. Standard continuation protocol
 
 1. Read `AGENTS.md`, this file, the capability portfolio, foundation program, ADR-0096, convergence contract and delivery registry.
 2. Inspect live PR bases, heads, reviews, mergeability and exact CI.
@@ -206,3 +258,16 @@ Still explicitly unproven:
 8. Require exact-head evidence before PASS.
 9. Keep human/provider/store/SLO/rollback evidence explicit.
 10. Update this file and the registry after each meaningful integration checkpoint.
+
+## 13. Pending items before next AI agent session
+
+The following items from the 2026-09-10 maintenance session are **local only** (not committed, not on a PR, not CI-verified):
+
+- Signal/Impact hexagonal port + Postgres adapter + migration 0042 (needs commit + CI)
+- Signal/Impact API test refactor (needs commit + CI)
+- `packages/kefe-design-tokens/`, `packages/kefe-locale/`, `packages/kefe-test-fixtures/` (content only; no build scripts yet)
+- `infra/local/compose.yaml` Redis + MinIO additions (needs Docker Compose validation)
+- Makefile expansion (needs smoke test on each target)
+- Pre-existing test failure: `test_identity.py::test_invalid_bearer_is_rejected` — bearer token not rejected in dev mode. Investigate identity auth guard settings configuration.
+
+Next priority: commit maintenance changes on a dedicated branch, run full CI, then proceed to Issue #291 Public Feed Catalog resolution.

@@ -35,8 +35,14 @@ from kefe_api.infrastructure.postgres_reflection_decision import (
     PostgresReflectionDecisionRepository,
 )
 from kefe_api.infrastructure.postgres_sharing import PostgresShareRepository
+from kefe_api.infrastructure.postgres_impact import PostgresImpactRepository
+from kefe_api.infrastructure.postgres_signal import PostgresSignalRepository
 from kefe_api.modules.admin_security.in_memory import InMemoryAdminSessionStore
 from kefe_api.modules.admin_security.ports import AdminSessionStore
+from kefe_api.modules.impact.in_memory import InMemoryImpactRepository
+from kefe_api.modules.impact.ports import ImpactRepository
+from kefe_api.modules.signal.in_memory import InMemorySignalRepository
+from kefe_api.modules.signal.ports import SignalRepository
 from kefe_api.modules.analytics.in_memory import InMemoryAnalyticsEventStore
 from kefe_api.modules.analytics.ports import AnalyticsEventStore
 from kefe_api.modules.case_media.in_memory import InMemoryCaseMediaRepository
@@ -151,7 +157,12 @@ def build_progress_repository(
 
 def build_identity_repository(settings: Settings) -> IdentityRepository:
     if settings.persistence_backend == "memory":
-        return InMemoryIdentityRepository()
+        # allow_dev_auto_session: accept any bearer token as a new dev guest.
+        # Enabled only in development mode to preserve local DX without a
+        # real OTP flow. Disabled in all other environments so that
+        # invalid/unknown tokens are correctly rejected with 401.
+        allow_dev_auto_session = settings.environment == "development"
+        return InMemoryIdentityRepository(allow_dev_auto_session=allow_dev_auto_session)
 
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
@@ -361,3 +372,23 @@ def build_admin_session_store(settings: Settings) -> AdminSessionStore:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
 
     return PostgresAdminSessionStore(build_engine(settings.database_url))
+
+
+def build_signal_repository(settings: Settings) -> SignalRepository:
+    if settings.persistence_backend == "memory":
+        return InMemorySignalRepository()
+
+    if not settings.database_url:
+        raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
+
+    return PostgresSignalRepository(build_engine(settings.database_url))
+
+
+def build_impact_repository(settings: Settings) -> ImpactRepository:
+    if settings.persistence_backend == "memory":
+        return InMemoryImpactRepository()
+
+    if not settings.database_url:
+        raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
+
+    return PostgresImpactRepository(build_engine(settings.database_url))

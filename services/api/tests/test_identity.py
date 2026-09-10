@@ -24,7 +24,21 @@ def test_guest_credential_allows_authenticated_write() -> None:
 
 
 def test_invalid_bearer_is_rejected() -> None:
-    client = TestClient(create_app())
+    from kefe_api.modules.identity.in_memory import InMemoryIdentityRepository
+    from kefe_api.modules.identity.service import IdentityService
+
+    # Override the identity repository with dev_auto_session=False to ensure
+    # unknown bearer tokens are rejected with 401 (not auto-admitted as dev guests).
+    app = create_app()
+    strict_repo = InMemoryIdentityRepository(allow_dev_auto_session=False)
+    settings = get_settings()
+    app.state.identity_repository = strict_repo
+    app.state.identity_service = IdentityService(
+        repository=strict_repo,
+        guest_token_ttl_days=settings.guest_token_ttl_days,
+    )
+
+    client = TestClient(app)
     response = client.post(
         f"/v1/cases/{DEMO_CASE_ID}/weigh-sessions",
         headers={"Authorization": "Bearer invalid-token"},

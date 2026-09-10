@@ -1,3 +1,21 @@
+# KEFE local development stack
+#
+# Services:
+#   postgres  — primary relational store (all domain data)
+#   redis     — session cache, OTP rate-limit, outbox lock coordination
+#   minio     — S3-compatible object storage (case media, evidence assets, exports)
+#
+# Usage:
+#   docker compose up -d          — start all services
+#   docker compose down           — stop (data preserved in volumes)
+#   docker compose down -v        — stop and delete all volumes (full reset)
+#
+# Connection strings (local dev defaults):
+#   Postgres : postgresql://kefe:kefe@localhost:5432/kefe
+#   Redis    : redis://localhost:6379/0
+#   MinIO    : http://localhost:9000  (access: kefedev / kefedev123)
+#   MinIO UI : http://localhost:9001
+
 services:
   postgres:
     image: postgres:17-alpine
@@ -14,6 +32,65 @@ services:
       retries: 20
     volumes:
       - kefe_postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: >
+      redis-server
+      --maxmemory 128mb
+      --maxmemory-policy allkeys-lru
+      --save ""
+      --appendonly no
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+    # No persistent volume for Redis — it is a cache/lock layer.
+    # If Redis data must survive restarts, add a named volume here.
+
+  minio:
+    image: minio/minio:RELEASE.2025-01-20T14-49-07Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: kefedev
+      MINIO_ROOT_PASSWORD: kefedev123
+      MINIO_DEFAULT_BUCKETS: kefe-media,kefe-evidence,kefe-exports
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # MinIO Console UI
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - kefe_minio_data:/data
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Bucket initializer — runs once on first start to create required buckets
+  # ---------------------------------------------------------------------------
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 kefedev kefedev123;
+      mc mb --ignore-existing local/kefe-media;
+      mc mb --ignore-existing local/kefe-evidence;
+      mc mb --ignore-existing local/kefe-exports;
+      mc anonymous set download local/kefe-media;
+      echo 'MinIO buckets initialized.';
+      "
+    restart: "no"
 
 volumes:
   kefe_postgres_data:
+  kefe_minio_data:

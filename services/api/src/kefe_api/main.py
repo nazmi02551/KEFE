@@ -18,11 +18,13 @@ from kefe_api.infrastructure.persistence import (
     build_context_repository,
     build_decision_repository,
     build_identity_repository,
+    build_impact_repository,
     build_otp_delivery_health_repository,
     build_otp_provider_receipt_repository,
     build_privacy_repository,
     build_progress_repository,
     build_share_repository,
+    build_signal_repository,
 )
 from kefe_api.infrastructure.raw_evidence_runtime import (
     build_raw_source_evidence_store,
@@ -146,6 +148,8 @@ from kefe_api.modules.progress.router import router as progress_router
 from kefe_api.modules.progress.service import ProgressService
 from kefe_api.modules.sharing.router import router as sharing_router
 from kefe_api.modules.sharing.service import ShareService
+from kefe_api.modules.signal.pipeline_router import router as signal_pipeline_router
+from kefe_api.modules.signal.pipeline_service import SignalPipelineService
 from kefe_api.modules.signal.router import signal_router
 
 
@@ -214,6 +218,8 @@ def create_app() -> FastAPI:
     content_configuration_repository = build_content_configuration_repository(settings)
     admin_session_store = build_admin_session_store(settings)
     raw_source_evidence_store = build_raw_source_evidence_store(settings)
+    signal_repository = build_signal_repository(settings)
+    impact_repository = build_impact_repository(settings)
 
     admin_security_service = AdminSecurityService(
         session_resolver=admin_session_store,
@@ -384,6 +390,9 @@ def create_app() -> FastAPI:
     app.state.secured_content_configuration_service = secured_content_configuration_service
     app.state.admin_operational_reports_service = admin_operational_reports_service
     app.state.secured_admin_operational_reports_service = secured_admin_operational_reports_service
+    app.state.signal_repository = signal_repository
+    app.state.impact_repository = impact_repository
+    app.state.signal_pipeline_service = SignalPipelineService(repository=signal_repository)
     app.state.guest_admission_guard = GuestAdmissionGuard(
         limiter=InMemoryGuestIssueRateLimiter(),
         integrity_verifier=UnconfiguredDeviceIntegrityVerifier(),
@@ -407,6 +416,7 @@ def create_app() -> FastAPI:
     app.include_router(sharing_router)
     app.include_router(privacy_router)
     app.include_router(signal_router)
+    app.include_router(signal_pipeline_router)
     app.include_router(impact_router)
     app.include_router(discovery_router)
     app.include_router(decision_lineage_router)

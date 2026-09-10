@@ -1,0 +1,24 @@
+{
+  "name": "@kefe/locale",
+  "version": "1.0.0",
+  "description": "KEFE canonical locale catalog — Turkish (tr) and English (en) governed strings.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./tr": "./catalog/tr.json",
+    "./en": "./catalog/en.json",
+    "./keys": "./catalog/keys.json"
+  },
+  "files": ["dist", "catalog"],
+  "scripts": {
+    "validate": "node scripts/validate.mjs"
+  },
+  "keywords": ["kefe", "locale", "i18n", "turkish", "english"],
+  "license": "UNLICENSED",
+  "private": true
+}

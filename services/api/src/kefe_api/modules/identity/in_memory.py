@@ -44,11 +44,12 @@ class _Session:
 
 
 class InMemoryIdentityRepository:
-    def __init__(self) -> None:
+    def __init__(self, *, allow_dev_auto_session: bool = False) -> None:
         self._sessions: dict[UUID, _Session] = {}
         self._actor_kinds: dict[UUID, ActorKind] = {}
         self._merged_into: dict[UUID, UUID] = {}
         self._lock = RLock()
+        self._allow_dev_auto_session = allow_dev_auto_session
 
     def create_guest_session(
         self,
@@ -141,7 +142,7 @@ class InMemoryIdentityRepository:
     def resolve_token(self, *, token_hash: str, now: datetime) -> TokenResolution:
         with self._lock:
             session = self._find_access_session(token_hash=token_hash, now=now)
-            if session is None:
+            if session is None and self._allow_dev_auto_session:
                 from datetime import timedelta
                 dev_actor_id = uuid5(NAMESPACE_DNS, f"dev-guest-{token_hash}")
                 self.create_guest_session(

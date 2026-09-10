@@ -15,6 +15,8 @@ const navItems = [
   { href: "/reason-moderation", label: "Moderasyon" },
   { href: "/operational-reports", label: "Raporlar" },
   { href: "/case-media", label: "Medya" },
+  { href: "/signal", label: "Sinyal" },
+  { href: "/impact", label: "Etki" },
 ] as const;
 
 function subscribeTheme(callback: () => void) {
@@ -63,13 +65,13 @@ export function AdminStudioHeader() {
                 ? pathname === "/"
                 : pathname.startsWith(item.href);
             return (
-              <Link
+              <a
                 key={item.href}
                 href={item.href}
                 className={`${styles.navLink} ${isActive ? styles.navLinkActive : ""}`}
               >
                 {item.label}
-              </Link>
+              </a>
             );
           })}
         </nav>

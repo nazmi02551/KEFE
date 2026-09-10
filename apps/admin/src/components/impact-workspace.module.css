@@ -1,0 +1,352 @@
+/* Impact Workspace — Admin Studio
+ * Dark-first premium KEFE design system.
+ */
+
+.workspace {
+  padding: 24px;
+  min-height: 100%;
+}
+
+.workspaceHeader {
+  margin-bottom: 32px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-dark-foreground, #f0efe8);
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--color-dark-muted, #8a8a9a);
+  line-height: 1.5;
+  max-width: 640px;
+  margin: 0;
+}
+
+.loadingText,
+.errorText {
+  font-size: 14px;
+  color: var(--color-dark-muted, #8a8a9a);
+  padding: 32px 0;
+}
+
+.errorText {
+  color: var(--color-dark-critical, #e05252);
+}
+
+/* Sections */
+.section {
+  margin-bottom: 40px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-dark-foreground, #f0efe8);
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sectionCount {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-dark-muted, #8a8a9a);
+}
+
+.emptyText {
+  font-size: 14px;
+  color: var(--color-dark-muted, #8a8a9a);
+  padding: 16px 0;
+}
+
+/* Institution Responses */
+.responseList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.responseCard {
+  background: var(--color-dark-surface, #12121a);
+  border: 1px solid rgba(240, 239, 232, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.responseHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.institutionName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-dark-foreground, #f0efe8);
+}
+
+.responseTypeBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: rgba(201, 168, 76, 0.15);
+  color: #c9a84c;
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.authorityRole {
+  font-size: 12px;
+  color: var(--color-dark-muted, #8a8a9a);
+  margin: 0 0 8px;
+}
+
+.statement {
+  font-size: 13px;
+  color: var(--color-dark-foreground, #f0efe8);
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+
+.publishedAt {
+  font-size: 11px;
+  color: var(--color-dark-muted, #8a8a9a);
+}
+
+/* Propose Form */
+.proposeForm {
+  background: var(--color-dark-surface, #12121a);
+  border: 1px solid rgba(240, 239, 232, 0.08);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-dark-foreground, #f0efe8);
+}
+
+.required {
+  color: var(--color-dark-critical, #e05252);
+}
+
+.input,
+.textarea {
+  background: var(--color-dark-sunken, #07070c);
+  border: 1px solid rgba(240, 239, 232, 0.12);
+  border-radius: 8px;
+  color: var(--color-dark-foreground, #f0efe8);
+  font-size: 14px;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 150ms ease;
+  font-family: inherit;
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: rgba(201, 168, 76, 0.5);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.formError {
+  font-size: 13px;
+  color: var(--color-dark-critical, #e05252);
+  margin: 0;
+}
+
+.submitButton {
+  align-self: flex-start;
+  background: rgba(201, 168, 76, 0.15);
+  border: 1px solid rgba(201, 168, 76, 0.4);
+  border-radius: 8px;
+  color: #c9a84c;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background 150ms ease, opacity 150ms ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: rgba(201, 168, 76, 0.25);
+}
+
+.submitButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Action Milestones */
+.actionList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.actionCard {
+  background: var(--color-dark-surface, #12121a);
+  border: 1px solid rgba(240, 239, 232, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.actionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.actionTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-dark-foreground, #f0efe8);
+  margin: 0;
+  line-height: 1.35;
+  flex: 1;
+}
+
+.statusBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.statusProposed {
+  background: rgba(107, 107, 122, 0.15);
+  color: #8a8a9a;
+  border: 1px solid rgba(107, 107, 122, 0.25);
+}
+
+.statusInProgress {
+  background: rgba(74, 191, 207, 0.12);
+  color: #4abfcf;
+  border: 1px solid rgba(74, 191, 207, 0.25);
+}
+
+.statusComplete {
+  background: rgba(76, 175, 118, 0.12);
+  color: #4caf76;
+  border: 1px solid rgba(76, 175, 118, 0.25);
+}
+
+.statusStalled {
+  background: rgba(232, 162, 58, 0.12);
+  color: #e8a23a;
+  border: 1px solid rgba(232, 162, 58, 0.25);
+}
+
+.actionDesc {
+  font-size: 13px;
+  color: var(--color-dark-muted, #8a8a9a);
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.progressBar {
+  flex: 1;
+  height: 6px;
+  background: rgba(240, 239, 232, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: #c9a84c;
+  border-radius: 3px;
+  transition: width 300ms ease;
+}
+
+.progressLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: #c9a84c;
+  min-width: 36px;
+  text-align: right;
+}
+
+.evidenceLink {
+  display: inline-block;
+  font-size: 12px;
+  color: var(--color-dark-rules-cyan, #4abfcf);
+  text-decoration: none;
+  margin-bottom: 12px;
+}
+
+.evidenceLink:hover {
+  text-decoration: underline;
+}
+
+.actionActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.progressButton,
+.completeButton {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+  border: 1px solid;
+}
+
+.progressButton {
+  background: rgba(74, 191, 207, 0.1);
+  color: #4abfcf;
+  border-color: rgba(74, 191, 207, 0.25);
+}
+
+.completeButton {
+  background: rgba(76, 175, 118, 0.1);
+  color: #4caf76;
+  border-color: rgba(76, 175, 118, 0.25);
+}
+
+.progressButton:hover,
+.completeButton:hover {
+  opacity: 0.8;
+}

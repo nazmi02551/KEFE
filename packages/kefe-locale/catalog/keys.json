@@ -1,0 +1,116 @@
+{
+  "$schema": "https://kefe.org/schemas/locale-keys/v1.0.0",
+  "$metadata": {
+    "version": "1.0.0",
+    "supported_locales": ["tr", "en"],
+    "default_fallback_locale": "en",
+    "authority": "docs/ecosystem_v3.3/ACTIVE — governed strings only. Raw backend/domain values are never translated at this layer.",
+    "note": "All keys must exist in both tr.json and en.json. Missing keys fall back to 'en'. Display localization must NOT mutate raw domain values."
+  },
+  "namespaces": {
+    "common": {
+      "keys": [
+        "common.continue", "common.cancel", "common.back", "common.next",
+        "common.save", "common.submit", "common.loading", "common.error",
+        "common.retry", "common.close", "common.confirm", "common.or",
+        "common.and", "common.yes", "common.no", "common.required",
+        "common.optional", "common.search", "common.filter", "common.sort"
+      ]
+    },
+    "onboarding": {
+      "keys": [
+        "onboarding.welcome_title", "onboarding.welcome_subtitle",
+        "onboarding.get_started", "onboarding.sign_in",
+        "onboarding.guest_continue", "onboarding.privacy_notice"
+      ]
+    },
+    "decision": {
+      "keys": [
+        "decision.weigh_in", "decision.your_position", "decision.commit",
+        "decision.committed", "decision.reveal", "decision.reveal_result",
+        "decision.collective_result", "decision.perspectives",
+        "decision.private_reason", "decision.private_reason_hint",
+        "decision.confidence_label", "decision.confidence_hint",
+        "decision.commit_first_notice",
+        "decision.blind_first_notice",
+        "decision.already_committed",
+        "decision.session_expired"
+      ]
+    },
+    "signal": {
+      "keys": [
+        "signal.title", "signal.consensus_cards", "signal.qualification_tier",
+        "signal.sample_size", "signal.agreement_percentage",
+        "signal.certified_at", "signal.gold_standard", "signal.silver_validated",
+        "signal.bronze_observed", "signal.unqualified",
+        "signal.health_report", "signal.qualification_report",
+        "signal.scope_alignment", "signal.versioning",
+        "signal.contribution_classes", "signal.targets",
+        "signal.empty_state"
+      ]
+    },
+    "impact": {
+      "keys": [
+        "impact.title", "impact.institution_responses",
+        "impact.action_milestones", "impact.response_type_acknowledge",
+        "impact.response_type_commitment", "impact.response_type_policy_change",
+        "impact.response_type_factual_clarification",
+        "impact.response_type_decline_with_reason",
+        "impact.action_status_proposed", "impact.action_status_in_progress",
+        "impact.action_status_verified_complete", "impact.action_status_stalled",
+        "impact.progress_label", "impact.evidence_label",
+        "impact.verified_badge", "impact.empty_state"
+      ]
+    },
+    "explore": {
+      "keys": [
+        "explore.title", "explore.featured", "explore.all_cases",
+        "explore.search_placeholder", "explore.no_results",
+        "explore.load_more", "explore.case_card_weigh_in",
+        "explore.case_card_committed", "explore.case_card_see_result"
+      ]
+    },
+    "my_kefe": {
+      "keys": [
+        "my_kefe.title", "my_kefe.report_title",
+        "my_kefe.observed_only_notice",
+        "my_kefe.no_personality_inference",
+        "my_kefe.no_ideology_inference",
+        "my_kefe.descriptive_only_notice",
+        "my_kefe.empty_state"
+      ]
+    },
+    "account": {
+      "keys": [
+        "account.sign_in_title", "account.email_label",
+        "account.otp_sent", "account.otp_label", "account.otp_hint",
+        "account.otp_resend", "account.otp_expired",
+        "account.sign_in_success", "account.sign_out",
+        "account.privacy_export", "account.delete_account"
+      ]
+    },
+    "settings": {
+      "keys": [
+        "settings.title", "settings.language", "settings.theme",
+        "settings.theme_dark", "settings.theme_light", "settings.theme_system",
+        "settings.reduce_motion", "settings.notifications",
+        "settings.about", "settings.version"
+      ]
+    },
+    "accessibility": {
+      "keys": [
+        "a11y.skip_to_content", "a11y.menu_open", "a11y.menu_close",
+        "a11y.loading", "a11y.error", "a11y.required_field",
+        "a11y.image_alt_case_cover"
+      ]
+    },
+    "errors": {
+      "keys": [
+        "error.network", "error.server", "error.not_found",
+        "error.unauthorized", "error.forbidden",
+        "error.validation", "error.unknown",
+        "error.session_expired", "error.rate_limited"
+      ]
+    }
+  }
+}

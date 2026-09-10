@@ -2,71 +2,37 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from typing import Annotated
-from uuid import UUID
+from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
 
 from kefe_api.modules.impact.action_models import ActionMilestone, ActionStatus
-from kefe_api.modules.impact.action_service import ActionFollowThroughService
 from kefe_api.modules.impact.models import (
     AuthorityVerificationStatus,
     InstitutionResponse,
     InstitutionResponseType,
 )
-from kefe_api.modules.impact.service import InstitutionResponseService
+from kefe_api.modules.impact.ports import ImpactRepository
 
 impact_router = APIRouter(prefix="/v1/impact", tags=["Impact"])
 
-_DEFAULT_SERVICE = InstitutionResponseService()
-_DEFAULT_ACTION_SERVICE = ActionFollowThroughService()
 
-# Seed default verified institution responses for preview/production cases
-_DEFAULT_SERVICE.publish_response(
-    case_version_id=UUID("22222222-2222-4222-8222-222222222222"),
-    institution_name="Ulaştırma ve Altyapı Denetleme Kurulu",
-    authority_role="Halkla İlişkiler ve Yolcu Hakları Dairesi",
-    response_type=InstitutionResponseType.POLICY_CHANGE,
-    statement="Topluluk müzakereleri ve yüksek uzlaşı verileri dikkate alınarak öncelikli yolcu kontenjanı genelgeye eklenmiştir.",
-    verification_status=AuthorityVerificationStatus.VERIFIED,
-)
-_DEFAULT_SERVICE.publish_response(
-    case_version_id=UUID("22222222-2222-4222-8222-222222222223"),
-    institution_name="Kişisel Verileri Koruma Kurumu (KVKK)",
-    authority_role="Veri Güvenliği ve Yapay Zekâ İzleme Masası",
-    response_type=InstitutionResponseType.COMMITMENT,
-    statement="Model eğitimi amaçlı veri toplama süreçlerine ilişkin şeffaflık kılavuzu taslağı kamuoyu görüşüne açılmıştır.",
-    verification_status=AuthorityVerificationStatus.VERIFIED,
-)
+# ---------------------------------------------------------------------------
+# Dependency — injects ImpactRepository from app.state
+# ---------------------------------------------------------------------------
 
-# Seed default action follow-throughs
-_DEFAULT_ACTION_SERVICE.propose_action(
-    case_version_id=UUID("22222222-2222-4222-8222-222222222222"),
-    title="Toplu Taşıma Gece Seferleri ve Öncelikli Koltuk Yönetmeliği",
-    description="Belediye meclisine resmi dilekçe verilmesi ve tarife komisyonu toplantısının izlenmesi.",
-    target_completion_date=datetime(2026, 10, 15, tzinfo=UTC),
-)
-_action_list = _DEFAULT_ACTION_SERVICE.list_actions(
-    UUID("22222222-2222-4222-8222-222222222222")
-)
-if _action_list:
-    _DEFAULT_ACTION_SERVICE.update_progress(
-        case_version_id=UUID("22222222-2222-4222-8222-222222222222"),
-        action_id=_action_list[0].action_id,
-        progress_percentage=65,
-        status=ActionStatus.IN_PROGRESS,
-        evidence_summary="Dilekçe kabul edildi, belediye meclisi gündemine alındı.",
-        evidence_url="https://belediye.gov.tr/kararlar/2026-44",
-    )
+def _get_impact_repository(request: Request) -> ImpactRepository:
+    repo: ImpactRepository = request.app.state.impact_repository
+    return repo
 
 
-def get_institution_response_service() -> InstitutionResponseService:
-    return _DEFAULT_SERVICE
+ImpactRepoDep = Annotated[ImpactRepository, Depends(_get_impact_repository)]
 
 
-def get_action_service() -> ActionFollowThroughService:
-    return _DEFAULT_ACTION_SERVICE
-
+# ---------------------------------------------------------------------------
+# Response / request models
+# ---------------------------------------------------------------------------
 
 class InstitutionResponseOut(BaseModel):
     model_config = ConfigDict(frozen=True)
@@ -118,70 +84,82 @@ class UpdateProgressIn(BaseModel):
     evidence_url: str | None = None
 
 
+# ---------------------------------------------------------------------------
+# Mapping helpers
+# ---------------------------------------------------------------------------
+
+def _response_out(r: InstitutionResponse) -> InstitutionResponseOut:
+    return InstitutionResponseOut(
+        response_id=r.response_id,
+        case_version_id=r.case_version_id,
+        institution_name=r.institution_name,
+        authority_role=r.authority_role,
+        verification_status=r.verification_status.value,
+        response_type=r.response_type.value,
+        statement=r.statement,
+        published_at=r.published_at,
+        milestone_date=r.milestone_date,
+    )
+
+
+def _action_out(a: ActionMilestone) -> ActionMilestoneOut:
+    return ActionMilestoneOut(
+        action_id=a.action_id,
+        case_version_id=a.case_version_id,
+        title=a.title,
+        description=a.description,
+        status=a.status.value,
+        progress_percentage=a.progress_percentage,
+        created_at=a.created_at,
+        institution_response_id=a.institution_response_id,
+        target_completion_date=a.target_completion_date,
+        evidence_summary=a.evidence_summary,
+        evidence_url=a.evidence_url,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Institution Response endpoints
+# ---------------------------------------------------------------------------
+
 @impact_router.get(
     "/institution-responses",
     response_model=list[InstitutionResponseOut],
 )
 def list_institution_responses(
+    repo: ImpactRepoDep,
     case_version_id: Annotated[UUID | None, Query()] = None,
-    service: InstitutionResponseService = Depends(
-        get_institution_response_service
-    ),
+    limit: Annotated[int, Query(ge=1, le=100)] = 50,
+    offset: Annotated[int, Query(ge=0)] = 0,
 ) -> list[InstitutionResponseOut]:
-    if case_version_id:
-        responses = service.list_verified_responses(case_version_id)
-    else:
-        responses = []
-        for case_id in service._responses_by_case:
-            responses.extend(service.list_verified_responses(case_id))
+    """List verified institution responses, optionally filtered by case."""
+    if case_version_id is not None:
+        responses = repo.list_verified_responses(case_version_id)
+        return [_response_out(r) for r in responses[offset : offset + limit]]
+    responses = repo.list_all_responses(limit=limit, offset=offset)
+    return [_response_out(r) for r in responses]
 
-    return [
-        InstitutionResponseOut(
-            response_id=r.response_id,
-            case_version_id=r.case_version_id,
-            institution_name=r.institution_name,
-            authority_role=r.authority_role,
-            verification_status=r.verification_status.value,
-            response_type=r.response_type.value,
-            statement=r.statement,
-            published_at=r.published_at,
-            milestone_date=r.milestone_date,
-        )
-        for r in responses
-    ]
 
+# ---------------------------------------------------------------------------
+# Action Milestone endpoints
+# ---------------------------------------------------------------------------
 
 @impact_router.get(
     "/actions",
     response_model=list[ActionMilestoneOut],
 )
 def list_actions(
+    repo: ImpactRepoDep,
     case_version_id: Annotated[UUID | None, Query()] = None,
-    service: ActionFollowThroughService = Depends(get_action_service),
+    limit: Annotated[int, Query(ge=1, le=100)] = 50,
+    offset: Annotated[int, Query(ge=0)] = 0,
 ) -> list[ActionMilestoneOut]:
-    if case_version_id:
-        actions = service.list_actions(case_version_id)
+    """List action milestones, optionally filtered by case."""
+    if case_version_id is not None:
+        actions = repo.list_actions(case_version_id, limit=limit, offset=offset)
     else:
-        actions = []
-        for case_id in service._actions_by_case:
-            actions.extend(service.list_actions(case_id))
-
-    return [
-        ActionMilestoneOut(
-            action_id=a.action_id,
-            case_version_id=a.case_version_id,
-            title=a.title,
-            description=a.description,
-            status=a.status.value,
-            progress_percentage=a.progress_percentage,
-            created_at=a.created_at,
-            institution_response_id=a.institution_response_id,
-            target_completion_date=a.target_completion_date,
-            evidence_summary=a.evidence_summary,
-            evidence_url=a.evidence_url,
-        )
-        for a in actions
-    ]
+        actions = repo.list_all_actions(limit=limit, offset=offset)
+    return [_action_out(a) for a in actions]
 
 
 @impact_router.post(
@@ -191,31 +169,30 @@ def list_actions(
 )
 def propose_action(
     payload: ProposeActionIn,
-    service: ActionFollowThroughService = Depends(get_action_service),
+    repo: ImpactRepoDep,
 ) -> ActionMilestoneOut:
-    try:
-        a = service.propose_action(
-            case_version_id=payload.case_version_id,
-            title=payload.title,
-            description=payload.description,
-            institution_response_id=payload.institution_response_id,
-            target_completion_date=payload.target_completion_date,
-        )
-        return ActionMilestoneOut(
-            action_id=a.action_id,
-            case_version_id=a.case_version_id,
-            title=a.title,
-            description=a.description,
-            status=a.status.value,
-            progress_percentage=a.progress_percentage,
-            created_at=a.created_at,
-            institution_response_id=a.institution_response_id,
-            target_completion_date=a.target_completion_date,
-            evidence_summary=a.evidence_summary,
-            evidence_url=a.evidence_url,
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    """Propose a new action milestone linked to a case."""
+    cleaned_title = payload.title.strip()
+    cleaned_desc = payload.description.strip()
+
+    if len(cleaned_title) < 3:
+        raise HTTPException(status_code=400, detail="title must have at least 3 characters")
+    if len(cleaned_desc) < 10:
+        raise HTTPException(status_code=400, detail="description must have at least 10 characters")
+
+    action = ActionMilestone(
+        action_id=uuid4(),
+        case_version_id=payload.case_version_id,
+        title=cleaned_title,
+        description=cleaned_desc,
+        status=ActionStatus.PROPOSED,
+        progress_percentage=0,
+        institution_response_id=payload.institution_response_id,
+        target_completion_date=payload.target_completion_date,
+        created_at=datetime.now(UTC),
+    )
+    repo.save_action(action)
+    return _action_out(action)
 
 
 @impact_router.patch(
@@ -225,39 +202,44 @@ def propose_action(
 def update_action_progress(
     action_id: UUID,
     payload: UpdateProgressIn,
-    service: ActionFollowThroughService = Depends(get_action_service),
+    repo: ImpactRepoDep,
 ) -> ActionMilestoneOut:
+    """Update the progress and status of an existing action milestone."""
     try:
         status_enum = ActionStatus(payload.status)
     except ValueError:
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid status: {payload.status}",
+            detail=f"Invalid status: {payload.status}. "
+                   f"Valid values: {[s.value for s in ActionStatus]}",
         )
 
+    existing = repo.get_action(action_id)
+    if existing is None:
+        raise HTTPException(status_code=404, detail=f"Action {action_id} not found")
+
+    if existing.case_version_id != payload.case_version_id:
+        raise HTTPException(
+            status_code=400,
+            detail="case_version_id does not match the stored action",
+        )
+
+    updated = ActionMilestone(
+        action_id=existing.action_id,
+        case_version_id=existing.case_version_id,
+        title=existing.title,
+        description=existing.description,
+        status=status_enum,
+        progress_percentage=payload.progress_percentage,
+        institution_response_id=existing.institution_response_id,
+        target_completion_date=existing.target_completion_date,
+        created_at=existing.created_at,
+        evidence_summary=payload.evidence_summary,
+        evidence_url=payload.evidence_url,
+    )
     try:
-        a = service.update_progress(
-            case_version_id=payload.case_version_id,
-            action_id=action_id,
-            progress_percentage=payload.progress_percentage,
-            status=status_enum,
-            evidence_summary=payload.evidence_summary,
-            evidence_url=payload.evidence_url,
-        )
-        return ActionMilestoneOut(
-            action_id=a.action_id,
-            case_version_id=a.case_version_id,
-            title=a.title,
-            description=a.description,
-            status=a.status.value,
-            progress_percentage=a.progress_percentage,
-            created_at=a.created_at,
-            institution_response_id=a.institution_response_id,
-            target_completion_date=a.target_completion_date,
-            evidence_summary=a.evidence_summary,
-            evidence_url=a.evidence_url,
-        )
+        repo.update_action(updated)
     except KeyError:
-        raise HTTPException(status_code=404, detail="Action not found")
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=404, detail=f"Action {action_id} not found")
+
+    return _action_out(updated)

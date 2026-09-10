@@ -1,0 +1,66 @@
+{
+  "$version": "1.0.0",
+  "$note": "Canonical signal test fixtures. All agreement_percentage and sample_size values are deterministic for test assertions.",
+  "signals": [
+    {
+      "signal_id": "77777777-7777-4777-8777-777777777701",
+      "case_version_id": "22222222-2222-4222-8222-222222222222",
+      "case_title_tr": "Son koltuk kime verilmeli?",
+      "case_title_en": "Who should get the last seat?",
+      "consensus_statement_tr": "Öncelikli ihtiyacı olan yurttaşlara pozitif ayrımcılık kamu vicdanında yüksek uzlaşı taşımaktadır.",
+      "consensus_statement_en": "Positive discrimination for citizens with priority needs carries high consensus in public conscience.",
+      "agreement_percentage": 82.4,
+      "sample_size": 1420,
+      "qualification_tier": "GOLD_STANDARD",
+      "methodology_version": "1.0.0",
+      "qualification_audit_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "certified_at": "2026-08-15T12:00:00Z",
+      "dispatch_status": "PENDING"
+    },
+    {
+      "signal_id": "77777777-7777-4777-8777-777777777702",
+      "case_version_id": "22222222-2222-4222-8222-222222222223",
+      "case_title_tr": "Yapay zekâ şirketlerinin veri toplaması sınırlandırılmalı mı?",
+      "case_title_en": "Should AI companies be restricted from collecting data?",
+      "consensus_statement_tr": "Kişisel mahremiyet ve açık rıza olmaksızın model eğitimi sınırlandırılmalıdır.",
+      "consensus_statement_en": "Model training without personal consent should be restricted.",
+      "agreement_percentage": 76.8,
+      "sample_size": 1150,
+      "qualification_tier": "SILVER_VALIDATED",
+      "methodology_version": "1.0.0",
+      "qualification_audit_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "certified_at": "2026-08-20T14:30:00Z",
+      "dispatch_status": "PENDING"
+    },
+    {
+      "signal_id": "77777777-7777-4777-8777-777777777703",
+      "case_version_id": "22222222-2222-4222-8222-222222222225",
+      "case_title_tr": "Kamu sözleşmeleri varsayılan olarak herkese açık olmalı mı?",
+      "case_title_en": "Should public contracts be open by default?",
+      "consensus_statement_tr": "Ticari sır kısıtlaması daraltılarak kamu ihalelerinde tam şeffaflık sağlanmalıdır.",
+      "consensus_statement_en": "Full transparency in public procurement should be ensured by narrowing trade secret restrictions.",
+      "agreement_percentage": 69.2,
+      "sample_size": 780,
+      "qualification_tier": "BRONZE_OBSERVED",
+      "methodology_version": "1.0.0",
+      "qualification_audit_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "certified_at": "2026-08-25T09:15:00Z",
+      "dispatch_status": "PENDING"
+    },
+    {
+      "signal_id": "77777777-7777-4777-8777-777777777799",
+      "case_version_id": "22222222-2222-4222-8222-222222222299",
+      "case_title_tr": "Düşük katılımlı test vakası",
+      "case_title_en": "Low participation test case",
+      "consensus_statement_tr": "Yeterli katılım sağlanamadı.",
+      "consensus_statement_en": "Insufficient participation.",
+      "agreement_percentage": 55.0,
+      "sample_size": 12,
+      "qualification_tier": "UNQUALIFIED",
+      "methodology_version": "1.0.0",
+      "qualification_audit_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "certified_at": "2026-09-01T00:00:00Z",
+      "dispatch_status": "PENDING"
+    }
+  ]
+}
