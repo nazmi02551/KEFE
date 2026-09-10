@@ -65,13 +65,14 @@ export function AdminStudioHeader() {
                 ? pathname === "/"
                 : pathname.startsWith(item.href);
             return (
-              <a
+              <Link
                 key={item.href}
                 href={item.href}
                 className={`${styles.navLink} ${isActive ? styles.navLinkActive : ""}`}
+                aria-current={isActive ? "page" : undefined}
               >
                 {item.label}
-              </a>
+              </Link>
             );
           })}
         </nav>
