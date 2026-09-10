@@ -354,7 +354,7 @@ The following items remain incomplete after Session 2:
 
 **PR #403:** https://github.com/nazmi02551/KEFE/pull/403
 
-**Commits in branch (15 total, on top of main):**
+**Commits in branch (18 total, on top of main):**
 1. `cf93f986` — signal/impact hexagonal ports, pipeline service, admin studio signal+impact pages
 2. `f2cd413a` — env.example, design-tokens build+validate scripts, CURRENT.md session 2
 3. `2dc3a47f` — kefe-locale validate script, fix a11y namespace in keys.json
@@ -368,10 +368,12 @@ The following items remain incomplete after Session 2:
 11. `0e770e55` — apps/web share link page, 26/26 tests
 12. `faada00c` — fix(admin): admin-studio-header plain `<a>` → `<Link>` + aria-current
 13. `4a82c163` — fix(admin): typed Route cast, async effect pattern signal/impact workspaces (lint 0, typecheck clean)
-14. (this commit) — kefe-test-fixtures cases/identities/impact fixtures + validate script, Makefile
+14. `65fb50e9` — kefe-test-fixtures cases/identities/impact fixtures + validate script, Makefile
+15. `4aa9ca79` — feat(impact): SignalTargetRegistryService injection-based design (CAP-057) — NullInstitutionTargetResolver safe default, StaticResolver for tests, validate_transition, 866 passed
+16. `507aba70` — fix(api): ruff lint — UP042→StrEnum (7 files), B904 raise from err (3), B008 Depends alias, E402, F841 — non-E501 lint errors reduced to 0
 
 **Test results (verified locally):**
-- API in-memory: **853 passed, 110 skipped, 0 failed**
+- API in-memory: **866 passed, 110 skipped, 0 failed**
 - Admin Studio: **56/56 tests, lint 0, typecheck clean, 8/8 contracts PASS, build OK**
 - apps/web structural: **26/26 tests PASS**
 - packages validate: **design-tokens PASS, locale PASS, test-fixtures PASS**
@@ -384,7 +386,8 @@ The following items remain incomplete after Session 2:
 3. **PR #267 / PR #273:** Formally supersede/close after CI pass on PR #403.
 4. **F4 production readiness:** OTP HTTP delivery is complete. Only runtime environment variables needed: `KEFE_OTP_HTTP_ENDPOINT`, `KEFE_OTP_HTTP_BEARER_TOKEN` or `KEFE_OTP_HTTP_SECRET_REF`. No code changes required.
 5. **F3 Admin Studio:** All existing workspaces have contract tests (8/8 PASS). Flow Composer, Reason Moderation, Publication Operations have full implementations. No immediate gaps.
-6. **Next wave:** After CI passes, open the F3 Flow Composer integration with content authoring API (CAP-064), then advance F1 Signal dispatch (CAP-057).
+6. **Signal Target Registry (CAP-057):** `SignalTargetRegistryService` now injection-based. `NullInstitutionTargetResolver` is the safe default. `StaticInstitutionTargetResolver` for tests. `validate_transition()` enforces one-way monotonic lifecycle. Real institutional targeting requires Admin Target Management UI (CAP-057 Phase 2 — not yet implemented).
+7. **Next wave:** F3 Flow Composer backend and Admin Studio workspace both complete. Next: implement `DatabaseInstitutionTargetResolver` backed by a new `signal_dispatch_target` migration (CAP-057 Phase 2), then Signal dispatch HTTP endpoint (`POST /v1/signals/{id}/dispatch`).
 
 **Next agent session standard protocol:**
 1. Read `AGENTS.md` + this file (sections 14-15)
