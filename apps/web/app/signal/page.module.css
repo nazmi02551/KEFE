@@ -1,0 +1,117 @@
+.main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--kefe-spacing-8) var(--kefe-spacing-4);
+}
+
+.header {
+  margin-bottom: var(--kefe-spacing-8);
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--kefe-color-foreground);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin-top: var(--kefe-spacing-2);
+  font-size: 1rem;
+  color: var(--kefe-color-muted);
+}
+
+.errorBanner {
+  background: color-mix(in srgb, var(--kefe-color-critical) 12%, transparent);
+  border: 1px solid var(--kefe-color-critical);
+  border-radius: var(--kefe-radius-md);
+  padding: var(--kefe-spacing-4);
+  color: var(--kefe-color-critical);
+  margin-bottom: var(--kefe-spacing-6);
+  font-size: 0.9375rem;
+}
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--kefe-color-muted);
+  font-size: 1rem;
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--kefe-spacing-4);
+}
+
+.card {
+  background: var(--kefe-color-surface);
+  border-radius: var(--kefe-radius-lg);
+  padding: var(--kefe-spacing-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-3);
+  box-shadow: var(--kefe-shadow-sm);
+  transition: box-shadow var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.card:hover {
+  box-shadow: var(--kefe-shadow-md);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--kefe-spacing-3);
+}
+
+.tierBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.agreementPct {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--kefe-color-gold);
+  letter-spacing: -0.02em;
+}
+
+.cardTitle {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--kefe-color-foreground);
+  line-height: 1.4;
+}
+
+.cardStatement {
+  font-size: 0.9375rem;
+  color: var(--kefe-color-muted);
+  line-height: 1.6;
+  flex: 1;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--kefe-spacing-3);
+  padding-top: var(--kefe-spacing-3);
+  border-top: 1px solid color-mix(in srgb, var(--kefe-color-muted) 20%, transparent);
+}
+
+.sampleSize {
+  font-size: 0.8125rem;
+  color: var(--kefe-color-muted);
+}
+
+.certifiedAt {
+  font-size: 0.8125rem;
+  color: var(--kefe-color-muted);
+}

@@ -1,0 +1,48 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  gap: var(--kefe-spacing-4);
+  text-align: center;
+  padding: var(--kefe-spacing-8);
+}
+
+.code {
+  font-size: 5rem;
+  font-weight: 700;
+  color: var(--kefe-color-gold);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--kefe-color-foreground);
+}
+
+.description {
+  font-size: 1rem;
+  color: var(--kefe-color-muted);
+  max-width: 400px;
+}
+
+.homeLink {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--kefe-spacing-3) var(--kefe-spacing-6);
+  background: var(--kefe-color-gold);
+  color: var(--kefe-color-canvas);
+  font-weight: 600;
+  border-radius: var(--kefe-radius-md);
+  font-size: 0.9375rem;
+  text-decoration: none;
+  margin-top: var(--kefe-spacing-2);
+}
+
+.homeLink:hover {
+  opacity: 0.88;
+  text-decoration: none;
+}

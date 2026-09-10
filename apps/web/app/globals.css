@@ -1,0 +1,159 @@
+/*
+ * KEFE Web — Global CSS
+ *
+ * Design token CSS custom properties are embedded here from packages/kefe-design-tokens.
+ * In a built workspace, import from @kefe/design-tokens/css instead.
+ *
+ * See: packages/kefe-design-tokens/dist/tokens.css
+ */
+
+/* ---------------------------------------------------------------------------
+ * Dark theme (default)
+ * --------------------------------------------------------------------------- */
+
+:root,
+[data-theme="dark"] {
+  --kefe-color-canvas: #0A0A0F;
+  --kefe-color-surface: #12121A;
+  --kefe-color-raised: #1C1C28;
+  --kefe-color-sunken: #07070C;
+  --kefe-color-foreground: #F0EFE8;
+  --kefe-color-muted: #8A8A9A;
+  --kefe-color-gold: #C9A84C;
+  --kefe-color-gold-subtle: #C9A84C1A;
+  --kefe-color-rules-cyan: #4ABFCF;
+  --kefe-color-empathy-coral: #E07A5F;
+  --kefe-color-burgundy: #7C2D52;
+  --kefe-color-success: #4CAF76;
+  --kefe-color-attention: #E8A23A;
+  --kefe-color-critical: #E05252;
+  --kefe-color-overlay: #0A0A0F99;
+
+  /* Spacing */
+  --kefe-spacing-1: 4px;
+  --kefe-spacing-2: 8px;
+  --kefe-spacing-3: 12px;
+  --kefe-spacing-4: 16px;
+  --kefe-spacing-5: 20px;
+  --kefe-spacing-6: 24px;
+  --kefe-spacing-8: 32px;
+  --kefe-spacing-10: 40px;
+  --kefe-spacing-12: 48px;
+  --kefe-spacing-16: 64px;
+
+  /* Radius */
+  --kefe-radius-xs: 4px;
+  --kefe-radius-sm: 8px;
+  --kefe-radius-md: 12px;
+  --kefe-radius-lg: 16px;
+  --kefe-radius-xl: 20px;
+  --kefe-radius-full: 9999px;
+
+  /* Shadow */
+  --kefe-shadow-sm: 0 1px 3px 0 rgba(0,0,0,0.4);
+  --kefe-shadow-md: 0 4px 12px 0 rgba(0,0,0,0.5);
+  --kefe-shadow-lg: 0 8px 24px 0 rgba(0,0,0,0.6);
+  --kefe-shadow-gold-glow: 0 0 16px 0 rgba(201,168,76,0.25);
+
+  /* Motion */
+  --kefe-motion-duration-instant: 80ms;
+  --kefe-motion-duration-fast: 150ms;
+  --kefe-motion-duration-normal: 250ms;
+  --kefe-motion-duration-slow: 400ms;
+  --kefe-motion-duration-deliberate: 600ms;
+  --kefe-motion-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --kefe-motion-easing-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --kefe-motion-easing-accelerate: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Signal tier */
+  --kefe-signal-tier-gold-standard: #C9A84C;
+  --kefe-signal-tier-silver-validated: #A8B5C0;
+  --kefe-signal-tier-bronze-observed: #C47C4A;
+  --kefe-signal-tier-unqualified: #6B6B7A;
+}
+
+/* ---------------------------------------------------------------------------
+ * Light theme
+ * --------------------------------------------------------------------------- */
+
+[data-theme="light"] {
+  --kefe-color-canvas: #F5F4EF;
+  --kefe-color-surface: #FFFFFF;
+  --kefe-color-raised: #FAFAFA;
+  --kefe-color-sunken: #EBEBEB;
+  --kefe-color-foreground: #1A1A2E;
+  --kefe-color-muted: #6B6B7A;
+  --kefe-color-gold: #B8922A;
+  --kefe-color-gold-subtle: #B8922A1A;
+  --kefe-color-rules-cyan: #1A8FA0;
+  --kefe-color-empathy-coral: #C45A40;
+  --kefe-color-burgundy: #6B1F45;
+  --kefe-color-success: #2E7D4F;
+  --kefe-color-attention: #C27A1A;
+  --kefe-color-critical: #C0392B;
+  --kefe-color-overlay: #1A1A2E80;
+}
+
+/* ---------------------------------------------------------------------------
+ * Reduced motion override (accessibility — first-class requirement)
+ * --------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --kefe-motion-duration-instant: 0ms;
+    --kefe-motion-duration-fast: 0ms;
+    --kefe-motion-duration-normal: 0ms;
+    --kefe-motion-duration-slow: 0ms;
+    --kefe-motion-duration-deliberate: 0ms;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Base reset
+ * --------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--kefe-color-canvas);
+  color: var(--kefe-color-foreground);
+  line-height: 1.5;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus ring — accessible, visible in both themes */
+:focus-visible {
+  outline: 2px solid var(--kefe-color-gold);
+  outline-offset: 2px;
+}
+
+/* Links */
+a {
+  color: var(--kefe-color-rules-cyan);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Images */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
