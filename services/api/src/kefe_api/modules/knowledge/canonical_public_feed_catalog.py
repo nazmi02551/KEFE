@@ -592,7 +592,7 @@ class CanonicalPublicFeedCatalogService:
         interval_seconds: int,
         max_dispatch_attempts: int,
     ) -> CanonicalPublicFeedDefinition:
-        self._security.authorize(principal, AdminCapability.SOURCE_MANAGE)
+        self._security.authorize(principal, AdminCapability.SOURCE_MANAGE, now=self._clock())
         latest = self._repository.get_latest(definition.feed_code)
         expected_version = 1 if latest is None else latest.definition_version + 1
         if definition_version != expected_version:
@@ -628,7 +628,7 @@ class CanonicalPublicFeedCatalogService:
         feed_code: str,
         definition_version: int,
     ) -> PublicFeedPreflightResult:
-        self._security.authorize(principal, AdminCapability.SOURCE_MANAGE)
+        self._security.authorize(principal, AdminCapability.SOURCE_MANAGE, now=self._clock())
         definition = self._require_definition(feed_code, definition_version)
         if definition.state is not PublicFeedCatalogState.DRAFT:
             raise DomainError(
@@ -670,7 +670,7 @@ class CanonicalPublicFeedCatalogService:
         definition_version: int,
         expected_configuration_hash: str,
     ) -> CanonicalPublicFeedDefinition:
-        self._security.authorize(principal, AdminCapability.SOURCE_APPROVE)
+        self._security.authorize(principal, AdminCapability.SOURCE_APPROVE, now=self._clock())
         definition = self._require_definition(feed_code, definition_version)
         if definition.configuration_hash != expected_configuration_hash:
             raise DomainError(
@@ -710,7 +710,7 @@ class CanonicalPublicFeedCatalogService:
         expected_configuration_hash: str,
         first_due_at: datetime,
     ) -> PublicFeedActivationProjection:
-        self._security.authorize(principal, AdminCapability.SOURCE_ACTIVATE)
+        self._security.authorize(principal, AdminCapability.SOURCE_ACTIVATE, now=self._clock())
         definition = self._require_definition(feed_code, definition_version)
         if definition.state is not PublicFeedCatalogState.APPROVED:
             raise DomainError(
@@ -834,7 +834,7 @@ class CanonicalPublicFeedCatalogService:
         feed_code: str,
         definition_version: int,
     ) -> CanonicalPublicFeedDefinition:
-        self._security.authorize(principal, AdminCapability.SOURCE_APPROVE)
+        self._security.authorize(principal, AdminCapability.SOURCE_APPROVE, now=self._clock())
         definition = self._require_definition(feed_code, definition_version)
         activation = self._repository.get_activation_for_definition(definition.id)
         if activation is not None and activation.state is not PublicFeedActivationState.RETIRED:
@@ -890,6 +890,7 @@ class CanonicalPublicFeedCatalogService:
                     AdminCapability.SOURCE_ACTIVATE,
                 }
             ),
+            now=self._clock(),
         )
         return self._repository.list_definitions()
 
@@ -900,7 +901,7 @@ class CanonicalPublicFeedCatalogService:
         feed_code: str,
         definition_version: int,
     ) -> tuple[PublicFeedAuditEvent, ...]:
-        self._security.authorize(principal, AdminCapability.AUDIT_READ)
+        self._security.authorize(principal, AdminCapability.AUDIT_READ, now=self._clock())
         definition = self._require_definition(feed_code, definition_version)
         return self._repository.list_audit(definition.id)
 
@@ -913,7 +914,7 @@ class CanonicalPublicFeedCatalogService:
         target: PublicFeedActivationState,
         action: PublicFeedAuditAction,
     ) -> PublicFeedActivationProjection:
-        self._security.authorize(principal, AdminCapability.SOURCE_ACTIVATE)
+        self._security.authorize(principal, AdminCapability.SOURCE_ACTIVATE, now=self._clock())
         definition = self._require_definition(feed_code, definition_version)
         activation = self._repository.get_activation_for_definition(definition.id)
         if activation is None:
