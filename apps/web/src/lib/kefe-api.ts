@@ -134,3 +134,22 @@ export async function listPublicCases(
 export async function getPublicCase(caseId: string): Promise<CaseDetail> {
   return fetchJson<CaseDetail>(`/v1/cases/${encodeURIComponent(caseId)}`);
 }
+
+// ---------------------------------------------------------------------------
+// Public Share (share link resolution)
+// ---------------------------------------------------------------------------
+
+export interface PublicShare {
+  share_id: string;
+  case_id: string;
+  case_version_id: string;
+  title: string;
+  summary: string;
+  primary_domain: string;
+  created_at: string;
+  expires_at: string;
+}
+
+export async function getPublicShare(token: string): Promise<PublicShare> {
+  return fetchJson<PublicShare>(`/v1/shares/${encodeURIComponent(token)}`);
+}

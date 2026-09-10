@@ -58,6 +58,10 @@ test("app/page.tsx exists", () => readFile("app/page.tsx"));
 test("app/globals.css exists", () => readFile("app/globals.css"));
 test("app/not-found.tsx exists", () => readFile("app/not-found.tsx"));
 test("app/signal/page.tsx exists", () => readFile("app/signal/page.tsx"));
+test("app/cases/page.tsx exists", () => readFile("app/cases/page.tsx"));
+test("app/cases/[caseId]/page.tsx exists", () => readFile("app/cases/[caseId]/page.tsx"));
+test("app/share/[token]/page.tsx exists", () => readFile("app/share/[token]/page.tsx"));
+test("src/components/site-header.tsx exists", () => readFile("src/components/site-header.tsx"));
 test("src/lib/kefe-api.ts exists", () => readFile("src/lib/kefe-api.ts"));
 test("next.config.ts exists", () => readFile("next.config.ts"));
 test("tsconfig.json exists", () => readFile("tsconfig.json"));
@@ -156,6 +160,23 @@ test("kefe-api.ts: uses /v1/signals/consensus-cards endpoint", () => {
     api.includes("/v1/signals/consensus-cards"),
     "Missing /v1/signals/consensus-cards endpoint",
   );
+});
+
+test("kefe-api.ts: uses /v1/cases endpoint (not /v1/context)", () => {
+  const api = readFile("src/lib/kefe-api.ts");
+  assert(api.includes("/v1/cases"), "Missing /v1/cases endpoint");
+  assert(!api.includes("/v1/context"), "/v1/context is the wrong endpoint — use /v1/cases");
+});
+
+test("kefe-api.ts: exports getPublicShare", () => {
+  const api = readFile("src/lib/kefe-api.ts");
+  assert(api.includes("getPublicShare"), "Missing getPublicShare export");
+});
+
+test("share/[token]/page.tsx: does not expose share token in rendered HTML title", () => {
+  const page = readFile("app/share/[token]/page.tsx");
+  // Token must NOT appear in static text — only the title from API
+  assert(!page.includes("{token}"), "Token must not be rendered directly in the page");
 });
 
 // ---------------------------------------------------------------------------

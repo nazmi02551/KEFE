@@ -1,0 +1,137 @@
+.main {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--kefe-spacing-8) var(--kefe-spacing-4);
+}
+
+.card {
+  width: 100%;
+  max-width: 580px;
+  background: var(--kefe-color-surface);
+  border-radius: var(--kefe-radius-xl);
+  padding: var(--kefe-spacing-8);
+  box-shadow: var(--kefe-shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-6);
+}
+
+.expiredBanner {
+  background: color-mix(in srgb, var(--kefe-color-attention) 12%, transparent);
+  border: 1px solid var(--kefe-color-attention);
+  border-radius: var(--kefe-radius-md);
+  padding: var(--kefe-spacing-3) var(--kefe-spacing-4);
+  color: var(--kefe-color-attention);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-3);
+}
+
+.domainBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--kefe-color-rules-cyan);
+}
+
+.title {
+  font-size: clamp(1.25rem, 4vw, 1.875rem);
+  font-weight: 700;
+  color: var(--kefe-color-foreground);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.summary {
+  font-size: 1rem;
+  color: var(--kefe-color-muted);
+  line-height: 1.7;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-2);
+  padding: var(--kefe-spacing-4) 0;
+  border-top: 1px solid color-mix(in srgb, var(--kefe-color-muted) 15%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--kefe-color-muted) 15%, transparent);
+}
+
+.metaItem {
+  font-size: 0.875rem;
+  color: var(--kefe-color-muted);
+}
+
+.metaLabel {
+  font-weight: 600;
+  color: var(--kefe-color-foreground);
+}
+
+.actions {
+  display: flex;
+  gap: var(--kefe-spacing-3);
+  flex-wrap: wrap;
+}
+
+.primaryBtn {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--kefe-spacing-3) var(--kefe-spacing-6);
+  background: var(--kefe-color-gold);
+  color: var(--kefe-color-canvas);
+  font-weight: 600;
+  border-radius: var(--kefe-radius-md);
+  font-size: 0.9375rem;
+  text-decoration: none;
+  transition: opacity var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.primaryBtn:hover {
+  opacity: 0.88;
+  text-decoration: none;
+}
+
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--kefe-spacing-3) var(--kefe-spacing-6);
+  background: transparent;
+  color: var(--kefe-color-muted);
+  font-weight: 500;
+  border-radius: var(--kefe-radius-md);
+  border: 1.5px solid color-mix(in srgb, var(--kefe-color-muted) 40%, transparent);
+  font-size: 0.9375rem;
+  text-decoration: none;
+  transition: color var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard),
+    border-color var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.secondaryBtn:hover {
+  color: var(--kefe-color-foreground);
+  border-color: var(--kefe-color-muted);
+  text-decoration: none;
+}
+
+.footer {
+  padding-top: var(--kefe-spacing-4);
+  border-top: 1px solid color-mix(in srgb, var(--kefe-color-muted) 15%, transparent);
+}
+
+.commitNote {
+  font-size: 0.875rem;
+  color: var(--kefe-color-muted);
+  line-height: 1.6;
+}
+
+.commitNote strong {
+  color: var(--kefe-color-gold);
+  font-weight: 600;
+}
