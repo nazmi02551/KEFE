@@ -33,6 +33,17 @@ abstract final class CoreStringCatalog {
       'context.claim.claimed': 'Claimed',
       'context.claim.disputed': 'Disputed',
       'context.claim.unknown': 'Unknown',
+      'context.information_status_guide.title': 'What do the information statuses mean?',
+      'context.information_status_guide.helper':
+          'These labels describe the status of each information block, not the source it links to.',
+      'context.information_status_guide.verified_desc':
+          'The editorial record marks this block as checked.',
+      'context.information_status_guide.claimed_desc':
+          'This block presents a claim and is not marked verified.',
+      'context.information_status_guide.disputed_desc':
+          'The available record contains disagreement about this block.',
+      'context.information_status_guide.unknown_desc':
+          'The current record does not establish a status for this block.',
       'context.source.official': 'Official source',
       'context.source.news': 'News source',
       'context.source.research': 'Research',
@@ -179,6 +190,17 @@ abstract final class CoreStringCatalog {
       'context.claim.claimed': 'İddia',
       'context.claim.disputed': 'Çelişkili',
       'context.claim.unknown': 'Bilinmiyor',
+      'context.information_status_guide.title': 'Bilgi durumları ne anlama gelir?',
+      'context.information_status_guide.helper':
+          'Bu etiketler her bilgi bloğunun durumunu açıklar; bağlantılı kaynağa değil.',
+      'context.information_status_guide.verified_desc':
+          'Editoryal kayıt bu bloğun doğrulandığını göstermektedir.',
+      'context.information_status_guide.claimed_desc':
+          'Bu blok bir iddia içermekte ve doğrulanmış olarak işaretlenmemiştir.',
+      'context.information_status_guide.disputed_desc':
+          'Mevcut kayıt bu blok hakkında çelişkili bilgiler içermektedir.',
+      'context.information_status_guide.unknown_desc':
+          'Mevcut kayıt bu blok için bir durum belirlememiştir.',
       'context.source.official': 'Resmî kaynak',
       'context.source.news': 'Haber kaynağı',
       'context.source.research': 'Araştırma',

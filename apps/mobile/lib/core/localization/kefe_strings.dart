@@ -55,6 +55,19 @@ class KefeStrings {
     _ => status,
   };
 
+  // Information-status guide (ADR-0142 / CAP-070)
+  String get contextInformationStatusGuideTitle =>
+      _text('context.information_status_guide.title');
+  String get contextInformationStatusGuideHelper =>
+      _text('context.information_status_guide.helper');
+  String contextInformationStatusDescription(String status) => switch (status) {
+    'VERIFIED' => _text('context.information_status_guide.verified_desc'),
+    'CLAIMED'  => _text('context.information_status_guide.claimed_desc'),
+    'DISPUTED' => _text('context.information_status_guide.disputed_desc'),
+    'UNKNOWN'  => _text('context.information_status_guide.unknown_desc'),
+    _ => status,
+  };
+
   String contextSourceKind(String sourceKind) => switch (sourceKind) {
     'OFFICIAL' => _text('context.source.official'),
     'NEWS' => _text('context.source.news'),
