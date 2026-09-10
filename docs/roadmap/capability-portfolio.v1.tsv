@@ -46,7 +46,7 @@ CAP-044	signal-health-card	Signal Health Card	SIGNAL	PROPOSAL_REVIEW	Phase 4	P0	
 CAP-045	signal-half-life	Signal half-life / freshness lifecycle	SIGNAL	PROPOSAL_REVIEW	Phase 4	P1	KEFE-TIM-001|KEFE-RM-001			conversation_proposal	
 CAP-046	signal-scope-alignment	Signal scope alignment	SIGNAL	ARCHITECTURE_LOCKED	Phase 4	P0	KEFE-TIM-001|KEFE-RM-001		signal-impact-model.v1	canonical	
 CAP-047	signal-versioning	MethodologyVersion-pinned Signal history	SIGNAL	ARCHITECTURE_LOCKED	Phase 4	P0	KEFE-TIM-001|KEFE-DGS-001		signal-impact-model.v1	canonical	
-CAP-048	impact-target	Signal target registry	IMPACT	ARCHITECTURE_LOCKED	Phase 5	P1	KEFE-MPD-001|KEFE-ADM-001		signal-impact-model.v1	canonical	
+CAP-048	impact-target	Signal target registry	IMPACT	IMPLEMENTED_PARTIAL	Phase 3	P1	KEFE-MPD-001|KEFE-ADM-001		signal-impact-model.v1	canonical	ADR-0098: migration 0043 signal.dispatch_target_registry; API: PostgresSignalDispatchTargetResolver+Writer, propose/advance/approve-statement endpoints; mobile: domain, card, HTTP+preview repos, controller, unit tests. Next gate: Postgres CI green + dispatch with real provider.
 CAP-049	institution-response	Verified Institution Response	IMPACT	ARCHITECTURE_LOCKED	Phase 5	P0	KEFE-MPD-001|KEFE-ADM-001|KEFE-SEC-001			canonical	
 CAP-050	institution-response-room	Kurum Cevap Odası	IMPACT	PROPOSAL_REVIEW	Phase 5	P0	KEFE-PB-001|KEFE-ADM-001|KEFE-DS-001			conversation_proposal	
 CAP-051	response-reweigh	Reweigh after institutional response	IMPACT	ARCHITECTURE_ACCEPTED	Phase 5	P1	KEFE-DGS-001|KEFE-RM-001			canonical	
