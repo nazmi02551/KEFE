@@ -354,7 +354,7 @@ The following items remain incomplete after Session 2:
 
 **PR #403:** https://github.com/nazmi02551/KEFE/pull/403
 
-**Commits in branch (18 total, on top of main):**
+**Commits in branch (22 total, on top of main):**
 1. `cf93f986` — signal/impact hexagonal ports, pipeline service, admin studio signal+impact pages
 2. `f2cd413a` — env.example, design-tokens build+validate scripts, CURRENT.md session 2
 3. `2dc3a47f` — kefe-locale validate script, fix a11y namespace in keys.json
@@ -371,9 +371,13 @@ The following items remain incomplete after Session 2:
 14. `65fb50e9` — kefe-test-fixtures cases/identities/impact fixtures + validate script, Makefile
 15. `4aa9ca79` — feat(impact): SignalTargetRegistryService injection-based design (CAP-057) — NullInstitutionTargetResolver safe default, StaticResolver for tests, validate_transition, 866 passed
 16. `507aba70` — fix(api): ruff lint — UP042→StrEnum (7 files), B904 raise from err (3), B008 Depends alias, E402, F841 — non-E501 lint errors reduced to 0
+17. `f7116416` — docs: CURRENT.md session 2 phase 2 update
+18. (CAP-057 Phase 2) — signal.dispatch_target_registry migration (0043), PostgresSignalDispatchTargetResolver + Writer, 13 tests
+19. (CAP-057 Phase 2) — signal dispatch endpoints: propose-target + advance-target, provisional block, 9 tests
+20. docs: CURRENT.md 22 commits, 888 tests
 
 **Test results (verified locally):**
-- API in-memory: **866 passed, 110 skipped, 0 failed**
+- API in-memory: **888 passed, 110 skipped, 0 failed**
 - Admin Studio: **56/56 tests, lint 0, typecheck clean, 8/8 contracts PASS, build OK**
 - apps/web structural: **26/26 tests PASS**
 - packages validate: **design-tokens PASS, locale PASS, test-fixtures PASS**
@@ -387,7 +391,8 @@ The following items remain incomplete after Session 2:
 4. **F4 production readiness:** OTP HTTP delivery is complete. Only runtime environment variables needed: `KEFE_OTP_HTTP_ENDPOINT`, `KEFE_OTP_HTTP_BEARER_TOKEN` or `KEFE_OTP_HTTP_SECRET_REF`. No code changes required.
 5. **F3 Admin Studio:** All existing workspaces have contract tests (8/8 PASS). Flow Composer, Reason Moderation, Publication Operations have full implementations. No immediate gaps.
 6. **Signal Target Registry (CAP-057):** `SignalTargetRegistryService` now injection-based. `NullInstitutionTargetResolver` is the safe default. `StaticInstitutionTargetResolver` for tests. `validate_transition()` enforces one-way monotonic lifecycle. Real institutional targeting requires Admin Target Management UI (CAP-057 Phase 2 — not yet implemented).
-7. **Next wave:** F3 Flow Composer backend and Admin Studio workspace both complete. Next: implement `DatabaseInstitutionTargetResolver` backed by a new `signal_dispatch_target` migration (CAP-057 Phase 2), then Signal dispatch HTTP endpoint (`POST /v1/signals/{id}/dispatch`).
+7. **CAP-057 Phase 2 complete (locally):** `signal.dispatch_target_registry` table (migration 0043), `PostgresSignalDispatchTargetResolver` (read), `PostgresSignalDispatchTargetWriter` (write, 5 lifecycle methods), dispatch endpoints `propose-target` + `advance-target` with [PROVISIONAL] block. 888 tests pass.
+8. **Next wave:** Add new test files to `api-ci.yml` postgres gate (test_signal_dispatch_target.py, test_signal_dispatch_pipeline_api.py). Then: implement editorial CQB acceptance that removes [PROVISIONAL] tag from consensus_statement (CAP-063 editorial pipeline) to enable real dispatch.
 
 **Next agent session standard protocol:**
 1. Read `AGENTS.md` + this file (sections 14-15)
