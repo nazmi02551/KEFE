@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
 import "@/app/globals.css";
+import { SiteHeader } from "@/src/components/site-header";
 
 export const metadata: Metadata = {
   title: {
@@ -55,6 +56,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
 `.trim(),
           }}
         />
+        <SiteHeader />
         <div id="app-root">{children}</div>
       </body>
     </html>
