@@ -96,15 +96,41 @@ export interface CaseContextSummary {
   primary_domain_code: string;
 }
 
+export interface QuestionOption {
+  code: string;
+  label: string;
+}
+
+export interface CaseQuestion {
+  question_id: string;
+  prompt: string;
+  response_type: string;
+  required: boolean;
+  response_schema: Record<string, unknown>;
+  options: QuestionOption[];
+}
+
+export interface CaseDetail {
+  case_id: string;
+  case_version_id: string;
+  version_no: number;
+  title: string;
+  summary: string;
+  base_format: string;
+  primary_domain: string;
+  content_risk: string;
+  questions: CaseQuestion[];
+}
+
 export async function listPublicCases(
   limit = 20,
   offset = 0,
 ): Promise<CaseContextSummary[]> {
   return fetchJson<CaseContextSummary[]>(
-    `/v1/context?limit=${limit}&offset=${offset}`,
+    `/v1/cases?limit=${limit}&offset=${offset}`,
   );
 }
 
-export async function getPublicCase(caseId: string): Promise<CaseContextSummary> {
-  return fetchJson<CaseContextSummary>(`/v1/context/${encodeURIComponent(caseId)}`);
+export async function getPublicCase(caseId: string): Promise<CaseDetail> {
+  return fetchJson<CaseDetail>(`/v1/cases/${encodeURIComponent(caseId)}`);
 }
