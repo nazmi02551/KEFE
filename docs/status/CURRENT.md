@@ -354,7 +354,7 @@ The following items remain incomplete after Session 2:
 
 **PR #403:** https://github.com/nazmi02551/KEFE/pull/403
 
-**Commits in branch (25 total, on top of main):**
+**Commits in branch (27 total, on top of main):**
 1. `cf93f986` — signal/impact hexagonal ports, pipeline service, admin studio signal+impact pages
 2. `f2cd413a` — env.example, design-tokens build+validate scripts, CURRENT.md session 2
 3. `2dc3a47f` — kefe-locale validate script, fix a11y namespace in keys.json
@@ -377,6 +377,8 @@ The following items remain incomplete after Session 2:
 20. `ed9d8f04` — docs: CURRENT.md 22 commits, 888 tests
 21. `b7671a11` — ci+test: signal postgres tests → api-ci.yml gate (test_signal_postgres.py, test_signal_dispatch_target_postgres.py)
 22. `f2d84330` — feat(api): Editorial CQB approve-statement endpoint (CAP-063) — [PROVISIONAL] removal, approve→dispatch flow, 7 tests
+23. `07666b2d` — feat(mobile): SignalConsensusCard provisional banner + isProvisional model field
+24. `bc1f3757` — feat(api+mobile): is_provisional field in SignalConsensusCardResponse + mobile fromJson guard
 
 **Test results (verified locally):**
 - API in-memory: **895 passed, 123 skipped, 0 failed**
@@ -402,7 +404,9 @@ The following items remain incomplete after Session 2:
    - `signal.dispatch_target_registry` table (migration 0043) with lifecycle CHECK constraint
    - `PostgresSignalDispatchTargetResolver` (read) + `PostgresSignalDispatchTargetWriter` (write)
    - 895 tests pass, 0 non-E501 lint errors
-9. **Next wave:** apps/mobile Signal card screen check (CAP-058), then OTP real provider binding (CAP-042).
+9. **OTP binding (CAP-042):** Altyapı tamam. `build_otp_delivery()` factory: CAPTURE (dev/test), DISABLED, HTTP (production). Real delivery: set `KEFE_OTP_DELIVERY_MODE=HTTP`, `KEFE_OTP_HTTP_ENDPOINT`, `KEFE_OTP_DELIVERY_SECRET`. No code changes needed.
+10. **Mobile Signal card (CAP-063):** isProvisional field + provisional banner (attention color, hourglass icon). API `SignalConsensusCardResponse.is_provisional` field added. Public feed still filters PROVISIONAL. Dart analyze: clean.
+11. **Next wave:** Issue #291 / Public Feed conflict (CAP-123) — Slice 17 ADR and canonical feed reconciliation between PR #267 and PR #273.
 
 **Next agent session standard protocol:**
 1. Read `AGENTS.md` + this file (sections 14-15)
