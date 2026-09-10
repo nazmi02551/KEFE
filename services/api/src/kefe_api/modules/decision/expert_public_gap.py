@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Mapping, Sequence
 
 
 class GapClassification(StrEnum):
@@ -90,5 +89,5 @@ class ExpertPublicGapService:
             gap_classification=classification,
             key_divergence_drivers=drivers,
             epistemic_bridges=bridges,
-            generated_at=datetime.now(timezone.utc).isoformat(),
+            generated_at=datetime.now(UTC).isoformat(),
         )

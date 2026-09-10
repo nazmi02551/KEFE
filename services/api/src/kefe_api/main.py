@@ -112,6 +112,7 @@ from kefe_api.modules.decision.lineage_service import DecisionLineageService
 from kefe_api.modules.decision.reflection_router import router as reflection_router
 from kefe_api.modules.decision.reflection_service import ReflectionService
 from kefe_api.modules.decision.router import router as decision_router
+from kefe_api.modules.discovery.router import discovery_router
 from kefe_api.modules.flow_runtime.router import router as flow_runtime_router
 from kefe_api.modules.flow_runtime.service import FlowRuntimeService
 from kefe_api.modules.global_discovery.router import router as global_discovery_router
@@ -140,7 +141,6 @@ from kefe_api.modules.identity.otp_provider_receipts_router import (
 )
 from kefe_api.modules.identity.router import router as identity_router
 from kefe_api.modules.identity.service import IdentityService
-from kefe_api.modules.discovery.router import discovery_router
 from kefe_api.modules.impact.router import impact_router
 from kefe_api.modules.privacy.router import router as privacy_router
 from kefe_api.modules.privacy.service import PrivacyService

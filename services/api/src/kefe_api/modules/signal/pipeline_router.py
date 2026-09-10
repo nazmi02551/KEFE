@@ -21,7 +21,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
 from kefe_api.modules.signal.pipeline_service import SignalPipelineError, SignalPipelineService
-from kefe_api.modules.signal.signal_models import QualifiedSignal, SignalQualificationTier
+from kefe_api.modules.signal.signal_models import QualifiedSignal
 
 router = APIRouter(prefix="/internal/signal-pipeline", tags=["internal-signal-pipeline"])
 

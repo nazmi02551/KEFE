@@ -1,20 +1,20 @@
 from __future__ import annotations
 
+import hashlib
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum
-import hashlib
-from typing import Sequence
+from enum import StrEnum
 from uuid import UUID
 
 
-class ContributionClassId(str, Enum):
+class ContributionClassId(StrEnum):
     CORE_PRE_RESULT = "CORE_PRE_RESULT"
     EXPOSED = "EXPOSED"
     ADVOCACY_SUPPORT = "ADVOCACY_SUPPORT"
 
 
-class IsolationAuditStatus(str, Enum):
+class IsolationAuditStatus(StrEnum):
     ENFORCED = "ENFORCED"
     BREACH_DETECTED = "BREACH_DETECTED"
 

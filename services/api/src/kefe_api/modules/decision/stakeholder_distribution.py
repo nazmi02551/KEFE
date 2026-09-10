@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Mapping, Sequence
 
 
 class StakeholderCategory(StrEnum):
@@ -135,5 +135,5 @@ class StakeholderDistributionService:
             active_categories_count=len(distributions),
             stakeholder_distributions=distributions,
             pluralism_score=pluralism,
-            generated_at=datetime.now(timezone.utc).isoformat(),
+            generated_at=datetime.now(UTC).isoformat(),
         )

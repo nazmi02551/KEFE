@@ -1,21 +1,21 @@
 from __future__ import annotations
 
+import hashlib
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum
-import hashlib
-from typing import Sequence
+from enum import StrEnum
 from uuid import UUID
 
 
-class JurisdictionLevel(str, Enum):
+class JurisdictionLevel(StrEnum):
     MUNICIPAL = "MUNICIPAL"
     REGIONAL = "REGIONAL"
     NATIONAL = "NATIONAL"
     TRANSNATIONAL = "TRANSNATIONAL"
 
 
-class ScopeAlignmentStatus(str, Enum):
+class ScopeAlignmentStatus(StrEnum):
     STRICTLY_ALIGNED = "STRICTLY_ALIGNED"
     OVERBROAD_WARNING = "OVERBROAD_WARNING"
     MISMATCH_DISQUALIFIED = "MISMATCH_DISQUALIFIED"

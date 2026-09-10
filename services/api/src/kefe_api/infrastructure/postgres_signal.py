@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import json
-from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import Engine, text
-from sqlalchemy.exc import IntegrityError
 
 from kefe_api.modules.signal.signal_models import (
     QualifiedSignal,
@@ -196,7 +193,8 @@ class PostgresSignalRepository:
         - collective.consensus_participation.case_version_id (uuid)
         - content.case_version.title for display title
         """
-        from datetime import UTC, datetime as dt
+        from datetime import UTC
+        from datetime import datetime as dt
 
         with self._engine.connect() as conn:
             # Count CORE_PRE_RESULT participants for this CaseVersion

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import hashlib
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
-import hashlib
-from typing import Mapping, Sequence
-from uuid import UUID, uuid4
+from uuid import UUID
 
 
 @dataclass(frozen=True)

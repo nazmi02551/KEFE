@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import datetime, timezone
-from enum import StrEnum
 import hashlib
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from enum import StrEnum
 
 
 class InstitutionType(StrEnum):
@@ -43,7 +43,7 @@ class VerifiedInstitutionResponseService:
         if len(signing_key_id.strip()) < 3:
             raise ValueError("signing_key_id must have at least 3 characters")
 
-        ts = timestamp or datetime.now(timezone.utc)
+        ts = timestamp or datetime.now(UTC)
         ts_str = ts.isoformat()
 
         raw_payload = f"{response_id}:{signal_id}:{institution_name}:{signing_key_id}:{ts_str}"

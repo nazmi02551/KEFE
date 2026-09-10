@@ -3,12 +3,10 @@ from __future__ import annotations
 from typing import Protocol
 from uuid import UUID
 
+from kefe_api.modules.impact.action_models import ActionMilestone
 from kefe_api.modules.impact.models import (
-    AuthorityVerificationStatus,
     InstitutionResponse,
-    InstitutionResponseType,
 )
-from kefe_api.modules.impact.action_models import ActionMilestone, ActionStatus
 
 
 class ImpactRepository(Protocol):

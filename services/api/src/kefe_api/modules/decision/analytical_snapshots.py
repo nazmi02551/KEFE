@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
-import hashlib
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
@@ -19,7 +18,7 @@ def build_analytical_perspectives(
     actor_id: UUID,
     committed_choice: str = "A",
 ) -> dict[str, Any]:
-    now_utc = datetime.now(timezone.utc)
+    now_utc = datetime.now(UTC)
     ts_str = now_utc.isoformat()
 
     user_pseudonym = str(actor_id)[:8]

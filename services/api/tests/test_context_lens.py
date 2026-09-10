@@ -23,7 +23,7 @@ def test_context_lens_service_adds_and_retrieves_pillars() -> None:
         source_url="https://mevzuat.gov.tr/mevzuat?MevzuatNo=5393",
     )
 
-    p2 = service.add_pillar(
+    service.add_pillar(
         case_version_id=case_id,
         pillar_type=LensPillarType.COMPARATIVE_PRACTICE,
         title="Avrupa Metropollerinde Gece Ulaşımı",

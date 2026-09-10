@@ -9,9 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from kefe_api.modules.impact.action_models import ActionMilestone, ActionStatus
 from kefe_api.modules.impact.models import (
-    AuthorityVerificationStatus,
     InstitutionResponse,
-    InstitutionResponseType,
 )
 from kefe_api.modules.impact.ports import ImpactRepository
 
@@ -207,12 +205,12 @@ def update_action_progress(
     """Update the progress and status of an existing action milestone."""
     try:
         status_enum = ActionStatus(payload.status)
-    except ValueError:
+    except ValueError as exc:
         raise HTTPException(
             status_code=400,
             detail=f"Invalid status: {payload.status}. "
                    f"Valid values: {[s.value for s in ActionStatus]}",
-        )
+        ) from exc
 
     existing = repo.get_action(action_id)
     if existing is None:
@@ -239,7 +237,7 @@ def update_action_progress(
     )
     try:
         repo.update_action(updated)
-    except KeyError:
-        raise HTTPException(status_code=404, detail=f"Action {action_id} not found")
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=f"Action {action_id} not found") from exc
 
     return _action_out(updated)

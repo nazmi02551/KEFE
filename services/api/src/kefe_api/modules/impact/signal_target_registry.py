@@ -16,14 +16,15 @@ Invariants:
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
-from typing import Protocol, Sequence
+from enum import StrEnum
+from typing import Protocol
 from uuid import UUID
 
 
-class TargetType(str, Enum):
+class TargetType(StrEnum):
     MUNICIPAL_GOVERNMENT = "MUNICIPAL_GOVERNMENT"
     MINISTRY_DEPARTMENT = "MINISTRY_DEPARTMENT"
     REGULATORY_BODY = "REGULATORY_BODY"
@@ -32,7 +33,7 @@ class TargetType(str, Enum):
     CIVIC_OMBUDSMAN = "CIVIC_OMBUDSMAN"
 
 
-class DispatchStatus(str, Enum):
+class DispatchStatus(StrEnum):
     """One-way monotonic dispatch lifecycle.
 
     PROPOSED_TARGET  → admin proposes an institution as a target

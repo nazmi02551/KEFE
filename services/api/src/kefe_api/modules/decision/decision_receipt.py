@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import datetime, timezone
 import hashlib
+from dataclasses import dataclass
+from datetime import UTC, datetime
 from uuid import UUID
 
 
@@ -29,7 +29,7 @@ class DecisionReceiptGenerator:
         if len(user_pseudonym.strip()) < 3:
             raise ValueError("user_pseudonym must have at least 3 characters")
 
-        ts = timestamp or datetime.now(timezone.utc)
+        ts = timestamp or datetime.now(UTC)
         ts_str = ts.isoformat()
 
         raw_payload = f"{case_version_id}:{user_pseudonym}:{committed_choice}:{ts_str}"

@@ -12,6 +12,13 @@ from kefe_api.modules.discovery.search_models import (
     SearchFilterQuery,
 )
 from kefe_api.modules.discovery.search_service import CaseSearchFilterService
+from kefe_api.modules.discovery.user_discovery_profile import (
+    ComplexityLevel,
+    DomainPreference,
+    FreshnessPreference,
+    RealEventPreference,
+    UserDiscoveryProfileService,
+)
 
 discovery_router = APIRouter(prefix="/v1/discovery", tags=["Discovery"])
 
@@ -43,6 +50,9 @@ def get_search_service() -> CaseSearchFilterService:
     return _DEFAULT_SEARCH_SERVICE
 
 
+_SearchServiceDep = Annotated[CaseSearchFilterService, Depends(get_search_service)]
+
+
 class SearchResultItemOut(BaseModel):
     model_config = ConfigDict(frozen=True)
 
@@ -70,13 +80,13 @@ class SearchFilterResultOut(BaseModel):
     response_model=SearchFilterResultOut,
 )
 def search_cases(
+    service: _SearchServiceDep,
     q: Annotated[str | None, Query(description="Search keyword")] = None,
     domain: Annotated[str | None, Query(description="Domain filter")] = None,
     tags: Annotated[
         str | None, Query(description="Comma-separated tags")
     ] = None,
     status: Annotated[str | None, Query(description="Case status")] = None,
-    service: CaseSearchFilterService = Depends(get_search_service),
 ) -> SearchFilterResultOut:
     tag_tuple: tuple[str, ...] = ()
     if tags:
@@ -110,14 +120,6 @@ def search_cases(
         ],
     )
 
-
-from kefe_api.modules.discovery.user_discovery_profile import (
-    ComplexityLevel,
-    DomainPreference,
-    FreshnessPreference,
-    RealEventPreference,
-    UserDiscoveryProfileService,
-)
 
 _DEFAULT_PROFILE_SERVICE = UserDiscoveryProfileService()
 

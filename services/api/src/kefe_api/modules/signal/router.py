@@ -1,22 +1,22 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
 
-from kefe_api.modules.signal.card_models import SignalConfidenceTier
+from kefe_api.modules.impact.signal_target_registry import SignalTargetRegistryService
 from kefe_api.modules.signal.card_service import SignalConsensusCardService
 from kefe_api.modules.signal.contribution_classes import ContributionClassesService
 from kefe_api.modules.signal.ports import SignalRepository
-from kefe_api.modules.signal.signal_health import SignalHealthAuditService, SignalQualificationStatus
+from kefe_api.modules.signal.signal_health import (
+    SignalHealthAuditService,
+)
 from kefe_api.modules.signal.signal_models import QualifiedSignal, SignalQualificationTier
 from kefe_api.modules.signal.signal_qualification import SignalQualificationService
 from kefe_api.modules.signal.signal_scope import JurisdictionLevel, SignalScopeAlignmentService
 from kefe_api.modules.signal.signal_versioning import SignalVersioningService
-from kefe_api.modules.impact.signal_target_registry import SignalTargetRegistryService
 
 signal_router = APIRouter(prefix="/v1/signals", tags=["signals"])
 

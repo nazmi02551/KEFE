@@ -19,6 +19,7 @@ from kefe_api.infrastructure.postgres_flow_pinned_content_authoring import (
     PostgresFlowPinnedContentAuthoringRepository,
 )
 from kefe_api.infrastructure.postgres_identity import PostgresIdentityRepository
+from kefe_api.infrastructure.postgres_impact import PostgresImpactRepository
 from kefe_api.infrastructure.postgres_ingestion_orchestration import (
     PostgresIngestionOrchestrationRepository,
 )
@@ -35,14 +36,9 @@ from kefe_api.infrastructure.postgres_reflection_decision import (
     PostgresReflectionDecisionRepository,
 )
 from kefe_api.infrastructure.postgres_sharing import PostgresShareRepository
-from kefe_api.infrastructure.postgres_impact import PostgresImpactRepository
 from kefe_api.infrastructure.postgres_signal import PostgresSignalRepository
 from kefe_api.modules.admin_security.in_memory import InMemoryAdminSessionStore
 from kefe_api.modules.admin_security.ports import AdminSessionStore
-from kefe_api.modules.impact.in_memory import InMemoryImpactRepository
-from kefe_api.modules.impact.ports import ImpactRepository
-from kefe_api.modules.signal.in_memory import InMemorySignalRepository
-from kefe_api.modules.signal.ports import SignalRepository
 from kefe_api.modules.analytics.in_memory import InMemoryAnalyticsEventStore
 from kefe_api.modules.analytics.ports import AnalyticsEventStore
 from kefe_api.modules.case_media.in_memory import InMemoryCaseMediaRepository
@@ -86,6 +82,8 @@ from kefe_api.modules.identity.otp_request_guard import (
     OtpRequestAbusePolicy,
 )
 from kefe_api.modules.identity.ports import IdentityRepository
+from kefe_api.modules.impact.in_memory import InMemoryImpactRepository
+from kefe_api.modules.impact.ports import ImpactRepository
 from kefe_api.modules.ingestion_orchestration.in_memory import (
     InMemoryIngestionOrchestrationRepository,
 )
@@ -100,6 +98,8 @@ from kefe_api.modules.progress.in_memory import InMemoryProgressRepository
 from kefe_api.modules.progress.ports import ProgressRepository
 from kefe_api.modules.sharing.in_memory import InMemoryShareRepository
 from kefe_api.modules.sharing.ports import ShareRepository
+from kefe_api.modules.signal.in_memory import InMemorySignalRepository
+from kefe_api.modules.signal.ports import SignalRepository
 
 
 def build_analytics_event_store(settings: Settings) -> AnalyticsEventStore:

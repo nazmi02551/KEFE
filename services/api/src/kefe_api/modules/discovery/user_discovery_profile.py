@@ -8,11 +8,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class DomainPreference(str, Enum):
+class DomainPreference(StrEnum):
     CIVIC = "CIVIC"
     TECHNOLOGY = "TECHNOLOGY"
     BIOETHICS = "BIOETHICS"
@@ -21,19 +21,19 @@ class DomainPreference(str, Enum):
     ECONOMIC = "ECONOMIC"
 
 
-class ComplexityLevel(str, Enum):
+class ComplexityLevel(StrEnum):
     INTRODUCTORY = "INTRODUCTORY"
     BALANCED = "BALANCED"
     DEEP_DELIBERATION = "DEEP_DELIBERATION"
 
 
-class FreshnessPreference(str, Enum):
+class FreshnessPreference(StrEnum):
     CURRENT_EVENTS = "CURRENT_EVENTS"
     BALANCED = "BALANCED"
     TIMELESS_FOUNDATIONS = "TIMELESS_FOUNDATIONS"
 
 
-class RealEventPreference(str, Enum):
+class RealEventPreference(StrEnum):
     REAL_EVENTS_FIRST = "REAL_EVENTS_FIRST"
     BALANCED = "BALANCED"
     HYPOTHETICALS_FIRST = "HYPOTHETICALS_FIRST"

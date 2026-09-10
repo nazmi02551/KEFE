@@ -1,20 +1,20 @@
 from __future__ import annotations
 
+import hashlib
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum
-import hashlib
-from typing import Sequence
+from enum import StrEnum
 from uuid import UUID
 
 
-class SignalQualificationStatus(str, Enum):
+class SignalQualificationStatus(StrEnum):
     QUALIFIED = "QUALIFIED"
     PROVISIONAL = "PROVISIONAL"
     DISQUALIFIED = "DISQUALIFIED"
 
 
-class SignalQualificationTier(str, Enum):
+class SignalQualificationTier(StrEnum):
     GOLD_STANDARD = "GOLD_STANDARD"
     SILVER_VALIDATED = "SILVER_VALIDATED"
     BRONZE_OBSERVED = "BRONZE_OBSERVED"

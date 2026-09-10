@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 
 
@@ -37,7 +37,7 @@ class MerkleAuditProofService:
         if proof_depth < 1:
             raise ValueError(f"proof_depth must be >= 1, got {proof_depth}")
 
-        ts = verified_timestamp or datetime.now(timezone.utc).isoformat()
+        ts = verified_timestamp or datetime.now(UTC).isoformat()
 
         return MerkleAuditProofResult(
             leaf_id=leaf_id.strip(),

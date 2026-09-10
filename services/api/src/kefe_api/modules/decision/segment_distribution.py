@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from collections.abc import Mapping
+from dataclasses import dataclass
+from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Mapping, Sequence
 
 
 class SegmentCohortType(StrEnum):
@@ -196,5 +196,5 @@ class PrivacySafeSegmentDistributionService:
             overall_sample_size=overall_sample,
             segments=evaluated_segments,
             privacy_guarantees=PrivacyGuarantees(),
-            generated_at=datetime.now(timezone.utc).isoformat(),
+            generated_at=datetime.now(UTC).isoformat(),
         )

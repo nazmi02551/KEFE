@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import datetime, timezone
-from enum import StrEnum
 import hashlib
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from enum import StrEnum
 
 
 class ModerationActionType(StrEnum):
@@ -44,7 +44,7 @@ class ModeratorAuditLogService:
         if len(justification_text.strip()) < 10:
             raise ValueError("justification_text must have at least 10 characters")
 
-        ts = timestamp or datetime.now(timezone.utc)
+        ts = timestamp or datetime.now(UTC)
         ts_str = ts.isoformat()
 
         raw_payload = f"{audit_id}:{target_resource_id}:{moderator_id}:{action_type}:{policy_rule_reference}:{justification_text}:{ts_str}"

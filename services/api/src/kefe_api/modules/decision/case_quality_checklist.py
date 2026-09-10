@@ -6,12 +6,12 @@ for editorial fairness, source provenance, and constitutional neutrality.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
-from enum import Enum
+from dataclasses import dataclass
+from enum import StrEnum
 from typing import Any
 
 
-class QualityAuditStatus(str, Enum):
+class QualityAuditStatus(StrEnum):
     VERIFIED = "VERIFIED"
     PENDING = "PENDING"
     FLAGGED = "FLAGGED"

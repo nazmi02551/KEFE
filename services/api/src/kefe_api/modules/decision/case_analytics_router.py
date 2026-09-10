@@ -1,18 +1,15 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime, timezone
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from kefe_api.modules.decision.case_objection import (
-    CaseObjectionItem,
     CaseObjectionService,
     ObjectionCategory,
-    ObjectionStatus,
 )
 from kefe_api.modules.decision.case_quality_checklist import (
     CaseQualityChecklistEvaluator,
@@ -28,7 +25,6 @@ from kefe_api.modules.decision.correction_history import (
 )
 from kefe_api.modules.decision.divergence_classifier import (
     ConsensusDivergenceClassifier,
-    DivergenceClassification,
 )
 from kefe_api.modules.decision.expert_public_gap import ExpertPublicGapService
 from kefe_api.modules.decision.incentive_map import IncentiveMapCalculator
@@ -37,7 +33,6 @@ from kefe_api.modules.decision.normative_models import (
     NormativePhilosophy,
 )
 from kefe_api.modules.decision.policy_simulator import (
-    EquilibriumState,
     PolicySimulatorCalculator,
 )
 from kefe_api.modules.decision.process_analysis import ProcessAnalysisCalculator
@@ -145,8 +140,8 @@ def get_consensus_divergence(
             dist = json.loads(distribution_json)
             if not isinstance(dist, dict):
                 raise ValueError("Distribution must be a JSON object")
-        except Exception:
-            raise HTTPException(status_code=400, detail="Invalid distribution_json format")
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail="Invalid distribution_json format") from exc
     else:
         dist = {"opt_a": 0.55, "opt_b": 0.45}
 
