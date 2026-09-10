@@ -354,7 +354,7 @@ The following items remain incomplete after Session 2:
 
 **PR #403:** https://github.com/nazmi02551/KEFE/pull/403
 
-**Commits in branch (27 total, on top of main):**
+**Commits in branch (31 total, on top of main):**
 1. `cf93f986` — signal/impact hexagonal ports, pipeline service, admin studio signal+impact pages
 2. `f2cd413a` — env.example, design-tokens build+validate scripts, CURRENT.md session 2
 3. `2dc3a47f` — kefe-locale validate script, fix a11y namespace in keys.json
@@ -379,6 +379,8 @@ The following items remain incomplete after Session 2:
 22. `f2d84330` — feat(api): Editorial CQB approve-statement endpoint (CAP-063) — [PROVISIONAL] removal, approve→dispatch flow, 7 tests
 23. `07666b2d` — feat(mobile): SignalConsensusCard provisional banner + isProvisional model field
 24. `bc1f3757` — feat(api+mobile): is_provisional field in SignalConsensusCardResponse + mobile fromJson guard
+25. `f1961dee` — feat(mobile): SignalTargetRegistry data layer — abstract + HTTP + preview repositories (CAP-057)
+26. `51b5c5f9` — feat(mobile): SignalTargetRegistry Riverpod controller, isFullyDispatched, reload() (CAP-057)
 
 **Test results (verified locally):**
 - API in-memory: **895 passed, 123 skipped, 0 failed**
@@ -406,7 +408,19 @@ The following items remain incomplete after Session 2:
    - 895 tests pass, 0 non-E501 lint errors
 9. **OTP binding (CAP-042):** Altyapı tamam. `build_otp_delivery()` factory: CAPTURE (dev/test), DISABLED, HTTP (production). Real delivery: set `KEFE_OTP_DELIVERY_MODE=HTTP`, `KEFE_OTP_HTTP_ENDPOINT`, `KEFE_OTP_DELIVERY_SECRET`. No code changes needed.
 10. **Mobile Signal card (CAP-063):** isProvisional field + provisional banner (attention color, hourglass icon). API `SignalConsensusCardResponse.is_provisional` field added. Public feed still filters PROVISIONAL. Dart analyze: clean.
-11. **Next wave:** Issue #291 / Public Feed conflict (CAP-123) — Slice 17 ADR and canonical feed reconciliation between PR #267 and PR #273.
+11. **Mobile Impact layer complete (CAP-057):**
+    - `signal_target_registry_repository.dart` abstract interface
+    - `http_signal_target_registry_repository.dart` (GET /v1/signals/{id}/target-registry)
+    - `preview_signal_target_registry_repository.dart` (deterministic fixture, no network)
+    - `signal_target_registry_controller.dart` — Riverpod Notifier, isFullyDispatched, reload()
+    - `SignalTargetRegistryCard` presentation widget already existed and wires correctly
+    - dart analyze: No issues found across all impact/ files
+12. **Issue #291 / Public Feed conflict (CAP-123):**
+    ADR-0098 accepted. feature/canonical-public-feed-catalog has 1405 commits above main.
+    This requires a product-level merge/rebase decision — not resolved in this session.
+    Migration 20260804_0026 correctly in main. In-memory catalog tests: 10/10 pass.
+13. **API test totals:** 895 passed, 123 skipped, 0 failed. Lint: 0 non-E501 errors.
+14. **Next wave (for next agent):** Dart unit tests for SignalTargetRegistryState + controller using PreviewSignalTargetRegistryRepository. Then: Issue #291 canonical feed merge strategy.
 
 **Next agent session standard protocol:**
 1. Read `AGENTS.md` + this file (sections 14-15)
