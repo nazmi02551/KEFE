@@ -185,21 +185,28 @@ class PostgresSignalRepository:
     def get_computation_input(self, case_version_id: UUID) -> SignalComputationInput | None:
         """Compute signal input from the live decision pipeline.
 
-        Reads from decision.weigh_session (committed, pre-result rows only)
-        and decision.response (to determine the leading stance).
-        Only CORE_PRE_RESULT contribution-class sessions are included per
-        ADR-0256 Contribution Classes Separation invariant.
+        Reads from collective.consensus_participation which is the authoritative
+        post-commit store for stance + contribution_class per participant.
+        Only CORE_PRE_RESULT rows are counted per the Contribution Classes
+        Separation invariant (ADR-0256 / CAP-055).
+
+        Schema verified against migration chain:
+        - collective.consensus_participation.stance_code (text)
+        - collective.consensus_participation.contribution_class IN ('CORE_PRE_RESULT','EXPOSED')
+        - collective.consensus_participation.case_version_id (uuid)
+        - content.case_version.title for display title
         """
+        from datetime import UTC, datetime as dt
+
         with self._engine.connect() as conn:
-            # Count committed core pre-result sessions for this case
+            # Count CORE_PRE_RESULT participants for this CaseVersion
             count_row = conn.execute(
                 text(
                     """
                     SELECT count(*) AS core_commit_count
-                    FROM decision.weigh_session ws
-                    WHERE ws.case_version_id    = :case_version_id
-                      AND ws.commit_status      = 'COMMITTED'
-                      AND ws.contribution_class = 'CORE_PRE_RESULT'
+                    FROM collective.consensus_participation cp
+                    WHERE cp.case_version_id    = :case_version_id
+                      AND cp.contribution_class = 'CORE_PRE_RESULT'
                     """
                 ),
                 {"case_version_id": case_version_id},
@@ -210,29 +217,24 @@ class PostgresSignalRepository:
 
             core_commit_count = int(count_row["core_commit_count"])
 
-            # Aggregate stance distribution from the primary single-choice question
-            # Uses the first SINGLE_CHOICE response found for each committed session
+            # Aggregate stance distribution from CORE_PRE_RESULT participants
             stance_rows = conn.execute(
                 text(
                     """
                     SELECT
-                        r.choice_code,
+                        cp.stance_code,
                         count(*) AS stance_count
-                    FROM decision.weigh_session ws
-                    JOIN decision.response r
-                      ON r.session_id = ws.session_id
-                    WHERE ws.case_version_id    = :case_version_id
-                      AND ws.commit_status      = 'COMMITTED'
-                      AND ws.contribution_class = 'CORE_PRE_RESULT'
-                      AND r.question_type       = 'SINGLE_CHOICE'
-                    GROUP BY r.choice_code
+                    FROM collective.consensus_participation cp
+                    WHERE cp.case_version_id    = :case_version_id
+                      AND cp.contribution_class = 'CORE_PRE_RESULT'
+                    GROUP BY cp.stance_code
                     ORDER BY stance_count DESC
                     """
                 ),
                 {"case_version_id": case_version_id},
             ).mappings().all()
 
-            # Fetch case title from content_authoring
+            # Fetch case display title
             title_row = conn.execute(
                 text(
                     """
@@ -253,16 +255,15 @@ class PostgresSignalRepository:
         divisor = total if total > 0 else 1
 
         stance_distribution = {
-            str(r["choice_code"]): int(r["stance_count"]) / divisor
+            str(r["stance_code"]): int(r["stance_count"]) / divisor
             for r in stance_rows
         }
 
         top_row = stance_rows[0]
-        top_stance_code = str(top_row["choice_code"])
+        top_stance_code = str(top_row["stance_code"])
         top_stance_count = int(top_row["stance_count"])
         agreement_percentage = round((top_stance_count / divisor) * 100, 2)
 
-        from datetime import UTC, datetime
         return SignalComputationInput(
             case_version_id=case_version_id,
             case_title=case_title,
@@ -271,7 +272,7 @@ class PostgresSignalRepository:
             top_stance_count=top_stance_count,
             agreement_percentage=agreement_percentage,
             stance_distribution=stance_distribution,
-            computed_at=datetime.now(UTC),
+            computed_at=dt.now(UTC),
         )
 
     # ------------------------------------------------------------------
