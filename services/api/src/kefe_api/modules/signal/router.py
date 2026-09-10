@@ -49,6 +49,14 @@ class SignalConsensusCardResponse(BaseModel):
     confidence_tier: str = Field(..., description="Confidence tier (GOLD_STANDARD, SILVER_VALIDATED, BRONZE_OBSERVED)")
     certified_at: str = Field(..., description="ISO 8601 UTC certification timestamp")
     qualification_tier: str = Field(..., description="Qualification tier from SignalQualificationTier")
+    is_provisional: bool = Field(
+        default=False,
+        description=(
+            "True if the consensus_statement contains [PROVISIONAL] "
+            "(pipeline-generated, pending editorial CQB review). "
+            "Provisional signals are excluded from public display by default."
+        ),
+    )
 
 
 class SignalHealthDimensionOut(BaseModel):
@@ -279,6 +287,7 @@ def get_signal_consensus_cards(
                 confidence_tier=card.confidence_tier.value,
                 certified_at=card.certified_at.isoformat(),
                 qualification_tier=signal.qualification_tier.value,
+                is_provisional="[PROVISIONAL]" in signal.consensus_statement,
             )
         )
     return cards
