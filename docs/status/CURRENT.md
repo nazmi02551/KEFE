@@ -354,7 +354,7 @@ The following items remain incomplete after Session 2:
 
 **PR #403:** https://github.com/nazmi02551/KEFE/pull/403
 
-**Commits in branch (22 total, on top of main):**
+**Commits in branch (25 total, on top of main):**
 1. `cf93f986` — signal/impact hexagonal ports, pipeline service, admin studio signal+impact pages
 2. `f2cd413a` — env.example, design-tokens build+validate scripts, CURRENT.md session 2
 3. `2dc3a47f` — kefe-locale validate script, fix a11y namespace in keys.json
@@ -374,10 +374,12 @@ The following items remain incomplete after Session 2:
 17. `f7116416` — docs: CURRENT.md session 2 phase 2 update
 18. (CAP-057 Phase 2) — signal.dispatch_target_registry migration (0043), PostgresSignalDispatchTargetResolver + Writer, 13 tests
 19. (CAP-057 Phase 2) — signal dispatch endpoints: propose-target + advance-target, provisional block, 9 tests
-20. docs: CURRENT.md 22 commits, 888 tests
+20. `ed9d8f04` — docs: CURRENT.md 22 commits, 888 tests
+21. `b7671a11` — ci+test: signal postgres tests → api-ci.yml gate (test_signal_postgres.py, test_signal_dispatch_target_postgres.py)
+22. `f2d84330` — feat(api): Editorial CQB approve-statement endpoint (CAP-063) — [PROVISIONAL] removal, approve→dispatch flow, 7 tests
 
 **Test results (verified locally):**
-- API in-memory: **888 passed, 110 skipped, 0 failed**
+- API in-memory: **895 passed, 123 skipped, 0 failed**
 - Admin Studio: **56/56 tests, lint 0, typecheck clean, 8/8 contracts PASS, build OK**
 - apps/web structural: **26/26 tests PASS**
 - packages validate: **design-tokens PASS, locale PASS, test-fixtures PASS**
@@ -392,7 +394,15 @@ The following items remain incomplete after Session 2:
 5. **F3 Admin Studio:** All existing workspaces have contract tests (8/8 PASS). Flow Composer, Reason Moderation, Publication Operations have full implementations. No immediate gaps.
 6. **Signal Target Registry (CAP-057):** `SignalTargetRegistryService` now injection-based. `NullInstitutionTargetResolver` is the safe default. `StaticInstitutionTargetResolver` for tests. `validate_transition()` enforces one-way monotonic lifecycle. Real institutional targeting requires Admin Target Management UI (CAP-057 Phase 2 — not yet implemented).
 7. **CAP-057 Phase 2 complete (locally):** `signal.dispatch_target_registry` table (migration 0043), `PostgresSignalDispatchTargetResolver` (read), `PostgresSignalDispatchTargetWriter` (write, 5 lifecycle methods), dispatch endpoints `propose-target` + `advance-target` with [PROVISIONAL] block. 888 tests pass.
-8. **Next wave:** Add new test files to `api-ci.yml` postgres gate (test_signal_dispatch_target.py, test_signal_dispatch_pipeline_api.py). Then: implement editorial CQB acceptance that removes [PROVISIONAL] tag from consensus_statement (CAP-063 editorial pipeline) to enable real dispatch.
+8. **Complete Signal→Dispatch pipeline (CAP-057 + CAP-063):**
+   - `POST /compute` → pipeline generates [PROVISIONAL] signal
+   - `PUT /approve-statement` → editorial CQB removes [PROVISIONAL], recomputes audit hash
+   - `POST /propose-target` → institutional target proposed (blocked if PROVISIONAL)
+   - `POST /advance-target` → PROPOSED→VERIFIED→DISPATCHED→ACKNOWLEDGED→ACTION_PLEDGED
+   - `signal.dispatch_target_registry` table (migration 0043) with lifecycle CHECK constraint
+   - `PostgresSignalDispatchTargetResolver` (read) + `PostgresSignalDispatchTargetWriter` (write)
+   - 895 tests pass, 0 non-E501 lint errors
+9. **Next wave:** apps/mobile Signal card screen check (CAP-058), then OTP real provider binding (CAP-042).
 
 **Next agent session standard protocol:**
 1. Read `AGENTS.md` + this file (sections 14-15)
