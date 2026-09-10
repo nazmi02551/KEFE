@@ -188,6 +188,7 @@ class KefeStrings {
   String get signalCardTierGold => _text('signal.tier_gold');
   String get signalCardTierSilver => _text('signal.tier_silver');
   String get signalCardTierBronze => _text('signal.tier_bronze');
+  String get signalCardProvisionalLabel => _text('signal.provisional_label');
   String signalCardAgreementBadge(int pct, int count) =>
       _text('signal.agreement_badge', placeholders: {'pct': pct, 'count': count});
 

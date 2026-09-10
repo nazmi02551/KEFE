@@ -17,6 +17,7 @@ class SignalConsensusCardModel {
     required this.sampleSize,
     required this.confidenceTier,
     required this.certifiedAt,
+    this.isProvisional = false,
   });
 
   final String signalId;
@@ -27,6 +28,7 @@ class SignalConsensusCardModel {
   final int sampleSize;
   final SignalConfidenceTierModel confidenceTier;
   final DateTime certifiedAt;
+  final bool isProvisional;
 
   factory SignalConsensusCardModel.fromJson(Map<String, dynamic> json) {
     final tierStr =
@@ -36,17 +38,27 @@ class SignalConsensusCardModel {
       'SILVER' => SignalConfidenceTierModel.silver,
       _ => SignalConfidenceTierModel.bronze,
     };
+    final rawStatement = json['consensus_statement'] as String;
+    // Strip [PROVISIONAL] prefix from display — the isProvisional flag is set separately
+    final displayStatement = rawStatement.startsWith('[PROVISIONAL]')
+        ? rawStatement
+            .replaceFirst(RegExp(r'^\[PROVISIONAL\]\s*'), '')
+            .trim()
+        : rawStatement;
+
     return SignalConsensusCardModel(
       signalId: json['signal_id'] as String,
       caseVersionId: json['case_version_id'] as String,
       caseTitle: json['case_title'] as String,
-      consensusStatement: json['consensus_statement'] as String,
+      consensusStatement: displayStatement,
       agreementPercentage: (json['agreement_percentage'] as num).toDouble(),
       sampleSize: (json['sample_size'] as num).toInt(),
       confidenceTier: tier,
       certifiedAt:
           DateTime.tryParse(json['certified_at'] as String? ?? '')?.toUtc() ??
           DateTime.now().toUtc(),
+      isProvisional: json['is_provisional'] as bool? ??
+          rawStatement.contains('[PROVISIONAL]'),
     );
   }
 
@@ -59,5 +71,6 @@ class SignalConsensusCardModel {
     'sample_size': sampleSize,
     'confidence_tier': confidenceTier.name.toUpperCase(),
     'certified_at': certifiedAt.toIso8601String(),
+    'is_provisional': isProvisional,
   };
 }
