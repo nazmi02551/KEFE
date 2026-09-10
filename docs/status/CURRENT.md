@@ -1,6 +1,6 @@
 # KEFE Current Project Checkpoint
 
-**Updated:** 2026-09-10 (Session 2 final — automated maintenance)
+**Updated:** 2026-09-10 (Session 2 complete — automated maintenance)
 **Repository:** `nazmi02551/KEFE`
 **Default branch:** `main`
 **Convergence issue:** Issue #287
@@ -352,7 +352,9 @@ The following items remain incomplete after Session 2:
 
 ## 14. Final state — branch maintenance/2026-09-10-signal-impact-hexagonal-studio
 
-**Commits in branch (10 total, on top of main):**
+**PR #403:** https://github.com/nazmi02551/KEFE/pull/403
+
+**Commits in branch (15 total, on top of main):**
 1. `cf93f986` — signal/impact hexagonal ports, pipeline service, admin studio signal+impact pages
 2. `f2cd413a` — env.example, design-tokens build+validate scripts, CURRENT.md session 2
 3. `2dc3a47f` — kefe-locale validate script, fix a11y namespace in keys.json
@@ -362,18 +364,31 @@ The following items remain incomplete after Session 2:
 7. `f3dd6fa6` — fix PostgresSignalRepository SQL (collective.consensus_participation)
 8. `be49f2b8` — ci: add 20 missing postgres test files to api-ci.yml
 9. `1c985085` — apps/web case detail page + API endpoint fix
-10. (this commit) — Makefile web targets, CURRENT.md final update
+10. `b23a5b5e` — Makefile web targets, CURRENT.md final update
+11. `0e770e55` — apps/web share link page, 26/26 tests
+12. `faada00c` — fix(admin): admin-studio-header plain `<a>` → `<Link>` + aria-current
+13. `4a82c163` — fix(admin): typed Route cast, async effect pattern signal/impact workspaces (lint 0, typecheck clean)
+14. (this commit) — kefe-test-fixtures cases/identities/impact fixtures + validate script, Makefile
 
-**Test results:** 853 passed, 110 skipped, 0 failed (in-memory only)
+**Test results (verified locally):**
+- API in-memory: **853 passed, 110 skipped, 0 failed**
+- Admin Studio: **56/56 tests, lint 0, typecheck clean, 8/8 contracts PASS, build OK**
+- apps/web structural: **26/26 tests PASS**
+- packages validate: **design-tokens PASS, locale PASS, test-fixtures PASS**
+- capability portfolio: **128 capabilities, 0 errors**
 
 ## 15. Pending items before next AI agent session
 
-1. **CI verification (HIGHEST PRIORITY):** Branch must be rebased onto PR #290 (`140960ac`) and all CI gates must pass: API CI, Mobile CI, MVP Beta Gates, Global Readiness, canonical-public-feed CI, postgres-integration (55 files).
-2. **Signal pipeline Postgres test:** `test_signal_*_postgres.py` and `test_canonical_public_feed_catalog_postgres.py` need to pass in the postgres-integration CI job to validate the SQL fix.
-3. **PR #267 / PR #273:** Formally supersede after CI pass.
-4. **Admin Studio nav links:** Revert plain `<a>` → `<Link>` after `next build` typed routes are confirmed.
-5. **apps/web:** `/share/{share_id}` route not yet implemented.
-6. **F4 production readiness:** OTP HTTP delivery (`HttpOtpDelivery`) is complete and correct. Only needs `KEFE_OTP_HTTP_ENDPOINT` + bearer/secret configured in deployment. No code changes required.
-7. **F3 completion:** Admin Studio Case Builder, Flow Composer, moderation, media, reporting remain incomplete.
+1. **CI verification (HIGHEST PRIORITY):** PR #403 must pass all CI gates: API CI lint-unit, postgres-integration (55 files), Mobile CI, MVP Beta Gates, Global Readiness. Rebase onto PR #290 (`140960ac`) if required.
+2. **Signal pipeline Postgres test:** `test_signal_*_postgres.py` and `test_canonical_public_feed_catalog_postgres.py` need to pass in postgres-integration CI to confirm the SQL fix end-to-end.
+3. **PR #267 / PR #273:** Formally supersede/close after CI pass on PR #403.
+4. **F4 production readiness:** OTP HTTP delivery is complete. Only runtime environment variables needed: `KEFE_OTP_HTTP_ENDPOINT`, `KEFE_OTP_HTTP_BEARER_TOKEN` or `KEFE_OTP_HTTP_SECRET_REF`. No code changes required.
+5. **F3 Admin Studio:** All existing workspaces have contract tests (8/8 PASS). Flow Composer, Reason Moderation, Publication Operations have full implementations. No immediate gaps.
+6. **Next wave:** After CI passes, open the F3 Flow Composer integration with content authoring API (CAP-064), then advance F1 Signal dispatch (CAP-057).
 
-**Next agent session standard protocol:** Read `AGENTS.md`, this file (section 14-15), capability portfolio, ADR-0096/0098, foundation program. Inspect branch `maintenance/2026-09-10-signal-impact-hexagonal-studio` → open PR → CI → merge.
+**Next agent session standard protocol:**
+1. Read `AGENTS.md` + this file (sections 14-15)
+2. Check capability portfolio validation: `python scripts/validate_capability_portfolio.py`
+3. Inspect PR #403 CI status — if green, merge; if failing, triage failures
+4. Inspect branch `maintenance/2026-09-10-signal-impact-hexagonal-studio` for any additional commits
+5. Continue from the first uncompleted pending item above in dependency order
