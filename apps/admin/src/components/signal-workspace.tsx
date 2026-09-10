@@ -39,11 +39,20 @@ export function SignalWorkspace({ baseUrl }: SignalWorkspaceProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setLoading(true);
-    listSignalConsensusCards(baseUrl, { limit: 50 })
-      .then(setCards)
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false));
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      try {
+        const result = await listSignalConsensusCards(baseUrl, { limit: 50 });
+        if (!cancelled) setCards(result);
+      } catch (err) {
+        if (!cancelled) setError((err as Error).message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    void load();
+    return () => { cancelled = true; };
   }, [baseUrl]);
 
   if (loading) {

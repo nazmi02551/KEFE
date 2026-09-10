@@ -62,17 +62,26 @@ export function ImpactWorkspace({ baseUrl, csrfToken, caseVersionId }: ImpactWor
   const [proposeCaseId, setProposeCaseId] = useState(caseVersionId ?? "");
 
   useEffect(() => {
-    setLoading(true);
-    Promise.all([
-      listInstitutionResponses(baseUrl, { caseVersionId, limit: 50 }),
-      listActionMilestones(baseUrl, { caseVersionId, limit: 50 }),
-    ])
-      .then(([resps, acts]) => {
-        setResponses(resps);
-        setActions(acts);
-      })
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false));
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      try {
+        const [resps, acts] = await Promise.all([
+          listInstitutionResponses(baseUrl, { caseVersionId, limit: 50 }),
+          listActionMilestones(baseUrl, { caseVersionId, limit: 50 }),
+        ]);
+        if (!cancelled) {
+          setResponses(resps);
+          setActions(acts);
+        }
+      } catch (err) {
+        if (!cancelled) setError((err as Error).message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    void load();
+    return () => { cancelled = true; };
   }, [baseUrl, caseVersionId]);
 
   async function handleProposeAction(e: React.FormEvent) {

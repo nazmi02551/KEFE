@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useSyncExternalStore } from "react";
@@ -67,7 +68,7 @@ export function AdminStudioHeader() {
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={item.href as Route}
                 className={`${styles.navLink} ${isActive ? styles.navLinkActive : ""}`}
                 aria-current={isActive ? "page" : undefined}
               >
