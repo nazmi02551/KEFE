@@ -210,7 +210,7 @@ class SignalTargetRegistryReportOut(BaseModel):
 
     signal_id: str
     case_version_id: str
-    primary_target_id: str
+    primary_target_id: str | None
     targets: list[SignalTargetItemOut]
     certified_at: str
     registry_proof_hash: str
@@ -488,14 +488,16 @@ def get_signal_targets(
     repo: SignalRepoDep,
 ) -> SignalTargetRegistryReportOut:
     signal = _resolve_signal(signal_id, repo)
-    report = SignalTargetRegistryService.evaluate(
+    service = SignalTargetRegistryService()
+    report = service.evaluate(
         signal_id=signal.signal_id,
         case_version_id=signal.case_version_id,
+        primary_domain_code=signal.case_title or "GOVERNANCE",
     )
     return SignalTargetRegistryReportOut(
         signal_id=str(report.signal_id),
         case_version_id=str(report.case_version_id),
-        primary_target_id=str(report.primary_target_id),
+        primary_target_id=str(report.primary_target_id) if report.primary_target_id else None,
         targets=[
             SignalTargetItemOut(
                 target_id=str(t.target_id),

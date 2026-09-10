@@ -1,3 +1,13 @@
+"""API tests for GET /v1/signals/{signal_id}/targets.
+
+The endpoint now uses NullInstitutionTargetResolver by default (safe — no
+auto-dispatch without explicit Admin targeting). Tests verify the endpoint
+shape and the null-target case.
+
+NOTE: When Admin target management (CAP-057) is integrated, the router will
+accept an injected resolver and tests will inject StaticInstitutionTargetResolver
+to verify populated responses.
+"""
 from __future__ import annotations
 
 from datetime import UTC, datetime
@@ -34,7 +44,12 @@ def _make_app():
     return app
 
 
-def test_signal_target_registry_api() -> None:
+def test_signal_target_registry_api_returns_200_with_null_targets() -> None:
+    """GET /targets returns 200 with empty targets list when no resolver is configured.
+
+    NullInstitutionTargetResolver is the safe default — no auto-dispatch without
+    explicit institutional targeting (CAP-057 Admin Signal Target Ops).
+    """
     app = _make_app()
     client = TestClient(app)
 
@@ -45,14 +60,26 @@ def test_signal_target_registry_api() -> None:
 
     assert data["signal_id"] == signal_id
     assert len(data["registry_proof_hash"]) == 64
-    assert len(data["targets"]) == 2
+    # NullResolver: no targets pre-assigned
+    assert data["targets"] == []
+    assert data["primary_target_id"] is None
+    assert data["case_version_id"] == str(_CASE_ID)
 
-    primary = data["targets"][0]
-    assert primary["target_id"] == data["primary_target_id"]
-    assert primary["target_type"] == "MUNICIPAL_GOVERNMENT"
-    assert primary["dispatch_status"] == "ACKNOWLEDGED"
-    assert primary["response_due_days"] == 30
-    assert "@" in primary["official_contact_channel"]
+
+def test_signal_target_registry_api_response_shape() -> None:
+    """Verify the response model fields are present and well-typed."""
+    app = _make_app()
+    client = TestClient(app)
+
+    res = client.get(f"/v1/signals/{_SIGNAL_ID}/targets")
+    assert res.status_code == 200
+    data = res.json()
+
+    required_fields = {"signal_id", "case_version_id", "primary_target_id",
+                       "targets", "certified_at", "registry_proof_hash"}
+    assert required_fields.issubset(data.keys())
+    assert isinstance(data["targets"], list)
+    assert isinstance(data["certified_at"], str)
 
 
 def test_signal_target_registry_not_found() -> None:
