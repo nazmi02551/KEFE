@@ -135,8 +135,17 @@ infra-reset:
 # ---------------------------------------------------------------------------
 
 packages-validate:
-	node packages/kefe-design-tokens/scripts/validate.mjs 2>/dev/null || echo "Design token validation: script not built yet"
-	node packages/kefe-locale/scripts/validate.mjs 2>/dev/null || echo "Locale validation: script not built yet"
+	node packages/kefe-design-tokens/scripts/validate.mjs
+	node packages/kefe-locale/scripts/validate.mjs
+
+web-test:
+	cd apps/web && node tools/run_tests.mjs
+
+web-dev:
+	cd apps/web && npm run dev
+
+web-build:
+	cd apps/web && npm run build
 
 # ---------------------------------------------------------------------------
 # Aggregate targets
@@ -146,4 +155,4 @@ packages-validate:
 check: api-lint api-test-fast admin-lint
 
 # Full local check: requires infra-up first
-check-all: api-check admin-check mobile-check packages-validate
+check-all: api-check admin-check mobile-check packages-validate web-test

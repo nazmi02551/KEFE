@@ -1,6 +1,6 @@
 # KEFE Current Project Checkpoint
 
-**Updated:** 2026-09-10 (Session 2 — automated maintenance)
+**Updated:** 2026-09-10 (Session 2 final — automated maintenance)
 **Repository:** `nazmi02551/KEFE`
 **Default branch:** `main`
 **Convergence issue:** Issue #287
@@ -323,4 +323,57 @@ The following items remain incomplete after Session 2:
 6. **PR #267 / PR #273:** Formally close/supersede these PRs after canonical feed catalog CI passes. Their migration identifiers must not enter canonical line.
 7. **F3 completion:** Admin Studio Case Builder, Flow Composer, CQB/risk gates, moderation, media and operational reporting remain incomplete relative to full F3 vision.
 
-Next priority for next agent session: Open a PR from `maintenance/2026-09-10-signal-impact-hexagonal-studio` → `main` (or rebase onto PR #290), run full CI, verify all gates, then supersede PR #267 and #273.
+### Makefile updates
+- `packages-validate`: removed silent fallback — both validate scripts now exist and must pass.
+- `web-test`, `web-dev`, `web-build` targets added for `apps/web`.
+- `check-all` now includes `web-test`.
+
+### CI — api-ci.yml postgres-integration
+- Added 20 missing postgres test files (was 35 files, now 55). Includes `test_canonical_public_feed_catalog_postgres.py`, `test_canonical_public_feed_http_postgres.py`, all OTP, MVP, guest merge and provider tests.
+
+### apps/web — consumer web application scaffold
+- `app/layout.tsx` — root layout, dark-first, theme flash prevention, accessibility
+- `app/globals.css` — full KEFE design token CSS custom properties (dark+light+reduced-motion)
+- `app/page.tsx` — home page hero
+- `app/signal/page.tsx` — public signal consensus cards (SSR, `/v1/signals/consensus-cards`)
+- `app/cases/page.tsx` — public case list (SSR, `/v1/cases`)
+- `app/cases/[caseId]/page.tsx` — case detail (questions, options, meta)
+- `app/not-found.tsx` — 404 page
+- `src/components/site-header.tsx` — sticky nav header, active link highlighting
+- `src/lib/kefe-api.ts` — typed public API client (no admin/internal endpoints)
+  - Fixed: `/v1/context` → `/v1/cases` (correct decision router endpoint)
+  - Added: `CaseDetail`, `CaseQuestion`, `QuestionOption` types
+- `tools/run_tests.mjs` — 19/19 structural tests pass
+- `package.json`, `tsconfig.json`, `next.config.ts`, `.env.example`
+
+### PostgresSignalRepository SQL fix
+- `get_computation_input()` SQL corrected: was using non-existent `decision.weigh_session.commit_status`, `decision.weigh_session.contribution_class`, `decision.response.choice_code`, `decision.response.question_type`.
+- Now correctly reads from `collective.consensus_participation.stance_code` and `.contribution_class = 'CORE_PRE_RESULT'` (schema verified against migrations 0001 + 0015).
+
+## 14. Final state — branch maintenance/2026-09-10-signal-impact-hexagonal-studio
+
+**Commits in branch (10 total, on top of main):**
+1. `cf93f986` — signal/impact hexagonal ports, pipeline service, admin studio signal+impact pages
+2. `f2cd413a` — env.example, design-tokens build+validate scripts, CURRENT.md session 2
+3. `2dc3a47f` — kefe-locale validate script, fix a11y namespace in keys.json
+4. `ad50e5a9` — canonical public feed catalog (Issue #291)
+5. `90ba5430` — kefe-design-tokens package.json tracking
+6. `bbbe80eb` — CURRENT.md feed catalog section
+7. `f3dd6fa6` — fix PostgresSignalRepository SQL (collective.consensus_participation)
+8. `be49f2b8` — ci: add 20 missing postgres test files to api-ci.yml
+9. `1c985085` — apps/web case detail page + API endpoint fix
+10. (this commit) — Makefile web targets, CURRENT.md final update
+
+**Test results:** 853 passed, 110 skipped, 0 failed (in-memory only)
+
+## 15. Pending items before next AI agent session
+
+1. **CI verification (HIGHEST PRIORITY):** Branch must be rebased onto PR #290 (`140960ac`) and all CI gates must pass: API CI, Mobile CI, MVP Beta Gates, Global Readiness, canonical-public-feed CI, postgres-integration (55 files).
+2. **Signal pipeline Postgres test:** `test_signal_*_postgres.py` and `test_canonical_public_feed_catalog_postgres.py` need to pass in the postgres-integration CI job to validate the SQL fix.
+3. **PR #267 / PR #273:** Formally supersede after CI pass.
+4. **Admin Studio nav links:** Revert plain `<a>` → `<Link>` after `next build` typed routes are confirmed.
+5. **apps/web:** `/share/{share_id}` route not yet implemented.
+6. **F4 production readiness:** OTP HTTP delivery (`HttpOtpDelivery`) is complete and correct. Only needs `KEFE_OTP_HTTP_ENDPOINT` + bearer/secret configured in deployment. No code changes required.
+7. **F3 completion:** Admin Studio Case Builder, Flow Composer, moderation, media, reporting remain incomplete.
+
+**Next agent session standard protocol:** Read `AGENTS.md`, this file (section 14-15), capability portfolio, ADR-0096/0098, foundation program. Inspect branch `maintenance/2026-09-10-signal-impact-hexagonal-studio` → open PR → CI → merge.
