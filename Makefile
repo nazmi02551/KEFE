@@ -137,6 +137,7 @@ infra-reset:
 packages-validate:
 	node packages/kefe-design-tokens/scripts/validate.mjs
 	node packages/kefe-locale/scripts/validate.mjs
+	node packages/kefe-test-fixtures/scripts/validate.mjs
 
 web-test:
 	cd apps/web && node tools/run_tests.mjs

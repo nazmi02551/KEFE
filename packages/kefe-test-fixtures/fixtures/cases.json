@@ -1,0 +1,58 @@
+{
+  "$version": "1.0.0",
+  "$note": "Canonical case test fixtures. UUIDs are stable and must not change without updating all dependent tests.",
+  "cases": [
+    {
+      "case_id": "22222222-2222-4222-8222-222222222222",
+      "case_version_id": "22222222-2222-4222-8222-222222222222",
+      "version_no": 1,
+      "title_tr": "Son koltuk kime verilmeli?",
+      "title_en": "Who should get the last seat?",
+      "summary_tr": "Sınırlı bir kaynakta öncelik belirleme meselesi.",
+      "summary_en": "Determining priority in a limited resource.",
+      "primary_domain_code": "SOCIAL",
+      "base_format": "BINARY",
+      "content_risk": "LOW",
+      "state": "PUBLISHED"
+    },
+    {
+      "case_id": "22222222-2222-4222-8222-222222222223",
+      "case_version_id": "22222222-2222-4222-8222-222222222223",
+      "version_no": 1,
+      "title_tr": "Yapay zekâ şirketlerinin veri toplaması sınırlandırılmalı mı?",
+      "title_en": "Should AI companies be restricted from collecting data?",
+      "summary_tr": "Kişisel veri ve rıza çerçevesinde yapay zekâ eğitimi kısıtlama meselesi.",
+      "summary_en": "AI training restrictions in the context of personal data and consent.",
+      "primary_domain_code": "TECHNOLOGY",
+      "base_format": "BINARY",
+      "content_risk": "MEDIUM",
+      "state": "PUBLISHED"
+    },
+    {
+      "case_id": "22222222-2222-4222-8222-222222222225",
+      "case_version_id": "22222222-2222-4222-8222-222222222225",
+      "version_no": 1,
+      "title_tr": "Kamu sözleşmeleri varsayılan olarak herkese açık olmalı mı?",
+      "title_en": "Should public contracts be open by default?",
+      "summary_tr": "Kamu ihalelerinde şeffaflık ve ticari sır dengesi.",
+      "summary_en": "Balance between transparency in public procurement and trade secrets.",
+      "primary_domain_code": "GOVERNANCE",
+      "base_format": "BINARY",
+      "content_risk": "LOW",
+      "state": "PUBLISHED"
+    },
+    {
+      "case_id": "22222222-2222-4222-8222-222222222299",
+      "case_version_id": "22222222-2222-4222-8222-222222222299",
+      "version_no": 1,
+      "title_tr": "Düşük katılımlı test vakası",
+      "title_en": "Low participation test case",
+      "summary_tr": "Bu vaka düşük katılımlı kenar senaryoları için test amaçlıdır.",
+      "summary_en": "This case is for testing low-participation edge scenarios.",
+      "primary_domain_code": "GOVERNANCE",
+      "base_format": "BINARY",
+      "content_risk": "LOW",
+      "state": "PUBLISHED"
+    }
+  ]
+}

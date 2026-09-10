@@ -1,0 +1,65 @@
+{
+  "$version": "1.0.0",
+  "$note": "Canonical identity/actor test fixtures. Used for auth, OTP, session and privacy tests.",
+  "actors": [
+    {
+      "actor_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "ref": "test_user_alpha",
+      "actor_type": "REGISTERED",
+      "email": "alpha@test.kefe.invalid",
+      "phone": "+905300000001",
+      "locale": "tr",
+      "country_code": "TR"
+    },
+    {
+      "actor_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      "ref": "test_user_beta",
+      "actor_type": "REGISTERED",
+      "email": "beta@test.kefe.invalid",
+      "phone": "+905300000002",
+      "locale": "en",
+      "country_code": "TR"
+    },
+    {
+      "actor_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+      "ref": "test_guest",
+      "actor_type": "GUEST",
+      "email": null,
+      "phone": null,
+      "locale": "tr",
+      "country_code": null
+    }
+  ],
+  "sessions": [
+    {
+      "session_id": "11111111-1111-4111-8111-111111111101",
+      "ref": "committed_core_1",
+      "actor_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "case_version_id": "22222222-2222-4222-8222-222222222222",
+      "contribution_class": "CORE_PRE_RESULT",
+      "state": "COMMITTED"
+    },
+    {
+      "session_id": "11111111-1111-4111-8111-111111111102",
+      "ref": "committed_core_2",
+      "actor_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      "case_version_id": "22222222-2222-4222-8222-222222222222",
+      "contribution_class": "CORE_PRE_RESULT",
+      "state": "COMMITTED"
+    },
+    {
+      "session_id": "11111111-1111-4111-8111-111111111201",
+      "ref": "exposed_1",
+      "actor_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "case_version_id": "22222222-2222-4222-8222-222222222222",
+      "contribution_class": "EXPOSED",
+      "state": "COMMITTED"
+    }
+  ],
+  "otp_test_codes": {
+    "note": "These codes are used in OTP delivery tests only. Never use in production or non-test code paths.",
+    "alpha_phone_otp": "123456",
+    "beta_phone_otp": "234567",
+    "alpha_email_otp": "345678"
+  }
+}

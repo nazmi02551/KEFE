@@ -1,0 +1,41 @@
+{
+  "$version": "1.0.0",
+  "$note": "Canonical impact test fixtures. Institution responses and action milestones for impact module tests.",
+  "institution_responses": [
+    {
+      "response_id": "88888888-8888-4888-8888-888888888801",
+      "signal_id": "77777777-7777-4777-8777-777777777701",
+      "case_version_id": "22222222-2222-4222-8222-222222222222",
+      "institution_name": "Test Kamu Kurumu A",
+      "institution_code": "TKK_A",
+      "response_type": "ACKNOWLEDGEMENT",
+      "response_text": "Vatandaş sesini dikkate alıyoruz.",
+      "responded_at": "2026-08-20T10:00:00Z",
+      "authority_verified": true
+    },
+    {
+      "response_id": "88888888-8888-4888-8888-888888888802",
+      "signal_id": "77777777-7777-4777-8777-777777777702",
+      "case_version_id": "22222222-2222-4222-8222-222222222223",
+      "institution_name": "Test Düzenleyici Kurum B",
+      "institution_code": "TDK_B",
+      "response_type": "POLICY_REFERENCE",
+      "response_text": "Konu mevcut regülasyon çalışmaları kapsamında incelenmektedir.",
+      "responded_at": "2026-08-25T14:00:00Z",
+      "authority_verified": true
+    }
+  ],
+  "action_milestones": [
+    {
+      "milestone_id": "99999999-9999-4999-8999-999999999901",
+      "signal_id": "77777777-7777-4777-8777-777777777701",
+      "case_version_id": "22222222-2222-4222-8222-222222222222",
+      "title": "Komisyon gündem maddesi",
+      "description": "Sinyalin ilgili meclis komisyonuna sevki",
+      "milestone_type": "LEGISLATIVE_REFERRAL",
+      "status": "PROPOSED",
+      "proposed_at": "2026-08-22T09:00:00Z",
+      "completed_at": null
+    }
+  ]
+}
