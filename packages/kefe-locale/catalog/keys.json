@@ -99,9 +99,9 @@
     },
     "accessibility": {
       "keys": [
-        "a11y.skip_to_content", "a11y.menu_open", "a11y.menu_close",
-        "a11y.loading", "a11y.error", "a11y.required_field",
-        "a11y.image_alt_case_cover"
+        "accessibility.skip_to_content", "accessibility.menu_open", "accessibility.menu_close",
+        "accessibility.loading", "accessibility.error", "accessibility.required_field",
+        "accessibility.image_alt_case_cover"
       ]
     },
     "errors": {
