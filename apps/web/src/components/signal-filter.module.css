@@ -1,0 +1,199 @@
+/* SignalFilter — client-side tier filter + search
+ * Dark-first KEFE design system, light theme via data-theme="light"
+ */
+
+.filterRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-4);
+  margin-bottom: var(--kefe-spacing-6);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.searchWrapper {
+  width: 100%;
+}
+
+.searchInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--kefe-spacing-3) var(--kefe-spacing-4);
+  font-size: 0.9375rem;
+  color: var(--kefe-color-foreground);
+  background: var(--kefe-color-surface);
+  border: 1px solid var(--kefe-color-border);
+  border-radius: var(--kefe-radius-md);
+  outline: none;
+  transition: border-color var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.searchInput::placeholder {
+  color: var(--kefe-color-muted);
+}
+
+.searchInput:focus {
+  border-color: var(--kefe-color-gold);
+}
+
+.tierFilter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kefe-spacing-2);
+}
+
+.tierBtn {
+  padding: 4px 14px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--kefe-color-muted);
+  background: transparent;
+  border: 1px solid var(--kefe-color-border);
+  border-radius: 99px;
+  cursor: pointer;
+  transition: color var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard),
+    background var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard),
+    border-color var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.tierBtn:hover {
+  color: var(--kefe-color-foreground);
+  border-color: var(--kefe-color-foreground);
+}
+
+.tierBtnActive {
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.resultCount {
+  font-size: 0.8125rem;
+  color: var(--kefe-color-muted);
+  margin: 0;
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--kefe-spacing-10) var(--kefe-spacing-4);
+  color: var(--kefe-color-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--kefe-spacing-4);
+}
+
+.clearBtn {
+  padding: 8px 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--kefe-color-gold);
+  background: transparent;
+  border: 1px solid var(--kefe-color-gold);
+  border-radius: 99px;
+  cursor: pointer;
+  transition: opacity var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.clearBtn:hover {
+  opacity: 0.75;
+}
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--kefe-spacing-5);
+}
+
+/* Card */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-3);
+  padding: var(--kefe-spacing-5);
+  background: var(--kefe-color-surface);
+  border: 1px solid var(--kefe-color-border);
+  border-radius: var(--kefe-radius-lg);
+  transition: box-shadow var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.card:hover {
+  box-shadow: var(--kefe-shadow-md);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--kefe-spacing-3);
+}
+
+.tierBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.agreementPct {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--kefe-color-foreground);
+  letter-spacing: -0.02em;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--kefe-color-foreground);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.cardStatement {
+  font-size: 0.875rem;
+  color: var(--kefe-color-muted);
+  line-height: 1.6;
+  flex: 1;
+  margin: 0;
+}
+
+.cardFooter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-1);
+  margin-top: auto;
+}
+
+.sampleSize {
+  font-size: 0.8125rem;
+  color: var(--kefe-color-muted);
+}
+
+.certifiedAt {
+  font-size: 0.8125rem;
+  color: var(--kefe-color-muted);
+}
+
+.detailLink {
+  display: inline-block;
+  margin-top: var(--kefe-spacing-3);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--kefe-color-gold);
+  text-decoration: none;
+  transition: opacity var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.detailLink:hover {
+  opacity: 0.75;
+}
