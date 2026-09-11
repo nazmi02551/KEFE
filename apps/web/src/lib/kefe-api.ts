@@ -94,6 +94,8 @@ export interface CaseContextSummary {
   title: string;
   summary: string;
   primary_domain_code: string;
+  /** true only when the backend explicitly returns boolean true (ADR-0133). */
+  is_real_event?: boolean;
 }
 
 export interface QuestionOption {
@@ -119,6 +121,8 @@ export interface CaseDetail {
   base_format: string;
   primary_domain: string;
   content_risk: string;
+  /** true only when the backend explicitly returns boolean true (ADR-0133). */
+  is_real_event?: boolean;
   questions: CaseQuestion[];
 }
 

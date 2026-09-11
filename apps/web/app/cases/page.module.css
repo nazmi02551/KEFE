@@ -107,3 +107,23 @@
   opacity: 0.78;
   text-decoration: none;
 }
+
+/* Real-event badge row (ADR-0133, CAP-026) */
+.badgeRow {
+  display: flex;
+  align-items: center;
+  gap: var(--kefe-spacing-2);
+  flex-wrap: wrap;
+}
+
+.realEventBadge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--kefe-color-empathy-gold) 15%, transparent);
+  color: var(--kefe-color-empathy-gold, var(--kefe-gold));
+  border: 1px solid color-mix(in srgb, var(--kefe-color-empathy-gold, var(--kefe-gold)) 30%, transparent);
+}

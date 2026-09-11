@@ -71,7 +71,14 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
 
       <article className={styles.article}>
         <header className={styles.header}>
-          <span className={styles.domainBadge}>{caseDetail.primary_domain}</span>
+          <div className={styles.badges}>
+            <span className={styles.domainBadge}>{caseDetail.primary_domain}</span>
+            {caseDetail.is_real_event === true && (
+              <span className={styles.realEventBadge} aria-label="Gerçek Olay">
+                Gerçek Olay
+              </span>
+            )}
+          </div>
           <h1 className={styles.title}>{caseDetail.title}</h1>
           <p className={styles.summary}>{caseDetail.summary}</p>
           <div className={styles.meta}>

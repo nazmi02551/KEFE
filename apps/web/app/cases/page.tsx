@@ -60,9 +60,16 @@ export default async function CasesPage() {
         <div className={styles.grid}>
           {cases.map((c) => (
             <article key={c.case_version_id} className={styles.card}>
-              <span className={styles.domainBadge}>
-                {domainLabel(c.primary_domain_code)}
-              </span>
+              <div className={styles.badgeRow}>
+                <span className={styles.domainBadge}>
+                  {domainLabel(c.primary_domain_code)}
+                </span>
+                {c.is_real_event === true && (
+                  <span className={styles.realEventBadge} aria-label="Gerçek Olay">
+                    Gerçek Olay
+                  </span>
+                )}
+              </div>
               <h2 className={styles.cardTitle}>{c.title}</h2>
               <p className={styles.cardSummary}>{c.summary}</p>
               <div className={styles.cardFooter}>
