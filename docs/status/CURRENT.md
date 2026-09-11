@@ -354,7 +354,7 @@ The following items remain incomplete after Session 2:
 
 **PR #403:** https://github.com/nazmi02551/KEFE/pull/403
 
-**Commits in branch (44 total, on top of main):**
+**Commits in branch (46 total, on top of main):**
 1. `cf93f986` — signal/impact hexagonal ports, pipeline service, admin studio signal+impact pages
 2. `f2cd413a` — env.example, design-tokens build+validate scripts, CURRENT.md session 2
 3. `2dc3a47f` — kefe-locale validate script, fix a11y namespace in keys.json
@@ -390,6 +390,7 @@ The following items remain incomplete after Session 2:
 33. `2b6e52bf` — test(mobile): reconcileWithCatalog unit tests — 8 tests, EXACT_CASE_ID_MATCH boundary
 34. `1852befc` — refactor(mobile): PublicObservatoryScreen → governed locale catalog (isTr branches removed)
 35. `49e6bb37` — refactor(mobile): eliminate isTr presentation-level language branching across 5 files + 2 domain models
+36. `5f2766c6` — test(mobile): ADR-0130 context source trust presentation contract tests — 8 tests (CAP-069)
 
 **Test results (verified locally):**
 - API in-memory: **895 passed, 123 skipped, 0 failed**
@@ -458,11 +459,14 @@ The following items remain incomplete after Session 2:
     - `_philosophyTitle(type, bool)` → `_philosophyTitle(type, String)` (normative_models_card)
     - Zero isTr presentation branches remain in lib/
 17. **Final state (this session):** API: 895 passed, 123 skipped, 0 failed. Dart analyze lib/+test/ clean. Portfolio: CAP-048/CAP-079 evidence updated. 42 branch commits.
-18. **Next wave (for next agent):**
-    - CAP-069 source micro-preview ADR-0130 contract tests
-    - Issue #291 canonical feed merge requires separate product decision session
-    - Run portfolio validation: `python scripts/validate_capability_portfolio.py`
-    - Full Dart analyze clean: already confirmed `dart analyze lib/ test/` → No issues found
+18. **CAP-069 source trust presentation (ADR-0130):**
+    - 8 contract guard tests: contract_id guard, semantics assertions (source_existence_implies_verified=false, claim_status_is_block_level=true), architecture assertions (no backend/API/schema changes), locale string coverage (contextJourneySourceReference TR/EN parity, publishedAt ISO format deterministic, source_kind 4 types distinct)
+    - dart analyze: No issues found
+19. **Final verified state:** API: 895 passed, 123 skipped, 0 failed. `dart analyze lib/ test/` → No issues found. Portfolio validate: PASS 128 capabilities. 46 branch commits.
+20. **Next wave (for next agent):**
+    - Issue #291 canonical feed merge — product decision required (PR #267 vs PR #273 conflict)
+    - Consider opening PR for `maintenance/2026-09-10-signal-impact-hexagonal-studio` → main
+    - Run: `python scripts/validate_capability_portfolio.py` to confirm clean state
 
 **Next agent session standard protocol:**
 1. Read `AGENTS.md` + this file (sections 14-15)
