@@ -354,7 +354,7 @@ The following items remain incomplete after Session 2:
 
 **PR #403:** https://github.com/nazmi02551/KEFE/pull/403
 
-**Commits in branch (49 total, on top of main):**
+**Commits in branch (54 total, on top of main):**
 1. `cf93f986` — signal/impact hexagonal ports, pipeline service, admin studio signal+impact pages
 2. `f2cd413a` — env.example, design-tokens build+validate scripts, CURRENT.md session 2
 3. `2dc3a47f` — kefe-locale validate script, fix a11y namespace in keys.json
@@ -393,6 +393,10 @@ The following items remain incomplete after Session 2:
 36. `5f2766c6` — test(mobile): ADR-0130 context source trust presentation contract tests — 8 tests (CAP-069)
 37. `2076879b` — fix(mobile): 801/801 tests all passing — 6 failing tests resolved
 38. `56b911ec` — feat(web+api): case detail signal consensus cards + version history (CAP-016, CAP-072)
+39. `27126e87` — test(api): CAP-073 bot shield tests 2→21 passing (boundary, validation, snapshot)
+40. `4ec3b3b7` — feat(web): is_real_event badge on case list + detail pages (ADR-0133, CAP-026)
+41. `4dd4be14` — feat(admin): signal workspace inline detail panel (health, qualification, targets)
+42. `804e708c` — feat(web): site footer (brand, nav links, methodology note)
 
 **Test results (verified locally):**
 - API in-memory: **895 passed, 123 skipped, 0 failed**
@@ -471,18 +475,26 @@ The following items remain incomplete after Session 2:
     - API: GET /v1/signals/consensus-cards now accepts optional case_version_id query filter
     - APK rebuilt with correct IP (10.117.163.214:8000) and installed on test device
     - Admin Studio (localhost:3000), Web App (localhost:3001), API (localhost:8000) all running
-20. **Current verified state (2026-09-11):**
-    - API: 895 passed, 123 skipped, 0 failed
+20. **Session 2 continued additions (2026-09-11 afternoon):**
+    - CAP-073 bot shield tests expanded: 2 → 21 (boundary, parametrize, frozen dataclass, snapshot shape)
+    - API: 895 → 914 passed, 123 skipped, 0 failed
+    - Web: is_real_event badge on case list + detail pages (ADR-0133, CAP-026)
+    - Admin Studio: signal workspace inline detail panel (health, qualification, target registry)
+    - Web: site footer added (brand, nav, Commit First/Blind First methodology note)
+    - 54 branch commits total
+21. **Current verified state (2026-09-11 afternoon):**
+    - API: 914 passed, 123 skipped, 0 failed
     - dart analyze lib/ + test/: No issues found
     - flutter test --concurrency=1: 801/801 passed
     - TypeScript (web + admin): tsc --noEmit clean
     - Portfolio: PASS 128 capabilities, 0 errors
-    - 49 branch commits
-21. **Next wave (for next agent):**
+    - Admin Studio all 8 contract checks: PASS
+    - 54 branch commits
+22. **Next wave (for next agent):**
     - Issue #291 canonical feed merge — product decision required (PR #267 vs PR #273 conflict)
     - Consider opening PR for maintenance branch → main
-    - CAP-073 bot/anomaly detection P0 IMPLEMENTED_PARTIAL — next gate evidence needed
     - CAP-084 guest conversion P0 — real provider OTP evidence needed
+    - CAP-005 blind-first variants, CAP-006 principle-first flow — ARCHITECTURE_ACCEPTED, Phase 2
     - Run: `python scripts/validate_capability_portfolio.py` to confirm clean state
     - Services to start: uvicorn (port 8000), npm run dev admin (3000), npm run dev web (3001)
 
