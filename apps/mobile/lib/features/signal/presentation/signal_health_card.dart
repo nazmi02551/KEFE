@@ -68,7 +68,6 @@ class SignalHealthCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
     final visual = context.kefeVisual;
-    final isTr = strings.isTr;
     final accent = _statusColor(visual, report.overallQualification);
 
     return InkWell(
@@ -168,7 +167,7 @@ class SignalHealthCard extends StatelessWidget {
             ...report.dimensions.map((dim) {
               final dimPassed = dim.isPassed;
               final dimColor = dimPassed ? visual.rules : visual.attention;
-              final dimTitle = isTr ? dim.titleTr : dim.titleEn;
+              final dimTitle = dim.localizedTitle(strings.locale.languageCode);
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),

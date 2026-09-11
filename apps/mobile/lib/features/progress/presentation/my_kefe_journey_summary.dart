@@ -381,7 +381,7 @@ class _ConstitutionalCockpitAssuranceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
-    final isTr = strings.isTr;
+    final lang = strings.locale.languageCode;
 
     return KefeSurface(
       key: const ValueKey('my-kefe-constitutional-cockpit'),
@@ -410,12 +410,12 @@ class _ConstitutionalCockpitAssuranceCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     KefeEyebrow(
-                      isTr ? 'ANAYASAL VE BİLİŞSEL GÜVENCELER' : 'CONSTITUTIONAL ASSURANCES',
+                      lang == 'tr' ? 'ANAYASAL VE BİLİŞSEL GÜVENCELER' : 'CONSTITUTIONAL ASSURANCES',
                       color: visual.rules,
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      isTr ? 'Kişisel Müzakere Kasası' : 'Personal Deliberation Vault',
+                      lang == 'tr' ? 'Kişisel Müzakere Kasası' : 'Personal Deliberation Vault',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w900,
                             letterSpacing: -0.2,
@@ -430,41 +430,41 @@ class _ConstitutionalCockpitAssuranceCard extends StatelessWidget {
           _AssuranceItem(
             icon: Icons.receipt_long_outlined,
             accent: visual.burgundy,
-            title: isTr ? 'Kriptografik Karar Makbuzu (CAP-012)' : 'Cryptographic Decision Receipt (CAP-012)',
-            description: isTr
+            title: lang == 'tr' ? 'Kriptografik Karar Makbuzu (CAP-012)' : 'Cryptographic Decision Receipt (CAP-012)',
+            description: lang == 'tr'
                 ? 'Kararlarınız yerel SHA-256 bütünlük özetiyle mühürlenir; profil oluşturulamaz ve anonimdir.'
                 : 'Decisions are sealed with local SHA-256 digests; privacy-first and tamper-evident.',
-            status: isTr ? 'Aktif' : 'Active',
+            status: lang == 'tr' ? 'Aktif' : 'Active',
           ),
           const SizedBox(height: 12),
           _AssuranceItem(
             icon: Icons.psychology_alt_outlined,
             accent: visual.empathy,
-            title: isTr ? 'Bilişsel Esneklik & Derinlik (CAP-174)' : 'Epistemic Flexibility & Depth (CAP-174)',
-            description: isTr
+            title: lang == 'tr' ? 'Bilişsel Esneklik & Derinlik (CAP-174)' : 'Epistemic Flexibility & Depth (CAP-174)',
+            description: lang == 'tr'
                 ? '"Ne Fikrimi Değiştirir?" sorgulamasıyla kendi düşünce koşullarınızı betimsel olarak kaydedebilirsiniz.'
                 : 'Records the conditions you describe that would inform your perspective post-deliberation.',
-            status: isTr ? 'Betimsel' : 'Descriptive',
+            status: lang == 'tr' ? 'Betimsel' : 'Descriptive',
           ),
           const SizedBox(height: 12),
           _AssuranceItem(
             icon: Icons.battery_charging_full_rounded,
             accent: visual.goldSoft,
-            title: isTr ? 'Zihinsel Yorgunluk Kalkanı (CAP-190)' : 'Decision Fatigue Guard (CAP-190)',
-            description: isTr
+            title: lang == 'tr' ? 'Zihinsel Yorgunluk Kalkanı (CAP-190)' : 'Decision Fatigue Guard (CAP-190)',
+            description: lang == 'tr'
                 ? 'Optimal tempo gözetilir; aceleci veya manipülatif karar döngüleri engellenir.'
                 : 'Protects from cognitive fatigue with healthy pacing and mindful intervals.',
-            status: isTr ? 'Dinlenmiş & Berrak' : 'Optimal Pacing',
+            status: lang == 'tr' ? 'Dinlenmiş & Berrak' : 'Optimal Pacing',
           ),
           const SizedBox(height: 12),
           _AssuranceItem(
             icon: Icons.account_balance_outlined,
             accent: visual.rules,
-            title: isTr ? 'Doğrulanmış Kurumsal Yanıt (CAP-192)' : 'Verified Institution Response (CAP-192)',
-            description: isTr
+            title: lang == 'tr' ? 'Doğrulanmış Kurumsal Yanıt (CAP-192)' : 'Verified Institution Response (CAP-192)',
+            description: lang == 'tr'
                 ? 'Müzakere edilen konular resmi kurum taahhütlerine ve mevzuat etki odasına bağlanır.'
                 : 'Connects collective deliberation to verified institutional commitments.',
-            status: isTr ? 'Bağlantılı' : 'Linked',
+            status: lang == 'tr' ? 'Bağlantılı' : 'Linked',
           ),
         ],
       ),

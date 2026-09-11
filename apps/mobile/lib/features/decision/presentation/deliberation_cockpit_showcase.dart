@@ -21,6 +21,14 @@ class DeliberationFeatureItem {
   final String subtitleEn;
   final IconData icon;
   final Color Function(KefeVisualSystem visual) accentGetter;
+
+  /// Returns the locale-appropriate title (English fallback for unsupported locales).
+  String localizedTitle(String languageCode) =>
+      languageCode == 'tr' ? titleTr : titleEn;
+
+  /// Returns the locale-appropriate subtitle (English fallback for unsupported locales).
+  String localizedSubtitle(String languageCode) =>
+      languageCode == 'tr' ? subtitleTr : subtitleEn;
 }
 
 const List<DeliberationFeatureItem> kefeDeliberationFeatures = [
@@ -99,14 +107,14 @@ class _DeliberationCockpitShowcaseState
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
-    final isTr = strings.isTr;
+    final lang = strings.locale.languageCode;
     final visual = context.kefeVisual;
     final active = kefeDeliberationFeatures[_selectedFeature];
     final activeColor = active.accentGetter(visual);
 
     return Semantics(
       container: true,
-      label: isTr
+      label: lang == 'tr'
           ? 'Anayasal Müzakere ve Güvence Kokpiti'
           : 'Constitutional Deliberation & Assurance Cockpit',
       child: KefeSurface(
@@ -136,7 +144,7 @@ class _DeliberationCockpitShowcaseState
                       Icon(active.icon, color: activeColor, size: 15),
                       const SizedBox(width: 6),
                       Text(
-                        isTr ? 'ANAYASAL GÜVENCELER' : 'CONSTITUTIONAL GUARANTEES',
+                        lang == 'tr' ? 'ANAYASAL GÜVENCELER' : 'CONSTITUTIONAL GUARANTEES',
                         style: TextStyle(
                           color: activeColor,
                           fontSize: 10.5,
@@ -159,7 +167,7 @@ class _DeliberationCockpitShowcaseState
             ),
             const SizedBox(height: 12),
             Text(
-              isTr ? active.titleTr : active.titleEn,
+              active.localizedTitle(lang),
               key: const ValueKey('deliberation-active-title'),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Colors.white,
@@ -170,7 +178,7 @@ class _DeliberationCockpitShowcaseState
             ),
             const SizedBox(height: 4),
             Text(
-              isTr ? active.subtitleTr : active.subtitleEn,
+              active.localizedSubtitle(lang),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.white.withValues(alpha: 0.76),
                     height: 1.35,
@@ -186,7 +194,6 @@ class _DeliberationCockpitShowcaseState
                     _PillButton(
                       item: kefeDeliberationFeatures[i],
                       isSelected: i == _selectedFeature,
-                      isTr: isTr,
                       visual: visual,
                       onTap: () => setState(() => _selectedFeature = i),
                     ),
@@ -207,19 +214,18 @@ class _PillButton extends StatelessWidget {
   const _PillButton({
     required this.item,
     required this.isSelected,
-    required this.isTr,
     required this.visual,
     required this.onTap,
   });
 
   final DeliberationFeatureItem item;
   final bool isSelected;
-  final bool isTr;
   final KefeVisualSystem visual;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final lang = KefeStrings.of(context).locale.languageCode;
     final color = item.accentGetter(visual);
     return InkWell(
       onTap: onTap,
@@ -247,7 +253,7 @@ class _PillButton extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Text(
-              isTr ? item.titleTr : item.titleEn,
+              item.localizedTitle(lang),
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
@@ -267,7 +273,7 @@ class CaseDeliberationBadgesRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
-    final isTr = strings.isTr;
+    final lang = strings.locale.languageCode;
     final visual = context.kefeVisual;
 
     return Wrap(
@@ -276,25 +282,25 @@ class CaseDeliberationBadgesRow extends StatelessWidget {
       children: [
         _Badge(
           icon: Icons.shield_outlined,
-          label: isTr ? 'Bot Kalkanı' : 'Bot Shield',
+          label: lang == 'tr' ? 'Bot Kalkanı' : 'Bot Shield',
           color: visual.rules,
           bgColor: visual.subtleRulesSurface,
         ),
         _Badge(
           icon: Icons.balance_rounded,
-          label: isTr ? '3-Eksenli' : 'Tri-Axial',
+          label: lang == 'tr' ? '3-Eksenli' : 'Tri-Axial',
           color: visual.goldSoft,
           bgColor: visual.subtleGoldSurface,
         ),
         _Badge(
           icon: Icons.receipt_long_outlined,
-          label: isTr ? 'Makbuz' : 'Receipt',
+          label: lang == 'tr' ? 'Makbuz' : 'Receipt',
           color: visual.burgundy,
           bgColor: visual.burgundy.withValues(alpha: 0.12),
         ),
         _Badge(
           icon: Icons.psychology_alt_outlined,
-          label: isTr ? 'Esneklik' : 'Flexibility',
+          label: lang == 'tr' ? 'Esneklik' : 'Flexibility',
           color: visual.empathy,
           bgColor: visual.subtleEmpathySurface,
         ),

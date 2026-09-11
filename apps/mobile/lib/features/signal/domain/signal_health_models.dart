@@ -39,6 +39,14 @@ class SignalHealthDimensionModel {
   final bool isPassed;
   final String detail;
 
+  /// Returns the locale-appropriate title.
+  ///
+  /// Falls back to [titleEn] for unsupported locales (AGENTS.md §9:
+  /// "unsupported lookup has deterministic English fallback").
+  /// Raw backend values are not mutated — only sunum selection changes.
+  String localizedTitle(String languageCode) =>
+      languageCode == 'tr' ? titleTr : titleEn;
+
   factory SignalHealthDimensionModel.fromJson(Map<String, dynamic> json) =>
       SignalHealthDimensionModel(
         dimensionId: json['dimension_id'] as String? ?? '',

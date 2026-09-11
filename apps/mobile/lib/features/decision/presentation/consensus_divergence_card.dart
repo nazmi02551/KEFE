@@ -44,10 +44,10 @@ class ConsensusDivergenceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
-    final isTr = Localizations.localeOf(context).languageCode == 'tr';
+    final lang = Localizations.localeOf(context).languageCode;
     final badgeColor = _categoryColor(context, model.classification);
-    final label = isTr ? model.labelTr : model.labelEn;
-    final description = isTr ? model.descriptionTr : model.descriptionEn;
+    final label = lang == 'tr' ? model.labelTr : model.labelEn;
+    final description = lang == 'tr' ? model.descriptionTr : model.descriptionEn;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -66,7 +66,7 @@ class ConsensusDivergenceCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                isTr ? 'UZLAŞI VE AYRIŞMA ANALİZİ' : 'CONSENSUS & DIVERGENCE ANALYSIS',
+                lang == 'tr' ? 'UZLAŞI VE AYRIŞMA ANALİZİ' : 'CONSENSUS & DIVERGENCE ANALYSIS',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -137,7 +137,7 @@ class ConsensusDivergenceCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isTr ? 'ÖNCÜ PAY' : 'LEADING SHARE',
+                        lang == 'tr' ? 'ÖNCÜ PAY' : 'LEADING SHARE',
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
@@ -171,7 +171,7 @@ class ConsensusDivergenceCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isTr ? 'AYRIŞMA MARJI' : 'DIVERGENCE MARGIN',
+                        lang == 'tr' ? 'AYRIŞMA MARJI' : 'DIVERGENCE MARGIN',
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
@@ -196,7 +196,7 @@ class ConsensusDivergenceCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            isTr
+            lang == 'tr'
                 ? 'Bu sınıflandırma matematiksel dağılıma dayanır ve normatif bir değer yargısı içermez.'
                 : 'This classification is based on mathematical distribution and carries no normative judgment.',
             style: TextStyle(

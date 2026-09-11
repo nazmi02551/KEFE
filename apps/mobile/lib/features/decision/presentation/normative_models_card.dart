@@ -26,16 +26,17 @@ class NormativeModelsCard extends StatelessWidget {
     }
   }
 
-  String _philosophyTitle(NormativePhilosophyType type, bool isTr) {
+  String _philosophyTitle(NormativePhilosophyType type, String lang) {
+    final tr = lang == 'tr';
     switch (type) {
       case NormativePhilosophyType.utilitarianMaxWelfare:
-        return isTr ? 'Faydacılık' : 'Utilitarianism';
+        return tr ? 'Faydacılık' : 'Utilitarianism';
       case NormativePhilosophyType.deontologicalCategoricalRights:
-        return isTr ? 'Ödev Etiği (Haklar)' : 'Deontological Rights';
+        return tr ? 'Ödev Etiği (Haklar)' : 'Deontological Rights';
       case NormativePhilosophyType.rawlsianMaximinEquity:
-        return isTr ? 'Rawlsgil Hakkaniyet' : 'Rawlsian Equity';
+        return tr ? 'Rawlsgil Hakkaniyet' : 'Rawlsian Equity';
       case NormativePhilosophyType.virtueEthicsCharacter:
-        return isTr ? 'Erdem Etiği' : 'Virtue Ethics';
+        return tr ? 'Erdem Etiği' : 'Virtue Ethics';
     }
   }
 
@@ -89,7 +90,7 @@ class NormativeModelsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
-    final isTr = Localizations.localeOf(context).languageCode == 'tr';
+    final lang = Localizations.localeOf(context).languageCode;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -108,7 +109,7 @@ class NormativeModelsCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  isTr ? 'NORMATİF ETİK MODELLERİ' : 'NORMATIVE ETHICAL MODELS',
+                  lang == 'tr' ? 'NORMATİF ETİK MODELLERİ' : 'NORMATIVE ETHICAL MODELS',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -120,7 +121,7 @@ class NormativeModelsCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              isTr
+              lang == 'tr'
                   ? 'Seçeneklerin felsefi etik geleneklerindeki karşılıkları ve değer dağılımları.'
                   : 'Philosophical ethical traditions and value distribution across options.',
               style: TextStyle(
@@ -132,8 +133,8 @@ class NormativeModelsCard extends StatelessWidget {
             const SizedBox(height: 16),
             ...model.evaluations.map((evaluation) {
               final domColor = _philosophyColor(context, evaluation.dominantPhilosophy);
-              final domTitle = _philosophyTitle(evaluation.dominantPhilosophy, isTr);
-              final explanation = isTr
+              final domTitle = _philosophyTitle(evaluation.dominantPhilosophy, lang);
+              final explanation = lang == 'tr'
                   ? model.philosophiesExplainedTr[evaluation.dominantPhilosophy.wireValue] ?? ''
                   : model.philosophiesExplainedEn[evaluation.dominantPhilosophy.wireValue] ?? '';
 
@@ -180,25 +181,25 @@ class NormativeModelsCard extends StatelessWidget {
                     const SizedBox(height: 10),
                     _buildScoreBar(
                       context: context,
-                      label: isTr ? 'Faydacılık' : 'Utilitarianism',
+                      label: lang == 'tr' ? 'Faydacılık' : 'Utilitarianism',
                       score: evaluation.utilitarianScore,
                       color: visual.rules,
                     ),
                     _buildScoreBar(
                       context: context,
-                      label: isTr ? 'Ödev Etiği (Haklar)' : 'Deontological Rights',
+                      label: lang == 'tr' ? 'Ödev Etiği (Haklar)' : 'Deontological Rights',
                       score: evaluation.deontologicalScore,
                       color: visual.empathy,
                     ),
                     _buildScoreBar(
                       context: context,
-                      label: isTr ? 'Rawlsgil Hakkaniyet' : 'Rawlsian Equity',
+                      label: lang == 'tr' ? 'Rawlsgil Hakkaniyet' : 'Rawlsian Equity',
                       score: evaluation.rawlsianScore,
                       color: visual.gold,
                     ),
                     _buildScoreBar(
                       context: context,
-                      label: isTr ? 'Erdem Etiği' : 'Virtue Ethics',
+                      label: lang == 'tr' ? 'Erdem Etiği' : 'Virtue Ethics',
                       score: evaluation.virtueScore,
                       color: visual.success,
                     ),

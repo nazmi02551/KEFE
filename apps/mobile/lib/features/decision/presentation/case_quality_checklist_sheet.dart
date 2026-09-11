@@ -30,7 +30,7 @@ class CaseQualityChecklistSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final strings = KefeStrings.of(context);
     final visual = context.kefeVisual;
-    final isTr = strings.isTr;
+    final lang = strings.locale.languageCode;
 
     return Container(
       decoration: BoxDecoration(
@@ -90,8 +90,8 @@ class CaseQualityChecklistSheet extends StatelessWidget {
               child: Column(
                 children: checklist.items.map((item) {
                   final statusColor = _statusColor(visual, item.status);
-                  final name = isTr ? item.nameTr : item.nameEn;
-                  final criterion = isTr ? item.criterionTr : item.criterionEn;
+                  final name = lang == 'tr' ? item.nameTr : item.nameEn;
+                  final criterion = lang == 'tr' ? item.criterionTr : item.criterionEn;
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
