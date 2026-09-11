@@ -354,7 +354,7 @@ The following items remain incomplete after Session 2:
 
 **PR #403:** https://github.com/nazmi02551/KEFE/pull/403
 
-**Commits in branch (39 total, on top of main):**
+**Commits in branch (42 total, on top of main):**
 1. `cf93f986` — signal/impact hexagonal ports, pipeline service, admin studio signal+impact pages
 2. `f2cd413a` — env.example, design-tokens build+validate scripts, CURRENT.md session 2
 3. `2dc3a47f` — kefe-locale validate script, fix a11y namespace in keys.json
@@ -387,6 +387,8 @@ The following items remain incomplete after Session 2:
 30. `5ed46cae` — test(mobile): ADR-0142 information-status guide locale contract tests — 15 tests
 31. `2cd8633c` — refactor(mobile): remove dead extension methods from ContextJourneyStrings (CAP-070)
 32. `7cb93b95` — feat(mobile): SavedCasesState lifecycle update markers — reconcileWithCatalog, clearUpdateMarkers, updateCount, hasUpdate (ADR-0139, CAP-079)
+33. `2b6e52bf` — test(mobile): reconcileWithCatalog unit tests — 8 tests, EXACT_CASE_ID_MATCH boundary
+34. `1852befc` — refactor(mobile): PublicObservatoryScreen → governed locale catalog (isTr branches removed)
 
 **Test results (verified locally):**
 - API in-memory: **895 passed, 123 skipped, 0 failed**
@@ -441,8 +443,22 @@ The following items remain incomplete after Session 2:
     - load(): clears updatedCaseIds (catalog re-comparison required after reload)
     - SharedPreferences payload unchanged — no migration
     - dart analyze: No issues found
-16. **Final state (this session):** API: 895 passed, 123 skipped, 0 failed. Dart analyze lib/+test/ clean. Portfolio: CAP-048 IMPLEMENTED_PARTIAL, CAP-070 IMPLEMENTED_PARTIAL notes updated. 39 branch commits.
-17. **Next wave (for next agent):** Unit tests for reconcileWithCatalog (SavedCasesController). Then CAP-069 source micro-preview ADR-0130 contract tests. Issue #291 canonical feed merge requires separate product decision session.
+16. **Locale governance — PublicObservatoryScreen (AGENTS.md §9):**
+    - Created `observatory/localization/observatory_string_catalog.dart` (TR+EN, 10 strings)
+    - Created `observatory/localization/observatory_strings.dart` (extension on KefeStrings)
+    - Removed all `isTr ? '...' : '...'` inline branches from observatory screen
+    - dart analyze: No issues found
+    - Remaining locale governance violations detected (not yet fixed):
+      `my_kefe_journey_summary.dart` (10x), `normative_models_card.dart` (9x),
+      `deliberation_cockpit_showcase.dart` (8x), `consensus_divergence_card.dart` (5x),
+      `case_quality_checklist_sheet.dart` (2x), `signal_health_card.dart` (1x).
+      Most of these use `isTr ? model.titleTr : model.titleEn` — domain model locale fields,
+      require deeper KefeContentLocalizer refactor.
+17. **Final state (this session):** API: 895 passed, 123 skipped, 0 failed. Dart analyze lib/+test/ clean. Portfolio: CAP-048/CAP-079 evidence updated. 42 branch commits.
+18. **Next wave (for next agent):**
+    - Fix remaining `isTr` locale governance violations in decision/progress presentation files
+    - CAP-069 source micro-preview ADR-0130 contract tests
+    - Issue #291 canonical feed merge requires separate product decision session
 
 **Next agent session standard protocol:**
 1. Read `AGENTS.md` + this file (sections 14-15)
