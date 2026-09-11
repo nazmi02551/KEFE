@@ -1,268 +1,252 @@
 #!/usr/bin/env python3
-"""
-KEFE Proje Sağlık ve Doğrulama Scripti (Unified Project Health)
+"""Run truthful, repeatable KEFE local health profiles.
 
-Tek komutla projenin tüm kritik kapılarını doğrular:
-1. Capability Portfolio (128 yetenek aynası)
-2. Python API Testleri (pytest)
-3. Flutter Statik Analiz (flutter analyze)
-4. Git Çalışma Ağacı Durumu
+The default profile exercises every local, provider-independent gate that can
+be reproduced from a clean checkout. It deliberately does not claim PostgreSQL,
+external-provider, device, store, deployment, or human-review evidence.
+
+Use ``--quick`` while iterating and the default full profile before handoff.
 """
 
+from __future__ import annotations
+
+import argparse
+import os
+import shutil
 import subprocess
 import sys
+from collections.abc import Sequence
+from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def run_check(name: str, cmd: list[str], cwd: Path) -> bool:
-    print(f"\n[+] Kontrol Ediliyor: {name}...")
-    print(f"    Komut: {' '.join(cmd)}")
+@dataclass(frozen=True)
+class Check:
+    name: str
+    command: tuple[str, ...]
+    cwd: Path = ROOT
+    environment: tuple[tuple[str, str], ...] = ()
+
+
+@dataclass(frozen=True)
+class CheckResult:
+    name: str
+    passed: bool
+    detail: str = ""
+
+
+def _resolved_command(command: Sequence[str]) -> list[str]:
+    """Resolve command shims (notably npm.cmd on Windows) without a shell."""
+
+    resolved = list(command)
+    executable = shutil.which(resolved[0])
+    if executable:
+        resolved[0] = executable
+    return resolved
+
+
+def _tail(text: str, *, limit: int = 1200) -> str:
+    normalized = text.strip()
+    if len(normalized) <= limit:
+        return normalized
+    return normalized[-limit:]
+
+
+def run_check(check: Check) -> CheckResult:
+    print(f"\n[+] {check.name}")
+    print(f"    cwd: {check.cwd}")
+    print(f"    cmd: {' '.join(check.command)}")
+    environment = os.environ.copy()
+    environment.update(dict(check.environment))
     try:
-        res = subprocess.run(cmd, cwd=str(cwd), capture_output=True, text=True, check=False, shell=True)
-        if res.returncode == 0:
-            print(f"    >>> {name}: [BASARILI / PASS]")
-            if res.stdout.strip():
-                lines = res.stdout.strip().split("\n")
-                summary = lines[-1] if lines else ""
-                print(f"        Ozet: {summary}")
-            return True
-        else:
-            print(f"    >>> {name}: [HATA / FAIL] (Kod: {res.returncode})")
-            if res.stderr.strip():
-                print(f"        Hata: {res.stderr.strip()[:300]}")
-            elif res.stdout.strip():
-                print(f"        Cikti: {res.stdout.strip()[:300]}")
-            return False
-    except Exception as e:
-        print(f"    >>> {name}: [CALISTIRILAMADI] ({e})")
-        return False
+        completed = subprocess.run(
+            _resolved_command(check.command),
+            cwd=str(check.cwd),
+            env=environment,
+            capture_output=True,
+            text=True,
+            check=False,
+            shell=False,
+        )
+    except (OSError, ValueError) as error:
+        detail = f"could not start: {error}"
+        print(f"    FAIL: {detail}")
+        return CheckResult(check.name, False, detail)
+
+    combined = "\n".join(part for part in (completed.stdout, completed.stderr) if part)
+    detail = _tail(combined)
+    if completed.returncode == 0:
+        print("    PASS")
+        if detail:
+            print(f"    {_tail(detail, limit=300)}")
+        return CheckResult(check.name, True, detail)
+
+    print(f"    FAIL (exit {completed.returncode})")
+    if detail:
+        print(detail)
+    return CheckResult(check.name, False, detail)
 
 
-def main() -> int:
-    print("=" * 65)
-    print("      KEFE PROJE SAGLIK VE DOGRULAMA MERKEZI (PROJECT HEALTH)      ")
-    print("=" * 65)
+def git_clean_check() -> CheckResult:
+    check = Check("Git worktree clean", ("git", "status", "--porcelain"))
+    print(f"\n[+] {check.name}")
+    try:
+        completed = subprocess.run(
+            _resolved_command(check.command),
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            check=False,
+            shell=False,
+        )
+    except (OSError, ValueError) as error:
+        detail = f"could not start: {error}"
+        print(f"    FAIL: {detail}")
+        return CheckResult(check.name, False, detail)
 
-    results = []
+    dirty = completed.stdout.strip()
+    if completed.returncode == 0 and not dirty:
+        print("    PASS")
+        return CheckResult(check.name, True)
 
-    # 1. Capability Portfolio Gate
-    p_validator = ROOT / "scripts" / "validate_capability_portfolio.py"
-    if p_validator.exists():
-        results.append(("Capability Portfolio Gate", run_check("Capability Portfolio", [sys.executable, str(p_validator)], ROOT)))
+    detail = dirty or completed.stderr.strip() or f"git exited {completed.returncode}"
+    print("    FAIL: tracked or untracked changes are present")
+    if detail:
+        print(_tail(detail))
+    return CheckResult(check.name, False, detail)
 
-    # 2. Python API Tests
-    api_dir = ROOT / "services" / "api"
-    if api_dir.exists():
-        results.append(
-            (
-                "Python API Pytest",
-                run_check(
-                    "Python API Tests",
-                    [
-                        sys.executable,
-                        "-m",
-                        "pytest",
-                        "services/api/tests/test_bridge_arguments.py",
-                        "services/api/tests/test_divergence_anatomy.py",
-                        "services/api/tests/test_depolarization_index.py",
-                        "services/api/tests/test_deliberation_depth.py",
-                        "services/api/tests/test_synthetic_astroturfing_shield.py",
-                        "services/api/tests/test_threshold_analysis.py",
-                        "services/api/tests/test_stakeholder_impact.py",
-                        "services/api/tests/test_outcome_triangle.py",
-                        "services/api/tests/test_change_mind_inquiry.py",
-                        "services/api/tests/test_argument_strength.py",
-                        "services/api/tests/test_fallacy_detector.py",
-                        "services/api/tests/test_irreversibility_risk.py",
-                        "services/api/tests/test_unintended_consequences.py",
-                        "services/api/tests/test_proportionality_test.py",
-                        "services/api/tests/test_vulnerable_groups_shield.py",
-                        "services/api/tests/test_counter_argument.py",
-                        "services/api/tests/test_expert_testimony.py",
-                        "services/api/tests/test_rights_conflict.py",
-                        "services/api/tests/test_blind_variants.py",
-                        "services/api/tests/test_principle_first.py",
-                        "services/api/tests/test_role_flip.py",
-                        "services/api/tests/test_decision_receipt.py",
-                        "services/api/tests/test_fatigue_guard.py",
-                        "services/api/tests/test_signal_half_life.py",
-                        "services/api/tests/test_verified_institution_response.py",
-                        "services/api/tests/test_source_diversity.py",
-                        "services/api/tests/test_signal_consensus_card_api.py",
-                        "services/api/tests/test_institution_response.py",
-                        "services/api/tests/test_institution_response_api.py",
-                        "services/api/tests/test_action_follow_through.py",
-                        "services/api/tests/test_action_follow_through_api.py",
-                        "services/api/tests/test_case_objection.py",
-                        "services/api/tests/test_case_objection_api.py",
-                        "services/api/tests/test_correction_history.py",
-                        "services/api/tests/test_correction_history_api.py",
-                        "services/api/tests/test_case_search_filter.py",
-                        "services/api/tests/test_case_search_filter_api.py",
-                        "services/api/tests/test_canonical_public_feed_catalog.py",
-                        "services/api/tests/test_admin_case_builder_http.py",
-                        "services/api/tests/test_otp_http_delivery.py",
-                        "services/api/tests/test_guest_session_rotation.py",
-                        "services/api/tests/test_privacy_export_deletion_hardening.py",
-                        "services/api/tests/test_case_quality_checklist_api.py",
-                        "services/api/tests/test_user_controlled_discovery_api.py",
-                        "services/api/tests/test_temporal_drift.py",
-                        "services/api/tests/test_signal_health_card_api.py",
-                        "services/api/tests/test_historical_retrospective.py",
-                        "services/api/tests/test_divergence_classifier.py",
-                        "services/api/tests/test_consensus_divergence_api.py",
-                        "services/api/tests/test_normative_models.py",
-                        "services/api/tests/test_normative_models_api.py",
-                        "services/api/tests/test_policy_simulator.py",
-                        "services/api/tests/test_policy_simulator_api.py",
-                        "services/api/tests/test_process_analysis.py",
-                        "services/api/tests/test_process_analysis_api.py",
-                        "services/api/tests/test_responsibility_analysis.py",
-                        "services/api/tests/test_responsibility_analysis_api.py",
-                        "services/api/tests/test_incentive_map.py",
-                        "services/api/tests/test_incentive_map_api.py",
-                        "services/api/tests/test_perspective_clustering.py",
-                        "services/api/tests/test_perspective_clustering_api.py",
-                        "services/api/tests/test_segment_distribution.py",
-                        "services/api/tests/test_segment_distribution_api.py",
-                        "services/api/tests/test_stakeholder_distribution.py",
-                        "services/api/tests/test_stakeholder_distribution_api.py",
-                        "services/api/tests/test_expert_public_gap.py",
-                        "services/api/tests/test_expert_public_gap_api.py",
-                        "services/api/tests/test_budget_tradeoff_simulator.py",
-                        "services/api/tests/test_observe_mode_exploration.py",
-                        "services/api/tests/test_community_dilemma_proposals.py",
-                        "services/api/tests/test_signal_qualification.py",
-                        "services/api/tests/test_signal_qualification_api.py",
-                        "services/api/tests/test_contribution_classes.py",
-                        "services/api/tests/test_contribution_classes_api.py",
-                        "services/api/tests/test_signal_scope.py",
-                        "services/api/tests/test_signal_scope_api.py",
-                        "services/api/tests/test_signal_versioning.py",
-                        "services/api/tests/test_signal_versioning_api.py",
-                        "services/api/tests/test_signal_target_registry.py",
-                        "services/api/tests/test_signal_target_registry_api.py",
-                        "-q",
-                    ],
-                    ROOT,
-                ),
+
+def validator_checks() -> list[Check]:
+    return [
+        Check(
+            f"Validator: {path.stem.removeprefix('validate_').replace('_', ' ')}",
+            (sys.executable, str(path)),
+        )
+        for path in sorted((ROOT / "scripts").glob("validate_*.py"))
+    ]
+
+
+def package_checks() -> list[Check]:
+    return [
+        Check(
+            "Package: design tokens",
+            ("node", "packages/kefe-design-tokens/scripts/validate.mjs"),
+        ),
+        Check("Package: locale", ("node", "packages/kefe-locale/scripts/validate.mjs")),
+        Check(
+            "Package: test fixtures",
+            ("node", "packages/kefe-test-fixtures/scripts/validate.mjs"),
+        ),
+    ]
+
+
+def quick_checks() -> list[Check]:
+    api = ROOT / "services" / "api"
+    admin = ROOT / "apps" / "admin"
+    web = ROOT / "apps" / "web"
+    mobile = ROOT / "apps" / "mobile"
+    return [
+        *validator_checks(),
+        Check("API lint", (sys.executable, "-m", "ruff", "check", "."), api),
+        Check("Admin contracts", ("npm", "run", "contract"), admin),
+        Check("Admin lint", ("npm", "run", "lint"), admin),
+        Check("Admin typecheck", ("npm", "run", "typecheck"), admin),
+        Check("Admin tests", ("npm", "test"), admin),
+        Check("Web lint", ("npm", "run", "lint"), web),
+        Check("Web typecheck", ("npm", "run", "typecheck"), web),
+        Check("Web tests", ("npm", "test"), web),
+        *package_checks(),
+        Check("Mobile analyze", ("flutter", "analyze"), mobile),
+    ]
+
+
+def full_checks(*, include_postgres: bool) -> list[Check]:
+    api = ROOT / "services" / "api"
+    admin = ROOT / "apps" / "admin"
+    web = ROOT / "apps" / "web"
+    mobile = ROOT / "apps" / "mobile"
+    checks = [
+        *validator_checks(),
+        Check("API lint", (sys.executable, "-m", "ruff", "check", "."), api),
+        Check("API full in-memory tests", (sys.executable, "-m", "pytest", "-q"), api),
+        Check("Admin full verify", ("npm", "run", "verify"), admin),
+        Check("Web full verify", ("npm", "run", "verify"), web),
+        *package_checks(),
+        Check("Mobile analyze", ("flutter", "analyze"), mobile),
+        Check("Mobile full tests", ("flutter", "test", "--concurrency=1"), mobile),
+    ]
+    if include_postgres:
+        checks.append(
+            Check(
+                "API PostgreSQL tests",
+                (sys.executable, "-m", "pytest", "-q"),
+                api,
+                (("KEFE_PERSISTENCE_BACKEND", "postgres"),),
             )
         )
+    return checks
 
-    # 3. Flutter Tests & Analyze
-    mobile_dir = ROOT / "apps" / "mobile"
-    if mobile_dir.exists():
-        results.append(
-            (
-                "Flutter Unit Tests",
-                run_check(
-                    "Flutter Mobile Unit Tests",
-                    [
-                        "flutter",
-                        "test",
-                        "test/bridge_arguments_test.dart",
-                        "test/divergence_anatomy_test.dart",
-                        "test/depolarization_index_test.dart",
-                        "test/deliberation_depth_test.dart",
-                        "test/synthetic_astroturfing_shield_test.dart",
-                        "test/threshold_analysis_test.dart",
-                        "test/stakeholder_impact_test.dart",
-                        "test/outcome_triangle_test.dart",
-                        "test/change_mind_inquiry_test.dart",
-                        "test/argument_strength_test.dart",
-                        "test/fallacy_detector_test.dart",
-                        "test/irreversibility_risk_test.dart",
-                        "test/unintended_consequences_test.dart",
-                        "test/proportionality_test.dart",
-                        "test/vulnerable_groups_shield_test.dart",
-                        "test/counter_argument_test.dart",
-                        "test/expert_testimony_test.dart",
-                        "test/rights_conflict_test.dart",
-                        "test/blind_variants_test.dart",
-                        "test/principle_first_test.dart",
-                        "test/role_flip_test.dart",
-                        "test/decision_receipt_test.dart",
-                        "test/fatigue_guard_test.dart",
-                        "test/signal_half_life_test.dart",
-                        "test/verified_institution_response_test.dart",
-                        "test/deliberation_cockpit_showcase_test.dart",
-                        "test/signal_consensus_section_test.dart",
-                        "test/source_diversity_test.dart",
-                        "test/connected_alpha_app_config_test.dart",
-                        "test/insufficient_info_response_test.dart",
-                        "test/open_methodology_test.dart",
-                        "test/stakeholder_gap_test.dart",
-                        "test/institution_response_test.dart",
-                        "test/institution_response_section_test.dart",
-                        "test/action_follow_through_test.dart",
-                        "test/case_objection_test.dart",
-                        "test/correction_history_test.dart",
-                        "test/explore_tolerant_search_test.dart",
-                        "test/saved_case_lifecycle_updates_test.dart",
-                        "test/civic_petition_simulator_test.dart",
-                        "test/user_data_export_deletion_test.dart",
-                        "test/offline_decision_queue_test.dart",
-                        "test/accessibility_contrast_motion_test.dart",
-                        "test/case_quality_checklist_test.dart",
-                        "test/user_controlled_discovery_test.dart",
-                        "test/temporal_drift_test.dart",
-                        "test/signal_health_card_test.dart",
-                        "test/kefe_today_projection_test.dart",
-                        "test/historical_retrospective_test.dart",
-                        "test/consensus_divergence_test.dart",
-                        "test/normative_models_test.dart",
-                        "test/policy_simulator_test.dart",
-                        "test/process_analysis_test.dart",
-                        "test/responsibility_analysis_test.dart",
-                        "test/incentive_map_test.dart",
-                        "test/perspective_clustering_test.dart",
-                        "test/segment_distribution_test.dart",
-                        "test/stakeholder_distribution_test.dart",
-                        "test/expert_public_gap_test.dart",
-                        "test/budget_tradeoff_simulator_test.dart",
-                        "test/observe_mode_exploration_test.dart",
-                        "test/community_dilemma_proposals_test.dart",
-                        "test/signal_qualification_test.dart",
-                        "test/contribution_classes_test.dart",
-                        "test/signal_scope_alignment_test.dart",
-                        "test/signal_versioning_test.dart",
-                        "test/signal_target_registry_test.dart",
-                    ],
-                    mobile_dir,
-                ),
-            )
-        )
-        results.append(
-            (
-                "Flutter Analyze",
-                run_check(
-                    "Flutter Mobile Analyze",
-                    ["dart", "analyze", "--no-fatal-warnings"],
-                    mobile_dir,
-                ),
-            )
-        )
 
-    print("\n" + "=" * 65)
-    print("                         SONUC TABLOSU                           ")
-    print("=" * 65)
-    all_ok = True
-    for name, status in results:
-        status_str = "GECTI (PASS)" if status else "BASARISIZ (FAIL)"
-        print(f" - {name:<35} : {status_str}")
-        if not status:
-            all_ok = False
+def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--quick",
+        action="store_true",
+        help="Run static, contract and lightweight test gates; do not claim full local health.",
+    )
+    parser.add_argument(
+        "--include-postgres",
+        action="store_true",
+        help="Also run the API suite with KEFE_PERSISTENCE_BACKEND=postgres.",
+    )
+    parser.add_argument(
+        "--skip-git-clean",
+        action="store_true",
+        help="Do not require a clean worktree (useful only during local iteration).",
+    )
+    return parser.parse_args(argv)
 
-    print("=" * 65)
-    if all_ok:
-        print("[*] Proje saglikli, tum kapilar dogrulandi.")
-        return 0
-    else:
-        print("[!] Bazi kapilar basarisiz oldu, lutfen duzeltiniz.")
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = parse_args(argv)
+    if args.quick and args.include_postgres:
+        print("--include-postgres is available only in the full profile.", file=sys.stderr)
+        return 2
+
+    profile = "QUICK" if args.quick else "FULL LOCAL"
+    print("=" * 72)
+    print(f"KEFE PROJECT HEALTH — {profile} PROFILE")
+    print("=" * 72)
+
+    checks = quick_checks() if args.quick else full_checks(include_postgres=args.include_postgres)
+    results = [run_check(check) for check in checks]
+    if not args.skip_git_clean:
+        results.append(git_clean_check())
+
+    print("\n" + "=" * 72)
+    print("RESULTS")
+    print("=" * 72)
+    for result in results:
+        print(f"{'PASS' if result.passed else 'FAIL':<4}  {result.name}")
+
+    failures = [result for result in results if not result.passed]
+    print("=" * 72)
+    if failures:
+        print(f"FAILED: {len(failures)} of {len(results)} checks failed.")
         return 1
+
+    if args.quick:
+        print("QUICK PROFILE PASSED. Full local health was not established.")
+    else:
+        exclusions = ["external providers", "device/store", "deployment", "human review"]
+        if not args.include_postgres:
+            exclusions.insert(0, "PostgreSQL")
+        print("FULL LOCAL PROFILE PASSED.")
+        print("Not established by this run: " + ", ".join(exclusions) + ".")
+    return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())
