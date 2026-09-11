@@ -85,6 +85,81 @@ export async function listSignalConsensusCards(
 }
 
 // ---------------------------------------------------------------------------
+// Signal Detail (public — health + qualification)
+// ---------------------------------------------------------------------------
+
+export interface SignalHealthDimension {
+  dimension_id: string;
+  title_tr: string;
+  title_en: string;
+  score: number;
+  threshold: number;
+  is_passed: boolean;
+  detail: string;
+}
+
+export interface SignalHealthReport {
+  signal_id: string;
+  case_version_id: string;
+  overall_qualification: string;
+  overall_health_score: number;
+  sample_size: number;
+  dimensions: SignalHealthDimension[];
+  certified_at: string;
+  methodology_hash: string;
+}
+
+export interface SignalQualificationCriterion {
+  criterion_id: string;
+  name_tr: string;
+  name_en: string;
+  score: number;
+  threshold: number;
+  is_passed: boolean;
+  audit_note: string;
+}
+
+export interface SignalQualificationReport {
+  signal_id: string;
+  case_version_id: string;
+  case_title: string;
+  qualification_status: string;
+  qualification_tier: string;
+  overall_score: number;
+  sample_size: number;
+  criteria: SignalQualificationCriterion[];
+  eligible_channels: string[];
+  certified_at: string;
+  qualification_audit_hash: string;
+}
+
+export async function getSignalHealth(
+  signalId: string,
+): Promise<SignalHealthReport | null> {
+  try {
+    return await fetchJson<SignalHealthReport>(
+      `/v1/signals/${encodeURIComponent(signalId)}/health`,
+    );
+  } catch (err) {
+    if (err instanceof KefApiError && err.status === 404) return null;
+    throw err;
+  }
+}
+
+export async function getSignalQualification(
+  signalId: string,
+): Promise<SignalQualificationReport | null> {
+  try {
+    return await fetchJson<SignalQualificationReport>(
+      `/v1/signals/${encodeURIComponent(signalId)}/qualification`,
+    );
+  } catch (err) {
+    if (err instanceof KefApiError && err.status === 404) return null;
+    throw err;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Cases / Context (public read)
 // ---------------------------------------------------------------------------
 

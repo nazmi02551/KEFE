@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { listSignalConsensusCards } from "@/src/lib/kefe-api";
 import styles from "@/app/signal/page.module.css";
@@ -98,6 +99,12 @@ export default async function SignalPage() {
                   })}
                 </time>
               </footer>
+              <Link
+                href={`/signal/${encodeURIComponent(card.signal_id)}`}
+                className={styles.detailLink}
+              >
+                Sinyal Detayı →
+              </Link>
             </article>
           ))}
         </div>

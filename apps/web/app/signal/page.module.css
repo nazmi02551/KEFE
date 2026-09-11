@@ -115,3 +115,17 @@
   font-size: 0.8125rem;
   color: var(--kefe-color-muted);
 }
+
+.detailLink {
+  display: inline-block;
+  margin-top: var(--kefe-spacing-3);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--kefe-color-gold);
+  text-decoration: none;
+  transition: opacity var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.detailLink:hover {
+  opacity: 0.75;
+}
