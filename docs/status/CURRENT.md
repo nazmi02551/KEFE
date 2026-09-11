@@ -354,7 +354,7 @@ The following items remain incomplete after Session 2:
 
 **PR #403:** https://github.com/nazmi02551/KEFE/pull/403
 
-**Commits in branch (31 total, on top of main):**
+**Commits in branch (36 total, on top of main):**
 1. `cf93f986` — signal/impact hexagonal ports, pipeline service, admin studio signal+impact pages
 2. `f2cd413a` — env.example, design-tokens build+validate scripts, CURRENT.md session 2
 3. `2dc3a47f` — kefe-locale validate script, fix a11y namespace in keys.json
@@ -381,6 +381,10 @@ The following items remain incomplete after Session 2:
 24. `bc1f3757` — feat(api+mobile): is_provisional field in SignalConsensusCardResponse + mobile fromJson guard
 25. `f1961dee` — feat(mobile): SignalTargetRegistry data layer — abstract + HTTP + preview repositories (CAP-057)
 26. `51b5c5f9` — feat(mobile): SignalTargetRegistry Riverpod controller, isFullyDispatched, reload() (CAP-057)
+27. `cd55f7ff` — test(mobile): SignalTargetRegistry controller + preview repo unit tests (CAP-057)
+28. `b8c35d5c` — chore(portfolio): CAP-048 ARCHITECTURE_LOCKED→IMPLEMENTED_PARTIAL
+29. `ff60e7e0` — feat(mobile): Context information-status guide strings — kefe_strings + catalog TR+EN (ADR-0142, CAP-070)
+30. `5ed46cae` — test(mobile): ADR-0142 information-status guide locale contract tests — 15 tests
 
 **Test results (verified locally):**
 - API in-memory: **895 passed, 123 skipped, 0 failed**
@@ -420,7 +424,12 @@ The following items remain incomplete after Session 2:
     This requires a product-level merge/rebase decision — not resolved in this session.
     Migration 20260804_0026 correctly in main. In-memory catalog tests: 10/10 pass.
 13. **API test totals:** 895 passed, 123 skipped, 0 failed. Lint: 0 non-E501 errors.
-14. **Next wave (for next agent):** Dart unit tests for SignalTargetRegistryState + controller using PreviewSignalTargetRegistryRepository. Then: Issue #291 canonical feed merge strategy.
+14. **CAP-070 consumer information-status (ADR-0142):**
+    - Fixed missing `contextInformationStatusGuideTitle`, `contextInformationStatusGuideHelper`, `contextInformationStatusDescription` methods (these were called in `_InformationStatusGuide` widget but absent in KefeStrings — would have caused NoSuchMethodError at runtime)
+    - Added EN+TR locale strings for all 4 statuses (VERIFIED/CLAIMED/DISPUTED/UNKNOWN) and guide title/helper
+    - 15 contract guard tests: locale parity, uniqueness, ADR-0142 boundary (linked_source_status_inferred=false)
+    - dart analyze: No issues found
+15. **Next wave (for next agent):** CAP-069 source micro-preview improvements, or Issue #291 canonical feed merge strategy (requires product decision). API: 895 passed, 123 skipped, 0 failed.
 
 **Next agent session standard protocol:**
 1. Read `AGENTS.md` + this file (sections 14-15)
