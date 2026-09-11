@@ -270,6 +270,9 @@ class PreviewDecisionRepository
               format: item.format,
               domain: item.domain,
               risk: item.risk,
+              // Preview fixtures do not carry is_real_event metadata;
+              // real-event status requires server-side editorial review (ADR-0133).
+              isRealEvent: false,
             ),
           )
           .toList(growable: false);
