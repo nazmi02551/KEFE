@@ -354,7 +354,7 @@ The following items remain incomplete after Session 2:
 
 **PR #403:** https://github.com/nazmi02551/KEFE/pull/403
 
-**Commits in branch (46 total, on top of main):**
+**Commits in branch (49 total, on top of main):**
 1. `cf93f986` — signal/impact hexagonal ports, pipeline service, admin studio signal+impact pages
 2. `f2cd413a` — env.example, design-tokens build+validate scripts, CURRENT.md session 2
 3. `2dc3a47f` — kefe-locale validate script, fix a11y namespace in keys.json
@@ -391,6 +391,8 @@ The following items remain incomplete after Session 2:
 34. `1852befc` — refactor(mobile): PublicObservatoryScreen → governed locale catalog (isTr branches removed)
 35. `49e6bb37` — refactor(mobile): eliminate isTr presentation-level language branching across 5 files + 2 domain models
 36. `5f2766c6` — test(mobile): ADR-0130 context source trust presentation contract tests — 8 tests (CAP-069)
+37. `2076879b` — fix(mobile): 801/801 tests all passing — 6 failing tests resolved
+38. `56b911ec` — feat(web+api): case detail signal consensus cards + version history (CAP-016, CAP-072)
 
 **Test results (verified locally):**
 - API in-memory: **895 passed, 123 skipped, 0 failed**
@@ -462,11 +464,27 @@ The following items remain incomplete after Session 2:
 18. **CAP-069 source trust presentation (ADR-0130):**
     - 8 contract guard tests: contract_id guard, semantics assertions (source_existence_implies_verified=false, claim_status_is_block_level=true), architecture assertions (no backend/API/schema changes), locale string coverage (contextJourneySourceReference TR/EN parity, publishedAt ISO format deterministic, source_kind 4 types distinct)
     - dart analyze: No issues found
-19. **Final verified state:** API: 895 passed, 123 skipped, 0 failed. `dart analyze lib/ test/` → No issues found. Portfolio validate: PASS 128 capabilities. 46 branch commits.
-20. **Next wave (for next agent):**
+19. **Session 2 additions (2026-09-11):**
+    - Mobile 801/801 tests: fixed 6 previously failing tests (isTr refactor cascade, perspective height, locale boundary set, signal controller timing)
+    - ContextJourneyStringCatalog extracted to separate file — no circular dependency
+    - Web app: case detail page now shows Signal Consensus Cards (CAP-016) + Version History (ADR-0134, CAP-072)
+    - API: GET /v1/signals/consensus-cards now accepts optional case_version_id query filter
+    - APK rebuilt with correct IP (10.117.163.214:8000) and installed on test device
+    - Admin Studio (localhost:3000), Web App (localhost:3001), API (localhost:8000) all running
+20. **Current verified state (2026-09-11):**
+    - API: 895 passed, 123 skipped, 0 failed
+    - dart analyze lib/ + test/: No issues found
+    - flutter test --concurrency=1: 801/801 passed
+    - TypeScript (web + admin): tsc --noEmit clean
+    - Portfolio: PASS 128 capabilities, 0 errors
+    - 49 branch commits
+21. **Next wave (for next agent):**
     - Issue #291 canonical feed merge — product decision required (PR #267 vs PR #273 conflict)
-    - Consider opening PR for `maintenance/2026-09-10-signal-impact-hexagonal-studio` → main
+    - Consider opening PR for maintenance branch → main
+    - CAP-073 bot/anomaly detection P0 IMPLEMENTED_PARTIAL — next gate evidence needed
+    - CAP-084 guest conversion P0 — real provider OTP evidence needed
     - Run: `python scripts/validate_capability_portfolio.py` to confirm clean state
+    - Services to start: uvicorn (port 8000), npm run dev admin (3000), npm run dev web (3001)
 
 **Next agent session standard protocol:**
 1. Read `AGENTS.md` + this file (sections 14-15)
