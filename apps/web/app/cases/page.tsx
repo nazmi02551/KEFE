@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { listPublicCases } from "@/src/lib/kefe-api";
+import { CasesFilter } from "@/src/components/cases-filter";
 import styles from "@/app/cases/page.module.css";
 
 export const metadata: Metadata = {
@@ -10,27 +10,13 @@ export const metadata: Metadata = {
     "KEFE — Aktif meseleler. Commit First, Blind First ile kolektif sesinizi oluşturun.",
 };
 
-const DOMAIN_LABELS: Record<string, string> = {
-  GOVERNANCE: "Yönetim",
-  ENVIRONMENT: "Çevre",
-  SOCIAL: "Sosyal",
-  ECONOMY: "Ekonomi",
-  HEALTH: "Sağlık",
-  EDUCATION: "Eğitim",
-  TECHNOLOGY: "Teknoloji",
-  CULTURE: "Kültür",
-};
-
-function domainLabel(code: string): string {
-  return DOMAIN_LABELS[code] ?? code;
-}
-
 export default async function CasesPage() {
   let cases = null;
   let error: string | null = null;
 
   try {
-    cases = await listPublicCases(20, 0);
+    // Load up to 100 cases — client-side filter handles the rest
+    cases = await listPublicCases(100, 0);
   } catch (err) {
     error = err instanceof Error ? err.message : "Meseleler yüklenemedi.";
   }
@@ -57,32 +43,7 @@ export default async function CasesPage() {
       )}
 
       {cases !== null && cases.length > 0 && (
-        <div className={styles.grid}>
-          {cases.map((c) => (
-            <article key={c.case_version_id} className={styles.card}>
-              <div className={styles.badgeRow}>
-                <span className={styles.domainBadge}>
-                  {domainLabel(c.primary_domain_code)}
-                </span>
-                {c.is_real_event === true && (
-                  <span className={styles.realEventBadge} aria-label="Gerçek Olay">
-                    Gerçek Olay
-                  </span>
-                )}
-              </div>
-              <h2 className={styles.cardTitle}>{c.title}</h2>
-              <p className={styles.cardSummary}>{c.summary}</p>
-              <div className={styles.cardFooter}>
-                <Link
-                  href={`/cases/${encodeURIComponent(c.case_id)}`}
-                  className={styles.cardLink}
-                >
-                  İncele →
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
+        <CasesFilter cases={cases} />
       )}
     </main>
   );

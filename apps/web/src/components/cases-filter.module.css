@@ -1,0 +1,200 @@
+/* CasesFilter — client-side search + domain filter component
+ * Dark-first KEFE design system, light theme via data-theme="light"
+ */
+
+/* Filter bar */
+.filterRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-4);
+  margin-bottom: var(--kefe-spacing-6);
+}
+
+/* Screen reader only */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Search input */
+.searchWrapper {
+  width: 100%;
+}
+
+.searchInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--kefe-spacing-3) var(--kefe-spacing-4);
+  font-size: 0.9375rem;
+  color: var(--kefe-color-foreground);
+  background: var(--kefe-color-surface);
+  border: 1px solid var(--kefe-color-border);
+  border-radius: var(--kefe-radius-md);
+  outline: none;
+  transition: border-color var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.searchInput::placeholder {
+  color: var(--kefe-color-muted);
+}
+
+.searchInput:focus {
+  border-color: var(--kefe-color-gold);
+}
+
+/* Domain filter pills */
+.domainFilter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kefe-spacing-2);
+}
+
+.domainBtn {
+  padding: 4px 14px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--kefe-color-muted);
+  background: transparent;
+  border: 1px solid var(--kefe-color-border);
+  border-radius: 99px;
+  cursor: pointer;
+  transition: color var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard),
+    background var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard),
+    border-color var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.domainBtn:hover {
+  color: var(--kefe-color-foreground);
+  border-color: var(--kefe-color-foreground);
+}
+
+.domainBtnActive {
+  color: var(--kefe-color-gold);
+  border-color: var(--kefe-color-gold);
+  background: color-mix(in srgb, var(--kefe-color-gold) 10%, transparent);
+}
+
+/* Result count */
+.resultCount {
+  font-size: 0.8125rem;
+  color: var(--kefe-color-muted);
+  margin: 0;
+}
+
+/* Empty state */
+.emptyState {
+  text-align: center;
+  padding: var(--kefe-spacing-10) var(--kefe-spacing-4);
+  color: var(--kefe-color-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--kefe-spacing-4);
+}
+
+.clearBtn {
+  padding: 8px 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--kefe-color-gold);
+  background: transparent;
+  border: 1px solid var(--kefe-color-gold);
+  border-radius: 99px;
+  cursor: pointer;
+  transition: opacity var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.clearBtn:hover {
+  opacity: 0.75;
+}
+
+/* Card grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--kefe-spacing-5);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-3);
+  padding: var(--kefe-spacing-5);
+  background: var(--kefe-color-surface);
+  border: 1px solid var(--kefe-color-border);
+  border-radius: var(--kefe-radius-lg);
+  transition: border-color var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard),
+    box-shadow var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.card:hover {
+  border-color: color-mix(in srgb, var(--kefe-color-gold) 40%, transparent);
+  box-shadow: var(--kefe-shadow-md);
+}
+
+/* Badge row */
+.badgeRow {
+  display: flex;
+  align-items: center;
+  gap: var(--kefe-spacing-2);
+  flex-wrap: wrap;
+}
+
+.domainBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--kefe-color-rules-cyan, #4abfcf);
+}
+
+.realEventBadge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--kefe-color-empathy-gold, var(--kefe-gold)) 15%, transparent);
+  color: var(--kefe-color-empathy-gold, var(--kefe-color-gold, #c9a227));
+  border: 1px solid color-mix(in srgb, var(--kefe-color-empathy-gold, var(--kefe-gold)) 30%, transparent);
+}
+
+.cardTitle {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--kefe-color-foreground);
+  line-height: 1.4;
+}
+
+.cardSummary {
+  font-size: 0.9375rem;
+  color: var(--kefe-color-muted);
+  line-height: 1.6;
+  flex: 1;
+  margin: 0;
+}
+
+.cardFooter {
+  margin-top: auto;
+  padding-top: var(--kefe-spacing-2);
+}
+
+.cardLink {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--kefe-color-gold);
+  text-decoration: none;
+  transition: opacity var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.cardLink:hover {
+  opacity: 0.75;
+}
