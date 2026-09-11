@@ -92,12 +92,11 @@ extension ContextJourneyStrings on KefeStrings {
     'sources.published',
     placeholders: {'date': _contextIsoDate(value)},
   );
-  String get contextInformationStatusGuideTitle =>
-      _contextJourneyText('status.guide.title');
-  String get contextInformationStatusGuideHelper =>
-      _contextJourneyText('status.guide.helper');
-  String contextInformationStatusDescription(String status) =>
-      _contextJourneyText('status.${status.toLowerCase()}.helper');
+  // contextInformationStatusGuideTitle, contextInformationStatusGuideHelper,
+  // contextInformationStatusDescription are defined as instance methods on
+  // KefeStrings (core_string_catalog.dart). Instance methods take precedence
+  // over extension methods in Dart, so the extension versions were dead code.
+  // They have been removed here to avoid confusion.
   String get contextJourneyNext => _contextJourneyText('next');
   String get contextJourneyBack => _contextJourneyText('back');
   String get contextJourneyOptional => _contextJourneyText('optional');
