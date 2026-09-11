@@ -354,7 +354,7 @@ The following items remain incomplete after Session 2:
 
 **PR #403:** https://github.com/nazmi02551/KEFE/pull/403
 
-**Commits in branch (42 total, on top of main):**
+**Commits in branch (44 total, on top of main):**
 1. `cf93f986` — signal/impact hexagonal ports, pipeline service, admin studio signal+impact pages
 2. `f2cd413a` — env.example, design-tokens build+validate scripts, CURRENT.md session 2
 3. `2dc3a47f` — kefe-locale validate script, fix a11y namespace in keys.json
@@ -389,6 +389,7 @@ The following items remain incomplete after Session 2:
 32. `7cb93b95` — feat(mobile): SavedCasesState lifecycle update markers — reconcileWithCatalog, clearUpdateMarkers, updateCount, hasUpdate (ADR-0139, CAP-079)
 33. `2b6e52bf` — test(mobile): reconcileWithCatalog unit tests — 8 tests, EXACT_CASE_ID_MATCH boundary
 34. `1852befc` — refactor(mobile): PublicObservatoryScreen → governed locale catalog (isTr branches removed)
+35. `49e6bb37` — refactor(mobile): eliminate isTr presentation-level language branching across 5 files + 2 domain models
 
 **Test results (verified locally):**
 - API in-memory: **895 passed, 123 skipped, 0 failed**
@@ -448,17 +449,20 @@ The following items remain incomplete after Session 2:
     - Created `observatory/localization/observatory_strings.dart` (extension on KefeStrings)
     - Removed all `isTr ? '...' : '...'` inline branches from observatory screen
     - dart analyze: No issues found
-    - Remaining locale governance violations detected (not yet fixed):
-      `my_kefe_journey_summary.dart` (10x), `normative_models_card.dart` (9x),
-      `deliberation_cockpit_showcase.dart` (8x), `consensus_divergence_card.dart` (5x),
-      `case_quality_checklist_sheet.dart` (2x), `signal_health_card.dart` (1x).
-      Most of these use `isTr ? model.titleTr : model.titleEn` — domain model locale fields,
-      require deeper KefeContentLocalizer refactor.
+    - All remaining `isTr ? '...' : '...'` presentation-level language branches fixed:
+      `my_kefe_journey_summary.dart`, `normative_models_card.dart`,
+      `deliberation_cockpit_showcase.dart`, `consensus_divergence_card.dart`,
+      `case_quality_checklist_sheet.dart`, `signal_health_card.dart`
+    - Added `localizedTitle(String languageCode)` to SignalHealthDimensionModel
+    - Added `localizedTitle()/localizedSubtitle()` to DeliberationFeatureItem
+    - `_philosophyTitle(type, bool)` → `_philosophyTitle(type, String)` (normative_models_card)
+    - Zero isTr presentation branches remain in lib/
 17. **Final state (this session):** API: 895 passed, 123 skipped, 0 failed. Dart analyze lib/+test/ clean. Portfolio: CAP-048/CAP-079 evidence updated. 42 branch commits.
 18. **Next wave (for next agent):**
-    - Fix remaining `isTr` locale governance violations in decision/progress presentation files
     - CAP-069 source micro-preview ADR-0130 contract tests
     - Issue #291 canonical feed merge requires separate product decision session
+    - Run portfolio validation: `python scripts/validate_capability_portfolio.py`
+    - Full Dart analyze clean: already confirmed `dart analyze lib/ test/` → No issues found
 
 **Next agent session standard protocol:**
 1. Read `AGENTS.md` + this file (sections 14-15)
