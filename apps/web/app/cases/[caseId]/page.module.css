@@ -172,3 +172,118 @@
   color: var(--kefe-color-foreground);
   line-height: 1.6;
 }
+
+/* ------------------------------------------------------------------ */
+/* Signal Consensus Cards (CAP-016)                                     */
+/* ------------------------------------------------------------------ */
+
+.signals {
+  margin-top: var(--kefe-spacing-8);
+  padding-top: var(--kefe-spacing-6);
+  border-top: 1px solid var(--kefe-color-border);
+}
+
+.signalList {
+  list-style: none;
+  padding: 0;
+  margin: var(--kefe-spacing-4) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-4);
+}
+
+.signalCard {
+  padding: var(--kefe-spacing-4) var(--kefe-spacing-5);
+  background: color-mix(in srgb, var(--kefe-color-surface) 60%, transparent);
+  border: 1px solid var(--kefe-color-border);
+  border-radius: var(--kefe-radius-lg);
+}
+
+.signalStatement {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--kefe-color-foreground);
+  line-height: 1.5;
+  margin: 0 0 var(--kefe-spacing-2);
+}
+
+.signalMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--kefe-spacing-3);
+  flex-wrap: wrap;
+}
+
+.signalTier {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.signalAgreement {
+  font-size: 0.8125rem;
+  color: var(--kefe-color-muted);
+}
+
+/* ------------------------------------------------------------------ */
+/* Version History (ADR-0134, CAP-072)                                  */
+/* ------------------------------------------------------------------ */
+
+.history {
+  margin-top: var(--kefe-spacing-8);
+  padding-top: var(--kefe-spacing-6);
+  border-top: 1px solid var(--kefe-color-border);
+}
+
+.historyList {
+  list-style: none;
+  padding: 0;
+  margin: var(--kefe-spacing-4) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-3);
+}
+
+.historyItem {
+  display: flex;
+  align-items: center;
+  gap: var(--kefe-spacing-3);
+  flex-wrap: wrap;
+  padding: var(--kefe-spacing-3) var(--kefe-spacing-4);
+  background: color-mix(in srgb, var(--kefe-color-surface) 40%, transparent);
+  border: 1px solid var(--kefe-color-border);
+  border-radius: var(--kefe-radius-md);
+}
+
+.historyBadge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--kefe-color-gold) 15%, transparent);
+  color: var(--kefe-color-gold);
+  border: 1px solid color-mix(in srgb, var(--kefe-color-gold) 30%, transparent);
+}
+
+.historyVersion {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--kefe-color-muted);
+  min-width: 2.5rem;
+}
+
+.historyTitle {
+  font-size: 0.875rem;
+  color: var(--kefe-color-foreground);
+  flex: 1;
+  min-width: 0;
+}
+
+.historyDate {
+  font-size: 0.75rem;
+  color: var(--kefe-color-muted);
+  white-space: nowrap;
+}

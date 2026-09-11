@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { getPublicCase, KefApiError } from "@/src/lib/kefe-api";
+import {
+  getPublicCase,
+  getCaseVersionHistory,
+  listCaseSignalCards,
+  KefApiError,
+} from "@/src/lib/kefe-api";
 import styles from "@/app/cases/[caseId]/page.module.css";
 
 interface CaseDetailPageProps {
@@ -50,6 +55,12 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
     throw err;
   }
 
+  // Load version history and signal cards in parallel — both are fail-open.
+  const [history, signalCards] = await Promise.all([
+    getCaseVersionHistory(caseId),
+    listCaseSignalCards(caseDetail.case_version_id),
+  ]);
+
   return (
     <main className={styles.main}>
       <nav className={styles.breadcrumb} aria-label="Navigasyon yolu">
@@ -95,6 +106,66 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
                         </li>
                       ))}
                     </ul>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+
+        {signalCards.length > 0 && (
+          <section className={styles.signals} aria-label="Sinyal Konsensüs Kartları">
+            <h2 className={styles.sectionTitle}>Sinyal Konsensüs Kartları</h2>
+            <ul className={styles.signalList} role="list">
+              {signalCards.map((card) => (
+                <li key={card.signal_id} className={styles.signalCard}>
+                  <p className={styles.signalStatement}>{card.consensus_statement}</p>
+                  <div className={styles.signalMeta}>
+                    <span
+                      className={styles.signalTier}
+                      style={{
+                        color:
+                          card.qualification_tier === "GOLD_STANDARD"
+                            ? "var(--kefe-gold)"
+                            : card.qualification_tier === "SILVER_VALIDATED"
+                              ? "#9ca3af"
+                              : "#b45309",
+                      }}
+                    >
+                      {card.qualification_tier === "GOLD_STANDARD"
+                        ? "Altın Standart"
+                        : card.qualification_tier === "SILVER_VALIDATED"
+                          ? "Gümüş Doğrulanmış"
+                          : "Bronz Gözlemlendi"}
+                    </span>
+                    <span className={styles.signalAgreement}>
+                      %{card.agreement_percentage} uzlaşı · {card.sample_size} katılımcı
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {history && history.items.length > 1 && (
+          <section className={styles.history} aria-label="Sürüm Geçmişi">
+            <h2 className={styles.sectionTitle}>Yayın Geçmişi</h2>
+            <ol className={styles.historyList} reversed>
+              {history.items.map((v) => (
+                <li key={v.case_version_id} className={styles.historyItem}>
+                  <span className={styles.historyBadge}>
+                    {v.classification === "CURRENT" ? "Güncel" : "Önceki Sürüm"}
+                  </span>
+                  <span className={styles.historyVersion}>v{v.version_no}</span>
+                  <span className={styles.historyTitle}>{v.title}</span>
+                  {v.published_at && (
+                    <time
+                      dateTime={v.published_at}
+                      className={styles.historyDate}
+                    >
+                      {new Date(v.published_at).toLocaleDateString("tr-TR")}
+                    </time>
                   )}
                 </li>
               ))}

@@ -249,11 +249,14 @@ def get_signal_consensus_cards(
     repo: SignalRepoDep,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     offset: Annotated[int, Query(ge=0)] = 0,
+    case_version_id: Annotated[str | None, Query(description="Filter by exact CaseVersion UUID")] = None,
 ) -> list[SignalConsensusCardResponse]:
     """Return qualified signal consensus cards from the live repository.
 
     Results are ordered by certified_at DESC. Only GOLD, SILVER and BRONZE
     tiers are included (UNQUALIFIED signals are excluded from public display).
+    Optional `case_version_id` filter restricts results to signals for a
+    specific CaseVersion (used by the web case detail page, CAP-016).
     """
     signals = repo.list_all_signals(limit=limit + offset, offset=0)
     qualified = [
@@ -262,6 +265,11 @@ def get_signal_consensus_cards(
         # Provisional consensus_statements are pipeline-generated placeholders;
         # they must not appear in public display until editorial review completes.
         and "[PROVISIONAL]" not in s.consensus_statement
+        # Optional case_version_id filter (exact match, case-insensitive UUID)
+        and (
+            case_version_id is None
+            or str(s.case_version_id).lower() == case_version_id.lower()
+        )
     ]
     page = qualified[offset : offset + limit]
 

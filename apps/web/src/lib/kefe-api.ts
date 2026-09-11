@@ -153,3 +153,61 @@ export interface PublicShare {
 export async function getPublicShare(token: string): Promise<PublicShare> {
   return fetchJson<PublicShare>(`/v1/shares/${encodeURIComponent(token)}`);
 }
+
+// ---------------------------------------------------------------------------
+// Case Version History (ADR-0134, CAP-072)
+// ---------------------------------------------------------------------------
+
+export interface PublicCaseVersionItem {
+  case_version_id: string;
+  version_no: number;
+  title: string;
+  summary: string;
+  published_at: string | null;
+  /** "CURRENT" for the active published version, "PREVIOUS" for superseded. */
+  classification: "CURRENT" | "PREVIOUS";
+}
+
+export interface PublicCaseVersionHistory {
+  case_id: string;
+  items: PublicCaseVersionItem[];
+}
+
+/**
+ * Fetches the bounded public version history for a case.
+ * Returns null when the API returns 404 (case not found / not published).
+ * Throws on network or unexpected errors.
+ */
+export async function getCaseVersionHistory(
+  caseId: string,
+): Promise<PublicCaseVersionHistory | null> {
+  try {
+    return await fetchJson<PublicCaseVersionHistory>(
+      `/v1/cases/${encodeURIComponent(caseId)}/history`,
+    );
+  } catch (err) {
+    if (err instanceof KefApiError && err.status === 404) return null;
+    throw err;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Case Signal Consensus Cards (public — filtered by case_version_id)
+// ---------------------------------------------------------------------------
+
+/**
+ * Lists signal consensus cards for a specific case version.
+ * Returns empty array on 404 (no qualified signals yet).
+ */
+export async function listCaseSignalCards(
+  caseVersionId: string,
+): Promise<SignalConsensusCard[]> {
+  try {
+    return await fetchJson<SignalConsensusCard[]>(
+      `/v1/signals/consensus-cards?case_version_id=${encodeURIComponent(caseVersionId)}&limit=10`,
+    );
+  } catch (err) {
+    if (err instanceof KefApiError && err.status === 404) return [];
+    throw err;
+  }
+}
