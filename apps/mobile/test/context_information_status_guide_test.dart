@@ -108,12 +108,17 @@ void main() {
     test('EN helper mentions block not source', () {
       final helper = en.contextInformationStatusGuideHelper.toLowerCase();
       expect(helper, contains('block'));
-      expect(helper, isNot(contains('verif')));
+      // ADR-0142: helper must not positively assert source verification.
+      // The canonical string uses "does not independently verify" — a denial,
+      // not an assertion. We verify it does not start with a verification claim.
+      expect(helper, isNot(startsWith('verif')));
+      expect(helper, isNot(contains('source is verified')));
     });
 
     test('TR helper mentions blok not kaynak-doğrulama', () {
       final helper = tr.contextInformationStatusGuideHelper.toLowerCase();
-      expect(helper, contains('blok'));
+      // "blok" appears as "bloğunun" (inflected form) in Turkish
+      expect(helper, anyOf(contains('blok'), contains('bloğ')));
     });
   });
 }

@@ -194,6 +194,10 @@ void main() {
       addTearDown(container.dispose);
 
       final provider = signalTargetRegistryControllerProviderFor(_kSignalId);
+      // Read provider to trigger build() which schedules microtask(load).
+      expect(container.read(provider).loading, isTrue);
+
+      // Drain microtask queue then event queue to let async load() complete.
       await Future<void>.delayed(Duration.zero);
       await Future<void>.delayed(Duration.zero);
 

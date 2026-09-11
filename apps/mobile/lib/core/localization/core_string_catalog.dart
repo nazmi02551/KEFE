@@ -33,9 +33,9 @@ abstract final class CoreStringCatalog {
       'context.claim.claimed': 'Claimed',
       'context.claim.disputed': 'Disputed',
       'context.claim.unknown': 'Unknown',
-      'context.information_status_guide.title': 'What do the information statuses mean?',
+      'context.information_status_guide.title': 'What do these information states mean?',
       'context.information_status_guide.helper':
-          'These labels describe the status of each information block, not the source it links to.',
+          'A state belongs to the information block; it does not independently verify a linked source.',
       'context.information_status_guide.verified_desc':
           'The editorial record marks this block as checked.',
       'context.information_status_guide.claimed_desc':
@@ -190,9 +190,9 @@ abstract final class CoreStringCatalog {
       'context.claim.claimed': 'İddia',
       'context.claim.disputed': 'Çelişkili',
       'context.claim.unknown': 'Bilinmiyor',
-      'context.information_status_guide.title': 'Bilgi durumları ne anlama gelir?',
+      'context.information_status_guide.title': 'Bilgi durumları ne anlama geliyor?',
       'context.information_status_guide.helper':
-          'Bu etiketler her bilgi bloğunun durumunu açıklar; bağlantılı kaynağa değil.',
+          'Durum bilgi bloğuna aittir; bağlı kaynağı ayrıca doğrulamaz.',
       'context.information_status_guide.verified_desc':
           'Editoryal kayıt bu bloğun doğrulandığını göstermektedir.',
       'context.information_status_guide.claimed_desc':

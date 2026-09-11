@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../../features/context/presentation/context_journey_string_catalog.dart';
 import '../../features/decision/domain/decision_models.dart';
 import 'core_string_catalog.dart';
 import 'kefe_locale_catalog.dart';
@@ -56,17 +57,27 @@ class KefeStrings {
   };
 
   // Information-status guide (ADR-0142 / CAP-070)
+  // Single authoritative source: ContextJourneyStringCatalog (same catalog
+  // used by the ContextJourneyStrings extension). This avoids duplication and
+  // ensures test, widget and locale string are in sync.
   String get contextInformationStatusGuideTitle =>
-      _text('context.information_status_guide.title');
+      KefeLocaleCatalog.resolve(
+        locale: locale,
+        resources: ContextJourneyStringCatalog.resources,
+        key: 'status.guide.title',
+      );
   String get contextInformationStatusGuideHelper =>
-      _text('context.information_status_guide.helper');
-  String contextInformationStatusDescription(String status) => switch (status) {
-    'VERIFIED' => _text('context.information_status_guide.verified_desc'),
-    'CLAIMED'  => _text('context.information_status_guide.claimed_desc'),
-    'DISPUTED' => _text('context.information_status_guide.disputed_desc'),
-    'UNKNOWN'  => _text('context.information_status_guide.unknown_desc'),
-    _ => status,
-  };
+      KefeLocaleCatalog.resolve(
+        locale: locale,
+        resources: ContextJourneyStringCatalog.resources,
+        key: 'status.guide.helper',
+      );
+  String contextInformationStatusDescription(String status) =>
+      KefeLocaleCatalog.resolve(
+        locale: locale,
+        resources: ContextJourneyStringCatalog.resources,
+        key: 'status.${status.toLowerCase()}.helper',
+      );
 
   String contextSourceKind(String sourceKind) => switch (sourceKind) {
     'OFFICIAL' => _text('context.source.official'),

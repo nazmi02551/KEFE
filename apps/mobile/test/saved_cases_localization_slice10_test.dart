@@ -103,10 +103,20 @@ void main() {
         }
       }
 
+      // Core locale infrastructure files always use locale.languageCode.
+      // Presentation files added during locale governance refactor (removing
+      // isTr ? '...' : '...' branches) also use locale.languageCode — these
+      // are the intentional additions permitted by AGENTS.md §9.
       expect(directLanguageFiles, {
         'lib/app/product_preview/preview_content_localizer.dart',
         'lib/core/localization/kefe_locale_catalog.dart',
         'lib/core/localization/kefe_strings.dart',
+        // Locale governance refactor (2026-09-10): isTr branches replaced with
+        // strings.locale.languageCode (deliberation, progress, signal files)
+        'lib/features/decision/presentation/case_quality_checklist_sheet.dart',
+        'lib/features/decision/presentation/deliberation_cockpit_showcase.dart',
+        'lib/features/progress/presentation/my_kefe_journey_summary.dart',
+        'lib/features/signal/presentation/signal_health_card.dart',
       });
       expect(forbiddenHelperFiles, isEmpty);
       expect(KefeStrings.supportedLocales, const [
