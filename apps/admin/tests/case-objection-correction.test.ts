@@ -4,11 +4,11 @@ import assert from "node:assert/strict";
 import {
   CaseObjectionApiClient,
   CaseObjectionApiError,
-} from "../src/lib/case-objection-api.ts";
+} from "../src/lib/case-objection-api";
 import {
   CaseCorrectionApiClient,
   CaseCorrectionApiError,
-} from "../src/lib/case-correction-api.ts";
+} from "../src/lib/case-correction-api";
 
 test("CaseObjectionApiClient validates insecure URL and missing CSRF", async () => {
   assert.throws(
