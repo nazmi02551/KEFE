@@ -13,11 +13,13 @@
 
 .PHONY: \
   api-install api-lint api-format api-test api-test-postgres api-check api-dev \
-  admin-install admin-dev admin-build admin-lint admin-check \
+  admin-install admin-dev admin-build admin-lint admin-check admin-verify \
   mobile-test mobile-analyze mobile-build-android mobile-check \
   db-migrate db-migrate-down db-history db-current \
   infra-up infra-down infra-ps infra-logs \
   packages-validate \
+  web-test web-dev web-build web-lint web-typecheck web-check \
+  project-health project-health-quick \
   check check-all
 
 # ---------------------------------------------------------------------------
@@ -75,6 +77,9 @@ admin-typecheck:
 	cd $(ADMIN_DIR) && npm run typecheck
 
 admin-check: admin-lint admin-typecheck
+
+admin-verify:
+	cd $(ADMIN_DIR) && npm run verify
 
 # ---------------------------------------------------------------------------
 # Flutter Mobile
@@ -148,6 +153,21 @@ web-dev:
 web-build:
 	cd apps/web && npm run build
 
+web-lint:
+	cd apps/web && npm run lint
+
+web-typecheck:
+	cd apps/web && npm run typecheck
+
+web-check:
+	cd apps/web && npm run verify
+
+project-health:
+	python scripts/project_health.py
+
+project-health-quick:
+	python scripts/project_health.py --quick
+
 # ---------------------------------------------------------------------------
 # Aggregate targets
 # ---------------------------------------------------------------------------
@@ -156,4 +176,4 @@ web-build:
 check: api-lint api-test-fast admin-lint
 
 # Full local check: requires infra-up first
-check-all: api-check admin-check mobile-check packages-validate web-test
+check-all: api-check admin-verify mobile-check packages-validate web-check
