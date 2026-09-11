@@ -9,6 +9,7 @@ import '../../impact/application/institution_response_controller.dart';
 import '../../impact/presentation/institution_response_card.dart';
 import '../../signal/application/signal_controller.dart';
 import '../../signal/presentation/signal_consensus_card.dart';
+import '../localization/observatory_strings.dart';
 
 class PublicObservatoryScreen extends ConsumerStatefulWidget {
   const PublicObservatoryScreen({super.key});
@@ -31,18 +32,14 @@ class _PublicObservatoryScreenState
 
   @override
   Widget build(BuildContext context) {
-    final strings = Localizations.of<KefeStrings>(context, KefeStrings) ??
-        const KefeStrings(Locale('tr'));
+    final strings = KefeStrings.of(context);
     final visual = context.kefeVisual;
-    final isTr = strings.isTr;
     final signalState = ref.watch(signalControllerProvider);
     final impactState = ref.watch(institutionResponseControllerProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          isTr ? 'Kamusal Gözlemevi' : 'Public Observatory',
-        ),
+        title: Text(strings.observatoryScreenTitle),
       ),
       body: SafeArea(
         child: ListView(
@@ -77,16 +74,12 @@ class _PublicObservatoryScreenState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             KefeEyebrow(
-                              isTr
-                                  ? 'KAMUSAL GÖZLEMEVİ (CAP-016 & CAP-049)'
-                                  : 'PUBLIC OBSERVATORY (CAP-016 & CAP-049)',
+                              strings.observatoryEyebrow,
                               color: visual.gold,
                             ),
                             const SizedBox(height: 3),
                             Text(
-                              isTr
-                                  ? 'Sinyal ve Etki Takip Masası'
-                                  : 'Signal & Impact Desk',
+                              strings.observatoryHeaderTitle,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleMedium
@@ -102,9 +95,7 @@ class _PublicObservatoryScreenState
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    isTr
-                        ? 'Ön-karar manipülasyonlarından arındırılmış kamusal uzlaşı odakları ve yetkili kamu kurumlarının resmi taahhütleri.'
-                        : 'Methodology-qualified public consensus signals and official commitments from verified authorities.',
+                    strings.observatoryHeaderBody,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: visual.mutedForeground,
                           height: 1.45,
@@ -118,9 +109,7 @@ class _PublicObservatoryScreenState
               children: [
                 Expanded(
                   child: Text(
-                    isTr
-                        ? 'Nitelikli Topluluk Uzlaşı Sinyalleri'
-                        : 'Qualified Community Consensus Signals',
+                    strings.observatorySignalsSectionTitle,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w900,
                           letterSpacing: -0.2,
@@ -131,9 +120,7 @@ class _PublicObservatoryScreenState
             ),
             const SizedBox(height: 6),
             Text(
-              isTr
-                  ? 'Bireysel oylardan bağımsız, bot ve astroturfing filtrelerinden geçmiş sertifikalı uzlaşı haritaları.'
-                  : 'Certified societal consensus patterns filtered from bot manipulation and astroturfing.',
+              strings.observatorySignalsSectionBody,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: visual.mutedForeground,
                     height: 1.4,
@@ -144,10 +131,8 @@ class _PublicObservatoryScreenState
               KefeSurface(
                 tone: KefeSurfaceTone.sunken,
                 padding: const EdgeInsets.all(16),
-                child: Text(
-                  isTr
-                      ? 'Şu anda yayımlanmış kamusal uzlaşı sinyali bulunmuyor.'
-                      : 'No public consensus signals currently published.',
+child: Text(
+                    strings.observatorySignalsEmpty,
                   style: TextStyle(color: visual.mutedForeground),
                 ),
               )
@@ -164,9 +149,7 @@ class _PublicObservatoryScreenState
               children: [
                 Expanded(
                   child: Text(
-                    isTr
-                        ? 'Doğrulanmış Kurum Yanıtları ve Taahhütler'
-                        : 'Verified Institution Responses & Pledges',
+                    strings.observatoryInstitutionSectionTitle,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w900,
                           letterSpacing: -0.2,
@@ -177,9 +160,7 @@ class _PublicObservatoryScreenState
             ),
             const SizedBox(height: 6),
             Text(
-              isTr
-                  ? 'Uzlaşı sinyallerine bakanlıklar, belediyeler ve sivil toplum kuruluşlarınca verilen resmi yanıtlar.'
-                  : 'Official responses from ministries, municipalities, and verified institutions.',
+              strings.observatoryInstitutionSectionBody,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: visual.mutedForeground,
                     height: 1.4,
@@ -190,10 +171,8 @@ class _PublicObservatoryScreenState
               KefeSurface(
                 tone: KefeSurfaceTone.sunken,
                 padding: const EdgeInsets.all(16),
-                child: Text(
-                  isTr
-                      ? 'Henüz doğrulanmış bir kurumsal yanıt kaydı yok.'
-                      : 'No verified institutional response records yet.',
+child: Text(
+                    strings.observatoryInstitutionEmpty,
                   style: TextStyle(color: visual.mutedForeground),
                 ),
               )
