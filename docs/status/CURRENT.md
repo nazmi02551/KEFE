@@ -354,7 +354,7 @@ The following items remain incomplete after Session 2:
 
 **PR #403:** https://github.com/nazmi02551/KEFE/pull/403
 
-**Commits in branch (36 total, on top of main):**
+**Commits in branch (39 total, on top of main):**
 1. `cf93f986` — signal/impact hexagonal ports, pipeline service, admin studio signal+impact pages
 2. `f2cd413a` — env.example, design-tokens build+validate scripts, CURRENT.md session 2
 3. `2dc3a47f` — kefe-locale validate script, fix a11y namespace in keys.json
@@ -385,6 +385,8 @@ The following items remain incomplete after Session 2:
 28. `b8c35d5c` — chore(portfolio): CAP-048 ARCHITECTURE_LOCKED→IMPLEMENTED_PARTIAL
 29. `ff60e7e0` — feat(mobile): Context information-status guide strings — kefe_strings + catalog TR+EN (ADR-0142, CAP-070)
 30. `5ed46cae` — test(mobile): ADR-0142 information-status guide locale contract tests — 15 tests
+31. `2cd8633c` — refactor(mobile): remove dead extension methods from ContextJourneyStrings (CAP-070)
+32. `7cb93b95` — feat(mobile): SavedCasesState lifecycle update markers — reconcileWithCatalog, clearUpdateMarkers, updateCount, hasUpdate (ADR-0139, CAP-079)
 
 **Test results (verified locally):**
 - API in-memory: **895 passed, 123 skipped, 0 failed**
@@ -429,7 +431,18 @@ The following items remain incomplete after Session 2:
     - Added EN+TR locale strings for all 4 statuses (VERIFIED/CLAIMED/DISPUTED/UNKNOWN) and guide title/helper
     - 15 contract guard tests: locale parity, uniqueness, ADR-0142 boundary (linked_source_status_inferred=false)
     - dart analyze: No issues found
-15. **Next wave (for next agent):** CAP-069 source micro-preview improvements, or Issue #291 canonical feed merge strategy (requires product decision). API: 895 passed, 123 skipped, 0 failed.
+15. **CAP-079 saved-case lifecycle updates (ADR-0139):**
+    - SavedCasesState.updatedCaseIds: Set<String> (default const {})
+    - SavedCasesState.hasUpdate(caseId) / updateCount computed getters
+    - SavedCasesController.reconcileWithCatalog(): compares saved snapshots vs catalog — sets updatedCaseIds only when EXACT_CASE_ID_MATCH_AND_CASE_VERSION_ID_DIFFERS
+    - SavedCasesController.clearUpdateMarkers(): catalog unavailable = unknown state, never claim update/deletion
+    - acknowledgeCurrentVersion(): removes caseId from updatedCaseIds on ack
+    - toggle()/remove(): preserve updatedCaseIds in state transitions
+    - load(): clears updatedCaseIds (catalog re-comparison required after reload)
+    - SharedPreferences payload unchanged — no migration
+    - dart analyze: No issues found
+16. **Final state (this session):** API: 895 passed, 123 skipped, 0 failed. Dart analyze lib/+test/ clean. Portfolio: CAP-048 IMPLEMENTED_PARTIAL, CAP-070 IMPLEMENTED_PARTIAL notes updated. 39 branch commits.
+17. **Next wave (for next agent):** Unit tests for reconcileWithCatalog (SavedCasesController). Then CAP-069 source micro-preview ADR-0130 contract tests. Issue #291 canonical feed merge requires separate product decision session.
 
 **Next agent session standard protocol:**
 1. Read `AGENTS.md` + this file (sections 14-15)
