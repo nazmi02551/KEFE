@@ -39,7 +39,10 @@ class AcademicResearchPortalService:
         if record_count < 0:
             raise ValueError("record_count cannot be negative")
         if not 0.0 <= differential_privacy_epsilon <= 1.0:
-            raise ValueError(f"differential_privacy_epsilon must be in [0.0, 1.0], got {differential_privacy_epsilon}")
+            raise ValueError(
+                "differential_privacy_epsilon must be in [0.0, 1.0], "
+                f"got {differential_privacy_epsilon}"
+            )
 
         return AcademicResearchDatasetResult(
             dataset_id=dataset_id.strip(),

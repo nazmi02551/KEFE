@@ -29,9 +29,13 @@ class DigitalSovereigntyVaultService:
         exfiltration_threat_score: float,
     ) -> DigitalSovereigntyResult:
         if not 0.0 <= local_residency_pct <= 1.0:
-            raise ValueError(f"local_residency_pct must be in [0.0, 1.0], got {local_residency_pct}")
+            raise ValueError(
+                f"local_residency_pct must be in [0.0, 1.0], got {local_residency_pct}"
+            )
         if not 0.0 <= exfiltration_threat_score <= 1.0:
-            raise ValueError(f"exfiltration_threat_score must be in [0.0, 1.0], got {exfiltration_threat_score}")
+            raise ValueError(
+                f"exfiltration_threat_score must be in [0.0, 1.0], got {exfiltration_threat_score}"
+            )
         if len(jurisdiction_region.strip()) < 2:
             raise ValueError("jurisdiction_region must have at least 2 characters")
 

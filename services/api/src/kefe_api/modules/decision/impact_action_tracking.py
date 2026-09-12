@@ -33,7 +33,9 @@ class ImpactActionTracker:
         target_completion_utc: str,
     ) -> ImpactActionResult:
         if not 0 <= completion_percentage <= 100:
-            raise ValueError(f"completion_percentage must be in [0, 100], got {completion_percentage}")
+            raise ValueError(
+                f"completion_percentage must be in [0, 100], got {completion_percentage}"
+            )
         if len(institution_name.strip()) < 3:
             raise ValueError("institution_name must have at least 3 characters")
         if len(pledge_title.strip()) < 5:

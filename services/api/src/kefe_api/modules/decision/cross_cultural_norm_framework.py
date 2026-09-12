@@ -35,7 +35,9 @@ class CrossCulturalNormFrameworkService:
         if len(region_identifier.strip()) < 2:
             raise ValueError("region_identifier must have at least 2 characters")
         if not 0.0 <= cultural_alignment_score <= 1.0:
-            raise ValueError(f"cultural_alignment_score must be in [0.0, 1.0], got {cultural_alignment_score}")
+            raise ValueError(
+                f"cultural_alignment_score must be in [0.0, 1.0], got {cultural_alignment_score}"
+            )
         if len(norm_synthesis_summary.strip()) < 10:
             raise ValueError("norm_synthesis_summary must have at least 10 characters")
 

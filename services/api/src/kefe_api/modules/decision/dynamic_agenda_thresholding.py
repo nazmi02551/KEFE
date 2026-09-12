@@ -32,9 +32,14 @@ class DynamicAgendaThresholdingService:
         if len(topic_title.strip()) < 5:
             raise ValueError("topic_title must have at least 5 characters")
         if not 0.0 <= resonance_velocity_index <= 1.0:
-            raise ValueError(f"resonance_velocity_index must be in [0.0, 1.0], got {resonance_velocity_index}")
+            raise ValueError(
+                f"resonance_velocity_index must be in [0.0, 1.0], got {resonance_velocity_index}"
+            )
         if not 0.0 <= viewpoint_diversity_entropy <= 1.0:
-            raise ValueError(f"viewpoint_diversity_entropy must be in [0.0, 1.0], got {viewpoint_diversity_entropy}")
+            raise ValueError(
+                "viewpoint_diversity_entropy must be in [0.0, 1.0], "
+                f"got {viewpoint_diversity_entropy}"
+            )
 
         # Determine tier based on velocity and diversity (prevents astroturfing)
         combined_score = 0.6 * resonance_velocity_index + 0.4 * viewpoint_diversity_entropy

@@ -33,9 +33,13 @@ class MultiStakeholderConsensusCircleService:
         if len(pact_title.strip()) < 5:
             raise ValueError("pact_title must have at least 5 characters")
         if stakeholder_groups_count < 2:
-            raise ValueError(f"stakeholder_groups_count must be at least 2, got {stakeholder_groups_count}")
+            raise ValueError(
+                f"stakeholder_groups_count must be at least 2, got {stakeholder_groups_count}"
+            )
         if not 0.0 <= mutual_concession_score <= 1.0:
-            raise ValueError(f"mutual_concession_score must be in [0.0, 1.0], got {mutual_concession_score}")
+            raise ValueError(
+                f"mutual_concession_score must be in [0.0, 1.0], got {mutual_concession_score}"
+            )
         if len(synthesis_covenant_summary.strip()) < 10:
             raise ValueError("synthesis_covenant_summary must have at least 10 characters")
 

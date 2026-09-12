@@ -45,7 +45,8 @@ class ProportionalityCalculator:
         if len(summary.strip()) < 10:
             raise ValueError("summary must have at least 10 characters")
 
-        # Weighted calculation: Suitability (30%), Least Intrusive (40%), Strict Proportionality (30%)
+        # Weighted calculation: Suitability (30%), Least Intrusive (40%),
+        # Strict Proportionality (30%).
         composite = round(
             (suitability_score * 0.30)
             + (necessity_least_intrusive_score * 0.40)

@@ -34,7 +34,10 @@ class AiNeutralityFacilitatorService:
         if not 0.0 <= neutrality_index <= 1.0:
             raise ValueError(f"neutrality_index must be in [0.0, 1.0], got {neutrality_index}")
         if not 0.0 <= deescalation_efficacy_score <= 1.0:
-            raise ValueError(f"deescalation_efficacy_score must be in [0.0, 1.0], got {deescalation_efficacy_score}")
+            raise ValueError(
+                "deescalation_efficacy_score must be in [0.0, 1.0], "
+                f"got {deescalation_efficacy_score}"
+            )
         if len(facilitation_prompt_text.strip()) < 10:
             raise ValueError("facilitation_prompt_text must have at least 10 characters")
 

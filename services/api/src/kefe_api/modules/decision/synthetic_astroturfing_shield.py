@@ -31,11 +31,16 @@ class SyntheticAstroturfingShieldService:
         semantic_entropy_index: float,
     ) -> BotShieldResult:
         if not 0.0 <= synthetic_probability_score <= 1.0:
-            raise ValueError(f"synthetic_probability_score must be in [0.0, 1.0], got {synthetic_probability_score}")
+            raise ValueError(
+                "synthetic_probability_score must be in [0.0, 1.0], "
+                f"got {synthetic_probability_score}"
+            )
         if quarantined_bot_payloads_count < 0:
             raise ValueError("quarantined_bot_payloads_count cannot be negative")
         if not 0.0 <= semantic_entropy_index <= 1.0:
-            raise ValueError(f"semantic_entropy_index must be in [0.0, 1.0], got {semantic_entropy_index}")
+            raise ValueError(
+                f"semantic_entropy_index must be in [0.0, 1.0], got {semantic_entropy_index}"
+            )
 
         # State determination
         if synthetic_probability_score >= 0.80 and semantic_entropy_index < 0.25:

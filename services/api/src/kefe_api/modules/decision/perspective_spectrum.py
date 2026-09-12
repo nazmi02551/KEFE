@@ -37,7 +37,9 @@ class PerspectiveSpectrumService:
         if argument_resonance_count < 0:
             raise ValueError("argument_resonance_count cannot be negative")
         if not 0.0 <= cross_value_bridge_ratio <= 1.0:
-            raise ValueError(f"cross_value_bridge_ratio must be in [0.0, 1.0], got {cross_value_bridge_ratio}")
+            raise ValueError(
+                f"cross_value_bridge_ratio must be in [0.0, 1.0], got {cross_value_bridge_ratio}"
+            )
         if len(core_moral_intuition.strip()) < 10:
             raise ValueError("core_moral_intuition must have at least 10 characters")
 

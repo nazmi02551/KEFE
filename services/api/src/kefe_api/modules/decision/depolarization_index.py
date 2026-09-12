@@ -29,9 +29,14 @@ class DepolarizationCalculator:
         post_deliberation_distance: float,
     ) -> DepolarizationIndexResult:
         if not 0.0 <= pre_deliberation_distance <= 1.0:
-            raise ValueError(f"pre_deliberation_distance must be in [0.0, 1.0], got {pre_deliberation_distance}")
+            raise ValueError(
+                f"pre_deliberation_distance must be in [0.0, 1.0], got {pre_deliberation_distance}"
+            )
         if not 0.0 <= post_deliberation_distance <= 1.0:
-            raise ValueError(f"post_deliberation_distance must be in [0.0, 1.0], got {post_deliberation_distance}")
+            raise ValueError(
+                "post_deliberation_distance must be in [0.0, 1.0], "
+                f"got {post_deliberation_distance}"
+            )
 
         # Depolarization score is relative reduction in distance
         if pre_deliberation_distance > 0.0:

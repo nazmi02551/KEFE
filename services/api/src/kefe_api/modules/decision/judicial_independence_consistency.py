@@ -31,7 +31,9 @@ class JudicialIndependenceConsistencyService:
         evaluated_precedent_cases_count: int,
     ) -> JudicialConsistencyResult:
         if not 0.0 <= precedent_fidelity_score <= 1.0:
-            raise ValueError(f"precedent_fidelity_score must be in [0.0, 1.0], got {precedent_fidelity_score}")
+            raise ValueError(
+                f"precedent_fidelity_score must be in [0.0, 1.0], got {precedent_fidelity_score}"
+            )
         if evaluated_precedent_cases_count < 1:
             raise ValueError("evaluated_precedent_cases_count must be at least 1")
         if len(court_jurisdiction.strip()) < 3:

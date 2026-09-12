@@ -39,7 +39,9 @@ class ImpactEvidenceService:
         evidence_title: str,
         source_url: str,
         raw_document_content: str,
-        verification_status: EvidenceVerificationStatus = EvidenceVerificationStatus.VERIFIED_AUTHENTIC,
+        verification_status: EvidenceVerificationStatus = (
+            EvidenceVerificationStatus.VERIFIED_AUTHENTIC
+        ),
     ) -> ImpactEvidenceResult:
         if len(evidence_title.strip()) < 5:
             raise ValueError("evidence_title must have at least 5 characters")

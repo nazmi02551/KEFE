@@ -31,9 +31,14 @@ class MultiLlmConsensusService:
         synthesized_consensus_output: str,
     ) -> MultiLlmConsensusResult:
         if models_evaluated_count < 3:
-            raise ValueError(f"models_evaluated_count must be at least 3, got {models_evaluated_count}")
+            raise ValueError(
+                f"models_evaluated_count must be at least 3, got {models_evaluated_count}"
+            )
         if not 0.0 <= semantic_convergence_score <= 1.0:
-            raise ValueError(f"semantic_convergence_score must be in [0.0, 1.0], got {semantic_convergence_score}")
+            raise ValueError(
+                "semantic_convergence_score must be in [0.0, 1.0], "
+                f"got {semantic_convergence_score}"
+            )
         if len(synthesized_consensus_output.strip()) < 10:
             raise ValueError("synthesized_consensus_output must have at least 10 characters")
 

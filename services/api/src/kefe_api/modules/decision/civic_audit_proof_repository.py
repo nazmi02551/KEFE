@@ -33,7 +33,9 @@ class CivicAuditProofRepositoryService:
         if peer_attestation_signatures_count < 0:
             raise ValueError("peer_attestation_signatures_count cannot be negative")
         if not 0.0 <= evidentiary_rigor_score <= 1.0:
-            raise ValueError(f"evidentiary_rigor_score must be in [0.0, 1.0], got {evidentiary_rigor_score}")
+            raise ValueError(
+                f"evidentiary_rigor_score must be in [0.0, 1.0], got {evidentiary_rigor_score}"
+            )
         if len(investigation_title.strip()) < 6:
             raise ValueError("investigation_title must have at least 6 characters")
         if len(content_hash_digest.strip()) < 16:

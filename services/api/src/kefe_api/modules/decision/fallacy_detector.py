@@ -39,7 +39,10 @@ class CognitiveFallacyDetector:
             clean_item = DetectedFallacyItem(
                 fallacy_type=FallacyType.NO_FALLACY_DETECTED,
                 confidence=1.0,
-                explanation="Argümanda belirgin bir mantıksal safsata veya bilişsel çarpıtma tespit edilmedi.",
+                explanation=(
+                    "Argümanda belirgin bir mantıksal safsata veya bilişsel "
+                    "çarpıtma tespit edilmedi."
+                ),
             )
             return FallacyDetectionResult(
                 argument_id=argument_id,

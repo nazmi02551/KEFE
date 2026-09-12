@@ -28,7 +28,10 @@ class AdaptiveCognitiveLoadService:
         comprehension_retention_index: float = 0.90,
     ) -> AdaptiveCognitiveLoadResult:
         if not 0.0 <= comprehension_retention_index <= 1.0:
-            raise ValueError(f"comprehension_retention_index must be in [0.0, 1.0], got {comprehension_retention_index}")
+            raise ValueError(
+                "comprehension_retention_index must be in [0.0, 1.0], "
+                f"got {comprehension_retention_index}"
+            )
 
         # Compute reduction percentage based on density mode
         if density_mode == CognitiveDensityMode.STREAMLINED_ESSENTIALS:

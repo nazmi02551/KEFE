@@ -41,12 +41,18 @@ class ExpertTestimonyService:
         if len(source_name.strip()) < 3:
             raise ValueError("source_name must have at least 3 characters")
         if not 0.0 <= conflict_of_interest_score <= 1.0:
-            raise ValueError(f"conflict_of_interest_score must be in [0.0, 1.0], got {conflict_of_interest_score}")
+            raise ValueError(
+                "conflict_of_interest_score must be in [0.0, 1.0], "
+                f"got {conflict_of_interest_score}"
+            )
         if len(testimony_statement.strip()) < 10:
             raise ValueError("testimony_statement must have at least 10 characters")
 
         # Derive epistemic authority tier
-        if archetype == TestimonyArchetype.INDEPENDENT_ACADEMIC_EXPERT and conflict_of_interest_score <= 0.20:
+        if (
+            archetype == TestimonyArchetype.INDEPENDENT_ACADEMIC_EXPERT
+            and conflict_of_interest_score <= 0.20
+        ):
             tier = EpistemicAuthorityTier.HIGH_PEER_REVIEWED
         elif archetype == TestimonyArchetype.GOVERNMENTAL_REGULATORY_BODY:
             tier = EpistemicAuthorityTier.OFFICIAL_REGULATORY
