@@ -152,6 +152,45 @@ export interface StakeholderDistributionGroup {
   dominant_preference: string;
 }
 
+export interface BudgetTradeoffReport {
+  tradeoff_id: string;
+  case_version_id: string;
+  healthcare_pct: number;
+  education_pct: number;
+  infrastructure_pct: number;
+  green_transition_pct: number;
+  unallocated_pct: number;
+  tradeoff_profile: "HEALTH_EDUCATION_PRIORITY" | "INFRASTRUCTURE_GROWTH" | "ECOLOGICAL_TRANSITION" | "BALANCED_ALLOCATION";
+}
+
+export interface HistoricalRetrospectiveReport {
+  retrospective_id: string;
+  case_version_id: string;
+  historical_era: "ANCIENT_CLASSICAL" | "INDUSTRIAL_ERA" | "TWENTIETH_CENTURY" | "CONTEMPORARY_CRISIS";
+  historical_year: number;
+  historical_event_name: string;
+  actual_historical_decision: string;
+  historical_consequence_summary: string;
+}
+
+export interface ObserveModeSessionReport {
+  session_id: string;
+  case_version_id: string;
+  exploration_mode: "OBSERVE_ONLY" | "STUDY_AND_LEARN" | "TRANSITION_TO_WEIGH";
+  is_binding_vote: boolean;
+  viewed_argument_count: number;
+  viewed_evidence_count: number;
+}
+
+export interface CommunityProposalItem {
+  proposal_id: string;
+  proposed_title: string;
+  proposed_context: string;
+  curation_state: "DRAFT_SUBMITTED" | "COMMUNITY_PEER_REVIEW" | "EDITORIAL_APPROVED" | "REJECTED_WITH_REASON";
+  neutrality_score: number;
+  supporter_count: number;
+}
+
 export interface StakeholderDistributionReport {
   case_version_id: string;
   stakeholder_groups: StakeholderDistributionGroup[];
@@ -264,5 +303,70 @@ export class CaseAnalyticsApiClient {
 
   public async getStakeholderDistributions(caseVersionId: string): Promise<StakeholderDistributionReport> {
     return this.getJson<StakeholderDistributionReport>(`/v1/cases/${caseVersionId}/stakeholder-distributions`);
+  }
+
+  public async getBudgetTradeoff(caseVersionId: string): Promise<BudgetTradeoffReport> {
+    return this.getJson<BudgetTradeoffReport>(`/v1/cases/${caseVersionId}/budget-tradeoff`);
+  }
+
+  public async evaluateBudgetTradeoff(
+    caseVersionId: string,
+    allocation: {
+      healthcare_pct: number;
+      education_pct: number;
+      infrastructure_pct: number;
+      green_transition_pct: number;
+    }
+  ): Promise<BudgetTradeoffReport> {
+    const total =
+      allocation.healthcare_pct +
+      allocation.education_pct +
+      allocation.infrastructure_pct +
+      allocation.green_transition_pct;
+    if (total > 100) {
+      throw new AdminApiError(
+        "INVALID_ALLOCATION",
+        `Total budget allocation cannot exceed 100%, got ${total}%`,
+        400
+      );
+    }
+    return this.postJson<BudgetTradeoffReport>(
+      `/v1/cases/${caseVersionId}/budget-tradeoff/evaluate`,
+      allocation
+    );
+  }
+
+  public async getHistoricalRetrospective(caseVersionId: string): Promise<HistoricalRetrospectiveReport> {
+    return this.getJson<HistoricalRetrospectiveReport>(`/v1/cases/${caseVersionId}/historical-retrospective`);
+  }
+
+  public async createObserveSession(
+    caseVersionId: string,
+    explorationMode: string = "OBSERVE_ONLY"
+  ): Promise<ObserveModeSessionReport> {
+    return this.postJson<ObserveModeSessionReport>(`/v1/cases/${caseVersionId}/observe-session`, {
+      exploration_mode: explorationMode,
+    });
+  }
+
+  public async listCommunityProposals(caseVersionId: string): Promise<CommunityProposalItem[]> {
+    return this.getJson<CommunityProposalItem[]>(`/v1/cases/${caseVersionId}/community-proposals`);
+  }
+
+  public async createCommunityProposal(
+    caseVersionId: string,
+    title: string,
+    context: string
+  ): Promise<CommunityProposalItem> {
+    if (title.trim().length < 5) {
+      throw new AdminApiError("INVALID_TITLE", "Title must have at least 5 characters", 400);
+    }
+    if (context.trim().length < 10) {
+      throw new AdminApiError("INVALID_CONTEXT", "Context must have at least 10 characters", 400);
+    }
+    return this.postJson<CommunityProposalItem>(`/v1/cases/${caseVersionId}/community-proposals`, {
+      proposed_title: title.trim(),
+      proposed_context: context.trim(),
+    });
   }
 }

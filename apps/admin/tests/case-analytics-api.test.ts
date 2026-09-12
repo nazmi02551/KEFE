@@ -162,6 +162,79 @@ test("CaseAnalyticsApiClient mocked GET and POST requests", async () => {
       }), { status: 200 });
     }
 
+    if (url.includes("/budget-tradeoff/evaluate")) {
+      return new Response(JSON.stringify({
+        tradeoff_id: "TRD-test",
+        case_version_id: "test-case",
+        healthcare_pct: 30,
+        education_pct: 25,
+        infrastructure_pct: 25,
+        green_transition_pct: 20,
+        unallocated_pct: 0,
+        tradeoff_profile: "BALANCED_ALLOCATION"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/budget-tradeoff")) {
+      return new Response(JSON.stringify({
+        tradeoff_id: "TRD-default",
+        case_version_id: "test-case",
+        healthcare_pct: 30,
+        education_pct: 25,
+        infrastructure_pct: 25,
+        green_transition_pct: 20,
+        unallocated_pct: 0,
+        tradeoff_profile: "BALANCED_ALLOCATION"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/historical-retrospective")) {
+      return new Response(JSON.stringify({
+        retrospective_id: "RETRO-01",
+        case_version_id: "test-case",
+        historical_era: "INDUSTRIAL_ERA",
+        historical_year: 1888,
+        historical_event_name: "Demiryolu Kamulaştırması",
+        actual_historical_decision: "Kamu mülkiyeti seçildi.",
+        historical_consequence_summary: "Maliyetler düştü."
+      }), { status: 200 });
+    }
+
+    if (url.includes("/observe-session")) {
+      return new Response(JSON.stringify({
+        session_id: "OBS-01",
+        case_version_id: "test-case",
+        exploration_mode: "OBSERVE_ONLY",
+        is_binding_vote: false,
+        viewed_argument_count: 0,
+        viewed_evidence_count: 0
+      }), { status: 200 });
+    }
+
+    if (url.includes("/community-proposals") && method === "POST") {
+      return new Response(JSON.stringify({
+        proposal_id: "PROP-02",
+        proposed_title: "Yeni Yaya Yolu",
+        proposed_context: "Yayalaştırma projesi teklifi.",
+        curation_state: "DRAFT_SUBMITTED",
+        neutrality_score: 0.75,
+        supporter_count: 1
+      }), { status: 201 });
+    }
+
+    if (url.includes("/community-proposals")) {
+      return new Response(JSON.stringify([
+        {
+          proposal_id: "PROP-01",
+          proposed_title: "Gece Seferleri",
+          proposed_context: "Ücretsiz sefer talebi.",
+          curation_state: "COMMUNITY_PEER_REVIEW",
+          neutrality_score: 0.85,
+          supporter_count: 142
+        }
+      ]), { status: 200 });
+    }
+
     return new Response(JSON.stringify({ error: "Not found" }), { status: 404 });
   };
 
@@ -204,7 +277,34 @@ test("CaseAnalyticsApiClient mocked GET and POST requests", async () => {
     const st = await client.getStakeholderDistributions("test-case");
     assert.ok(Array.isArray(st.stakeholder_groups));
 
-    assert.equal(calls.length, 12);
+    const bt = await client.getBudgetTradeoff("test-case");
+    assert.equal(bt.tradeoff_profile, "BALANCED_ALLOCATION");
+
+    const evalBt = await client.evaluateBudgetTradeoff("test-case", {
+      healthcare_pct: 30,
+      education_pct: 25,
+      infrastructure_pct: 25,
+      green_transition_pct: 20
+    });
+    assert.equal(evalBt.healthcare_pct, 30);
+
+    const retro = await client.getHistoricalRetrospective("test-case");
+    assert.equal(retro.historical_era, "INDUSTRIAL_ERA");
+
+    const obs = await client.createObserveSession("test-case");
+    assert.equal(obs.is_binding_vote, false);
+
+    const props = await client.listCommunityProposals("test-case");
+    assert.equal(props.length, 1);
+
+    const newProp = await client.createCommunityProposal(
+      "test-case",
+      "Yeni Yaya Yolu",
+      "Yayalaştırma projesi teklifi."
+    );
+    assert.equal(newProp.curation_state, "DRAFT_SUBMITTED");
+
+    assert.equal(calls.length, 18);
   } finally {
     globalThis.fetch = originalFetch;
   }

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
@@ -39,6 +40,22 @@ from kefe_api.modules.decision.policy_simulator import (
 from kefe_api.modules.decision.process_analysis import ProcessAnalysisCalculator
 from kefe_api.modules.decision.responsibility_analysis import (
     ResponsibilityAnalysisCalculator,
+)
+from kefe_api.modules.decision.budget_tradeoff_simulator import (
+    BudgetTradeoffSimulator,
+    TradeoffProfile,
+)
+from kefe_api.modules.decision.community_dilemma_proposals import (
+    CommunityDilemmaProposalsService,
+    CurationState,
+)
+from kefe_api.modules.decision.historical_retrospective import (
+    HistoricalEra,
+    HistoricalRetrospectiveEngine,
+)
+from kefe_api.modules.decision.observe_mode_exploration import (
+    ExplorationMode,
+    ObserveModeService,
 )
 from kefe_api.modules.decision.segment_distribution import (
     PrivacySafeSegmentDistributionService,
@@ -96,6 +113,34 @@ class CorrectionCreateRequest(BaseModel):
 class PolicyEvaluateRequest(BaseModel):
     knob_value: float = Field(..., ge=0.0, le=100.0)
     policy_knob_name: str = Field(..., min_length=3)
+
+
+class BudgetTradeoffEvaluateRequest(BaseModel):
+    healthcare_pct: int = Field(..., ge=0, le=100)
+    education_pct: int = Field(..., ge=0, le=100)
+    infrastructure_pct: int = Field(..., ge=0, le=100)
+    green_transition_pct: int = Field(..., ge=0, le=100)
+
+
+class ObserveSessionCreateRequest(BaseModel):
+    exploration_mode: str = "OBSERVE_ONLY"
+
+
+class CommunityProposalCreateRequest(BaseModel):
+    proposed_title: str = Field(..., min_length=5)
+    proposed_context: str = Field(..., min_length=10)
+
+
+_PROPOSALS_STORE: list[dict[str, Any]] = [
+    {
+        "proposal_id": "PROP-001",
+        "proposed_title": "Kent İçi Ulaşımda Gece Seferlerinin Ücretsiz Olması",
+        "proposed_context": "Gece vardiyasında çalışan işçiler ve gençlerin güvenliği için kamu sübvansiyonu sağlanmalıdır.",
+        "curation_state": "COMMUNITY_PEER_REVIEW",
+        "neutrality_score": 0.85,
+        "supporter_count": 142,
+    }
+]
 
 
 @case_analytics_router.get("/{case_version_id}/objections")
@@ -394,3 +439,142 @@ def get_stakeholder_distributions(case_version_id: UUID) -> dict[str, Any]:
     return StakeholderDistributionService.get_stakeholder_distribution(
         str(case_version_id)
     ).to_dict()
+
+
+@case_analytics_router.get("/{case_version_id}/budget-tradeoff")
+def get_default_budget_tradeoff(case_version_id: UUID) -> dict[str, Any]:
+    res = BudgetTradeoffSimulator.evaluate(
+        tradeoff_id=f"TRD-{str(case_version_id)[:8]}",
+        case_version_id=case_version_id,
+        healthcare_pct=30,
+        education_pct=25,
+        infrastructure_pct=25,
+        green_transition_pct=20,
+    )
+    return {
+        "tradeoff_id": res.tradeoff_id,
+        "case_version_id": str(res.case_version_id),
+        "healthcare_pct": res.healthcare_pct,
+        "education_pct": res.education_pct,
+        "infrastructure_pct": res.infrastructure_pct,
+        "green_transition_pct": res.green_transition_pct,
+        "unallocated_pct": res.unallocated_pct,
+        "tradeoff_profile": res.tradeoff_profile.value,
+    }
+
+
+@case_analytics_router.post("/{case_version_id}/budget-tradeoff/evaluate")
+def evaluate_budget_tradeoff(
+    case_version_id: UUID,
+    body: BudgetTradeoffEvaluateRequest,
+) -> dict[str, Any]:
+    total = (
+        body.healthcare_pct
+        + body.education_pct
+        + body.infrastructure_pct
+        + body.green_transition_pct
+    )
+    if total > 100:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Total budget allocation cannot exceed 100%, got {total}%",
+        )
+
+    res = BudgetTradeoffSimulator.evaluate(
+        tradeoff_id=f"TRD-{str(case_version_id)[:8]}",
+        case_version_id=case_version_id,
+        healthcare_pct=body.healthcare_pct,
+        education_pct=body.education_pct,
+        infrastructure_pct=body.infrastructure_pct,
+        green_transition_pct=body.green_transition_pct,
+    )
+    return {
+        "tradeoff_id": res.tradeoff_id,
+        "case_version_id": str(res.case_version_id),
+        "healthcare_pct": res.healthcare_pct,
+        "education_pct": res.education_pct,
+        "infrastructure_pct": res.infrastructure_pct,
+        "green_transition_pct": res.green_transition_pct,
+        "unallocated_pct": res.unallocated_pct,
+        "tradeoff_profile": res.tradeoff_profile.value,
+    }
+
+
+@case_analytics_router.get("/{case_version_id}/historical-retrospective")
+def get_historical_retrospective(case_version_id: UUID) -> dict[str, Any]:
+    res = HistoricalRetrospectiveEngine.evaluate(
+        retrospective_id=f"RETRO-{str(case_version_id)[:8]}",
+        case_version_id=case_version_id,
+        historical_era=HistoricalEra.INDUSTRIAL_ERA,
+        historical_year=1888,
+        historical_event_name="Demiryolu Hatlarının Kamulaştırılması Kararı",
+        actual_historical_decision="Özel imtiyazlı yabancı demiryolu şirketleri yerine kamu mülkiyeti ve tarifeli denetim modeli benimsenmiştir.",
+        historical_consequence_summary="Ulaşım maliyetleri uzun vadede düşmüş, bölgesel entegrasyon hızlanmış ve kamusal denetim sağlanmıştır.",
+    )
+    return {
+        "retrospective_id": res.retrospective_id,
+        "case_version_id": str(res.case_version_id),
+        "historical_era": res.historical_era.value,
+        "historical_year": res.historical_year,
+        "historical_event_name": res.historical_event_name,
+        "actual_historical_decision": res.actual_historical_decision,
+        "historical_consequence_summary": res.historical_consequence_summary,
+    }
+
+
+@case_analytics_router.post("/{case_version_id}/observe-session")
+def create_observe_session(
+    case_version_id: UUID,
+    body: ObserveSessionCreateRequest | None = None,
+) -> dict[str, Any]:
+    mode_str = body.exploration_mode if body else "OBSERVE_ONLY"
+    mode = (
+        ExplorationMode.STUDY_AND_LEARN
+        if mode_str == "STUDY_AND_LEARN"
+        else ExplorationMode.OBSERVE_ONLY
+    )
+    res = ObserveModeService.start_session(
+        session_id=f"OBS-{str(case_version_id)[:8]}",
+        case_version_id=case_version_id,
+        exploration_mode=mode,
+        viewed_argument_count=0,
+        viewed_evidence_count=0,
+    )
+    return {
+        "session_id": res.session_id,
+        "case_version_id": str(res.case_version_id),
+        "exploration_mode": res.exploration_mode.value,
+        "is_binding_vote": res.is_binding_vote,
+        "viewed_argument_count": res.viewed_argument_count,
+        "viewed_evidence_count": res.viewed_evidence_count,
+    }
+
+
+@case_analytics_router.get("/{case_version_id}/community-proposals")
+def list_community_proposals(case_version_id: UUID) -> list[dict[str, Any]]:
+    return _PROPOSALS_STORE
+
+
+@case_analytics_router.post("/{case_version_id}/community-proposals", status_code=201)
+def create_community_proposal(
+    case_version_id: UUID,
+    body: CommunityProposalCreateRequest,
+) -> dict[str, Any]:
+    proposal = CommunityDilemmaProposalsService.register_proposal(
+        proposal_id=f"PROP-{len(_PROPOSALS_STORE) + 1:03d}",
+        proposed_title=body.proposed_title,
+        proposed_context=body.proposed_context,
+        curation_state=CurationState.DRAFT_SUBMITTED,
+        neutrality_score=0.75,
+        supporter_count=1,
+    )
+    item = {
+        "proposal_id": proposal.proposal_id,
+        "proposed_title": proposal.proposed_title,
+        "proposed_context": proposal.proposed_context,
+        "curation_state": proposal.curation_state.value,
+        "neutrality_score": proposal.neutrality_score,
+        "supporter_count": proposal.supporter_count,
+    }
+    _PROPOSALS_STORE.append(item)
+    return item
