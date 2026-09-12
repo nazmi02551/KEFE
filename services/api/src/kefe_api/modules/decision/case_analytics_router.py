@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import json
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 from kefe_api.modules.decision.case_objection import (
     CaseObjectionService,
     ObjectionCategory,
+    ObjectionStatus,
 )
 from kefe_api.modules.decision.case_quality_checklist import (
     CaseQualityChecklistEvaluator,
@@ -78,6 +79,20 @@ class ObjectionCreateRequest(BaseModel):
     supporting_evidence_url: str | None = None
 
 
+class ObjectionDecisionRequest(BaseModel):
+    decision: str
+    resolution_note: str = Field(..., min_length=10)
+
+
+class CorrectionCreateRequest(BaseModel):
+    correction_type: CorrectionType
+    severity: CorrectionSeverity
+    summary: str = Field(..., min_length=5)
+    editorial_rationale: str = Field(..., min_length=10)
+    previous_text: str | None = None
+    corrected_text: str | None = None
+
+
 class PolicyEvaluateRequest(BaseModel):
     knob_value: float = Field(..., ge=0.0, le=100.0)
     policy_knob_name: str = Field(..., min_length=3)
@@ -124,6 +139,33 @@ def submit_case_objection(
     }
 
 
+@case_analytics_router.post("/{case_version_id}/objections/{objection_id}/decision")
+def decide_case_objection(
+    case_version_id: UUID,
+    objection_id: UUID,
+    body: ObjectionDecisionRequest,
+) -> dict[str, Any]:
+    new_status = (
+        ObjectionStatus.ACCEPTED_CORRECTION_FILED
+        if body.decision == "ACCEPT_AND_FILE_CORRECTION"
+        else ObjectionStatus.REJECTED_WITH_REASON
+    )
+    resolved = _OBJECTION_SERVICE.resolve_objection(
+        objection_id=objection_id,
+        new_status=new_status,
+        resolution_note=body.resolution_note,
+    )
+    if not resolved:
+        raise HTTPException(status_code=404, detail="Objection not found")
+    return {
+        "objection_id": str(resolved.objection_id),
+        "status": resolved.status.value,
+        "resolution_note": resolved.resolution_note,
+        "resolved_at": datetime.now(UTC).isoformat(),
+        "audit_hash": f"sha256:{resolved.objection_id}",
+    }
+
+
 @case_analytics_router.get("/{case_version_id}/quality-checklist")
 def get_quality_checklist(case_version_id: UUID) -> dict[str, Any]:
     evaluator = CaseQualityChecklistEvaluator()
@@ -161,6 +203,33 @@ def get_consensus_divergence(
 @case_analytics_router.get("/{case_version_id}/corrections")
 def get_case_corrections(case_version_id: UUID) -> dict[str, Any]:
     return _CORRECTION_SERVICE.get_history(case_version_id).to_dict()
+
+
+@case_analytics_router.post("/{case_version_id}/corrections", status_code=201)
+def add_case_correction(
+    case_version_id: UUID,
+    body: CorrectionCreateRequest,
+) -> dict[str, Any]:
+    item = _CORRECTION_SERVICE.log_correction(
+        case_version_id=case_version_id,
+        correction_type=body.correction_type,
+        severity=body.severity,
+        summary=body.summary,
+        editorial_rationale=body.editorial_rationale,
+        previous_text=body.previous_text,
+        corrected_text=body.corrected_text,
+    )
+    return {
+        "correction_id": str(item.correction_id),
+        "case_version_id": str(item.case_version_id),
+        "correction_type": item.correction_type.value,
+        "severity": item.severity.value,
+        "summary": item.summary,
+        "editorial_rationale": item.editorial_rationale,
+        "timestamp": item.timestamp.isoformat(),
+        "previous_text": item.previous_text,
+        "corrected_text": item.corrected_text,
+    }
 
 
 @case_analytics_router.get("/{case_version_id}/expert-public-gap")
