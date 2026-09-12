@@ -6,6 +6,7 @@ import {
   listSignalConsensusCards,
   listActionMilestones,
 } from "@/src/lib/kefe-api";
+import { clampPercentage } from "@/src/lib/presentation";
 import styles from "@/app/page.module.css";
 
 export const metadata: Metadata = {
@@ -154,6 +155,12 @@ export default async function HomePage() {
                 <span className={styles.signalSample}>
                   {card.sample_size.toLocaleString("tr-TR")} katılımcı
                 </span>
+                <Link
+                  href={`/signal/${encodeURIComponent(card.signal_id)}`}
+                  className={styles.signalCardLink}
+                >
+                  Sinyal detayını gör →
+                </Link>
               </article>
             ))}
           </div>
@@ -178,10 +185,17 @@ export default async function HomePage() {
                     {ACTION_STATUS_LABELS[a.status] ?? a.status}
                   </span>
                 </div>
-                <div className={styles.progressBar} role="presentation">
+                <div
+                  className={styles.progressBar}
+                  role="progressbar"
+                  aria-label={`${a.title} ilerleme`}
+                  aria-valuenow={clampPercentage(a.progress_percentage)}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                >
                   <div
                     className={styles.progressFill}
-                    style={{ width: `${a.progress_percentage}%` }}
+                    style={{ width: `${clampPercentage(a.progress_percentage)}%` }}
                   />
                 </div>
               </li>

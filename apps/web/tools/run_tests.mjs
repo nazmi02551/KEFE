@@ -166,6 +166,21 @@ test("impact page: exposes accessible error, progress and navigation landmarks",
   assert(page.includes('aria-label="İlgili sayfalar"'), "Impact footer navigation needs a label");
 });
 
+test("home page: featured signals link to their detail route", () => {
+  const page = readFile("app/page.tsx");
+  assert(
+    page.includes("/signal/${encodeURIComponent(card.signal_id)}"),
+    "Featured signal cards must link to their detail route",
+  );
+});
+
+test("home page: action progress is semantic rather than presentational", () => {
+  const page = readFile("app/page.tsx");
+  assert(page.includes('role="progressbar"'), "Home action progress must use role=progressbar");
+  assert(!page.includes('role="presentation"'), "Action progress must not be hidden from assistive tech");
+  assert(page.includes("clampPercentage"), "External progress values must be clamped");
+});
+
 // ---------------------------------------------------------------------------
 // 7. kefe-api.ts — no admin/internal endpoints
 // ---------------------------------------------------------------------------

@@ -301,6 +301,19 @@
   color: var(--kefe-color-muted);
 }
 
+.signalCardLink {
+  align-self: flex-start;
+  color: var(--kefe-color-gold);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.signalCardLink:hover {
+  opacity: 0.75;
+}
+
 /* Action list */
 .actionList {
   list-style: none;

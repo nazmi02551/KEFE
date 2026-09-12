@@ -5,6 +5,7 @@ import {
   listInstitutionResponses,
   listActionMilestones,
 } from "@/src/lib/kefe-api";
+import { clampPercentage } from "@/src/lib/presentation";
 import styles from "@/app/impact/page.module.css";
 
 const _siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://kefe.app";
@@ -177,18 +178,18 @@ export default async function ImpactPage() {
                     <div
                       className={styles.progressBar}
                       role="progressbar"
-                      aria-valuenow={a.progress_percentage}
+                      aria-valuenow={clampPercentage(a.progress_percentage)}
                       aria-valuemin={0}
                       aria-valuemax={100}
                       aria-label={`İlerleme: %${a.progress_percentage}`}
                     >
                       <div
                         className={styles.progressFill}
-                        style={{ width: `${a.progress_percentage}%` }}
+                        style={{ width: `${clampPercentage(a.progress_percentage)}%` }}
                       />
                     </div>
                     <span className={styles.progressLabel}>
-                      %{a.progress_percentage}
+                      %{clampPercentage(a.progress_percentage)}
                     </span>
                   </div>
                   {a.evidence_summary && (
