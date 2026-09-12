@@ -19,6 +19,7 @@ const navItems = [
   { href: "/signal", label: "Sinyal" },
   { href: "/impact", label: "Etki" },
   { href: "/deliberation", label: "Deliberation" },
+  { href: "/claims", label: "İddia & Graf" },
 ] as const;
 
 function subscribeTheme(callback: () => void) {

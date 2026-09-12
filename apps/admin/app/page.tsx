@@ -95,6 +95,14 @@ export default function AdminStudioPage() {
             </p>
             <span className={styles.moduleAction}>Modülü Aç →</span>
           </Link>
+          <Link href="/claims" className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-057..059 · Knowledge</span>
+            <h3 className={styles.moduleTitle}>İddia & Bilgi Grafiği</h3>
+            <p className={styles.moduleDesc}>
+              Birinci sınıf iddia sınıflandırması, kanıt değerlendirme döngüsü ve iddia-argüman ağ ilişkileri.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
         </div>
       </section>
     </>
