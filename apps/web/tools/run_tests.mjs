@@ -11,7 +11,8 @@
  * 3. layout.tsx contains data-theme="dark" (dark-first invariant).
  * 4. layout.tsx contains reduced-motion script (accessibility invariant).
  * 5. signal/page.tsx does not render [PROVISIONAL] strings.
- * 6. kefe-api.ts does not import admin-only endpoints.
+ * 6. Public detail/impact routes exist and preserve their public-read boundary.
+ * 7. kefe-api.ts does not import admin-only endpoints.
  */
 
 import { readFileSync, existsSync } from "fs";
@@ -58,9 +59,13 @@ test("app/page.tsx exists", () => readFile("app/page.tsx"));
 test("app/globals.css exists", () => readFile("app/globals.css"));
 test("app/not-found.tsx exists", () => readFile("app/not-found.tsx"));
 test("app/signal/page.tsx exists", () => readFile("app/signal/page.tsx"));
+test("app/signal/[signalId]/page.tsx exists", () =>
+  readFile("app/signal/[signalId]/page.tsx"),
+);
 test("app/cases/page.tsx exists", () => readFile("app/cases/page.tsx"));
 test("app/cases/[caseId]/page.tsx exists", () => readFile("app/cases/[caseId]/page.tsx"));
 test("app/share/[token]/page.tsx exists", () => readFile("app/share/[token]/page.tsx"));
+test("app/impact/page.tsx exists", () => readFile("app/impact/page.tsx"));
 test("src/components/site-header.tsx exists", () => readFile("src/components/site-header.tsx"));
 test("src/lib/kefe-api.ts exists", () => readFile("src/lib/kefe-api.ts"));
 test("next.config.ts exists", () => readFile("next.config.ts"));
@@ -135,7 +140,34 @@ test("signal/page.tsx: does not hardcode [PROVISIONAL] in JSX output", () => {
 });
 
 // ---------------------------------------------------------------------------
-// 6. kefe-api.ts — no admin/internal endpoints
+// 6. Detail and impact routes — public-read boundary
+// ---------------------------------------------------------------------------
+
+test("signal detail: encodes the dynamic identifier in public API calls", () => {
+  const api = readFile("src/lib/kefe-api.ts");
+  assert(
+    api.includes("encodeURIComponent(signalId)"),
+    "Signal identifiers must be URL-encoded before entering an API path",
+  );
+});
+
+test("impact page: uses only public list operations", () => {
+  const page = readFile("app/impact/page.tsx");
+  assert(page.includes("listInstitutionResponses"), "Missing institution response list");
+  assert(page.includes("listActionMilestones"), "Missing action milestone list");
+  assert(!/\b(create|update|delete|post|patch)\w*\s*\(/i.test(page),
+    "Public impact page must not invoke mutation operations");
+});
+
+test("impact page: exposes accessible error, progress and navigation landmarks", () => {
+  const page = readFile("app/impact/page.tsx");
+  assert(page.includes('role="alert"'), "Impact errors must use role=alert");
+  assert(page.includes('role="progressbar"'), "Action progress must use role=progressbar");
+  assert(page.includes('aria-label="İlgili sayfalar"'), "Impact footer navigation needs a label");
+});
+
+// ---------------------------------------------------------------------------
+// 7. kefe-api.ts — no admin/internal endpoints
 // ---------------------------------------------------------------------------
 
 test("kefe-api.ts: does not import /internal/ admin endpoints", () => {
@@ -171,6 +203,15 @@ test("kefe-api.ts: uses /v1/cases endpoint (not /v1/context)", () => {
 test("kefe-api.ts: exports getPublicShare", () => {
   const api = readFile("src/lib/kefe-api.ts");
   assert(api.includes("getPublicShare"), "Missing getPublicShare export");
+});
+
+test("kefe-api.ts: impact client exposes public reads only", () => {
+  const api = readFile("src/lib/kefe-api.ts");
+  assert(api.includes("listInstitutionResponses"), "Missing institution response reader");
+  assert(api.includes("listActionMilestones"), "Missing action milestone reader");
+  assert(!api.includes('method: "POST"'), "Public API client must not issue POST requests");
+  assert(!api.includes('method: "PATCH"'), "Public API client must not issue PATCH requests");
+  assert(!api.includes('method: "DELETE"'), "Public API client must not issue DELETE requests");
 });
 
 test("share/[token]/page.tsx: does not expose share token in rendered HTML title", () => {

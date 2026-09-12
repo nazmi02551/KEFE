@@ -11,7 +11,7 @@
     "start": "next start --port 3001",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings=0",
-    "test": "node tools/run_tests.mjs",
+    "test": "node tools/run_tests.mjs && tsx --test tools/kefe-api.test.ts",
     "verify": "npm run lint && npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
