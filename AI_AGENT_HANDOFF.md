@@ -31,7 +31,10 @@
 - Analytics Core Verification (CAP-115, CAP-116, CAP-075): `ActivationFunnelCalculator`, `PerspectiveResilienceCalculator`, and `SignalFreshnessEngine` / `SignalHalfLifeCalculator` passed 100% (4/4 test suites PASS).
 - Impact & Institution Response Verification (CAP-049, CAP-050, CAP-052, CAP-054): 54/54 tests PASS across institution responses, action follow-through, and verified impact matrices.
 - Mobile Trust & Methodology (CAP-074, CAP-084): 7/7 Flutter unit tests PASS covering Open Methodology Sheet, localized anti-profiling guarantees, and raw result methodology copy.
-- Capability Portfolio: 128/128 Capabilities, 20 lifecycle states, 0 errors PASS (`CAP-004`, `CAP-032`, `CAP-061`, `CAP-062`, `CAP-063`, `CAP-064`, `CAP-065`, `CAP-066`, `CAP-072`, `CAP-078`, `CAP-085` advanced to `IMPLEMENTED_VERIFIED`; `CAP-084` cataloged with verified ADRs, replay/session tests and next gate).
+- Capability Portfolio: 128/128 Capabilities, 20 lifecycle states, 0 errors PASS (`CAP-004`, `CAP-032`, `CAP-057`, `CAP-058`, `CAP-059`, `CAP-061`, `CAP-062`, `CAP-063`, `CAP-064`, `CAP-065`, `CAP-066`, `CAP-068`, `CAP-072`, `CAP-078`, `CAP-085` advanced to `IMPLEMENTED_VERIFIED`; `CAP-048`, `CAP-069`, `CAP-070`, `CAP-084` cataloged with verified contracts, tests and exact gates).
+- Trust & Presentation Verification (CAP-069, CAP-070): Contract `KEFE-CONTEXT-INFORMATION-STATUS-GUIDE-001` verified across `context_information_status_guide_test.dart` and `context_section_test.dart` (25/25 PASS) with zero analyzer issues.
+- Signal & Impact Delivery (CAP-048, CAP-050): Signal Target Registry (`signal.dispatch_target_registry`) and Verified Institution Response Room verified with 17 API Pytest tests and 7 Flutter tests (24/24 PASS).
+- Admin Studio 14-Route Production Build: Next.js 16 (Turbopack) production build passed across all 14 routes (`/`, `/_not-found`, `/case-builder`, `/case-media`, `/claims`, `/content-review`, `/deliberation`, `/flow-composer`, `/impact`, `/operational-reports`, `/publication-operations`, `/reason-moderation`, `/signal`). 80/80 unit tests PASS, 8/8 executable contracts PASS.
 - Governance & Delivery Validation: All 16 `validate_*.py` scripts PASS 100%.
 - Flutter Mobile Test Suite: 100% PASS (812/812 tests across all 195 test files PASS, 0 failures, 0 leaks).
 - Dart Analyze: 0 issues found!
