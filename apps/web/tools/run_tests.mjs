@@ -123,6 +123,37 @@ test("layout.tsx: contains theme flash prevention script", () => {
   );
 });
 
+test("layout.tsx: resolves relative social images against a canonical origin", () => {
+  const layout = readFile("app/layout.tsx");
+  assert(layout.includes("metadataBase: new URL(siteUrl)"), "Missing metadataBase");
+  assert(layout.includes('NEXT_PUBLIC_SITE_URL ?? "https://kefe.app"'),
+    "Canonical site URL must have an explicit production-safe fallback");
+});
+
+test("next.config.ts: disables framework disclosure and clickjacking", () => {
+  const config = readFile("next.config.ts");
+  assert(config.includes("poweredByHeader: false"), "X-Powered-By must be disabled");
+  assert(config.includes('key: "X-Frame-Options"'), "Missing X-Frame-Options header");
+  assert(config.includes('value: "DENY"'), "Public pages must deny framing");
+});
+
+test("next.config.ts: prevents MIME sniffing", () => {
+  const config = readFile("next.config.ts");
+  assert(
+    config.includes('key: "X-Content-Type-Options"') && config.includes('value: "nosniff"'),
+    "Missing nosniff response header",
+  );
+});
+
+test("next.config.ts: bounds referrer and browser capability exposure", () => {
+  const config = readFile("next.config.ts");
+  assert(config.includes('key: "Referrer-Policy"'), "Missing Referrer-Policy header");
+  assert(config.includes('key: "Permissions-Policy"'), "Missing Permissions-Policy header");
+  for (const capability of ["camera=()", "geolocation=()", "microphone=()"] ) {
+    assert(config.includes(capability), `Permissions-Policy must disable ${capability}`);
+  }
+});
+
 // ---------------------------------------------------------------------------
 // 5. signal/page.tsx — does NOT render [PROVISIONAL]
 // ---------------------------------------------------------------------------
