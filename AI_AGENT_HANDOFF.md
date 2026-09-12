@@ -9,10 +9,11 @@
 **Master Recovery & Architectural Refactoring:** COMPLETED & VERIFIED:
 - Multi-Agent Parallel Protocol: Verified zero-conflict worktree isolation across Codex (`E:\KEFE-Codex`), Claude (`E:\KEFE`), and Gemini (`E:\KEFE-Gemini`).
 - Admin Studio API & Backend Operations (CAP-016, CAP-017, CAP-019, CAP-020, CAP-021, CAP-022, CAP-027, CAP-028, CAP-029, CAP-030, CAP-033, CAP-036, CAP-037, CAP-039, CAP-041, CAP-042, CAP-043, CAP-044, CAP-046, CAP-047, CAP-048, CAP-049, CAP-050, CAP-051, CAP-052, CAP-053, CAP-054, CAP-068, CAP-072, CAP-075):
-  * Added `CaseAnalyticsApiClient` (`apps/admin/src/lib/case-analytics-api.ts`) covering all 11 deliberation analytics endpoints with strict URL security and parameter validation.
-  * Added unit test suites `case-analytics-api.test.ts`, `signal-api.test.ts`, and `impact-api.test.ts`. All 72 Admin Studio unit tests PASS, `tsc --noEmit` PASS (0 errors), 8/8 executable contracts PASS.
-  * All 8 Pytest suites for Retro, Budget Tradeoff, Observe Mode, Community Proposals PASS (8/8 PASS).
+  * Added `CaseAnalyticsApiClient` (`apps/admin/src/lib/case-analytics-api.ts`) covering all 15 deliberation and experience endpoints (`QualityChecklist`, `ConsensusDivergence`, `ExpertPublicGap`, `IncentiveMap`, `NormativeModels`, `PerspectiveClusters`, `PolicySimulator`, `ProcessAnalysis`, `ResponsibilityAnalysis`, `SegmentDistributions`, `StakeholderDistributions`, `BudgetTradeoff`, `HistoricalRetrospective`, `ObserveModeSession`, `CommunityProposal`) with strict URL security and parameter validation.
+  * Added unit test suites `case-analytics-api.test.ts` (18 tests), `signal-api.test.ts` (7 tests), and `impact-api.test.ts` (4 tests). All 72 Admin Studio unit tests PASS, `tsc --noEmit` PASS (0 errors), 8/8 executable contracts PASS.
+  * All 16 Pytest suites for deliberation analytics, case objection decision, correction create, retro, budget tradeoff, observe mode, and community proposals PASS (16/16 PASS).
   * Flutter mobile test suites (`case_objection`, `correction_history`, `budget_tradeoff`, `historical_retrospective`, `observe_mode`, `community_dilemma`) PASS (25/25 PASS), `dart analyze` 0 issues.
+  * All 16 governance and delivery validation scripts (`validate_*.py`) PASS 100%, and full `scripts/project_health.py` 4-gate suite PASS 100%.
 - Analytics Core Verification (CAP-115, CAP-116, CAP-075): `ActivationFunnelCalculator`, `PerspectiveResilienceCalculator`, and `SignalFreshnessEngine` / `SignalHalfLifeCalculator` passed 100% (4/4 test suites PASS).
 - Impact & Institution Response Verification (CAP-049, CAP-050, CAP-052, CAP-054): 54/54 tests PASS across institution responses, action follow-through, and verified impact matrices.
 - Mobile Trust & Methodology (CAP-074, CAP-084): 7/7 Flutter unit tests PASS covering Open Methodology Sheet, localized anti-profiling guarantees, and raw result methodology copy.
