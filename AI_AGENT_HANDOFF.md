@@ -19,7 +19,7 @@
 - Mobile Trust & Methodology (CAP-074, CAP-084): 7/7 Flutter unit tests PASS covering Open Methodology Sheet, localized anti-profiling guarantees, and raw result methodology copy.
 - Capability Portfolio: 128/128 Capabilities, 20 lifecycle states, 0 errors PASS (`CAP-004`, `CAP-032`, `CAP-061`, `CAP-062`, `CAP-063`, `CAP-064`, `CAP-065`, `CAP-066`, `CAP-072`, `CAP-078`, `CAP-085` advanced to `IMPLEMENTED_VERIFIED`; `CAP-084` cataloged with verified ADRs, replay/session tests and next gate).
 - Governance & Delivery Validation: All 16 `validate_*.py` scripts PASS 100%.
-- Flutter Mobile Test Suite: 100% PASS (754/754 tests across all 195 test files PASS, 0 failures, 0 leaks).
+- Flutter Mobile Test Suite: 100% PASS (812/812 tests across all 195 test files PASS, 0 failures, 0 leaks).
 - Dart Analyze: 0 issues found!
 - Single-Screen / Single-Stage Responsive Viewport Overhaul & Zero-Scroll Completion:
   * Header Reclamation: `CaseHeroHeader` and `KefeActiveJourney` switch to `compact` mode during active subjourneys, reclaiming 470px of screen height.
