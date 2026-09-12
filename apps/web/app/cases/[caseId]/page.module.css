@@ -311,3 +311,118 @@
   color: var(--kefe-color-muted);
   white-space: nowrap;
 }
+
+/* Context blocks (CAP-069, CAP-070, ADR-0142) */
+.context {
+  margin-top: var(--kefe-spacing-8);
+  padding-top: var(--kefe-spacing-6);
+  border-top: 1px solid var(--kefe-color-border);
+}
+
+.contextList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-5);
+  counter-reset: context-block;
+}
+
+.contextBlock {
+  padding: var(--kefe-spacing-4);
+  background: color-mix(in srgb, var(--kefe-color-surface) 60%, transparent);
+  border: 1px solid var(--kefe-color-border);
+  border-left: 3px solid var(--kefe-color-rules-cyan, #4abfcf);
+  border-radius: var(--kefe-radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-2);
+}
+
+.contextBlockMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--kefe-spacing-2);
+  flex-wrap: wrap;
+}
+
+.disclosureLevel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--kefe-color-rules-cyan, #4abfcf) 12%, transparent);
+  color: var(--kefe-color-rules-cyan, #4abfcf);
+}
+
+.claimStatus {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--kefe-color-muted);
+}
+
+.contextBlockTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--kefe-color-foreground);
+  margin: 0;
+}
+
+.contextBlockBody {
+  font-size: 0.875rem;
+  color: var(--kefe-color-foreground);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* Sources */
+.sourceList {
+  list-style: none;
+  padding: 0;
+  margin: var(--kefe-spacing-2) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-1);
+  border-top: 1px solid var(--kefe-color-border);
+  padding-top: var(--kefe-spacing-2);
+}
+
+.sourceItem {
+  display: flex;
+  align-items: baseline;
+  gap: var(--kefe-spacing-2);
+  flex-wrap: wrap;
+}
+
+.sourceLink {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--kefe-color-gold);
+  text-decoration: none;
+  transition: opacity var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.sourceLink:hover {
+  opacity: 0.75;
+}
+
+.sourceTitle {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--kefe-color-muted);
+}
+
+.sourcePublisher {
+  font-size: 0.75rem;
+  color: var(--kefe-color-muted);
+}
+
+.sourcePublisher::before {
+  content: "·";
+  margin-right: var(--kefe-spacing-1);
+}

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import {
   getPublicCase,
+  getCaseContext,
   getCaseVersionHistory,
   listCaseSignalCards,
   KefApiError,
@@ -28,6 +29,19 @@ export async function generateMetadata(
     return { title: "Mesele bulunamadı" };
   }
 }
+
+const CLAIM_STATUS_LABELS: Record<string, string> = {
+  VERIFIED: "Doğrulandı",
+  CLAIMED: "İddia Edildi",
+  DISPUTED: "Tartışmalı",
+  UNKNOWN: "Bilinmiyor",
+};
+
+const DISCLOSURE_LEVEL_LABELS: Record<string, string> = {
+  ESSENTIAL: "Temel",
+  DETAIL: "Detay",
+  SOURCE: "Kaynak",
+};
 
 const RISK_LABELS: Record<string, string> = {
   LOW: "Düşük",
@@ -55,8 +69,9 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
     throw err;
   }
 
-  // Load version history and signal cards in parallel — both are fail-open.
-  const [history, signalCards] = await Promise.all([
+  // Load context, version history and signal cards in parallel — all fail-open.
+  const [context, history, signalCards] = await Promise.all([
+    getCaseContext(caseDetail.case_version_id),
     getCaseVersionHistory(caseId),
     listCaseSignalCards(caseDetail.case_version_id),
   ]);
@@ -116,6 +131,59 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
                   )}
                 </li>
               ))}
+            </ol>
+          </section>
+        )}
+
+        {context !== null && context.blocks.length > 0 && (
+          <section className={styles.context} aria-label="Bağlam Blokları">
+            <h2 className={styles.sectionTitle}>Bağlam</h2>
+            <ol className={styles.contextList}>
+              {context.blocks
+                .slice()
+                .sort((a, b) => a.display_order - b.display_order)
+                .map((block) => {
+                  const blockSources = context.sources.filter((s) =>
+                    block.source_ids.includes(s.source_id),
+                  );
+                  return (
+                    <li key={block.context_block_id} className={styles.contextBlock}>
+                      <div className={styles.contextBlockMeta}>
+                        <span className={styles.disclosureLevel}>
+                          {DISCLOSURE_LEVEL_LABELS[block.disclosure_level] ?? block.disclosure_level}
+                        </span>
+                        <span className={styles.claimStatus}>
+                          {CLAIM_STATUS_LABELS[block.claim_status] ?? block.claim_status}
+                        </span>
+                      </div>
+                      <h3 className={styles.contextBlockTitle}>{block.title}</h3>
+                      <p className={styles.contextBlockBody}>{block.body}</p>
+                      {blockSources.length > 0 && (
+                        <ul className={styles.sourceList} aria-label="Kaynaklar">
+                          {blockSources.map((src) => (
+                            <li key={src.source_id} className={styles.sourceItem}>
+                              {src.url ? (
+                                <a
+                                  href={src.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={styles.sourceLink}
+                                >
+                                  {src.title}
+                                </a>
+                              ) : (
+                                <span className={styles.sourceTitle}>{src.title}</span>
+                              )}
+                              <span className={styles.sourcePublisher}>
+                                {src.publisher}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                })}
             </ol>
           </section>
         )}

@@ -252,6 +252,53 @@ export interface PublicCaseVersionHistory {
   items: PublicCaseVersionItem[];
 }
 
+// ---------------------------------------------------------------------------
+// Case Context (public read — Commit First isolated, no result/perspective)
+// CAP-069, CAP-070, ADR-0142
+// ---------------------------------------------------------------------------
+
+export interface ContextSource {
+  source_id: string;
+  title: string;
+  publisher: string;
+  source_kind: string;
+  url: string | null;
+  published_at: string | null;
+}
+
+export interface ContextBlock {
+  context_block_id: string;
+  display_order: number;
+  disclosure_level: string;
+  title: string;
+  body: string;
+  claim_status: string;
+  source_ids: string[];
+}
+
+export interface CaseContextSnapshot {
+  case_version_id: string;
+  blocks: ContextBlock[];
+  sources: ContextSource[];
+}
+
+/**
+ * Fetches context blocks for a case version.
+ * Returns null on 404. Commit First: response never contains result/perspective.
+ */
+export async function getCaseContext(
+  caseVersionId: string,
+): Promise<CaseContextSnapshot | null> {
+  try {
+    return await fetchJson<CaseContextSnapshot>(
+      `/v1/case-versions/${encodeURIComponent(caseVersionId)}/context`,
+    );
+  } catch (err) {
+    if (err instanceof KefApiError && err.status === 404) return null;
+    throw err;
+  }
+}
+
 /**
  * Fetches the bounded public version history for a case.
  * Returns null when the API returns 404 (case not found / not published).
