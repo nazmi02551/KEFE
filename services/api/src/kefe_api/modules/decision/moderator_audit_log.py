@@ -47,7 +47,10 @@ class ModeratorAuditLogService:
         ts = timestamp or datetime.now(UTC)
         ts_str = ts.isoformat()
 
-        raw_payload = f"{audit_id}:{target_resource_id}:{moderator_id}:{action_type}:{policy_rule_reference}:{justification_text}:{ts_str}"
+        raw_payload = (
+            f"{audit_id}:{target_resource_id}:{moderator_id}:{action_type}:"
+            f"{policy_rule_reference}:{justification_text}:{ts_str}"
+        )
         action_hash = hashlib.sha256(raw_payload.encode("utf-8")).hexdigest()
 
         return ModeratorAuditLogResult(

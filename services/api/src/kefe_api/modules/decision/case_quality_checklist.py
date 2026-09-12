@@ -67,7 +67,10 @@ class CaseQualityChecklistEvaluator:
             "BALANCED_OPTIONS",
             "Dengeli Seçenekler",
             "Balanced Options",
-            "Seçenekler kutuplaştırıcı veya kukla argüman olmaksızın gerçek normatif gerilimi temsil eder.",
+            (
+                "Seçenekler kutuplaştırıcı veya kukla argüman olmaksızın gerçek "
+                "normatif gerilimi temsil eder."
+            ),
             "Options represent genuine normative tension without strawman framing.",
         ),
         (

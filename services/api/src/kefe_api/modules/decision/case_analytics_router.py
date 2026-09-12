@@ -56,7 +56,10 @@ _default_case_id = UUID("22222222-2222-4222-8222-222222222222")
 _OBJECTION_SERVICE.submit_objection(
     case_version_id=_default_case_id,
     reason_category=ObjectionCategory.EDITORIAL_BIAS_FRAMING,
-    statement="Seçenek kurgusu belirli bir ahlaki önceliği diğerine göre daha avantajlı gösterecek şekilde dil yönlendirmesi içermektedir.",
+    statement=(
+        "Seçenek kurgusu belirli bir ahlaki önceliği diğerine göre daha avantajlı "
+        "gösterecek şekilde dil yönlendirmesi içermektedir."
+    ),
     supporting_evidence_url="https://kefe.org/delil/secenek-tarafsizligi",
 )
 
@@ -153,8 +156,14 @@ def get_consensus_divergence(
         "margin_of_divergence": result.margin_of_divergence,
         "label_tr": "Kolektif Uzlaşı / Ayrışma Dağılımı",
         "label_en": "Collective Consensus / Divergence Distribution",
-        "description_tr": "Karar tercihlerinin topluluk genelindeki dağılımı ve kutuplaşma düzeyi ölçülmüştür.",
-        "description_en": "Measures distribution and polarization levels of choices across the community.",
+        "description_tr": (
+            "Karar tercihlerinin topluluk genelindeki dağılımı ve kutuplaşma "
+            "düzeyi ölçülmüştür."
+        ),
+        "description_en": (
+            "Measures distribution and polarization levels of choices across "
+            "the community."
+        ),
     }
 
 
@@ -180,16 +189,32 @@ def get_normative_models(case_version_id: UUID) -> dict[str, Any]:
     res = NormativeModelsCalculator.evaluate_case(case_version_id, [opt_a, opt_b])
 
     philosophies_tr = {
-        NormativePhilosophy.UTILITARIAN_MAX_WELFARE.value: "En fazla sayıda insan için en yüksek toplam faydayı hedefler.",
-        NormativePhilosophy.DEONTOLOGICAL_CATEGORICAL_RIGHTS.value: "Sonuçtan bağımsız olarak temel hak ve ahlaki ödevleri üstün tutar.",
-        NormativePhilosophy.RAWLSIAN_MAXIMIN_EQUITY.value: "Toplumun en dezavantajlı kesiminin durumunu maksimize eder (fark ilkesi).",
-        NormativePhilosophy.VIRTUE_ETHICS_CHARACTER.value: "Eylemin ardındaki erdem, basiret ve karakter bütünlüğünü esas alır.",
+        NormativePhilosophy.UTILITARIAN_MAX_WELFARE.value: (
+            "En fazla sayıda insan için en yüksek toplam faydayı hedefler."
+        ),
+        NormativePhilosophy.DEONTOLOGICAL_CATEGORICAL_RIGHTS.value: (
+            "Sonuçtan bağımsız olarak temel hak ve ahlaki ödevleri üstün tutar."
+        ),
+        NormativePhilosophy.RAWLSIAN_MAXIMIN_EQUITY.value: (
+            "Toplumun en dezavantajlı kesiminin durumunu maksimize eder (fark ilkesi)."
+        ),
+        NormativePhilosophy.VIRTUE_ETHICS_CHARACTER.value: (
+            "Eylemin ardındaki erdem, basiret ve karakter bütünlüğünü esas alır."
+        ),
     }
     philosophies_en = {
-        NormativePhilosophy.UTILITARIAN_MAX_WELFARE.value: "Maximizes net well-being across all stakeholders.",
-        NormativePhilosophy.DEONTOLOGICAL_CATEGORICAL_RIGHTS.value: "Upholds categorical rights regardless of outcomes.",
-        NormativePhilosophy.RAWLSIAN_MAXIMIN_EQUITY.value: "Maximizes outcomes for the least advantaged.",
-        NormativePhilosophy.VIRTUE_ETHICS_CHARACTER.value: "Emphasizes moral character, prudence, and civic virtue.",
+        NormativePhilosophy.UTILITARIAN_MAX_WELFARE.value: (
+            "Maximizes net well-being across all stakeholders."
+        ),
+        NormativePhilosophy.DEONTOLOGICAL_CATEGORICAL_RIGHTS.value: (
+            "Upholds categorical rights regardless of outcomes."
+        ),
+        NormativePhilosophy.RAWLSIAN_MAXIMIN_EQUITY.value: (
+            "Maximizes outcomes for the least advantaged."
+        ),
+        NormativePhilosophy.VIRTUE_ETHICS_CHARACTER.value: (
+            "Emphasizes moral character, prudence, and civic virtue."
+        ),
     }
 
     return {
@@ -220,12 +245,18 @@ def get_perspective_clusters(case_version_id: UUID) -> dict[str, Any]:
         },
         {
             "archetype": PerspectiveArchetype.OPPOSING_PRINCIPLE.value,
-            "core_thesis": "Temel yurttaş hakları ve mahremiyet hiçbir koşulda pazarlık konusu yapılamaz.",
+            "core_thesis": (
+                "Temel yurttaş hakları ve mahremiyet hiçbir koşulda pazarlık "
+                "konusu yapılamaz."
+            ),
             "argument_count": 310,
         },
         {
             "archetype": PerspectiveArchetype.BRIDGE_SYNTHESIS.value,
-            "core_thesis": "Bireysel fedakarlık yerine kamusal altyapı ve kurumsal kapasite genişletilmelidir.",
+            "core_thesis": (
+                "Bireysel fedakarlık yerine kamusal altyapı ve kurumsal kapasite "
+                "genişletilmelidir."
+            ),
             "argument_count": 170,
         },
     ]

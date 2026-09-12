@@ -38,7 +38,9 @@ class CounterArgumentMapperService:
         if source_argument_id == target_argument_id:
             raise ValueError("An argument cannot target itself as a refutation")
         if not 0.0 <= refutation_strength <= 1.0:
-            raise ValueError(f"refutation_strength must be in [0.0, 1.0], got {refutation_strength}")
+            raise ValueError(
+                f"refutation_strength must be in [0.0, 1.0], got {refutation_strength}"
+            )
         if len(rebuttal_thesis.strip()) < 10:
             raise ValueError("rebuttal_thesis must have at least 10 characters")
 
@@ -57,6 +59,5 @@ class CounterArgumentMapperService:
 
     def get_rebuttals_for_target(self, target_argument_id: UUID) -> list[ArgumentRefutationLink]:
         return [
-            link for link in self._links.values()
-            if link.target_argument_id == target_argument_id
+            link for link in self._links.values() if link.target_argument_id == target_argument_id
         ]

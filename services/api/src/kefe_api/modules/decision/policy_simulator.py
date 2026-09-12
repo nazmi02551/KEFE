@@ -43,7 +43,9 @@ class PolicySimulatorCalculator:
         if not 0.0 <= social_score <= 1.0:
             raise ValueError(f"social_score must be in [0.0, 1.0], got {social_score}")
         if not 0.0 <= environmental_score <= 1.0:
-            raise ValueError(f"environmental_score must be in [0.0, 1.0], got {environmental_score}")
+            raise ValueError(
+                f"environmental_score must be in [0.0, 1.0], got {environmental_score}"
+            )
         if len(policy_knob_name.strip()) < 3:
             raise ValueError("policy_knob_name must have at least 3 characters")
 

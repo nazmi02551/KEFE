@@ -48,7 +48,10 @@ class SignalQualificationReport:
 
 
 class SignalQualificationService:
-    """Evaluates multi-dimensional deliberative and epistemic criteria to qualify raw results into civic signals."""
+    """Qualifies raw results into civic signals.
+
+    Evaluation covers multi-dimensional deliberative and epistemic criteria.
+    """
 
     @staticmethod
     def evaluate(

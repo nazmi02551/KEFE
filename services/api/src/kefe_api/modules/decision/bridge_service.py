@@ -24,7 +24,8 @@ class BridgeArgumentsService:
     ) -> BridgeArgumentItem:
         if sample_size < MINIMUM_BRIDGE_SAMPLE_SIZE:
             raise ValueError(
-                f"sample_size must be >= {MINIMUM_BRIDGE_SAMPLE_SIZE} for privacy & statistical validity"
+                f"sample_size must be >= {MINIMUM_BRIDGE_SAMPLE_SIZE} for privacy "
+                "& statistical validity"
             )
 
         if not (0.0 <= cross_group_support_rate <= 1.0):
@@ -32,7 +33,8 @@ class BridgeArgumentsService:
 
         if cross_group_support_rate < MINIMUM_CROSS_GROUP_RATE:
             raise ValueError(
-                f"cross_group_support_rate must be >= {MINIMUM_CROSS_GROUP_RATE} to qualify as bridge argument"
+                "cross_group_support_rate must be >= "
+                f"{MINIMUM_CROSS_GROUP_RATE} to qualify as bridge argument"
             )
 
         item = BridgeArgumentItem(

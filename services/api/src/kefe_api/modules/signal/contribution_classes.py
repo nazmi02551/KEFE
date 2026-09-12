@@ -42,7 +42,10 @@ class ContributionClassesReport:
 
 
 class ContributionClassesService:
-    """Enforces strict architectural segregation across core pre-result, exposed, and advocacy contributions."""
+    """Enforces strict architectural segregation across contribution classes.
+
+    The boundary separates core pre-result, exposed, and advocacy contributions.
+    """
 
     @staticmethod
     def evaluate(
@@ -71,7 +74,10 @@ class ContributionClassesService:
             count=core_count,
             percentage=core_pct,
             is_signal_eligible=True,
-            description="Sonuçlar ve diğer perspektifler görülmeden önce verilmiş bağımsız, tarafsız karar girdileri.",
+            description=(
+                "Sonuçlar ve diğer perspektifler görülmeden önce verilmiş bağımsız, "
+                "tarafsız karar girdileri."
+            ),
         )
 
         c_exposed = ContributionClassSummary(
@@ -81,7 +87,10 @@ class ContributionClassesService:
             count=exposed_count,
             percentage=exposed_pct,
             is_signal_eligible=False,
-            description="Topluluk sonuçları veya karşı argümanlar incelendikten sonra güncellenen müzakere girdileri.",
+            description=(
+                "Topluluk sonuçları veya karşı argümanlar incelendikten sonra "
+                "güncellenen müzakere girdileri."
+            ),
         )
 
         c_advocacy = ContributionClassSummary(
@@ -91,7 +100,10 @@ class ContributionClassesService:
             count=advocacy_count,
             percentage=advocacy_pct,
             is_signal_eligible=False,
-            description="Dilekçe imzalama, topluluk eylemine katılma ve takip taahhüdü gibi yönlendirilmiş sivil aksiyonlar.",
+            description=(
+                "Dilekçe imzalama, topluluk eylemine katılma ve takip taahhüdü "
+                "gibi yönlendirilmiş sivil aksiyonlar."
+            ),
         )
 
         classes = [c_core, c_exposed, c_advocacy]
