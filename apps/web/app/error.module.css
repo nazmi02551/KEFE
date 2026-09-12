@@ -1,0 +1,91 @@
+/* Error Boundary Page — KEFE Web */
+
+.main {
+  max-width: 500px;
+  margin: var(--kefe-spacing-16, 5rem) auto;
+  padding: var(--kefe-spacing-10) var(--kefe-spacing-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--kefe-spacing-4);
+}
+
+.code {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kefe-color-error, #e05252);
+  margin: 0;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--kefe-color-foreground);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.description {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--kefe-color-muted);
+  margin: 0;
+  max-width: 38ch;
+}
+
+.digest {
+  font-size: 0.75rem;
+  color: var(--kefe-color-muted);
+  margin: 0;
+}
+
+.digest code {
+  font-family: monospace;
+}
+
+.actions {
+  display: flex;
+  gap: var(--kefe-spacing-3);
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: var(--kefe-spacing-2);
+}
+
+.retryButton {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--kefe-spacing-2) var(--kefe-spacing-5);
+  background: var(--kefe-color-gold);
+  color: #0a0a0d;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--kefe-radius-md);
+  cursor: pointer;
+  transition: opacity var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.retryButton:hover {
+  opacity: 0.85;
+}
+
+.homeLink {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--kefe-spacing-2) var(--kefe-spacing-5);
+  background: transparent;
+  color: var(--kefe-color-gold);
+  font-size: 0.875rem;
+  font-weight: 700;
+  border: 1px solid var(--kefe-color-gold);
+  border-radius: var(--kefe-radius-md);
+  text-decoration: none;
+  transition: background var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.homeLink:hover {
+  background: color-mix(in srgb, var(--kefe-color-gold) 10%, transparent);
+}
