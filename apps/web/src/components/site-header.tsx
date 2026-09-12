@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { href: "/", label: "Ana Sayfa" },
   { href: "/signal", label: "Sinyaller" },
   { href: "/cases", label: "Meseleler" },
+  { href: "/impact", label: "Etki" },
 ];
 
 export function SiteHeader() {

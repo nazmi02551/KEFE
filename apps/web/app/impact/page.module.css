@@ -1,0 +1,308 @@
+/* Impact Tracking Page — KEFE Web
+ * CAP-048..054 Signal→Impact public display
+ * Dark-first design tokens, light theme via data-theme="light"
+ */
+
+.main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--kefe-spacing-8) var(--kefe-spacing-4);
+}
+
+.header {
+  margin-bottom: var(--kefe-spacing-8);
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--kefe-color-foreground);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin-top: var(--kefe-spacing-2);
+  font-size: 1rem;
+  color: var(--kefe-color-muted);
+}
+
+.errorBanner {
+  padding: var(--kefe-spacing-4);
+  background: color-mix(in srgb, #e05757 12%, transparent);
+  border: 1px solid color-mix(in srgb, #e05757 30%, transparent);
+  border-radius: var(--kefe-radius-md);
+  color: #e05757;
+  font-size: 0.9375rem;
+  margin-bottom: var(--kefe-spacing-6);
+}
+
+/* Two-column layout */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--kefe-spacing-8);
+}
+
+@media (max-width: 720px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Sections */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-4);
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--kefe-color-foreground);
+  display: flex;
+  align-items: center;
+  gap: var(--kefe-spacing-2);
+  margin: 0;
+}
+
+.sectionCount {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--kefe-color-gold) 15%, transparent);
+  color: var(--kefe-color-gold);
+}
+
+.emptyState {
+  padding: var(--kefe-spacing-6) var(--kefe-spacing-4);
+  color: var(--kefe-color-muted);
+  font-size: 0.9375rem;
+  text-align: center;
+  background: color-mix(in srgb, var(--kefe-color-surface) 50%, transparent);
+  border: 1px dashed var(--kefe-color-border);
+  border-radius: var(--kefe-radius-md);
+}
+
+/* Institution response cards */
+.responseList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-4);
+}
+
+.responseCard {
+  padding: var(--kefe-spacing-4);
+  background: var(--kefe-color-surface);
+  border: 1px solid var(--kefe-color-border);
+  border-radius: var(--kefe-radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-2);
+}
+
+.responseHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--kefe-spacing-2);
+}
+
+.institutionName {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--kefe-color-foreground);
+}
+
+.verificationBadge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: color-mix(in srgb, #4caf7d 12%, transparent);
+  color: #4caf7d;
+  white-space: nowrap;
+}
+
+.authorityRole {
+  font-size: 0.8125rem;
+  color: var(--kefe-color-muted);
+  margin: 0;
+}
+
+.responseType {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--kefe-color-rules-cyan, #4abfcf);
+  margin: 0;
+}
+
+.statement {
+  font-size: 0.875rem;
+  color: var(--kefe-color-foreground);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.publishedAt {
+  font-size: 0.75rem;
+  color: var(--kefe-color-muted);
+}
+
+/* Action milestone cards */
+.actionList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-4);
+}
+
+.actionCard {
+  padding: var(--kefe-spacing-4);
+  background: var(--kefe-color-surface);
+  border: 1px solid var(--kefe-color-border);
+  border-radius: var(--kefe-radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-2);
+}
+
+.actionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--kefe-spacing-2);
+}
+
+.actionTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--kefe-color-foreground);
+  margin: 0;
+  flex: 1;
+}
+
+.statusBadge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+
+.statusProposed {
+  background: color-mix(in srgb, var(--kefe-color-muted) 12%, transparent);
+  color: var(--kefe-color-muted);
+}
+
+.statusInProgress {
+  background: color-mix(in srgb, var(--kefe-color-gold) 15%, transparent);
+  color: var(--kefe-color-gold);
+}
+
+.statusComplete {
+  background: color-mix(in srgb, #4caf7d 12%, transparent);
+  color: #4caf7d;
+}
+
+.statusStalled {
+  background: color-mix(in srgb, #e05757 12%, transparent);
+  color: #e05757;
+}
+
+.actionDescription {
+  font-size: 0.875rem;
+  color: var(--kefe-color-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Progress bar */
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: var(--kefe-spacing-3);
+}
+
+.progressBar {
+  flex: 1;
+  height: 6px;
+  background: var(--kefe-color-border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--kefe-color-gold);
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+.progressLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--kefe-color-gold);
+  min-width: 32px;
+  text-align: right;
+}
+
+.evidenceSummary {
+  font-size: 0.8125rem;
+  color: var(--kefe-color-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+.targetDate {
+  font-size: 0.75rem;
+  color: var(--kefe-color-muted);
+}
+
+/* Footer */
+.footer {
+  margin-top: var(--kefe-spacing-10);
+  padding: var(--kefe-spacing-5);
+  background: color-mix(in srgb, var(--kefe-color-surface) 60%, transparent);
+  border: 1px solid var(--kefe-color-border);
+  border-radius: var(--kefe-radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-3);
+}
+
+.footerNote {
+  font-size: 0.8125rem;
+  color: var(--kefe-color-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.footerNav {
+  display: flex;
+  gap: var(--kefe-spacing-4);
+}
+
+.footerLink {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--kefe-color-gold);
+  text-decoration: none;
+  transition: opacity var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.footerLink:hover {
+  opacity: 0.75;
+}

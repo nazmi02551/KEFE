@@ -290,3 +290,51 @@ export async function listCaseSignalCards(
     throw err;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Impact — public institution responses and action milestones (CAP-048..054)
+// ---------------------------------------------------------------------------
+
+export interface InstitutionResponsePublic {
+  response_id: string;
+  case_version_id: string;
+  institution_name: string;
+  authority_role: string;
+  verification_status: string;
+  response_type: string;
+  statement: string;
+  published_at: string;
+  milestone_date: string | null;
+}
+
+export interface ActionMilestonePublic {
+  action_id: string;
+  case_version_id: string;
+  title: string;
+  description: string;
+  status: string;
+  progress_percentage: number;
+  created_at: string;
+  institution_response_id: string | null;
+  target_completion_date: string | null;
+  evidence_summary: string | null;
+  evidence_url: string | null;
+}
+
+export async function listInstitutionResponses(
+  caseVersionId?: string,
+): Promise<InstitutionResponsePublic[]> {
+  const qs = caseVersionId
+    ? `?case_version_id=${encodeURIComponent(caseVersionId)}`
+    : "";
+  return fetchJson<InstitutionResponsePublic[]>(`/v1/impact/institution-responses${qs}`);
+}
+
+export async function listActionMilestones(
+  caseVersionId?: string,
+): Promise<ActionMilestonePublic[]> {
+  const qs = caseVersionId
+    ? `?case_version_id=${encodeURIComponent(caseVersionId)}`
+    : "";
+  return fetchJson<ActionMilestonePublic[]>(`/v1/impact/actions${qs}`);
+}
