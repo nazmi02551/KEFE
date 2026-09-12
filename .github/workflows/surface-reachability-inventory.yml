@@ -23,6 +23,7 @@ on:
       - "docs/adr/0118-production-and-preview-surface-reachability-inventory.md"
       - "docs/status/F4_SURFACE_REACHABILITY_INVENTORY_2026-08-06.md"
       - ".github/workflows/global-readiness.yml"
+      - ".github/workflows/web-ci.yml"
       - ".github/workflows/surface-reachability-inventory.yml"
   push:
     branches: [main]
@@ -47,6 +48,7 @@ on:
       - "docs/adr/0118-production-and-preview-surface-reachability-inventory.md"
       - "docs/status/F4_SURFACE_REACHABILITY_INVENTORY_2026-08-06.md"
       - ".github/workflows/global-readiness.yml"
+      - ".github/workflows/web-ci.yml"
       - ".github/workflows/surface-reachability-inventory.yml"
 
 permissions:
