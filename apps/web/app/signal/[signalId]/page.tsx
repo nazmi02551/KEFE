@@ -28,9 +28,23 @@ export async function generateMetadata(
   try {
     const q = await getSignalQualification(signalId);
     if (!q) return { title: "Sinyal bulunamadı" };
+    const title = `Sinyal — ${q.case_title}`;
+    const description = `${TIER_LABELS[q.qualification_tier] ?? q.qualification_tier} · %${(q.overall_score * 100).toFixed(0)} · ${q.sample_size} katılımcı`;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://kefe.app";
     return {
-      title: `Sinyal — ${q.case_title}`,
-      description: `${TIER_LABELS[q.qualification_tier] ?? q.qualification_tier} · %${(q.overall_score * 100).toFixed(0)} · ${q.sample_size} katılımcı`,
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        type: "article",
+        url: `${siteUrl}/signal/${signalId}`,
+      },
+      twitter: {
+        card: "summary",
+        title,
+        description,
+      },
     };
   } catch {
     return { title: "Sinyal bulunamadı" };

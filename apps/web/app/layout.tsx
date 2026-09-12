@@ -19,10 +19,34 @@ export const metadata: Metadata = {
     locale: "tr_TR",
     alternateLocale: "en_US",
     siteName: "KEFE",
+    url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://kefe.app",
+    title: "KEFE — Kolektif ses, kurumsal etki",
+    description:
+      "Methodology-qualified civic deliberation. Commit First, Blind First — sesiniz nitelendiriliyor.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "KEFE — Kolektif ses, kurumsal etki",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KEFE",
+    description:
+      "Methodology-qualified civic deliberation platform.",
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+    },
   },
 };
 
