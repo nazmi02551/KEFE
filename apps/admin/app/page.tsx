@@ -120,6 +120,30 @@ export default function AdminStudioPage() {
             </p>
             <span className={styles.moduleAction}>Modülü Aç →</span>
           </Link>
+          <Link href={"/ai-editorial" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-060 · Content Admin</span>
+            <h3 className={styles.moduleTitle}>AI Editoryal Asistan</h3>
+            <p className={styles.moduleDesc}>
+              Yapay zeka destekli iddia çıkarımı, dengeli perspektif önerileri ve önyargı denetimi.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/finops" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-124 · FinOps</span>
+            <h3 className={styles.moduleTitle}>FinOps & Birim Maliyet Analitiği</h3>
+            <p className={styles.moduleDesc}>
+              Tartım başına maliyet (CPW), model token tüketimi, SMS/OTP giderleri ve ölçek projeksiyonu.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/radar-live" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-076 · Consumer Growth</span>
+            <h3 className={styles.moduleTitle}>Canlı Radar & Bağlam Sapması</h3>
+            <p className={styles.moduleDesc}>
+              Gerçek zamanlı tartışma momentumu, demografik yönelim vektörleri ve yasal sapma bildirimleri.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
         </div>
       </section>
     </>

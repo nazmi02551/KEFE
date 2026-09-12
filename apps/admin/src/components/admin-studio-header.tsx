@@ -22,6 +22,9 @@ const navItems = [
   { href: "/claims", label: "İddia & Graf" },
   { href: "/trust-integrity", label: "Bot & Güvenlik" },
   { href: "/analytics", label: "Metrikler" },
+  { href: "/ai-editorial", label: "AI Asistan" },
+  { href: "/finops", label: "FinOps" },
+  { href: "/radar-live", label: "Canlı Radar" },
 ] as const;
 
 function subscribeTheme(callback: () => void) {
