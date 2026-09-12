@@ -1,0 +1,132 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 900px) {
+  .hero {
+    grid-template-columns: 1.5fr 1fr;
+  }
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--gold, #D97706);
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.title {
+  font-size: clamp(1.65rem, 2.8vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text, #FFFFFF);
+  margin: 0 0 0.5rem;
+}
+
+.subtitle {
+  color: var(--muted, #A8BCD4);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.boundaryCard {
+  background: var(--surface, #141A29);
+  border: 1px solid var(--line, #2C4362);
+  border-left: 4px solid var(--gold, #D97706);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  font-size: 0.85rem;
+  color: var(--muted, #A8BCD4);
+}
+
+.boundaryCard strong {
+  color: var(--text, #FFFFFF);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.statCard {
+  background: var(--surface, #141A29);
+  border: 1px solid var(--line, #2C4362);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.statLabel {
+  font-size: 0.8rem;
+  color: var(--muted, #A8BCD4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.statValue {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text, #FFFFFF);
+}
+
+.card {
+  background: var(--surface, #141A29);
+  border: 1px solid var(--line, #2C4362);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.cardTitle {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text, #FFFFFF);
+  margin: 0 0 1rem;
+}
+
+.formulaBox {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--line, #2C4362);
+  border-radius: 6px;
+  padding: 1rem;
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #38BDF8;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+}
+
+.safeguardsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.safeguardItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text, #FFFFFF);
+}
+
+.checkIcon {
+  color: #10B981;
+  font-weight: 700;
+}

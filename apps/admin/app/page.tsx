@@ -144,6 +144,54 @@ export default function AdminStudioPage() {
             </p>
             <span className={styles.moduleAction}>Modülü Aç →</span>
           </Link>
+          <Link href={"/source-diversity" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-071 · Trust</span>
+            <h3 className={styles.moduleTitle}>Kaynak Çeşitliliği & Spektrum</h3>
+            <p className={styles.moduleDesc}>
+              Vakaların çoğulcu kaynaklardan beslendiğini denetleyen taksonomi ve çeşitlilik seviyesi analizi.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/open-methodology" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-074 · Transparency</span>
+            <h3 className={styles.moduleTitle}>Açık Metodoloji & Güven</h3>
+            <p className={styles.moduleDesc}>
+              Kolektif karar ve sinyal hesaplama formülleri, anayasal korumalar ve anti-profiling denetimi.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/evidence-builder" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-098 · Epistemic Rigor</span>
+            <h3 className={styles.moduleTitle}>Kanıt & Kaynak Masası</h3>
+            <p className={styles.moduleDesc}>
+              Akademik hakemli makaleler, resmi istatistikler ve kurumsal kanıtları vakalara bağlama.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/moderator-audit" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-067 · Governance</span>
+            <h3 className={styles.moduleTitle}>Moderatör Denetim Zinciri</h3>
+            <p className={styles.moduleDesc}>
+              Tüm idari ve moderasyon kararlarının kriptografik hash ile kamu denetimine açıldığı kütük.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/user-discovery" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-077 · User Agency</span>
+            <h3 className={styles.moduleTitle}>Kullanıcı Keşif Profili</h3>
+            <p className={styles.moduleDesc}>
+              Kullanıcının algoritmik manipülasyon olmadan keşif akışını ve çeşitlilik düzeyini belirlemesi.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/kefe-today" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-026 · Curation</span>
+            <h3 className={styles.moduleTitle}>KEFE Today Vitrini</h3>
+            <p className={styles.moduleDesc}>
+              Gerçek dünyada yaşanan somut ikilemlerin doğrulanarak günün öne çıkan vitrinine yerleştirilmesi.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
         </div>
       </section>
     </>

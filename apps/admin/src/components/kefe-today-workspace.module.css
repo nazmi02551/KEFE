@@ -1,0 +1,155 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 900px) {
+  .hero {
+    grid-template-columns: 1.5fr 1fr;
+  }
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--gold, #D97706);
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.title {
+  font-size: clamp(1.65rem, 2.8vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text, #FFFFFF);
+  margin: 0 0 0.5rem;
+}
+
+.subtitle {
+  color: var(--muted, #A8BCD4);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.boundaryCard {
+  background: var(--surface, #141A29);
+  border: 1px solid var(--line, #2C4362);
+  border-left: 4px solid var(--gold, #D97706);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  font-size: 0.85rem;
+  color: var(--muted, #A8BCD4);
+}
+
+.boundaryCard strong {
+  color: var(--text, #FFFFFF);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.card {
+  background: var(--surface, #141A29);
+  border: 1px solid var(--line, #2C4362);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.cardTitle {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text, #FFFFFF);
+  margin: 0 0 1rem;
+}
+
+.headlineBox {
+  border-left: 3px solid #38BDF8;
+  padding-left: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.headline {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #38BDF8;
+  margin-bottom: 0.25rem;
+}
+
+.caseTitle {
+  font-size: 1rem;
+  color: var(--text, #FFFFFF);
+  font-weight: 600;
+}
+
+.caseSummary {
+  font-size: 0.9rem;
+  color: var(--muted, #A8BCD4);
+  line-height: 1.5;
+}
+
+.badgeRealEvent {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+  border: 1px solid #10B981;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.inputGroup label {
+  font-size: 0.8rem;
+  color: var(--muted, #A8BCD4);
+  font-weight: 600;
+}
+
+.input, .textarea {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--line, #2C4362);
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  color: var(--text, #FFFFFF);
+  font-size: 0.9rem;
+}
+
+.textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.button {
+  background: var(--gold, #D97706);
+  color: #000000;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+}
