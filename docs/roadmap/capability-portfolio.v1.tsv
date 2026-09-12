@@ -8,9 +8,9 @@ CAP-006	principle-first	Principle-first decision flow	ME	ARCHITECTURE_ACCEPTED	P
 CAP-007	role-flip	Role Flip / stakeholder-position reweigh	ME	ROADMAP_ACCEPTED	Phase 4	P1	KEFE-PB-001|KEFE-CQB-001|KEFE-DGS-001		ADR-0019	canonical	
 CAP-008	decision-revision	Decision Revision and generic Decision Delta	ME	IMPLEMENTED_VERIFIED	Phase 2	P0	KEFE-MPD-001|KEFE-DGS-001|KEFE-ENG-001		ADR-0025|Product Preview	canonical	
 CAP-009	reflection	Non-causal post-decision Reflection	ME	IMPLEMENTED_VERIFIED	Phase 2	P0	KEFE-MPD-001|KEFE-DGS-001		ADR-0026|Slice 24	canonical	
-CAP-010	what-would-change-mind	What would change your mind?	ME	PROPOSAL_REVIEW	Phase 4	P1	KEFE-PB-001|KEFE-CQB-001|KEFE-RM-001			conversation_proposal	Product/methodology review and question contract.
-CAP-011	insufficient-information-response	Bilmiyorum / yeterli bilgim yok / seçenekler eksik response	ME	PROPOSAL_REVIEW	Phase 2	P0	KEFE-CQB-001|KEFE-TIM-001			conversation_proposal	Typed response semantics and result treatment decision.
-CAP-012	decision-receipt	Versioned Decision Receipt	ME	PROPOSAL_REVIEW	Phase 3	P1	KEFE-PB-001|KEFE-DGS-001|KEFE-SEC-001			conversation_proposal	
+CAP-010	what-would-change-mind	What would change your mind?	ME	PROPOSAL_REVIEW	Phase 4	P1	KEFE-PB-001|KEFE-CQB-001|KEFE-RM-001		ADR-0158|test_change_mind_inquiry.py|change_mind_inquiry_test.dart	conversation_proposal	exact-head review and question flow integration
+CAP-011	insufficient-information-response	Bilmiyorum / yeterli bilgim yok / seçenekler eksik response	ME	PROPOSAL_REVIEW	Phase 2	P0	KEFE-CQB-001|KEFE-TIM-001		ADR-0146|insufficient-information-response.v1.json|test_insufficient_info_response.py|insufficient_info_response_test.dart	conversation_proposal	exact-head review and question input integration
+CAP-012	decision-receipt	Versioned Decision Receipt	ME	PROPOSAL_REVIEW	Phase 3	P1	KEFE-PB-001|KEFE-DGS-001|KEFE-SEC-001		ADR-0189|test_decision_receipt.py|decision_receipt_test.dart	conversation_proposal	exact-head review and receipt export integration
 CAP-013	temporal-retest	Blind temporal retest / Temporal Drift	ME	ROADMAP_HIGH	Phase 4	P1	KEFE-PB-001|KEFE-RM-001|KEFE-DGS-001			canonical	
 CAP-014	decision-fatigue-guard	Decision fatigue / healthy pacing guard	ME	ROADMAP_CANDIDATE	Phase 5	P2	KEFE-PB-001|KEFE-DS-001			conversation_proposal	
 CAP-015	challenge-card	Independent Challenge Card	CASE_COMPOSITION	IMPLEMENTED_VERIFIED	Phase 1	P0	KEFE-PB-001|KEFE-DS-001		ADR-0019 challenge-card semantics|Product Preview challenge flow|active runtime	canonical	
@@ -32,13 +32,13 @@ CAP-030	ugc-personal-dilemmas	UGC Personal Dilemmas	CASE_COMPOSITION	ROADMAP_HIG
 CAP-031	collective-result	Post-Commit Collective Result	WE	IMPLEMENTED_VERIFIED	Phase 1	P0	KEFE-MPD-001|KEFE-TIM-001		post-Commit Reveal runtime|Slice 23 / PR #149|active runtime	canonical	
 CAP-032	reason-distribution	Reason distribution	WE	IMPLEMENTED_VERIFIED	Phase 2	P1	KEFE-PB-001|KEFE-AED-001		ADR-0007|ADR-0008|ADR-0036|ADR-0053|ADR-0140|test_community_reason_pattern_distribution.py|community_reason_pattern_distribution_test.dart	canonical	Exact-head API/Mobile/MVP/Global review; trends, segmentation and Signal qualification remain separate
 CAP-033	argument-clustering	Argument pattern clustering	WE	ARCHITECTURE_ACCEPTED	Phase 4	P1	KEFE-PB-001|KEFE-AIA-001|KEFE-DGS-001		ADR-0027	canonical	
-CAP-034	bridge-arguments	Bridge arguments / Ortak Zemin	WE	PROPOSAL_REVIEW	Phase 4	P0	KEFE-PB-001|KEFE-AIA-001|KEFE-TIM-001			conversation_proposal	Neutrality, provenance and editorial review contract.
+CAP-034	bridge-arguments	Bridge arguments / Ortak Zemin	WE	PROPOSAL_REVIEW	Phase 4	P0	KEFE-PB-001|KEFE-AIA-001|KEFE-TIM-001		ADR-0161|test_bridge_arguments.py|bridge_arguments_test.dart	conversation_proposal	exact-head review and perspective landscape integration
 CAP-035	perspective-landscape	Near/Opposing/Bridge/Alternative Context perspectives	WE	IMPLEMENTED_VERIFIED	Phase 2	P0	KEFE-PB-001|KEFE-DS-001		Slice 20	canonical	
 CAP-036	segment-distribution	Privacy-safe segment distribution	WE	ARCHITECTURE_ACCEPTED	Phase 3	P1	KEFE-TIM-001|KEFE-SEC-001			canonical	
 CAP-037	stakeholder-distribution	Stakeholder distribution	WE	ARCHITECTURE_ACCEPTED	Phase 4	P1	KEFE-TIM-001|KEFE-RM-001			canonical	
-CAP-038	stakeholder-gap	Stakeholder Gap disclosure	WE	ARCHITECTURE_ACCEPTED	Phase 4	P0	KEFE-TIM-001|KEFE-RM-001		signal-impact-model.v1	canonical	
+CAP-038	stakeholder-gap	Stakeholder Gap disclosure	WE	ARCHITECTURE_ACCEPTED	Phase 4	P0	KEFE-TIM-001|KEFE-RM-001		ADR-0147|test_stakeholder_gap.py|stakeholder_gap_test.dart	canonical	exact-head review and signal impact integration
 CAP-039	consensus-divergence	Consensus and divergence classification	WE	ARCHITECTURE_ACCEPTED	Phase 4	P1	KEFE-TIM-001|KEFE-AED-001			canonical	
-CAP-040	divergence-anatomy	Ayrışma Anatomisi	WE	PROPOSAL_REVIEW	Phase 4	P0	KEFE-PB-001|KEFE-RM-001|KEFE-AIA-001			conversation_proposal	
+CAP-040	divergence-anatomy	Ayrışma Anatomisi	WE	PROPOSAL_REVIEW	Phase 4	P0	KEFE-PB-001|KEFE-RM-001|KEFE-AIA-001		ADR-0163|test_divergence_anatomy.py|divergence_anatomy_test.dart	conversation_proposal	exact-head review and divergence classifier integration
 CAP-041	expert-public-gap	Expert-Public Gap	WE	ROADMAP_ACCEPTED	Phase 8	P2	KEFE-PB-001|KEFE-RM-001|KEFE-CGD-001			canonical	
 CAP-042	signal-qualification	Methodology-qualified Signal	SIGNAL	ARCHITECTURE_LOCKED	Phase 4	P0	KEFE-MPD-001|KEFE-TIM-001|KEFE-RM-001		ADR-0019|signal-impact-model.v1	canonical	
 CAP-043	contribution-classes	CORE_PRE_RESULT / EXPOSED / ADVOCACY_SUPPORT separation	SIGNAL	ARCHITECTURE_LOCKED	Phase 4	P0	KEFE-TIM-001|KEFE-RM-001		signal-impact-model.v1	canonical	
