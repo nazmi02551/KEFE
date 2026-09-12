@@ -505,13 +505,17 @@ The following items remain incomplete after Session 2:
     - test(api): privacy export + deletion HTTP tests — 13 tests (CAP-004)
     - docs: AI_AGENT_HANDOFF.md multi-agent parallel session record
     - 78 branch commits total (16 new this session)
-23. **Current verified state (2026-09-12 afternoon):**
-    - API: **1047 passed**, 123 skipped, 0 failed
-    - dart analyze: No issues found (spot checks)
+23. **Current verified state (2026-09-12 evening):**
+    - API: **1123 passed**, 123 skipped, 0 failed (was 968 at session start)
+    - Mobile Flutter: 812 tests passing
     - TypeScript (web + admin): tsc --noEmit clean
     - Portfolio: PASS 128 capabilities, 0 errors
-    - Web app: 5 pages (/, /cases, /cases/[id], /signal, /signal/[id], /impact) + sitemap/robots/manifest
-    - 78 branch commits
+    - Web app: 6 pages (/, /cases, /cases/[id], /signal, /signal/[id], /impact) + sitemap/robots/manifest/OG
+    - 92 branch commits (30 new this session)
+    - New API test files (this session): test_discovery_router_extended, test_case_objection_correction_extended,
+      test_weigh_session_http, test_perspectives_reflection_http, test_privacy_http,
+      test_account_otp_flow_http, test_public_context_community_reason_http, test_identity_session_http,
+      test_share_http, test_segment_distribution_me_http
 24. **Multi-agent parallel session (2026-09-12):**
     - Claude (E:\KEFE): API test coverage 968→1047, web /impact + home + context + nav
     - Gemini (E:\KEFE-Gemini): admin API clients, analytics, mobile viewport, 754/754 flutter tests
