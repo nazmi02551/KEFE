@@ -354,7 +354,7 @@ The following items remain incomplete after Session 2:
 
 **PR #403:** https://github.com/nazmi02551/KEFE/pull/403
 
-**Commits in branch (54 total, on top of main):**
+**Commits in branch (62 total, on top of main):**
 1. `cf93f986` — signal/impact hexagonal ports, pipeline service, admin studio signal+impact pages
 2. `f2cd413a` — env.example, design-tokens build+validate scripts, CURRENT.md session 2
 3. `2dc3a47f` — kefe-locale validate script, fix a11y namespace in keys.json
@@ -482,19 +482,30 @@ The following items remain incomplete after Session 2:
     - Admin Studio: signal workspace inline detail panel (health, qualification, target registry)
     - Web: site footer added (brand, nav, Commit First/Blind First methodology note)
     - 54 branch commits total
-21. **Current verified state (2026-09-11 afternoon):**
-    - API: 914 passed, 123 skipped, 0 failed
-    - dart analyze lib/ + test/: No issues found
-    - flutter test --concurrency=1: 801/801 passed
+21. **Session 2 final additions (2026-09-12):**
+    - test(api): context HTTP integration tests — 13 tests (ADR-0142, CAP-069, CAP-070)
+    - test(api): sharing HTTP integration tests — 11 tests (revoke, expire, auth guard, hash)
+    - test(api): impact router HTTP integration tests — 18 tests (CAP-048, CAP-050, CAP-051)
+    - test(api): community reason HTTP integration tests — 12 tests (auth guard, OpenAPI)
+    - feat+test(mobile): ExploreController 11 tests + preview isRealEvent fix (ADR-0133, ADR-0141)
+    - feat(web): signal detail page /signal/[signalId] health + qualification (CAP-016)
+    - feat(web): cases page — Turkish-tolerant search + domain filter (ADR-0141)
+    - feat(web): signal page — Turkish-tolerant search + tier filter (ADR-0141, CAP-016)
+    - 62 branch commits total
+22. **Current verified state (2026-09-12):**
+    - API: 968 passed, 123 skipped, 0 failed
+    - dart analyze lib/features/: No issues found (single-file spot checks)
+    - flutter test (key 62 tests): all passing
     - TypeScript (web + admin): tsc --noEmit clean
     - Portfolio: PASS 128 capabilities, 0 errors
     - Admin Studio all 8 contract checks: PASS
-    - 54 branch commits
-22. **Next wave (for next agent):**
+    - 62 branch commits
+23. **Next wave (for next agent):**
     - Issue #291 canonical feed merge — product decision required (PR #267 vs PR #273 conflict)
-    - Consider opening PR for maintenance branch → main
+    - **Recommended: open PR for maintenance branch → main** (62 clean commits, all green)
     - CAP-084 guest conversion P0 — real provider OTP evidence needed
     - CAP-005 blind-first variants, CAP-006 principle-first flow — ARCHITECTURE_ACCEPTED, Phase 2
+    - APK rebuild with updated web app filter UI for test device
     - Run: `python scripts/validate_capability_portfolio.py` to confirm clean state
     - Services to start: uvicorn (port 8000), npm run dev admin (3000), npm run dev web (3001)
 
