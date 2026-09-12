@@ -7,10 +7,23 @@ import {
 } from "@/src/lib/kefe-api";
 import styles from "@/app/impact/page.module.css";
 
+const _siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://kefe.app";
+
 export const metadata: Metadata = {
   title: "Etki Takibi",
   description:
     "KEFE — Kurumsal yanıtlar ve eylem kilometre taşları. Signal'dan Impact'e.",
+  openGraph: {
+    title: "Etki Takibi · KEFE",
+    description: "Kurumsal yanıtlar ve eylem kilometre taşları. Signal'dan Impact'e.",
+    url: `${_siteUrl}/impact`,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Etki Takibi · KEFE",
+    description: "Kurumsal yanıtlar ve eylem kilometre taşları.",
+  },
 };
 
 const RESPONSE_TYPE_LABELS: Record<string, string> = {

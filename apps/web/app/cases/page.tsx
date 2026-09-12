@@ -4,10 +4,23 @@ import { listPublicCases } from "@/src/lib/kefe-api";
 import { CasesFilter } from "@/src/components/cases-filter";
 import styles from "@/app/cases/page.module.css";
 
+const _siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://kefe.app";
+
 export const metadata: Metadata = {
   title: "Meseleler",
   description:
     "KEFE — Aktif meseleler. Commit First, Blind First ile kolektif sesinizi oluşturun.",
+  openGraph: {
+    title: "Meseleler · KEFE",
+    description: "Aktif meseleler — Commit First, Blind First ile kolektif sesinizi oluşturun.",
+    url: `${_siteUrl}/cases`,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Meseleler · KEFE",
+    description: "Aktif meseleler — Commit First, Blind First.",
+  },
 };
 
 export default async function CasesPage() {

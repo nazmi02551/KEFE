@@ -4,10 +4,23 @@ import { listSignalConsensusCards } from "@/src/lib/kefe-api";
 import { SignalFilter } from "@/src/components/signal-filter";
 import styles from "@/app/signal/page.module.css";
 
+const _siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://kefe.app";
+
 export const metadata: Metadata = {
   title: "Sinyal Kartları",
   description:
     "Methodology-qualified civic signal consensus cards — KEFE.",
+  openGraph: {
+    title: "Sinyal Kartları · KEFE",
+    description: "Methodology-qualified sinyal konsensüs kartları. Kolektif sesin kurumsal tercümesi.",
+    url: `${_siteUrl}/signal`,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Sinyal Kartları · KEFE",
+    description: "Methodology-qualified civic signal consensus cards.",
+  },
 };
 
 export default async function SignalPage() {
