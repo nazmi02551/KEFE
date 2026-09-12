@@ -25,6 +25,26 @@ export function SiteFooter() {
                 Sinyaller
               </Link>
             </li>
+            <li>
+              <Link href="/impact" className={styles.link}>
+                Etki
+              </Link>
+            </li>
+            <li>
+              <Link href="/about" className={styles.link}>
+                Metodoloji
+              </Link>
+            </li>
+            <li>
+              <Link href="/faq" className={styles.link}>
+                SSS
+              </Link>
+            </li>
+            <li>
+              <Link href="/privacy" className={styles.link}>
+                Gizlilik
+              </Link>
+            </li>
           </ul>
         </nav>
 
