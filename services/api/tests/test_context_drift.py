@@ -20,7 +20,10 @@ def test_publish_and_retrieve_context_drift_notices() -> None:
         case_version_id=case_version_id,
         drift_type=ContextDriftType.LEGAL_REFORM,
         effective_date=effective_date,
-        summary="İlgili kanun maddesi TBMM genel kurulunda değiştirilmiş ve yeni tarife düzenlemesi Resmi Gazetede yayımlanmıştır.",
+        summary=(
+            "İlgili kanun maddesi TBMM genel kurulunda değiştirilmiş ve yeni "
+            "tarife düzenlemesi Resmi Gazetede yayımlanmıştır."
+        ),
         recommended_action=DriftRecommendedAction.CONTINUE_WITH_AWARENESS,
         source_reference_url="https://resmigazete.gov.tr/2026/08/30",
     )

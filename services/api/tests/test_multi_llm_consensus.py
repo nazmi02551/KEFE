@@ -13,7 +13,10 @@ def test_multi_llm_achieves_unanimous_consensus() -> None:
         prompt_context_hash="hash_prompt_001",
         models_evaluated_count=4,
         semantic_convergence_score=0.95,
-        synthesized_consensus_output="Tüm modeller karbon salınım vergilendirmesinin kamu gelirine etkisinde anlaştı.",
+        synthesized_consensus_output=(
+            "Tüm modeller karbon salınım vergilendirmesinin kamu gelirine "
+            "etkisinde anlaştı."
+        ),
     )
 
     assert isinstance(r, MultiLlmConsensusResult)

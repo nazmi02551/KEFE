@@ -14,7 +14,10 @@ def test_expert_testimony_service_assigns_correct_epistemic_tiers() -> None:
         source_name="Prof. Dr. Ayşe Yılmaz (Boğaziçi Üniv. Çevre Enstitüsü)",
         archetype=TestimonyArchetype.INDEPENDENT_ACADEMIC_EXPERT,
         conflict_of_interest_score=0.05,
-        testimony_statement="Akademik ölçümlerimiz yeraltı su havzalarında geri dönülemez ağır metal kirliliği riskini %85 olarak göstermektedir.",
+        testimony_statement=(
+            "Akademik ölçümlerimiz yeraltı su havzalarında geri dönülemez ağır "
+            "metal kirliliği riskini %85 olarak göstermektedir."
+        ),
     )
     assert isinstance(t1, ExpertTestimonyItem)
     assert t1.epistemic_authority_tier == EpistemicAuthorityTier.HIGH_PEER_REVIEWED
@@ -24,7 +27,10 @@ def test_expert_testimony_service_assigns_correct_epistemic_tiers() -> None:
         source_name="Maden İşletmecileri Derneği Sözcüsü",
         archetype=TestimonyArchetype.INDUSTRY_CORPORATE_STAKEHOLDER,
         conflict_of_interest_score=0.90,
-        testimony_statement="Tesisimiz en yüksek çevre standartlarına sahip olup bölgeye 5000 kişilik istihdam sağlayacaktır.",
+        testimony_statement=(
+            "Tesisimiz en yüksek çevre standartlarına sahip olup bölgeye 5000 "
+            "kişilik istihdam sağlayacaktır."
+        ),
     )
     assert t2.epistemic_authority_tier == EpistemicAuthorityTier.PARTISAN_SPECIAL_INTEREST
 

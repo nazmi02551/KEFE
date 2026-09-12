@@ -17,7 +17,10 @@ def test_principle_first_calculator_evaluates_consistency() -> None:
         primary_principle=PrincipleType.INDIVIDUAL_LIBERTY,
         secondary_principle=PrincipleType.PROCEDURAL_JUSTICE,
         consistency_score=0.88,
-        reflection_prompt="İlk kararınızda bireysel özgürlüğü önceliklendirdiniz; somut vakada da bu ilkeyle uyumlu kaldınız.",
+        reflection_prompt=(
+            "İlk kararınızda bireysel özgürlüğü önceliklendirdiniz; somut "
+            "vakada da bu ilkeyle uyumlu kaldınız."
+        ),
     )
 
     assert isinstance(r, PrincipleFirstResult)

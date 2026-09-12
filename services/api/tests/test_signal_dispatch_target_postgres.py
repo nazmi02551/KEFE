@@ -7,6 +7,7 @@ Requires:
 Tests PostgresSignalDispatchTargetWriter + PostgresSignalDispatchTargetResolver
 against a real PostgreSQL database (migrations 0042 + 0043 must be applied).
 """
+
 from __future__ import annotations
 
 import os
@@ -51,6 +52,7 @@ def _make_signal(case_version_id: UUID | None = None) -> QualifiedSignal:
 @pytest.fixture
 def pg_conn():
     from sqlalchemy import create_engine
+
     url = os.environ["KEFE_DATABASE_URL"]
     engine = create_engine(url)
     with engine.connect() as conn:
@@ -61,6 +63,7 @@ def pg_conn():
 @pytest.fixture
 def pg_signal_repo(pg_conn):
     from kefe_api.infrastructure.postgres_signal import PostgresSignalRepository
+
     return PostgresSignalRepository(pg_conn)
 
 
@@ -69,6 +72,7 @@ def pg_writer(pg_conn):
     from kefe_api.infrastructure.postgres_signal_dispatch_target import (
         PostgresSignalDispatchTargetWriter,
     )
+
     return PostgresSignalDispatchTargetWriter(pg_conn)
 
 
@@ -77,6 +81,7 @@ def pg_resolver(pg_conn):
     from kefe_api.infrastructure.postgres_signal_dispatch_target import (
         PostgresSignalDispatchTargetResolver,
     )
+
     return PostgresSignalDispatchTargetResolver(pg_conn)
 
 
@@ -133,7 +138,9 @@ class TestSignalDispatchTargetWriter:
         )
         assert targets[0].dispatch_status == DispatchStatus.VERIFIED_TARGET
 
-    def test_full_lifecycle_proposed_to_dispatched(self, pg_signal_repo, pg_writer, pg_resolver) -> None:
+    def test_full_lifecycle_proposed_to_dispatched(
+        self, pg_signal_repo, pg_writer, pg_resolver
+    ) -> None:
         signal = _make_signal()
         pg_signal_repo.save_qualified_signal(signal)
         target_id = uuid4()
@@ -214,6 +221,7 @@ class TestSignalDispatchTargetWriter:
 
     def test_duplicate_target_raises_integrity_error(self, pg_signal_repo, pg_writer) -> None:
         from sqlalchemy.exc import IntegrityError
+
         signal = _make_signal()
         pg_signal_repo.save_qualified_signal(signal)
         target_id = uuid4()

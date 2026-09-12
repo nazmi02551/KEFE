@@ -14,6 +14,7 @@ Covers:
 - Correction: response shape invariants
 - Cross: same case_version_id yields independent objection + correction lists
 """
+
 from __future__ import annotations
 
 import uuid
@@ -34,6 +35,7 @@ def _client() -> TestClient:
 # Objection — list
 # ---------------------------------------------------------------------------
 
+
 def test_list_objections_unknown_version_not_500() -> None:
     client = _client()
     res = client.get(f"/v1/cases/{_UNKNOWN_VERSION}/objections")
@@ -52,6 +54,7 @@ def test_list_objections_malformed_uuid() -> None:
 # ---------------------------------------------------------------------------
 # Objection — submit
 # ---------------------------------------------------------------------------
+
 
 def test_submit_objection_missing_reason_category() -> None:
     client = _client()
@@ -82,7 +85,10 @@ def test_submit_objection_without_evidence_url() -> None:
         f"/v1/cases/{_SEEDED_CASE_VERSION}/objections",
         json={
             "reason_category": "FACTUAL_INACCURACY",
-            "statement": "Olgusal açıdan değerlendirme kriteri eksik bırakılmış, belirtilen veri doğrulanamıyor.",
+            "statement": (
+                "Olgusal açıdan değerlendirme kriteri eksik bırakılmış, "
+                "belirtilen veri doğrulanamıyor."
+            ),
         },
     )
     assert res.status_code == 201
@@ -130,7 +136,10 @@ def test_submit_multiple_objections_both_listed() -> None:
             f"/v1/cases/{_SEEDED_CASE_VERSION}/objections",
             json={
                 "reason_category": category,
-                "statement": f"{category} kapsamında seçenek çerçevesi eksik bırakılmış ve paydaş temsili yetersizdir.",
+                "statement": (
+                    f"{category} kapsamında seçenek çerçevesi eksik bırakılmış "
+                    "ve paydaş temsili yetersizdir."
+                ),
             },
         )
         assert res.status_code == 201
@@ -146,6 +155,7 @@ def test_submit_multiple_objections_both_listed() -> None:
 # Correction history — list
 # Corrections endpoint returns: {case_version_id, corrections: [...]}
 # ---------------------------------------------------------------------------
+
 
 def test_list_corrections_seeded_case_returns_dict_with_list() -> None:
     """Corrections endpoint returns a dict with a 'corrections' key."""
@@ -193,6 +203,7 @@ def test_list_corrections_response_shape() -> None:
 # Cross: independent lists
 # ---------------------------------------------------------------------------
 
+
 def test_objections_and_corrections_are_independent() -> None:
     client = _client()
     obj_res = client.get(f"/v1/cases/{_SEEDED_CASE_VERSION}/objections")
@@ -209,6 +220,7 @@ def test_objections_and_corrections_are_independent() -> None:
 # ---------------------------------------------------------------------------
 # OpenAPI registration
 # ---------------------------------------------------------------------------
+
 
 def test_objection_correction_paths_in_openapi() -> None:
     client = _client()

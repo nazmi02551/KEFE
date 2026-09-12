@@ -17,7 +17,10 @@ def test_case_objection_service_submits_and_resolves_challenge() -> None:
     item = service.submit_objection(
         case_version_id=case_id,
         reason_category=ObjectionCategory.EXCLUDED_STAKEHOLDER,
-        statement="Gece vardiyasında çalışan sağlık personeli paydaş analizi ve seçeneklerde dışlanmıştır.",
+        statement=(
+            "Gece vardiyasında çalışan sağlık personeli paydaş analizi ve "
+            "seçeneklerde dışlanmıştır."
+        ),
         supporting_evidence_url="https://tabipodasi.org.tr/rapor/2026",
     )
 
@@ -29,7 +32,10 @@ def test_case_objection_service_submits_and_resolves_challenge() -> None:
     resolved = service.resolve_objection(
         objection_id=item.objection_id,
         new_status=ObjectionStatus.ACCEPTED_CORRECTION_FILED,
-        resolution_note="Haklı itiraz. Vaka sürümü v1.2'ye sağlık çalışanları paydaş grubu eklendi.",
+        resolution_note=(
+            "Haklı itiraz. Vaka sürümü v1.2'ye sağlık çalışanları paydaş "
+            "grubu eklendi."
+        ),
     )
 
     assert resolved.status == ObjectionStatus.ACCEPTED_CORRECTION_FILED

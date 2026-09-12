@@ -18,7 +18,10 @@ def test_perspective_spectrum_maps_properly() -> None:
         primary_value_hue=PrimaryValueHue.EQUALITY_AND_CARE,
         argument_resonance_count=450,
         cross_value_bridge_ratio=0.72,
-        core_moral_intuition="Kırılgan kesimlerin korunması ve adil fırsat eşitliğinin güvence altına alınması.",
+        core_moral_intuition=(
+            "Kırılgan kesimlerin korunması ve adil fırsat eşitliğinin güvence "
+            "altına alınması."
+        ),
     )
 
     assert isinstance(r, PerspectiveSpectrumResult)

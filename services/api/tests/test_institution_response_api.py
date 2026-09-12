@@ -24,7 +24,10 @@ _SEED_RESPONSES = [
         authority_role="Halkla İlişkiler ve Yolcu Hakları Dairesi",
         verification_status=AuthorityVerificationStatus.VERIFIED,
         response_type=InstitutionResponseType.POLICY_CHANGE,
-        statement="Topluluk müzakereleri ve yüksek uzlaşı verileri dikkate alınarak öncelikli yolcu kontenjanı genelgeye eklenmiştir.",
+        statement=(
+            "Topluluk müzakereleri ve yüksek uzlaşı verileri dikkate alınarak "
+            "öncelikli yolcu kontenjanı genelgeye eklenmiştir."
+        ),
         published_at=datetime(2026, 8, 20, 10, 0, 0, tzinfo=UTC),
     ),
     InstitutionResponse(
@@ -34,7 +37,10 @@ _SEED_RESPONSES = [
         authority_role="Veri Güvenliği ve Yapay Zekâ İzleme Masası",
         verification_status=AuthorityVerificationStatus.VERIFIED,
         response_type=InstitutionResponseType.COMMITMENT,
-        statement="Model eğitimi amaçlı veri toplama süreçlerine ilişkin şeffaflık kılavuzu taslağı kamuoyu görüşüne açılmıştır.",
+        statement=(
+            "Model eğitimi amaçlı veri toplama süreçlerine ilişkin şeffaflık "
+            "kılavuzu taslağı kamuoyu görüşüne açılmıştır."
+        ),
         published_at=datetime(2026, 8, 25, 14, 0, 0, tzinfo=UTC),
     ),
 ]
@@ -88,9 +94,7 @@ def test_filter_institution_responses_by_case() -> None:
     client = TestClient(app)
 
     target_case = str(_CASE_ID_1)
-    response = client.get(
-        f"/v1/impact/institution-responses?case_version_id={target_case}"
-    )
+    response = client.get(f"/v1/impact/institution-responses?case_version_id={target_case}")
     assert response.status_code == 200
     data = response.json()
     assert len(data) >= 1
@@ -116,9 +120,7 @@ def test_unverified_response_not_in_list() -> None:
     app.state.impact_repository = repo
     client = TestClient(app)
 
-    response = client.get(
-        f"/v1/impact/institution-responses?case_version_id={_CASE_ID_1}"
-    )
+    response = client.get(f"/v1/impact/institution-responses?case_version_id={_CASE_ID_1}")
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 0

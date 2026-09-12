@@ -9,6 +9,7 @@ Covers:
 - Auth guard on both endpoints
 - Double delete: idempotent or informative error
 """
+
 from __future__ import annotations
 
 import uuid
@@ -30,9 +31,7 @@ def _guest_headers(client: TestClient) -> dict[str, str]:
 
 
 def _commit_demo(client: TestClient, headers: dict) -> str:
-    session_res = client.post(
-        f"/v1/cases/{DEMO_CASE_ID}/weigh-sessions", headers=headers
-    )
+    session_res = client.post(f"/v1/cases/{DEMO_CASE_ID}/weigh-sessions", headers=headers)
     assert session_res.status_code == 201
     session_id = session_res.json()["session_id"]
 
@@ -52,6 +51,7 @@ def _commit_demo(client: TestClient, headers: dict) -> str:
 # Authentication guard
 # ---------------------------------------------------------------------------
 
+
 def test_privacy_export_requires_auth() -> None:
     client = _client()
     res = client.get("/v1/me/privacy-export")
@@ -67,6 +67,7 @@ def test_privacy_delete_requires_auth() -> None:
 # ---------------------------------------------------------------------------
 # Privacy export — shape invariants
 # ---------------------------------------------------------------------------
+
 
 def test_privacy_export_guest_no_data_returns_safe_structure() -> None:
     """Fresh guest export must return safe structure without personal inferences."""
@@ -116,6 +117,7 @@ def test_privacy_export_after_commit_includes_actor_data() -> None:
 # ---------------------------------------------------------------------------
 # Privacy deletion
 # ---------------------------------------------------------------------------
+
 
 def _actor_id_from_export(client: TestClient, auth_headers: dict) -> str:
     """Fetch actor_id from privacy export."""
@@ -194,7 +196,8 @@ def test_privacy_export_after_deletion_reflects_erasure() -> None:
     del_res = client.delete("/v1/me", headers=_delete_headers_for_actor(headers, actor_id))
     assert del_res.status_code in (200, 204)
 
-    # Export after deletion: token revoked (401) or not found (403/404) — never full pre-delete payload
+    # Export after deletion: token revoked (401) or not found (403/404).
+    # Never return the full pre-delete payload.
     export_res = client.get("/v1/me/privacy-export", headers=headers)
     assert export_res.status_code in (401, 403, 404), (
         f"Expected 401/403/404 after erasure, got {export_res.status_code}"
@@ -223,6 +226,7 @@ def test_double_delete_does_not_cause_500() -> None:
 # ---------------------------------------------------------------------------
 # OpenAPI registration
 # ---------------------------------------------------------------------------
+
 
 def test_privacy_paths_in_openapi() -> None:
     client = _client()

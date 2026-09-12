@@ -12,6 +12,7 @@ Covers:
 - GET /v1/me/privacy-export: shape verification (schema_version, actor_id)
 - OpenAPI: segment distributions + me/progress registered
 """
+
 from __future__ import annotations
 
 import uuid
@@ -37,6 +38,7 @@ def _guest_headers(client: TestClient) -> dict[str, str]:
 # ---------------------------------------------------------------------------
 # Segment distributions
 # ---------------------------------------------------------------------------
+
 
 def test_segment_distributions_no_auth_required() -> None:
     """Segment distributions are public — no authentication needed."""
@@ -74,7 +76,14 @@ def test_segment_distributions_item_shape() -> None:
     assert "cohort_type" in segment
     assert "cohort_label" in segment
     # At least one meaningful data field must be present
-    data_fields = {"distribution", "percentages", "counts", "entropy_score", "is_suppressed", "sample_size"}
+    data_fields = {
+        "distribution",
+        "percentages",
+        "counts",
+        "entropy_score",
+        "is_suppressed",
+        "sample_size",
+    }
     assert any(f in segment for f in data_fields), (
         f"Segment item missing expected data fields. Got: {list(segment.keys())}"
     )
@@ -116,6 +125,7 @@ def test_segment_distributions_overall_sample_size_positive() -> None:
 # ---------------------------------------------------------------------------
 # /v1/me/progress
 # ---------------------------------------------------------------------------
+
 
 def test_me_progress_requires_auth() -> None:
     client = _client()
@@ -162,6 +172,7 @@ def test_me_progress_no_other_actor_data() -> None:
 # /v1/me/privacy-export — shape verification
 # ---------------------------------------------------------------------------
 
+
 def test_privacy_export_response_shape() -> None:
     client = _client()
     headers = _guest_headers(client)
@@ -181,6 +192,7 @@ def test_privacy_export_response_shape() -> None:
 # OpenAPI registration
 # ---------------------------------------------------------------------------
 
+
 def test_segment_and_me_paths_in_openapi() -> None:
     client = _client()
     res = client.get("/openapi.json")
@@ -189,6 +201,4 @@ def test_segment_and_me_paths_in_openapi() -> None:
     assert any("segment-distributions" in p for p in paths), (
         "segment-distributions path not in OpenAPI"
     )
-    assert any("me/progress" in p for p in paths), (
-        "me/progress path not in OpenAPI"
-    )
+    assert any("me/progress" in p for p in paths), "me/progress path not in OpenAPI"

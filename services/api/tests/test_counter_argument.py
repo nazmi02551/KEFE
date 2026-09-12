@@ -19,7 +19,10 @@ def test_counter_argument_mapper_links_rebuttals() -> None:
         target_argument_id=arg1,
         refutation_type=RefutationType.DIRECT_EMPIRICAL_REBUTTAL,
         refutation_strength=0.85,
-        rebuttal_thesis="2026 yılı TÜİK verilerine göre iddia edilen maliyet artışı gerçekleşmemiştir.",
+        rebuttal_thesis=(
+            "2026 yılı TÜİK verilerine göre iddia edilen maliyet artışı "
+            "gerçekleşmemiştir."
+        ),
     )
 
     assert isinstance(link, ArgumentRefutationLink)

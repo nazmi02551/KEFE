@@ -9,6 +9,7 @@ Covers:
 - cluster_id / target_case_id whitespace stripping
 - Analytical snapshot bot_shield block shape (via build_analytical_perspectives)
 """
+
 from __future__ import annotations
 
 import uuid
@@ -18,7 +19,6 @@ import pytest
 from kefe_api.modules.decision.analytical_snapshots import build_analytical_perspectives
 from kefe_api.modules.decision.synthetic_astroturfing_shield import (
     BotDefenseState,
-    BotShieldResult,
     SyntheticAstroturfingShieldService,
 )
 
@@ -28,6 +28,7 @@ _inspect = SyntheticAstroturfingShieldService.inspect_cluster
 # ---------------------------------------------------------------------------
 # State: ISOLATED_QUARANTINE_SWARM
 # ---------------------------------------------------------------------------
+
 
 def test_isolated_quarantine_swarm_nominal() -> None:
     r = _inspect(
@@ -71,6 +72,7 @@ def test_not_quarantine_if_entropy_at_0_25() -> None:
 # State: SUSPECTED_BOT_COORDINATION
 # ---------------------------------------------------------------------------
 
+
 def test_suspected_coordination_nominal() -> None:
     r = _inspect(
         cluster_id="sus_cls",
@@ -109,6 +111,7 @@ def test_not_suspected_just_below_0_40() -> None:
 # State: ORGANIC_CITIZEN_AUTHENTIC
 # ---------------------------------------------------------------------------
 
+
 def test_organic_citizen_authentic_nominal() -> None:
     r = _inspect(
         cluster_id="org_cls",
@@ -135,6 +138,7 @@ def test_organic_at_zero_probability() -> None:
 # ---------------------------------------------------------------------------
 # Output precision and immutability
 # ---------------------------------------------------------------------------
+
 
 def test_scores_rounded_to_two_decimals() -> None:
     r = _inspect(
@@ -177,6 +181,7 @@ def test_cluster_and_case_id_whitespace_stripped() -> None:
 # Input validation
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize("score", [-0.01, 1.01, 2.0, -1.0])
 def test_invalid_synthetic_probability_score(score: float) -> None:
     with pytest.raises(ValueError, match="synthetic_probability_score"):
@@ -216,6 +221,7 @@ def test_negative_quarantined_count_raises() -> None:
 # BotDefenseState enum completeness
 # ---------------------------------------------------------------------------
 
+
 def test_all_three_states_reachable() -> None:
     states = set()
     for score, entropy in [(0.05, 0.9), (0.50, 0.5), (0.85, 0.10)]:
@@ -237,6 +243,7 @@ def test_all_three_states_reachable() -> None:
 # ---------------------------------------------------------------------------
 # Analytical snapshot integration — bot_shield block shape (CAP-073)
 # ---------------------------------------------------------------------------
+
 
 def test_analytical_snapshot_bot_shield_block_shape() -> None:
     """build_analytical_perspectives must include a well-formed bot_shield block."""

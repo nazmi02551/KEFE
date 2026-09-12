@@ -14,7 +14,10 @@ def test_propose_and_update_action_progress() -> None:
     action = service.propose_action(
         case_version_id=case_version_id,
         title="Toplu Taşıma Gece Seferleri Düzenlemesi",
-        description="Belediye meclisine resmi dilekçe verilmesi ve tarife komisyonu toplantısının izlenmesi.",
+        description=(
+            "Belediye meclisine resmi dilekçe verilmesi ve tarife komisyonu "
+            "toplantısının izlenmesi."
+        ),
         target_completion_date=datetime.now(UTC) + timedelta(days=30),
     )
 

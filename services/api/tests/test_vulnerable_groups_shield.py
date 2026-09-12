@@ -22,7 +22,10 @@ def test_vulnerable_groups_shield_applies_maximin_rule() -> None:
             CohortEvaluationItem(
                 cohort=VulnerableCohort.PERSONS_WITH_DISABILITIES,
                 impact_score=-0.70,
-                assessment="Akıllı telefonu veya dijital bankacılığı olmayan engelliler toplu taşımaya erişememektedir.",
+                assessment=(
+                    "Akıllı telefonu veya dijital bankacılığı olmayan engelliler "
+                    "toplu taşımaya erişememektedir."
+                ),
             ),
             CohortEvaluationItem(
                 cohort=VulnerableCohort.ELDERLY_GERIATRIC,

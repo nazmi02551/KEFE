@@ -15,7 +15,10 @@ def test_impact_evidence_service_registers_digest() -> None:
         evidence_type=ImpactEvidenceType.OFFICIAL_GAZETTE_DECREE,
         evidence_title="Resmi Gazete Sayı 32900 Karar Metni",
         source_url="https://resmigazete.gov.tr/ilanlar/2026/09/01/karar.pdf",
-        raw_document_content="Bu karar ile Marmara Denizi su arıtma tesisleri standartları yürürlüğe girmiştir.",
+        raw_document_content=(
+            "Bu karar ile Marmara Denizi su arıtma tesisleri standartları "
+            "yürürlüğe girmiştir."
+        ),
     )
 
     assert isinstance(r, ImpactEvidenceResult)

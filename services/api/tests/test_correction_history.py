@@ -20,7 +20,10 @@ def test_correction_history_logs_and_orders_corrections() -> None:
         correction_type=CorrectionType.FACTUAL_UPDATE,
         severity=CorrectionSeverity.MATERIAL,
         summary="Sübvansiyon bütçesi rakamı güncellendi.",
-        editorial_rationale="Belediye meclisinin 2026 yılı ek bütçe kararı doğrultusunda revize edildi.",
+        editorial_rationale=(
+            "Belediye meclisinin 2026 yılı ek bütçe kararı doğrultusunda "
+            "revize edildi."
+        ),
         previous_text="120 Milyon TL sübvansiyon",
         corrected_text="150 Milyon TL sübvansiyon",
     )

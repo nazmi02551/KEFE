@@ -13,7 +13,10 @@ def test_multi_stakeholder_ratifies_pact() -> None:
         pact_title="Sanayi Emisyonları ve Yerel Halk Sağlığı Uzlaşı Sözleşmesi",
         stakeholder_groups_count=4,
         mutual_concession_score=0.85,
-        synthesis_covenant_summary="Aşamalı filtreleme yatırımlarına karşılık vergi teşviki ve bağımsız hava izleme istasyonu mutabakatı.",
+        synthesis_covenant_summary=(
+            "Aşamalı filtreleme yatırımlarına karşılık vergi teşviki ve bağımsız "
+            "hava izleme istasyonu mutabakatı."
+        ),
     )
 
     assert isinstance(r, ConsensusCircleResult)

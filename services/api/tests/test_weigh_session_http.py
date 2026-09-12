@@ -12,11 +12,11 @@ Also covers:
 - Authentication guard: all session endpoints require auth
 - Double-commit behavior (idempotency key reuse)
 """
+
 from __future__ import annotations
 
 import uuid
 
-import pytest
 from fastapi.testclient import TestClient
 
 from kefe_api.main import create_app
@@ -42,6 +42,7 @@ def _create_session(client: TestClient, headers: dict) -> str:
 # ---------------------------------------------------------------------------
 # Authentication guard
 # ---------------------------------------------------------------------------
+
 
 def test_create_session_requires_auth() -> None:
     client = _make_client()
@@ -87,6 +88,7 @@ def test_reveal_requires_auth() -> None:
 # Session creation
 # ---------------------------------------------------------------------------
 
+
 def test_create_session_returns_201_with_session_id() -> None:
     client = _make_client()
     headers = _guest_headers(client)
@@ -117,6 +119,7 @@ def test_create_session_malformed_case_id() -> None:
 # Flow endpoint
 # ---------------------------------------------------------------------------
 
+
 def test_get_flow_returns_200_with_steps() -> None:
     client = _make_client()
     headers = _guest_headers(client)
@@ -146,6 +149,7 @@ def test_get_flow_malformed_session_id() -> None:
 # ---------------------------------------------------------------------------
 # Full commit journey
 # ---------------------------------------------------------------------------
+
 
 def test_full_commit_journey_returns_200() -> None:
     """Guest → create session → put responses → commit → reveal."""
@@ -253,6 +257,7 @@ def test_two_guests_have_independent_sessions() -> None:
 # ---------------------------------------------------------------------------
 # Response validation
 # ---------------------------------------------------------------------------
+
 
 def test_put_responses_malformed_session_id() -> None:
     client = _make_client()

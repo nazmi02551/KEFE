@@ -18,8 +18,14 @@ def test_historical_retrospective_evaluates_event() -> None:
         historical_era=HistoricalEra.TWENTIETH_CENTURY,
         historical_year=1973,
         historical_event_name="1973 Petrol Ambargosu ve Enerji Kısıtlaması",
-        actual_historical_decision="Hız sınırı 55 mph'ye düşürüldü ve pazar günleri akaryakıt satışı yasaklandı.",
-        historical_consequence_summary="Kısa vadede yakıt tüketimi %7 azaldı, uzun vadede küçük motorlu araç inovasyonu ve alternatif enerji yatırımları hız kazandı.",
+        actual_historical_decision=(
+            "Hız sınırı 55 mph'ye düşürüldü ve pazar günleri akaryakıt "
+            "satışı yasaklandı."
+        ),
+        historical_consequence_summary=(
+            "Kısa vadede yakıt tüketimi %7 azaldı, uzun vadede küçük motorlu "
+            "araç inovasyonu ve alternatif enerji yatırımları hız kazandı."
+        ),
     )
 
     assert isinstance(r, HistoricalRetrospectiveResult)

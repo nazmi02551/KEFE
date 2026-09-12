@@ -13,7 +13,10 @@ def test_xai_provenance_generates_full_axiomatic_graph() -> None:
         target_synthesis_id="synth_001",
         causal_steps_count=6,
         axiomatic_grounding_score=0.96,
-        root_axiom_summary="Anayasal orantılılık ve en az müdahaleci araç ilkesinden türetilmiştir.",
+        root_axiom_summary=(
+            "Anayasal orantılılık ve en az müdahaleci araç ilkesinden "
+            "türetilmiştir."
+        ),
     )
 
     assert isinstance(r, XaiProvenanceResult)

@@ -13,7 +13,10 @@ def test_appeals_review_panel_overturns_decision() -> None:
         target_resource_id="rsn_9814",
         panelist_count=7,
         votes_to_overturn=5,  # 5/7 = 0.71 >= 0.67
-        resolution_summary="Hakem heyeti argümanın akademik bir eleştiri olduğunu ve kural ihlali oluşturmadığını oy çokluğuyla tespit etmiştir.",
+        resolution_summary=(
+            "Hakem heyeti argümanın akademik bir eleştiri olduğunu ve kural "
+            "ihlali oluşturmadığını oy çokluğuyla tespit etmiştir."
+        ),
     )
 
     assert isinstance(r, AppealsReviewResult)
