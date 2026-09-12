@@ -20,6 +20,8 @@ const navItems = [
   { href: "/impact", label: "Etki" },
   { href: "/deliberation", label: "Deliberation" },
   { href: "/claims", label: "İddia & Graf" },
+  { href: "/trust-integrity", label: "Bot & Güvenlik" },
+  { href: "/analytics", label: "Metrikler" },
 ] as const;
 
 function subscribeTheme(callback: () => void) {

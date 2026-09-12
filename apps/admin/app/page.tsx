@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 
 import styles from "@/app/home.module.css";
@@ -100,6 +101,22 @@ export default function AdminStudioPage() {
             <h3 className={styles.moduleTitle}>İddia & Bilgi Grafiği</h3>
             <p className={styles.moduleDesc}>
               Birinci sınıf iddia sınıflandırması, kanıt değerlendirme döngüsü ve iddia-argüman ağ ilişkileri.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/trust-integrity" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-073 · Trust & Integrity</span>
+            <h3 className={styles.moduleTitle}>Bot Kalkanı & Gündem Eşiği</h3>
+            <p className={styles.moduleDesc}>
+              Sentetik astroturfing tespiti, bot koordinasyon karantinası ve dinamik gündem önceliklendirme.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/analytics" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-114..117 · Analytics</span>
+            <h3 className={styles.moduleTitle}>North Star & Kutuplaşma Metrikleri</h3>
+            <p className={styles.moduleDesc}>
+              Meaningful Weighs / WAU, aktivasyon dönüşüm hunisi ve kutuplaşma azaltma endeksi.
             </p>
             <span className={styles.moduleAction}>Modülü Aç →</span>
           </Link>

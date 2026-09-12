@@ -70,6 +70,9 @@ from kefe_api.modules.admin_security.operational_reports import (
 from kefe_api.modules.admin_security.operational_reports_router import (
     router as admin_operational_reports_router,
 )
+from kefe_api.modules.analytics.router import (
+    analytics_router,
+)
 from kefe_api.modules.admin_security.policy import default_admin_security_policy
 from kefe_api.modules.admin_security.proposal_queue_router import (
     router as admin_proposal_queue_router,
@@ -105,6 +108,9 @@ from kefe_api.modules.context.router import router as context_router
 from kefe_api.modules.context.service import ContextService
 from kefe_api.modules.decision.case_analytics_router import (
     case_analytics_router,
+)
+from kefe_api.modules.decision.trust_integrity_router import (
+    trust_integrity_router,
 )
 from kefe_api.modules.decision.lineage_aware_service import LineageAwareDecisionService
 from kefe_api.modules.decision.lineage_router import router as decision_lineage_router
@@ -446,6 +452,8 @@ def create_app() -> FastAPI:
     app.include_router(admin_content_configuration_router)
     app.include_router(community_reason_admin_router)
     app.include_router(admin_operational_reports_router)
+    app.include_router(trust_integrity_router)
+    app.include_router(analytics_router)
     return app
 
 
