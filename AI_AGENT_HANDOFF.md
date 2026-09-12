@@ -3,21 +3,22 @@
 **Updated:** 2026-09-12 afternoon (Claude — multi-agent session, branch: maintenance/2026-09-10-signal-impact-hexagonal-studio)  
 **Active Working Branch:** `maintenance/2026-09-10-signal-impact-hexagonal-studio` (`E:\KEFE`)
 
-### Claude Session 3 — 2026-09-12 Additions (Full Day):
-- **API test coverage:** 968 → **1047 passed** (+79 new tests across 5 new test files)
-  - discovery router extended: 20 tests (schema, status filter, tag parsing, Turkish chars, profile)
-  - case objection + correction extended: 14 tests (auth, validation, schema, independence)
-  - weigh session HTTP: 17 tests (auth guard, Commit First invariant, idempotency, session isolation)
-  - perspectives + reflection + reveal: 15 tests (Commit First pre/post-commit, no-leakage)
-  - privacy export + deletion: 13 tests (actor-bound confirm token, post-delete erasure)
-- **Web frontend new pages:**
-  - `/impact` — institution responses + action milestones (CAP-048..054)
-  - Dynamic home page — real cases/signals/actions from API
-  - Case detail: context blocks section (Commit First isolated, CAP-069/070)
-  - sitemap.ts + robots.ts + manifest.ts (SEO, PWA)
-  - Cross-page footer navigation: cases ↔ signal ↔ impact
-- **Branch:** 78 commits on `maintenance/2026-09-10-signal-impact-hexagonal-studio`
+### Claude Session 3 — 2026-09-12 Full Day + Night:
+- **API test coverage:** 968 → **1239 passed** (+271 new tests across 17 new test files)
+  - All 66 public /v1/ endpoints now have HTTP-level coverage
+  - test files: discovery_router_extended(20), case_objection_correction_extended(14), weigh_session_http(17),
+    perspectives_reflection_http(15), privacy_http(13), account_otp_flow_http(16),
+    public_context_community_reason_http(15), identity_session_http(17), share_http(14),
+    segment_distribution_me_http(14), health_and_infra_http(9), impact_actions_extended_http(14),
+    decision_steps_http(12), signal_endpoints_extended_http(14),
+    case_analytics_endpoints_http(27), weigh_session_extended_http(19),
+    discovery_profile_lineage_http(21)
+- **Web frontend:** 11 pages with OG metadata, sitemap, robots, PWA manifest, error boundary
+  - `/impact`, `/about` (methodology), `/faq` (10 Q&A), `/privacy` (KVKK/GDPR), `/error` boundary
+  - Dynamic home page, case/signal detail OG, footer nav complete (6 links)
+- **Branch:** ~130 commits on `maintenance/2026-09-10-signal-impact-hexagonal-studio`
 - **Portfolio:** PASS 128 capabilities, 0 errors
+- **Mobile Flutter:** 812 tests passing (unchanged, already green)
 
 **Previous Active Working Branch:** `backup/untracked-ecosystem-snapshot-20260906`  
 **Physical Device & Emulator Test:** Standalone Product Preview Release APK Built & Tested (`56.9MB`), local Android Emulator `emulator-5554` (API 36) verified live.  
