@@ -21,9 +21,21 @@ export async function generateMetadata(
   const { caseId } = await params;
   try {
     const c = await getPublicCase(caseId);
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://kefe.app";
     return {
       title: c.title,
       description: c.summary,
+      openGraph: {
+        title: `${c.title} · KEFE`,
+        description: c.summary,
+        url: `${siteUrl}/cases/${encodeURIComponent(caseId)}`,
+        type: "article",
+      },
+      twitter: {
+        card: "summary",
+        title: c.title,
+        description: c.summary,
+      },
     };
   } catch {
     return { title: "Mesele bulunamadı" };
