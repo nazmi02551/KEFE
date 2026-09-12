@@ -15,8 +15,8 @@
   },
   "canonical_chain": {
     "expected_root": "20260727_0001",
-    "expected_head": "20260829_0041",
-    "expected_migration_file_count": 41,
+    "expected_head": "20260910_0043",
+    "expected_migration_file_count": 43,
     "single_root_required": true,
     "single_head_required": true,
     "merge_revision_allowed": false,
