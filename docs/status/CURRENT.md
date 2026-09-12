@@ -492,26 +492,44 @@ The following items remain incomplete after Session 2:
     - feat(web): cases page — Turkish-tolerant search + domain filter (ADR-0141)
     - feat(web): signal page — Turkish-tolerant search + tier filter (ADR-0141, CAP-016)
     - 62 branch commits total
-22. **Current verified state (2026-09-12):**
-    - API: 968 passed, 123 skipped, 0 failed
-    - dart analyze lib/features/: No issues found (single-file spot checks)
-    - flutter test (key 62 tests): all passing
+22. **Session 3 Claude additions (2026-09-12 afternoon):**
+    - feat(web): /impact page — institution responses + action milestones (CAP-048..054)
+    - feat(web): case detail context blocks — Commit First isolated (CAP-069, CAP-070, ADR-0142)
+    - feat(web): home page dynamic landing — cases, signals, impact sections
+    - feat(web): sitemap + robots.txt + PWA manifest (SEO, discoverability)
+    - feat(web): cross-page navigation links — signal/case detail footer
+    - test(api): discovery router extended HTTP tests — 20 tests (CAP-023, CAP-033)
+    - test(api): case objection + correction extended HTTP tests — 14 tests (CAP-068, CAP-072)
+    - test(api): weigh session HTTP integration tests — 17 tests (CAP-005, CAP-006, Commit First)
+    - test(api): perspectives + reflection + reveal HTTP tests — 15 tests (CAP-007, CAP-014)
+    - test(api): privacy export + deletion HTTP tests — 13 tests (CAP-004)
+    - docs: AI_AGENT_HANDOFF.md multi-agent parallel session record
+    - 78 branch commits total (16 new this session)
+23. **Current verified state (2026-09-12 afternoon):**
+    - API: **1047 passed**, 123 skipped, 0 failed
+    - dart analyze: No issues found (spot checks)
     - TypeScript (web + admin): tsc --noEmit clean
     - Portfolio: PASS 128 capabilities, 0 errors
-    - Admin Studio all 8 contract checks: PASS
-    - 62 branch commits
-23. **Next wave (for next agent):**
-    - Issue #291 canonical feed merge — product decision required (PR #267 vs PR #273 conflict)
-    - **Recommended: open PR for maintenance branch → main** (62 clean commits, all green)
+    - Web app: 5 pages (/, /cases, /cases/[id], /signal, /signal/[id], /impact) + sitemap/robots/manifest
+    - 78 branch commits
+24. **Multi-agent parallel session (2026-09-12):**
+    - Claude (E:\KEFE): API test coverage 968→1047, web /impact + home + context + nav
+    - Gemini (E:\KEFE-Gemini): admin API clients, analytics, mobile viewport, 754/754 flutter tests
+    - Codex (E:\KEFE-Codex): project health scripts, web pages, ExploreController
+    - All branches: zero conflicts (independent worktrees)
+25. **Next wave (for next agent):**
+    - Issue #291 canonical feed merge — product decision required (PR #267 vs PR #273)
+    - **Recommended: open PR for maintenance branch → main** (78 commits, 1047 API tests, all green)
     - CAP-084 guest conversion P0 — real provider OTP evidence needed
     - CAP-005 blind-first variants, CAP-006 principle-first flow — ARCHITECTURE_ACCEPTED, Phase 2
-    - APK rebuild with updated web app filter UI for test device
+    - APK rebuild reflecting updated web filter UI + impact page
+    - Web PWA icons (public/icon-192.png, public/icon-512.png) — placeholders needed
     - Run: `python scripts/validate_capability_portfolio.py` to confirm clean state
     - Services to start: uvicorn (port 8000), npm run dev admin (3000), npm run dev web (3001)
 
 **Next agent session standard protocol:**
-1. Read `AGENTS.md` + this file (sections 14-15)
+1. Read `AGENTS.md` + this file (sections 21-25)
 2. Check capability portfolio validation: `python scripts/validate_capability_portfolio.py`
-3. Inspect PR #403 CI status — if green, merge; if failing, triage failures
-4. Inspect branch `maintenance/2026-09-10-signal-impact-hexagonal-studio` for any additional commits
+3. Inspect branch `maintenance/2026-09-10-signal-impact-hexagonal-studio` — 78 commits, open PR
+4. Review multi-agent handoffs: `AI_AGENT_HANDOFF.md`
 5. Continue from the first uncompleted pending item above in dependency order
