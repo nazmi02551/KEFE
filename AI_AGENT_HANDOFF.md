@@ -8,11 +8,22 @@
 **Physical Device & Emulator Test:** Standalone Product Preview Release APK Built & Tested (`56.9MB`), local Android Emulator `emulator-5554` (API 36) verified live.  
 **Master Recovery & Architectural Refactoring:** COMPLETED & VERIFIED:
 - Multi-Agent Parallel Protocol: Verified zero-conflict worktree isolation across Codex (`E:\KEFE-Codex`), Claude (`E:\KEFE`), and Gemini (`E:\KEFE-Gemini`).
+- Claim & Knowledge Graph API & Admin Client (CAP-057, CAP-058, CAP-059):
+  * Implemented FastAPI router `kefe_api.modules.knowledge.router` and mounted in `main.py` providing endpoints:
+    - `POST /v1/claims` & `GET /v1/claims/{claim_id}` (CAP-057)
+    - `POST /v1/claims/{claim_id}/assessments` & `GET /v1/claims/{claim_id}/assessments` (CAP-058)
+    - `POST /v1/claims/{claim_id}/assertions` & `GET /v1/claims/{claim_id}/assertions`
+    - `POST /v1/claims/{claim_id}/relations` & `GET /v1/claims/{claim_id}/relations` (CAP-059)
+    - `POST /v1/arguments` & `GET /v1/arguments/{argument_id}`
+    - `POST /v1/arguments/{argument_id}/relations` & `GET /v1/arguments/{argument_id}/relations`
+  * Created `ClaimApiClient` (`apps/admin/src/lib/claim-api.ts`) with strict URL validation, input guards, self-relation prevention, and full typed models for Claim, Assessment, Assertion, Relation, and Argument.
+  * Created test suites `test_claim_knowledge_api.py` (9/9 Pytest PASS) and `claim-api.test.ts` (3/3 Node test PASS). Total Admin Studio unit tests: 78/78 PASS, `tsc --noEmit` 0 errors.
+  * Commit: `4e15498d`.
 - Admin Studio API & Backend Operations (CAP-016, CAP-017, CAP-019, CAP-020, CAP-021, CAP-022, CAP-027, CAP-028, CAP-029, CAP-030, CAP-033, CAP-036, CAP-037, CAP-039, CAP-041, CAP-042, CAP-043, CAP-044, CAP-046, CAP-047, CAP-048, CAP-049, CAP-050, CAP-051, CAP-052, CAP-053, CAP-054, CAP-068, CAP-072, CAP-075):
   * Added `DeliberationWorkspace` (`apps/admin/src/components/deliberation-workspace.tsx`) and Next.js route `/deliberation` uniting the 8-criteria Case Quality Checklist (CAP-075), Case Objections and challenge decisions (CAP-068), and Append-only Case Correction History changelog (CAP-072) with live collective analytics (CAP-039, CAP-041, CAP-019).
   * Added `CaseAnalyticsApiClient` (`apps/admin/src/lib/case-analytics-api.ts`) covering all 15 deliberation and experience endpoints with strict URL security and parameter validation.
-  * Added unit test suites `deliberation-workspace.test.ts` (3 tests), `case-analytics-api.test.ts` (18 tests), `signal-api.test.ts` (7 tests), and `impact-api.test.ts` (4 tests). All 75 Admin Studio unit tests PASS, `tsc --noEmit` PASS (0 errors), 8/8 executable contracts PASS.
-  * All 16 Pytest suites for deliberation analytics, case objection decision, correction create, retro, budget tradeoff, observe mode, and community proposals PASS (16/16 PASS).
+  * Added unit test suites `deliberation-workspace.test.ts` (3 tests), `case-analytics-api.test.ts` (18 tests), `signal-api.test.ts` (7 tests), and `impact-api.test.ts` (4 tests). All 78 Admin Studio unit tests PASS, `tsc --noEmit` PASS (0 errors), 8/8 executable contracts PASS.
+  * All 17 Pytest suites for deliberation analytics, knowledge graph, case objection decision, correction create, retro, budget tradeoff, observe mode, and community proposals PASS (17/17 PASS).
   * Flutter mobile test suites (`case_objection`, `correction_history`, `budget_tradeoff`, `historical_retrospective`, `observe_mode`, `community_dilemma`) PASS (25/25 PASS), `dart analyze` 0 issues, full mobile suite 812/812 PASS.
   * All 16 governance and delivery validation scripts (`validate_*.py`) PASS 100%, and full `scripts/project_health.py` 4-gate suite PASS 100%.
 - Analytics Core Verification (CAP-115, CAP-116, CAP-075): `ActivationFunnelCalculator`, `PerspectiveResilienceCalculator`, and `SignalFreshnessEngine` / `SignalHalfLifeCalculator` passed 100% (4/4 test suites PASS).

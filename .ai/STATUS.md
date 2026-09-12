@@ -7,10 +7,10 @@
 **Project Health Gate:** 100% PASS:
 - Capability Portfolio Validation: 128/128 Capabilities, 20 lifecycle states, 0 errors PASS (`CAP-004`, `CAP-032`, `CAP-061`, `CAP-062`, `CAP-063`, `CAP-064`, `CAP-065`, `CAP-066`, `CAP-068`, `CAP-072`, `CAP-078`, `CAP-085` advanced to `IMPLEMENTED_VERIFIED`; `CAP-084` cataloged with verified ADRs, replay/session tests and next gate).
 - Governance & Delivery Validation: All 16 active validation scripts (`validate_*.py`) PASS 100%.
-- Backend API Suite: Case analytics & decision endpoints (`case_analytics_router.py`) covering all 15 deliberation and experience endpoints tested and passing (16/16 Pytest analytics suites PASS, 824+ API tests PASS).
+- Backend API Suite: Case analytics & decision endpoints (`case_analytics_router.py`) and Claim & Knowledge Graph endpoints (`kefe_api.modules.knowledge.router`) covering all 15 deliberation/experience endpoints and claim/argument knowledge graph (17/17 Pytest analytics/knowledge suites PASS, 824+ API tests PASS).
 - Flutter Mobile Test Suite: 100% PASS (`case_objection`, `correction_history`, `budget_tradeoff`, `historical_retrospective`, `observe_mode`, `community_dilemma` 25/25 PASS, full suite 812/812 PASS across 195 test files).
 - Dart Analyze: 0 issues found!
-- Admin Studio Suite: All 8 executable contracts PASS, `eslint` PASS, `tsc --noEmit` PASS (0 errors), unit/integration tests PASS (75/75 tests passed across `DeliberationWorkspace`, `CaseAnalyticsApiClient`, `SignalApiClient`, `ImpactApiClient`, and workspace modules).
+- Admin Studio Suite: All 8 executable contracts PASS, `eslint` PASS, `tsc --noEmit` PASS (0 errors), unit/integration tests PASS (78/78 tests passed across `DeliberationWorkspace`, `CaseAnalyticsApiClient`, `ClaimApiClient`, `SignalApiClient`, `ImpactApiClient`, and workspace modules).
 - Canonical Documentation Authority Baseline: 18 Canonical Baseline Documents strictly anchored in `docs/ecosystem_v3.3/KEFE_Documentation_Ecosystem_2026-07-28_v3.3_RECOVERY_R1/ACTIVE/` as Tier 1 Authority.
 **Architectural Integrity & Master Recovery:** COMPLETED & VERIFIED (Blind First enforced, Public Observatory operational, Case Analytics routers mounted, InternalAlphaStringCatalog fully mapped across TR/EN, zero untracked data loss).
 **Standalone Product Preview Release APK:** Standalone 100% offline self-contained release build verified (56.9MB).  
