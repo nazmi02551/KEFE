@@ -11,6 +11,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 
 import type { CaseContextSummary } from "@/src/lib/kefe-api";
+import { matchesSearchQuery } from "@/src/lib/search";
 import styles from "@/src/components/cases-filter.module.css";
 
 const DOMAIN_LABELS: Record<string, string> = {
@@ -28,27 +29,12 @@ function domainLabel(code: string): string {
   return DOMAIN_LABELS[code] ?? code;
 }
 
-/** Turkish-tolerant normalization (mirrors ADR-0141). */
-function normalize(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[İI]/g, "i")
-    .replace(/ı/g, "i")
-    .replace(/ç/g, "c")
-    .replace(/ğ/g, "g")
-    .replace(/ö/g, "o")
-    .replace(/ş/g, "s")
-    .replace(/ü/g, "u")
-    .trim()
-    .replace(/\s+/g, " ");
-}
-
 function matchesQuery(query: string, item: CaseContextSummary): boolean {
-  if (!query) return true;
-  const normalizedQuery = normalize(query);
-  const tokens = normalizedQuery.split(" ").filter(Boolean);
-  const haystack = normalize(`${item.title} ${item.summary} ${item.primary_domain_code}`);
-  return tokens.every((t) => haystack.includes(t));
+  return matchesSearchQuery(query, [
+    item.title,
+    item.summary,
+    item.primary_domain_code,
+  ]);
 }
 
 interface CasesFilterProps {
