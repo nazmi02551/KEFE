@@ -8,6 +8,27 @@
 **Physical Device & Emulator Test:** Standalone Product Preview Release APK Built & Tested (`56.9MB`), local Android Emulator `emulator-5554` (API 36) verified live.  
 **Master Recovery & Architectural Refactoring:** COMPLETED & VERIFIED:
 - Multi-Agent Parallel Protocol: Verified zero-conflict worktree isolation across Codex (`E:\KEFE-Codex`), Claude (`E:\KEFE`), and Gemini (`E:\KEFE-Gemini`).
+- Trust, Bot & Anomaly Integrity Shield (CAP-073):
+  * Implemented FastAPI router `trust_integrity_router.py` in `services/api/src/kefe_api/modules/decision` with endpoints:
+    - `POST /v1/trust/shield/inspect`: inspects cluster for synthetic astroturfing and quarantines bot swarms via `SyntheticAstroturfingShieldService`.
+    - `POST /v1/trust/agenda/evaluate`: evaluates topic velocity and entropy against agenda thresholding via `DynamicAgendaThresholdingService`.
+    - `GET /v1/trust/clusters`: lists active quarantine/monitored clusters.
+    - `POST /v1/trust/clusters/{cluster_id}/status`: updates cluster quarantine status.
+  * Created `TrustIntegrityApiClient` (`apps/admin/src/lib/trust-integrity-api.ts`) with typed models and fallback execution.
+  * Created `TrustIntegrityWorkspace` (`apps/admin/src/components/trust-integrity-workspace.tsx` & `.module.css`) and Next.js route `/trust-integrity` with 3 operational tabs: Bot Defense Inspection, Agenda Thresholding, and Quarantine Registry.
+  * Created unit test suites `test_trust_integrity_api.py` (7/7 Pytest PASS) and `trust-integrity.test.ts` (4/4 Node test PASS).
+- Analytics, North Star Metric & Depolarization Index (CAP-114, CAP-115, CAP-116, CAP-117):
+  * Implemented FastAPI router `analytics_router` in `services/api/src/kefe_api/modules/analytics/router.py` with endpoints:
+    - `GET /v1/analytics/north-star`: calculates Meaningful Weighs / WAU metrics via `MeaningfulWeighsAggregator` (CAP-114).
+    - `GET /v1/analytics/funnel`: computes 5-stage activation funnel conversion and drop-off rates via `ActivationFunnelCalculator` (CAP-115).
+    - `GET /v1/analytics/quality`: computes decision resilience index and attitude shift rates via `PerspectiveResilienceCalculator` (CAP-116).
+    - `POST /v1/analytics/depolarization/evaluate`: evaluates depolarization score and bridge efficacy state via `DepolarizationCalculator` (CAP-117).
+  * Created `AnalyticsMetricsApiClient` (`apps/admin/src/lib/analytics-metrics-api.ts`) with typed models and HTTP fallback.
+  * Created `AnalyticsMetricsWorkspace` (`apps/admin/src/components/analytics-metrics-workspace.tsx` & `.module.css`) and Next.js route `/analytics` featuring North Star stat cards, Activation Funnel table, and Depolarization index evaluator.
+  * Created unit test suites `test_analytics_metrics_api.py` (6/6 Pytest PASS) and `analytics-metrics.test.ts` (5/5 Node test PASS).
+- Admin Studio 16-Route Production Build:
+  * Next.js 16 (Turbopack) production build passed across all 16 static/dynamic routes (`/`, `/_not-found`, `/analytics`, `/case-builder`, `/case-media`, `/claims`, `/content-review`, `/deliberation`, `/flow-composer`, `/impact`, `/operational-reports`, `/publication-operations`, `/reason-moderation`, `/signal`, `/trust-integrity`).
+  * 89/89 unit tests PASS, 8/8 executable contracts PASS, `tsc --noEmit` 0 errors.
 - Claim & Knowledge Graph API, Workspace & Admin Client (CAP-057, CAP-058, CAP-059):
   * Implemented FastAPI router `kefe_api.modules.knowledge.router` and mounted in `main.py` providing endpoints:
     - `POST /v1/claims` & `GET /v1/claims/{claim_id}` (CAP-057)
