@@ -1,0 +1,215 @@
+/* About / Methodology Page — KEFE Web
+ * Dark-first, design tokens, light theme via data-theme="light"
+ */
+
+.main {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: var(--kefe-spacing-10) var(--kefe-spacing-4) var(--kefe-spacing-16, 5rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-12, 3rem);
+}
+
+/* Hero */
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-4);
+  padding-bottom: var(--kefe-spacing-8);
+  border-bottom: 1px solid var(--kefe-color-border);
+}
+
+.heroTitle {
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--kefe-color-foreground);
+  margin: 0;
+}
+
+.heroTitleKefe {
+  background: linear-gradient(
+    135deg,
+    var(--kefe-color-gold) 0%,
+    color-mix(in srgb, var(--kefe-color-gold) 70%, var(--kefe-color-rules-cyan, #4abfcf)) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.heroParagraph {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: var(--kefe-color-muted);
+  margin: 0;
+  max-width: 65ch;
+}
+
+.heroParagraph strong {
+  color: var(--kefe-color-foreground);
+  font-weight: 600;
+}
+
+/* Section titles */
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--kefe-color-foreground);
+  margin: 0 0 var(--kefe-spacing-5);
+}
+
+/* Principles */
+.principles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-3);
+}
+
+.principle {
+  padding: var(--kefe-spacing-4) var(--kefe-spacing-5);
+  background: var(--kefe-color-surface);
+  border: 1px solid var(--kefe-color-border);
+  border-left-width: 3px;
+  border-radius: var(--kefe-radius-md);
+}
+
+.principle[data-color="gold"] {
+  border-left-color: var(--kefe-color-gold);
+}
+
+.principle[data-color="cyan"] {
+  border-left-color: var(--kefe-color-rules-cyan, #4abfcf);
+}
+
+.principleLabel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kefe-color-muted);
+  display: block;
+  margin-bottom: var(--kefe-spacing-1);
+}
+
+.principleTitle {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--kefe-color-foreground);
+  margin: 0 0 var(--kefe-spacing-2);
+}
+
+.principle[data-color="gold"] .principleTitle {
+  color: var(--kefe-color-gold);
+}
+
+.principle[data-color="cyan"] .principleTitle {
+  color: var(--kefe-color-rules-cyan, #4abfcf);
+}
+
+.principleDesc {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--kefe-color-muted);
+  margin: 0;
+}
+
+/* Methodology chain */
+.chain {
+  background: var(--kefe-color-surface);
+  border: 1px solid var(--kefe-color-border);
+  border-radius: var(--kefe-radius-lg);
+  padding: var(--kefe-spacing-6);
+}
+
+.chainList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--kefe-spacing-4);
+  counter-reset: chain;
+}
+
+.chainStep {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--kefe-spacing-4);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--kefe-color-foreground);
+}
+
+.chainNumber {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--kefe-color-gold);
+  min-width: 28px;
+  padding-top: 2px;
+}
+
+.chainStep strong {
+  color: var(--kefe-color-foreground);
+  font-weight: 700;
+}
+
+/* CTA */
+.cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--kefe-spacing-4);
+  padding-top: var(--kefe-spacing-4);
+  border-top: 1px solid var(--kefe-color-border);
+}
+
+.ctaText {
+  font-size: 0.9375rem;
+  color: var(--kefe-color-muted);
+  margin: 0;
+}
+
+.ctaNav {
+  display: flex;
+  gap: var(--kefe-spacing-3);
+  flex-wrap: wrap;
+}
+
+.ctaPrimary {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--kefe-spacing-2) var(--kefe-spacing-4);
+  background: var(--kefe-color-gold);
+  color: #0a0a0d;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: var(--kefe-radius-md);
+  text-decoration: none;
+  transition: opacity var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.ctaPrimary:hover {
+  opacity: 0.85;
+}
+
+.ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--kefe-spacing-2) var(--kefe-spacing-4);
+  background: transparent;
+  color: var(--kefe-color-gold);
+  font-size: 0.875rem;
+  font-weight: 700;
+  border: 1px solid var(--kefe-color-gold);
+  border-radius: var(--kefe-radius-md);
+  text-decoration: none;
+  transition: background var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.ctaSecondary:hover {
+  background: color-mix(in srgb, var(--kefe-color-gold) 10%, transparent);
+}

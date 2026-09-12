@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: "/signal", label: "Sinyaller" },
   { href: "/cases", label: "Meseleler" },
   { href: "/impact", label: "Etki" },
+  { href: "/about", label: "Metodoloji" },
 ];
 
 export function SiteHeader() {
