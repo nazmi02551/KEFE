@@ -29,9 +29,16 @@
     - Integration with `ContextDriftService` (`KEFE-CONTEXT-DRIFT-ALERTING-001`), velocity metrics, demographic shift vectors, and notice publishing.
     - `RadarLiveApiClient` (`apps/admin/src/lib/radar-live-api.ts`), `RadarLiveWorkspace` (`apps/admin/src/components/radar-live-workspace.tsx` & `.module.css`), Next.js route `/radar-live`.
     - Unit tests: `test_radar_live_api.py` (2/2 Pytest PASS), `radar-live.test.ts` (2/2 Node test PASS).
-  * **Admin Studio 19-Route Production Build:**
-    - Next.js 16 (Turbopack) production build passed across all 19 routes (`/`, `/_not-found`, `/ai-editorial`, `/analytics`, `/case-builder`, `/case-media`, `/claims`, `/content-review`, `/deliberation`, `/finops`, `/flow-composer`, `/impact`, `/operational-reports`, `/publication-operations`, `/radar-live`, `/reason-moderation`, `/signal`, `/trust-integrity`).
-    - Admin Studio unit tests: 101/101 PASS (`tsc --noEmit` 0 errors).
+  * **Admin Studio 25-Route Production Build:**
+    - Next.js 16 (Turbopack) production build passed across all 25 routes (`/`, `/_not-found`, `/ai-editorial`, `/analytics`, `/case-builder`, `/case-media`, `/claims`, `/content-review`, `/deliberation`, `/evidence-builder`, `/finops`, `/flow-composer`, `/impact`, `/kefe-today`, `/moderator-audit`, `/open-methodology`, `/operational-reports`, `/publication-operations`, `/radar-live`, `/reason-moderation`, `/signal`, `/source-diversity`, `/trust-integrity`, `/user-discovery`).
+    - Admin Studio unit tests: 119/119 PASS (`tsc --noEmit` 0 errors).
+- Extended 6-Capability Implementation Suite (CAP-071, CAP-074, CAP-098, CAP-067, CAP-077, CAP-026):
+  * **CAP-071 (Source Diversity Indicator):** `source_diversity_router.py` (`/v1/cases/{case_version_id}/source-diversity`), `SourceDiversityApiClient`, `SourceDiversityWorkspace` (`/source-diversity`), `test_source_diversity_api.py` (4/4 PASS), `source-diversity.test.ts` (3/3 PASS).
+  * **CAP-074 (Open Methodology Disclosure):** `open_methodology_router.py` (`/v1/methodology/{target_type}/{target_id}` & `/manifest/summary`), `OpenMethodologyApiClient`, `OpenMethodologyWorkspace` (`/open-methodology`), `test_open_methodology_api.py` (4/4 PASS), `open-methodology.test.ts` (3/3 PASS).
+  * **CAP-098 (Evidence Builder):** `evidence_builder_router.py` (`/v1/evidence`), `EvidenceBuilderApiClient`, `EvidenceBuilderWorkspace` (`/evidence-builder`), `test_evidence_builder_api.py` (3/3 PASS), `evidence-builder.test.ts` (3/3 PASS).
+  * **CAP-067 (Moderator Action Audit Log):** `moderator_audit_router.py` (`/v1/moderation/audit`), `ModeratorAuditApiClient`, `ModeratorAuditWorkspace` (`/moderator-audit`), `test_moderator_audit_api.py` (2/2 PASS), `moderator-audit.test.ts` (3/3 PASS).
+  * **CAP-077 (User-Controlled Discovery Profile):** `UserDiscoveryApiClient`, `UserDiscoveryWorkspace` (`/user-discovery`), `user-discovery.test.ts` (3/3 PASS), backed by `user_discovery_profile.py` and `test_user_controlled_discovery_api.py`.
+  * **CAP-026 (KEFE Today Real Event Projection):** `kefe_today_router.py` (`/v1/today/case` & `/curate`), `KefeTodayApiClient`, `KefeTodayWorkspace` (`/kefe-today`), `test_kefe_today_api.py` (2/2 PASS), `kefe-today.test.ts` (3/3 PASS).
 - Trust, Bot & Anomaly Integrity Shield (CAP-073):
   * Implemented FastAPI router `trust_integrity_router.py` in `services/api/src/kefe_api/modules/decision` with endpoints:
     - `POST /v1/trust/shield/inspect`: inspects cluster for synthetic astroturfing and quarantines bot swarms via `SyntheticAstroturfingShieldService`.
