@@ -505,17 +505,21 @@ The following items remain incomplete after Session 2:
     - test(api): privacy export + deletion HTTP tests — 13 tests (CAP-004)
     - docs: AI_AGENT_HANDOFF.md multi-agent parallel session record
     - 78 branch commits total (16 new this session)
-23. **Current verified state (2026-09-12 evening):**
-    - API: **1123 passed**, 123 skipped, 0 failed (was 968 at session start)
+23. **Current verified state (2026-09-12 evening — final):**
+    - API: **1146 passed**, 123 skipped, 0 failed (was 968 at session start, +178 tests)
     - Mobile Flutter: 812 tests passing
     - TypeScript (web + admin): tsc --noEmit clean
     - Portfolio: PASS 128 capabilities, 0 errors
-    - Web app: 6 pages (/, /cases, /cases/[id], /signal, /signal/[id], /impact) + sitemap/robots/manifest/OG
-    - 92 branch commits (30 new this session)
-    - New API test files (this session): test_discovery_router_extended, test_case_objection_correction_extended,
-      test_weigh_session_http, test_perspectives_reflection_http, test_privacy_http,
-      test_account_otp_flow_http, test_public_context_community_reason_http, test_identity_session_http,
-      test_share_http, test_segment_distribution_me_http
+    - Web app: **10 pages**: /, /cases, /cases/[id], /signal, /signal/[id], /impact, /about, /faq, /privacy, /share/[token]
+    - Web: sitemap (10 static + dynamic cases), robots.txt, PWA manifest, OG on all pages
+    - ~110 branch commits (45+ new this session)
+    - New API test files (this session):
+      test_discovery_router_extended (20), test_case_objection_correction_extended (14),
+      test_weigh_session_http (17), test_perspectives_reflection_http (15),
+      test_privacy_http (13), test_account_otp_flow_http (16),
+      test_public_context_community_reason_http (15), test_identity_session_http (17),
+      test_share_http (14), test_segment_distribution_me_http (14),
+      test_health_and_infra_http (9), test_impact_actions_extended_http (14)
 24. **Multi-agent parallel session (2026-09-12):**
     - Claude (E:\KEFE): API test coverage 968→1047, web /impact + home + context + nav
     - Gemini (E:\KEFE-Gemini): admin API clients, analytics, mobile viewport, 754/754 flutter tests
