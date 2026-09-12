@@ -253,6 +253,17 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
             Bu meseleye katılmak için mobil uygulamamızı kullanın.
             Commit First, Blind First — sesiniz metodolojik olarak nitelendirilir.
           </p>
+          <nav className={styles.footerNav} aria-label="İlgili sayfalar">
+            <Link href="/signal" className={styles.footerLink}>
+              Sinyal Kartları
+            </Link>
+            <Link href="/impact" className={styles.footerLink}>
+              Etki Takibi
+            </Link>
+            <Link href="/cases" className={styles.footerLink}>
+              ← Meseleler
+            </Link>
+          </nav>
         </footer>
       </article>
     </main>

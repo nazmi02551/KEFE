@@ -312,6 +312,26 @@
   white-space: nowrap;
 }
 
+/* Footer navigation */
+.footerNav {
+  display: flex;
+  gap: var(--kefe-spacing-4);
+  margin-top: var(--kefe-spacing-3);
+  flex-wrap: wrap;
+}
+
+.footerLink {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--kefe-color-gold);
+  text-decoration: none;
+  transition: opacity var(--kefe-motion-duration-fast) var(--kefe-motion-easing-standard);
+}
+
+.footerLink:hover {
+  opacity: 0.75;
+}
+
 /* Context blocks (CAP-069, CAP-070, ADR-0142) */
 .context {
   margin-top: var(--kefe-spacing-8);

@@ -182,6 +182,14 @@ export default async function SignalDetailPage({ params }: SignalDetailPageProps
               Denetim: <code>{qualification.qualification_audit_hash.slice(0, 16)}…</code>
             </p>
           )}
+          <nav className={styles.footerNav} aria-label="İlgili sayfalar">
+            <Link href="/impact" className={styles.footerLink}>
+              Etki Takibi →
+            </Link>
+            <Link href="/signal" className={styles.footerLink}>
+              ← Tüm Sinyaller
+            </Link>
+          </nav>
         </footer>
       </article>
     </main>
