@@ -22,6 +22,8 @@ class ProjectHealthTests(unittest.TestCase):
         self.assertIn("API lint", names)
         self.assertIn("Web tests", names)
         self.assertIn("Mobile analyze", names)
+        self.assertIn("Admin production dependency audit", names)
+        self.assertIn("Web production dependency audit", names)
         self.assertNotIn("API full in-memory tests", names)
         self.assertNotIn("Web full verify", names)
         self.assertNotIn("Mobile full tests", names)
@@ -33,6 +35,8 @@ class ProjectHealthTests(unittest.TestCase):
         self.assertIn("Admin full verify", names)
         self.assertIn("Web full verify", names)
         self.assertIn("Mobile full tests", names)
+        self.assertIn("Admin production dependency audit", names)
+        self.assertIn("Web production dependency audit", names)
         self.assertNotIn("API PostgreSQL tests", names)
 
     def test_postgres_is_explicit_opt_in(self) -> None:

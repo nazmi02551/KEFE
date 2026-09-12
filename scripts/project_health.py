@@ -154,9 +154,19 @@ def quick_checks() -> list[Check]:
         Check("Admin lint", ("npm", "run", "lint"), admin),
         Check("Admin typecheck", ("npm", "run", "typecheck"), admin),
         Check("Admin tests", ("npm", "test"), admin),
+        Check(
+            "Admin production dependency audit",
+            ("npm", "audit", "--omit=dev", "--audit-level=high"),
+            admin,
+        ),
         Check("Web lint", ("npm", "run", "lint"), web),
         Check("Web typecheck", ("npm", "run", "typecheck"), web),
         Check("Web tests", ("npm", "test"), web),
+        Check(
+            "Web production dependency audit",
+            ("npm", "audit", "--omit=dev", "--audit-level=high"),
+            web,
+        ),
         *package_checks(),
         Check("Mobile analyze", ("flutter", "analyze"), mobile),
     ]
@@ -172,7 +182,17 @@ def full_checks(*, include_postgres: bool) -> list[Check]:
         Check("API lint", (sys.executable, "-m", "ruff", "check", "."), api),
         Check("API full in-memory tests", (sys.executable, "-m", "pytest", "-q"), api),
         Check("Admin full verify", ("npm", "run", "verify"), admin),
+        Check(
+            "Admin production dependency audit",
+            ("npm", "audit", "--omit=dev", "--audit-level=high"),
+            admin,
+        ),
         Check("Web full verify", ("npm", "run", "verify"), web),
+        Check(
+            "Web production dependency audit",
+            ("npm", "audit", "--omit=dev", "--audit-level=high"),
+            web,
+        ),
         *package_checks(),
         Check("Mobile analyze", ("flutter", "analyze"), mobile),
         Check("Mobile full tests", ("flutter", "test", "--concurrency=1"), mobile),
