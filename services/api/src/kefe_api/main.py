@@ -142,6 +142,7 @@ from kefe_api.modules.identity.otp_provider_receipts_router import (
 from kefe_api.modules.identity.router import router as identity_router
 from kefe_api.modules.identity.service import IdentityService
 from kefe_api.modules.impact.router import impact_router
+from kefe_api.modules.knowledge.router import knowledge_router
 from kefe_api.modules.privacy.router import router as privacy_router
 from kefe_api.modules.privacy.service import PrivacyService
 from kefe_api.modules.progress.router import router as progress_router
@@ -418,6 +419,7 @@ def create_app() -> FastAPI:
     app.include_router(signal_router)
     app.include_router(signal_pipeline_router)
     app.include_router(impact_router)
+    app.include_router(knowledge_router)
     app.include_router(discovery_router)
     app.include_router(decision_lineage_router)
     app.include_router(reflection_router)
