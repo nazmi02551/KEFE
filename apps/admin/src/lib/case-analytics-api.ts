@@ -1,0 +1,268 @@
+/**
+ * Admin Studio — Case Deliberation Analytics API Client
+ *
+ * Implements typed API clients for deliberation analytics endpoints mounted in
+ * case_analytics_router.py:
+ * - Quality Checklist (CAP-075)
+ * - Consensus / Divergence Classification (CAP-039)
+ * - Expert-Public Epistemic Gap Analysis (CAP-041)
+ * - Incentive Map Analysis (CAP-022)
+ * - Normative Philosophical Models (CAP-019)
+ * - Perspective Clusters (CAP-033)
+ * - Policy Simulations & Parameter Tuning (CAP-017)
+ * - Process Analysis (CAP-021)
+ * - Responsibility & Accountability Matrix (CAP-020)
+ * - Privacy-Safe Segment Distributions (CAP-036)
+ * - Stakeholder Distributions (CAP-037)
+ *
+ * Invariants:
+ * - Read-only analytical introspection; no user profile mutations or scoring.
+ * - Minimum k-anonymity (n >= 30) for demographic distributions.
+ * - Strict base URL validation preventing credential leakage.
+ */
+
+import { AdminApiError } from "@/src/lib/admin-api";
+
+export interface QualityChecklistCriterion {
+  code: string;
+  name: string;
+  is_met: boolean;
+  score: number;
+  threshold: number;
+  details: string;
+}
+
+export interface QualityChecklistReport {
+  case_version_id: string;
+  overall_status: "PASSED" | "PROVISIONAL" | "FAILED";
+  overall_score: number;
+  criteria: QualityChecklistCriterion[];
+  evaluated_at: string;
+}
+
+export interface ConsensusDivergenceReport {
+  case_version_id: string;
+  classification: "BROAD_CONSENSUS" | "BIPOLAR_DIVERGENCE" | "FRAGMENTED_PLURALITY" | "LEANING_MAJORITY";
+  leading_share: number;
+  margin_of_divergence: number;
+  label_tr: string;
+  label_en: string;
+  description_tr: string;
+  description_en: string;
+}
+
+export interface ExpertPublicGapReport {
+  case_version_id: string;
+  gap_classification: "CONVERGENT" | "TECHNICAL_TRANSLATION_GAP" | "NORMATIVE_VALUE_DIVERGENCE" | "TRUST_DEFICIT_SKEPTICISM";
+  gap_score: number;
+  expert_consensus_share: number;
+  public_consensus_share: number;
+  friction_points: string[];
+  divergence_drivers: string[];
+}
+
+export interface IncentiveMapItem {
+  actor_group: string;
+  perverse_incentive_risk: string;
+  rent_seeking_score: number;
+  mitigation_lever: string;
+}
+
+export interface IncentiveMapReport {
+  case_version_id: string;
+  incentives: IncentiveMapItem[];
+}
+
+export interface NormativeEvaluation {
+  option_code: string;
+  dominant_philosophy: "UTILITARIAN_MAX_WELFARE" | "DEONTOLOGICAL_CATEGORICAL_RIGHTS" | "RAWLSIAN_MAXIMIN_EQUITY" | "VIRTUE_ETHICS_CHARACTER";
+  utilitarian_score: number;
+  deontological_score: number;
+  rawlsian_score: number;
+  virtue_score: number;
+}
+
+export interface NormativeModelsReport {
+  case_version_id: string;
+  evaluations: NormativeEvaluation[];
+  philosophies_explained_tr: Record<string, string>;
+  philosophies_explained_en: Record<string, string>;
+}
+
+export interface PerspectiveClusterItem {
+  cluster_id: string;
+  case_version_id: string;
+  archetype: "NEAR_CONSENSUS" | "OPPOSING_PRINCIPLE" | "BRIDGE_SYNTHESIS";
+  core_thesis: string;
+  argument_count: number;
+  support_percentage: number;
+}
+
+export interface PerspectiveClustersReport {
+  case_version_id: string;
+  total_arguments_clustered: number;
+  clusters: PerspectiveClusterItem[];
+}
+
+export interface PolicySimulationResult {
+  simulation_id: string;
+  case_version_id: string;
+  policy_knob_name: string;
+  knob_value: number;
+  fiscal_score: number;
+  social_score: number;
+  environmental_score: number;
+  equilibrium_state: string;
+}
+
+export interface ProcessAnalysisReport {
+  case_version_id: string;
+  procedural_fairness_score: number;
+  stakeholder_inclusion_score: number;
+  institutional_transparency_score: number;
+  deliberation_verdict: string;
+}
+
+export interface ResponsibilityAnalysisReport {
+  case_version_id: string;
+  duty_bearers: Array<{
+    institution: string;
+    accountability_tier: string;
+    statutory_mandate: string;
+  }>;
+}
+
+export interface SegmentDistributionCohort {
+  cohort_name: string;
+  sample_count: number;
+  choice_distribution: Record<string, number>;
+  is_suppressed: boolean;
+}
+
+export interface SegmentDistributionReport {
+  case_version_id: string;
+  k_anonymity_floor: number;
+  cohorts: SegmentDistributionCohort[];
+}
+
+export interface StakeholderDistributionGroup {
+  role: "DIRECTLY_IMPACTED" | "FRONTLINE_PRACTITIONERS" | "COMMERCIAL_ENTERPRISES" | "REGULATORY_OVERSIGHT" | "CIVIC_COMMUNITY";
+  representation_percentage: number;
+  cohesion_score: number;
+  dominant_preference: string;
+}
+
+export interface StakeholderDistributionReport {
+  case_version_id: string;
+  stakeholder_groups: StakeholderDistributionGroup[];
+}
+
+export class CaseAnalyticsApiClient {
+  private readonly baseUrl: string;
+
+  public constructor(baseUrl: string = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000") {
+    const trimmed = baseUrl.trim().replace(/\/+$/, "");
+    if (!trimmed.startsWith("http://localhost") && !trimmed.startsWith("http://127.0.0.1") && !trimmed.startsWith("https://")) {
+      throw new AdminApiError("INVALID_BASE_URL", "Insecure or invalid API base URL", 400);
+    }
+    this.baseUrl = trimmed;
+  }
+
+  private async getJson<T>(path: string): Promise<T> {
+    const url = `${this.baseUrl}${path}`;
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new AdminApiError("GET_FAILED", `GET ${path} failed (${res.status}): ${text}`, res.status);
+    }
+
+    return (await res.json()) as T;
+  }
+
+  private async postJson<T>(path: string, body: unknown): Promise<T> {
+    const url = `${this.baseUrl}${path}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new AdminApiError("POST_FAILED", `POST ${path} failed (${res.status}): ${text}`, res.status);
+    }
+
+    return (await res.json()) as T;
+  }
+
+  public async getQualityChecklist(caseVersionId: string): Promise<QualityChecklistReport> {
+    return this.getJson<QualityChecklistReport>(`/v1/cases/${caseVersionId}/quality-checklist`);
+  }
+
+  public async getConsensusDivergence(caseVersionId: string, distributionJson?: string): Promise<ConsensusDivergenceReport> {
+    const query = distributionJson ? `?distribution_json=${encodeURIComponent(distributionJson)}` : "";
+    return this.getJson<ConsensusDivergenceReport>(`/v1/cases/${caseVersionId}/consensus-divergence${query}`);
+  }
+
+  public async getExpertPublicGap(caseVersionId: string): Promise<ExpertPublicGapReport> {
+    return this.getJson<ExpertPublicGapReport>(`/v1/cases/${caseVersionId}/expert-public-gap`);
+  }
+
+  public async getIncentiveMap(caseVersionId: string): Promise<IncentiveMapReport> {
+    return this.getJson<IncentiveMapReport>(`/v1/cases/${caseVersionId}/incentive-map`);
+  }
+
+  public async getNormativeModels(caseVersionId: string): Promise<NormativeModelsReport> {
+    return this.getJson<NormativeModelsReport>(`/v1/cases/${caseVersionId}/normative-models`);
+  }
+
+  public async getPerspectiveClusters(caseVersionId: string): Promise<PerspectiveClustersReport> {
+    return this.getJson<PerspectiveClustersReport>(`/v1/cases/${caseVersionId}/perspective-clusters`);
+  }
+
+  public async getDefaultPolicySimulation(caseVersionId: string): Promise<PolicySimulationResult> {
+    return this.getJson<PolicySimulationResult>(`/v1/cases/${caseVersionId}/policy-simulations`);
+  }
+
+  public async evaluatePolicySimulation(
+    caseVersionId: string,
+    policyKnobName: string,
+    knobValue: number
+  ): Promise<PolicySimulationResult> {
+    if (knobValue < 0 || knobValue > 100) {
+      throw new AdminApiError("INVALID_KNOB_VALUE", "knobValue must be between 0.0 and 100.0", 400);
+    }
+    if (policyKnobName.trim().length < 3) {
+      throw new AdminApiError("INVALID_KNOB_NAME", "policyKnobName must have at least 3 characters", 400);
+    }
+    return this.postJson<PolicySimulationResult>(`/v1/cases/${caseVersionId}/policy-simulations/evaluate`, {
+      policy_knob_name: policyKnobName.trim(),
+      knob_value: knobValue,
+    });
+  }
+
+  public async getProcessAnalysis(caseVersionId: string): Promise<ProcessAnalysisReport> {
+    return this.getJson<ProcessAnalysisReport>(`/v1/cases/${caseVersionId}/process-analysis`);
+  }
+
+  public async getResponsibilityAnalysis(caseVersionId: string): Promise<ResponsibilityAnalysisReport> {
+    return this.getJson<ResponsibilityAnalysisReport>(`/v1/cases/${caseVersionId}/responsibility-analysis`);
+  }
+
+  public async getSegmentDistributions(caseVersionId: string): Promise<SegmentDistributionReport> {
+    return this.getJson<SegmentDistributionReport>(`/v1/cases/${caseVersionId}/segment-distributions`);
+  }
+
+  public async getStakeholderDistributions(caseVersionId: string): Promise<StakeholderDistributionReport> {
+    return this.getJson<StakeholderDistributionReport>(`/v1/cases/${caseVersionId}/stakeholder-distributions`);
+  }
+}
