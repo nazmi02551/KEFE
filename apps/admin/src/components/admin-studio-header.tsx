@@ -18,6 +18,7 @@ const navItems = [
   { href: "/case-media", label: "Medya" },
   { href: "/signal", label: "Sinyal" },
   { href: "/impact", label: "Etki" },
+  { href: "/deliberation", label: "Deliberation" },
 ] as const;
 
 function subscribeTheme(callback: () => void) {

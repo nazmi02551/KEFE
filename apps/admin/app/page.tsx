@@ -87,6 +87,14 @@ export default function AdminStudioPage() {
             </p>
             <span className={styles.moduleAction}>Modülü Aç →</span>
           </Link>
+          <Link href="/deliberation" className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-075 / 068 / 072 · Audit</span>
+            <h3 className={styles.moduleTitle}>Deliberation & Kalite Denetimi</h3>
+            <p className={styles.moduleDesc}>
+              8 boyutlu kalite kontrolü, halk itirazları yönetimi ve şeffaf vaka düzeltme geçmişi.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
         </div>
       </section>
     </>
