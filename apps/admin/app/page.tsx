@@ -71,6 +71,22 @@ export default function AdminStudioPage() {
             </p>
             <span className={styles.moduleAction}>Modülü Aç →</span>
           </Link>
+          <Link href="/signal" className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-042..048 · Signal</span>
+            <h3 className={styles.moduleTitle}>Sinyal Operasyonları</h3>
+            <p className={styles.moduleDesc}>
+              Kolektif uzlaşı, metodoloji sertifikasyonu, katkı sınıfları ve sinyal hedef sicili.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href="/impact" className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-049..054 · Impact</span>
+            <h3 className={styles.moduleTitle}>Etki & Kurumsal Yanıt</h3>
+            <p className={styles.moduleDesc}>
+              Doğrulanmış kurum yanıtları, eylem adımları ve kilometre taşı takibi.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
         </div>
       </section>
     </>
