@@ -500,4 +500,167 @@ test("Deliberation Workspace: loads systemic governance and impact capabilities 
   }
 });
 
+test("Deliberation Workspace: loads simulation, budget tradeoff, retrospective, observe mode and community proposals (CAP-017, CAP-027, CAP-028, CAP-029, CAP-030)", async () => {
+  const caseId = "22222222-2222-4222-8222-222222222222";
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = input.toString();
+    const method = init?.method ?? "GET";
+
+    if (url.includes("/policy-simulations/evaluate")) {
+      return new Response(JSON.stringify({
+        simulation_id: "SIM-01",
+        case_version_id: caseId,
+        policy_knob_name: "Yeşil Dönüşüm",
+        knob_value: 80.0,
+        fiscal_score: 0.75,
+        social_score: 0.90,
+        environmental_score: 0.95,
+        equilibrium_state: "OPTIMAL_BALANCE"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/policy-simulations")) {
+      return new Response(JSON.stringify({
+        simulation_id: "SIM-00",
+        case_version_id: caseId,
+        policy_knob_name: "Varsayılan Fon",
+        knob_value: 50.0,
+        fiscal_score: 0.60,
+        social_score: 0.70,
+        environmental_score: 0.65,
+        equilibrium_state: "OPTIMAL_BALANCE"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/budget-tradeoff/evaluate")) {
+      return new Response(JSON.stringify({
+        tradeoff_id: "TRD-EVAL",
+        case_version_id: caseId,
+        healthcare_pct: 35,
+        education_pct: 25,
+        infrastructure_pct: 20,
+        green_transition_pct: 20,
+        unallocated_pct: 0,
+        tradeoff_profile: "HEALTH_EDUCATION_PRIORITY"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/budget-tradeoff")) {
+      return new Response(JSON.stringify({
+        tradeoff_id: "TRD-01",
+        case_version_id: caseId,
+        healthcare_pct: 30,
+        education_pct: 25,
+        infrastructure_pct: 25,
+        green_transition_pct: 20,
+        unallocated_pct: 0,
+        tradeoff_profile: "BALANCED_ALLOCATION"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/historical-retrospective")) {
+      return new Response(JSON.stringify({
+        retrospective_id: "RETRO-01",
+        case_version_id: caseId,
+        historical_era: "INDUSTRIAL_ERA",
+        historical_year: 1888,
+        historical_event_name: "Demiryolu Kamulaştırması",
+        actual_historical_decision: "Kamu mülkiyeti ve tarifeli denetim seçildi.",
+        historical_consequence_summary: "Lojistik maliyetleri düşürüldü ve kamu tekeli sağlandı."
+      }), { status: 200 });
+    }
+
+    if (url.includes("/observe-session")) {
+      return new Response(JSON.stringify({
+        session_id: "OBS-01",
+        case_version_id: caseId,
+        exploration_mode: "OBSERVE_ONLY",
+        is_binding_vote: false,
+        viewed_argument_count: 5,
+        viewed_evidence_count: 3
+      }), { status: 200 });
+    }
+
+    if (url.includes("/community-proposals") && method === "POST") {
+      return new Response(JSON.stringify({
+        proposal_id: "PROP-03",
+        proposed_title: "Tarihi Meydan Düzenlemesi",
+        proposed_context: "Tarihi meydanda yayalaştırma ve esnaf yük indirme saatlerinin düzenlenmesi.",
+        curation_state: "DRAFT_SUBMITTED",
+        neutrality_score: 0.85,
+        supporter_count: 1
+      }), { status: 201 });
+    }
+
+    if (url.includes("/community-proposals")) {
+      return new Response(JSON.stringify([
+        {
+          proposal_id: "PROP-01",
+          proposed_title: "Köy Okulları Güneş Enerjisi",
+          proposed_context: "Kırsal kalkınma için okullara mikro solar kurulumu.",
+          curation_state: "COMMUNITY_PEER_REVIEW",
+          neutrality_score: 0.90,
+          supporter_count: 142
+        }
+      ]), { status: 200 });
+    }
+
+    return new Response(JSON.stringify({}), { status: 200 });
+  };
+
+  try {
+    const client = new CaseAnalyticsApiClient("http://localhost:8000");
+
+    // 1. Policy Simulator (CAP-017)
+    const policyDefault = await client.getDefaultPolicySimulation(caseId);
+    assert.equal(policyDefault.policy_knob_name, "Varsayılan Fon");
+    assert.equal(policyDefault.equilibrium_state, "OPTIMAL_BALANCE");
+
+    const policyEval = await client.evaluatePolicySimulation(caseId, "Yeşil Dönüşüm", 80.0);
+    assert.equal(policyEval.knob_value, 80.0);
+    assert.equal(policyEval.environmental_score, 0.95);
+
+    // 2. Budget Tradeoff (CAP-027)
+    const budgetDefault = await client.getBudgetTradeoff(caseId);
+    assert.equal(budgetDefault.tradeoff_profile, "BALANCED_ALLOCATION");
+
+    const budgetEval = await client.evaluateBudgetTradeoff(caseId, {
+      healthcare_pct: 35,
+      education_pct: 25,
+      infrastructure_pct: 20,
+      green_transition_pct: 20
+    });
+    assert.equal(budgetEval.tradeoff_profile, "HEALTH_EDUCATION_PRIORITY");
+
+    // 3. Historical Retrospective (CAP-028)
+    const retro = await client.getHistoricalRetrospective(caseId);
+    assert.equal(retro.historical_era, "INDUSTRIAL_ERA");
+    assert.equal(retro.historical_year, 1888);
+    assert.ok(retro.actual_historical_decision.includes("Kamu mülkiyeti"));
+
+    // 4. Observe Mode (CAP-029)
+    const obs = await client.createObserveSession(caseId, "OBSERVE_ONLY");
+    assert.equal(obs.exploration_mode, "OBSERVE_ONLY");
+    assert.equal(obs.is_binding_vote, false);
+    assert.equal(obs.viewed_argument_count, 5);
+
+    // 5. Community Dilemma Proposals (CAP-030)
+    const props = await client.listCommunityProposals(caseId);
+    assert.equal(props.length, 1);
+    assert.equal(props[0].curation_state, "COMMUNITY_PEER_REVIEW");
+
+    const created = await client.createCommunityProposal(
+      caseId,
+      "Tarihi Meydan Düzenlemesi",
+      "Tarihi meydanda yayalaştırma ve esnaf yük indirme saatlerinin düzenlenmesi."
+    );
+    assert.equal(created.proposal_id, "PROP-03");
+    assert.equal(created.curation_state, "DRAFT_SUBMITTED");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 

@@ -25,6 +25,11 @@ import {
   type StakeholderImpactReport,
   type TemporalDriftReport,
   type DecisionFatigueReport,
+  type PolicySimulationResult,
+  type BudgetTradeoffReport,
+  type HistoricalRetrospectiveReport,
+  type ObserveModeSessionReport,
+  type CommunityProposalItem,
 } from "@/src/lib/case-analytics-api";
 import {
   CaseObjectionApiClient,
@@ -53,7 +58,7 @@ export function DeliberationWorkspace({
   const [caseVersionId, setCaseVersionId] = useState(initialCaseVersionId);
   const [baseUrl, setBaseUrl] = useState(initialBaseUrl);
   const [csrfToken, setCsrfToken] = useState(initialCsrfToken);
-  const [activeTab, setActiveTab] = useState<"checklist" | "objections" | "corrections" | "analytics" | "advanced" | "governance">("checklist");
+  const [activeTab, setActiveTab] = useState<"checklist" | "objections" | "corrections" | "analytics" | "advanced" | "governance" | "simulation">("checklist");
 
   // Data states
   const [checklist, setChecklist] = useState<QualityChecklistReport | null>(null);
@@ -79,6 +84,21 @@ export function DeliberationWorkspace({
   const [stakeholderImpact, setStakeholderImpact] = useState<StakeholderImpactReport | null>(null);
   const [temporalDrift, setTemporalDrift] = useState<TemporalDriftReport | null>(null);
   const [fatigueGuard, setFatigueGuard] = useState<DecisionFatigueReport | null>(null);
+
+  // Simulation & Retrospectives state (CAP-017, CAP-027, CAP-028, CAP-029, CAP-030)
+  const [policySimulation, setPolicySimulation] = useState<PolicySimulationResult | null>(null);
+  const [policyKnobValue, setPolicyKnobValue] = useState<number>(50.0);
+  const [policyKnobName, setPolicyKnobName] = useState<string>("Yeşil Dönüşüm Fonu");
+  const [budgetTradeoff, setBudgetTradeoff] = useState<BudgetTradeoffReport | null>(null);
+  const [budgetHealthcare, setBudgetHealthcare] = useState<number>(30);
+  const [budgetEducation, setBudgetEducation] = useState<number>(25);
+  const [budgetInfrastructure, setBudgetInfrastructure] = useState<number>(25);
+  const [budgetGreen, setBudgetGreen] = useState<number>(20);
+  const [historicalRetrospective, setHistoricalRetrospective] = useState<HistoricalRetrospectiveReport | null>(null);
+  const [observeSession, setObserveSession] = useState<ObserveModeSessionReport | null>(null);
+  const [communityProposals, setCommunityProposals] = useState<CommunityProposalItem[]>([]);
+  const [newProposalTitle, setNewProposalTitle] = useState<string>("");
+  const [newProposalContext, setNewProposalContext] = useState<string>("");
 
   // Status & loading states
   const [loading, setLoading] = useState(false);
@@ -135,6 +155,11 @@ export function DeliberationWorkspace({
         stakeholderImpactRes,
         temporalDriftRes,
         fatigueGuardRes,
+        policySimulationRes,
+        budgetTradeoffRes,
+        historicalRetrospectiveRes,
+        observeSessionRes,
+        communityProposalsRes,
       ] = await Promise.all([
         analyticsClient.getQualityChecklist(caseVersionId),
         objectionClient.listObjections(caseVersionId),
@@ -159,6 +184,11 @@ export function DeliberationWorkspace({
         analyticsClient.getStakeholderImpact(caseVersionId),
         analyticsClient.getTemporalDrift(caseVersionId),
         analyticsClient.getFatigueGuardStatus(),
+        analyticsClient.getDefaultPolicySimulation(caseVersionId),
+        analyticsClient.getBudgetTradeoff(caseVersionId),
+        analyticsClient.getHistoricalRetrospective(caseVersionId),
+        analyticsClient.createObserveSession(caseVersionId),
+        analyticsClient.listCommunityProposals(caseVersionId),
       ]);
 
       setChecklist(checklistRes);
@@ -184,6 +214,17 @@ export function DeliberationWorkspace({
       setStakeholderImpact(stakeholderImpactRes);
       setTemporalDrift(temporalDriftRes);
       setFatigueGuard(fatigueGuardRes);
+      setPolicySimulation(policySimulationRes);
+      setPolicyKnobValue(policySimulationRes.knob_value);
+      setPolicyKnobName(policySimulationRes.policy_knob_name);
+      setBudgetTradeoff(budgetTradeoffRes);
+      setBudgetHealthcare(budgetTradeoffRes.healthcare_pct);
+      setBudgetEducation(budgetTradeoffRes.education_pct);
+      setBudgetInfrastructure(budgetTradeoffRes.infrastructure_pct);
+      setBudgetGreen(budgetTradeoffRes.green_transition_pct);
+      setHistoricalRetrospective(historicalRetrospectiveRes);
+      setObserveSession(observeSessionRes);
+      setCommunityProposals(communityProposalsRes);
 
 
       setStatusMessage({
@@ -269,6 +310,74 @@ export function DeliberationWorkspace({
     } catch (err: unknown) {
       const msg = err instanceof AdminApiError ? `[${err.code}] ${err.message}` : String(err);
       setStatusMessage({ type: "error", text: `Düzeltme kaydedilemedi: ${msg}` });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleEvaluatePolicy() {
+    if (!caseVersionId.trim()) return;
+    setLoading(true);
+    try {
+      const analyticsClient = new CaseAnalyticsApiClient(baseUrl);
+      const res = await analyticsClient.evaluatePolicySimulation(
+        caseVersionId,
+        policyKnobName,
+        policyKnobValue
+      );
+      setPolicySimulation(res);
+      setStatusMessage({ type: "success", text: `Politika simülasyonu güncellendi: ${res.equilibrium_state}` });
+    } catch (err: unknown) {
+      const msg = err instanceof AdminApiError ? `[${err.code}] ${err.message}` : String(err);
+      setStatusMessage({ type: "error", text: `Politika simülasyonu başarısız: ${msg}` });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleEvaluateBudget() {
+    if (!caseVersionId.trim()) return;
+    setLoading(true);
+    try {
+      const analyticsClient = new CaseAnalyticsApiClient(baseUrl);
+      const res = await analyticsClient.evaluateBudgetTradeoff(caseVersionId, {
+        healthcare_pct: budgetHealthcare,
+        education_pct: budgetEducation,
+        infrastructure_pct: budgetInfrastructure,
+        green_transition_pct: budgetGreen,
+      });
+      setBudgetTradeoff(res);
+      setStatusMessage({ type: "success", text: `Bütçe takası hesaplandı: ${res.tradeoff_profile}` });
+    } catch (err: unknown) {
+      const msg = err instanceof AdminApiError ? `[${err.code}] ${err.message}` : String(err);
+      setStatusMessage({ type: "error", text: `Bütçe takası başarısız: ${msg}` });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleCreateProposal(e: React.FormEvent) {
+    e.preventDefault();
+    if (!caseVersionId.trim()) return;
+    if (newProposalTitle.trim().length < 5 || newProposalContext.trim().length < 10) {
+      setStatusMessage({ type: "error", text: "Başlık en az 5, bağlam en az 10 karakter olmalıdır." });
+      return;
+    }
+    setLoading(true);
+    try {
+      const analyticsClient = new CaseAnalyticsApiClient(baseUrl);
+      const created = await analyticsClient.createCommunityProposal(
+        caseVersionId,
+        newProposalTitle,
+        newProposalContext
+      );
+      setCommunityProposals((prev) => [...prev, created]);
+      setNewProposalTitle("");
+      setNewProposalContext("");
+      setStatusMessage({ type: "success", text: `Topluluk dilemması başarıyla oluşturuldu: ${created.proposal_id}` });
+    } catch (err: unknown) {
+      const msg = err instanceof AdminApiError ? `[${err.code}] ${err.message}` : String(err);
+      setStatusMessage({ type: "error", text: `Dilemma önerisi gönderilemedi: ${msg}` });
     } finally {
       setLoading(false);
     }
@@ -391,6 +500,13 @@ export function DeliberationWorkspace({
           onClick={() => setActiveTab("governance")}
         >
           Sistemik Yönetişim & Etki (CAP-018 / CAP-020 / CAP-021 / CAP-022 / CAP-023)
+        </button>
+        <button
+          type="button"
+          className={`${styles.tabButton} ${activeTab === "simulation" ? styles.tabActive : ""}`}
+          onClick={() => setActiveTab("simulation")}
+        >
+          Simülasyon & Retrospektif (CAP-017 / CAP-027 / CAP-028 / CAP-029 / CAP-030)
         </button>
       </nav>
 
@@ -1385,6 +1501,348 @@ export function DeliberationWorkspace({
             ) : (
               <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
             )}
+          </div>
+        </section>
+      )}
+
+      {/* Tab 7: Simulation, Resource Tradeoff, Historical Retrospective & Community Dilemmas */}
+      {activeTab === "simulation" && (
+        <section aria-label="Simülasyon ve Tarihsel Retrospektif">
+          <div className={styles.sectionTitle}>
+            <span>Politika Simülatörü, Bütçe Takası, Tarihsel Retrospektif ve Topluluk İkilemleri</span>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", marginBottom: "1.25rem" }}>
+            {/* 1. Policy Simulator (CAP-017) */}
+            <div className={styles.itemCard}>
+              <div className={styles.itemHeader}>
+                <div className={styles.itemMeta}>
+                  <span className={styles.itemTitle}>Politika Simülatörü & Denge Analizi</span>
+                  <span className={`${styles.badge} ${styles.badgePassed}`}>CAP-017</span>
+                </div>
+                {policySimulation && (
+                  <span className={`${styles.badge} ${
+                    policySimulation.equilibrium_state === "OPTIMAL_BALANCE"
+                      ? styles.badgePassed
+                      : styles.badgeProvisional
+                  }`}>
+                    {policySimulation.equilibrium_state}
+                  </span>
+                )}
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "0.75rem" }}>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <input
+                    className={styles.controlInput}
+                    style={{ flex: 1 }}
+                    value={policyKnobName}
+                    onChange={(e) => setPolicyKnobName(e.target.value)}
+                    placeholder="Politika Kaldıracı Adı"
+                  />
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      value={policyKnobValue}
+                      onChange={(e) => setPolicyKnobValue(Number(e.target.value))}
+                      style={{ width: "100px", accentColor: "var(--gold)" }}
+                    />
+                    <span style={{ fontSize: "0.85rem", fontWeight: 700, minWidth: "3rem" }}>
+                      {policyKnobValue}%
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.fetchButton}
+                    onClick={handleEvaluatePolicy}
+                    disabled={loading}
+                    style={{ padding: "0.4rem 0.8rem", fontSize: "0.82rem" }}
+                  >
+                    Simüle Et
+                  </button>
+                </div>
+
+                {policySimulation ? (
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem", background: "var(--background)", padding: "0.75rem", borderRadius: "0.5rem", border: "1px solid var(--line)" }}>
+                    <div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>Mali Skor</div>
+                      <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text)" }}>
+                        {Math.round(policySimulation.fiscal_score * 100)}%
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>Sosyal Skor</div>
+                      <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--gold)" }}>
+                        {Math.round(policySimulation.social_score * 100)}%
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>Çevresel Skor</div>
+                      <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "#10b981" }}>
+                        {Math.round(policySimulation.environmental_score * 100)}%
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: 0 }}>Simülasyon verisi yüklenmedi.</p>
+                )}
+              </div>
+            </div>
+
+            {/* 2. Budget Tradeoff Simulator (CAP-027) */}
+            <div className={styles.itemCard}>
+              <div className={styles.itemHeader}>
+                <div className={styles.itemMeta}>
+                  <span className={styles.itemTitle}>KEFE Decide · Bütçe Takası & Kaynak Dağılımı</span>
+                  <span className={`${styles.badge} ${styles.badgePassed}`}>CAP-027</span>
+                </div>
+                {budgetTradeoff && (
+                  <span className={`${styles.badge} ${styles.badgeProvisional}`}>
+                    {budgetTradeoff.tradeoff_profile}
+                  </span>
+                )}
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.75rem" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
+                  <div>
+                    <label style={{ fontSize: "0.75rem", color: "var(--muted)" }}>Sağlık: {budgetHealthcare}%</label>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      value={budgetHealthcare}
+                      onChange={(e) => setBudgetHealthcare(Number(e.target.value))}
+                      style={{ width: "100%", accentColor: "var(--gold)" }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: "0.75rem", color: "var(--muted)" }}>Eğitim: {budgetEducation}%</label>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      value={budgetEducation}
+                      onChange={(e) => setBudgetEducation(Number(e.target.value))}
+                      style={{ width: "100%", accentColor: "var(--gold)" }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: "0.75rem", color: "var(--muted)" }}>Altyapı: {budgetInfrastructure}%</label>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      value={budgetInfrastructure}
+                      onChange={(e) => setBudgetInfrastructure(Number(e.target.value))}
+                      style={{ width: "100%", accentColor: "var(--gold)" }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: "0.75rem", color: "var(--muted)" }}>Yeşil Dönüşüm: {budgetGreen}%</label>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      value={budgetGreen}
+                      onChange={(e) => setBudgetGreen(Number(e.target.value))}
+                      style={{ width: "100%", accentColor: "var(--gold)" }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.25rem" }}>
+                  <span style={{ fontSize: "0.82rem", color: (budgetHealthcare + budgetEducation + budgetInfrastructure + budgetGreen) > 100 ? "#ef4444" : "var(--muted)" }}>
+                    Toplam: {budgetHealthcare + budgetEducation + budgetInfrastructure + budgetGreen}% / 100%
+                    {budgetTradeoff ? ` (Serbest: ${budgetTradeoff.unallocated_pct}%)` : ""}
+                  </span>
+                  <button
+                    type="button"
+                    className={styles.fetchButton}
+                    onClick={handleEvaluateBudget}
+                    disabled={loading || (budgetHealthcare + budgetEducation + budgetInfrastructure + budgetGreen) > 100}
+                    style={{ padding: "0.35rem 0.75rem", fontSize: "0.8rem" }}
+                  >
+                    Takası Değerlendir
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", marginBottom: "1.25rem" }}>
+            {/* 3. Historical Retrospective (CAP-028) */}
+            <div className={styles.itemCard}>
+              <div className={styles.itemHeader}>
+                <div className={styles.itemMeta}>
+                  <span className={styles.itemTitle}>KEFE Retro · Tarihsel Karar Simülasyonu</span>
+                  <span className={`${styles.badge} ${styles.badgePassed}`}>CAP-028</span>
+                </div>
+                {historicalRetrospective && (
+                  <span className={`${styles.badge} ${styles.badgePassed}`}>
+                    {historicalRetrospective.historical_era} · {historicalRetrospective.historical_year}
+                  </span>
+                )}
+              </div>
+
+              {historicalRetrospective ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.75rem" }}>
+                  <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "var(--text)" }}>
+                    {historicalRetrospective.historical_event_name}
+                  </div>
+                  <div style={{ background: "var(--background)", padding: "0.75rem", borderRadius: "0.5rem", border: "1px solid var(--line)" }}>
+                    <div style={{ fontSize: "0.75rem", color: "var(--gold)", fontWeight: 600, marginBottom: "0.25rem" }}>
+                      GERÇEKLEŞEN TARİHSEL KARAR
+                    </div>
+                    <p style={{ fontSize: "0.85rem", color: "var(--text)", margin: 0 }}>
+                      {historicalRetrospective.actual_historical_decision}
+                    </p>
+                  </div>
+                  <p style={{ fontSize: "0.82rem", color: "var(--muted)", margin: 0 }}>
+                    <strong>Sonuç ve Çıkarılan Ders:</strong> {historicalRetrospective.historical_consequence_summary}
+                  </p>
+                </div>
+              ) : (
+                <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: "0.5rem 0 0" }}>Tarihsel retrospektif verisi bulunamadı.</p>
+              )}
+            </div>
+
+            {/* 4. Observe Mode Exploration (CAP-029) */}
+            <div className={styles.itemCard}>
+              <div className={styles.itemHeader}>
+                <div className={styles.itemMeta}>
+                  <span className={styles.itemTitle}>Gözlem Modu · Sadece Oku / Keşfet</span>
+                  <span className={`${styles.badge} ${styles.badgePassed}`}>CAP-029</span>
+                </div>
+                {observeSession && (
+                  <span className={`${styles.badge} ${styles.badgeProvisional}`}>
+                    {observeSession.exploration_mode}
+                  </span>
+                )}
+              </div>
+
+              {observeSession ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem", marginTop: "0.75rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <span className={`${styles.badge} ${observeSession.is_binding_vote ? styles.badgeFailed : styles.badgePassed}`}>
+                      {observeSession.is_binding_vote ? "Bağlayıcı Oy" : "Bağlayıcı Olmayan Gözlem"}
+                    </span>
+                    <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+                      Oturum ID: {observeSession.session_id.slice(0, 12)}…
+                    </span>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", background: "var(--background)", padding: "0.75rem", borderRadius: "0.5rem", border: "1px solid var(--line)" }}>
+                    <div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>İncelenen Argümanlar</div>
+                      <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text)" }}>
+                        {observeSession.viewed_argument_count}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>İncelenen Deliller</div>
+                      <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--gold)" }}>
+                        {observeSession.viewed_evidence_count}
+                      </div>
+                    </div>
+                  </div>
+                  <p style={{ fontSize: "0.8rem", color: "var(--muted)", margin: 0 }}>
+                    Kullanıcı bağlayıcı oy vermeden önce argüman haritasını ve kanıtları özgürce inceleyebilir.
+                  </p>
+                </div>
+              ) : (
+                <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: "0.5rem 0 0" }}>Gözlem oturumu aktif değil.</p>
+              )}
+            </div>
+          </div>
+
+          {/* 5. UGC Personal & Community Dilemma Proposals (CAP-030) */}
+          <div className={styles.itemCard}>
+            <div className={styles.itemHeader}>
+              <div className={styles.itemMeta}>
+                <span className={styles.itemTitle}>Topluluk Dilemma Önerileri & Yurttaş İkilemleri</span>
+                <span className={`${styles.badge} ${styles.badgePassed}`}>CAP-030</span>
+              </div>
+              <span className={`${styles.badge} ${styles.badgePassed}`}>
+                {communityProposals.length} Öneri Kayıtlı
+              </span>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", marginTop: "1rem" }}>
+              {/* Proposals List */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--gold)" }}>
+                  KAYITLI TOPLULUK DİLEMMALARI
+                </div>
+                {communityProposals.length > 0 ? (
+                  communityProposals.map((prop) => (
+                    <div
+                      key={prop.proposal_id}
+                      style={{
+                        background: "var(--background)",
+                        padding: "0.75rem",
+                        borderRadius: "0.5rem",
+                        border: "1px solid var(--line)",
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.3rem" }}>
+                        <strong style={{ fontSize: "0.88rem", color: "var(--text)" }}>{prop.proposed_title}</strong>
+                        <span className={`${styles.badge} ${
+                          prop.curation_state === "EDITORIAL_APPROVED"
+                            ? styles.badgePassed
+                            : prop.curation_state === "REJECTED_WITH_REASON"
+                            ? styles.badgeFailed
+                            : styles.badgeProvisional
+                        }`} style={{ fontSize: "0.7rem" }}>
+                          {prop.curation_state}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: "0.8rem", color: "var(--muted)", margin: "0 0 0.35rem" }}>
+                        {prop.proposed_context}
+                      </p>
+                      <div style={{ display: "flex", gap: "0.75rem", fontSize: "0.75rem", color: "var(--muted)" }}>
+                        <span>Tarafsızlık: <strong>{Math.round(prop.neutrality_score * 100)}%</strong></span>
+                        <span>Destekçi: <strong>{prop.supporter_count}</strong></span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Kayıtlı öneri yok.</p>
+                )}
+              </div>
+
+              {/* Submission Form */}
+              <form onSubmit={handleCreateProposal} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--gold)" }}>
+                  YENİ TOPLULUK DİLEMMASI GÖNDER
+                </div>
+                <div className={styles.formField}>
+                  <label className={styles.formLabel}>Öneri Başlığı (Min. 5 karakter)</label>
+                  <input
+                    className={styles.formInput}
+                    value={newProposalTitle}
+                    onChange={(e) => setNewProposalTitle(e.target.value)}
+                    placeholder="Örn: Tarihi Meydanda Gece Ulaşımı Düzenlemesi"
+                    required
+                  />
+                </div>
+                <div className={styles.formField}>
+                  <label className={styles.formLabel}>Dilemma Bağlamı ve Çatışma (Min. 10 karakter)</label>
+                  <textarea
+                    className={styles.formTextarea}
+                    value={newProposalContext}
+                    onChange={(e) => setNewProposalContext(e.target.value)}
+                    placeholder="Farklı tarafların menfaatlerini ve temel etik/pratik çatışmayı açıklayın..."
+                    rows={4}
+                    required
+                  />
+                </div>
+                <button type="submit" className={styles.submitBtn} disabled={loading}>
+                  {loading ? "Gönderiliyor…" : "Topluluk Dilemması Gönder"}
+                </button>
+              </form>
+            </div>
           </div>
         </section>
       )}
