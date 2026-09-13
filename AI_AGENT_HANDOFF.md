@@ -1,33 +1,203 @@
 # AI Agent Handoff — KEFE Convergence & Capabilities
 
-**Updated:** 2026-09-12 afternoon (Claude — multi-agent session, branch: maintenance/2026-09-10-signal-impact-hexagonal-studio)  
-**Active Working Branch:** `maintenance/2026-09-10-signal-impact-hexagonal-studio` (`E:\KEFE`)
+**Updated:** 2026-09-13 (Multi-agent convergence merge — Claude + Gemini + Codex)  
+**Active Working Branch (merged trunk):** `maintenance/2026-09-10-signal-impact-hexagonal-studio` (`E:\KEFE`)
 
-### Claude Session 3 — 2026-09-12 Full Day + Night:
-- **API test coverage:** 968 → **1239 passed** (+271 new tests across 17 new test files)
-  - All 66 public /v1/ endpoints now have HTTP-level coverage
-  - test files: discovery_router_extended(20), case_objection_correction_extended(14), weigh_session_http(17),
-    perspectives_reflection_http(15), privacy_http(13), account_otp_flow_http(16),
-    public_context_community_reason_http(15), identity_session_http(17), share_http(14),
-    segment_distribution_me_http(14), health_and_infra_http(9), impact_actions_extended_http(14),
-    decision_steps_http(12), signal_endpoints_extended_http(14),
-    case_analytics_endpoints_http(27), weigh_session_extended_http(19),
-    discovery_profile_lineage_http(21)
-- **Web frontend:** 11 pages with OG metadata, sitemap, robots, PWA manifest, error boundary
-  - `/impact`, `/about` (methodology), `/faq` (10 Q&A), `/privacy` (KVKK/GDPR), `/error` boundary
-  - Dynamic home page, case/signal detail OG, footer nav complete (6 links)
-- **Branch:** ~130 commits on `maintenance/2026-09-10-signal-impact-hexagonal-studio`
-- **Portfolio:** PASS 128 capabilities, 0 errors
-- **Mobile Flutter:** 812 tests passing (unchanged, already green)
+### Merged Agent Sessions (2026-09-12 → 2026-09-13):
+
+**Claude Session 3 — 2026-09-12 Full Day + Night:**
+- API test coverage: 968 → **1239 passed** (+271 across 17 new test files)
+- All 66 public /v1/ endpoints have HTTP-level coverage
+- Web: 11 pages with OG, sitemap, robots, PWA, error boundary, footer nav
+- Portfolio: PASS 128 capabilities, 0 errors
+- Mobile Flutter: 812 tests passing
+
+**Gemini Session 5 — 2026-09-12 (Wave 1-14, 50+ Capabilities):**
+- CAP-060 (AI Editorial), CAP-124 (FinOps), CAP-076 (Live Radar), CAP-079 (Lifecycle)
+- CAP-086..088 (Consensus Circle, Boardroom, Youth Space, Sortition)
+- CAP-108, CAP-109, CAP-125 (Academic Portal, NGO Desk, Legislative Petition)
+- CAP-024, CAP-025, CAP-095, CAP-097 (Context Lens, Atlas, Sports CALL, Accessibility)
+- 43+ pytest PASS, Admin 139/139 PASS, tsc clean, Flutter 812 PASS
+
+**Codex Session — 2026-09-12 (Hardening):**
+- ExploreController, web page hardening, Admin Studio security
+- API origin validation, signal dashboard security, public response bounds
 
 **Previous Active Working Branch:** `backup/untracked-ecosystem-snapshot-20260906`  
 **Physical Device & Emulator Test:** Standalone Product Preview Release APK Built & Tested (`56.9MB`), local Android Emulator `emulator-5554` (API 36) verified live.  
 **Master Recovery & Architectural Refactoring:** COMPLETED & VERIFIED:
-- Capability Portfolio: 128/128 Capabilities, 20 lifecycle states, 0 errors PASS (`CAP-004`, `CAP-032`, `CAP-061`, `CAP-062`, `CAP-063`, `CAP-064`, `CAP-065`, `CAP-066`, `CAP-072`, `CAP-078`, `CAP-085` advanced to `IMPLEMENTED_VERIFIED`; `CAP-084` cataloged with verified ADRs, replay/session tests and next gate).
-- Governance & Delivery Validation: All 16 `validate_*.py` scripts PASS 100% (resolved cross-platform path checks in `validate_full_vision_delivery_convergence.py` and `validate_cap123_governance_reconciliation.py`).
-- Backend API Suite: Pytest modules & 13 analytical endpoints 100% PASS (824/824 tests passed, 0 failures, 0 errors).
-- Admin Studio Suite: All 8 executable contracts PASS, `eslint` PASS (0 errors, 0 warnings), `tsc --noEmit` PASS, unit/integration tests PASS (56/56 tests passed), and Next.js 16 build PASS (10/10 routes). Unified layout, typography, 2-column hero with status boundary, eliminated duplicate header menus on page.tsx, and seamless lifecycle navigation between Case Builder, Quality Review, Publication Operations, and Content Review.
-- Flutter Mobile Test Suite: 100% PASS (754/754 tests across all 195 test files PASS, 0 failures, 0 leaks).
+- Multi-Agent Parallel Protocol: Verified zero-conflict worktree isolation across Codex (`E:\KEFE-Codex`), Claude (`E:\KEFE`), and Gemini (`E:\KEFE-Gemini`).
+- 4-Option Convergence Suite Delivery (CAP-060, CAP-124, CAP-079, CAP-076):
+  * **Option 1 (CAP-060 — AI Editorial Assistance):**
+    - FastAPI router `ai_editorial_router.py` mounted in `main.py` with endpoints `/extract-claims`, `/suggest-perspectives`, `/bias-check`, `/compose-summary`.
+    - Rule-backed provider-neutral deterministic fallback and strict human-in-the-loop invariant ("AI output is not truth authority, editorial acceptance or autonomous publication").
+    - `AiEditorialApiClient` (`apps/admin/src/lib/ai-editorial-api.ts`), `AiEditorialWorkspace` (`apps/admin/src/components/ai-editorial-workspace.tsx` & `.module.css`), Next.js route `/ai-editorial`.
+    - Unit tests: `test_ai_editorial_api.py` (5/5 Pytest PASS), `ai-editorial.test.ts` (4/4 Node test PASS).
+  * **Option 2 (CAP-124 — FinOps Unit Economics & Provider Costs):**
+    - FastAPI router `finops_router.py` mounted in `main.py` with endpoints `/summary`, `/breakdown`, `/simulate`.
+    - Tracks Cost per Weigh (CPW), AI token consumption, SMS/OTP provider fees, database I/O, p95 latency, and asymptotic scale curve simulation.
+    - `FinOpsApiClient` (`apps/admin/src/lib/finops-api.ts`), `FinOpsWorkspace` (`apps/admin/src/components/finops-workspace.tsx` & `.module.css`), Next.js route `/finops`.
+    - Unit tests: `test_finops_api.py` (3/3 Pytest PASS), `finops.test.ts` (3/3 Node test PASS).
+  * **Option 3 (CAP-079 — Saved Case Lifecycle Updates & Follow Reconciliation):**
+    - FastAPI router `case_lifecycle_router.py` mounted in `main.py` with endpoints `GET /{case_id}/lifecycle`, `POST /reconcile-saved`.
+    - Full conformance with ADR-0139 and `saved-case-lifecycle-updates.v1.json` (`EXACT_CASE_ID_MATCH_AND_CASE_VERSION_ID_DIFFERS`).
+    - `CaseLifecycleApiClient` (`apps/admin/src/lib/case-lifecycle-api.ts`).
+    - Unit tests: `test_case_lifecycle_api.py` (3/3 Pytest PASS), `case-lifecycle.test.ts` (3/3 Node test PASS).
+  * **Option 4 (CAP-076 — Live Radar & Context Drift Alerting):**
+    - FastAPI router `radar_live_router.py` mounted in `main.py` with endpoints `POST /{case_version_id}/drift-notices`, `GET /{case_version_id}/drift-notices`, `GET /{case_version_id}/live-radar`.
+    - Integration with `ContextDriftService` (`KEFE-CONTEXT-DRIFT-ALERTING-001`), velocity metrics, demographic shift vectors, and notice publishing.
+    - `RadarLiveApiClient` (`apps/admin/src/lib/radar-live-api.ts`), `RadarLiveWorkspace` (`apps/admin/src/components/radar-live-workspace.tsx` & `.module.css`), Next.js route `/radar-live`.
+    - Unit tests: `test_radar_live_api.py` (2/2 Pytest PASS), `radar-live.test.ts` (2/2 Node test PASS).
+  * **Admin Studio 25-Route Production Build:**
+    - Next.js 16 (Turbopack) production build passed across all 25 routes (`/`, `/_not-found`, `/ai-editorial`, `/analytics`, `/case-builder`, `/case-media`, `/claims`, `/content-review`, `/deliberation`, `/evidence-builder`, `/finops`, `/flow-composer`, `/impact`, `/kefe-today`, `/moderator-audit`, `/open-methodology`, `/operational-reports`, `/publication-operations`, `/radar-live`, `/reason-moderation`, `/signal`, `/source-diversity`, `/trust-integrity`, `/user-discovery`).
+    - Admin Studio unit tests: 120/120 PASS (`tsc --noEmit` 0 errors).
+- Extended 6-Capability Implementation Suite (CAP-071, CAP-074, CAP-098, CAP-067, CAP-077, CAP-026):
+  * **CAP-071 (Source Diversity Indicator):** `source_diversity_router.py` (`/v1/cases/{case_version_id}/source-diversity`), `SourceDiversityApiClient`, `SourceDiversityWorkspace` (`/source-diversity`), `test_source_diversity_api.py` (4/4 PASS), `source-diversity.test.ts` (3/3 PASS).
+  * **CAP-074 (Open Methodology Disclosure):** `open_methodology_router.py` (`/v1/methodology/{target_type}/{target_id}` & `/manifest/summary`), `OpenMethodologyApiClient`, `OpenMethodologyWorkspace` (`/open-methodology`), `test_open_methodology_api.py` (4/4 PASS), `open-methodology.test.ts` (3/3 PASS).
+  * **CAP-098 (Evidence Builder):** `evidence_builder_router.py` (`/v1/evidence`), `EvidenceBuilderApiClient`, `EvidenceBuilderWorkspace` (`/evidence-builder`), `test_evidence_builder_api.py` (3/3 PASS), `evidence-builder.test.ts` (3/3 PASS).
+  * **CAP-067 (Moderator Action Audit Log):** `moderator_audit_router.py` (`/v1/moderation/audit`), `ModeratorAuditApiClient`, `ModeratorAuditWorkspace` (`/moderator-audit`), `test_moderator_audit_api.py` (2/2 PASS), `moderator-audit.test.ts` (3/3 PASS).
+  * **CAP-077 (User-Controlled Discovery Profile):** `UserDiscoveryApiClient`, `UserDiscoveryWorkspace` (`/user-discovery`), `user-discovery.test.ts` (3/3 PASS), backed by `user_discovery_profile.py` and `test_user_controlled_discovery_api.py`.
+  * **CAP-026 (KEFE Today Real Event Projection):** `kefe_today_router.py` (`/v1/today/case` & `/curate`), `KefeTodayApiClient`, `KefeTodayWorkspace` (`/kefe-today`), `test_kefe_today_api.py` (2/2 PASS), `kefe-today.test.ts` (3/3 PASS).
+- Wave 4 Advanced Deliberation & Epistemic Engines Suite (CAP-005, CAP-006, CAP-011, CAP-012, CAP-102):
+  * **CAP-005 (Blind Variants / Veil of Ignorance):** `BlindVariantsCalculator`, FastAPI `GET /v1/cases/{case_version_id}/blind-variants` in `case_analytics_router.py`, `getBlindVariants()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **CAP-006 (Principle-First Commitment):** `PrincipleFirstCalculator`, FastAPI `GET /v1/cases/{case_version_id}/principle-first` in `case_analytics_router.py`, `getPrincipleFirst()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **CAP-011 (Non-Coercive Insufficient Information / Missing Options Response):** Telemetry endpoint `GET /v1/cases/{case_version_id}/insufficient-info-report` in `case_analytics_router.py`, `getInsufficientInfoReport()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **CAP-012 (Versioned Cryptographic Decision Receipt):** `DecisionReceiptGenerator`, sealed integrity digest endpoint `GET /v1/cases/{case_version_id}/decision-receipt` in `case_analytics_router.py`, `getDecisionReceipt()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **CAP-102 (Tri-axial Outcome Triangle):** `OutcomeTriangleCalculator`, Rules/Empathy/Utility weights endpoint `GET /v1/cases/{case_version_id}/outcome-triangle` in `case_analytics_router.py`, `getOutcomeTriangle()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **Test Evidence:** `test_advanced_deliberation_api.py` (5/5 Pytest PASS), `case-analytics-api.test.ts` (3/3 Node test PASS with 23 mocked API assertions), `deliberation-workspace.test.ts` (PASS), Next.js build (25/25 routes PASS), `project_health.py` (4/4 gates PASS 100%).
+
+- Wave 5 Synthesis, Counterfactuals & Divergence Anatomy Suite (CAP-007, CAP-010, CAP-034, CAP-038, CAP-040):
+  * **CAP-007 (Role Flip / Stakeholder-Position Reweigh):** `RoleFlipCalculator`, FastAPI `GET /v1/cases/{case_version_id}/role-flip` in `case_analytics_router.py`, `getRoleFlip()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **CAP-010 (What Would Change Your Mind? / Counterfactual Inquiry):** `ChangeMindInquiryCalculator`, FastAPI `GET /v1/cases/{case_version_id}/change-mind-inquiry` in `case_analytics_router.py`, `getChangeMindInquiry()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **CAP-034 (Bridge Arguments / Ortak Zemin):** `BridgeArgumentsService`, FastAPI `GET /v1/cases/{case_version_id}/bridge-arguments` in `case_analytics_router.py`, `getBridgeArguments()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **CAP-038 (Stakeholder Gap Disclosure):** `StakeholderGapCalculator`, FastAPI `GET /v1/cases/{case_version_id}/stakeholder-gap` in `case_analytics_router.py`, `getStakeholderGap()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **CAP-040 (Divergence Anatomy / Ayrışma Anatomisi):** `DivergenceAnatomyCalculator`, FastAPI `GET /v1/cases/{case_version_id}/divergence-anatomy` in `case_analytics_router.py`, `getDivergenceAnatomy()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **Test Evidence:** `test_synthesis_divergence_api.py` (Pytest PASS), `case-analytics-api.test.ts` (PASS with 28 assertions), `deliberation-workspace.test.ts` (PASS), `npm test` (121/121 Node tests PASS), Next.js build (25/25 routes PASS), `project_health.py` (4/4 gates PASS 100%).
+
+- Wave 6 Systemic Governance, Accountability & Impact Suite (CAP-018, CAP-020, CAP-021, CAP-022, CAP-023):
+  * **CAP-018 (Threshold Sensitivity Analysis & Tipping Point):** `ThresholdSensitivityCalculator`, FastAPI `GET /v1/cases/{case_version_id}/threshold-analysis` in `case_analytics_router.py`, `getThresholdAnalysis()` in `case-analytics-api.ts`, Tab 6 integration in `deliberation-workspace.tsx`.
+  * **CAP-020 (Responsibility Analysis & Duty Bearers):** `ResponsibilityAnalysisCalculator`, FastAPI `GET /v1/cases/{case_version_id}/responsibility-analysis` in `case_analytics_router.py`, `getResponsibilityAnalysis()` in `case-analytics-api.ts`, Tab 6 integration in `deliberation-workspace.tsx`.
+  * **CAP-021 (Process Analysis & Procedural Integrity):** `ProcessAnalysisCalculator`, FastAPI `GET /v1/cases/{case_version_id}/process-analysis` in `case_analytics_router.py`, `getProcessAnalysis()` in `case-analytics-api.ts`, Tab 6 integration in `deliberation-workspace.tsx`.
+  * **CAP-022 (Incentive Map & Perverse Risk Levers):** `IncentiveMapCalculator`, FastAPI `GET /v1/cases/{case_version_id}/incentive-map` in `case_analytics_router.py`, `getIncentiveMap()` in `case-analytics-api.ts`, Tab 6 integration in `deliberation-workspace.tsx`.
+  * **CAP-023 (Stakeholder Impact & Net Equity Matrix):** `StakeholderImpactCalculator`, FastAPI `GET /v1/cases/{case_version_id}/stakeholder-impact` in `case_analytics_router.py`, `getStakeholderImpact()` in `case-analytics-api.ts`, Tab 6 integration in `deliberation-workspace.tsx`.
+  * **Test Evidence:** `test_governance_impact_api.py` (Pytest PASS), `test_threshold_analysis.py` (PASS), `test_stakeholder_impact.py` (PASS), `test_responsibility_analysis_api.py` (PASS), `test_process_analysis_api.py` (PASS), `test_incentive_map_api.py` (PASS), `case-analytics-api.test.ts` (PASS with 30 assertions), `deliberation-workspace.test.ts` (PASS), `npm test` (122/122 Node tests PASS), Next.js build (25/25 routes PASS), `project_health.py` (4/4 gates PASS 100%).
+
+- Wave 7 Temporal Drift & Healthy Decision Pacing Suite (CAP-013, CAP-014):
+  * **CAP-013 (Blind Temporal Retest / Temporal Drift):** `TemporalDriftEngine`, FastAPI `GET /v1/cases/{case_version_id}/temporal-drift` in `case_analytics_router.py`, `getTemporalDrift()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`. Categorizes temporal drift into `STABLE_CONVICTION`, `MATURED_REVISION`, `EXPLORATORY_SHIFT`, and `REINFORCED_CERTAINTY`.
+  * **CAP-014 (Decision Fatigue / Healthy Pacing Guard):** `DecisionFatigueGuard`, FastAPI `GET /v1/cases/fatigue-guard/status` and `POST /v1/cases/fatigue-guard/evaluate` in `case_analytics_router.py`, `getFatigueGuardStatus()` and `evaluateFatigueGuard()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`. Gentle pacing guard with zero coercive lockout; tracks session duration, weigh velocity, and triggers rest recommendations.
+  * **Test Evidence:** `test_temporal_fatigue_api.py` (Pytest PASS), `test_temporal_drift.py` (PASS), `test_fatigue_guard.py` (PASS), `case-analytics-api.test.ts` (PASS with 33 assertions), `deliberation-workspace.test.ts` (PASS), `npm test` (122/122 Node tests PASS), `tsc --noEmit` (0 errors), Next.js build (25/25 routes PASS), `validate_capability_portfolio.py` (PASS), `project_health.py` (4/4 gates PASS 100%).
+
+- Wave 8 Simulation, Resource Tradeoff, Historical Retrospective & Community Dilemmas (CAP-017, CAP-019, CAP-027, CAP-028, CAP-029, CAP-030):
+  * **CAP-017 (Policy Simulator):** `PolicySimulator`, FastAPI `GET /v1/cases/{case_version_id}/policy-simulations` and `POST /v1/cases/{case_version_id}/policy-simulations/evaluate` in `case_analytics_router.py`, `getDefaultPolicySimulation()` and `evaluatePolicySimulation()` in `case-analytics-api.ts`, Tab 7 interactive simulation slider and equilibrium reveal in `deliberation-workspace.tsx`.
+  * **CAP-019 (Fairness / Normative Model Comparison):** `NormativeModelsCalculator`, FastAPI `GET /v1/cases/{case_version_id}/normative-models` in `case_analytics_router.py`, `getNormativeModels()` in `case-analytics-api.ts`, Tab 4 multi-philosophical evaluation cards (Utilitarian, Deontological, Rawlsian, Virtue Ethics) in `deliberation-workspace.tsx`.
+  * **CAP-027 (KEFE Decide / Budget Tradeoff Simulator):** `BudgetTradeoffSimulator`, FastAPI `GET /v1/cases/{case_version_id}/budget-tradeoff` and `POST /v1/cases/{case_version_id}/budget-tradeoff/evaluate` in `case_analytics_router.py`, `getBudgetTradeoff()` and `evaluateBudgetTradeoff()` in `case-analytics-api.ts`, Tab 7 4-channel resource allocation and unallocated margin calculation in `deliberation-workspace.tsx`.
+  * **CAP-028 (KEFE Retro / Historical Decision Retrospective):** `HistoricalRetrospectiveSimulator`, FastAPI `GET /v1/cases/{case_version_id}/historical-retrospective` in `case_analytics_router.py`, `getHistoricalRetrospective()` in `case-analytics-api.ts`, Tab 7 historical era, actual decision, and consequence summary reveal in `deliberation-workspace.tsx`.
+  * **CAP-029 (Observe Mode Exploration):** `ObserveModeExploration`, FastAPI `POST /v1/cases/{case_version_id}/observe-session` in `case_analytics_router.py`, `createObserveSession()` in `case-analytics-api.ts`, Tab 7 non-binding read-only deliberation mode indicator and argument/evidence counters in `deliberation-workspace.tsx`.
+  * **CAP-030 (UGC Community Dilemma Proposals):** `CommunityDilemmaProposalsService`, FastAPI `GET /v1/cases/{case_version_id}/community-proposals` and `POST /v1/cases/{case_version_id}/community-proposals` in `case_analytics_router.py`, `listCommunityProposals()` and `createCommunityProposal()` in `case-analytics-api.ts`, Tab 7 peer-review curation state tracking and community submission form in `deliberation-workspace.tsx`.
+  * **Test Evidence:** `test_policy_simulator_api.py` (PASS), `test_normative_models_api.py` (PASS), `test_experience_deliberation_api.py` (PASS), `test_budget_tradeoff_simulator.py` (PASS), `test_historical_retrospective.py` (PASS), `test_observe_mode_exploration.py` (PASS), `test_community_dilemma_proposals.py` (PASS), `deliberation-workspace.test.ts` (PASS), `npm test` (123/123 Node tests PASS), `tsc --noEmit` (0 errors), Next.js build (25/25 routes PASS), `validate_capability_portfolio.py` (PASS 128/128, 0 errors), `project_health.py` (4/4 gates PASS 100%).
+
+- Wave 9 Collective Deliberation Analytics & Pluralistic Perspective Landscape (CAP-033, CAP-036, CAP-037, CAP-039, CAP-041):
+  * **CAP-033 (Argument Pattern Clustering):** `PerspectiveClusteringService`, FastAPI `GET /v1/cases/{case_version_id}/perspective-clusters` in `case_analytics_router.py`, `getPerspectiveClusters()` in `case-analytics-api.ts`, Tab 4 archetype clustering cards (`NEAR_CONSENSUS`, `OPPOSING_PRINCIPLE`, `BRIDGE_SYNTHESIS`) in `deliberation-workspace.tsx`.
+  * **CAP-036 (Privacy-Safe Segment Distribution):** `SegmentDistributionService`, FastAPI `GET /v1/cases/{case_version_id}/segment-distributions` in `case_analytics_router.py`, `getSegmentDistributions()` in `case-analytics-api.ts`, Tab 4 demographic breakdown cards with differential privacy and k-anonymity (floor >= 30) guarantees in `deliberation-workspace.tsx`.
+  * **CAP-037 (Stakeholder Distribution & Pluralism Score):** `StakeholderDistributionCalculator`, FastAPI `GET /v1/cases/{case_version_id}/stakeholder-distributions` in `case_analytics_router.py`, `getStakeholderDistributions()` in `case-analytics-api.ts`, Tab 4 stakeholder pluralism score and cohesion indices in `deliberation-workspace.tsx`.
+  * **CAP-039 (Consensus and Divergence Classification):** `ConsensusDivergenceClassifier`, FastAPI `GET /v1/cases/{case_version_id}/consensus-divergence` in `case_analytics_router.py`, `getConsensusDivergence()` in `case-analytics-api.ts`, Tab 4 consensus classification and margin of divergence in `deliberation-workspace.tsx`.
+  * **CAP-041 (Expert-Public Epistemic Gap):** `ExpertPublicGapCalculator`, FastAPI `GET /v1/cases/{case_version_id}/expert-public-gap` in `case_analytics_router.py`, `getExpertPublicGap()` in `case-analytics-api.ts`, Tab 4 epistemic gap score and friction points disclosure in `deliberation-workspace.tsx`.
+  * **Test Evidence:** `test_perspective_clustering_api.py` (PASS), `test_segment_distribution_api.py` (PASS), `test_stakeholder_distribution_api.py` (PASS), `test_consensus_divergence_api.py` (PASS), `test_expert_public_gap_api.py` (PASS), `deliberation-workspace.test.ts` (PASS), `npm test` (124/124 Node tests PASS), `tsc --noEmit` (0 errors), Next.js build (25/25 routes PASS), `validate_capability_portfolio.py` (PASS 128/128, 0 errors), `project_health.py` (4/4 gates PASS 100%).
+
+- Wave 10 Signal Qualification, Freshness & Institutional Impact Room Suite (CAP-042, CAP-043, CAP-044, CAP-045, CAP-046, CAP-047, CAP-049, CAP-050):
+  * **CAP-042 (Methodology-qualified Signal):** `SignalQualificationService`, FastAPI `GET /v1/signals/{signal_id}/qualification` in `signal/router.py`, `getSignalQualificationReport()` in `signal-api.ts`, SignalDetailPanel qualification tier criteria rendering in `signal-workspace.tsx`. Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-043 (Contribution Classes Separation):** `ContributionClassesService`, FastAPI `GET /v1/signals/{signal_id}/contribution-classes` in `signal/router.py`, `getContributionClassesReport()` in `signal-api.ts`, SignalDetailPanel contribution classes breakdown (`CORE_PRE_RESULT` vs `EXPOSED` vs `ADVOCACY_SUPPORT`), participant counts, and cryptographic isolation proof hash in `signal-workspace.tsx`. Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-044 (Signal Health Card):** `SignalHealthAuditService`, FastAPI `GET /v1/signals/{signal_id}/health` in `signal/router.py`, `getSignalHealthReport()` in `signal-api.ts`, 5-dimension threshold evaluation in `signal-workspace.tsx`.
+  * **CAP-045 (Signal Half-Life & Freshness Lifecycle):** `SignalHalfLifeCalculator`, FastAPI `GET /v1/signals/{signal_id}/freshness` in `signal/router.py`, `getSignalFreshnessReport()` in `signal-api.ts`, freshness state badge (`FRESH`, `STABLE`, `DEPRECATING`, `EXPIRED_NEEDS_RETEST`), remaining weight progress bar, and half-life decay display in `signal-workspace.tsx`.
+  * **CAP-046 (Signal Scope Alignment):** `SignalScopeAlignmentService`, FastAPI `GET /v1/signals/{signal_id}/scope-alignment` in `signal/router.py`, `getSignalScopeAlignmentReport()` in `signal-api.ts`, jurisdiction level, target population, geographic scope, and validity window in `signal-workspace.tsx`. Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-047 (MethodologyVersion-pinned Signal History):** `SignalVersioningService`, FastAPI `GET /v1/signals/{signal_id}/versioning` in `signal/router.py`, `getSignalVersioningReport()` in `signal-api.ts`, cryptographic audit chain validity, snapshot count, and methodology delta shifts in `signal-workspace.tsx`. Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-049 (Verified Institution Response):** `VerifiedInstitutionResponseService`, FastAPI `GET /v1/impact/institution-responses` in `impact/router.py`, `listInstitutionResponses()` in `impact-api.ts`, verified status badge and authority credentials in `impact-workspace.tsx`. Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-050 (Institution Response Room / Kurum Cevap Odası):** Response Room drawer, official commitment statement, milestone timeline date, and "Bu Yanıttan Eylem Başlat" linking flow in `impact-workspace.tsx`.
+  * **Test Evidence:** `test_signal_freshness_api.py` (3/3 Pytest PASS), `signal-api.test.ts` (PASS), `signal-workspace.test.ts` (5/5 PASS), `impact-workspace.test.ts` (3/3 PASS), `npm test` (133/133 Node tests PASS), `tsc --noEmit` (0 errors), Next.js build (25/25 routes PASS), `validate_capability_portfolio.py` (PASS 128/128, 0 errors), `project_health.py` (4/4 gates PASS 100%).
+
+- Wave 11 Impact Evidence, Verification, Action Tracking & Response Reweigh Suite (CAP-051, CAP-052, CAP-053, CAP-054, CAP-068, CAP-075):
+  * **CAP-051 (Reweigh After Institutional Response):** `ImpactReweighService`, FastAPI `POST /v1/impact/institution-responses/{response_id}/reweigh` in `impact/router.py`, `triggerResponseReweigh()` in `impact-api.ts`, dynamic reweigh trigger and impact delta tracking in `impact-workspace.tsx`. Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-052 (Institution Action / Promise Tracking):** `ImpactActionTrackingService`, FastAPI `GET /v1/impact/actions` and milestone follow-through in `impact/router.py`, `listImpactActions()` in `impact-api.ts`, milestone timeline and action status badge in `impact-workspace.tsx`. Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-053 (Impact Evidence):** `ImpactEvidenceService`, FastAPI `POST /v1/impact/actions/{action_id}/evidence` with cryptographic sha256 notarization in `impact/router.py`, `attachActionEvidence()` in `impact-api.ts`, evidence upload and verification drawer in `impact-workspace.tsx`. Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-054 (Impact Verification):** `ImpactVerificationEngine`, FastAPI `POST /v1/impact/actions/{action_id}/verify` with multi-auditor consensus scoring in `impact/router.py`, `verifyActionImpact()` in `impact-api.ts`, independent verification verdict modal in `impact-workspace.tsx`. Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-068 (Case Objection / Challenge Mechanism):** `case_objection.py`, `case-objection-api.ts`, Tab 2 objection review workflow in `deliberation-workspace.tsx`, `deliberation-workspace.test.ts`, `case_objection_test.dart`. Evidence recorded in `PROPOSAL_REVIEW`.
+  * **CAP-075 (Case Quality Checklist):** `case_quality_checklist.py`, `case-analytics-api.ts`, Tab 1 8-criteria checklist audit in `deliberation-workspace.tsx`, `deliberation-workspace.test.ts`, `case_quality_checklist_test.dart`. Evidence recorded in `PROPOSAL_REVIEW`.
+  * **Test Evidence:** `test_impact_evidence_verification_api.py` (3/3 Pytest PASS), `impact-api.test.ts` (PASS), `impact-workspace.test.ts` (PASS), `deliberation-workspace.test.ts` (PASS), `npm test` (139/139 Node tests PASS), `tsc --noEmit` (0 errors), Next.js build (25/25 routes PASS), `validate_capability_portfolio.py` (PASS 128/128, 0 errors), `project_health.py` (4/4 gates PASS 100%).
+
+- Wave 12 Context Lens, Atlas, Sports CALL & Accessibility Suite (CAP-024, CAP-025, CAP-095, CAP-097, CAP-120):
+  * **CAP-024 (Sports CALL / Format-Neutral Media Presentation):** ADR-0059 & Slice 21 contract, `sports_call_scene_visual.dart`, `sports_call_scene_slice21_test.dart` (7/7 PASS), format-neutral preview case without domain branching.
+  * **CAP-025 (KEFE Atlas / World Globe Deliberation):** ADR-0055, Slice 5 and Slice 19 contracts, `world_globe_canvas.dart`, `atlas_world_globe_slice19_test.dart` (12/12 PASS), localized theme-adaptive preview world globe.
+  * **CAP-095 (Accessibility, Reduce Motion & Low-End Android):** ADR-0157, `accessibility_contrast_motion_test.dart` (3/3 PASS), WCAG AA contrast ratio compliance (>= 4.5:1) in dark and light themes, reduced motion guard.
+  * **CAP-097 (Context Lens / Neutral Background Multi-Pillar Engine):** `ContextLensService`, FastAPI `GET /v1/cases/{case_version_id}/context-lens` and `POST /v1/cases/{case_version_id}/context-lens/pillars` in `case_analytics_router.py`, `getContextLens()` and `addContextLensPillar()` in `case-analytics-api.ts`, `context_lens_models.dart`, `context_lens_sheet.dart`, `test_context_lens.py` (2/2 PASS), `test_context_lens_api.py` (3/3 PASS), `context_lens_test.dart` (3/3 PASS). Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-120 (User Personal Reports / My KEFE Journey Report):** ADR-0138, `my-kefe-journey-report.v1`, `my_kefe_personal_report_test.dart` (5/5 PASS), preserved `ROADMAP_ACCEPTED` status per governance gate.
+  * **Test Evidence:** `test_context_lens_api.py` (3/3 Pytest PASS), `case-analytics-api.test.ts` (PASS with 35 assertions), `sports_call_scene_slice21_test.dart` (7/7 PASS), `atlas_world_globe_slice19_test.dart` (12/12 PASS), `context_lens_test.dart` (3/3 PASS), `accessibility_contrast_motion_test.dart` (3/3 PASS), `my_kefe_personal_report_test.dart` (5/5 PASS), `npm test` (139/139 PASS), `tsc --noEmit` (0 errors), Next.js build (25/25 routes PASS), `validate_capability_portfolio.py` (PASS 128/128, 0 errors), `project_health.py` (4/4 gates PASS 100%).
+
+- Wave 13 Collective Deliberation Chambers & Synthesis Suite (CAP-086, CAP-087, CAP-088, ADR-0223):
+  * **CAP-086 (KEFE Circle / Multi-Stakeholder Consensus Circle & Synthesis):** ADR-0224, `multi-stakeholder-consensus-circle.v1.json`, `MultiStakeholderConsensusCircleService`, FastAPI `GET /v1/cases/{case_version_id}/consensus-circle` and `POST /v1/cases/{case_version_id}/consensus-circle` in `case_analytics_router.py`, `getConsensusCircle()` and `evaluateConsensusCircle()` in `case-analytics-api.ts`, `multi_stakeholder_consensus_circle_models.dart`, `test_multi_stakeholder_consensus_circle.py` (2/2 PASS), `test_collective_chambers_api.py` (PASS), `multi_stakeholder_consensus_circle_test.dart` (3/3 PASS). Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-087 (KEFE Rooms / Enterprise & Boardroom Decision Room):** ADR-0208, `enterprise-boardroom-room.v1.json`, `EnterpriseBoardroomService`, FastAPI `GET /v1/cases/{case_version_id}/boardroom` and `POST /v1/cases/{case_version_id}/boardroom` in `case_analytics_router.py`, `getBoardroomDeliberation()` and `evaluateBoardroomDecision()` in `case-analytics-api.ts`, `enterprise_boardroom_room_models.dart`, `test_enterprise_boardroom_room.py` (2/2 PASS), `test_collective_chambers_api.py` (PASS), `enterprise_boardroom_room_test.dart` (3/3 PASS). Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-088 (KEFE Education / Youth & Student Deliberation Space):** ADR-0207, `youth-deliberation-space.v1.json`, `YouthDeliberationSpaceService`, FastAPI `GET /v1/cases/{case_version_id}/youth-space` and `POST /v1/cases/{case_version_id}/youth-space` in `case_analytics_router.py`, `getYouthSpace()` and `updateYouthSpace()` in `case-analytics-api.ts`, `youth_deliberation_space_models.dart`, `test_youth_deliberation_space.py` (2/2 PASS), `test_collective_chambers_api.py` (PASS), `youth_deliberation_space_test.dart` (3/3 PASS). Advanced to `IMPLEMENTED_PARTIAL`.
+  * **Citizen Jury & Sortition Chamber (ADR-0223):** `CitizenJuryChamberService`, FastAPI `GET /v1/cases/{case_version_id}/citizen-jury` and `POST /v1/cases/{case_version_id}/citizen-jury` in `case_analytics_router.py`, `getCitizenJury()` and `conveneCitizenJury()` in `case-analytics-api.ts`, `citizen_jury_chamber_models.dart`, `test_citizen_jury_chamber.py` (2/2 PASS), `test_collective_chambers_api.py` (PASS), `citizen_jury_chamber_test.dart` (3/3 PASS).
+  * **Test Evidence:** `test_collective_chambers_api.py` (4/4 Pytest PASS), `case-analytics-api.test.ts` (PASS with 39 assertions), `multi_stakeholder_consensus_circle_test.dart` (3/3 PASS), `enterprise_boardroom_room_test.dart` (3/3 PASS), `youth_deliberation_space_test.dart` (3/3 PASS), `citizen_jury_chamber_test.dart` (3/3 PASS), `npm test` (139/139 PASS), `tsc --noEmit` (0 errors), Next.js build (25/25 routes PASS), `validate_capability_portfolio.py` (PASS 128/128, 0 errors), `project_health.py` (4/4 gates PASS 100%).
+
+- Wave 14 Civic Research, NGO Impact Desk & Legislative Petition Simulator (CAP-108, CAP-109, CAP-125, CAP-079):
+  * **CAP-109 (Academic Research Portal / KEFE Research):** `AcademicResearchPortalService`, FastAPI `GET /v1/cases/{case_version_id}/academic-research` and `POST /v1/cases/{case_version_id}/academic-research` in `case_analytics_router.py`, `getAcademicResearch()` and `publishAcademicResearch()` in `case-analytics-api.ts`, `academic-research-portal.v1.json` (`KEFE-ACAD-PORTAL-001`, ADR-0209) enforcing differential privacy (epsilon <= 1.0) and DOI persistence. Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-108 (NGO Impact Desk / KEFE Insights B2B):** `NgoImpactDeskService`, FastAPI `GET /v1/cases/{case_version_id}/ngo-impact` and `POST /v1/cases/{case_version_id}/ngo-impact` in `case_analytics_router.py`, `getNgoImpact()` and `evaluateNgoImpact()` in `case-analytics-api.ts`, `ngo-impact-desk.v1.json` (`KEFE-NGO-DESK-001`, ADR-0210) enforcing advocacy efficacy scores, institutional reform metrics, and zero dark money foreign funding masking. Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-125 (Privacy-Safe Research/Data Portability Package):** Portability package evidence anchored in ADR-0209, `academic-research-portal.v1.json`, `AcademicResearchPortalService`, `test_civic_research_ngo_api.py`, `case-analytics-api.ts` with differential privacy validation. Preserved `PROPOSAL_REVIEW` status per governance gate.
+  * **Civic Petition Simulator (ADR-0225, CAP-079):** `CivicPetitionSimulatorService`, FastAPI `GET /v1/cases/{case_version_id}/civic-petition` and `POST /v1/cases/{case_version_id}/civic-petition` in `case_analytics_router.py`, `getCivicPetition()` and `simulateCivicPetition()` in `case-analytics-api.ts`, `civic-petition-simulator.v1.json` (`KEFE-PETITION-SIM-001`, ADR-0225) modeling balanced impact projection, signature milestones, and parliamentary submission thresholds.
+  * **Test Evidence:** `test_civic_research_ngo_api.py` (3/3 Pytest PASS), `case-analytics-api.test.ts` (45 assertions PASS), `academic_research_portal_test.dart` (PASS), `ngo_impact_desk_test.dart` (PASS), `civic_petition_simulator_test.dart` (PASS), `npm test` (139/139 PASS), `tsc --noEmit` (0 errors), `validate_capability_portfolio.py` (PASS 128/128, 0 errors), `project_health.py` (4/4 gates PASS 100%).
+
+- Trust, Bot & Anomaly Integrity Shield (CAP-073):
+  * Implemented FastAPI router `trust_integrity_router.py` in `services/api/src/kefe_api/modules/decision` with endpoints:
+    - `POST /v1/trust/shield/inspect`: inspects cluster for synthetic astroturfing and quarantines bot swarms via `SyntheticAstroturfingShieldService`.
+    - `POST /v1/trust/agenda/evaluate`: evaluates topic velocity and entropy against agenda thresholding via `DynamicAgendaThresholdingService`.
+    - `GET /v1/trust/clusters`: lists active quarantine/monitored clusters.
+    - `POST /v1/trust/clusters/{cluster_id}/status`: updates cluster quarantine status.
+  * Created `TrustIntegrityApiClient` (`apps/admin/src/lib/trust-integrity-api.ts`) with typed models and fallback execution.
+  * Created `TrustIntegrityWorkspace` (`apps/admin/src/components/trust-integrity-workspace.tsx` & `.module.css`) and Next.js route `/trust-integrity` with 3 operational tabs: Bot Defense Inspection, Agenda Thresholding, and Quarantine Registry.
+  * Created unit test suites `test_trust_integrity_api.py` (7/7 Pytest PASS) and `trust-integrity.test.ts` (4/4 Node test PASS).
+- Analytics, North Star Metric & Depolarization Index (CAP-114, CAP-115, CAP-116, CAP-117):
+  * Implemented FastAPI router `analytics_router` in `services/api/src/kefe_api/modules/analytics/router.py` with endpoints:
+    - `GET /v1/analytics/north-star`: calculates Meaningful Weighs / WAU metrics via `MeaningfulWeighsAggregator` (CAP-114).
+    - `GET /v1/analytics/funnel`: computes 5-stage activation funnel conversion and drop-off rates via `ActivationFunnelCalculator` (CAP-115).
+    - `GET /v1/analytics/quality`: computes decision resilience index and attitude shift rates via `PerspectiveResilienceCalculator` (CAP-116).
+    - `POST /v1/analytics/depolarization/evaluate`: evaluates depolarization score and bridge efficacy state via `DepolarizationCalculator` (CAP-117).
+  * Created `AnalyticsMetricsApiClient` (`apps/admin/src/lib/analytics-metrics-api.ts`) with typed models and HTTP fallback.
+  * Created `AnalyticsMetricsWorkspace` (`apps/admin/src/components/analytics-metrics-workspace.tsx` & `.module.css`) and Next.js route `/analytics` featuring North Star stat cards, Activation Funnel table, and Depolarization index evaluator.
+  * Created unit test suites `test_analytics_metrics_api.py` (6/6 Pytest PASS) and `analytics-metrics.test.ts` (5/5 Node test PASS).
+- Admin Studio 16-Route Production Build:
+  * Next.js 16 (Turbopack) production build passed across all 16 static/dynamic routes (`/`, `/_not-found`, `/analytics`, `/case-builder`, `/case-media`, `/claims`, `/content-review`, `/deliberation`, `/flow-composer`, `/impact`, `/operational-reports`, `/publication-operations`, `/reason-moderation`, `/signal`, `/trust-integrity`).
+  * 89/89 unit tests PASS, 8/8 executable contracts PASS, `tsc --noEmit` 0 errors.
+- Claim & Knowledge Graph API, Workspace & Admin Client (CAP-057, CAP-058, CAP-059):
+  * Implemented FastAPI router `kefe_api.modules.knowledge.router` and mounted in `main.py` providing endpoints:
+    - `POST /v1/claims` & `GET /v1/claims/{claim_id}` (CAP-057)
+    - `POST /v1/claims/{claim_id}/assessments` & `GET /v1/claims/{claim_id}/assessments` (CAP-058)
+    - `POST /v1/claims/{claim_id}/assertions` & `GET /v1/claims/{claim_id}/assertions`
+    - `POST /v1/claims/{claim_id}/relations` & `GET /v1/claims/{claim_id}/relations` (CAP-059)
+    - `POST /v1/arguments` & `GET /v1/arguments/{argument_id}`
+    - `POST /v1/arguments/{argument_id}/relations` & `GET /v1/arguments/{argument_id}/relations`
+  * Created `ClaimWorkspace` (`apps/admin/src/components/claim-workspace.tsx` & `.module.css`) and Next.js route `/claims` with 4 dedicated tabs: İddia Kataloğu & Oluşturma (CAP-057), Değerlendirme & Kanıt Döngüsü (CAP-058), Aktör Beyanları (Assertions), and Argüman & Bilgi Grafı (CAP-059).
+  * Updated persistent `AdminStudioHeader` and `app/page.tsx` module grid with distinct `CAP-057..059 · Knowledge` card.
+  * Created `ClaimApiClient` (`apps/admin/src/lib/claim-api.ts`) with strict URL validation, input guards, self-relation prevention, and full typed models for Claim, Assessment, Assertion, Relation, and Argument.
+  * Created test suites `test_claim_knowledge_api.py` (9/9 Pytest PASS), `claim-api.test.ts` (3/3 Node test PASS), and `claim-workspace.test.ts` (2/2 Node test PASS). Total Admin Studio unit tests: 80/80 PASS, `tsc --noEmit` 0 errors.
+  * Commits: `4e15498d`, `14706edc`.
+- Admin Studio API & Backend Operations (CAP-016, CAP-017, CAP-019, CAP-020, CAP-021, CAP-022, CAP-027, CAP-028, CAP-029, CAP-030, CAP-033, CAP-036, CAP-037, CAP-039, CAP-041, CAP-042, CAP-043, CAP-044, CAP-046, CAP-047, CAP-048, CAP-049, CAP-050, CAP-051, CAP-052, CAP-053, CAP-054, CAP-068, CAP-072, CAP-075):
+  * Added `DeliberationWorkspace` (`apps/admin/src/components/deliberation-workspace.tsx`) and Next.js route `/deliberation` uniting the 8-criteria Case Quality Checklist (CAP-075), Case Objections and challenge decisions (CAP-068), and Append-only Case Correction History changelog (CAP-072) with live collective analytics (CAP-039, CAP-041, CAP-019).
+  * Added `CaseAnalyticsApiClient` (`apps/admin/src/lib/case-analytics-api.ts`) covering all 15 deliberation and experience endpoints with strict URL security and parameter validation.
+  * Added unit test suites `deliberation-workspace.test.ts` (3 tests), `case-analytics-api.test.ts` (18 tests), `signal-api.test.ts` (7 tests), and `impact-api.test.ts` (4 tests). All 80 Admin Studio unit tests PASS, `tsc --noEmit` PASS (0 errors), 8/8 executable contracts PASS.
+  * All 17 Pytest suites for deliberation analytics, knowledge graph, case objection decision, correction create, retro, budget tradeoff, observe mode, and community proposals PASS (17/17 PASS).
+  * Flutter mobile test suites (`case_objection`, `correction_history`, `budget_tradeoff`, `historical_retrospective`, `observe_mode`, `community_dilemma`) PASS (25/25 PASS), `dart analyze` 0 issues, full mobile suite 812/812 PASS.
+  * All 16 governance and delivery validation scripts (`validate_*.py`) PASS 100%, and full `scripts/project_health.py` 4-gate suite PASS 100%.
+- Analytics Core Verification (CAP-115, CAP-116, CAP-075): `ActivationFunnelCalculator`, `PerspectiveResilienceCalculator`, and `SignalFreshnessEngine` / `SignalHalfLifeCalculator` passed 100% (4/4 test suites PASS).
+- Impact & Institution Response Verification (CAP-049, CAP-050, CAP-052, CAP-054): 54/54 tests PASS across institution responses, action follow-through, and verified impact matrices.
+- Mobile Trust & Methodology (CAP-074, CAP-084): 7/7 Flutter unit tests PASS covering Open Methodology Sheet, localized anti-profiling guarantees, and raw result methodology copy.
+- Capability Portfolio: 128/128 Capabilities, 20 lifecycle states, 0 errors PASS (`CAP-004`, `CAP-032`, `CAP-057`, `CAP-058`, `CAP-059`, `CAP-061`, `CAP-062`, `CAP-063`, `CAP-064`, `CAP-065`, `CAP-066`, `CAP-068`, `CAP-072`, `CAP-078`, `CAP-085` advanced to `IMPLEMENTED_VERIFIED`; `CAP-010`, `CAP-011`, `CAP-012`, `CAP-034`, `CAP-038`, `CAP-040`, `CAP-048`, `CAP-069`, `CAP-070`, `CAP-084` cataloged with verified contracts, tests and exact gates).
+- Advanced ME Deliberation Verification (CAP-010, CAP-011, CAP-012): ADR-0146, ADR-0158, ADR-0189 verified across `test_change_mind_inquiry.py`, `test_insufficient_info_response.py`, `test_decision_receipt.py` in API and `change_mind_inquiry_test.dart`, `insufficient_info_response_test.dart`, `decision_receipt_test.dart` in Flutter (16/16 PASS).
+- Collective WE Perspectives & Shared Ground (CAP-034, CAP-038, CAP-040): ADR-0161, ADR-0147, ADR-0163 verified across `test_bridge_arguments.py`, `test_stakeholder_gap.py`, `test_divergence_anatomy.py` in API and `bridge_arguments_test.dart`, `stakeholder_gap_test.dart`, `divergence_anatomy_test.dart` in Flutter (12/12 PASS).
+- Trust & Presentation Verification (CAP-069, CAP-070): Contract `KEFE-CONTEXT-INFORMATION-STATUS-GUIDE-001` verified across `context_information_status_guide_test.dart` and `context_section_test.dart` (25/25 PASS) with zero analyzer issues.
+- Signal & Impact Delivery (CAP-048, CAP-050): Signal Target Registry (`signal.dispatch_target_registry`) and Verified Institution Response Room verified with 17 API Pytest tests and 7 Flutter tests (24/24 PASS).
+- Admin Studio 14-Route Production Build: Next.js 16 (Turbopack) production build passed across all 14 routes (`/`, `/_not-found`, `/case-builder`, `/case-media`, `/claims`, `/content-review`, `/deliberation`, `/flow-composer`, `/impact`, `/operational-reports`, `/publication-operations`, `/reason-moderation`, `/signal`). 80/80 unit tests PASS, 8/8 executable contracts PASS.
+- Governance & Delivery Validation: All 16 `validate_*.py` scripts PASS 100%.
+- Flutter Mobile Test Suite: 100% PASS (812/812 tests across all 195 test files PASS, 0 failures, 0 leaks).
 - Dart Analyze: 0 issues found!
 - Single-Screen / Single-Stage Responsive Viewport Overhaul & Zero-Scroll Completion:
   * Header Reclamation: `CaseHeroHeader` and `KefeActiveJourney` switch to `compact` mode during active subjourneys, reclaiming 470px of screen height.

@@ -44,3 +44,18 @@ def test_list_and_submit_case_objections_api() -> None:
     res_after = client.get(f"/v1/cases/{case_version_id}/objections")
     assert res_after.status_code == 200
     assert len(res_after.json()) >= 2
+
+    # 4. Decide on objection
+    objection_id = created["objection_id"]
+    decision_res = client.post(
+        f"/v1/cases/{case_version_id}/objections/{objection_id}/decision",
+        json={
+            "decision": "ACCEPT_AND_FILE_CORRECTION",
+            "resolution_note": "Haklı itiraz kabul edildi ve editoryal düzeltme planlandı.",
+        },
+    )
+    assert decision_res.status_code == 200
+    decided = decision_res.json()
+    assert decided["objection_id"] == objection_id
+    assert decided["status"] == "ACCEPTED_CORRECTION_FILED"
+    assert "Haklı itiraz" in decided["resolution_note"]

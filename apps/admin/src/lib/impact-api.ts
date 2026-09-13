@@ -61,6 +61,57 @@ export interface UpdateActionProgressInput {
   evidence_url?: string | null;
 }
 
+export interface ImpactEvidence {
+  evidence_id: string;
+  action_id: string;
+  evidence_type:
+    | "OFFICIAL_GAZETTE_DECREE"
+    | "AUDIT_EXPENDITURE_RECEIPT"
+    | "SENSOR_TELEMETRY_DATA"
+    | "THIRD_PARTY_ACADEMIC_STUDY";
+  evidence_title: string;
+  source_url: string;
+  sha256_digest: string;
+  verification_status: "PENDING_AUDIT" | "VERIFIED_AUTHENTIC" | "CHALLENGED_OR_INSUFFICIENT";
+}
+
+export interface RegisterImpactEvidenceInput {
+  evidence_type: ImpactEvidence["evidence_type"];
+  evidence_title: string;
+  source_url: string;
+  raw_document_content: string;
+}
+
+export interface ImpactVerification {
+  verification_id: string;
+  action_id: string;
+  outcome_verdict:
+    | "FULL_RESOLUTION"
+    | "SUBSTANTIAL_PROGRESS"
+    | "PARTIAL_SYMBOLIC_ONLY"
+    | "REJECTED_NON_COMPLIANT";
+  resolution_score: number;
+  auditor_consensus_count: number;
+  verification_notes: string;
+}
+
+export interface VerifyActionImpactInput {
+  outcome_verdict: ImpactVerification["outcome_verdict"];
+  resolution_score: number;
+  auditor_consensus_count: number;
+  verification_notes: string;
+}
+
+export interface ResponseReweigh {
+  response_id: string;
+  case_version_id: string;
+  reweigh_round_id: string;
+  is_reweigh_active: boolean;
+  initiated_at: string;
+  instructions: string;
+}
+
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -196,3 +247,50 @@ export async function updateActionProgress(
     fetchImpl
   );
 }
+
+export async function attachActionEvidence(
+  baseUrl: string,
+  actionId: string,
+  input: RegisterImpactEvidenceInput,
+  csrfToken: string,
+  fetchImpl?: typeof fetch
+): Promise<ImpactEvidence> {
+  return apiMutate<ImpactEvidence>(
+    `${baseUrl}/v1/impact/actions/${actionId}/evidence`,
+    "POST",
+    input,
+    csrfToken,
+    fetchImpl
+  );
+}
+
+export async function verifyActionImpact(
+  baseUrl: string,
+  actionId: string,
+  input: VerifyActionImpactInput,
+  csrfToken: string,
+  fetchImpl?: typeof fetch
+): Promise<ImpactVerification> {
+  return apiMutate<ImpactVerification>(
+    `${baseUrl}/v1/impact/actions/${actionId}/verify`,
+    "POST",
+    input,
+    csrfToken,
+    fetchImpl
+  );
+}
+
+export async function triggerResponseReweigh(
+  baseUrl: string,
+  responseId: string,
+  csrfToken: string,
+  fetchImpl?: typeof fetch
+): Promise<ResponseReweigh> {
+  return apiMutate<ResponseReweigh>(
+    `${baseUrl}/v1/impact/institution-responses/${responseId}/reweigh`,
+    "POST",
+    {},
+    csrfToken,
+    fetchImpl
+  );
+}

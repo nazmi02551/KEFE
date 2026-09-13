@@ -26,3 +26,23 @@ def test_get_case_correction_history_api() -> None:
     assert "2026 revizyonu" in first["editorial_rationale"]
     assert first["previous_text"] == "Madde 14 uyarınca"
     assert first["corrected_text"] == "Madde 16/A uyarınca"
+
+    # Add new correction via POST
+    post_res = client.post(
+        f"/v1/cases/{case_version_id}/corrections",
+        json={
+            "correction_type": "TYPO_FIX",
+            "severity": "MINOR",
+            "summary": "Yazım hatası düzeltildi.",
+            "editorial_rationale": "Türk Dil Kurumu kuralları gereği ek ayrıldı.",
+            "previous_text": "KEFE de",
+            "corrected_text": "KEFE'de",
+        },
+    )
+    assert post_res.status_code == 201
+    created = post_res.json()
+    assert "correction_id" in created
+    assert created["correction_type"] == "TYPO_FIX"
+    assert created["severity"] == "MINOR"
+    assert created["previous_text"] == "KEFE de"
+    assert created["corrected_text"] == "KEFE'de"

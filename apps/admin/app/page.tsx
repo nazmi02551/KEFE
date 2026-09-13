@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 
 import styles from "@/app/home.module.css";
@@ -68,6 +69,126 @@ export default function AdminStudioPage() {
             <h3 className={styles.moduleTitle}>Vaka Medya Kaydı</h3>
             <p className={styles.moduleDesc}>
               Doğrulanmış görsel ve medya varlıklarının içerik karması ile kayıt yönetimi.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href="/signal" className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-042..048 · Signal</span>
+            <h3 className={styles.moduleTitle}>Sinyal Operasyonları</h3>
+            <p className={styles.moduleDesc}>
+              Kolektif uzlaşı, metodoloji sertifikasyonu, katkı sınıfları ve sinyal hedef sicili.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href="/impact" className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-049..054 · Impact</span>
+            <h3 className={styles.moduleTitle}>Etki & Kurumsal Yanıt</h3>
+            <p className={styles.moduleDesc}>
+              Doğrulanmış kurum yanıtları, eylem adımları ve kilometre taşı takibi.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href="/deliberation" className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-075 / 068 / 072 · Audit</span>
+            <h3 className={styles.moduleTitle}>Deliberation & Kalite Denetimi</h3>
+            <p className={styles.moduleDesc}>
+              8 boyutlu kalite kontrolü, halk itirazları yönetimi ve şeffaf vaka düzeltme geçmişi.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href="/claims" className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-057..059 · Knowledge</span>
+            <h3 className={styles.moduleTitle}>İddia & Bilgi Grafiği</h3>
+            <p className={styles.moduleDesc}>
+              Birinci sınıf iddia sınıflandırması, kanıt değerlendirme döngüsü ve iddia-argüman ağ ilişkileri.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/trust-integrity" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-073 · Trust & Integrity</span>
+            <h3 className={styles.moduleTitle}>Bot Kalkanı & Gündem Eşiği</h3>
+            <p className={styles.moduleDesc}>
+              Sentetik astroturfing tespiti, bot koordinasyon karantinası ve dinamik gündem önceliklendirme.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/analytics" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-114..117 · Analytics</span>
+            <h3 className={styles.moduleTitle}>North Star & Kutuplaşma Metrikleri</h3>
+            <p className={styles.moduleDesc}>
+              Meaningful Weighs / WAU, aktivasyon dönüşüm hunisi ve kutuplaşma azaltma endeksi.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/ai-editorial" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-060 · Content Admin</span>
+            <h3 className={styles.moduleTitle}>AI Editoryal Asistan</h3>
+            <p className={styles.moduleDesc}>
+              Yapay zeka destekli iddia çıkarımı, dengeli perspektif önerileri ve önyargı denetimi.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/finops" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-124 · FinOps</span>
+            <h3 className={styles.moduleTitle}>FinOps & Birim Maliyet Analitiği</h3>
+            <p className={styles.moduleDesc}>
+              Tartım başına maliyet (CPW), model token tüketimi, SMS/OTP giderleri ve ölçek projeksiyonu.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/radar-live" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-076 · Consumer Growth</span>
+            <h3 className={styles.moduleTitle}>Canlı Radar & Bağlam Sapması</h3>
+            <p className={styles.moduleDesc}>
+              Gerçek zamanlı tartışma momentumu, demografik yönelim vektörleri ve yasal sapma bildirimleri.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/source-diversity" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-071 · Trust</span>
+            <h3 className={styles.moduleTitle}>Kaynak Çeşitliliği & Spektrum</h3>
+            <p className={styles.moduleDesc}>
+              Vakaların çoğulcu kaynaklardan beslendiğini denetleyen taksonomi ve çeşitlilik seviyesi analizi.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/open-methodology" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-074 · Transparency</span>
+            <h3 className={styles.moduleTitle}>Açık Metodoloji & Güven</h3>
+            <p className={styles.moduleDesc}>
+              Kolektif karar ve sinyal hesaplama formülleri, anayasal korumalar ve anti-profiling denetimi.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/evidence-builder" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-098 · Epistemic Rigor</span>
+            <h3 className={styles.moduleTitle}>Kanıt & Kaynak Masası</h3>
+            <p className={styles.moduleDesc}>
+              Akademik hakemli makaleler, resmi istatistikler ve kurumsal kanıtları vakalara bağlama.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/moderator-audit" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-067 · Governance</span>
+            <h3 className={styles.moduleTitle}>Moderatör Denetim Zinciri</h3>
+            <p className={styles.moduleDesc}>
+              Tüm idari ve moderasyon kararlarının kriptografik hash ile kamu denetimine açıldığı kütük.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/user-discovery" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-077 · User Agency</span>
+            <h3 className={styles.moduleTitle}>Kullanıcı Keşif Profili</h3>
+            <p className={styles.moduleDesc}>
+              Kullanıcının algoritmik manipülasyon olmadan keşif akışını ve çeşitlilik düzeyini belirlemesi.
+            </p>
+            <span className={styles.moduleAction}>Modülü Aç →</span>
+          </Link>
+          <Link href={"/kefe-today" as Route} className={styles.moduleCard}>
+            <span className={styles.moduleBadge}>CAP-026 · Curation</span>
+            <h3 className={styles.moduleTitle}>KEFE Today Vitrini</h3>
+            <p className={styles.moduleDesc}>
+              Gerçek dünyada yaşanan somut ikilemlerin doğrulanarak günün öne çıkan vitrinine yerleştirilmesi.
             </p>
             <span className={styles.moduleAction}>Modülü Aç →</span>
           </Link>

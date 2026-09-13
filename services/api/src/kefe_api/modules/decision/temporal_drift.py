@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 from uuid import UUID
 
@@ -23,8 +23,34 @@ class TemporalDriftResult:
     confidence_delta: float
     drift_nature: DriftNature
 
+    def to_dict(self) -> dict[str, any]:
+        return {
+            "case_version_id": str(self.case_version_id),
+            "initial_option_code": self.initial_option_code,
+            "retest_option_code": self.retest_option_code,
+            "time_elapsed_days": self.time_elapsed_days,
+            "is_shifted": self.is_shifted,
+            "confidence_delta": self.confidence_delta,
+            "drift_nature": self.drift_nature.value,
+            "capability_id": "CAP-013",
+        }
+
 
 class TemporalDriftCalculator:
+    @classmethod
+    def compute_for_case(cls, case_version_id: UUID) -> TemporalDriftResult:
+        """Deterministic temporal retest drift simulation for a case (CAP-013)."""
+        t0 = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
+        t_later = t0 + timedelta(days=45)
+        return cls.calculate_drift(
+            case_version_id=case_version_id,
+            initial_option_code="OPT_A",
+            retest_option_code="OPT_B",
+            initial_timestamp=t0,
+            retest_timestamp=t_later,
+            initial_confidence=0.6,
+            retest_confidence=0.8,
+        )
     @staticmethod
     def calculate_drift(
         *,

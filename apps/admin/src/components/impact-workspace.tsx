@@ -84,6 +84,15 @@ export function ImpactWorkspace({ baseUrl, csrfToken, caseVersionId }: ImpactWor
     return () => { cancelled = true; };
   }, [baseUrl, caseVersionId]);
 
+  const [linkedResponseId, setLinkedResponseId] = useState<string | null>(null);
+
+  function handleLinkResponse(r: InstitutionResponse) {
+    setProposeCaseId(r.case_version_id);
+    setLinkedResponseId(r.response_id);
+    setProposeTitle(`${r.institution_name} — Taahhüt Eylemi`);
+    setProposeDescription(`Kurum Yanıtı (${r.authority_role}): "${r.statement.slice(0, 120)}…" taahhüdüne yönelik eylem planı.`);
+  }
+
   async function handleProposeAction(e: React.FormEvent) {
     e.preventDefault();
     setProposing(true);
@@ -95,12 +104,14 @@ export function ImpactWorkspace({ baseUrl, csrfToken, caseVersionId }: ImpactWor
           case_version_id: proposeCaseId,
           title: proposeTitle,
           description: proposeDescription,
+          institution_response_id: linkedResponseId,
         },
         csrfToken
       );
       setActions((prev) => [action, ...prev]);
       setProposeTitle("");
       setProposeDescription("");
+      setLinkedResponseId(null);
     } catch (err: unknown) {
       setProposeError(err instanceof Error ? err.message : "Bilinmeyen hata");
     } finally {
@@ -162,10 +173,10 @@ export function ImpactWorkspace({ baseUrl, csrfToken, caseVersionId }: ImpactWor
         </p>
       </header>
 
-      {/* Institution Responses */}
+      {/* Institution Responses / Response Room (CAP-049, CAP-050) */}
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>
-          Kurum Yanıtları
+          Kurum Cevap Odası (Doğrulanmış Yanıtlar)
           <span className={styles.sectionCount}>({responses.length})</span>
         </h2>
         {responses.length === 0 ? (
@@ -175,16 +186,45 @@ export function ImpactWorkspace({ baseUrl, csrfToken, caseVersionId }: ImpactWor
             {responses.map((r) => (
               <li key={r.response_id} className={styles.responseCard}>
                 <div className={styles.responseHeader}>
-                  <span className={styles.institutionName}>{r.institution_name}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span className={styles.institutionName}>{r.institution_name}</span>
+                    <span
+                      className={
+                        r.verification_status === "VERIFIED"
+                          ? styles.roomBadgeVerified
+                          : styles.roomBadgePending
+                      }
+                    >
+                      {r.verification_status === "VERIFIED" ? "✓ Doğrulandı" : r.verification_status}
+                    </span>
+                  </div>
                   <span className={styles.responseTypeBadge}>
                     {RESPONSE_TYPE_LABELS[r.response_type] ?? r.response_type}
                   </span>
                 </div>
                 <p className={styles.authorityRole}>{r.authority_role}</p>
                 <p className={styles.statement}>{r.statement}</p>
-                <time className={styles.publishedAt} dateTime={r.published_at}>
-                  {new Date(r.published_at).toLocaleDateString("tr-TR")}
-                </time>
+
+                <div className={styles.responseRoomFooter}>
+                  <div className={styles.roomMetaDetails}>
+                    <time className={styles.publishedAt} dateTime={r.published_at}>
+                      Tarih: {new Date(r.published_at).toLocaleDateString("tr-TR")}
+                    </time>
+                    {r.milestone_date && (
+                      <span className={styles.milestoneTag}>
+                        Hedef Vade: {new Date(r.milestone_date).toLocaleDateString("tr-TR")}
+                      </span>
+                    )}
+                    <span className={styles.reweighBadge}>Yeniden Tartım Açık</span>
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.roomActionBtn}
+                    onClick={() => handleLinkResponse(r)}
+                  >
+                    Bu Yanıttan Eylem Başlat (CAP-052) →
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

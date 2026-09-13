@@ -70,6 +70,12 @@ from kefe_api.modules.admin_security.operational_reports import (
 from kefe_api.modules.admin_security.operational_reports_router import (
     router as admin_operational_reports_router,
 )
+from kefe_api.modules.analytics.router import (
+    analytics_router,
+)
+from kefe_api.modules.analytics.finops_router import (
+    finops_router,
+)
 from kefe_api.modules.admin_security.policy import default_admin_security_policy
 from kefe_api.modules.admin_security.proposal_queue_router import (
     router as admin_proposal_queue_router,
@@ -106,6 +112,30 @@ from kefe_api.modules.context.service import ContextService
 from kefe_api.modules.decision.case_analytics_router import (
     case_analytics_router,
 )
+from kefe_api.modules.decision.trust_integrity_router import (
+    trust_integrity_router,
+)
+from kefe_api.modules.decision.ai_editorial_router import (
+    ai_editorial_router,
+)
+from kefe_api.modules.decision.case_lifecycle_router import (
+    case_lifecycle_router,
+)
+from kefe_api.modules.decision.radar_live_router import (
+    radar_live_router,
+)
+from kefe_api.modules.decision.source_diversity_router import (
+    router as source_diversity_router,
+)
+from kefe_api.modules.decision.open_methodology_router import (
+    router as open_methodology_router,
+)
+from kefe_api.modules.decision.evidence_builder_router import (
+    router as evidence_builder_router,
+)
+from kefe_api.modules.decision.moderator_audit_router import (
+    router as moderator_audit_router,
+)
 from kefe_api.modules.decision.lineage_aware_service import LineageAwareDecisionService
 from kefe_api.modules.decision.lineage_router import router as decision_lineage_router
 from kefe_api.modules.decision.lineage_service import DecisionLineageService
@@ -113,6 +143,9 @@ from kefe_api.modules.decision.reflection_router import router as reflection_rou
 from kefe_api.modules.decision.reflection_service import ReflectionService
 from kefe_api.modules.decision.router import router as decision_router
 from kefe_api.modules.discovery.router import discovery_router
+from kefe_api.modules.discovery.kefe_today_router import (
+    router as kefe_today_router,
+)
 from kefe_api.modules.flow_runtime.router import router as flow_runtime_router
 from kefe_api.modules.flow_runtime.service import FlowRuntimeService
 from kefe_api.modules.global_discovery.router import router as global_discovery_router
@@ -142,6 +175,7 @@ from kefe_api.modules.identity.otp_provider_receipts_router import (
 from kefe_api.modules.identity.router import router as identity_router
 from kefe_api.modules.identity.service import IdentityService
 from kefe_api.modules.impact.router import impact_router
+from kefe_api.modules.knowledge.router import knowledge_router
 from kefe_api.modules.privacy.router import router as privacy_router
 from kefe_api.modules.privacy.service import PrivacyService
 from kefe_api.modules.progress.router import router as progress_router
@@ -418,6 +452,7 @@ def create_app() -> FastAPI:
     app.include_router(signal_router)
     app.include_router(signal_pipeline_router)
     app.include_router(impact_router)
+    app.include_router(knowledge_router)
     app.include_router(discovery_router)
     app.include_router(decision_lineage_router)
     app.include_router(reflection_router)
@@ -444,6 +479,17 @@ def create_app() -> FastAPI:
     app.include_router(admin_content_configuration_router)
     app.include_router(community_reason_admin_router)
     app.include_router(admin_operational_reports_router)
+    app.include_router(trust_integrity_router)
+    app.include_router(analytics_router)
+    app.include_router(finops_router)
+    app.include_router(ai_editorial_router)
+    app.include_router(case_lifecycle_router)
+    app.include_router(radar_live_router)
+    app.include_router(source_diversity_router)
+    app.include_router(open_methodology_router)
+    app.include_router(evidence_builder_router)
+    app.include_router(moderator_audit_router)
+    app.include_router(kefe_today_router)
     return app
 
 

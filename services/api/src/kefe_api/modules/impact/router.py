@@ -7,6 +7,19 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
 
+from kefe_api.modules.decision.impact_evidence import (
+    EvidenceVerificationStatus,
+    ImpactEvidenceService,
+    ImpactEvidenceType,
+)
+from kefe_api.modules.decision.impact_verification import (
+    ImpactVerificationEngine,
+    OutcomeVerdict,
+)
+from kefe_api.modules.decision.institutional_promise_outcome_matrix import (
+    InstitutionalPromiseOutcomeMatrixService,
+    PromiseRealizationStatus,
+)
 from kefe_api.modules.impact.action_models import ActionMilestone, ActionStatus
 from kefe_api.modules.impact.models import (
     InstitutionResponse,
@@ -80,6 +93,59 @@ class UpdateProgressIn(BaseModel):
     status: str
     evidence_summary: str | None = None
     evidence_url: str | None = None
+
+
+class RegisterEvidenceIn(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    evidence_type: str = Field(description="OFFICIAL_GAZETTE_DECREE, AUDIT_EXPENDITURE_RECEIPT, SENSOR_TELEMETRY_DATA, THIRD_PARTY_ACADEMIC_STUDY")
+    evidence_title: str = Field(min_length=5, max_length=200)
+    source_url: str = Field(min_length=10, max_length=500)
+    raw_document_content: str = Field(min_length=10, max_length=100000)
+
+
+class ImpactEvidenceOut(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    evidence_id: str
+    action_id: str
+    evidence_type: str
+    evidence_title: str
+    source_url: str
+    sha256_digest: str
+    verification_status: str
+
+
+class VerifyImpactIn(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    outcome_verdict: str = Field(description="FULL_RESOLUTION, SUBSTANTIAL_PROGRESS, PARTIAL_SYMBOLIC_ONLY, REJECTED_NON_COMPLIANT")
+    resolution_score: float = Field(ge=0.0, le=1.0)
+    auditor_consensus_count: int = Field(ge=1)
+    verification_notes: str = Field(min_length=5, max_length=2000)
+
+
+class ImpactVerificationOut(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    verification_id: str
+    action_id: str
+    outcome_verdict: str
+    resolution_score: float
+    auditor_consensus_count: int
+    verification_notes: str
+
+
+class ResponseReweighOut(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    response_id: UUID
+    case_version_id: UUID
+    reweigh_round_id: str
+    is_reweigh_active: bool
+    initiated_at: str
+    instructions: str
+
 
 
 # ---------------------------------------------------------------------------
@@ -241,3 +307,158 @@ def update_action_progress(
         raise HTTPException(status_code=404, detail=f"Action {action_id} not found") from exc
 
     return _action_out(updated)
+
+
+@impact_router.post(
+    "/actions/{action_id}/evidence",
+    response_model=ImpactEvidenceOut,
+    status_code=201,
+)
+def attach_action_evidence(
+    action_id: UUID,
+    payload: RegisterEvidenceIn,
+    repo: ImpactRepoDep,
+) -> ImpactEvidenceOut:
+    """Attach empirical evidence artifact to an action milestone (CAP-053)."""
+    action = repo.get_action(action_id)
+    if action is None:
+        raise HTTPException(status_code=404, detail=f"Action {action_id} not found")
+
+    try:
+        ev_type = ImpactEvidenceType(payload.evidence_type)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid evidence_type: {payload.evidence_type}. Valid: {[e.value for e in ImpactEvidenceType]}",
+        ) from exc
+
+    try:
+        result = ImpactEvidenceService.register_evidence(
+            evidence_id=str(uuid4()),
+            action_id=str(action_id),
+            evidence_type=ev_type,
+            evidence_title=payload.evidence_title,
+            source_url=payload.source_url,
+            raw_document_content=payload.raw_document_content,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    updated = ActionMilestone(
+        action_id=action.action_id,
+        case_version_id=action.case_version_id,
+        title=action.title,
+        description=action.description,
+        status=action.status,
+        progress_percentage=action.progress_percentage,
+        institution_response_id=action.institution_response_id,
+        target_completion_date=action.target_completion_date,
+        created_at=action.created_at,
+        evidence_summary=payload.evidence_title,
+        evidence_url=payload.source_url,
+    )
+    repo.update_action(updated)
+
+    return ImpactEvidenceOut(
+        evidence_id=result.evidence_id,
+        action_id=result.action_id,
+        evidence_type=result.evidence_type.value,
+        evidence_title=result.evidence_title,
+        source_url=result.source_url,
+        sha256_digest=result.sha256_digest,
+        verification_status=result.verification_status.value,
+    )
+
+
+@impact_router.post(
+    "/actions/{action_id}/verify",
+    response_model=ImpactVerificationOut,
+    status_code=200,
+)
+def verify_action_impact(
+    action_id: UUID,
+    payload: VerifyImpactIn,
+    repo: ImpactRepoDep,
+) -> ImpactVerificationOut:
+    """Evaluate and certify impact verification verdict for an action milestone (CAP-054)."""
+    action = repo.get_action(action_id)
+    if action is None:
+        raise HTTPException(status_code=404, detail=f"Action {action_id} not found")
+
+    try:
+        verdict = OutcomeVerdict(payload.outcome_verdict)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid outcome_verdict: {payload.outcome_verdict}. Valid: {[v.value for v in OutcomeVerdict]}",
+        ) from exc
+
+    try:
+        result = ImpactVerificationEngine.evaluate(
+            verification_id=str(uuid4()),
+            action_id=str(action_id),
+            outcome_verdict=verdict,
+            resolution_score=payload.resolution_score,
+            auditor_consensus_count=payload.auditor_consensus_count,
+            verification_notes=payload.verification_notes,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    if verdict == OutcomeVerdict.FULL_RESOLUTION and payload.resolution_score >= 0.9:
+        status_enum = ActionStatus.VERIFIED_COMPLETE
+    elif verdict == OutcomeVerdict.REJECTED_NON_COMPLIANT:
+        status_enum = ActionStatus.STALLED
+    else:
+        status_enum = ActionStatus.IN_PROGRESS
+
+    updated = ActionMilestone(
+        action_id=action.action_id,
+        case_version_id=action.case_version_id,
+        title=action.title,
+        description=action.description,
+        status=status_enum,
+        progress_percentage=int(payload.resolution_score * 100),
+        institution_response_id=action.institution_response_id,
+        target_completion_date=action.target_completion_date,
+        created_at=action.created_at,
+        evidence_summary=f"Denetim Kararı: {verdict.value} (Skor: {payload.resolution_score:.2f})",
+        evidence_url=action.evidence_url,
+    )
+    repo.update_action(updated)
+
+    return ImpactVerificationOut(
+        verification_id=result.verification_id,
+        action_id=result.action_id,
+        outcome_verdict=result.outcome_verdict.value,
+        resolution_score=result.resolution_score,
+        auditor_consensus_count=result.auditor_consensus_count,
+        verification_notes=result.verification_notes,
+    )
+
+
+@impact_router.post(
+    "/institution-responses/{response_id}/reweigh",
+    response_model=ResponseReweighOut,
+    status_code=200,
+)
+def trigger_response_reweigh(
+    response_id: UUID,
+    repo: ImpactRepoDep,
+) -> ResponseReweighOut:
+    """Initiate a post-response public reweighing round (CAP-051)."""
+    resp = repo.get_institution_response(response_id)
+    if resp is None:
+        raise HTTPException(status_code=404, detail=f"InstitutionResponse {response_id} not found")
+
+    return ResponseReweighOut(
+        response_id=resp.response_id,
+        case_version_id=resp.case_version_id,
+        reweigh_round_id=f"reweigh-{str(uuid4())[:8]}",
+        is_reweigh_active=True,
+        initiated_at=datetime.now(UTC).isoformat(),
+        instructions=(
+            f"'{resp.institution_name}' kurumu tarafından verilen resmi taahhüt sonrasında, "
+            "yurttaşların başlangıç tercihlerini ve önem ağırlıklarını yeniden değerlendirmesi başlatılmıştır."
+        ),
+    )

@@ -18,6 +18,19 @@ const navItems = [
   { href: "/case-media", label: "Medya" },
   { href: "/signal", label: "Sinyal" },
   { href: "/impact", label: "Etki" },
+  { href: "/deliberation", label: "Deliberation" },
+  { href: "/claims", label: "İddia & Graf" },
+  { href: "/trust-integrity", label: "Bot & Güvenlik" },
+  { href: "/analytics", label: "Metrikler" },
+  { href: "/ai-editorial", label: "AI Asistan" },
+  { href: "/finops", label: "FinOps" },
+  { href: "/radar-live", label: "Canlı Radar" },
+  { href: "/source-diversity", label: "Kaynak Çeşitliliği" },
+  { href: "/open-methodology", label: "Metodoloji" },
+  { href: "/evidence-builder", label: "Kanıt Masası" },
+  { href: "/moderator-audit", label: "Denetim Zinciri" },
+  { href: "/user-discovery", label: "Keşif Profili" },
+  { href: "/kefe-today", label: "KEFE Today" },
 ] as const;
 
 function subscribeTheme(callback: () => void) {
