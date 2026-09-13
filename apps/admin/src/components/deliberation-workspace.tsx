@@ -19,6 +19,10 @@ import {
   type BridgeArgumentReportItem,
   type StakeholderGapReport,
   type DivergenceAnatomyReport,
+  type ThresholdAnalysisReport,
+  type ResponsibilityAnalysisReport,
+  type ProcessAnalysisReport,
+  type StakeholderImpactReport,
 } from "@/src/lib/case-analytics-api";
 import {
   CaseObjectionApiClient,
@@ -47,7 +51,7 @@ export function DeliberationWorkspace({
   const [caseVersionId, setCaseVersionId] = useState(initialCaseVersionId);
   const [baseUrl, setBaseUrl] = useState(initialBaseUrl);
   const [csrfToken, setCsrfToken] = useState(initialCsrfToken);
-  const [activeTab, setActiveTab] = useState<"checklist" | "objections" | "corrections" | "analytics" | "advanced">("checklist");
+  const [activeTab, setActiveTab] = useState<"checklist" | "objections" | "corrections" | "analytics" | "advanced" | "governance">("checklist");
 
   // Data states
   const [checklist, setChecklist] = useState<QualityChecklistReport | null>(null);
@@ -67,6 +71,10 @@ export function DeliberationWorkspace({
   const [bridgeArgs, setBridgeArgs] = useState<BridgeArgumentReportItem[]>([]);
   const [stakeholderGap, setStakeholderGap] = useState<StakeholderGapReport | null>(null);
   const [divergenceAnatomy, setDivergenceAnatomy] = useState<DivergenceAnatomyReport | null>(null);
+  const [thresholdAnalysis, setThresholdAnalysis] = useState<ThresholdAnalysisReport | null>(null);
+  const [responsibilityAnalysis, setResponsibilityAnalysis] = useState<ResponsibilityAnalysisReport | null>(null);
+  const [processAnalysis, setProcessAnalysis] = useState<ProcessAnalysisReport | null>(null);
+  const [stakeholderImpact, setStakeholderImpact] = useState<StakeholderImpactReport | null>(null);
 
   // Status & loading states
   const [loading, setLoading] = useState(false);
@@ -117,6 +125,10 @@ export function DeliberationWorkspace({
         bridgeArgsRes,
         stakeholderGapRes,
         divergenceAnatomyRes,
+        thresholdAnalysisRes,
+        responsibilityAnalysisRes,
+        processAnalysisRes,
+        stakeholderImpactRes,
       ] = await Promise.all([
         analyticsClient.getQualityChecklist(caseVersionId),
         objectionClient.listObjections(caseVersionId),
@@ -135,6 +147,10 @@ export function DeliberationWorkspace({
         analyticsClient.getBridgeArguments(caseVersionId),
         analyticsClient.getStakeholderGap(caseVersionId),
         analyticsClient.getDivergenceAnatomy(caseVersionId),
+        analyticsClient.getThresholdAnalysis(caseVersionId),
+        analyticsClient.getResponsibilityAnalysis(caseVersionId),
+        analyticsClient.getProcessAnalysis(caseVersionId),
+        analyticsClient.getStakeholderImpact(caseVersionId),
       ]);
 
       setChecklist(checklistRes);
@@ -154,6 +170,10 @@ export function DeliberationWorkspace({
       setBridgeArgs(bridgeArgsRes);
       setStakeholderGap(stakeholderGapRes);
       setDivergenceAnatomy(divergenceAnatomyRes);
+      setThresholdAnalysis(thresholdAnalysisRes);
+      setResponsibilityAnalysis(responsibilityAnalysisRes);
+      setProcessAnalysis(processAnalysisRes);
+      setStakeholderImpact(stakeholderImpactRes);
 
 
       setStatusMessage({
@@ -354,6 +374,13 @@ export function DeliberationWorkspace({
           onClick={() => setActiveTab("advanced")}
         >
           İleri Düzey Müzakere (CAP-005 / CAP-006 / CAP-011 / CAP-012 / CAP-102)
+        </button>
+        <button
+          type="button"
+          className={`${styles.tabButton} ${activeTab === "governance" ? styles.tabActive : ""}`}
+          onClick={() => setActiveTab("governance")}
+        >
+          Sistemik Yönetişim & Etki (CAP-018 / CAP-020 / CAP-021 / CAP-022 / CAP-023)
         </button>
       </nav>
 
@@ -1051,6 +1078,247 @@ export function DeliberationWorkspace({
               </div>
             ) : (
               <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Köprü tezi bulunamadı.</p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Tab 6: Governance, Accountability & Impact */}
+      {activeTab === "governance" && (
+        <section aria-label="Sistemik Yönetişim ve Politika Analizleri">
+          <div className={styles.sectionTitle}>
+            <span>Sistemik Yönetişim, Usul Denetimi, Teşvik Yapısı ve Paydaş Hakkaniyeti</span>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+            {/* CAP-018: Threshold Analysis */}
+            <div className={styles.itemCard}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1rem", color: "var(--gold)" }}>
+                  Eşik ve Kırılma Hassasiyeti (CAP-018)
+                </h3>
+                {thresholdAnalysis && (
+                  <span className={`${styles.badge} ${styles.badgePassed}`}>
+                    Kırılma Eşiği: {thresholdAnalysis.tipping_point_threshold} {thresholdAnalysis.unit}
+                  </span>
+                )}
+              </div>
+              {thresholdAnalysis ? (
+                <div>
+                  <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: "0 0 0.5rem" }}>
+                    Parametre: <strong>{thresholdAnalysis.parameter_name}</strong> ({thresholdAnalysis.unit})
+                  </p>
+                  <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                    {thresholdAnalysis.curve_points.map((pt) => (
+                      <div
+                        key={pt.parameter_value}
+                        style={{
+                          background: "var(--background)",
+                          padding: "0.4rem 0.6rem",
+                          borderRadius: "0.35rem",
+                          border: "1px solid var(--line)",
+                          fontSize: "0.8rem",
+                        }}
+                      >
+                        <span>{pt.parameter_value} {thresholdAnalysis.unit}: </span>
+                        <strong>{Math.round(pt.acceptance_rate * 100)}% Kabul</strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
+              )}
+            </div>
+
+            {/* CAP-020: Responsibility Analysis */}
+            <div className={styles.itemCard}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1rem", color: "var(--gold)" }}>
+                  Sorumluluk ve Hesap Verebilirlik (CAP-020)
+                </h3>
+                {responsibilityAnalysis && (
+                  <span className={`${styles.badge} ${styles.badgePassed}`}>
+                    Açıklık: {Math.round((responsibilityAnalysis.clarity_score ?? 0) * 100)}%
+                  </span>
+                )}
+              </div>
+              {responsibilityAnalysis ? (
+                <div>
+                  <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: "0 0 0.5rem" }}>
+                    Yasal Başvuru / İtiraz Kanalı: <strong>{responsibilityAnalysis.legal_redress_channel ?? "Belirtilmemiş"}</strong>
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                    {(responsibilityAnalysis.actor_allocations ?? []).map((act) => (
+                      <div
+                        key={act.actor_key}
+                        style={{
+                          background: "var(--background)",
+                          padding: "0.4rem 0.6rem",
+                          borderRadius: "0.35rem",
+                          border: "1px solid var(--line)",
+                          fontSize: "0.8rem",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <div>
+                          <strong>{act.actor_name}</strong> ({act.duty_nature})
+                          <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>{act.jurisdiction_scope}</div>
+                        </div>
+                        <span className={styles.badge}>
+                          {Math.round(act.responsibility_share * 100)}% Sorumluluk
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
+              )}
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", marginTop: "1.25rem" }}>
+            {/* CAP-021: Process Analysis */}
+            <div className={styles.itemCard}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1rem", color: "var(--gold)" }}>
+                  Usul ve Süreç Denetimi (CAP-021)
+                </h3>
+                {processAnalysis && (
+                  <span className={`${styles.badge} ${styles.badgeProvisional}`}>
+                    Aşama: {processAnalysis.current_stage ?? "Bilinmiyor"}
+                  </span>
+                )}
+              </div>
+              {processAnalysis ? (
+                <div>
+                  <div style={{ fontSize: "0.82rem", color: "var(--muted)", marginBottom: "0.5rem", display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+                    <span>Usul Bütünlüğü: <strong>{Math.round((processAnalysis.procedural_integrity_score ?? 0) * 100)}%</strong></span>
+                    <span>Şeffaflık: <strong>{processAnalysis.transparency_level ?? "MODERATE"}</strong></span>
+                    <span>Katılım: <strong>{processAnalysis.public_participation_status ?? "OPEN"}</strong></span>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                    {(processAnalysis.stages ?? []).map((st) => (
+                      <div
+                        key={st.stage_key}
+                        style={{
+                          background: "var(--background)",
+                          padding: "0.35rem 0.5rem",
+                          borderRadius: "0.35rem",
+                          border: "1px solid var(--line)",
+                          fontSize: "0.78rem",
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <span>{st.is_completed ? "✓" : "○"} {st.stage_title} ({st.duration_days} gün)</span>
+                        <span style={{ color: st.has_public_input ? "#81c784" : "var(--muted)" }}>
+                          {st.has_public_input ? "Halk Katılımı Var" : "İç Usul"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
+              )}
+            </div>
+
+            {/* CAP-022: Incentive Map */}
+            <div className={styles.itemCard}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1rem", color: "var(--gold)" }}>
+                  Teşvik Yapısı & Rant Riski (CAP-022)
+                </h3>
+                {incentives && (
+                  <span className={`${styles.badge} ${incentives.perverse_incentive_risk === "LOW" ? styles.badgePassed : styles.badgeFailed}`}>
+                    Rant/Ters Teşvik Riski: {incentives.perverse_incentive_risk ?? "MODERATE"}
+                  </span>
+                )}
+              </div>
+              {incentives ? (
+                <div>
+                  <p style={{ fontSize: "0.82rem", color: "var(--muted)", margin: "0 0 0.5rem" }}>
+                    Birincil Güdüleyici: <strong>{incentives.primary_driver ?? "Ekonomik / İdari"}</strong> · Uyum: <strong>{Math.round((incentives.alignment_index ?? 0.75) * 100)}%</strong>
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                    {(incentives.incentive_nodes ?? incentives.incentives ?? []).map((node, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          background: "var(--background)",
+                          padding: "0.35rem 0.5rem",
+                          borderRadius: "0.35rem",
+                          border: "1px solid var(--line)",
+                          fontSize: "0.78rem",
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <div>
+                          <strong>{node.stakeholder_group ?? node.actor_group ?? "Grup"}</strong>: {node.core_incentive ?? node.mitigation_lever}
+                        </div>
+                        <span className={styles.badge} style={{ fontSize: "0.72rem" }}>
+                          {node.alignment_status ?? node.perverse_incentive_risk ?? "ALIGNED"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
+              )}
+            </div>
+          </div>
+
+          {/* CAP-023: Stakeholder Impact Matrix */}
+          <div className={styles.itemCard} style={{ marginTop: "1.25rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+              <h3 style={{ margin: 0, fontSize: "1rem", color: "var(--gold)" }}>
+                Paydaş Etki & Net Hakkaniyet Matrisi (CAP-023)
+              </h3>
+              {stakeholderImpact && (
+                <span className={`${styles.badge} ${stakeholderImpact.net_equity_score >= 0 ? styles.badgePassed : styles.badgeFailed}`}>
+                  Net Hakkaniyet Skoru: {stakeholderImpact.net_equity_score > 0 ? `+${stakeholderImpact.net_equity_score}` : stakeholderImpact.net_equity_score}
+                </span>
+              )}
+            </div>
+            {stakeholderImpact ? (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "0.75rem" }}>
+                {stakeholderImpact.impact_items.map((item, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      background: "var(--background)",
+                      padding: "0.75rem",
+                      borderRadius: "0.5rem",
+                      border: "1px solid var(--line)",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.35rem" }}>
+                      <strong style={{ fontSize: "0.85rem", color: "var(--text)" }}>{item.stakeholder_group}</strong>
+                      <span
+                        className={`${styles.badge} ${
+                          item.impact_type === "BENEFIT" || item.impact_type === "PROTECTION"
+                            ? styles.badgePassed
+                            : styles.badgeFailed
+                        }`}
+                        style={{ fontSize: "0.72rem" }}
+                      >
+                        {item.impact_type} ({item.impact_score > 0 ? `+${item.impact_score}` : item.impact_score})
+                      </span>
+                    </div>
+                    <p style={{ fontSize: "0.8rem", color: "var(--muted)", margin: 0 }}>
+                      {item.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
             )}
           </div>
         </section>

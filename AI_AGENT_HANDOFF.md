@@ -55,6 +55,15 @@
   * **CAP-040 (Divergence Anatomy / Ayrışma Anatomisi):** `DivergenceAnatomyCalculator`, FastAPI `GET /v1/cases/{case_version_id}/divergence-anatomy` in `case_analytics_router.py`, `getDivergenceAnatomy()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
   * **Test Evidence:** `test_synthesis_divergence_api.py` (Pytest PASS), `case-analytics-api.test.ts` (PASS with 28 assertions), `deliberation-workspace.test.ts` (PASS), `npm test` (121/121 Node tests PASS), Next.js build (25/25 routes PASS), `project_health.py` (4/4 gates PASS 100%).
 
+- Wave 6 Systemic Governance, Accountability & Impact Suite (CAP-018, CAP-020, CAP-021, CAP-022, CAP-023):
+  * **CAP-018 (Threshold Sensitivity Analysis & Tipping Point):** `ThresholdSensitivityCalculator`, FastAPI `GET /v1/cases/{case_version_id}/threshold-analysis` in `case_analytics_router.py`, `getThresholdAnalysis()` in `case-analytics-api.ts`, Tab 6 integration in `deliberation-workspace.tsx`.
+  * **CAP-020 (Responsibility Analysis & Duty Bearers):** `ResponsibilityAnalysisCalculator`, FastAPI `GET /v1/cases/{case_version_id}/responsibility-analysis` in `case_analytics_router.py`, `getResponsibilityAnalysis()` in `case-analytics-api.ts`, Tab 6 integration in `deliberation-workspace.tsx`.
+  * **CAP-021 (Process Analysis & Procedural Integrity):** `ProcessAnalysisCalculator`, FastAPI `GET /v1/cases/{case_version_id}/process-analysis` in `case_analytics_router.py`, `getProcessAnalysis()` in `case-analytics-api.ts`, Tab 6 integration in `deliberation-workspace.tsx`.
+  * **CAP-022 (Incentive Map & Perverse Risk Levers):** `IncentiveMapCalculator`, FastAPI `GET /v1/cases/{case_version_id}/incentive-map` in `case_analytics_router.py`, `getIncentiveMap()` in `case-analytics-api.ts`, Tab 6 integration in `deliberation-workspace.tsx`.
+  * **CAP-023 (Stakeholder Impact & Net Equity Matrix):** `StakeholderImpactCalculator`, FastAPI `GET /v1/cases/{case_version_id}/stakeholder-impact` in `case_analytics_router.py`, `getStakeholderImpact()` in `case-analytics-api.ts`, Tab 6 integration in `deliberation-workspace.tsx`.
+  * **Test Evidence:** `test_governance_impact_api.py` (Pytest PASS), `test_threshold_analysis.py` (PASS), `test_stakeholder_impact.py` (PASS), `test_responsibility_analysis_api.py` (PASS), `test_process_analysis_api.py` (PASS), `test_incentive_map_api.py` (PASS), `case-analytics-api.test.ts` (PASS with 30 assertions), `deliberation-workspace.test.ts` (PASS), `npm test` (122/122 Node tests PASS), Next.js build (25/25 routes PASS), `project_health.py` (4/4 gates PASS 100%).
+
+
 
 - Trust, Bot & Anomaly Integrity Shield (CAP-073):
   * Implemented FastAPI router `trust_integrity_router.py` in `services/api/src/kefe_api/modules/decision` with endpoints:

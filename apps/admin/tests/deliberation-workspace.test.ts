@@ -364,4 +364,140 @@ test("Deliberation Workspace: loads Wave 5 synthesis and divergence capabilities
   }
 });
 
+test("Deliberation Workspace: loads systemic governance and impact capabilities (CAP-018, CAP-020, CAP-021, CAP-022, CAP-023)", async () => {
+  const caseId = "22222222-2222-4222-8222-222222222222";
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = async (input: RequestInfo | URL) => {
+    const url = input.toString();
+
+    if (url.includes("/threshold-analysis")) {
+      return new Response(JSON.stringify({
+        case_version_id: caseId,
+        parameter_name: "Aylık Ulaşım Katkı Payı / Eşik",
+        unit: "TL",
+        tipping_point_threshold: 20.0,
+        curve_points: [
+          { parameter_value: 5.0, acceptance_rate: 0.90 },
+          { parameter_value: 10.0, acceptance_rate: 0.75 },
+          { parameter_value: 20.0, acceptance_rate: 0.45 },
+          { parameter_value: 50.0, acceptance_rate: 0.15 }
+        ]
+      }), { status: 200 });
+    }
+
+    if (url.includes("/responsibility-analysis")) {
+      return new Response(JSON.stringify({
+        analysis_id: "RESP-22222222",
+        case_version_id: caseId,
+        clarity_score: 0.82,
+        has_accountability_gap: false,
+        legal_redress_channel: "İdare Mahkemesi & Kamu Denetçiliği Kurumu",
+        actor_allocations: [
+          {
+            actor_key: "REGULATORY_AUTHORITY",
+            actor_name: "Düzenleyici Üst Kurul",
+            responsibility_share: 0.40,
+            duty_nature: "REGULATORY_OVERSIGHT",
+            jurisdiction_scope: "Standart belirleme",
+            accountability_mechanism: "İdari cezalar"
+          }
+        ]
+      }), { status: 200 });
+    }
+
+    if (url.includes("/process-analysis")) {
+      return new Response(JSON.stringify({
+        analysis_id: "PROC-22222222",
+        case_version_id: caseId,
+        current_stage: "PUBLIC_HEARING",
+        procedural_integrity_score: 0.85,
+        transparency_level: "HIGH",
+        public_participation_status: "OPEN_CONSULTATION",
+        oversight_body: "Ombudsmanlık",
+        stages: [
+          {
+            stage_key: "STAGE_1",
+            stage_title: "Ön İstişare",
+            is_completed: true,
+            duration_days: 14,
+            has_public_input: true
+          }
+        ]
+      }), { status: 200 });
+    }
+
+    if (url.includes("/incentive-map")) {
+      return new Response(JSON.stringify({
+        map_id: "INC-22222222",
+        case_version_id: caseId,
+        alignment_index: 0.78,
+        perverse_incentive_risk: "LOW",
+        primary_driver: "Kamu Yararı",
+        mitigation_mechanism: "Şeffaf Açık Veri",
+        incentive_nodes: [
+          {
+            stakeholder_group: "İşletmeciler",
+            core_incentive: "Maliyet optimizasyonu",
+            incentive_type: "FINANCIAL_PROFIT",
+            alignment_status: "ALIGNED",
+            intensity_score: 0.7,
+            unintended_behavior: ""
+          }
+        ]
+      }), { status: 200 });
+    }
+
+    if (url.includes("/stakeholder-impact")) {
+      return new Response(JSON.stringify({
+        case_version_id: caseId,
+        option_code: "OPTION_A",
+        net_equity_score: 6,
+        impact_items: [
+          {
+            stakeholder_group: "DIRECT_USERS",
+            impact_type: "BENEFIT",
+            impact_score: 4,
+            description: "Doğrudan hizmet erişimi"
+          },
+          {
+            stakeholder_group: "VULNERABLE_GROUPS",
+            impact_type: "PROTECTION",
+            impact_score: 5,
+            description: "Koruma güvencesi"
+          }
+        ]
+      }), { status: 200 });
+    }
+
+    return new Response(JSON.stringify({}), { status: 200 });
+  };
+
+  try {
+    const client = new CaseAnalyticsApiClient("http://localhost:8000");
+
+    const ta = await client.getThresholdAnalysis(caseId);
+    assert.equal(ta.tipping_point_threshold, 20.0);
+    assert.equal(ta.unit, "TL");
+
+    const resp = await client.getResponsibilityAnalysis(caseId);
+    assert.equal(resp.clarity_score, 0.82);
+    assert.equal(resp.has_accountability_gap, false);
+
+    const proc = await client.getProcessAnalysis(caseId);
+    assert.equal(proc.current_stage, "PUBLIC_HEARING");
+    assert.equal(proc.procedural_integrity_score, 0.85);
+
+    const inc = await client.getIncentiveMap(caseId);
+    assert.equal(inc.perverse_incentive_risk, "LOW");
+    assert.equal(inc.alignment_index, 0.78);
+
+    const impact = await client.getStakeholderImpact(caseId, "OPTION_A");
+    assert.equal(impact.net_equity_score, 6);
+    assert.equal(impact.impact_items.length, 2);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 

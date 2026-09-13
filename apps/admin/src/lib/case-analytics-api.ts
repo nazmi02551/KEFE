@@ -62,15 +62,27 @@ export interface ExpertPublicGapReport {
 }
 
 export interface IncentiveMapItem {
-  actor_group: string;
-  perverse_incentive_risk: string;
-  rent_seeking_score: number;
-  mitigation_lever: string;
+  actor_group?: string;
+  stakeholder_group?: string;
+  core_incentive?: string;
+  incentive_type?: string;
+  alignment_status?: string;
+  intensity_score?: number;
+  unintended_behavior?: string;
+  perverse_incentive_risk?: string;
+  rent_seeking_score?: number;
+  mitigation_lever?: string;
 }
 
 export interface IncentiveMapReport {
   case_version_id: string;
-  incentives: IncentiveMapItem[];
+  map_id?: string;
+  alignment_index?: number;
+  perverse_incentive_risk?: string;
+  primary_driver?: string;
+  mitigation_mechanism?: string;
+  incentives?: IncentiveMapItem[];
+  incentive_nodes?: IncentiveMapItem[];
 }
 
 export interface NormativeEvaluation {
@@ -115,17 +127,49 @@ export interface PolicySimulationResult {
   equilibrium_state: string;
 }
 
+export interface ProcessStageItem {
+  stage_key: string;
+  stage_title: string;
+  is_completed: boolean;
+  duration_days: number;
+  has_public_input: boolean;
+  notes?: string;
+}
+
 export interface ProcessAnalysisReport {
   case_version_id: string;
-  procedural_fairness_score: number;
-  stakeholder_inclusion_score: number;
-  institutional_transparency_score: number;
-  deliberation_verdict: string;
+  analysis_id?: string;
+  current_stage?: string;
+  procedural_integrity_score?: number;
+  transparency_level?: string;
+  public_participation_status?: string;
+  oversight_body?: string;
+  procedural_bottleneck?: string | null;
+  stages?: ProcessStageItem[];
+  procedural_fairness_score?: number;
+  stakeholder_inclusion_score?: number;
+  institutional_transparency_score?: number;
+  deliberation_verdict?: string;
+}
+
+export interface ActorResponsibilityItem {
+  actor_key: string;
+  actor_name: string;
+  responsibility_share: number;
+  duty_nature: string;
+  jurisdiction_scope: string;
+  accountability_mechanism?: string;
 }
 
 export interface ResponsibilityAnalysisReport {
   case_version_id: string;
-  duty_bearers: Array<{
+  analysis_id?: string;
+  clarity_score?: number;
+  has_accountability_gap?: boolean;
+  legal_redress_channel?: string;
+  gap_explanation?: string | null;
+  actor_allocations?: ActorResponsibilityItem[];
+  duty_bearers?: Array<{
     institution: string;
     accountability_tier: string;
     statutory_mandate: string;
@@ -302,6 +346,35 @@ export interface DivergenceAnatomyReport {
   primary_driver: string;
   drivers: DivergenceDriverItem[];
   capability_id: string;
+}
+
+// CAP-018: Threshold Sensitivity Analysis
+export interface SensitivityCurvePoint {
+  parameter_value: number;
+  acceptance_rate: number;
+}
+
+export interface ThresholdAnalysisReport {
+  case_version_id: string;
+  parameter_name: string;
+  unit: string;
+  tipping_point_threshold: number;
+  curve_points: SensitivityCurvePoint[];
+}
+
+// CAP-023: Stakeholder Impact Matrix
+export interface StakeholderImpactItem {
+  stakeholder_group: string;
+  impact_type: string;
+  impact_score: number;
+  description: string;
+}
+
+export interface StakeholderImpactReport {
+  case_version_id: string;
+  option_code: string;
+  net_equity_score: number;
+  impact_items: StakeholderImpactItem[];
 }
 
 export class CaseAnalyticsApiClient {
@@ -522,6 +595,16 @@ export class CaseAnalyticsApiClient {
 
   public async getDivergenceAnatomy(caseVersionId: string): Promise<DivergenceAnatomyReport> {
     return this.getJson<DivergenceAnatomyReport>(`/v1/cases/${caseVersionId}/divergence-anatomy`);
+  }
+
+  public async getThresholdAnalysis(caseVersionId: string): Promise<ThresholdAnalysisReport> {
+    return this.getJson<ThresholdAnalysisReport>(`/v1/cases/${caseVersionId}/threshold-analysis`);
+  }
+
+  public async getStakeholderImpact(caseVersionId: string, optionCode: string = "A"): Promise<StakeholderImpactReport> {
+    return this.getJson<StakeholderImpactReport>(
+      `/v1/cases/${caseVersionId}/stakeholder-impact?option_code=${encodeURIComponent(optionCode)}`
+    );
   }
 }
 

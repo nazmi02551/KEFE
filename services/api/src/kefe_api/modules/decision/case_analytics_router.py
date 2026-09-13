@@ -97,6 +97,12 @@ from kefe_api.modules.decision.divergence_anatomy import (
     DivergenceAnatomyCalculator,
     DivergenceDriverType,
 )
+from kefe_api.modules.decision.threshold_analysis import (
+    ThresholdSensitivityCalculator,
+)
+from kefe_api.modules.decision.stakeholder_impact import (
+    StakeholderImpactCalculator,
+)
 
 case_analytics_router = APIRouter(prefix="/v1/cases", tags=["Case Analytics"])
 
@@ -869,4 +875,21 @@ def get_divergence_anatomy(case_version_id: UUID) -> dict[str, Any]:
         ],
         "capability_id": "CAP-040",
     }
+
+
+@case_analytics_router.get("/{case_version_id}/threshold-analysis")
+def get_threshold_analysis(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve Threshold Sensitivity Analysis & Tipping Point (CAP-018)."""
+    return ThresholdSensitivityCalculator.compute_for_case(case_version_id).to_dict()
+
+
+@case_analytics_router.get("/{case_version_id}/stakeholder-impact")
+def get_stakeholder_impact(
+    case_version_id: UUID, option_code: str = "A"
+) -> dict[str, Any]:
+    """Retrieve Stakeholder Impact Matrix & Net Equity Score (CAP-023)."""
+    return StakeholderImpactCalculator.compute_for_case(
+        case_version_id, option_code=option_code
+    ).to_dict()
+
 

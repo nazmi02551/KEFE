@@ -365,6 +365,43 @@ test("CaseAnalyticsApiClient mocked GET and POST requests", async () => {
       }), { status: 200 });
     }
 
+    if (url.includes("/threshold-analysis")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        parameter_name: "Aylık Ulaşım Katkı Payı",
+        unit: "TL",
+        tipping_point_threshold: 20.0,
+        curve_points: [
+          { parameter_value: 5.0, acceptance_rate: 0.90 },
+          { parameter_value: 10.0, acceptance_rate: 0.75 },
+          { parameter_value: 20.0, acceptance_rate: 0.45 },
+          { parameter_value: 50.0, acceptance_rate: 0.15 }
+        ]
+      }), { status: 200 });
+    }
+
+    if (url.includes("/stakeholder-impact")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        option_code: "OPTION_A",
+        net_equity_score: 6,
+        impact_items: [
+          {
+            stakeholder_group: "DIRECT_USERS",
+            impact_type: "BENEFIT",
+            impact_score: 4,
+            description: "Doğrudan erişim"
+          },
+          {
+            stakeholder_group: "VULNERABLE_GROUPS",
+            impact_type: "PROTECTION",
+            impact_score: 5,
+            description: "Koruma"
+          }
+        ]
+      }), { status: 200 });
+    }
+
     return new Response(JSON.stringify({ error: "Not found" }), { status: 404 });
   };
 
@@ -474,7 +511,15 @@ test("CaseAnalyticsApiClient mocked GET and POST requests", async () => {
     assert.equal(da.primary_driver, "NORMATIVE_VALUE_WEIGHT");
     assert.equal(da.capability_id, "CAP-040");
 
-    assert.equal(calls.length, 28);
+    const ta = await client.getThresholdAnalysis("test-case");
+    assert.equal(ta.tipping_point_threshold, 20.0);
+    assert.equal(ta.curve_points.length, 4);
+
+    const si = await client.getStakeholderImpact("test-case", "OPTION_A");
+    assert.equal(si.net_equity_score, 6);
+    assert.equal(si.impact_items.length, 2);
+
+    assert.equal(calls.length, 30);
   } finally {
     globalThis.fetch = originalFetch;
   }
