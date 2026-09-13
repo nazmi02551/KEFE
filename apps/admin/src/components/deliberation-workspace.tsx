@@ -14,6 +14,11 @@ import {
   type DecisionReceiptReport,
   type OutcomeTriangleReport,
   type InsufficientInfoReport,
+  type RoleFlipReport,
+  type ChangeMindInquiryReport,
+  type BridgeArgumentReportItem,
+  type StakeholderGapReport,
+  type DivergenceAnatomyReport,
 } from "@/src/lib/case-analytics-api";
 import {
   CaseObjectionApiClient,
@@ -57,6 +62,11 @@ export function DeliberationWorkspace({
   const [decisionReceipt, setDecisionReceipt] = useState<DecisionReceiptReport | null>(null);
   const [outcomeTriangle, setOutcomeTriangle] = useState<OutcomeTriangleReport | null>(null);
   const [insufficientInfo, setInsufficientInfo] = useState<InsufficientInfoReport | null>(null);
+  const [roleFlip, setRoleFlip] = useState<RoleFlipReport | null>(null);
+  const [changeMind, setChangeMind] = useState<ChangeMindInquiryReport | null>(null);
+  const [bridgeArgs, setBridgeArgs] = useState<BridgeArgumentReportItem[]>([]);
+  const [stakeholderGap, setStakeholderGap] = useState<StakeholderGapReport | null>(null);
+  const [divergenceAnatomy, setDivergenceAnatomy] = useState<DivergenceAnatomyReport | null>(null);
 
   // Status & loading states
   const [loading, setLoading] = useState(false);
@@ -102,6 +112,11 @@ export function DeliberationWorkspace({
         decisionReceiptRes,
         outcomeTriangleRes,
         insufficientInfoRes,
+        roleFlipRes,
+        changeMindRes,
+        bridgeArgsRes,
+        stakeholderGapRes,
+        divergenceAnatomyRes,
       ] = await Promise.all([
         analyticsClient.getQualityChecklist(caseVersionId),
         objectionClient.listObjections(caseVersionId),
@@ -115,6 +130,11 @@ export function DeliberationWorkspace({
         analyticsClient.getDecisionReceipt(caseVersionId),
         analyticsClient.getOutcomeTriangle(caseVersionId),
         analyticsClient.getInsufficientInfoReport(caseVersionId),
+        analyticsClient.getRoleFlip(caseVersionId),
+        analyticsClient.getChangeMindInquiry(caseVersionId),
+        analyticsClient.getBridgeArguments(caseVersionId),
+        analyticsClient.getStakeholderGap(caseVersionId),
+        analyticsClient.getDivergenceAnatomy(caseVersionId),
       ]);
 
       setChecklist(checklistRes);
@@ -129,6 +149,11 @@ export function DeliberationWorkspace({
       setDecisionReceipt(decisionReceiptRes);
       setOutcomeTriangle(outcomeTriangleRes);
       setInsufficientInfo(insufficientInfoRes);
+      setRoleFlip(roleFlipRes);
+      setChangeMind(changeMindRes);
+      setBridgeArgs(bridgeArgsRes);
+      setStakeholderGap(stakeholderGapRes);
+      setDivergenceAnatomy(divergenceAnatomyRes);
 
 
       setStatusMessage({
@@ -872,6 +897,160 @@ export function DeliberationWorkspace({
               </div>
             ) : (
               <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
+            )}
+          </div>
+
+          {/* Wave 5: Synthesis & Counterfactuals */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", marginTop: "1.25rem" }}>
+            {/* CAP-007: Role Flip */}
+            <div className={styles.itemCard}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1rem", color: "var(--gold)" }}>
+                  Rol Değişimi / Perspektif Esnemesi (CAP-007)
+                </h3>
+                {roleFlip && (
+                  <span className={`${styles.badge} ${styles.badgePassed}`}>
+                    Esneme: {Math.round(roleFlip.perspective_shift_score * 100)}%
+                  </span>
+                )}
+              </div>
+              {roleFlip ? (
+                <div>
+                  <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem", fontSize: "0.82rem" }}>
+                    <span style={{ color: "var(--muted)" }}>Başlangıç: <strong>{roleFlip.initial_role}</strong></span>
+                    <span>→</span>
+                    <span style={{ color: "var(--gold)" }}>Dönüşüm: <strong>{roleFlip.flipped_role}</strong></span>
+                  </div>
+                  <p style={{ fontSize: "0.82rem", color: "var(--text)", margin: 0 }}>
+                    {roleFlip.flipped_scenario_prompt}
+                  </p>
+                </div>
+              ) : (
+                <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
+              )}
+            </div>
+
+            {/* CAP-010: Change Mind Inquiry */}
+            <div className={styles.itemCard}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1rem", color: "var(--gold)" }}>
+                  Fikrimi Ne Değiştirir? / Karşı-Koşul (CAP-010)
+                </h3>
+                {changeMind && (
+                  <span className={`${styles.badge} ${styles.badgePassed}`}>
+                    {changeMind.flexibility_class}
+                  </span>
+                )}
+              </div>
+              {changeMind ? (
+                <div>
+                  <p style={{ fontSize: "0.82rem", color: "var(--muted)", margin: "0 0 0.5rem" }}>
+                    Kullanıcının tercihini gözden geçirebileceği eşik koşulları:
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: "1.2rem", fontSize: "0.82rem", color: "var(--text)" }}>
+                    {changeMind.selected_conditions.map((c, idx) => (
+                      <li key={idx} style={{ marginBottom: "0.25rem" }}>
+                        <code>{c.condition_type}</code>: {c.description}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
+              )}
+            </div>
+
+            {/* CAP-038: Stakeholder Gap */}
+            <div className={styles.itemCard}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1rem", color: "var(--gold)" }}>
+                  Paydaş Ayrışma Boşluğu (CAP-038)
+                </h3>
+                {stakeholderGap && (
+                  <span className={`${styles.badge} ${styles.badgeProvisional}`}>
+                    Fark: +{stakeholderGap.gap_points} puan
+                  </span>
+                )}
+              </div>
+              {stakeholderGap ? (
+                <div>
+                  <p style={{ fontSize: "0.82rem", color: "var(--muted)", margin: "0 0 0.5rem" }}>
+                    Segment: <strong>{stakeholderGap.segment_key}</strong> · Hedef Seçenek: <strong>{stakeholderGap.target_option}</strong> · Örneklem: <strong>{stakeholderGap.sample_size}</strong> (k-anonim: {stakeholderGap.k_anonymity_satisfied ? "Sağlandı" : "Yetersiz"})
+                  </p>
+                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                    {Object.entries(stakeholderGap.segment_distributions).map(([opt, share]) => (
+                      <span key={opt} className={styles.badge}>
+                        Seçenek {opt}: {Math.round(share * 100)}%
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
+              )}
+            </div>
+
+            {/* CAP-040: Divergence Anatomy */}
+            <div className={styles.itemCard}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1rem", color: "var(--gold)" }}>
+                  Ayrışma Anatomisi (CAP-040)
+                </h3>
+                {divergenceAnatomy && (
+                  <span className={`${styles.badge} ${styles.badgePassed}`}>
+                    {divergenceAnatomy.primary_driver}
+                  </span>
+                )}
+              </div>
+              {divergenceAnatomy ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                  {divergenceAnatomy.drivers.map((d) => (
+                    <div key={d.driver_type} style={{ fontSize: "0.82rem" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 600 }}>
+                        <span style={{ color: "var(--gold)" }}>{d.driver_type}</span>
+                        <span>{d.share_percentage}%</span>
+                      </div>
+                      <p style={{ margin: "0.15rem 0 0", color: "var(--muted)" }}>{d.explanation}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
+              )}
+            </div>
+          </div>
+
+          {/* CAP-034: Bridge Arguments / Ortak Zemin */}
+          <div className={styles.itemCard} style={{ marginTop: "1.25rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+              <h3 style={{ margin: 0, fontSize: "1rem", color: "var(--gold)" }}>
+                Köprü Argümanlar & Ortak Zemin Tezleri (CAP-034)
+              </h3>
+              <span className={`${styles.badge} ${styles.badgePassed}`}>
+                {bridgeArgs.length} Köprü Tezi
+              </span>
+            </div>
+            {bridgeArgs.length > 0 ? (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1rem" }}>
+                {bridgeArgs.map((b) => (
+                  <div key={b.bridge_id} style={{ background: "var(--background)", padding: "0.75rem", borderRadius: "0.5rem", border: "1px solid var(--line)" }}>
+                    <p style={{ margin: "0 0 0.5rem", fontSize: "0.85rem", color: "var(--text)", fontWeight: 500 }}>
+                      &ldquo;{b.synthesis_thesis}&rdquo;
+                    </p>
+                    <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap", marginBottom: "0.4rem" }}>
+                      {b.connecting_values.map((v) => (
+                        <span key={v} className={styles.badge} style={{ fontSize: "0.75rem" }}>#{v}</span>
+                      ))}
+                    </div>
+                    <div style={{ fontSize: "0.8rem", color: "var(--muted)", display: "flex", justifyContent: "space-between" }}>
+                      <span>Kutuplar-Arası Destek: <strong>{Math.round(b.cross_group_support_rate * 100)}%</strong></span>
+                      <span>Örneklem: <strong>n={b.sample_size}</strong></span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Köprü tezi bulunamadı.</p>
             )}
           </div>
         </section>

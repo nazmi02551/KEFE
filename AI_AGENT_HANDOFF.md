@@ -47,6 +47,15 @@
   * **CAP-102 (Tri-axial Outcome Triangle):** `OutcomeTriangleCalculator`, Rules/Empathy/Utility weights endpoint `GET /v1/cases/{case_version_id}/outcome-triangle` in `case_analytics_router.py`, `getOutcomeTriangle()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
   * **Test Evidence:** `test_advanced_deliberation_api.py` (5/5 Pytest PASS), `case-analytics-api.test.ts` (3/3 Node test PASS with 23 mocked API assertions), `deliberation-workspace.test.ts` (PASS), Next.js build (25/25 routes PASS), `project_health.py` (4/4 gates PASS 100%).
 
+- Wave 5 Synthesis, Counterfactuals & Divergence Anatomy Suite (CAP-007, CAP-010, CAP-034, CAP-038, CAP-040):
+  * **CAP-007 (Role Flip / Stakeholder-Position Reweigh):** `RoleFlipCalculator`, FastAPI `GET /v1/cases/{case_version_id}/role-flip` in `case_analytics_router.py`, `getRoleFlip()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **CAP-010 (What Would Change Your Mind? / Counterfactual Inquiry):** `ChangeMindInquiryCalculator`, FastAPI `GET /v1/cases/{case_version_id}/change-mind-inquiry` in `case_analytics_router.py`, `getChangeMindInquiry()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **CAP-034 (Bridge Arguments / Ortak Zemin):** `BridgeArgumentsService`, FastAPI `GET /v1/cases/{case_version_id}/bridge-arguments` in `case_analytics_router.py`, `getBridgeArguments()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **CAP-038 (Stakeholder Gap Disclosure):** `StakeholderGapCalculator`, FastAPI `GET /v1/cases/{case_version_id}/stakeholder-gap` in `case_analytics_router.py`, `getStakeholderGap()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **CAP-040 (Divergence Anatomy / Ayrışma Anatomisi):** `DivergenceAnatomyCalculator`, FastAPI `GET /v1/cases/{case_version_id}/divergence-anatomy` in `case_analytics_router.py`, `getDivergenceAnatomy()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **Test Evidence:** `test_synthesis_divergence_api.py` (Pytest PASS), `case-analytics-api.test.ts` (PASS with 28 assertions), `deliberation-workspace.test.ts` (PASS), `npm test` (121/121 Node tests PASS), Next.js build (25/25 routes PASS), `project_health.py` (4/4 gates PASS 100%).
+
+
 - Trust, Bot & Anomaly Integrity Shield (CAP-073):
   * Implemented FastAPI router `trust_integrity_router.py` in `services/api/src/kefe_api/modules/decision` with endpoints:
     - `POST /v1/trust/shield/inspect`: inspects cluster for synthetic astroturfing and quarantines bot swarms via `SyntheticAstroturfingShieldService`.

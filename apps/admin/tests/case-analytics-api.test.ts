@@ -298,6 +298,73 @@ test("CaseAnalyticsApiClient mocked GET and POST requests", async () => {
       }), { status: 200 });
     }
 
+    if (url.includes("/role-flip")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        initial_role: "Tesis Sahibi / Sanayici",
+        flipped_role: "Bölge Sakini / Temiz Su Tüketicisi",
+        flipped_scenario_prompt: "Şimdi fabrikanın atık boşalttığı nehir kıyısında yaşayan bir köylü olduğunuzu hayal edin.",
+        perspective_shift_score: 0.74,
+        capability_id: "CAP-007"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/change-mind-inquiry")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        flexibility_class: "HIGHLY_EPISTEMIC_OPEN",
+        selected_conditions: [
+          {
+            condition_type: "EMPIRICAL_DATA_THRESHOLD",
+            description: "Kaza ve arıza oranlarında %20'den fazla azalma kanıtlanırsa."
+          }
+        ],
+        capability_id: "CAP-010"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/bridge-arguments")) {
+      return new Response(JSON.stringify([
+        {
+          bridge_id: "BRG-01",
+          case_version_id: "test-case",
+          synthesis_thesis: "Kademeli geçiş kamu mülkiyeti ile sürdürülebilirliği birleştirir.",
+          connecting_values: ["kamusal_denetim", "ulasilabilirlik"],
+          cross_group_support_rate: 0.62,
+          sample_size: 120,
+          capability_id: "CAP-034"
+        }
+      ]), { status: 200 });
+    }
+
+    if (url.includes("/stakeholder-gap")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        segment_key: "DIRECTLY_AFFECTED",
+        target_option: "A",
+        gap_points: 16,
+        sample_size: 145,
+        segment_distributions: { A: 0.74, B: 0.26 },
+        k_anonymity_satisfied: true,
+        capability_id: "CAP-038"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/divergence-anatomy")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        primary_driver: "NORMATIVE_VALUE_WEIGHT",
+        drivers: [
+          {
+            driver_type: "NORMATIVE_VALUE_WEIGHT",
+            share_percentage: 52.0,
+            explanation: "Ahlaki önceliklendirme farkı."
+          }
+        ],
+        capability_id: "CAP-040"
+      }), { status: 200 });
+    }
+
     return new Response(JSON.stringify({ error: "Not found" }), { status: 404 });
   };
 
@@ -387,7 +454,27 @@ test("CaseAnalyticsApiClient mocked GET and POST requests", async () => {
     assert.equal(ii.total_opt_outs, 48);
     assert.equal(ii.preserves_commit_first_isolation, true);
 
-    assert.equal(calls.length, 23);
+    const rf = await client.getRoleFlip("test-case");
+    assert.equal(rf.initial_role, "Tesis Sahibi / Sanayici");
+    assert.equal(rf.capability_id, "CAP-007");
+
+    const cm = await client.getChangeMindInquiry("test-case");
+    assert.equal(cm.flexibility_class, "HIGHLY_EPISTEMIC_OPEN");
+    assert.equal(cm.capability_id, "CAP-010");
+
+    const ba = await client.getBridgeArguments("test-case");
+    assert.equal(ba.length, 1);
+    assert.equal(ba[0].capability_id, "CAP-034");
+
+    const sg = await client.getStakeholderGap("test-case");
+    assert.equal(sg.gap_points, 16);
+    assert.equal(sg.capability_id, "CAP-038");
+
+    const da = await client.getDivergenceAnatomy("test-case");
+    assert.equal(da.primary_driver, "NORMATIVE_VALUE_WEIGHT");
+    assert.equal(da.capability_id, "CAP-040");
+
+    assert.equal(calls.length, 28);
   } finally {
     globalThis.fetch = originalFetch;
   }

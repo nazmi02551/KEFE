@@ -249,6 +249,60 @@ export interface InsufficientInfoReport {
   preserves_commit_first_isolation: boolean;
 }
 
+export interface RoleFlipReport {
+  case_version_id: string;
+  initial_role: string;
+  flipped_role: string;
+  flipped_scenario_prompt: string;
+  perspective_shift_score: number;
+  capability_id: string;
+}
+
+export interface CounterfactualConditionItem {
+  condition_type: string;
+  description: string;
+}
+
+export interface ChangeMindInquiryReport {
+  case_version_id: string;
+  flexibility_class: "HIGHLY_EPISTEMIC_OPEN" | "CONDITIONALLY_OPEN" | "CATEGORICAL_ABSOLUTE";
+  selected_conditions: CounterfactualConditionItem[];
+  capability_id: string;
+}
+
+export interface BridgeArgumentReportItem {
+  bridge_id: string;
+  case_version_id: string;
+  synthesis_thesis: string;
+  connecting_values: string[];
+  cross_group_support_rate: number;
+  sample_size: number;
+  capability_id: string;
+}
+
+export interface StakeholderGapReport {
+  case_version_id: string;
+  segment_key: string;
+  target_option: string;
+  gap_points: number;
+  sample_size: number;
+  segment_distributions: Record<string, number>;
+  k_anonymity_satisfied: boolean;
+  capability_id: string;
+}
+
+export interface DivergenceDriverItem {
+  driver_type: string;
+  share_percentage: number;
+  explanation: string;
+}
+
+export interface DivergenceAnatomyReport {
+  case_version_id: string;
+  primary_driver: string;
+  drivers: DivergenceDriverItem[];
+  capability_id: string;
+}
 
 export class CaseAnalyticsApiClient {
   private readonly baseUrl: string;
@@ -443,5 +497,32 @@ export class CaseAnalyticsApiClient {
   public async getInsufficientInfoReport(caseVersionId: string): Promise<InsufficientInfoReport> {
     return this.getJson<InsufficientInfoReport>(`/v1/cases/${caseVersionId}/insufficient-info-report`);
   }
+
+  public async getRoleFlip(caseVersionId: string): Promise<RoleFlipReport> {
+    return this.getJson<RoleFlipReport>(`/v1/cases/${caseVersionId}/role-flip`);
+  }
+
+  public async getChangeMindInquiry(caseVersionId: string): Promise<ChangeMindInquiryReport> {
+    return this.getJson<ChangeMindInquiryReport>(`/v1/cases/${caseVersionId}/change-mind-inquiry`);
+  }
+
+  public async getBridgeArguments(caseVersionId: string): Promise<BridgeArgumentReportItem[]> {
+    return this.getJson<BridgeArgumentReportItem[]>(`/v1/cases/${caseVersionId}/bridge-arguments`);
+  }
+
+  public async getStakeholderGap(
+    caseVersionId: string,
+    segmentKey: string = "DIRECTLY_AFFECTED",
+    targetOption: string = "A"
+  ): Promise<StakeholderGapReport> {
+    return this.getJson<StakeholderGapReport>(
+      `/v1/cases/${caseVersionId}/stakeholder-gap?segment_key=${encodeURIComponent(segmentKey)}&target_option=${encodeURIComponent(targetOption)}`
+    );
+  }
+
+  public async getDivergenceAnatomy(caseVersionId: string): Promise<DivergenceAnatomyReport> {
+    return this.getJson<DivergenceAnatomyReport>(`/v1/cases/${caseVersionId}/divergence-anatomy`);
+  }
 }
+
 

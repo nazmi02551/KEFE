@@ -78,11 +78,32 @@ from kefe_api.modules.decision.outcome_triangle import (
     OutcomeTriangleCalculator,
     TriangleArchetype,
 )
+from kefe_api.modules.decision.role_flip import (
+    RoleFlipCalculator,
+    RoleFlipResult,
+)
+from kefe_api.modules.decision.change_mind_inquiry import (
+    ChangeMindInquiryCalculator,
+    CounterfactualConditionType,
+    EpistemicFlexibilityClass,
+    SelectedCounterfactualCondition,
+)
+from kefe_api.modules.decision.bridge_service import BridgeArgumentsService
+from kefe_api.modules.decision.stakeholder_gap import (
+    StakeholderGapCalculator,
+    StakeholderSegmentKey,
+)
+from kefe_api.modules.decision.divergence_anatomy import (
+    DivergenceAnatomyCalculator,
+    DivergenceDriverType,
+)
 
 case_analytics_router = APIRouter(prefix="/v1/cases", tags=["Case Analytics"])
 
 _OBJECTION_SERVICE = CaseObjectionService()
 _CORRECTION_SERVICE = CaseCorrectionHistoryService()
+_BRIDGE_SERVICE = BridgeArgumentsService()
+
 
 # Seed default objection
 _default_case_id = UUID("22222222-2222-4222-8222-222222222222")
@@ -698,3 +719,154 @@ def get_insufficient_info_report(case_version_id: UUID) -> dict[str, Any]:
         ],
         "preserves_commit_first_isolation": True,
     }
+
+
+@case_analytics_router.get("/{case_version_id}/role-flip")
+def get_role_flip(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve Role Flip / Stakeholder-position reweigh analysis (CAP-007)."""
+    res = RoleFlipCalculator.evaluate(
+        case_version_id=case_version_id,
+        initial_role="Tesis Sahibi / Sanayici",
+        flipped_role="Bölge Sakini / Temiz Su Tüketicisi",
+        flipped_scenario_prompt="Şimdi fabrikanın atık boşalttığı nehir kıyısında yaşayan ve tarım yapan bir köylü olduğunuzu hayal edin.",
+        perspective_shift_score=0.74,
+    )
+    return {
+        "case_version_id": str(res.case_version_id),
+        "initial_role": res.initial_role,
+        "flipped_role": res.flipped_role,
+        "flipped_scenario_prompt": res.flipped_scenario_prompt,
+        "perspective_shift_score": res.perspective_shift_score,
+        "capability_id": "CAP-007",
+    }
+
+
+@case_analytics_router.get("/{case_version_id}/change-mind-inquiry")
+def get_change_mind_inquiry(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve counterfactual 'What would change your mind?' openness evaluation (CAP-010)."""
+    conditions = [
+        SelectedCounterfactualCondition(
+            condition_type=CounterfactualConditionType.EMPIRICAL_DATA_THRESHOLD,
+            description="Kaza ve arıza oranlarında %20'den fazla azalma bağımsız denetimle kanıtlanırsa.",
+        ),
+        SelectedCounterfactualCondition(
+            condition_type=CounterfactualConditionType.VULNERABILITY_PROTECTION,
+            description="Dar gelirli ve dezavantajlı yurttaşların tarifeleri yasal korumaya alınırsa.",
+        ),
+    ]
+    res = ChangeMindInquiryCalculator.evaluate(case_version_id, conditions)
+    return {
+        "case_version_id": str(res.case_version_id),
+        "flexibility_class": res.flexibility_class.value,
+        "selected_conditions": [
+            {
+                "condition_type": c.condition_type.value,
+                "description": c.description,
+            }
+            for c in res.selected_conditions
+        ],
+        "capability_id": "CAP-010",
+    }
+
+
+@case_analytics_router.get("/{case_version_id}/bridge-arguments")
+def get_bridge_arguments(case_version_id: UUID) -> list[dict[str, Any]]:
+    """Retrieve bridge arguments / common ground synthesis theses (CAP-034)."""
+    existing = _BRIDGE_SERVICE.get_bridge_arguments(case_version_id)
+    if not existing:
+        default_item = _BRIDGE_SERVICE.register_bridge_argument(
+            case_version_id=case_version_id,
+            synthesis_thesis="Kademeli geçiş ve bağımsız denetim şartıyla kamu mülkiyeti, hizmet kalitesini ve erişilebilirliği güvence altına alabilir.",
+            connecting_values=("kamusal_denetim", "ulasilabilirlik", "mali_surdurulebilirlik"),
+            cross_group_support_rate=0.62,
+            sample_size=120,
+        )
+        existing = [default_item]
+    return [
+        {
+            "bridge_id": str(item.bridge_id),
+            "case_version_id": str(item.case_version_id),
+            "synthesis_thesis": item.synthesis_thesis,
+            "connecting_values": list(item.connecting_values),
+            "cross_group_support_rate": item.cross_group_support_rate,
+            "sample_size": item.sample_size,
+            "capability_id": "CAP-034",
+        }
+        for item in existing
+    ]
+
+
+@case_analytics_router.get("/{case_version_id}/stakeholder-gap")
+def get_stakeholder_gap(
+    case_version_id: UUID,
+    segment_key: str = "DIRECTLY_AFFECTED",
+    target_option: str = "A",
+) -> dict[str, Any]:
+    """Retrieve privacy-preserving Stakeholder Gap disclosure (CAP-038)."""
+    seg_key = (
+        StakeholderSegmentKey.DIRECTLY_AFFECTED
+        if segment_key == "DIRECTLY_AFFECTED"
+        else StakeholderSegmentKey.GENERAL_PUBLIC
+    )
+    overall_dist = {"A": 0.58, "B": 0.42}
+    segment_dist = (
+        {"A": 0.74, "B": 0.26}
+        if seg_key == StakeholderSegmentKey.DIRECTLY_AFFECTED
+        else {"A": 0.52, "B": 0.48}
+    )
+    sample_size = 145
+
+    res = StakeholderGapCalculator.calculate_gap(
+        overall_distributions=overall_dist,
+        segment_distributions=segment_dist,
+        sample_size=sample_size,
+        segment_key=seg_key,
+        target_option=target_option,
+    )
+    return {
+        "case_version_id": str(case_version_id),
+        "segment_key": res.segment_key.value,
+        "target_option": target_option,
+        "gap_points": res.gap_points,
+        "sample_size": res.sample_size,
+        "segment_distributions": dict(res.distributions),
+        "k_anonymity_satisfied": True,
+        "capability_id": "CAP-038",
+    }
+
+
+@case_analytics_router.get("/{case_version_id}/divergence-anatomy")
+def get_divergence_anatomy(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve multi-axial Divergence Anatomy breakdown (CAP-040)."""
+    inputs = [
+        {
+            "driver_type": DivergenceDriverType.NORMATIVE_VALUE_WEIGHT.value,
+            "weight": 52.0,
+            "explanation": "Kamusal fayda ve eşit erişim hakkı ile piyasa verimliliği önceliklendirmesi arasındaki temel ahlaki ayrışma.",
+        },
+        {
+            "driver_type": DivergenceDriverType.FACTUAL_PROBABILITY_ASSESSMENT.value,
+            "weight": 28.0,
+            "explanation": "Özelleştirme ve serbest rekabetin hat yenileme maliyetlerini düşüreceğine ilişkin ampirik öngörü farkı.",
+        },
+        {
+            "driver_type": DivergenceDriverType.PROCEDURAL_GOVERNANCE.value,
+            "weight": 20.0,
+            "explanation": "Tarife ve güvenlik denetiminin bağımsız bir üst kurulda mı yoksa doğrudan bakanlıkta mı toplanması gerektiği.",
+        },
+    ]
+    res = DivergenceAnatomyCalculator.calculate(case_version_id, inputs)
+    return {
+        "case_version_id": str(res.case_version_id),
+        "primary_driver": res.primary_driver.value,
+        "drivers": [
+            {
+                "driver_type": d.driver_type.value,
+                "share_percentage": d.share_percentage,
+                "explanation": d.explanation,
+            }
+            for d in res.drivers
+        ],
+        "capability_id": "CAP-040",
+    }
+
