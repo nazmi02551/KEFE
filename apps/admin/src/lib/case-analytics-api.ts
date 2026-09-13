@@ -707,6 +707,50 @@ export class CaseAnalyticsApiClient {
       pillar
     );
   }
+
+  public async getConsensusCircle(caseVersionId: string): Promise<ConsensusCircleReport> {
+    return this.getJson<ConsensusCircleReport>(`/v1/cases/${caseVersionId}/consensus-circle`);
+  }
+
+  public async evaluateConsensusCircle(
+    caseVersionId: string,
+    payload: ConsensusCircleInput
+  ): Promise<ConsensusCircleReport> {
+    return this.postJson<ConsensusCircleReport>(`/v1/cases/${caseVersionId}/consensus-circle`, payload);
+  }
+
+  public async getBoardroomDeliberation(caseVersionId: string): Promise<BoardroomReport> {
+    return this.getJson<BoardroomReport>(`/v1/cases/${caseVersionId}/boardroom`);
+  }
+
+  public async evaluateBoardroomDecision(
+    caseVersionId: string,
+    payload: BoardroomInput
+  ): Promise<BoardroomReport> {
+    return this.postJson<BoardroomReport>(`/v1/cases/${caseVersionId}/boardroom`, payload);
+  }
+
+  public async getYouthSpace(caseVersionId: string): Promise<YouthSpaceReport> {
+    return this.getJson<YouthSpaceReport>(`/v1/cases/${caseVersionId}/youth-space`);
+  }
+
+  public async updateYouthSpace(
+    caseVersionId: string,
+    payload: YouthSpaceInput
+  ): Promise<YouthSpaceReport> {
+    return this.postJson<YouthSpaceReport>(`/v1/cases/${caseVersionId}/youth-space`, payload);
+  }
+
+  public async getCitizenJury(caseVersionId: string): Promise<CitizenJuryReport> {
+    return this.getJson<CitizenJuryReport>(`/v1/cases/${caseVersionId}/citizen-jury`);
+  }
+
+  public async conveneCitizenJury(
+    caseVersionId: string,
+    payload: CitizenJuryInput
+  ): Promise<CitizenJuryReport> {
+    return this.postJson<CitizenJuryReport>(`/v1/cases/${caseVersionId}/citizen-jury`, payload);
+  }
 }
 
 export interface ContextLensPillar {
@@ -728,4 +772,83 @@ export interface ContextLensPillarInput {
   content: string;
   source_citation: string;
   source_url?: string | null;
+}
+
+export interface ConsensusCircleReport {
+  case_version_id: string;
+  circle_id: string;
+  pact_title: string;
+  state: "STAKEHOLDER_DIAMETRIC_IMPASSE" | "INTERMEDIATE_CONCESSION_BARGAINING" | "SYNTHESIS_PACT_RATIFIED";
+  stakeholder_groups_count: number;
+  mutual_concession_score: number;
+  synthesis_covenant_summary: string;
+  capability_id: string;
+}
+
+export interface ConsensusCircleInput {
+  circle_id: string;
+  pact_title: string;
+  stakeholder_groups_count: number;
+  mutual_concession_score: number;
+  synthesis_covenant_summary: string;
+}
+
+export interface BoardroomReport {
+  case_version_id: string;
+  room_id: string;
+  organization_name: string;
+  dilemma_scope: "ESG_AND_SUSTAINABILITY" | "CAPITAL_ALLOCATION_AND_MA" | "EXECUTIVE_COMPENSATION" | "CRISIS_MANAGEMENT";
+  board_member_count: number;
+  fiduciary_consensus_ratio: number;
+  esg_alignment_score: number;
+  capability_id: string;
+}
+
+export interface BoardroomInput {
+  room_id: string;
+  organization_name: string;
+  dilemma_scope: string;
+  board_member_count: number;
+  votes_in_favor: number;
+  esg_alignment_score: number;
+}
+
+export interface YouthSpaceReport {
+  case_version_id: string;
+  space_id: string;
+  space_name: string;
+  focus_area: "CAMPUS_AND_EDUCATION_POLICY" | "CLIMATE_AND_INTERGENERATIONAL" | "DIGITAL_RIGHTS_AND_AI" | "CIVIC_ENTREPRENEURSHIP";
+  institution_or_community: string;
+  active_student_count: number;
+  consensus_action_count: number;
+  capability_id: string;
+}
+
+export interface YouthSpaceInput {
+  space_id: string;
+  space_name: string;
+  focus_area: string;
+  institution_or_community: string;
+  active_student_count: number;
+  consensus_action_count: number;
+}
+
+export interface CitizenJuryReport {
+  case_version_id: string;
+  jury_id: string;
+  dilemma_title: string;
+  stage: "STRATIFIED_PANEL_ASSEMBLY" | "EXPERT_HEARINGS_IN_SESSION" | "CONSENSUS_VERDICT_EMITTED";
+  juror_count: number;
+  expert_witnesses_count: number;
+  verdict_consensus_rate: number;
+  reference_adr: string;
+}
+
+export interface CitizenJuryInput {
+  jury_id: string;
+  dilemma_title: string;
+  stage: string;
+  juror_count: number;
+  expert_witnesses_count: number;
+  verdict_consensus_rate: number;
 }

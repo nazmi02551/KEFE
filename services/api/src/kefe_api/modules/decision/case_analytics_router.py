@@ -115,6 +115,26 @@ from kefe_api.modules.decision.context_lens import (
     ContextLensService,
     LensPillarType,
 )
+from kefe_api.modules.decision.multi_stakeholder_consensus_circle import (
+    ConsensusCircleResult,
+    ConsensusCircleState,
+    MultiStakeholderConsensusCircleService,
+)
+from kefe_api.modules.decision.enterprise_boardroom_room import (
+    BoardroomDilemmaScope,
+    EnterpriseBoardroomResult,
+    EnterpriseBoardroomService,
+)
+from kefe_api.modules.decision.youth_deliberation_space import (
+    YouthDeliberationSpaceResult,
+    YouthDeliberationSpaceService,
+    YouthSpaceFocusArea,
+)
+from kefe_api.modules.decision.citizen_jury_chamber import (
+    CitizenJuryChamberService,
+    CitizenJuryResult,
+    CitizenJuryStage,
+)
 
 case_analytics_router = APIRouter(prefix="/v1/cases", tags=["Case Analytics"])
 
@@ -1060,6 +1080,269 @@ def add_context_lens_pillar(
             "source_url": p.source_url,
         },
     }
+
+
+class ConsensusCircleEvaluateRequest(BaseModel):
+    circle_id: str = Field(..., min_length=2)
+    pact_title: str = Field(..., min_length=5)
+    stakeholder_groups_count: int = Field(..., ge=2)
+    mutual_concession_score: float = Field(..., ge=0.0, le=1.0)
+    synthesis_covenant_summary: str = Field(..., min_length=10)
+
+
+@case_analytics_router.get("/{case_version_id}/consensus-circle")
+def get_consensus_circle(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve Multi-Stakeholder Consensus Circle & Synthesis status (CAP-086)."""
+    res = MultiStakeholderConsensusCircleService.register_circle(
+        circle_id=f"crc-{str(case_version_id)[:8]}",
+        pact_title="Sanayi Emisyonları ve Halk Sağlığı Uzlaşı Sözleşmesi",
+        stakeholder_groups_count=4,
+        mutual_concession_score=0.85,
+        synthesis_covenant_summary="Aşamalı karbon filtreleme ve bağımsız kamu-sivil toplum izleme komisyonu mutabakatı.",
+    )
+    return {
+        "case_version_id": str(case_version_id),
+        "circle_id": res.circle_id,
+        "pact_title": res.pact_title,
+        "state": res.state.value,
+        "stakeholder_groups_count": res.stakeholder_groups_count,
+        "mutual_concession_score": res.mutual_concession_score,
+        "synthesis_covenant_summary": res.synthesis_covenant_summary,
+        "capability_id": "CAP-086",
+    }
+
+
+@case_analytics_router.post("/{case_version_id}/consensus-circle")
+def evaluate_consensus_circle(
+    case_version_id: UUID, payload: ConsensusCircleEvaluateRequest
+) -> dict[str, Any]:
+    """Evaluate or register a Multi-Stakeholder Consensus Circle (CAP-086)."""
+    try:
+        res = MultiStakeholderConsensusCircleService.register_circle(
+            circle_id=payload.circle_id,
+            pact_title=payload.pact_title,
+            stakeholder_groups_count=payload.stakeholder_groups_count,
+            mutual_concession_score=payload.mutual_concession_score,
+            synthesis_covenant_summary=payload.synthesis_covenant_summary,
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=400, detail=str(err))
+
+    return {
+        "case_version_id": str(case_version_id),
+        "circle_id": res.circle_id,
+        "pact_title": res.pact_title,
+        "state": res.state.value,
+        "stakeholder_groups_count": res.stakeholder_groups_count,
+        "mutual_concession_score": res.mutual_concession_score,
+        "synthesis_covenant_summary": res.synthesis_covenant_summary,
+        "capability_id": "CAP-086",
+    }
+
+
+class EnterpriseBoardroomRequest(BaseModel):
+    room_id: str = Field(..., min_length=2)
+    organization_name: str = Field(..., min_length=3)
+    dilemma_scope: str = Field(..., description="ESG_AND_SUSTAINABILITY, CAPITAL_ALLOCATION_AND_MA, EXECUTIVE_COMPENSATION, CRISIS_MANAGEMENT")
+    board_member_count: int = Field(..., ge=1)
+    votes_in_favor: int = Field(..., ge=0)
+    esg_alignment_score: float = Field(..., ge=0.0, le=1.0)
+
+
+@case_analytics_router.get("/{case_version_id}/boardroom")
+def get_boardroom_deliberation(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve Enterprise Boardroom decision deliberation state (CAP-087)."""
+    res = EnterpriseBoardroomService.evaluate_board_decision(
+        room_id=f"room-{str(case_version_id)[:8]}",
+        organization_name="Global Tech Ventures Yönetim Kurulu",
+        dilemma_scope=BoardroomDilemmaScope.ESG_AND_SUSTAINABILITY,
+        board_member_count=9,
+        votes_in_favor=7,
+        esg_alignment_score=0.92,
+    )
+    return {
+        "case_version_id": str(case_version_id),
+        "room_id": res.room_id,
+        "organization_name": res.organization_name,
+        "dilemma_scope": res.dilemma_scope.value,
+        "board_member_count": res.board_member_count,
+        "fiduciary_consensus_ratio": res.fiduciary_consensus_ratio,
+        "esg_alignment_score": res.esg_alignment_score,
+        "capability_id": "CAP-087",
+    }
+
+
+@case_analytics_router.post("/{case_version_id}/boardroom")
+def evaluate_boardroom_decision(
+    case_version_id: UUID, payload: EnterpriseBoardroomRequest
+) -> dict[str, Any]:
+    """Evaluate Enterprise Boardroom decision deliberation (CAP-087)."""
+    try:
+        scope = BoardroomDilemmaScope(payload.dilemma_scope)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Geçersiz dilemma_scope: {payload.dilemma_scope}",
+        )
+    try:
+        res = EnterpriseBoardroomService.evaluate_board_decision(
+            room_id=payload.room_id,
+            organization_name=payload.organization_name,
+            dilemma_scope=scope,
+            board_member_count=payload.board_member_count,
+            votes_in_favor=payload.votes_in_favor,
+            esg_alignment_score=payload.esg_alignment_score,
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=400, detail=str(err))
+
+    return {
+        "case_version_id": str(case_version_id),
+        "room_id": res.room_id,
+        "organization_name": res.organization_name,
+        "dilemma_scope": res.dilemma_scope.value,
+        "board_member_count": res.board_member_count,
+        "fiduciary_consensus_ratio": res.fiduciary_consensus_ratio,
+        "esg_alignment_score": res.esg_alignment_score,
+        "capability_id": "CAP-087",
+    }
+
+
+class YouthSpaceRequest(BaseModel):
+    space_id: str = Field(..., min_length=2)
+    space_name: str = Field(..., min_length=5)
+    focus_area: str = Field(..., description="CAMPUS_AND_EDUCATION_POLICY, CLIMATE_AND_INTERGENERATIONAL, DIGITAL_RIGHTS_AND_AI, CIVIC_ENTREPRENEURSHIP")
+    institution_or_community: str = Field(..., min_length=3)
+    active_student_count: int = Field(..., ge=0)
+    consensus_action_count: int = Field(..., ge=0)
+
+
+@case_analytics_router.get("/{case_version_id}/youth-space")
+def get_youth_space(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve Youth & Student Deliberation Space info (CAP-088)."""
+    res = YouthDeliberationSpaceService.register_or_update_space(
+        space_id=f"youth-{str(case_version_id)[:8]}",
+        space_name="Üniversite Kampüs Ulaşımı ve Gece Güvenliği",
+        focus_area=YouthSpaceFocusArea.CAMPUS_AND_EDUCATION_POLICY,
+        institution_or_community="ODTÜ Öğrenci Temsilciliği",
+        active_student_count=420,
+        consensus_action_count=5,
+    )
+    return {
+        "case_version_id": str(case_version_id),
+        "space_id": res.space_id,
+        "space_name": res.space_name,
+        "focus_area": res.focus_area.value,
+        "institution_or_community": res.institution_or_community,
+        "active_student_count": res.active_student_count,
+        "consensus_action_count": res.consensus_action_count,
+        "capability_id": "CAP-088",
+    }
+
+
+@case_analytics_router.post("/{case_version_id}/youth-space")
+def update_youth_space(
+    case_version_id: UUID, payload: YouthSpaceRequest
+) -> dict[str, Any]:
+    """Register or update Youth & Student Deliberation Space (CAP-088)."""
+    try:
+        area = YouthSpaceFocusArea(payload.focus_area)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Geçersiz focus_area: {payload.focus_area}",
+        )
+    try:
+        res = YouthDeliberationSpaceService.register_or_update_space(
+            space_id=payload.space_id,
+            space_name=payload.space_name,
+            focus_area=area,
+            institution_or_community=payload.institution_or_community,
+            active_student_count=payload.active_student_count,
+            consensus_action_count=payload.consensus_action_count,
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=400, detail=str(err))
+
+    return {
+        "case_version_id": str(case_version_id),
+        "space_id": res.space_id,
+        "space_name": res.space_name,
+        "focus_area": res.focus_area.value,
+        "institution_or_community": res.institution_or_community,
+        "active_student_count": res.active_student_count,
+        "consensus_action_count": res.consensus_action_count,
+        "capability_id": "CAP-088",
+    }
+
+
+class CitizenJuryRequest(BaseModel):
+    jury_id: str = Field(..., min_length=2)
+    dilemma_title: str = Field(..., min_length=5)
+    stage: str = Field(..., description="STRATIFIED_PANEL_ASSEMBLY, EXPERT_HEARINGS_IN_SESSION, CONSENSUS_VERDICT_EMITTED")
+    juror_count: int = Field(..., ge=12)
+    expert_witnesses_count: int = Field(..., ge=1)
+    verdict_consensus_rate: float = Field(..., ge=0.0, le=1.0)
+
+
+@case_analytics_router.get("/{case_version_id}/citizen-jury")
+def get_citizen_jury(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve Citizen Jury & Sortition Deliberation Chamber status (ADR-0223)."""
+    res = CitizenJuryChamberService.convene_jury(
+        jury_id=f"jury-{str(case_version_id)[:8]}",
+        dilemma_title="Yapay Zeka ve Otonom Araçlar Kamu Düzenlemesi",
+        stage=CitizenJuryStage.CONSENSUS_VERDICT_EMITTED,
+        juror_count=24,
+        expert_witnesses_count=4,
+        verdict_consensus_rate=0.88,
+    )
+    return {
+        "case_version_id": str(case_version_id),
+        "jury_id": res.jury_id,
+        "dilemma_title": res.dilemma_title,
+        "stage": res.stage.value,
+        "juror_count": res.juror_count,
+        "expert_witnesses_count": res.expert_witnesses_count,
+        "verdict_consensus_rate": res.verdict_consensus_rate,
+        "reference_adr": "ADR-0223",
+    }
+
+
+@case_analytics_router.post("/{case_version_id}/citizen-jury")
+def convene_citizen_jury(
+    case_version_id: UUID, payload: CitizenJuryRequest
+) -> dict[str, Any]:
+    """Convene or evaluate Citizen Jury & Sortition Deliberation Chamber (ADR-0223)."""
+    try:
+        stage = CitizenJuryStage(payload.stage)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Geçersiz stage: {payload.stage}",
+        )
+    try:
+        res = CitizenJuryChamberService.convene_jury(
+            jury_id=payload.jury_id,
+            dilemma_title=payload.dilemma_title,
+            stage=stage,
+            juror_count=payload.juror_count,
+            expert_witnesses_count=payload.expert_witnesses_count,
+            verdict_consensus_rate=payload.verdict_consensus_rate,
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=400, detail=str(err))
+
+    return {
+        "case_version_id": str(case_version_id),
+        "jury_id": res.jury_id,
+        "dilemma_title": res.dilemma_title,
+        "stage": res.stage.value,
+        "juror_count": res.juror_count,
+        "expert_witnesses_count": res.expert_witnesses_count,
+        "verdict_consensus_rate": res.verdict_consensus_rate,
+        "reference_adr": "ADR-0223",
+    }
+
 
 
 

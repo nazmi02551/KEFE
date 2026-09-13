@@ -294,6 +294,58 @@ test("CaseAnalyticsApiClient mocked GET and POST requests", async () => {
       }), { status: 200 });
     }
 
+    if (url.includes("/consensus-circle")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        circle_id: "crc-01",
+        pact_title: "Sanayi Emisyon Sözleşmesi",
+        state: "SYNTHESIS_PACT_RATIFIED",
+        stakeholder_groups_count: 4,
+        mutual_concession_score: 0.85,
+        synthesis_covenant_summary: "Ortak uzlaşı.",
+        capability_id: "CAP-086"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/boardroom")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        room_id: "room-01",
+        organization_name: "Tech Ventures",
+        dilemma_scope: "ESG_AND_SUSTAINABILITY",
+        board_member_count: 9,
+        fiduciary_consensus_ratio: 0.78,
+        esg_alignment_score: 0.92,
+        capability_id: "CAP-087"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/youth-space")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        space_id: "youth-01",
+        space_name: "Öğrenci Temsilciliği",
+        focus_area: "CAMPUS_AND_EDUCATION_POLICY",
+        institution_or_community: "ODTÜ",
+        active_student_count: 420,
+        consensus_action_count: 5,
+        capability_id: "CAP-088"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/citizen-jury")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        jury_id: "jury-01",
+        dilemma_title: "Yapay Zeka Düzenlemesi",
+        stage: "CONSENSUS_VERDICT_EMITTED",
+        juror_count: 24,
+        expert_witnesses_count: 4,
+        verdict_consensus_rate: 0.88,
+        reference_adr: "ADR-0223"
+      }), { status: 200 });
+    }
+
     if (url.includes("/outcome-triangle")) {
       return new Response(JSON.stringify({
         case_version_id: "test-case",
@@ -593,7 +645,23 @@ test("CaseAnalyticsApiClient mocked GET and POST requests", async () => {
     assert.equal(clAdd.status, "CREATED");
     assert.equal(clAdd.pillar.pillar_type, "COMPARATIVE_PRACTICE");
 
-    assert.equal(calls.length, 35);
+    const cc = await client.getConsensusCircle("test-case");
+    assert.equal(cc.state, "SYNTHESIS_PACT_RATIFIED");
+    assert.equal(cc.capability_id, "CAP-086");
+
+    const br = await client.getBoardroomDeliberation("test-case");
+    assert.equal(br.fiduciary_consensus_ratio, 0.78);
+    assert.equal(br.capability_id, "CAP-087");
+
+    const ys = await client.getYouthSpace("test-case");
+    assert.equal(ys.active_student_count, 420);
+    assert.equal(ys.capability_id, "CAP-088");
+
+    const cj = await client.getCitizenJury("test-case");
+    assert.equal(cj.juror_count, 24);
+    assert.equal(cj.reference_adr, "ADR-0223");
+
+    assert.equal(calls.length, 39);
   } finally {
     globalThis.fetch = originalFetch;
   }
