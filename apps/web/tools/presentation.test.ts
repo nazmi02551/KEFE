@@ -6,6 +6,7 @@ import {
   publicLoadErrorMessage,
   ratioToPercentage,
   safeCount,
+  safeExternalHttpUrl,
 } from "../src/lib/presentation";
 
 test("percentage values inside the display range remain unchanged", () => {
@@ -36,6 +37,19 @@ test("external counts are finite non-negative integers", () => {
   assert.equal(safeCount(1420.9), 1420);
   assert.equal(safeCount(-1), 0);
   assert.equal(safeCount(Number.POSITIVE_INFINITY), 0);
+});
+
+test("external links allow only credential-free HTTP URLs", () => {
+  assert.equal(
+    safeExternalHttpUrl("https://example.test/kaynak?dil=tr#ozet"),
+    "https://example.test/kaynak?dil=tr#ozet",
+  );
+  assert.equal(safeExternalHttpUrl("http://example.test/source"), "http://example.test/source");
+  assert.equal(safeExternalHttpUrl("javascript:alert(1)"), null);
+  assert.equal(safeExternalHttpUrl("data:text/html,unsafe"), null);
+  assert.equal(safeExternalHttpUrl("https://user:secret@example.test/source"), null);
+  assert.equal(safeExternalHttpUrl("not a URL"), null);
+  assert.equal(safeExternalHttpUrl(null), null);
 });
 
 test("public load errors never reflect upstream error details", () => {

@@ -9,7 +9,11 @@ import {
   listCaseSignalCards,
   KefApiError,
 } from "@/src/lib/kefe-api";
-import { clampPercentage, safeCount } from "@/src/lib/presentation";
+import {
+  clampPercentage,
+  safeCount,
+  safeExternalHttpUrl,
+} from "@/src/lib/presentation";
 import styles from "@/app/cases/[caseId]/page.module.css";
 
 interface CaseDetailPageProps {
@@ -187,25 +191,28 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
                       <p className={styles.contextBlockBody}>{block.body}</p>
                       {blockSources.length > 0 && (
                         <ul className={styles.sourceList} aria-label="Kaynaklar">
-                          {blockSources.map((src) => (
-                            <li key={src.source_id} className={styles.sourceItem}>
-                              {src.url ? (
-                                <a
-                                  href={src.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className={styles.sourceLink}
-                                >
-                                  {src.title}
-                                </a>
-                              ) : (
-                                <span className={styles.sourceTitle}>{src.title}</span>
-                              )}
-                              <span className={styles.sourcePublisher}>
-                                {src.publisher}
-                              </span>
-                            </li>
-                          ))}
+                          {blockSources.map((src) => {
+                            const sourceUrl = safeExternalHttpUrl(src.url);
+                            return (
+                              <li key={src.source_id} className={styles.sourceItem}>
+                                {sourceUrl ? (
+                                  <a
+                                    href={sourceUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={styles.sourceLink}
+                                  >
+                                    {src.title}
+                                  </a>
+                                ) : (
+                                  <span className={styles.sourceTitle}>{src.title}</span>
+                                )}
+                                <span className={styles.sourcePublisher}>
+                                  {src.publisher}
+                                </span>
+                              </li>
+                            );
+                          })}
                         </ul>
                       )}
                     </li>

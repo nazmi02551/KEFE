@@ -243,6 +243,17 @@ test("case detail: auxiliary reads degrade independently with a visible notice",
   );
 });
 
+test("case detail: validates outbound source links before rendering", () => {
+  const page = readFile("app/cases/[caseId]/page.tsx");
+  assert(page.includes("safeExternalHttpUrl"), "Source URLs need a public-link allowlist");
+  assert(page.includes("href={sourceUrl}"), "Only the validated source URL may reach href");
+  assert(!page.includes("href={src.url}"), "Raw editorial URLs must not reach href");
+  assert(
+    page.includes('rel="noopener noreferrer"'),
+    "New-tab source links must isolate the opener and referrer",
+  );
+});
+
 test("home page: featured signals link to their detail route", () => {
   const page = readFile("app/page.tsx");
   assert(

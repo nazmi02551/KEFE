@@ -15,6 +15,20 @@ export function safeCount(value: number): number {
   return Math.max(0, Math.trunc(value));
 }
 
+/** Allows public outbound links only when they use an ordinary web protocol. */
+export function safeExternalHttpUrl(value: string | null | undefined): string | null {
+  if (!value) return null;
+
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    if (url.username || url.password) return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Converts request failures into copy that is safe to render on a public page.
  *
