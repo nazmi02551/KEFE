@@ -8,13 +8,11 @@ export const metadata = {
 /**
  * Signal page — read-only signal dashboard.
  *
- * KEFE_API_BASE_URL is set in .env.local and never exposed to the client.
- * The SignalWorkspace component fetches directly from the API base URL,
- * which in production should be a server-side Next.js route handler proxy
- * to avoid CORS and to attach server-side auth headers.
+ * SignalWorkspace fetches in the browser, so only the explicitly public API
+ * origin may be passed to it. Auth remains in the same-site Admin cookie.
  */
 export default function SignalPage() {
-  const baseUrl = process.env.KEFE_API_BASE_URL ?? "http://localhost:8000";
+  const baseUrl = process.env.NEXT_PUBLIC_KEFE_API_BASE_URL ?? "http://localhost:8000";
 
   return (
     <main>

@@ -11,7 +11,11 @@
  * - Collective Result is not automatically Signal, truth or authority.
  */
 
-import { AdminApiError } from "@/src/lib/admin-api";
+import {
+  ADMIN_API_TIMEOUT_MS,
+  AdminApiError,
+  normalizeAdminApiBaseUrl,
+} from "@/src/lib/admin-api";
 
 export interface SignalConsensusCard {
   signal_id: string;
@@ -20,7 +24,7 @@ export interface SignalConsensusCard {
   consensus_statement: string;
   agreement_percentage: number;
   sample_size: number;
-  confidence_tier: "GOLD_STANDARD" | "SILVER_VALIDATED" | "BRONZE_OBSERVED" | "UNQUALIFIED";
+  confidence_tier: "GOLD" | "SILVER" | "BRONZE";
   certified_at: string;
   qualification_tier: string;
 }
@@ -140,7 +144,7 @@ export interface SignalVersioningReport {
 export interface SignalTargetRegistryReport {
   signal_id: string;
   case_version_id: string;
-  primary_target_id: string;
+  primary_target_id: string | null;
   targets: Array<{
     target_id: string;
     target_name: string;
@@ -160,15 +164,40 @@ export interface SignalTargetRegistryReport {
 // API client functions
 // ---------------------------------------------------------------------------
 
-async function apiFetch<T>(url: string, fetchImpl: typeof fetch = fetch): Promise<T> {
-  const res = await fetchImpl(url);
+function boundedInteger(value: number, minimum: number, maximum: number, fallback: number): number {
+  if (!Number.isFinite(value)) return fallback;
+  return Math.min(maximum, Math.max(minimum, Math.trunc(value)));
+}
+
+function boundedErrorText(value: unknown, fallback: string): string {
+  if (typeof value !== "string") return fallback;
+  return value.replace(/\s+/g, " ").trim().slice(0, 500) || fallback;
+}
+
+async function apiFetch<T>(
+  baseUrl: string,
+  path: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<T> {
+  const res = await fetchImpl(`${normalizeAdminApiBaseUrl(baseUrl)}${path}`, {
+    method: "GET",
+    credentials: "include",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+    redirect: "error",
+    signal: AbortSignal.timeout(ADMIN_API_TIMEOUT_MS),
+  });
   if (!res.ok) {
     let code = "SIGNAL_API_ERROR";
-    let message = `Signal API error: ${res.status}`;
+    const fallback = `Signal API error: ${res.status}`;
+    let message = fallback;
     try {
-      const body = await res.json();
-      if (body?.detail) message = body.detail;
-      if (body?.code) code = body.code;
+      const body = await res.json() as Record<string, unknown>;
+      const nested = body.error && typeof body.error === "object"
+        ? body.error as Record<string, unknown>
+        : body;
+      message = boundedErrorText(nested.message ?? nested.detail, fallback);
+      if (typeof nested.code === "string" && nested.code.length <= 120) code = nested.code;
     } catch {
       // Ignore parse errors
     }
@@ -182,8 +211,13 @@ export async function listSignalConsensusCards(
   options: { limit?: number; offset?: number; fetchImpl?: typeof fetch } = {}
 ): Promise<SignalConsensusCard[]> {
   const { limit = 20, offset = 0, fetchImpl } = options;
-  const url = `${baseUrl}/v1/signals/consensus-cards?limit=${limit}&offset=${offset}`;
-  return apiFetch<SignalConsensusCard[]>(url, fetchImpl);
+  const safeLimit = boundedInteger(limit, 1, 100, 20);
+  const safeOffset = boundedInteger(offset, 0, Number.MAX_SAFE_INTEGER, 0);
+  return apiFetch<SignalConsensusCard[]>(
+    baseUrl,
+    `/v1/signals/consensus-cards?limit=${safeLimit}&offset=${safeOffset}`,
+    fetchImpl,
+  );
 }
 
 export async function getSignalHealthReport(
@@ -191,7 +225,11 @@ export async function getSignalHealthReport(
   signalId: string,
   fetchImpl?: typeof fetch
 ): Promise<SignalHealthReport> {
-  return apiFetch<SignalHealthReport>(`${baseUrl}/v1/signals/${signalId}/health`, fetchImpl);
+  return apiFetch<SignalHealthReport>(
+    baseUrl,
+    `/v1/signals/${encodeURIComponent(signalId)}/health`,
+    fetchImpl,
+  );
 }
 
 export async function getSignalQualificationReport(
@@ -200,8 +238,9 @@ export async function getSignalQualificationReport(
   fetchImpl?: typeof fetch
 ): Promise<SignalQualificationReport> {
   return apiFetch<SignalQualificationReport>(
-    `${baseUrl}/v1/signals/${signalId}/qualification`,
-    fetchImpl
+    baseUrl,
+    `/v1/signals/${encodeURIComponent(signalId)}/qualification`,
+    fetchImpl,
   );
 }
 
@@ -211,8 +250,9 @@ export async function getContributionClassesReport(
   fetchImpl?: typeof fetch
 ): Promise<ContributionClassesReport> {
   return apiFetch<ContributionClassesReport>(
-    `${baseUrl}/v1/signals/${signalId}/contribution-classes`,
-    fetchImpl
+    baseUrl,
+    `/v1/signals/${encodeURIComponent(signalId)}/contribution-classes`,
+    fetchImpl,
   );
 }
 
@@ -222,8 +262,9 @@ export async function getSignalScopeAlignmentReport(
   fetchImpl?: typeof fetch
 ): Promise<SignalScopeAlignmentReport> {
   return apiFetch<SignalScopeAlignmentReport>(
-    `${baseUrl}/v1/signals/${signalId}/scope-alignment`,
-    fetchImpl
+    baseUrl,
+    `/v1/signals/${encodeURIComponent(signalId)}/scope-alignment`,
+    fetchImpl,
   );
 }
 
@@ -233,8 +274,9 @@ export async function getSignalVersioningReport(
   fetchImpl?: typeof fetch
 ): Promise<SignalVersioningReport> {
   return apiFetch<SignalVersioningReport>(
-    `${baseUrl}/v1/signals/${signalId}/versioning`,
-    fetchImpl
+    baseUrl,
+    `/v1/signals/${encodeURIComponent(signalId)}/versioning`,
+    fetchImpl,
   );
 }
 
@@ -244,7 +286,8 @@ export async function getSignalTargetRegistry(
   fetchImpl?: typeof fetch
 ): Promise<SignalTargetRegistryReport> {
   return apiFetch<SignalTargetRegistryReport>(
-    `${baseUrl}/v1/signals/${signalId}/targets`,
-    fetchImpl
+    baseUrl,
+    `/v1/signals/${encodeURIComponent(signalId)}/targets`,
+    fetchImpl,
   );
 }
