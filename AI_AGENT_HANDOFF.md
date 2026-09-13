@@ -63,6 +63,11 @@
   * **CAP-023 (Stakeholder Impact & Net Equity Matrix):** `StakeholderImpactCalculator`, FastAPI `GET /v1/cases/{case_version_id}/stakeholder-impact` in `case_analytics_router.py`, `getStakeholderImpact()` in `case-analytics-api.ts`, Tab 6 integration in `deliberation-workspace.tsx`.
   * **Test Evidence:** `test_governance_impact_api.py` (Pytest PASS), `test_threshold_analysis.py` (PASS), `test_stakeholder_impact.py` (PASS), `test_responsibility_analysis_api.py` (PASS), `test_process_analysis_api.py` (PASS), `test_incentive_map_api.py` (PASS), `case-analytics-api.test.ts` (PASS with 30 assertions), `deliberation-workspace.test.ts` (PASS), `npm test` (122/122 Node tests PASS), Next.js build (25/25 routes PASS), `project_health.py` (4/4 gates PASS 100%).
 
+- Wave 7 Temporal Drift & Healthy Decision Pacing Suite (CAP-013, CAP-014):
+  * **CAP-013 (Blind Temporal Retest / Temporal Drift):** `TemporalDriftEngine`, FastAPI `GET /v1/cases/{case_version_id}/temporal-drift` in `case_analytics_router.py`, `getTemporalDrift()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`. Categorizes temporal drift into `STABLE_CONVICTION`, `MATURED_REVISION`, `EXPLORATORY_SHIFT`, and `REINFORCED_CERTAINTY`.
+  * **CAP-014 (Decision Fatigue / Healthy Pacing Guard):** `DecisionFatigueGuard`, FastAPI `GET /v1/cases/fatigue-guard/status` and `POST /v1/cases/fatigue-guard/evaluate` in `case_analytics_router.py`, `getFatigueGuardStatus()` and `evaluateFatigueGuard()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`. Gentle pacing guard with zero coercive lockout; tracks session duration, weigh velocity, and triggers rest recommendations.
+  * **Test Evidence:** `test_temporal_fatigue_api.py` (Pytest PASS), `test_temporal_drift.py` (PASS), `test_fatigue_guard.py` (PASS), `case-analytics-api.test.ts` (PASS with 33 assertions), `deliberation-workspace.test.ts` (PASS), `npm test` (122/122 Node tests PASS), `tsc --noEmit` (0 errors), Next.js build (25/25 routes PASS), `validate_capability_portfolio.py` (PASS), `project_health.py` (4/4 gates PASS 100%).
+
 
 
 - Trust, Bot & Anomaly Integrity Shield (CAP-073):

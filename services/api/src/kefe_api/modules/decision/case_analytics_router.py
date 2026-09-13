@@ -103,6 +103,12 @@ from kefe_api.modules.decision.threshold_analysis import (
 from kefe_api.modules.decision.stakeholder_impact import (
     StakeholderImpactCalculator,
 )
+from kefe_api.modules.decision.temporal_drift import (
+    TemporalDriftCalculator,
+)
+from kefe_api.modules.decision.fatigue_guard import (
+    DecisionFatigueCalculator,
+)
 
 case_analytics_router = APIRouter(prefix="/v1/cases", tags=["Case Analytics"])
 
@@ -891,5 +897,39 @@ def get_stakeholder_impact(
     return StakeholderImpactCalculator.compute_for_case(
         case_version_id, option_code=option_code
     ).to_dict()
+
+
+@case_analytics_router.get("/{case_version_id}/temporal-drift")
+def get_temporal_drift(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve blind temporal retest drift analysis (CAP-013)."""
+    return TemporalDriftCalculator.compute_for_case(case_version_id).to_dict()
+
+
+@case_analytics_router.get("/fatigue-guard/status")
+def get_fatigue_guard_status(
+    session_id: str = "SESSION-DEFAULT",
+    consecutive_weigh_count: int = 6,
+    session_duration_minutes: float = 24.5,
+) -> dict[str, Any]:
+    """Retrieve decision fatigue and healthy pacing status (CAP-014)."""
+    return DecisionFatigueCalculator.evaluate_session(
+        session_id=session_id,
+        consecutive_weigh_count=consecutive_weigh_count,
+        session_duration_minutes=session_duration_minutes,
+    ).to_dict()
+
+
+@case_analytics_router.post("/fatigue-guard/evaluate")
+def evaluate_fatigue_guard(payload: dict[str, Any]) -> dict[str, Any]:
+    """Evaluate decision fatigue for a specific active session payload (CAP-014)."""
+    session_id = str(payload.get("session_id", "SESSION-DEFAULT"))
+    count = int(payload.get("consecutive_weigh_count", 0))
+    duration = float(payload.get("session_duration_minutes", 0.0))
+    return DecisionFatigueCalculator.evaluate(
+        session_id=session_id,
+        consecutive_weigh_count=count,
+        session_duration_minutes=duration,
+    ).to_dict()
+
 
 

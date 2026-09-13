@@ -23,6 +23,8 @@ import {
   type ResponsibilityAnalysisReport,
   type ProcessAnalysisReport,
   type StakeholderImpactReport,
+  type TemporalDriftReport,
+  type DecisionFatigueReport,
 } from "@/src/lib/case-analytics-api";
 import {
   CaseObjectionApiClient,
@@ -75,6 +77,8 @@ export function DeliberationWorkspace({
   const [responsibilityAnalysis, setResponsibilityAnalysis] = useState<ResponsibilityAnalysisReport | null>(null);
   const [processAnalysis, setProcessAnalysis] = useState<ProcessAnalysisReport | null>(null);
   const [stakeholderImpact, setStakeholderImpact] = useState<StakeholderImpactReport | null>(null);
+  const [temporalDrift, setTemporalDrift] = useState<TemporalDriftReport | null>(null);
+  const [fatigueGuard, setFatigueGuard] = useState<DecisionFatigueReport | null>(null);
 
   // Status & loading states
   const [loading, setLoading] = useState(false);
@@ -129,6 +133,8 @@ export function DeliberationWorkspace({
         responsibilityAnalysisRes,
         processAnalysisRes,
         stakeholderImpactRes,
+        temporalDriftRes,
+        fatigueGuardRes,
       ] = await Promise.all([
         analyticsClient.getQualityChecklist(caseVersionId),
         objectionClient.listObjections(caseVersionId),
@@ -151,6 +157,8 @@ export function DeliberationWorkspace({
         analyticsClient.getResponsibilityAnalysis(caseVersionId),
         analyticsClient.getProcessAnalysis(caseVersionId),
         analyticsClient.getStakeholderImpact(caseVersionId),
+        analyticsClient.getTemporalDrift(caseVersionId),
+        analyticsClient.getFatigueGuardStatus(),
       ]);
 
       setChecklist(checklistRes);
@@ -174,6 +182,8 @@ export function DeliberationWorkspace({
       setResponsibilityAnalysis(responsibilityAnalysisRes);
       setProcessAnalysis(processAnalysisRes);
       setStakeholderImpact(stakeholderImpactRes);
+      setTemporalDrift(temporalDriftRes);
+      setFatigueGuard(fatigueGuardRes);
 
 
       setStatusMessage({
@@ -1040,6 +1050,61 @@ export function DeliberationWorkspace({
                       <p style={{ margin: "0.15rem 0 0", color: "var(--muted)" }}>{d.explanation}</p>
                     </div>
                   ))}
+                </div>
+              ) : (
+                <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
+              )}
+            </div>
+
+            {/* CAP-013: Temporal Drift */}
+            <div className={styles.itemCard}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1rem", color: "var(--gold)" }}>
+                  Kör Zamansal Yeniden Test & Sürüklenme (CAP-013)
+                </h3>
+                {temporalDrift && (
+                  <span className={`${styles.badge} ${temporalDrift.is_shifted ? styles.badgeProvisional : styles.badgePassed}`}>
+                    {temporalDrift.drift_nature}
+                  </span>
+                )}
+              </div>
+              {temporalDrift ? (
+                <div>
+                  <p style={{ fontSize: "0.82rem", color: "var(--text)", margin: "0 0 0.5rem" }}>
+                    İlk Tercih: <strong>{temporalDrift.initial_option_code}</strong> → Yeniden Test: <strong>{temporalDrift.retest_option_code}</strong>
+                  </p>
+                  <div style={{ fontSize: "0.8rem", color: "var(--muted)", display: "flex", gap: "1rem" }}>
+                    <span>Geçen Süre: <strong>{temporalDrift.time_elapsed_days} gün</strong></span>
+                    <span>Değişim: <strong>{temporalDrift.is_shifted ? "Kayma Var" : "Sabit"}</strong></span>
+                    <span>Güven Farkı: <strong>{temporalDrift.confidence_delta > 0 ? `+${temporalDrift.confidence_delta}` : temporalDrift.confidence_delta}</strong></span>
+                  </div>
+                </div>
+              ) : (
+                <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
+              )}
+            </div>
+
+            {/* CAP-014: Decision Fatigue Guard */}
+            <div className={styles.itemCard}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1rem", color: "var(--gold)" }}>
+                  Karar Yorgunluğu & Pacing Guard (CAP-014)
+                </h3>
+                {fatigueGuard && (
+                  <span className={`${styles.badge} ${fatigueGuard.pacing_status === "OPTIMAL_PACING" ? styles.badgePassed : styles.badgeFailed}`}>
+                    {fatigueGuard.pacing_status}
+                  </span>
+                )}
+              </div>
+              {fatigueGuard ? (
+                <div>
+                  <p style={{ fontSize: "0.82rem", color: "var(--muted)", margin: "0 0 0.5rem" }}>
+                    {fatigueGuard.gentle_recommendation_prompt}
+                  </p>
+                  <div style={{ fontSize: "0.8rem", color: "var(--muted)", display: "flex", gap: "1rem" }}>
+                    <span>Ardışık Tartım: <strong>{fatigueGuard.consecutive_weigh_count}</strong></span>
+                    <span>Oturum Süresi: <strong>{fatigueGuard.session_duration_minutes} dk</strong></span>
+                  </div>
                 </div>
               ) : (
                 <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>

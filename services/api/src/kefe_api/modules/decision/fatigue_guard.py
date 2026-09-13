@@ -18,8 +18,31 @@ class DecisionFatigueResult:
     pacing_status: PacingStatus
     gentle_recommendation_prompt: str
 
+    def to_dict(self) -> dict[str, any]:
+        return {
+            "session_id": self.session_id,
+            "consecutive_weigh_count": self.consecutive_weigh_count,
+            "session_duration_minutes": self.session_duration_minutes,
+            "pacing_status": self.pacing_status.value,
+            "gentle_recommendation_prompt": self.gentle_recommendation_prompt,
+            "capability_id": "CAP-014",
+        }
+
 
 class DecisionFatigueCalculator:
+    @classmethod
+    def evaluate_session(
+        cls,
+        session_id: str = "SESSION-DEFAULT",
+        consecutive_weigh_count: int = 6,
+        session_duration_minutes: float = 24.5,
+    ) -> DecisionFatigueResult:
+        """Deterministic session evaluation for pacing/fatigue (CAP-014)."""
+        return cls.evaluate(
+            session_id=session_id,
+            consecutive_weigh_count=consecutive_weigh_count,
+            session_duration_minutes=session_duration_minutes,
+        )
     @staticmethod
     def evaluate(
         *,

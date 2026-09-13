@@ -402,6 +402,30 @@ test("CaseAnalyticsApiClient mocked GET and POST requests", async () => {
       }), { status: 200 });
     }
 
+    if (url.includes("/temporal-drift")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        initial_option_code: "OPT_A",
+        retest_option_code: "OPT_B",
+        time_elapsed_days: 45,
+        is_shifted: true,
+        confidence_delta: 0.2,
+        drift_nature: "MATURED_REVISION",
+        capability_id: "CAP-013"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/fatigue-guard/status") || url.includes("/fatigue-guard/evaluate")) {
+      return new Response(JSON.stringify({
+        session_id: "SESS-01",
+        consecutive_weigh_count: 6,
+        session_duration_minutes: 24.5,
+        pacing_status: "PACING_RECOMMENDED",
+        gentle_recommendation_prompt: "Önceki kararlarınızı gözden geçirebilirsiniz.",
+        capability_id: "CAP-014"
+      }), { status: 200 });
+    }
+
     return new Response(JSON.stringify({ error: "Not found" }), { status: 404 });
   };
 
@@ -519,7 +543,18 @@ test("CaseAnalyticsApiClient mocked GET and POST requests", async () => {
     assert.equal(si.net_equity_score, 6);
     assert.equal(si.impact_items.length, 2);
 
-    assert.equal(calls.length, 30);
+    const td = await client.getTemporalDrift("test-case");
+    assert.equal(td.is_shifted, true);
+    assert.equal(td.capability_id, "CAP-013");
+
+    const fgStatus = await client.getFatigueGuardStatus("SESS-01", 6, 24.5);
+    assert.equal(fgStatus.pacing_status, "PACING_RECOMMENDED");
+    assert.equal(fgStatus.capability_id, "CAP-014");
+
+    const fgEval = await client.evaluateFatigueGuard("SESS-01", 6, 24.5);
+    assert.equal(fgEval.consecutive_weigh_count, 6);
+
+    assert.equal(calls.length, 33);
   } finally {
     globalThis.fetch = originalFetch;
   }

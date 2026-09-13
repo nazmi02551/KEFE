@@ -377,6 +377,28 @@ export interface StakeholderImpactReport {
   impact_items: StakeholderImpactItem[];
 }
 
+// CAP-013: Blind Temporal Retest / Temporal Drift
+export interface TemporalDriftReport {
+  case_version_id: string;
+  initial_option_code: string;
+  retest_option_code: string;
+  time_elapsed_days: number;
+  is_shifted: boolean;
+  confidence_delta: number;
+  drift_nature: "STABLE_CONVICTION" | "MATURED_REVISION" | "EXPLORATORY_SHIFT" | "REINFORCED_CERTAINTY";
+  capability_id: string;
+}
+
+// CAP-014: Decision Fatigue / Healthy Pacing Guard
+export interface DecisionFatigueReport {
+  session_id: string;
+  consecutive_weigh_count: number;
+  session_duration_minutes: number;
+  pacing_status: "OPTIMAL_PACING" | "PACING_RECOMMENDED" | "REST_INTERVAL_ACTIVE";
+  gentle_recommendation_prompt: string;
+  capability_id: string;
+}
+
 export class CaseAnalyticsApiClient {
   private readonly baseUrl: string;
 
@@ -605,6 +627,38 @@ export class CaseAnalyticsApiClient {
     return this.getJson<StakeholderImpactReport>(
       `/v1/cases/${caseVersionId}/stakeholder-impact?option_code=${encodeURIComponent(optionCode)}`
     );
+  }
+
+  public async getTemporalDrift(caseVersionId: string): Promise<TemporalDriftReport> {
+    return this.getJson<TemporalDriftReport>(`/v1/cases/${caseVersionId}/temporal-drift`);
+  }
+
+  public async getFatigueGuardStatus(
+    sessionId: string = "SESSION-DEFAULT",
+    consecutiveWeighCount: number = 6,
+    sessionDurationMinutes: number = 24.5
+  ): Promise<DecisionFatigueReport> {
+    return this.getJson<DecisionFatigueReport>(
+      `/v1/cases/fatigue-guard/status?session_id=${encodeURIComponent(sessionId)}&consecutive_weigh_count=${consecutiveWeighCount}&session_duration_minutes=${sessionDurationMinutes}`
+    );
+  }
+
+  public async evaluateFatigueGuard(
+    sessionId: string,
+    consecutiveWeighCount: number,
+    sessionDurationMinutes: number
+  ): Promise<DecisionFatigueReport> {
+    if (consecutiveWeighCount < 0) {
+      throw new AdminApiError("INVALID_COUNT", "consecutiveWeighCount cannot be negative", 400);
+    }
+    if (sessionDurationMinutes < 0) {
+      throw new AdminApiError("INVALID_DURATION", "sessionDurationMinutes cannot be negative", 400);
+    }
+    return this.postJson<DecisionFatigueReport>(`/v1/cases/fatigue-guard/evaluate`, {
+      session_id: sessionId.trim(),
+      consecutive_weigh_count: consecutiveWeighCount,
+      session_duration_minutes: sessionDurationMinutes,
+    });
   }
 }
 
