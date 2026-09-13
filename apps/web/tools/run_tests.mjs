@@ -182,6 +182,22 @@ test("signal detail: encodes the dynamic identifier in public API calls", () => 
   );
 });
 
+test("signal detail: respects mixed health-score units", () => {
+  const page = readFile("app/signal/[signalId]/page.tsx");
+  assert(
+    page.includes("clampPercentage(health.overall_health_score)"),
+    "Overall health is already a zero-to-one-hundred percentage",
+  );
+  assert(
+    page.includes('d.dimension_id === "SAMPLE_SIZE"'),
+    "Sample-size dimensions must render as counts rather than percentages",
+  );
+  assert(
+    !page.includes("health.overall_health_score * 100"),
+    "Overall health must not be multiplied into an invalid percentage",
+  );
+});
+
 test("impact page: uses only public list operations", () => {
   const page = readFile("app/impact/page.tsx");
   assert(page.includes("listInstitutionResponses"), "Missing institution response list");

@@ -184,7 +184,7 @@ export default async function ImpactPage() {
                       aria-valuenow={clampPercentage(a.progress_percentage)}
                       aria-valuemin={0}
                       aria-valuemax={100}
-                      aria-label={`İlerleme: %${a.progress_percentage}`}
+                      aria-label={`İlerleme: %${clampPercentage(a.progress_percentage)}`}
                     >
                       <div
                         className={styles.progressFill}

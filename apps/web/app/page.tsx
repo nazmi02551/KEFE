@@ -148,7 +148,7 @@ export default async function HomePage() {
                     {TIER_LABELS[card.qualification_tier] ?? card.qualification_tier}
                   </span>
                   <span className={styles.signalAgreement}>
-                    %{Math.round(card.agreement_percentage)}
+                    %{Math.round(clampPercentage(card.agreement_percentage))}
                   </span>
                 </div>
                 <p className={styles.signalStatement}>{card.consensus_statement}</p>

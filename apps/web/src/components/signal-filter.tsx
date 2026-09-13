@@ -9,6 +9,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 
 import type { SignalConsensusCard } from "@/src/lib/kefe-api";
+import { clampPercentage } from "@/src/lib/presentation";
 import { matchesSearchQuery } from "@/src/lib/search";
 import styles from "@/src/components/signal-filter.module.css";
 
@@ -134,7 +135,7 @@ export function SignalFilter({ cards }: SignalFilterProps) {
                   {TIER_LABELS[card.qualification_tier] ?? card.qualification_tier}
                 </span>
                 <span className={styles.agreementPct}>
-                  %{Math.round(card.agreement_percentage)}
+                  %{Math.round(clampPercentage(card.agreement_percentage))}
                 </span>
               </header>
               <h2 className={styles.cardTitle}>{card.case_title}</h2>

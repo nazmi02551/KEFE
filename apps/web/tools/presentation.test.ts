@@ -4,6 +4,8 @@ import { test } from "node:test";
 import {
   clampPercentage,
   publicLoadErrorMessage,
+  ratioToPercentage,
+  safeCount,
 } from "../src/lib/presentation";
 
 test("percentage values inside the display range remain unchanged", () => {
@@ -21,6 +23,19 @@ test("non-finite percentage values fail closed to zero", () => {
   assert.equal(clampPercentage(Number.NaN), 0);
   assert.equal(clampPercentage(Number.POSITIVE_INFINITY), 0);
   assert.equal(clampPercentage(Number.NEGATIVE_INFINITY), 0);
+});
+
+test("normalized ratios convert to bounded display percentages", () => {
+  assert.equal(ratioToPercentage(0.425), 42.5);
+  assert.equal(ratioToPercentage(-0.1), 0);
+  assert.equal(ratioToPercentage(1.1), 100);
+  assert.equal(ratioToPercentage(Number.NaN), 0);
+});
+
+test("external counts are finite non-negative integers", () => {
+  assert.equal(safeCount(1420.9), 1420);
+  assert.equal(safeCount(-1), 0);
+  assert.equal(safeCount(Number.POSITIVE_INFINITY), 0);
 });
 
 test("public load errors never reflect upstream error details", () => {

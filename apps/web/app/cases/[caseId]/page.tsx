@@ -9,6 +9,7 @@ import {
   listCaseSignalCards,
   KefApiError,
 } from "@/src/lib/kefe-api";
+import { clampPercentage, safeCount } from "@/src/lib/presentation";
 import styles from "@/app/cases/[caseId]/page.module.css";
 
 interface CaseDetailPageProps {
@@ -225,7 +226,7 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
                           : "Bronz Gözlemlendi"}
                     </span>
                     <span className={styles.signalAgreement}>
-                      %{card.agreement_percentage} uzlaşı · {card.sample_size} katılımcı
+                      %{clampPercentage(card.agreement_percentage)} uzlaşı · {safeCount(card.sample_size)} katılımcı
                     </span>
                   </div>
                 </li>
