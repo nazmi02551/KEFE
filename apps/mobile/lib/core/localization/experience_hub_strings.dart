@@ -44,4 +44,10 @@ extension KefeExperienceHubStrings on KefeStrings {
       _experienceText('preview_truth_note');
   String get experienceLoading => _experienceText('loading');
   String get experienceRetry => _experienceText('retry');
+  String get experienceImpactTitle => _experienceText('impact_title');
+  String get experienceImpactBody => _experienceText('impact_body');
+  String get experienceImpactAction => _experienceText('impact_action');
+  String get experienceObservatoryTitle => _experienceText('observatory_title');
+  String get experienceObservatoryBody => _experienceText('observatory_body');
+  String get experienceObservatoryAction => _experienceText('observatory_action');
 }

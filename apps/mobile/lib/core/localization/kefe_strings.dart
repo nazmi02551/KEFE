@@ -225,6 +225,27 @@ class KefeStrings {
   String get institutionTypePolicyChange => _text('institution.type_policy_change');
   String get institutionTypeClarification => _text('institution.type_clarification');
   String get institutionTypeDecline => _text('institution.type_decline');
+  // Impact screen (CAP-048..054)
+  String get impactTitle => _text('impact.title');
+  String get impactSubtitle => _text('impact.subtitle');
+  String get impactInstitutionResponsesTitle => _text('impact.institution_responses_title');
+  String get impactActionsTitle => _text('impact.actions_title');
+  String get impactLoadError => _text('impact.load_error');
+  String get impactNoResponses => _text('impact.no_responses');
+  String get impactNoActions => _text('impact.no_actions');
+  String get impactMethodologyNote => _text('impact.methodology_note');
+  String get retryAction => _text('retry_action');
+
+  // About screen
+  String get aboutTitle => _text('about.title');
+  String get aboutMethodologyTitle => _text('about.methodology_title');
+  String get aboutCommitFirst => _text('about.commit_first');
+  String get aboutCommitFirstDesc => _text('about.commit_first_desc');
+  String get aboutBlindFirst => _text('about.blind_first');
+  String get aboutBlindFirstDesc => _text('about.blind_first_desc');
+  String get aboutSignalTitle => _text('about.signal_title');
+  String get aboutSignalDesc => _text('about.signal_desc');
+  String get aboutVersionLabel => _text('about.version_label');
 }
 
 class KefeStringsDelegate extends LocalizationsDelegate<KefeStrings> {

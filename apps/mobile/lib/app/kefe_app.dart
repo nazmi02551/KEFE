@@ -13,10 +13,13 @@ import '../features/activity/presentation/activity_screen.dart';
 import '../features/decision/presentation/decision_experience_screen.dart';
 import '../features/explore/presentation/discovery_explore_screen.dart';
 import '../features/explore/presentation/experience_hub_screen.dart';
+import '../features/impact/presentation/impact_screen.dart';
+import '../features/observatory/presentation/public_observatory_screen.dart';
 import '../features/onboarding/presentation/onboarding_experience_screen.dart';
 import '../features/privacy/presentation/privacy_screen.dart';
 import '../features/progress/presentation/my_kefe_journey_screen.dart';
 import '../features/progress/presentation/my_kefe_personal_report_screen.dart';
+import '../features/settings/presentation/about_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../features/sharing/presentation/public_share_screen.dart';
 import '../features/weigh/presentation/weigh_hub_screen.dart';
@@ -111,6 +114,18 @@ class _KefeAppState extends ConsumerState<KefeApp> {
           caseId: state.pathParameters['caseId']!,
           firstUse: state.uri.queryParameters['firstUse'] == '1',
         ),
+      ),
+      GoRoute(
+        path: '/impact',
+        builder: (context, state) => const ImpactScreen(),
+      ),
+      GoRoute(
+        path: '/observatory',
+        builder: (context, state) => const PublicObservatoryScreen(),
+      ),
+      GoRoute(
+        path: '/about',
+        builder: (context, state) => const AboutScreen(),
       ),
     ],
   );

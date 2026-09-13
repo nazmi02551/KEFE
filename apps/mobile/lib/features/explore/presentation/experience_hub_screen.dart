@@ -260,6 +260,24 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
                   ? () => context.push('/atlas')
                   : null,
             ),
+            const SizedBox(height: 10),
+            _ExperienceCard(
+              cardKey: const ValueKey('experience-impact'),
+              icon: Icons.trending_up_rounded,
+              title: strings.experienceImpactTitle,
+              body: strings.experienceImpactBody,
+              actionLabel: strings.experienceImpactAction,
+              onPressed: () => context.push('/impact'),
+            ),
+            const SizedBox(height: 10),
+            _ExperienceCard(
+              cardKey: const ValueKey('experience-observatory'),
+              icon: Icons.public_rounded,
+              title: strings.experienceObservatoryTitle,
+              body: strings.experienceObservatoryBody,
+              actionLabel: strings.experienceObservatoryAction,
+              onPressed: () => context.push('/observatory'),
+            ),
             const SizedBox(height: 14),
             KefeSurface(
               key: const ValueKey('experience-truth-note'),

@@ -46,6 +46,12 @@ abstract final class ExperienceHubStringCatalog {
           'Preview Radar and Atlas use representative fixture data. KEFE does not present those fixtures as live, nationally representative or validated country analytics.',
       'loading': 'Loading experiences…',
       'retry': 'Try again',
+      'impact_title': 'Impact',
+      'impact_body': 'Signals that reached institutions and triggered real-world responses.',
+      'impact_action': 'View Impact',
+      'observatory_title': 'Observatory',
+      'observatory_body': 'Explore collective consensus across all KEFE cases.',
+      'observatory_action': 'Open Observatory',
     },
     'tr': {
       'title': 'KEFE deneyimleri',
@@ -91,6 +97,12 @@ abstract final class ExperienceHubStringCatalog {
           'Preview Radar ve Atlas temsili fixture verisi kullanır. KEFE bu verileri canlı, ulusal olarak temsili veya doğrulanmış ülke analitiği gibi sunmaz.',
       'loading': 'Deneyimler yükleniyor…',
       'retry': 'Tekrar dene',
+      'impact_title': 'Etki',
+      'impact_body': 'Kurumlara ulasan ve gercek dunyada eylem baslatan sinyaller.',
+      'impact_action': 'Etkiyi Goster',
+      'observatory_title': 'Gozlemevi',
+      'observatory_body': 'Tum KEFE vakalarindaki kolektif uzlasiyi kesfedin.',
+      'observatory_action': 'Gozlemevini Ac',
     },
   };
 }
