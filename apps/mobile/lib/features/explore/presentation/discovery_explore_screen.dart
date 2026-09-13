@@ -803,10 +803,13 @@ class _ExploreError extends StatelessWidget {
 
 IconData _domainIcon(String domain) => switch (domain) {
   'DAILY_LIFE' => Icons.people_alt_outlined,
-  'TECHNOLOGY' => Icons.memory_rounded,
+  'TECHNOLOGY' || 'TECHNOLOGY_AI' => Icons.memory_rounded,
   'SPORTS' => Icons.sports_soccer_rounded,
-  'CIVIC' => Icons.account_balance_outlined,
-  'WORK_ECONOMY' => Icons.work_outline_rounded,
+  'CIVIC' || 'CITY_PUBLIC_LIFE' => Icons.account_balance_outlined,
+  'WORK_ECONOMY' || 'WORK_BUSINESS' => Icons.work_outline_rounded,
   'EDUCATION' => Icons.school_outlined,
+  'FAMILY_PARENTING' => Icons.family_restroom_rounded,
+  'CULTURE_MEDIA' => Icons.theater_comedy_outlined,
+  'HEALTH' => Icons.health_and_safety_outlined,
   _ => Icons.balance_outlined,
 };

@@ -29,6 +29,7 @@ extension KefeExploreStrings on KefeStrings {
     'EDUCATION' => _exploreText('domain.education'),
     'FAMILY_PARENTING' => _exploreText('domain.family_parenting'),
     'CULTURE_MEDIA' => _exploreText('domain.culture_media'),
+    'HEALTH' => _exploreText('domain.health'),
     _ => domain.replaceAll('_', ' '),
   };
 }

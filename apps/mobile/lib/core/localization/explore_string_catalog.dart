@@ -16,6 +16,7 @@ abstract final class ExploreStringCatalog {
       'domain.education': 'Education',
       'domain.family_parenting': 'Family & Parenting',
       'domain.culture_media': 'Culture & Media',
+      'domain.health': 'Health',
     },
     'tr': {
       'trending_weighs': 'Trend tartımlar',
@@ -31,6 +32,7 @@ abstract final class ExploreStringCatalog {
       'domain.education': 'Eğitim',
       'domain.family_parenting': 'Aile & Ebeveynlik',
       'domain.culture_media': 'Kültür & Medya',
+      'domain.health': 'Sağlık',
     },
   };
 }
