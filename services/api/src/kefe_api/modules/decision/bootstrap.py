@@ -16,6 +16,7 @@ from kefe_api.modules.decision.models import (
     ResolvedFlow,
     RevealSnapshot,
 )
+from kefe_api.modules.decision.bootstrap_catalog import build_catalog_cases
 from kefe_api.modules.decision.reflection_in_memory import (
     InMemoryReflectionDecisionRepository,
 )
@@ -267,8 +268,10 @@ def build_demo_repository() -> InMemoryReflectionDecisionRepository:
         ),
     )
 
+    catalog_cases, catalog_reveals, catalog_perspectives = build_catalog_cases()
+
     return InMemoryReflectionDecisionRepository(
-        cases=[case, triage_case],
-        reveals=[reveal, triage_reveal],
-        perspectives=[perspective, triage_perspective],
+        cases=[case, triage_case] + catalog_cases,
+        reveals=[reveal, triage_reveal] + catalog_reveals,
+        perspectives=[perspective, triage_perspective] + catalog_perspectives,
     )
