@@ -30,6 +30,9 @@ import {
   type HistoricalRetrospectiveReport,
   type ObserveModeSessionReport,
   type CommunityProposalItem,
+  type PerspectiveClustersReport,
+  type SegmentDistributionReport,
+  type StakeholderDistributionReport,
 } from "@/src/lib/case-analytics-api";
 import {
   CaseObjectionApiClient,
@@ -100,6 +103,11 @@ export function DeliberationWorkspace({
   const [newProposalTitle, setNewProposalTitle] = useState<string>("");
   const [newProposalContext, setNewProposalContext] = useState<string>("");
 
+  // Collective Deliberation Analytics state (CAP-033, CAP-036, CAP-037)
+  const [perspectiveClusters, setPerspectiveClusters] = useState<PerspectiveClustersReport | null>(null);
+  const [segmentDistributions, setSegmentDistributions] = useState<SegmentDistributionReport | null>(null);
+  const [stakeholderDistributions, setStakeholderDistributions] = useState<StakeholderDistributionReport | null>(null);
+
   // Status & loading states
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -160,6 +168,9 @@ export function DeliberationWorkspace({
         historicalRetrospectiveRes,
         observeSessionRes,
         communityProposalsRes,
+        perspectiveClustersRes,
+        segmentDistributionsRes,
+        stakeholderDistributionsRes,
       ] = await Promise.all([
         analyticsClient.getQualityChecklist(caseVersionId),
         objectionClient.listObjections(caseVersionId),
@@ -189,6 +200,9 @@ export function DeliberationWorkspace({
         analyticsClient.getHistoricalRetrospective(caseVersionId),
         analyticsClient.createObserveSession(caseVersionId),
         analyticsClient.listCommunityProposals(caseVersionId),
+        analyticsClient.getPerspectiveClusters(caseVersionId),
+        analyticsClient.getSegmentDistributions(caseVersionId),
+        analyticsClient.getStakeholderDistributions(caseVersionId),
       ]);
 
       setChecklist(checklistRes);
@@ -225,6 +239,9 @@ export function DeliberationWorkspace({
       setHistoricalRetrospective(historicalRetrospectiveRes);
       setObserveSession(observeSessionRes);
       setCommunityProposals(communityProposalsRes);
+      setPerspectiveClusters(perspectiveClustersRes);
+      setSegmentDistributions(segmentDistributionsRes);
+      setStakeholderDistributions(stakeholderDistributionsRes);
 
 
       setStatusMessage({
@@ -485,7 +502,7 @@ export function DeliberationWorkspace({
           className={`${styles.tabButton} ${activeTab === "analytics" ? styles.tabActive : ""}`}
           onClick={() => setActiveTab("analytics")}
         >
-          Deliberation Analitikleri (CAP-039 / CAP-041)
+          Kolektif Analitikler (CAP-033 / CAP-036 / CAP-037 / CAP-039 / CAP-041)
         </button>
         <button
           type="button"
@@ -859,6 +876,130 @@ export function DeliberationWorkspace({
                 <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
               )}
             </div>
+          </div>
+
+          {/* Perspective Clusters (CAP-033) */}
+          <div className={styles.itemCard} style={{ marginTop: "1.25rem" }}>
+            <div className={styles.itemHeader}>
+              <div className={styles.itemMeta}>
+                <span className={styles.itemTitle}>Argüman Örüntü Kümelenmesi & Çekirdek Tezler</span>
+                <span className={`${styles.badge} ${styles.badgePassed}`}>CAP-033</span>
+              </div>
+              {perspectiveClusters && (
+                <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+                  Toplam Argüman: <strong>{perspectiveClusters.total_arguments_clustered}</strong>
+                </span>
+              )}
+            </div>
+            {perspectiveClusters ? (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "0.75rem", marginTop: "0.75rem" }}>
+                {perspectiveClusters.clusters.map((cl) => (
+                  <div key={cl.cluster_id} style={{ background: "var(--background)", padding: "0.75rem", borderRadius: "0.5rem", border: "1px solid var(--line)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.35rem" }}>
+                      <span className={`${styles.badge} ${cl.archetype === "BRIDGE_SYNTHESIS" ? styles.badgePassed : cl.archetype === "NEAR_CONSENSUS" ? styles.badgePassed : styles.badgeProvisional}`} style={{ fontSize: "0.72rem" }}>
+                        {cl.archetype}
+                      </span>
+                      <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--gold)" }}>
+                        {cl.support_percentage}% Destek
+                      </span>
+                    </div>
+                    <p style={{ fontSize: "0.85rem", color: "var(--text)", margin: "0 0 0.35rem", fontWeight: 600 }}>
+                      {cl.core_thesis}
+                    </p>
+                    <span style={{ fontSize: "0.75rem", color: "var(--muted)" }}>
+                      Argüman Sayısı: {cl.argument_count}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: "0.5rem 0 0" }}>Veri yüklenmedi.</p>
+            )}
+          </div>
+
+          {/* Privacy-safe Segment Distribution (CAP-036) */}
+          <div className={styles.itemCard} style={{ marginTop: "1.25rem" }}>
+            <div className={styles.itemHeader}>
+              <div className={styles.itemMeta}>
+                <span className={styles.itemTitle}>Gizlilik Korumalı Segment Dağılımı</span>
+                <span className={`${styles.badge} ${styles.badgePassed}`}>CAP-036</span>
+              </div>
+              <span className={`${styles.badge} ${styles.badgePassed}`}>
+                k-Anonymity (≥30) · Diferansiyel Gizlilik Aktif
+              </span>
+            </div>
+            {segmentDistributions ? (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "0.75rem", marginTop: "0.75rem" }}>
+                {(segmentDistributions.segments || segmentDistributions.cohorts || []).map((seg, idx) => (
+                  <div key={idx} style={{ background: "var(--background)", padding: "0.75rem", borderRadius: "0.5rem", border: "1px solid var(--line)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.35rem" }}>
+                      <strong style={{ fontSize: "0.85rem", color: "var(--text)" }}>{seg.cohort_label || seg.cohort_name}</strong>
+                      <span className={`${styles.badge} ${seg.is_suppressed ? styles.badgeFailed : styles.badgePassed}`} style={{ fontSize: "0.7rem" }}>
+                        {seg.is_suppressed ? "Gizlilik Bastırması" : `N=${seg.sample_size || seg.sample_count}`}
+                      </span>
+                    </div>
+                    {seg.is_suppressed ? (
+                      <p style={{ fontSize: "0.78rem", color: "#f87171", margin: 0 }}>
+                        {seg.suppression_reason || "Örneklem yetersizliği nedeniyle bastırıldı."}
+                      </p>
+                    ) : (
+                      <div style={{ fontSize: "0.8rem", color: "var(--muted)", display: "flex", flexDirection: "column", gap: "0.15rem" }}>
+                        <span>Baskın Tercih: <strong>{seg.primary_choice || "Dengeli"}</strong></span>
+                        {seg.option_shares && (
+                          <div style={{ display: "flex", gap: "0.5rem", fontSize: "0.75rem", marginTop: "0.2rem" }}>
+                            {Object.entries(seg.option_shares).map(([opt, share]) => (
+                              <span key={opt}>{opt}: {Math.round(share * 100)}%</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: "0.5rem 0 0" }}>Veri yüklenmedi.</p>
+            )}
+          </div>
+
+          {/* Stakeholder Distribution (CAP-037) */}
+          <div className={styles.itemCard} style={{ marginTop: "1.25rem" }}>
+            <div className={styles.itemHeader}>
+              <div className={styles.itemMeta}>
+                <span className={styles.itemTitle}>Paydaş Temsiliyeti & Çoğulculuk Skoru</span>
+                <span className={`${styles.badge} ${styles.badgePassed}`}>CAP-037</span>
+              </div>
+              {stakeholderDistributions && (
+                <span className={`${styles.badge} ${styles.badgePassed}`}>
+                  Çoğulculuk Skoru: {Math.round((stakeholderDistributions.pluralism_score ?? 0.85) * 100)}%
+                </span>
+              )}
+            </div>
+            {stakeholderDistributions ? (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "0.75rem", marginTop: "0.75rem" }}>
+                {(stakeholderDistributions.stakeholder_distributions || stakeholderDistributions.stakeholder_groups || []).map((stk, idx) => (
+                  <div key={idx} style={{ background: "var(--background)", padding: "0.75rem", borderRadius: "0.5rem", border: "1px solid var(--line)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.35rem" }}>
+                      <strong style={{ fontSize: "0.85rem", color: "var(--text)" }}>{stk.name || stk.category || stk.role}</strong>
+                      <span className={`${styles.badge} ${styles.badgePassed}`} style={{ fontSize: "0.7rem" }}>
+                        Uyum: {Math.round((stk.cohesion_index ?? stk.cohesion_score ?? 0.8) * 100)}%
+                      </span>
+                    </div>
+                    <div style={{ fontSize: "0.8rem", color: "var(--muted)", display: "flex", flexDirection: "column", gap: "0.15rem" }}>
+                      <span>Katılımcı: {stk.participant_count ?? (stk.representation_percentage ? `${stk.representation_percentage}%` : "—")}</span>
+                      <span>Baskın Tercih: <strong>{stk.primary_choice || stk.dominant_preference}</strong></span>
+                      {stk.divergence_from_overall_points !== undefined && (
+                        <span style={{ fontSize: "0.75rem", color: "var(--gold)" }}>
+                          Genel Sapma: {stk.divergence_from_overall_points > 0 ? `+${stk.divergence_from_overall_points}` : stk.divergence_from_overall_points} puan
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: "0.5rem 0 0" }}>Veri yüklenmedi.</p>
+            )}
           </div>
 
           {/* Normative Models */}

@@ -177,23 +177,55 @@ export interface ResponsibilityAnalysisReport {
 }
 
 export interface SegmentDistributionCohort {
-  cohort_name: string;
-  sample_count: number;
-  choice_distribution: Record<string, number>;
+  cohort_name?: string;
+  cohort_label?: string;
+  cohort_type?: string;
+  sample_count?: number;
+  sample_size?: number;
+  choice_distribution?: Record<string, number>;
+  option_shares?: Record<string, number>;
+  primary_choice?: string | null;
   is_suppressed: boolean;
+  suppression_reason?: string | null;
+  entropy_score?: number;
 }
 
 export interface SegmentDistributionReport {
   case_version_id: string;
-  k_anonymity_floor: number;
-  cohorts: SegmentDistributionCohort[];
+  k_anonymity_floor?: number;
+  minimum_sample_threshold?: number;
+  overall_sample_size?: number;
+  cohorts?: SegmentDistributionCohort[];
+  segments?: SegmentDistributionCohort[];
+  privacy_guarantees?: {
+    k_anonymity_threshold: number;
+    no_individual_profiling: boolean;
+    differential_privacy_noise_applied: boolean;
+  };
 }
 
 export interface StakeholderDistributionGroup {
-  role: "DIRECTLY_IMPACTED" | "FRONTLINE_PRACTITIONERS" | "COMMERCIAL_ENTERPRISES" | "REGULATORY_OVERSIGHT" | "CIVIC_COMMUNITY";
-  representation_percentage: number;
-  cohesion_score: number;
-  dominant_preference: string;
+  role?: "DIRECTLY_IMPACTED" | "FRONTLINE_PRACTITIONERS" | "COMMERCIAL_ENTERPRISES" | "REGULATORY_OVERSIGHT" | "CIVIC_COMMUNITY" | string;
+  category?: string;
+  name?: string;
+  representation_percentage?: number;
+  participant_count?: number;
+  sample_share?: number;
+  cohesion_score?: number;
+  cohesion_index?: number;
+  dominant_preference?: string;
+  primary_choice?: string;
+  option_shares?: Record<string, number>;
+  divergence_from_overall_points?: number;
+}
+
+export interface StakeholderDistributionReport {
+  case_version_id: string;
+  total_stakeholders_represented?: number;
+  active_categories_count?: number;
+  pluralism_score?: number;
+  stakeholder_groups?: StakeholderDistributionGroup[];
+  stakeholder_distributions?: StakeholderDistributionGroup[];
 }
 
 export interface BudgetTradeoffReport {
@@ -233,11 +265,6 @@ export interface CommunityProposalItem {
   curation_state: "DRAFT_SUBMITTED" | "COMMUNITY_PEER_REVIEW" | "EDITORIAL_APPROVED" | "REJECTED_WITH_REASON";
   neutrality_score: number;
   supporter_count: number;
-}
-
-export interface StakeholderDistributionReport {
-  case_version_id: string;
-  stakeholder_groups: StakeholderDistributionGroup[];
 }
 
 export interface BlindVariantsReport {

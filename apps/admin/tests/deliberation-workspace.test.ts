@@ -663,4 +663,122 @@ test("Deliberation Workspace: loads simulation, budget tradeoff, retrospective, 
   }
 });
 
+test("Deliberation Workspace: loads collective analytics (CAP-033, CAP-036, CAP-037, CAP-039, CAP-041)", async () => {
+  const caseId = "22222222-2222-4222-8222-222222222222";
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = async (input: RequestInfo | URL) => {
+    const url = input.toString();
+
+    if (url.includes("/perspective-clusters")) {
+      return new Response(JSON.stringify({
+        case_version_id: caseId,
+        total_arguments_clustered: 1000,
+        clusters: [
+          {
+            cluster_id: "cl-01",
+            case_version_id: caseId,
+            archetype: "BRIDGE_SYNTHESIS",
+            core_thesis: "Kamu yararı ve esnaf hakları arasında tarifeli geçiş uzlaşısı",
+            argument_count: 450,
+            support_percentage: 45.0
+          },
+          {
+            cluster_id: "cl-02",
+            case_version_id: caseId,
+            archetype: "OPPOSING_PRINCIPLE",
+            core_thesis: "Tam serbest piyasa ve ticari serbestlik",
+            argument_count: 300,
+            support_percentage: 30.0
+          }
+        ]
+      }), { status: 200 });
+    }
+
+    if (url.includes("/segment-distributions")) {
+      return new Response(JSON.stringify({
+        case_version_id: caseId,
+        minimum_sample_threshold: 30,
+        overall_sample_size: 1500,
+        privacy_guarantees: {
+          k_anonymity_threshold: 30,
+          no_individual_profiling: true,
+          differential_privacy_noise_applied: true
+        },
+        segments: [
+          {
+            cohort_type: "AGE_COHORT",
+            cohort_label: "Genç Yurttaşlar (18-29)",
+            sample_size: 420,
+            is_suppressed: false,
+            suppression_reason: null,
+            option_shares: { OPTION_A: 0.65, OPTION_B: 0.35 },
+            primary_choice: "OPTION_A",
+            entropy_score: 0.92
+          },
+          {
+            cohort_type: "REGIONAL_COHORT",
+            cohort_label: "Kırsal Havza",
+            sample_size: 18,
+            is_suppressed: true,
+            suppression_reason: "INSUFFICIENT_SAMPLE_PRIVACY_THRESHOLD",
+            option_shares: {},
+            primary_choice: null,
+            entropy_score: 0.0
+          }
+        ]
+      }), { status: 200 });
+    }
+
+    if (url.includes("/stakeholder-distributions")) {
+      return new Response(JSON.stringify({
+        case_version_id: caseId,
+        total_stakeholders_represented: 1200,
+        active_categories_count: 5,
+        pluralism_score: 0.88,
+        stakeholder_distributions: [
+          {
+            category: "DIRECTLY_IMPACTED",
+            name: "Doğrudan Etkilenenler",
+            participant_count: 480,
+            sample_share: 0.40,
+            option_shares: { OPTION_A: 0.70, OPTION_B: 0.30 },
+            primary_choice: "OPTION_A",
+            cohesion_index: 0.85,
+            divergence_from_overall_points: 12
+          }
+        ]
+      }), { status: 200 });
+    }
+
+    return new Response(JSON.stringify({}), { status: 200 });
+  };
+
+  try {
+    const client = new CaseAnalyticsApiClient("http://localhost:8000");
+
+    // 1. Perspective Clusters (CAP-033)
+    const clusters = await client.getPerspectiveClusters(caseId);
+    assert.equal(clusters.total_arguments_clustered, 1000);
+    assert.equal(clusters.clusters.length, 2);
+    assert.equal(clusters.clusters[0].archetype, "BRIDGE_SYNTHESIS");
+
+    // 2. Segment Distributions (CAP-036)
+    const segs = await client.getSegmentDistributions(caseId);
+    assert.equal(segs.overall_sample_size, 1500);
+    assert.equal(segs.privacy_guarantees?.k_anonymity_threshold, 30);
+    assert.equal(segs.segments?.length, 2);
+    assert.equal(segs.segments?.[1].is_suppressed, true);
+
+    // 3. Stakeholder Distributions (CAP-037)
+    const stks = await client.getStakeholderDistributions(caseId);
+    assert.equal(stks.pluralism_score, 0.88);
+    assert.equal(stks.stakeholder_distributions?.length, 1);
+    assert.equal(stks.stakeholder_distributions?.[0].primary_choice, "OPTION_A");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+
 
