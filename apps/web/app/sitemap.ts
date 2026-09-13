@@ -60,7 +60,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let dynamicCaseRoutes: MetadataRoute.Sitemap = [];
   try {
-    const cases = await listPublicCases(100, 0);
+    const cases = await listPublicCases(50);
     dynamicCaseRoutes = cases.map((c) => ({
       url: `${BASE_URL}/cases/${encodeURIComponent(c.case_id)}`,
       lastModified: new Date(),

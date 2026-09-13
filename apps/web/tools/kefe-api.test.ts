@@ -55,19 +55,19 @@ test("list endpoints use the server base, bounded query parameters and GET seman
   process.env.KEFE_API_BASE_URL = "https://api.example.test/gateway/";
   const requests = installFetch([
     jsonResponse([]),
-    jsonResponse([]),
+    jsonResponse({ items: [] }),
     jsonResponse([]),
   ]);
 
   await listSignalConsensusCards(25, 5);
-  await listPublicCases(30, 10);
+  await listPublicCases(30);
   await listInstitutionResponses();
 
   assert.deepEqual(
     requests.map(({ url }) => url),
     [
       "https://api.example.test/gateway/v1/signals/consensus-cards?limit=25&offset=5",
-      "https://api.example.test/gateway/v1/cases?limit=30&offset=10",
+      "https://api.example.test/gateway/v1/cases?limit=30",
       "https://api.example.test/gateway/v1/impact/institution-responses",
     ],
   );
@@ -80,17 +80,48 @@ test("list endpoints use the server base, bounded query parameters and GET seman
 
 test("list pagination is bounded to each public endpoint contract", async () => {
   process.env.KEFE_API_BASE_URL = "https://api.example.test";
-  const requests = installFetch([jsonResponse([]), jsonResponse([])]);
+  const requests = installFetch([jsonResponse([]), jsonResponse({ items: [] })]);
 
   await listSignalConsensusCards(1000.9, -8);
-  await listPublicCases(100, Number.POSITIVE_INFINITY);
+  await listPublicCases(100);
 
   assert.deepEqual(
     requests.map(({ url }) => url),
     [
       "https://api.example.test/v1/signals/consensus-cards?limit=100&offset=0",
-      "https://api.example.test/v1/cases?limit=50&offset=0",
+      "https://api.example.test/v1/cases?limit=50",
     ],
+  );
+});
+
+test("public case lists unwrap the API response envelope without renaming fields", async () => {
+  const item = {
+    case_id: "11111111-1111-4111-8111-111111111111",
+    case_version_id: "22222222-2222-4222-8222-222222222222",
+    version_no: 3,
+    title: "Mahalle parkı",
+    summary: "Park alanının kullanımını değerlendir.",
+    base_format: "DILEMMA",
+    primary_domain: "DAILY_LIFE",
+    content_risk: "L0",
+    is_real_event: true,
+  };
+  installFetch([jsonResponse({ items: [item] })]);
+
+  assert.deepEqual(await listPublicCases(), [item]);
+});
+
+test("malformed public case envelopes fail explicitly", async () => {
+  installFetch([jsonResponse({ cases: [] })]);
+
+  await assert.rejects(
+    () => listPublicCases(),
+    (error: unknown) => {
+      assert(error instanceof KefApiError);
+      assert.equal(error.code, "INVALID_API_RESPONSE");
+      assert.equal(error.status, 502);
+      return true;
+    },
   );
 });
 

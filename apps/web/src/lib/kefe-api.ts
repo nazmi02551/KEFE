@@ -229,16 +229,13 @@ export async function getSignalQualification(
 export interface CaseContextSummary {
   case_id: string;
   case_version_id: string;
+  version_no: number;
   title: string;
   summary: string;
-  primary_domain_code: string;
-  /** true only when the backend explicitly returns boolean true (ADR-0133). */
-  is_real_event?: boolean;
-}
-
-export interface QuestionOption {
-  code: string;
-  label: string;
+  base_format: string;
+  primary_domain: string;
+  content_risk: string;
+  is_real_event: boolean;
 }
 
 export interface CaseQuestion {
@@ -247,7 +244,7 @@ export interface CaseQuestion {
   response_type: string;
   required: boolean;
   response_schema: Record<string, unknown>;
-  options: QuestionOption[];
+  options: string[];
 }
 
 export interface CaseDetail {
@@ -266,17 +263,19 @@ export interface CaseDetail {
 
 export async function listPublicCases(
   limit = 20,
-  offset = 0,
 ): Promise<CaseContextSummary[]> {
   const safeLimit = boundedInteger(limit, { minimum: 1, maximum: 50, fallback: 20 });
-  const safeOffset = boundedInteger(offset, {
-    minimum: 0,
-    maximum: Number.MAX_SAFE_INTEGER,
-    fallback: 0,
-  });
-  return fetchJson<CaseContextSummary[]>(
-    `/v1/cases?limit=${safeLimit}&offset=${safeOffset}`,
+  const response = await fetchJson<{ items: CaseContextSummary[] }>(
+    `/v1/cases?limit=${safeLimit}`,
   );
+  if (!Array.isArray(response.items)) {
+    throw new KefApiError(
+      "INVALID_API_RESPONSE",
+      "Public case list response is missing its items array.",
+      502,
+    );
+  }
+  return response.items;
 }
 
 export async function getPublicCase(caseId: string): Promise<CaseDetail> {

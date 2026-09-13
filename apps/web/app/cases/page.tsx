@@ -30,7 +30,7 @@ export default async function CasesPage() {
 
   try {
     // Public cases contract caps a page at 50; client-side filter handles it.
-    cases = await listPublicCases(50, 0);
+    cases = await listPublicCases(50);
   } catch (err) {
     error = publicLoadErrorMessage(err, "Meseleler şu anda yüklenemiyor.");
   }

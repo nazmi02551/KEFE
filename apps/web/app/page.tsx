@@ -43,7 +43,7 @@ const ACTION_STATUS_LABELS: Record<string, string> = {
 export default async function HomePage() {
   // All three are fail-open — errors yield empty arrays
   const [recentCases, signalCards, actions] = await Promise.all([
-    listPublicCases(4, 0).catch(() => []),
+    listPublicCases(4).catch(() => []),
     listSignalConsensusCards(3, 0).catch(() => []),
     listActionMilestones().catch(() => []),
   ]);
@@ -115,7 +115,7 @@ export default async function HomePage() {
             {recentCases.map((c) => (
               <article key={c.case_version_id} className={styles.caseCard}>
                 <div className={styles.caseCardBadge}>
-                  {DOMAIN_LABELS[c.primary_domain_code] ?? c.primary_domain_code}
+                  {DOMAIN_LABELS[c.primary_domain] ?? c.primary_domain}
                 </div>
                 <h3 className={styles.caseCardTitle}>{c.title}</h3>
                 <p className={styles.caseCardSummary}>{c.summary}</p>

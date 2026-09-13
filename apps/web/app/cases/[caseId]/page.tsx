@@ -134,9 +134,8 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
                   {q.options.length > 0 && (
                     <ul className={styles.optionList} role="list">
                       {q.options.map((opt) => (
-                        <li key={opt.code} className={styles.optionItem}>
-                          <span className={styles.optionCode}>{opt.code}</span>
-                          <span className={styles.optionLabel}>{opt.label}</span>
+                        <li key={opt} className={styles.optionItem}>
+                          <span className={styles.optionLabel}>{opt}</span>
                         </li>
                       ))}
                     </ul>
