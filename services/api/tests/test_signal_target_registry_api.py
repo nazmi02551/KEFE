@@ -8,6 +8,7 @@ NOTE: When Admin target management (CAP-057) is integrated, the router will
 accept an injected resolver and tests will inject StaticInstitutionTargetResolver
 to verify populated responses.
 """
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
@@ -26,7 +27,10 @@ _SEED_SIGNAL = QualifiedSignal(
     signal_id=_SIGNAL_ID,
     case_version_id=_CASE_ID,
     case_title="Son koltuk kime verilmeli?",
-    consensus_statement="Öncelikli ihtiyacı olan yurttaşlara pozitif ayrımcılık kamu vicdanında yüksek uzlaşı taşımaktadır.",
+    consensus_statement=(
+        "Öncelikli ihtiyacı olan yurttaşlara pozitif ayrımcılık kamu "
+        "vicdanında yüksek uzlaşı taşımaktadır."
+    ),
     agreement_percentage=82.4,
     sample_size=1420,
     qualification_tier=SignalQualificationTier.GOLD_STANDARD,
@@ -75,8 +79,14 @@ def test_signal_target_registry_api_response_shape() -> None:
     assert res.status_code == 200
     data = res.json()
 
-    required_fields = {"signal_id", "case_version_id", "primary_target_id",
-                       "targets", "certified_at", "registry_proof_hash"}
+    required_fields = {
+        "signal_id",
+        "case_version_id",
+        "primary_target_id",
+        "targets",
+        "certified_at",
+        "registry_proof_hash",
+    }
     assert required_fields.issubset(data.keys())
     assert isinstance(data["targets"], list)
     assert isinstance(data["certified_at"], str)

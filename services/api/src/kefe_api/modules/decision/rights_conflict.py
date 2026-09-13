@@ -39,7 +39,9 @@ class RightsConflictCalculator:
         constitutional_rationale: str,
     ) -> RightsConflictResult:
         if not 0.0 <= inalienable_core_score <= 1.0:
-            raise ValueError(f"inalienable_core_score must be in [0.0, 1.0], got {inalienable_core_score}")
+            raise ValueError(
+                f"inalienable_core_score must be in [0.0, 1.0], got {inalienable_core_score}"
+            )
         if len(constitutional_rationale.strip()) < 10:
             raise ValueError("constitutional_rationale must have at least 10 characters")
 

@@ -53,8 +53,14 @@ class DispatchStatus(StrEnum):
 
 # Dispatch transitions allowed by the domain invariant
 _VALID_TRANSITIONS: dict[DispatchStatus, set[DispatchStatus]] = {
-    DispatchStatus.PROPOSED_TARGET: {DispatchStatus.VERIFIED_TARGET, DispatchStatus.DECLINED_JURISDICTION},
-    DispatchStatus.VERIFIED_TARGET: {DispatchStatus.DISPATCHED, DispatchStatus.DECLINED_JURISDICTION},
+    DispatchStatus.PROPOSED_TARGET: {
+        DispatchStatus.VERIFIED_TARGET,
+        DispatchStatus.DECLINED_JURISDICTION,
+    },
+    DispatchStatus.VERIFIED_TARGET: {
+        DispatchStatus.DISPATCHED,
+        DispatchStatus.DECLINED_JURISDICTION,
+    },
     DispatchStatus.DISPATCHED: {DispatchStatus.ACKNOWLEDGED, DispatchStatus.DECLINED_JURISDICTION},
     DispatchStatus.ACKNOWLEDGED: {DispatchStatus.ACTION_PLEDGED},
     DispatchStatus.ACTION_PLEDGED: set(),

@@ -9,6 +9,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 
 import type { SignalConsensusCard } from "@/src/lib/kefe-api";
+import { clampPercentage } from "@/src/lib/presentation";
+import { matchesSearchQuery } from "@/src/lib/search";
 import styles from "@/src/components/signal-filter.module.css";
 
 const TIER_LABELS: Record<string, string> = {
@@ -20,26 +22,8 @@ const TIER_LABELS: Record<string, string> = {
 
 const TIER_ORDER = ["GOLD_STANDARD", "SILVER_VALIDATED", "BRONZE_OBSERVED", "UNQUALIFIED"];
 
-/** Turkish-tolerant normalization (ADR-0141). */
-function normalize(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[İI]/g, "i")
-    .replace(/ı/g, "i")
-    .replace(/ç/g, "c")
-    .replace(/ğ/g, "g")
-    .replace(/ö/g, "o")
-    .replace(/ş/g, "s")
-    .replace(/ü/g, "u")
-    .trim()
-    .replace(/\s+/g, " ");
-}
-
 function matchesQuery(query: string, card: SignalConsensusCard): boolean {
-  if (!query) return true;
-  const tokens = normalize(query).split(" ").filter(Boolean);
-  const haystack = normalize(`${card.case_title} ${card.consensus_statement}`);
-  return tokens.every((t) => haystack.includes(t));
+  return matchesSearchQuery(query, [card.case_title, card.consensus_statement]);
 }
 
 function tierColorVar(tier: string): string {
@@ -151,7 +135,7 @@ export function SignalFilter({ cards }: SignalFilterProps) {
                   {TIER_LABELS[card.qualification_tier] ?? card.qualification_tier}
                 </span>
                 <span className={styles.agreementPct}>
-                  %{Math.round(card.agreement_percentage)}
+                  %{Math.round(clampPercentage(card.agreement_percentage))}
                 </span>
               </header>
               <h2 className={styles.cardTitle}>{card.case_title}</h2>

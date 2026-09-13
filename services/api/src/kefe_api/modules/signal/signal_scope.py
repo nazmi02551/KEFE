@@ -46,7 +46,10 @@ class SignalScopeAlignmentReport:
 
 
 class SignalScopeAlignmentService:
-    """Enforces constitutional boundary limits preventing signals from silently broadening beyond measured scope."""
+    """Prevents signals from silently broadening beyond their measured scope.
+
+    Enforcement follows the constitutional scope boundary limits.
+    """
 
     @staticmethod
     def evaluate(

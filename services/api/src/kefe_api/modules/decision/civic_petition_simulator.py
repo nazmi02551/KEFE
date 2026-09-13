@@ -35,9 +35,14 @@ class CivicPetitionSimulatorService:
         if signatures_count < 0:
             raise ValueError("signatures_count cannot be negative")
         if signature_target_threshold < 1000:
-            raise ValueError(f"signature_target_threshold must be >= 1000, got {signature_target_threshold}")
+            raise ValueError(
+                f"signature_target_threshold must be >= 1000, got {signature_target_threshold}"
+            )
         if not -1.0 <= projected_net_benefit_score <= 1.0:
-            raise ValueError(f"projected_net_benefit_score must be in [-1.0, 1.0], got {projected_net_benefit_score}")
+            raise ValueError(
+                "projected_net_benefit_score must be in [-1.0, 1.0], "
+                f"got {projected_net_benefit_score}"
+            )
 
         if signatures_count >= signature_target_threshold:
             stage = PetitionStage.SUBMITTED_TO_PARLIAMENT

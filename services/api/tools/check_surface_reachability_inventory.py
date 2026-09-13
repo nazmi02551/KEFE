@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -50,6 +51,19 @@ def _text(relative_path: str) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def _tracked_files(relative_path: str) -> list[str]:
+    result = subprocess.run(
+        ["git", "ls-files", "--", relative_path],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+        shell=False,
+    )
+    _require(result.returncode == 0, f"git inventory lookup: {relative_path}")
+    return [line for line in result.stdout.splitlines() if line.strip()]
+
+
 def _surface_map(contract: dict) -> dict[str, dict]:
     surfaces = contract.get("surfaces")
     _require(isinstance(surfaces, list), "surfaces must be a list")
@@ -74,7 +88,7 @@ def main() -> None:
         contract["contract_id"] == "KEFE-SURFACE-REACHABILITY-INVENTORY-001",
         "contract id",
     )
-    _require(contract["version"] == "1.0.0", "contract version")
+    _require(contract["version"] == "1.0.1", "contract version")
     _require(contract["wave"] == "F4", "F4 binding")
     _require(
         contract["capabilities"] == ["CAP-092", "CAP-123"],
@@ -175,7 +189,7 @@ def main() -> None:
         "canonical-api-production": ("NOT_CONFIGURED", "STATIC_CONFIG", False),
         "admin-studio-local": ("LOCAL_ONLY", "LOCAL_RUNTIME", False),
         "admin-studio-production": ("NOT_CONFIGURED", "STATIC_CONFIG", False),
-        "consumer-web-production": ("PLACEHOLDER_ONLY", "STATIC_CONFIG", False),
+        "consumer-web-production": ("COMPILE_ONLY", "CI_BUILD_ARTIFACT", False),
         "mobile-production-shell": ("COMPILE_ONLY", "CI_BUILD_ARTIFACT", False),
         "installable-phone-preview": (
             "CI_ARTIFACT_AVAILABLE",
@@ -188,7 +202,7 @@ def main() -> None:
             False,
         ),
         "mobile-deeplinks": ("NOT_CONFIGURED", "STATIC_CONFIG", False),
-        "web-deeplinks": ("NOT_CONFIGURED", "STATIC_CONFIG", False),
+        "web-deeplinks": ("COMPILE_ONLY", "CI_BUILD_ARTIFACT", False),
         "otp-provider-receipt-callback": ("INTERNAL_ONLY", "STATIC_CONFIG", False),
     }
     for surface_id, expected in expected_states.items():
@@ -203,9 +217,12 @@ def main() -> None:
     mobile_config = _text("apps/mobile/lib/core/config/app_config.dart")
     mobile_pubspec = _text("apps/mobile/pubspec.yaml")
     mobile_readme = _text("apps/mobile/README.md")
+    android_manifest = _text("apps/mobile/android/app/src/main/AndroidManifest.xml")
     admin_env = _text("apps/admin/.env.example")
     admin_readme = _text("apps/admin/README.md")
     web_readme = _text("apps/web/README.md")
+    web_package = json.loads(_text("apps/web/package.json"))
+    web_workflow = _text(".github/workflows/web-ci.yml")
     installable_contract = json.loads(
         _text("docs/contracts/installable-phone-preview-hotfix.v1.json")
     )
@@ -240,9 +257,24 @@ def main() -> None:
     _require("http://localhost:8000" in mobile_config, "mobile local API default")
     _require("http://localhost:8000" in admin_env, "Admin local API default")
     _require("production deployment" in admin_readme.lower(), "Admin non-claim")
-    _require("public/deep-link/web experience" in web_readme, "web placeholder intent")
-    web_entries = sorted(path.name for path in (ROOT / "apps/web").iterdir())
-    _require(web_entries == ["README.md"], "consumer web must remain placeholder-only")
+    _require("public/deep-link/web experience" in web_readme, "web runtime intent")
+    for relative_path in (
+        "apps/web/app/page.tsx",
+        "apps/web/app/cases/page.tsx",
+        "apps/web/app/cases/[caseId]/page.tsx",
+        "apps/web/app/share/[token]/page.tsx",
+        "apps/web/app/signal/page.tsx",
+        "apps/web/app/signal/[signalId]/page.tsx",
+    ):
+        _text(relative_path)
+    _require(web_package["scripts"].get("verify"), "consumer web verify command")
+    for fragment in (
+        "name: Consumer Web CI",
+        "npm ci --no-audit --no-fund",
+        "npm audit --omit=dev --audit-level=high",
+        "npm run verify",
+    ):
+        _require(fragment in web_workflow, f"consumer web CI evidence: {fragment}")
 
     _require("go_router:" in mobile_pubspec, "mobile route library")
     _require("`/case/:caseId`" in mobile_readme, "in-app direct Case route")
@@ -255,8 +287,23 @@ def main() -> None:
             forbidden_dependency not in mobile_pubspec,
             f"unexpected deeplink dependency without inventory update: {forbidden_dependency}",
         )
-    _require(not (ROOT / "apps/mobile/android").exists(), "committed Android host")
-    _require(not (ROOT / "apps/mobile/ios").exists(), "committed iOS host")
+    _require(
+        "apps/mobile/android/app/src/main/AndroidManifest.xml"
+        in _tracked_files("apps/mobile/android"),
+        "tracked Android production manifest",
+    )
+    for forbidden_fragment in (
+        "android.intent.action.VIEW",
+        'android:scheme="http"',
+        'android:scheme="https"',
+        'android:scheme="kefe"',
+        "android:host=",
+    ):
+        _require(
+            forbidden_fragment not in android_manifest,
+            f"committed Android deeplink host: {forbidden_fragment}",
+        )
+    _require(not _tracked_files("apps/mobile/ios"), "committed iOS host")
 
     production_entry = installable_contract["production_entry"]
     preview = installable_contract["installable_phone_preview"]

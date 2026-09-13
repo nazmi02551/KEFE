@@ -35,7 +35,9 @@ class MultilingualDeliberationLayerService:
         if len(translated_text.strip()) < 3:
             raise ValueError("translated_text must have at least 3 characters")
         if not 0.0 <= semantic_similarity_score <= 1.0:
-            raise ValueError(f"semantic_similarity_score must be in [0.0, 1.0], got {semantic_similarity_score}")
+            raise ValueError(
+                f"semantic_similarity_score must be in [0.0, 1.0], got {semantic_similarity_score}"
+            )
 
         if semantic_similarity_score >= 0.90:
             tier = TranslationFidelityTier.HIGH_FIDELITY_CERTIFIED

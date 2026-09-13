@@ -75,6 +75,16 @@
   color: var(--kefe-color-foreground);
 }
 
+.loadWarning {
+  padding: var(--kefe-spacing-4);
+  border: 1px solid color-mix(in srgb, var(--kefe-color-empathy-gold) 35%, transparent);
+  border-radius: var(--kefe-radius-md);
+  background: color-mix(in srgb, var(--kefe-color-empathy-gold) 10%, transparent);
+  color: var(--kefe-color-foreground);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
 .questions {
   display: flex;
   flex-direction: column;

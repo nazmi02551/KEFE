@@ -9,6 +9,7 @@ Covers:
 - 404 if signal not found
 - Blank statement validation
 """
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
@@ -76,7 +77,12 @@ class TestApproveConsensusStatement:
 
         res = client.put(
             f"/internal/signal-pipeline/signals/{_PROV_SIGNAL_ID}/approve-statement",
-            json={"approved_statement": "Test vakasında katılımcıların çoğunluğu opt_a seçeneğini desteklemiştir."},
+            json={
+                "approved_statement": (
+                    "Test vakasında katılımcıların çoğunluğu opt_a "
+                    "seçeneğini desteklemiştir."
+                )
+            },
         )
         assert res.status_code == 200
         data = res.json()

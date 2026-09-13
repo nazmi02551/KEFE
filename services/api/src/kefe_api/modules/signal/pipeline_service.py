@@ -110,13 +110,15 @@ class SignalPipelineService:
         """Internal computation path — pure function aside from clock + repo save."""
         if inp.core_commit_count < MIN_SAMPLE_SIZE:
             raise SignalPipelineError(
-                f"core_commit_count={inp.core_commit_count} is below MIN_SAMPLE_SIZE={MIN_SAMPLE_SIZE}"
+                f"core_commit_count={inp.core_commit_count} is below "
+                f"MIN_SAMPLE_SIZE={MIN_SAMPLE_SIZE}"
             )
 
         now = self._clock()
 
-        # Derive a stable deterministic signal_id from (case_version_id, methodology_version, computed_at_date)
-        # Using date precision so that multiple intra-day runs produce the same signal_id (idempotent).
+        # Derive a stable deterministic signal_id from case version, methodology
+        # version, and computation date. Date precision keeps intra-day runs
+        # idempotent.
         signal_id = uuid5(
             _SIGNAL_NAMESPACE,
             f"{inp.case_version_id}:{_METHODOLOGY_VERSION}:{inp.computed_at.date().isoformat()}",
@@ -204,6 +206,7 @@ class SignalPipelineService:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _compute_normalised_entropy(distribution: dict[str, float]) -> float:
     """Compute normalised Shannon entropy H / log2(n) for a stance distribution.

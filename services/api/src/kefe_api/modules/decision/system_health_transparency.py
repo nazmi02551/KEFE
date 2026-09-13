@@ -36,7 +36,9 @@ class SystemHealthTransparencyService:
         if p99_latency_ms < 0:
             raise ValueError(f"p99_latency_ms must be >= 0, got {p99_latency_ms}")
         if not 0.0 <= uptime_percentage_30d <= 100.0:
-            raise ValueError(f"uptime_percentage_30d must be in [0.0, 100.0], got {uptime_percentage_30d}")
+            raise ValueError(
+                f"uptime_percentage_30d must be in [0.0, 100.0], got {uptime_percentage_30d}"
+            )
 
         return SystemHealthResult(
             subsystem_id=subsystem_id.strip(),

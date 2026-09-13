@@ -15,7 +15,10 @@ def test_role_flip_calculator_evaluates_shift() -> None:
         case_version_id=case_id,
         initial_role="Tesis Sahibi / Sanayici",
         flipped_role="Bölge Sakini / Temiz Su Tüketicisi",
-        flipped_scenario_prompt="Şimdi fabrikanın atık boşalttığı nehir kıyısında yaşayan ve tarım yapan bir köylü olduğunuzu hayal edin.",
+        flipped_scenario_prompt=(
+            "Şimdi fabrikanın atık boşalttığı nehir kıyısında yaşayan ve tarım "
+            "yapan bir köylü olduğunuzu hayal edin."
+        ),
         perspective_shift_score=0.74,
     )
 

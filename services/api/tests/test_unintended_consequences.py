@@ -19,7 +19,10 @@ def test_unintended_consequences_evaluates_systemic_risk() -> None:
             consequence_type=ConsequenceType.PERVERSE_INCENTIVE,
             severity=ConsequenceSeverity.SEVERE_PARADOX,
             mitigation_feasibility=0.40,
-            description="Kira tavan fiyatı uygulaması ev sahiplerinin evleri piyasadan çekmesine neden oldu.",
+            description=(
+                "Kira tavan fiyatı uygulaması ev sahiplerinin evleri piyasadan "
+                "çekmesine neden oldu."
+            ),
         ),
         UnintendedConsequenceItem(
             consequence_type=ConsequenceType.BEHAVIORAL_REBOUND,

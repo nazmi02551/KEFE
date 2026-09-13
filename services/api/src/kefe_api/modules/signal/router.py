@@ -46,9 +46,15 @@ class SignalConsensusCardResponse(BaseModel):
     consensus_statement: str = Field(..., description="Methodology-qualified consensus statement")
     agreement_percentage: float = Field(..., description="Normalized agreement score percentage")
     sample_size: int = Field(..., description="Pre-result core participant count")
-    confidence_tier: str = Field(..., description="Confidence tier (GOLD_STANDARD, SILVER_VALIDATED, BRONZE_OBSERVED)")
+    confidence_tier: str = Field(
+        ...,
+        description="Confidence tier (GOLD_STANDARD, SILVER_VALIDATED, BRONZE_OBSERVED)",
+    )
     certified_at: str = Field(..., description="ISO 8601 UTC certification timestamp")
-    qualification_tier: str = Field(..., description="Qualification tier from SignalQualificationTier")
+    qualification_tier: str = Field(
+        ...,
+        description="Qualification tier from SignalQualificationTier",
+    )
     is_provisional: bool = Field(
         default=False,
         description=(
@@ -249,7 +255,10 @@ def get_signal_consensus_cards(
     repo: SignalRepoDep,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     offset: Annotated[int, Query(ge=0)] = 0,
-    case_version_id: Annotated[str | None, Query(description="Filter by exact CaseVersion UUID")] = None,
+    case_version_id: Annotated[
+        str | None,
+        Query(description="Filter by exact CaseVersion UUID"),
+    ] = None,
 ) -> list[SignalConsensusCardResponse]:
     """Return qualified signal consensus cards from the live repository.
 

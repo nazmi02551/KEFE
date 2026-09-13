@@ -37,7 +37,9 @@ class EnterpriseBoardroomService:
         if not 0 <= votes_in_favor <= board_member_count:
             raise ValueError(f"votes_in_favor must be in [0, {board_member_count}]")
         if not 0.0 <= esg_alignment_score <= 1.0:
-            raise ValueError(f"esg_alignment_score must be in [0.0, 1.0], got {esg_alignment_score}")
+            raise ValueError(
+                f"esg_alignment_score must be in [0.0, 1.0], got {esg_alignment_score}"
+            )
         if len(organization_name.strip()) < 3:
             raise ValueError("organization_name must have at least 3 characters")
 

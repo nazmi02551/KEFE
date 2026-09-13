@@ -6,6 +6,7 @@ import {
   listSignalConsensusCards,
   listActionMilestones,
 } from "@/src/lib/kefe-api";
+import { clampPercentage } from "@/src/lib/presentation";
 import styles from "@/app/page.module.css";
 
 export const metadata: Metadata = {
@@ -42,7 +43,7 @@ const ACTION_STATUS_LABELS: Record<string, string> = {
 export default async function HomePage() {
   // All three are fail-open — errors yield empty arrays
   const [recentCases, signalCards, actions] = await Promise.all([
-    listPublicCases(4, 0).catch(() => []),
+    listPublicCases(4).catch(() => []),
     listSignalConsensusCards(3, 0).catch(() => []),
     listActionMilestones().catch(() => []),
   ]);
@@ -114,7 +115,7 @@ export default async function HomePage() {
             {recentCases.map((c) => (
               <article key={c.case_version_id} className={styles.caseCard}>
                 <div className={styles.caseCardBadge}>
-                  {DOMAIN_LABELS[c.primary_domain_code] ?? c.primary_domain_code}
+                  {DOMAIN_LABELS[c.primary_domain] ?? c.primary_domain}
                 </div>
                 <h3 className={styles.caseCardTitle}>{c.title}</h3>
                 <p className={styles.caseCardSummary}>{c.summary}</p>
@@ -147,13 +148,19 @@ export default async function HomePage() {
                     {TIER_LABELS[card.qualification_tier] ?? card.qualification_tier}
                   </span>
                   <span className={styles.signalAgreement}>
-                    %{Math.round(card.agreement_percentage)}
+                    %{Math.round(clampPercentage(card.agreement_percentage))}
                   </span>
                 </div>
                 <p className={styles.signalStatement}>{card.consensus_statement}</p>
                 <span className={styles.signalSample}>
                   {card.sample_size.toLocaleString("tr-TR")} katılımcı
                 </span>
+                <Link
+                  href={`/signal/${encodeURIComponent(card.signal_id)}`}
+                  className={styles.signalCardLink}
+                >
+                  Sinyal detayını gör →
+                </Link>
               </article>
             ))}
           </div>
@@ -178,10 +185,17 @@ export default async function HomePage() {
                     {ACTION_STATUS_LABELS[a.status] ?? a.status}
                   </span>
                 </div>
-                <div className={styles.progressBar} role="presentation">
+                <div
+                  className={styles.progressBar}
+                  role="progressbar"
+                  aria-label={`${a.title} ilerleme`}
+                  aria-valuenow={clampPercentage(a.progress_percentage)}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                >
                   <div
                     className={styles.progressFill}
-                    style={{ width: `${a.progress_percentage}%` }}
+                    style={{ width: `${clampPercentage(a.progress_percentage)}%` }}
                   />
                 </div>
               </li>

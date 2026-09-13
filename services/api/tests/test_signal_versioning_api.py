@@ -16,7 +16,10 @@ _SEED_SIGNAL = QualifiedSignal(
     signal_id=_SIGNAL_ID,
     case_version_id=_CASE_ID,
     case_title="Son koltuk kime verilmeli?",
-    consensus_statement="Öncelikli ihtiyacı olan yurttaşlara pozitif ayrımcılık kamu vicdanında yüksek uzlaşı taşımaktadır.",
+    consensus_statement=(
+        "Öncelikli ihtiyacı olan yurttaşlara pozitif ayrımcılık kamu "
+        "vicdanında yüksek uzlaşı taşımaktadır."
+    ),
     agreement_percentage=82.4,
     sample_size=1420,
     qualification_tier=SignalQualificationTier.GOLD_STANDARD,

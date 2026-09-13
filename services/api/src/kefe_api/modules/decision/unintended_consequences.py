@@ -47,7 +47,9 @@ class UnintendedConsequencesCalculator:
 
         for c in consequences:
             if not 0.0 <= c.mitigation_feasibility <= 1.0:
-                raise ValueError(f"mitigation_feasibility must be in [0.0, 1.0], got {c.mitigation_feasibility}")
+                raise ValueError(
+                    f"mitigation_feasibility must be in [0.0, 1.0], got {c.mitigation_feasibility}"
+                )
 
         has_severe = any(c.severity == ConsequenceSeverity.SEVERE_PARADOX for c in consequences)
         has_moderate = any(c.severity == ConsequenceSeverity.MODERATE_IMPACT for c in consequences)

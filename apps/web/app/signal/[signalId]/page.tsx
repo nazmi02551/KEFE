@@ -8,6 +8,11 @@ import {
   listSignalConsensusCards,
   KefApiError,
 } from "@/src/lib/kefe-api";
+import {
+  clampPercentage,
+  ratioToPercentage,
+  safeCount,
+} from "@/src/lib/presentation";
 import styles from "@/app/signal/[signalId]/page.module.css";
 
 interface SignalDetailPageProps {
@@ -29,7 +34,7 @@ export async function generateMetadata(
     const q = await getSignalQualification(signalId);
     if (!q) return { title: "Sinyal bulunamadı" };
     const title = `Sinyal — ${q.case_title}`;
-    const description = `${TIER_LABELS[q.qualification_tier] ?? q.qualification_tier} · %${(q.overall_score * 100).toFixed(0)} · ${q.sample_size} katılımcı`;
+    const description = `${TIER_LABELS[q.qualification_tier] ?? q.qualification_tier} · %${ratioToPercentage(q.overall_score).toFixed(0)} · ${safeCount(q.sample_size)} katılımcı`;
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://kefe.app";
     return {
       title,
@@ -100,19 +105,19 @@ export default async function SignalDetailPage({ params }: SignalDetailPageProps
                 <span className={styles.metaItem}>
                   <span className={styles.metaLabel}>Genel Skor:</span>{" "}
                   <span className={styles.metaScore}>
-                    %{(qualification.overall_score * 100).toFixed(1)}
+                    %{ratioToPercentage(qualification.overall_score).toFixed(1)}
                   </span>
                 </span>
                 <span className={styles.metaItem}>
                   <span className={styles.metaLabel}>Katılımcı:</span>{" "}
-                  {qualification.sample_size.toLocaleString("tr-TR")}
+                  {safeCount(qualification.sample_size).toLocaleString("tr-TR")}
                 </span>
               </>
             )}
             {card && (
               <span className={styles.metaItem}>
                 <span className={styles.metaLabel}>Uzlaşı:</span>{" "}
-                %{card.agreement_percentage.toFixed(1)}
+                %{clampPercentage(card.agreement_percentage).toFixed(1)}
               </span>
             )}
             {qualification?.certified_at && (
@@ -131,7 +136,7 @@ export default async function SignalDetailPage({ params }: SignalDetailPageProps
             <h2 className={styles.sectionTitle}>
               Sinyal Sağlık Raporu
               <span className={styles.sectionScore}>
-                %{(health.overall_health_score * 100).toFixed(0)}
+                %{clampPercentage(health.overall_health_score).toFixed(0)}
               </span>
             </h2>
             <ul className={styles.dimensionList} role="list">
@@ -145,7 +150,9 @@ export default async function SignalDetailPage({ params }: SignalDetailPageProps
                   </span>
                   <span className={styles.dimensionTitle}>{d.title_tr}</span>
                   <span className={styles.dimensionScore}>
-                    %{(d.score * 100).toFixed(0)} / %{(d.threshold * 100).toFixed(0)}
+                    {d.dimension_id === "SAMPLE_SIZE"
+                      ? `${safeCount(d.score).toLocaleString("tr-TR")} / ${safeCount(d.threshold).toLocaleString("tr-TR")}`
+                      : `%${ratioToPercentage(d.score).toFixed(0)} / %${ratioToPercentage(d.threshold).toFixed(0)}`}
                   </span>
                 </li>
               ))}
@@ -167,7 +174,7 @@ export default async function SignalDetailPage({ params }: SignalDetailPageProps
                   </span>
                   <span className={styles.dimensionTitle}>{c.name_tr}</span>
                   <span className={styles.dimensionScore}>
-                    %{(c.score * 100).toFixed(0)} / %{(c.threshold * 100).toFixed(0)}
+                    %{ratioToPercentage(c.score).toFixed(0)} / %{ratioToPercentage(c.threshold).toFixed(0)}
                   </span>
                 </li>
               ))}

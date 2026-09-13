@@ -6,6 +6,7 @@ Tests cover:
 2. PostgresSignalDispatchTargetWriter lifecycle transitions via mock connection
 3. Migration structure (revision chain)
 """
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
@@ -51,8 +52,11 @@ class TestDispatchTargetRegistryIntegration:
     def test_multi_target_report(self) -> None:
         targets = [
             _make_target(_TARGET_A, DispatchStatus.VERIFIED_TARGET),
-            _make_target(_TARGET_B, DispatchStatus.DISPATCHED,
-                        dispatched_at=datetime(2026, 9, 10, 9, 0, tzinfo=UTC)),
+            _make_target(
+                _TARGET_B,
+                DispatchStatus.DISPATCHED,
+                dispatched_at=datetime(2026, 9, 10, 9, 0, tzinfo=UTC),
+            ),
         ]
         resolver = StaticInstitutionTargetResolver(targets=targets)
         service = SignalTargetRegistryService(resolver=resolver)
@@ -86,10 +90,13 @@ class TestDispatchTargetRegistryIntegration:
         dispatched_at = datetime(2026, 9, 10, 9, 0, tzinfo=UTC)
         ack_at = datetime(2026, 9, 11, 10, 0, tzinfo=UTC)
         targets = [
-            _make_target(_TARGET_A, DispatchStatus.ACKNOWLEDGED,
-                        dispatched_at=dispatched_at, acknowledged_at=ack_at),
-            _make_target(_TARGET_B, DispatchStatus.DISPATCHED,
-                        dispatched_at=dispatched_at),
+            _make_target(
+                _TARGET_A,
+                DispatchStatus.ACKNOWLEDGED,
+                dispatched_at=dispatched_at,
+                acknowledged_at=ack_at,
+            ),
+            _make_target(_TARGET_B, DispatchStatus.DISPATCHED, dispatched_at=dispatched_at),
         ]
         resolver = StaticInstitutionTargetResolver(targets=targets)
         service = SignalTargetRegistryService(resolver=resolver)
@@ -104,8 +111,7 @@ class TestDispatchTargetRegistryIntegration:
     def test_is_fully_dispatched_when_all_past_dispatched(self) -> None:
         dispatched_at = datetime(2026, 9, 10, 9, 0, tzinfo=UTC)
         targets = [
-            _make_target(_TARGET_A, DispatchStatus.ACTION_PLEDGED,
-                        dispatched_at=dispatched_at),
+            _make_target(_TARGET_A, DispatchStatus.ACTION_PLEDGED, dispatched_at=dispatched_at),
             _make_target(_TARGET_B, DispatchStatus.DECLINED_JURISDICTION),
         ]
         resolver = StaticInstitutionTargetResolver(targets=targets)
@@ -134,16 +140,28 @@ class TestDispatchTargetRegistryIntegration:
 
     def test_proof_hash_changes_with_different_targets(self) -> None:
         certified = datetime(2026, 9, 10, 12, 0, tzinfo=UTC)
-        t1 = StaticInstitutionTargetResolver(targets=[_make_target(_TARGET_A, DispatchStatus.VERIFIED_TARGET)])
-        t2 = StaticInstitutionTargetResolver(targets=[_make_target(_TARGET_B, DispatchStatus.VERIFIED_TARGET)])
+        t1 = StaticInstitutionTargetResolver(
+            targets=[_make_target(_TARGET_A, DispatchStatus.VERIFIED_TARGET)]
+        )
+        t2 = StaticInstitutionTargetResolver(
+            targets=[_make_target(_TARGET_B, DispatchStatus.VERIFIED_TARGET)]
+        )
 
         s1 = SignalTargetRegistryService(resolver=t1)
         s2 = SignalTargetRegistryService(resolver=t2)
 
-        r1 = s1.evaluate(signal_id=_SIGNAL_ID, case_version_id=_CASE_ID,
-                         primary_domain_code="GOVERNANCE", certified_at=certified)
-        r2 = s2.evaluate(signal_id=_SIGNAL_ID, case_version_id=_CASE_ID,
-                         primary_domain_code="GOVERNANCE", certified_at=certified)
+        r1 = s1.evaluate(
+            signal_id=_SIGNAL_ID,
+            case_version_id=_CASE_ID,
+            primary_domain_code="GOVERNANCE",
+            certified_at=certified,
+        )
+        r2 = s2.evaluate(
+            signal_id=_SIGNAL_ID,
+            case_version_id=_CASE_ID,
+            primary_domain_code="GOVERNANCE",
+            certified_at=certified,
+        )
 
         # Different primary targets → different proof hashes
         assert r1.registry_proof_hash != r2.registry_proof_hash
@@ -245,7 +263,9 @@ class TestMigrationRevisionChain:
 
         migration_path = os.path.join(
             os.path.dirname(__file__),
-            "..", "migrations", "versions",
+            "..",
+            "migrations",
+            "versions",
             "20260910_0043_signal_dispatch_target_registry.py",
         )
         spec = importlib.util.spec_from_file_location("migration_0043", migration_path)
@@ -261,7 +281,9 @@ class TestMigrationRevisionChain:
 
         migration_path = os.path.join(
             os.path.dirname(__file__),
-            "..", "migrations", "versions",
+            "..",
+            "migrations",
+            "versions",
             "20260910_0043_signal_dispatch_target_registry.py",
         )
         spec = importlib.util.spec_from_file_location("migration_0043", migration_path)

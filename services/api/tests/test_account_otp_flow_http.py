@@ -11,6 +11,7 @@ Covers:
 - Rate limiting: repeated requests within window handled
 - Channel types: EMAIL and SMS both accepted
 """
+
 from __future__ import annotations
 
 import uuid
@@ -34,6 +35,7 @@ def _guest_headers(client: TestClient) -> dict[str, str]:
 # OTP request — /v1/auth/otp/request
 # ---------------------------------------------------------------------------
 
+
 def test_otp_request_email_returns_201() -> None:
     client = _client()
     res = client.post(
@@ -53,7 +55,11 @@ def test_otp_request_email_returns_201() -> None:
     # challenge_id must be a valid UUID
     uuid.UUID(body["challenge_id"])
     # Destination hint must mask the address (not expose full email)
-    assert "***" in body["destination_hint"] or "@" not in body["destination_hint"] or len(body["destination_hint"]) < len("user@example.com")
+    assert (
+        "***" in body["destination_hint"]
+        or "@" not in body["destination_hint"]
+        or len(body["destination_hint"]) < len("user@example.com")
+    )
     assert body["channel"] == "EMAIL"
 
 
@@ -147,6 +153,7 @@ def test_otp_request_returns_challenge_id_as_uuid() -> None:
 # OTP verify — /v1/auth/otp/verify
 # ---------------------------------------------------------------------------
 
+
 def test_otp_verify_wrong_code_returns_error() -> None:
     client = _client()
     # First request a challenge
@@ -200,6 +207,7 @@ def test_otp_verify_unknown_challenge_id_returns_error() -> None:
 # Guest merge — /v1/auth/guest-merge
 # ---------------------------------------------------------------------------
 
+
 def test_guest_merge_requires_auth() -> None:
     client = _client()
     res = client.post("/v1/auth/guest-merge", json={})
@@ -231,6 +239,7 @@ def test_guest_merge_invalid_challenge_returns_error() -> None:
 # ---------------------------------------------------------------------------
 # OpenAPI registration
 # ---------------------------------------------------------------------------
+
 
 def test_otp_and_merge_paths_in_openapi() -> None:
     client = _client()

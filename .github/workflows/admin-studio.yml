@@ -39,6 +39,8 @@ jobs:
           cache-dependency-path: apps/admin/package-lock.json
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
       - name: Verify executable contract, lint, types, tests and production build
         env:
           NEXT_TELEMETRY_DISABLED: "1"

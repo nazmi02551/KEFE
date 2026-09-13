@@ -5,7 +5,10 @@ import "@/app/globals.css";
 import { SiteFooter } from "@/src/components/site-footer";
 import { SiteHeader } from "@/src/components/site-header";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://kefe.app";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: "KEFE",
     template: "%s · KEFE",
@@ -19,7 +22,7 @@ export const metadata: Metadata = {
     locale: "tr_TR",
     alternateLocale: "en_US",
     siteName: "KEFE",
-    url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://kefe.app",
+    url: siteUrl,
     title: "KEFE — Kolektif ses, kurumsal etki",
     description:
       "Methodology-qualified civic deliberation. Commit First, Blind First — sesiniz nitelendiriliyor.",

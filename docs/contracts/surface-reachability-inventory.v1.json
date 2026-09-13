@@ -1,6 +1,6 @@
 {
   "contract_id": "KEFE-SURFACE-REACHABILITY-INVENTORY-001",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "IMPLEMENTED_PARTIAL",
   "wave": "F4",
   "capabilities": [
@@ -8,7 +8,7 @@
     "CAP-123"
   ],
   "exit_criterion": "PRODUCTION_AND_PREVIEW_SURFACE_REACHABILITY_INVENTORIED",
-  "inventory_observed_at": "2026-08-06",
+  "inventory_observed_at": "2026-09-12",
   "policy": {
     "inventory_is_deployment_evidence": false,
     "ci_build_is_external_reachability_evidence": false,
@@ -113,14 +113,18 @@
       "surface_type": "CONSUMER_WEB",
       "environment": "PRODUCTION",
       "audience": "PUBLIC",
-      "status": "PLACEHOLDER_ONLY",
+      "status": "COMPILE_ONLY",
       "externally_reachable": false,
       "endpoint": null,
-      "evidence_kind": "STATIC_CONFIG",
+      "evidence_kind": "CI_BUILD_ARTIFACT",
       "evidence_sources": [
-        "apps/web/README.md"
+        "apps/web/package.json",
+        "apps/web/app/page.tsx",
+        "apps/web/app/cases/page.tsx",
+        "apps/web/app/signal/page.tsx",
+        ".github/workflows/web-ci.yml"
       ],
-      "next_required_proof": "Implement a runtime, deploy an HTTPS origin and attach external route probes."
+      "next_required_proof": "Deploy an approved HTTPS origin and attach timestamped external route probes."
     },
     {
       "surface_id": "mobile-production-shell",
@@ -183,6 +187,7 @@
       "evidence_sources": [
         "apps/mobile/pubspec.yaml",
         "apps/mobile/README.md",
+        "apps/mobile/android/app/src/main/AndroidManifest.xml",
         ".github/workflows/mvp-beta-gates.yml"
       ],
       "next_required_proof": "Commit Android/iOS host declarations, route mapping tests and verified association files."
@@ -192,14 +197,17 @@
       "surface_type": "DEEPLINK",
       "environment": "PRODUCTION",
       "audience": "PUBLIC",
-      "status": "NOT_CONFIGURED",
+      "status": "COMPILE_ONLY",
       "externally_reachable": false,
       "endpoint": null,
-      "evidence_kind": "STATIC_CONFIG",
+      "evidence_kind": "CI_BUILD_ARTIFACT",
       "evidence_sources": [
-        "apps/web/README.md"
+        "apps/web/app/cases/[caseId]/page.tsx",
+        "apps/web/app/share/[token]/page.tsx",
+        "apps/web/app/signal/[signalId]/page.tsx",
+        ".github/workflows/web-ci.yml"
       ],
-      "next_required_proof": "Implement canonical web routes and attach external route probes plus mobile association files."
+      "next_required_proof": "Bind canonical routes to an approved HTTPS origin, add association files where applicable and attach external route probes."
     },
     {
       "surface_id": "otp-provider-receipt-callback",
@@ -219,7 +227,7 @@
   ],
   "explicit_non_claims": [
     "No production API origin is deployed or externally probed.",
-    "No consumer web runtime or web deeplink origin is deployed.",
+    "The consumer web runtime and canonical routes compile, but no web or deeplink origin is deployed or externally probed.",
     "No Admin Studio production origin or operator access path is deployed.",
     "No Android App Link, iOS Universal Link or association-file configuration is committed.",
     "The transient kefe custom-scheme candidate is generated only in CI, has no host binding and is not uploaded.",

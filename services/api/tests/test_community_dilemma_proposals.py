@@ -11,7 +11,10 @@ def test_community_dilemma_proposals_registers_correctly() -> None:
     r = CommunityDilemmaProposalsService.register_proposal(
         proposal_id="prop_001",
         proposed_title="Yapay Zeka Telif Hakları ve Kamusal Alan",
-        proposed_context="Üretken yapay zeka modellerinin eğitiminde kamuya açık sanat eserlerinin kullanımı telif ücretine tabi olmalı mıdır?",
+        proposed_context=(
+            "Üretken yapay zeka modellerinin eğitiminde kamuya açık sanat "
+            "eserlerinin kullanımı telif ücretine tabi olmalı mıdır?"
+        ),
         curation_state=CurationState.COMMUNITY_PEER_REVIEW,
         neutrality_score=0.88,
         supporter_count=42,

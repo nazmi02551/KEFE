@@ -31,9 +31,13 @@ class AccessibleVoiceDeliberationService:
         transcript_preview: str,
     ) -> VoiceDeliberationResult:
         if not 1.0 <= audio_duration_seconds <= 600.0:
-            raise ValueError(f"audio_duration_seconds must be in [1.0, 600.0], got {audio_duration_seconds}")
+            raise ValueError(
+                f"audio_duration_seconds must be in [1.0, 600.0], got {audio_duration_seconds}"
+            )
         if not 0.0 <= speech_confidence_score <= 1.0:
-            raise ValueError(f"speech_confidence_score must be in [0.0, 1.0], got {speech_confidence_score}")
+            raise ValueError(
+                f"speech_confidence_score must be in [0.0, 1.0], got {speech_confidence_score}"
+            )
         if len(transcript_preview.strip()) < 3:
             raise ValueError("transcript_preview must have at least 3 characters")
 

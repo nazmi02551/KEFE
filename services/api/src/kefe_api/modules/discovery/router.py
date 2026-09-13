@@ -27,7 +27,10 @@ _DEFAULT_SEARCH_SERVICE = CaseSearchFilterService(
         SearchableCaseItem(
             case_version_id=UUID("22222222-2222-4222-8222-222222222222"),
             title="Toplu Taşıma Öncelik İkilemi",
-            summary="Metro ve otobüslerde yaşlı, engelli ve hamile yolculara yer verme zorunluluğunun sınırları.",
+            summary=(
+                "Metro ve otobüslerde yaşlı, engelli ve hamile yolculara yer verme "
+                "zorunluluğunun sınırları."
+            ),
             domain="Civic",
             tags=("ulaşım", "etik", "kamusal-alan"),
             status="PUBLISHED",
@@ -36,7 +39,10 @@ _DEFAULT_SEARCH_SERVICE = CaseSearchFilterService(
         SearchableCaseItem(
             case_version_id=UUID("22222222-2222-4222-8222-222222222223"),
             title="Yapay Zekâ ve Veri Mahremiyeti",
-            summary="Kamu hizmetlerinde yapay zekâ modellerinin vatandaş verisiyle eğitilmesinin meşruiyeti.",
+            summary=(
+                "Kamu hizmetlerinde yapay zekâ modellerinin vatandaş verisiyle "
+                "eğitilmesinin meşruiyeti."
+            ),
             domain="Technology",
             tags=("yapay-zeka", "mahremiyet", "veri"),
             status="PUBLISHED",

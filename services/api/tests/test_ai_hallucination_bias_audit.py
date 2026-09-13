@@ -13,7 +13,10 @@ def test_ai_audit_verifies_grounding() -> None:
         target_artifact_id="art_synth_001",
         grounding_confidence_score=0.96,
         bias_asymmetry_index=0.08,
-        audit_findings_summary="Tüm ampirik iddialar birincil kaynaklara dayanıyor; anlamsal tarafsızlık doğrulandı.",
+        audit_findings_summary=(
+            "Tüm ampirik iddialar birincil kaynaklara dayanıyor; anlamsal "
+            "tarafsızlık doğrulandı."
+        ),
     )
 
     assert isinstance(r, AiAuditResult)

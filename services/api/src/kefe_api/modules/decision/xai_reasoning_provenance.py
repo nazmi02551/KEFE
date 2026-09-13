@@ -33,7 +33,9 @@ class XaiReasoningProvenanceService:
         if causal_steps_count < 2:
             raise ValueError(f"causal_steps_count must be at least 2, got {causal_steps_count}")
         if not 0.0 <= axiomatic_grounding_score <= 1.0:
-            raise ValueError(f"axiomatic_grounding_score must be in [0.0, 1.0], got {axiomatic_grounding_score}")
+            raise ValueError(
+                f"axiomatic_grounding_score must be in [0.0, 1.0], got {axiomatic_grounding_score}"
+            )
         if len(root_axiom_summary.strip()) < 10:
             raise ValueError("root_axiom_summary must have at least 10 characters")
 

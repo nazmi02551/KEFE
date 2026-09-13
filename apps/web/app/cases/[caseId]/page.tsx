@@ -9,6 +9,11 @@ import {
   listCaseSignalCards,
   KefApiError,
 } from "@/src/lib/kefe-api";
+import {
+  clampPercentage,
+  safeCount,
+  safeExternalHttpUrl,
+} from "@/src/lib/presentation";
 import styles from "@/app/cases/[caseId]/page.module.css";
 
 interface CaseDetailPageProps {
@@ -81,12 +86,20 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
     throw err;
   }
 
-  // Load context, version history and signal cards in parallel — all fail-open.
-  const [context, history, signalCards] = await Promise.all([
+  // Auxiliary sections degrade independently; the governed case remains readable.
+  const [contextResult, historyResult, signalCardsResult] = await Promise.allSettled([
     getCaseContext(caseDetail.case_version_id),
     getCaseVersionHistory(caseId),
     listCaseSignalCards(caseDetail.case_version_id),
   ]);
+  const context = contextResult.status === "fulfilled" ? contextResult.value : null;
+  const history = historyResult.status === "fulfilled" ? historyResult.value : null;
+  const signalCards = signalCardsResult.status === "fulfilled" ? signalCardsResult.value : [];
+  const auxiliaryDataUnavailable = [
+    contextResult,
+    historyResult,
+    signalCardsResult,
+  ].some((result) => result.status === "rejected");
 
   return (
     <main className={styles.main}>
@@ -124,6 +137,13 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
           </div>
         </header>
 
+        {auxiliaryDataUnavailable && (
+          <aside className={styles.loadWarning} role="status" aria-live="polite">
+            Mesele yüklendi; bazı bağlam, yayın geçmişi veya sinyal bilgileri geçici
+            olarak gösterilemiyor. Daha sonra yeniden deneyebilirsiniz.
+          </aside>
+        )}
+
         {caseDetail.questions.length > 0 && (
           <section className={styles.questions}>
             <h2 className={styles.sectionTitle}>Sorular</h2>
@@ -134,9 +154,8 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
                   {q.options.length > 0 && (
                     <ul className={styles.optionList} role="list">
                       {q.options.map((opt) => (
-                        <li key={opt.code} className={styles.optionItem}>
-                          <span className={styles.optionCode}>{opt.code}</span>
-                          <span className={styles.optionLabel}>{opt.label}</span>
+                        <li key={opt} className={styles.optionItem}>
+                          <span className={styles.optionLabel}>{opt}</span>
                         </li>
                       ))}
                     </ul>
@@ -172,25 +191,28 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
                       <p className={styles.contextBlockBody}>{block.body}</p>
                       {blockSources.length > 0 && (
                         <ul className={styles.sourceList} aria-label="Kaynaklar">
-                          {blockSources.map((src) => (
-                            <li key={src.source_id} className={styles.sourceItem}>
-                              {src.url ? (
-                                <a
-                                  href={src.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className={styles.sourceLink}
-                                >
-                                  {src.title}
-                                </a>
-                              ) : (
-                                <span className={styles.sourceTitle}>{src.title}</span>
-                              )}
-                              <span className={styles.sourcePublisher}>
-                                {src.publisher}
-                              </span>
-                            </li>
-                          ))}
+                          {blockSources.map((src) => {
+                            const sourceUrl = safeExternalHttpUrl(src.url);
+                            return (
+                              <li key={src.source_id} className={styles.sourceItem}>
+                                {sourceUrl ? (
+                                  <a
+                                    href={sourceUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={styles.sourceLink}
+                                  >
+                                    {src.title}
+                                  </a>
+                                ) : (
+                                  <span className={styles.sourceTitle}>{src.title}</span>
+                                )}
+                                <span className={styles.sourcePublisher}>
+                                  {src.publisher}
+                                </span>
+                              </li>
+                            );
+                          })}
                         </ul>
                       )}
                     </li>
@@ -226,7 +248,7 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
                           : "Bronz Gözlemlendi"}
                     </span>
                     <span className={styles.signalAgreement}>
-                      %{card.agreement_percentage} uzlaşı · {card.sample_size} katılımcı
+                      %{clampPercentage(card.agreement_percentage)} uzlaşı · {safeCount(card.sample_size)} katılımcı
                     </span>
                   </div>
                 </li>

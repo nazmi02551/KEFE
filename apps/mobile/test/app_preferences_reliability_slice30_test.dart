@@ -12,6 +12,13 @@ import 'package:kefe_mobile/core/preferences/app_preferences.dart';
 import 'package:kefe_mobile/features/settings/presentation/settings_screen.dart';
 
 void main() {
+  setUpAll(() {
+    WidgetController.hitTestWarningShouldBeFatal = true;
+  });
+  tearDownAll(() {
+    WidgetController.hitTestWarningShouldBeFatal = false;
+  });
+
   test('Slice 30 contract keeps preference boundaries closed', () {
     final contract =
         jsonDecode(
@@ -185,8 +192,14 @@ void main() {
       findsOneWidget,
     );
 
-    await tester.tap(find.text('Dark'));
-    await tester.pump();
+    final appearanceGroup = find.byKey(
+      const ValueKey('settings-appearance-group'),
+    );
+    var appearanceGuard = find.descendant(
+      of: appearanceGroup,
+      matching: find.byType(IgnorePointer),
+    );
+    expect(tester.widget<IgnorePointer>(appearanceGuard).ignoring, isTrue);
     expect(store.themeWrites, 0);
 
     await tester.tap(find.byKey(const ValueKey('settings-retry')));
@@ -194,7 +207,17 @@ void main() {
 
     expect(store.reads, 2);
     expect(find.byKey(const ValueKey('settings-error')), findsNothing);
-    await tester.tap(find.text('Dark'));
+    appearanceGuard = find.descendant(
+      of: appearanceGroup,
+      matching: find.byType(IgnorePointer),
+    );
+    expect(tester.widget<IgnorePointer>(appearanceGuard).ignoring, isFalse);
+    final darkChoice = find.ancestor(
+      of: find.text('Dark'),
+      matching: find.byType(RadioListTile<AppThemePreference>),
+    );
+    await tester.ensureVisible(darkChoice);
+    await tester.tap(darkChoice);
     await tester.pumpAndSettle();
     expect(store.themeWrites, 1);
     expect(tester.takeException(), isNull);
@@ -217,8 +240,11 @@ void main() {
     expect(find.byKey(const ValueKey('settings-saving')), findsOneWidget);
     expect(store.localeWrites, 1);
 
-    await tester.tap(find.text('Koyu'));
-    await tester.pump();
+    final appearanceGuard = find.descendant(
+      of: find.byKey(const ValueKey('settings-appearance-group')),
+      matching: find.byType(IgnorePointer),
+    );
+    expect(tester.widget<IgnorePointer>(appearanceGuard).ignoring, isTrue);
     expect(store.themeWrites, 0);
 
     store.localeWriteGate!.complete();

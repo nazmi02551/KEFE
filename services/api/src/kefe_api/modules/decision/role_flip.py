@@ -24,7 +24,9 @@ class RoleFlipCalculator:
         perspective_shift_score: float,
     ) -> RoleFlipResult:
         if not 0.0 <= perspective_shift_score <= 1.0:
-            raise ValueError(f"perspective_shift_score must be in [0.0, 1.0], got {perspective_shift_score}")
+            raise ValueError(
+                f"perspective_shift_score must be in [0.0, 1.0], got {perspective_shift_score}"
+            )
         if len(initial_role.strip()) < 3 or len(flipped_role.strip()) < 3:
             raise ValueError("Role names must have at least 3 characters")
         if len(flipped_scenario_prompt.strip()) < 10:

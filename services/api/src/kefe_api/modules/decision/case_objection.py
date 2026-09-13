@@ -47,7 +47,9 @@ class CaseObjectionService:
     ) -> CaseObjectionItem:
         cleaned_statement = statement.strip()
         if len(cleaned_statement) < 20:
-            raise ValueError("statement must have at least 20 characters for actionable deliberation")
+            raise ValueError(
+                "statement must have at least 20 characters for actionable deliberation"
+            )
 
         objection_id = uuid4()
         item = CaseObjectionItem(
@@ -90,6 +92,5 @@ class CaseObjectionService:
 
     def get_objections_for_case(self, case_version_id: UUID) -> list[CaseObjectionItem]:
         return [
-            item for item in self._objections.values()
-            if item.case_version_id == case_version_id
+            item for item in self._objections.values() if item.case_version_id == case_version_id
         ]

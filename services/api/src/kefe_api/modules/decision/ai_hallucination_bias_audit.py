@@ -31,9 +31,14 @@ class AiHallucinationBiasAuditService:
         audit_findings_summary: str,
     ) -> AiAuditResult:
         if not 0.0 <= grounding_confidence_score <= 1.0:
-            raise ValueError(f"grounding_confidence_score must be in [0.0, 1.0], got {grounding_confidence_score}")
+            raise ValueError(
+                "grounding_confidence_score must be in [0.0, 1.0], "
+                f"got {grounding_confidence_score}"
+            )
         if not 0.0 <= bias_asymmetry_index <= 1.0:
-            raise ValueError(f"bias_asymmetry_index must be in [0.0, 1.0], got {bias_asymmetry_index}")
+            raise ValueError(
+                f"bias_asymmetry_index must be in [0.0, 1.0], got {bias_asymmetry_index}"
+            )
         if len(audit_findings_summary.strip()) < 10:
             raise ValueError("audit_findings_summary must have at least 10 characters")
 

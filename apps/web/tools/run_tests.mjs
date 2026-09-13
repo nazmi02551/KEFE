@@ -11,7 +11,8 @@
  * 3. layout.tsx contains data-theme="dark" (dark-first invariant).
  * 4. layout.tsx contains reduced-motion script (accessibility invariant).
  * 5. signal/page.tsx does not render [PROVISIONAL] strings.
- * 6. kefe-api.ts does not import admin-only endpoints.
+ * 6. Public detail/impact routes exist and preserve their public-read boundary.
+ * 7. kefe-api.ts does not import admin-only endpoints.
  */
 
 import { readFileSync, existsSync } from "fs";
@@ -58,9 +59,13 @@ test("app/page.tsx exists", () => readFile("app/page.tsx"));
 test("app/globals.css exists", () => readFile("app/globals.css"));
 test("app/not-found.tsx exists", () => readFile("app/not-found.tsx"));
 test("app/signal/page.tsx exists", () => readFile("app/signal/page.tsx"));
+test("app/signal/[signalId]/page.tsx exists", () =>
+  readFile("app/signal/[signalId]/page.tsx"),
+);
 test("app/cases/page.tsx exists", () => readFile("app/cases/page.tsx"));
 test("app/cases/[caseId]/page.tsx exists", () => readFile("app/cases/[caseId]/page.tsx"));
 test("app/share/[token]/page.tsx exists", () => readFile("app/share/[token]/page.tsx"));
+test("app/impact/page.tsx exists", () => readFile("app/impact/page.tsx"));
 test("src/components/site-header.tsx exists", () => readFile("src/components/site-header.tsx"));
 test("src/lib/kefe-api.ts exists", () => readFile("src/lib/kefe-api.ts"));
 test("next.config.ts exists", () => readFile("next.config.ts"));
@@ -118,6 +123,37 @@ test("layout.tsx: contains theme flash prevention script", () => {
   );
 });
 
+test("layout.tsx: resolves relative social images against a canonical origin", () => {
+  const layout = readFile("app/layout.tsx");
+  assert(layout.includes("metadataBase: new URL(siteUrl)"), "Missing metadataBase");
+  assert(layout.includes('NEXT_PUBLIC_SITE_URL ?? "https://kefe.app"'),
+    "Canonical site URL must have an explicit production-safe fallback");
+});
+
+test("next.config.ts: disables framework disclosure and clickjacking", () => {
+  const config = readFile("next.config.ts");
+  assert(config.includes("poweredByHeader: false"), "X-Powered-By must be disabled");
+  assert(config.includes('key: "X-Frame-Options"'), "Missing X-Frame-Options header");
+  assert(config.includes('value: "DENY"'), "Public pages must deny framing");
+});
+
+test("next.config.ts: prevents MIME sniffing", () => {
+  const config = readFile("next.config.ts");
+  assert(
+    config.includes('key: "X-Content-Type-Options"') && config.includes('value: "nosniff"'),
+    "Missing nosniff response header",
+  );
+});
+
+test("next.config.ts: bounds referrer and browser capability exposure", () => {
+  const config = readFile("next.config.ts");
+  assert(config.includes('key: "Referrer-Policy"'), "Missing Referrer-Policy header");
+  assert(config.includes('key: "Permissions-Policy"'), "Missing Permissions-Policy header");
+  for (const capability of ["camera=()", "geolocation=()", "microphone=()"] ) {
+    assert(config.includes(capability), `Permissions-Policy must disable ${capability}`);
+  }
+});
+
 // ---------------------------------------------------------------------------
 // 5. signal/page.tsx — does NOT render [PROVISIONAL]
 // ---------------------------------------------------------------------------
@@ -135,7 +171,106 @@ test("signal/page.tsx: does not hardcode [PROVISIONAL] in JSX output", () => {
 });
 
 // ---------------------------------------------------------------------------
-// 6. kefe-api.ts — no admin/internal endpoints
+// 6. Detail and impact routes — public-read boundary
+// ---------------------------------------------------------------------------
+
+test("signal detail: encodes the dynamic identifier in public API calls", () => {
+  const api = readFile("src/lib/kefe-api.ts");
+  assert(
+    api.includes("encodeURIComponent(signalId)"),
+    "Signal identifiers must be URL-encoded before entering an API path",
+  );
+});
+
+test("signal detail: respects mixed health-score units", () => {
+  const page = readFile("app/signal/[signalId]/page.tsx");
+  assert(
+    page.includes("clampPercentage(health.overall_health_score)"),
+    "Overall health is already a zero-to-one-hundred percentage",
+  );
+  assert(
+    page.includes('d.dimension_id === "SAMPLE_SIZE"'),
+    "Sample-size dimensions must render as counts rather than percentages",
+  );
+  assert(
+    !page.includes("health.overall_health_score * 100"),
+    "Overall health must not be multiplied into an invalid percentage",
+  );
+});
+
+test("impact page: uses only public list operations", () => {
+  const page = readFile("app/impact/page.tsx");
+  assert(page.includes("listInstitutionResponses"), "Missing institution response list");
+  assert(page.includes("listActionMilestones"), "Missing action milestone list");
+  assert(!/\b(create|update|delete|post|patch)\w*\s*\(/i.test(page),
+    "Public impact page must not invoke mutation operations");
+});
+
+test("impact page: exposes accessible error, progress and navigation landmarks", () => {
+  const page = readFile("app/impact/page.tsx");
+  assert(page.includes('role="alert"'), "Impact errors must use role=alert");
+  assert(page.includes('role="progressbar"'), "Action progress must use role=progressbar");
+  assert(page.includes('aria-label="İlgili sayfalar"'), "Impact footer navigation needs a label");
+});
+
+test("public list pages: never render upstream error messages", () => {
+  for (const path of ["app/cases/page.tsx", "app/signal/page.tsx", "app/impact/page.tsx"]) {
+    const page = readFile(path);
+    assert(
+      page.includes("publicLoadErrorMessage"),
+      `${path} must map request failures to safe public copy`,
+    );
+    assert(
+      !page.includes("err.message"),
+      `${path} must not reflect upstream error messages into public HTML`,
+    );
+  }
+});
+
+test("case detail: auxiliary reads degrade independently with a visible notice", () => {
+  const page = readFile("app/cases/[caseId]/page.tsx");
+  assert(
+    page.includes("Promise.allSettled"),
+    "An auxiliary read failure must not discard the governed case detail",
+  );
+  assert(
+    page.includes("auxiliaryDataUnavailable") && page.includes('role="status"'),
+    "Partial case-detail data must be disclosed accessibly",
+  );
+  assert(
+    !page.includes("Promise.all([\n    getCaseContext"),
+    "Auxiliary reads must not share an all-or-nothing failure boundary",
+  );
+});
+
+test("case detail: validates outbound source links before rendering", () => {
+  const page = readFile("app/cases/[caseId]/page.tsx");
+  assert(page.includes("safeExternalHttpUrl"), "Source URLs need a public-link allowlist");
+  assert(page.includes("href={sourceUrl}"), "Only the validated source URL may reach href");
+  assert(!page.includes("href={src.url}"), "Raw editorial URLs must not reach href");
+  assert(
+    page.includes('rel="noopener noreferrer"'),
+    "New-tab source links must isolate the opener and referrer",
+  );
+});
+
+test("home page: featured signals link to their detail route", () => {
+  const page = readFile("app/page.tsx");
+  assert(
+    page.includes("/signal/${encodeURIComponent(card.signal_id)}"),
+    "Featured signal cards must link to their detail route",
+  );
+});
+
+test("home page: action progress is semantic rather than presentational", () => {
+  const page = readFile("app/page.tsx");
+  assert(page.includes('role="progressbar"'), "Home action progress must use role=progressbar");
+  assert(!page.includes('role="presentation"'), "Action progress must not be hidden from assistive tech");
+  assert(page.includes("clampPercentage"), "External progress values must be clamped");
+});
+
+// ---------------------------------------------------------------------------
+// 7. kefe-api.ts — no admin/internal endpoints
 // ---------------------------------------------------------------------------
 
 test("kefe-api.ts: does not import /internal/ admin endpoints", () => {
@@ -171,6 +306,24 @@ test("kefe-api.ts: uses /v1/cases endpoint (not /v1/context)", () => {
 test("kefe-api.ts: exports getPublicShare", () => {
   const api = readFile("src/lib/kefe-api.ts");
   assert(api.includes("getPublicShare"), "Missing getPublicShare export");
+});
+
+test("kefe-api.ts: impact client exposes public reads only", () => {
+  const api = readFile("src/lib/kefe-api.ts");
+  assert(api.includes("listInstitutionResponses"), "Missing institution response reader");
+  assert(api.includes("listActionMilestones"), "Missing action milestone reader");
+  assert(!api.includes('method: "POST"'), "Public API client must not issue POST requests");
+  assert(!api.includes('method: "PATCH"'), "Public API client must not issue PATCH requests");
+  assert(!api.includes('method: "DELETE"'), "Public API client must not issue DELETE requests");
+});
+
+test("kefe-api.ts: public reads have a bounded response wait", () => {
+  const api = readFile("src/lib/kefe-api.ts");
+  assert(api.includes("PUBLIC_API_TIMEOUT_MS = 10_000"), "Missing bounded API timeout");
+  assert(
+    api.includes("AbortSignal.timeout(PUBLIC_API_TIMEOUT_MS)"),
+    "Public fetches must not wait indefinitely for an upstream response",
+  );
 });
 
 test("share/[token]/page.tsx: does not expose share token in rendered HTML title", () => {

@@ -14,7 +14,10 @@ def test_cross_cultural_maps_norms() -> None:
         primary_dimension=CulturalNormDimension.COMMUNITY_SOLIDARITY_AND_MUTUALITY,
         cultural_alignment_score=0.92,
         universal_baseline_compliance=True,
-        norm_synthesis_summary="İmece ve dayanışma geleneği ile modern şeffaflık ilkelerinin sentezi.",
+        norm_synthesis_summary=(
+            "İmece ve dayanışma geleneği ile modern şeffaflık ilkelerinin "
+            "sentezi."
+        ),
     )
 
     assert isinstance(r, CulturalNormResult)

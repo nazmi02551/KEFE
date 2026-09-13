@@ -26,7 +26,10 @@ def test_list_and_submit_case_objections_api() -> None:
         f"/v1/cases/{case_version_id}/objections",
         json={
             "reason_category": "EXCLUDED_STAKEHOLDER",
-            "statement": "Engelli ve hareket kısıtlılığı olan yolcuların bakış açısı bu ikilemde yeterince temsil edilmemiş.",
+            "statement": (
+                "Engelli ve hareket kısıtlılığı olan yolcuların bakış açısı "
+                "bu ikilemde yeterince temsil edilmemiş."
+            ),
             "supporting_evidence_url": "https://kefe.org/delil/engelli-haklari",
         },
     )
@@ -35,10 +38,7 @@ def test_list_and_submit_case_objections_api() -> None:
     assert "objection_id" in created
     assert created["reason_category"] == "EXCLUDED_STAKEHOLDER"
     assert created["status"] == "SUBMITTED"
-    assert (
-        created["supporting_evidence_url"]
-        == "https://kefe.org/delil/engelli-haklari"
-    )
+    assert created["supporting_evidence_url"] == "https://kefe.org/delil/engelli-haklari"
 
     # 3. Verify it shows in list
     res_after = client.get(f"/v1/cases/{case_version_id}/objections")

@@ -12,7 +12,10 @@ def test_multilingual_translates_high_fidelity() -> None:
         translation_id="tra_001",
         source_locale="tr",
         target_locale="en",
-        translated_text="Algorithmic transparency is an essential precondition for civic legitimacy.",
+        translated_text=(
+            "Algorithmic transparency is an essential precondition for civic "
+            "legitimacy."
+        ),
         semantic_similarity_score=0.96,
     )
 

@@ -29,7 +29,9 @@ class MediaMonopolyDiversityScannerService:
         independent_outlets_count: int,
     ) -> MediaDiversityResult:
         if not 0.0 <= source_diversity_index <= 1.0:
-            raise ValueError(f"source_diversity_index must be in [0.0, 1.0], got {source_diversity_index}")
+            raise ValueError(
+                f"source_diversity_index must be in [0.0, 1.0], got {source_diversity_index}"
+            )
         if independent_outlets_count < 0:
             raise ValueError("independent_outlets_count cannot be negative")
         if len(topic_cluster.strip()) < 4:

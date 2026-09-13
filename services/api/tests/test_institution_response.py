@@ -19,7 +19,10 @@ def test_publish_and_list_verified_institution_responses() -> None:
         institution_name="Ulaştırma Bakanlığı",
         authority_role="Basın ve Halkla İlişkiler Dairesi",
         response_type=InstitutionResponseType.POLICY_CHANGE,
-        statement="Topluluk müzakeresi sonucunda ilgili tarife düzenlemesi yeniden değerlendirmeye alınmıştır.",
+        statement=(
+            "Topluluk müzakeresi sonucunda ilgili tarife düzenlemesi yeniden "
+            "değerlendirmeye alınmıştır."
+        ),
         verification_status=AuthorityVerificationStatus.VERIFIED,
     )
 

@@ -223,7 +223,10 @@ def build_demo_repository() -> InMemoryReflectionDecisionRepository:
             PerspectiveCard(
                 perspective_id=TRIAGE_NEAR_PERSPECTIVE_ID,
                 slot=PerspectiveSlot.NEAR,
-                body="Genç hastanın yaşam beklentisi ve kurtulma şansı yüksek olduğu için kaynak maksimum fayda ile kullanılmalıdır.",
+                body=(
+                    "Genç hastanın yaşam beklentisi ve kurtulma şansı yüksek olduğu "
+                    "için kaynak maksimum fayda ile kullanılmalıdır."
+                ),
                 source_kind=PerspectiveSourceKind.CURATED,
                 provenance_label="KEFE editoryal",
                 moderation_state=ReasonModerationState.NOT_REQUIRED,
@@ -231,7 +234,10 @@ def build_demo_repository() -> InMemoryReflectionDecisionRepository:
             PerspectiveCard(
                 perspective_id=TRIAGE_OPPOSING_PERSPECTIVE_ID,
                 slot=PerspectiveSlot.OPPOSING,
-                body="Topluma uzun yıllar hizmet etmiş ve kliniği ayakta tutan kıdemli hekime vefa ve süreklilik gereği öncelik verilmelidir.",
+                body=(
+                    "Topluma uzun yıllar hizmet etmiş ve kliniği ayakta tutan kıdemli "
+                    "hekime vefa ve süreklilik gereği öncelik verilmelidir."
+                ),
                 source_kind=PerspectiveSourceKind.CURATED,
                 provenance_label="KEFE editoryal",
                 moderation_state=ReasonModerationState.NOT_REQUIRED,
@@ -239,7 +245,10 @@ def build_demo_repository() -> InMemoryReflectionDecisionRepository:
             PerspectiveCard(
                 perspective_id=TRIAGE_BRIDGE_PERSPECTIVE_ID,
                 slot=PerspectiveSlot.BRIDGE,
-                body="Yaş veya unvan yerine sadece nesnel tıbbi triyaj skorları (SOFA/APACHE) esas alınarak tarafsız protokol uygulanmalıdır.",
+                body=(
+                    "Yaş veya unvan yerine sadece nesnel tıbbi triyaj skorları "
+                    "(SOFA/APACHE) esas alınarak tarafsız protokol uygulanmalıdır."
+                ),
                 source_kind=PerspectiveSourceKind.CURATED,
                 provenance_label="KEFE editoryal",
                 moderation_state=ReasonModerationState.NOT_REQUIRED,
@@ -247,7 +256,10 @@ def build_demo_repository() -> InMemoryReflectionDecisionRepository:
             PerspectiveCard(
                 perspective_id=TRIAGE_ALTERNATIVE_PERSPECTIVE_ID,
                 slot=PerspectiveSlot.ALTERNATIVE_CONTEXT,
-                body="Komşu hastanelerden acil transfer veya non-invaziv alternatif solunum desteği olanakları hızla devreye sokulmalıdır.",
+                body=(
+                    "Komşu hastanelerden acil transfer veya non-invaziv alternatif "
+                    "solunum desteği olanakları hızla devreye sokulmalıdır."
+                ),
                 source_kind=PerspectiveSourceKind.CURATED,
                 provenance_label="KEFE editoryal",
                 moderation_state=ReasonModerationState.NOT_REQUIRED,

@@ -22,12 +22,12 @@ That conclusion is deliberate and evidence-based:
 | Canonical API — production | `NOT_CONFIGURED` | No production HTTPS origin or external probe exists. |
 | Admin Studio — local | `LOCAL_ONLY` | Local Next.js setup targets the local API. |
 | Admin Studio — production | `NOT_CONFIGURED` | No deployed origin or operator access path exists. |
-| Consumer web | `PLACEHOLDER_ONLY` | `apps/web` contains only its intent README. |
+| Consumer web | `COMPILE_ONLY` | The Next.js runtime, public Case/Signal/share routes and dedicated CI build exist; no deployed origin is proven. |
 | Mobile production shell | `COMPILE_ONLY` | It builds against `https://beta-api.invalid/`; it is not usable production distribution. |
 | Installable phone preview | `CI_ARTIFACT_AVAILABLE` | GitHub Actions creates a debug APK artifact from the explicit preview entrypoint. |
 | `mobile-share-scheme-compile-candidate` | `COMPILE_ONLY` | MVP CI creates a transient Android host with hostless `kefe:` scheme, builds the production shell and deliberately does not upload the APK. |
 | Mobile production deeplinks | `NOT_CONFIGURED` | In-app `/case/:caseId` routing exists, but no committed Android/iOS host declarations or association evidence exists. |
-| Web deeplinks | `NOT_CONFIGURED` | No web runtime or externally probed canonical routes exist. |
+| Web deeplinks | `COMPILE_ONLY` | Canonical dynamic routes compile; no approved host, association files or external probes exist. |
 | OTP provider receipt callback | `INTERNAL_ONLY` | The hidden HMAC callback route exists; no deployed provider/network binding exists. |
 
 ## Executable evidence
@@ -39,7 +39,7 @@ That conclusion is deliberate and evidence-based:
 - that `.invalid`, localhost, loopback, wildcard and emulator endpoints cannot be production reachability evidence;
 - the compile-only production mobile endpoint;
 - local mobile/Admin API defaults;
-- consumer web placeholder-only state;
+- consumer web route presence, locked install, dependency audit and production-build CI;
 - in-app Case routing while distinguishing absent committed native deeplink hosts;
 - the hostless, non-uploaded transient `kefe:` scheme compile candidate;
 - the separately generated installable preview debug APK artifact;

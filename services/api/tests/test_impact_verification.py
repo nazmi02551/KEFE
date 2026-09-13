@@ -14,7 +14,10 @@ def test_impact_verification_engine_evaluates_verdict() -> None:
         outcome_verdict=OutcomeVerdict.FULL_RESOLUTION,
         resolution_score=0.92,
         auditor_consensus_count=12,
-        verification_notes="Bağımsız çevre mühendisleri ve sivil toplum izleme heyeti tarafından atık arıtma tesisi yerinde incelenmiş ve nehir suyu temizliği onaylanmıştır.",
+        verification_notes=(
+            "Bağımsız çevre mühendisleri ve sivil toplum izleme heyeti tarafından "
+            "atık arıtma tesisi yerinde incelenmiş ve nehir suyu temizliği onaylanmıştır."
+        ),
     )
 
     assert isinstance(r, ImpactVerificationResult)

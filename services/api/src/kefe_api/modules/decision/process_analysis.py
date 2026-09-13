@@ -90,7 +90,8 @@ class ProcessAnalysisCalculator:
     ) -> ProcessAnalysisResult:
         if not 0.0 <= procedural_integrity_score <= 1.0:
             raise ValueError(
-                f"procedural_integrity_score must be in [0.0, 1.0], got {procedural_integrity_score}"
+                "procedural_integrity_score must be in [0.0, 1.0], "
+                f"got {procedural_integrity_score}"
             )
         if len(oversight_body.strip()) < 3:
             raise ValueError("oversight_body must have at least 3 characters")
@@ -157,14 +158,19 @@ class ProcessAnalysisCalculator:
 
         completed_count = sum(1 for s in stages if s.is_completed)
         public_count = sum(1 for s in stages if s.has_public_input)
-        integrity = min(1.0, max(0.0, (completed_count / len(stages)) * 0.6 + (public_count / len(stages)) * 0.4))
+        integrity = min(
+            1.0,
+            max(0.0, (completed_count / len(stages)) * 0.6 + (public_count / len(stages)) * 0.4),
+        )
 
         return cls.analyze(
             analysis_id=f"PROC-{case_version_id.hex[:8]}",
             case_version_id=case_version_id,
             current_stage=ProcessStageEnum.DECISION_ENACTED,
             procedural_integrity_score=integrity,
-            transparency_level=TransparencyLevel.HIGH if integrity >= 0.7 else TransparencyLevel.MODERATE,
+            transparency_level=TransparencyLevel.HIGH
+            if integrity >= 0.7
+            else TransparencyLevel.MODERATE,
             public_participation_status=PublicParticipationStatus.OPEN_CONSULTATION,
             oversight_body="Bağımsız Denetim ve Ombudsmanlık",
             stages=stages,

@@ -29,9 +29,14 @@ class IntergenerationalJusticeProxyService:
         planetary_boundary_headroom_score: float,
     ) -> IntergenerationalJusticeResult:
         if not 0.0 <= stewardship_equity_index <= 1.0:
-            raise ValueError(f"stewardship_equity_index must be in [0.0, 1.0], got {stewardship_equity_index}")
+            raise ValueError(
+                f"stewardship_equity_index must be in [0.0, 1.0], got {stewardship_equity_index}"
+            )
         if not 0.0 <= planetary_boundary_headroom_score <= 1.0:
-            raise ValueError(f"planetary_boundary_headroom_score must be in [0.0, 1.0], got {planetary_boundary_headroom_score}")
+            raise ValueError(
+                "planetary_boundary_headroom_score must be in [0.0, 1.0], "
+                f"got {planetary_boundary_headroom_score}"
+            )
         if len(policy_domain.strip()) < 3:
             raise ValueError("policy_domain must have at least 3 characters")
 

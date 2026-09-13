@@ -14,7 +14,10 @@ def test_ai_neutrality_facilitates_socratic_prompt() -> None:
         mode=FacilitationMode.SOCRATIC_INQUIRY_PROMPT,
         neutrality_index=0.98,
         deescalation_efficacy_score=0.88,
-        facilitation_prompt_text="Her iki taraf da kamu yararını amaçlıyor; peki kısa vadeli maliyetler nasıl dengelenebilir?",
+        facilitation_prompt_text=(
+            "Her iki taraf da kamu yararını amaçlıyor; peki kısa vadeli "
+            "maliyetler nasıl dengelenebilir?"
+        ),
     )
 
     assert isinstance(r, FacilitationResult)

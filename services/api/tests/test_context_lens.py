@@ -18,7 +18,10 @@ def test_context_lens_service_adds_and_retrieves_pillars() -> None:
         case_version_id=case_id,
         pillar_type=LensPillarType.LEGAL_FRAMEWORK,
         title="Belediye Kanunu Madde 14 ve 15",
-        content="Büyükşehir belediyelerinin toplu taşıma hizmetlerini düzenleme, sübvanse etme ve ücret tarifesi belirleme yetkisi kanunla tanımlanmıştır.",
+        content=(
+            "Büyükşehir belediyelerinin toplu taşıma hizmetlerini düzenleme, "
+            "sübvanse etme ve ücret tarifesi belirleme yetkisi kanunla tanımlanmıştır."
+        ),
         source_citation="5393 Sayılı Belediye Kanunu, Resmi Gazete",
         source_url="https://mevzuat.gov.tr/mevzuat?MevzuatNo=5393",
     )
@@ -27,7 +30,10 @@ def test_context_lens_service_adds_and_retrieves_pillars() -> None:
         case_version_id=case_id,
         pillar_type=LensPillarType.COMPARATIVE_PRACTICE,
         title="Avrupa Metropollerinde Gece Ulaşımı",
-        content="Londra Night Tube ve Berlin 24 saatlik metro uygulamaları kamu bütçesi ve güvenlik personeli sübvansiyonu ile işletilmektedir.",
+        content=(
+            "Londra Night Tube ve Berlin 24 saatlik metro uygulamaları kamu "
+            "bütçesi ve güvenlik personeli sübvansiyonu ile işletilmektedir."
+        ),
         source_citation="TfL Night Services Report 2024",
     )
 

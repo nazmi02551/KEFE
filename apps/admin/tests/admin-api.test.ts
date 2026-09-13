@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { AdminApiClient, AdminApiError } from "../src/lib/admin-api";
+import {
+  ADMIN_API_TIMEOUT_MS,
+  AdminApiClient,
+  AdminApiError,
+  normalizeAdminApiBaseUrl
+} from "../src/lib/admin-api";
 
 function jsonResponse(payload: unknown, status = 200): Response {
   return new Response(JSON.stringify(payload), {
@@ -35,6 +40,11 @@ test("read requests include the Admin session cookie boundary without CSRF", asy
   assert.equal(calls.length, 1);
   assert.equal(calls[0].input, "https://api.example.test/internal/admin/v1/session");
   assert.equal(calls[0].init?.credentials, "include");
+  assert.equal(calls[0].init?.cache, "no-store");
+  assert.equal(calls[0].init?.redirect, "error");
+  assert.ok(calls[0].init?.signal instanceof AbortSignal);
+  assert.equal(calls[0].init.signal.aborted, false);
+  assert.equal(ADMIN_API_TIMEOUT_MS, 15_000);
   assert.equal(new Headers(calls[0].init?.headers).has("X-KEFE-CSRF"), false);
 });
 
@@ -125,4 +135,32 @@ test("non-local insecure API origins are rejected", () => {
     (error: unknown) =>
       error instanceof AdminApiError && error.code === "ADMIN_API_BASE_INSECURE"
   );
+});
+
+test("Admin API base URL normalization preserves paths and supports loopback development", () => {
+  assert.equal(
+    normalizeAdminApiBaseUrl(" https://api.example.test/admin-gateway/// "),
+    "https://api.example.test/admin-gateway"
+  );
+  assert.equal(
+    normalizeAdminApiBaseUrl("http://127.0.0.1:8000/"),
+    "http://127.0.0.1:8000"
+  );
+});
+
+test("ambiguous or credential-bearing Admin API bases are rejected", () => {
+  for (const baseUrl of [
+    "not a URL",
+    "ftp://localhost/admin",
+    "https://user:secret@api.example.test/admin",
+    "https://api.example.test/admin?tenant=secret",
+    "https://api.example.test/admin#fragment"
+  ]) {
+    assert.throws(
+      () => normalizeAdminApiBaseUrl(baseUrl),
+      (error: unknown) =>
+        error instanceof AdminApiError && error.code === "ADMIN_API_BASE_INVALID",
+      baseUrl
+    );
+  }
 });

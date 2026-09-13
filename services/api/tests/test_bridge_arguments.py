@@ -12,7 +12,10 @@ def test_register_and_retrieve_bridge_arguments() -> None:
 
     item = service.register_bridge_argument(
         case_version_id=case_version_id,
-        synthesis_thesis="Hem şeffaflık hem de veri mahremiyeti kademeli anonimleştirme ile korunabilir.",
+        synthesis_thesis=(
+            "Hem şeffaflık hem de veri mahremiyeti kademeli anonimleştirme "
+            "ile korunabilir."
+        ),
         connecting_values=("seffaflik", "mahremiyet", "kamu_yarari"),
         cross_group_support_rate=0.58,
         sample_size=150,

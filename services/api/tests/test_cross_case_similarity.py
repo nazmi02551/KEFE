@@ -18,7 +18,10 @@ def test_cross_case_similarity_calculates_high_analogue() -> None:
         target_case_id=tgt_id,
         target_case_title="Tarihsel Su Kaynakları Dağıtım Krizi (1994)",
         similarity_score=0.88,
-        shared_tension_summary="Sınırlı kamu kaynağının tarımsal ihtiyaçlar ve kentsel tüketim arasındaki adil bölüşümü.",
+        shared_tension_summary=(
+            "Sınırlı kamu kaynağının tarımsal ihtiyaçlar ve kentsel tüketim "
+            "arasındaki adil bölüşümü."
+        ),
     )
 
     assert isinstance(r, CrossCaseSimilarityResult)

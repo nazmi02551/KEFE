@@ -11,10 +11,11 @@
     "start": "next start --port 3001",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings=0",
-    "test": "node tools/run_tests.mjs"
+    "test": "node tools/run_tests.mjs && tsx --test tools/kefe-api.test.ts tools/presentation.test.ts tools/search.test.ts",
+    "verify": "npm run lint && npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
-    "next": "16.2.12",
+    "next": "16.3.5",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
@@ -23,7 +24,7 @@
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "eslint": "9.39.4",
-    "eslint-config-next": "16.2.12",
+    "eslint-config-next": "16.3.5",
     "tsx": "4.22.4",
     "typescript": "6.0.3"
   }

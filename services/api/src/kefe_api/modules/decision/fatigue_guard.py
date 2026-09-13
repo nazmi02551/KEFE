@@ -36,10 +36,16 @@ class DecisionFatigueCalculator:
 
         if consecutive_weigh_count >= 10 or session_duration_minutes >= 45.0:
             status = PacingStatus.REST_INTERVAL_ACTIVE
-            prompt = "Bugün yoğun ve derinlikli tartımlar yaptınız. Zihninizi tazelemek ve sindirmek için kısa bir mola vermeniz önerilir."
+            prompt = (
+                "Bugün yoğun ve derinlikli tartımlar yaptınız. Zihninizi tazelemek "
+                "ve sindirmek için kısa bir mola vermeniz önerilir."
+            )
         elif consecutive_weigh_count >= 5 or session_duration_minutes >= 20.0:
             status = PacingStatus.PACING_RECOMMENDED
-            prompt = "Arka arkaya birkaç karmaşık ikilemi değerlendirdiniz. Dilerseniz önceki kararlarınızı gözden geçirebilirsiniz."
+            prompt = (
+                "Arka arkaya birkaç karmaşık ikilemi değerlendirdiniz. Dilerseniz "
+                "önceki kararlarınızı gözden geçirebilirsiniz."
+            )
         else:
             status = PacingStatus.OPTIMAL_PACING
             prompt = "Zihinsel ritminiz dengeli ve odaklanmış durumda."

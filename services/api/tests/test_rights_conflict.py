@@ -19,7 +19,10 @@ def test_rights_conflict_calculator_evaluates_severity() -> None:
         option_code="OPT_DIGITAL_ID",
         collision_type=RightsCollisionType.PRIVACY_VS_SECURITY,
         inalienable_core_score=0.85,
-        constitutional_rationale="Veri minimizasyonu ve uçtan uca şifreleme ile mahremiyetin özüne dokunulmamaktadır.",
+        constitutional_rationale=(
+            "Veri minimizasyonu ve uçtan uca şifreleme ile mahremiyetin "
+            "özüne dokunulmamaktadır."
+        ),
     )
     assert isinstance(r1, RightsConflictResult)
     assert r1.severity == RestrictionSeverity.PERMISSIBLE_RESTRICTION
@@ -30,7 +33,10 @@ def test_rights_conflict_calculator_evaluates_severity() -> None:
         option_code="OPT_TOTAL_SURVEILLANCE",
         collision_type=RightsCollisionType.PRIVACY_VS_SECURITY,
         inalienable_core_score=0.20,
-        constitutional_rationale="Mahkeme kararı olmaksızın tüm yurttaşların sürekli izlenmesi hakkın özünü zedeler.",
+        constitutional_rationale=(
+            "Mahkeme kararı olmaksızın tüm yurttaşların sürekli izlenmesi "
+            "hakkın özünü zedeler."
+        ),
     )
     assert r2.severity == RestrictionSeverity.UNCONSTITUTIONAL_BREACH
 

@@ -34,9 +34,14 @@ def build_analytical_perspectives(
             {
                 "argument_id": "bridge-1",
                 "title": "Ortak Zemin Çözümü",
-                "premise": "Acil ihtiyaca yanıt verirken şeffaf kural işletimi her iki tarafça makul bulunmaktadır.",
+                "premise": (
+                    "Acil ihtiyaca yanıt verirken şeffaf kural işletimi her iki "
+                    "tarafça makul bulunmaktadır."
+                ),
                 "common_ground_score": 0.82,
-                "opposing_acknowledgment": "Karşı tarafın süreç güvenliği kaygısı meşru kabul edilmiştir.",
+                "opposing_acknowledgment": (
+                    "Karşı tarafın süreç güvenliği kaygısı meşru kabul edilmiştir."
+                ),
             }
         ],
         "divergence_anatomy": {
@@ -199,12 +204,17 @@ def build_analytical_perspectives(
             "collision_type": "INDIVIDUAL_LIBERTY_VS_PUBLIC_HEALTH",
             "severity": "PERMISSIBLE_RESTRICTION",
             "inalienable_core_score": 0.91,
-            "constitutional_rationale": "Temel hakların özüne dokunulmaksızın kamu yararı gözetilmiştir.",
+            "constitutional_rationale": (
+                "Temel hakların özüne dokunulmaksızın kamu yararı gözetilmiştir."
+            ),
         },
         "blind_variants": {
             "case_version_id": str(case_version_id),
             "blind_mode": "ACTOR_BLIND",
-            "blinded_prompt": "Özne kimliği gizlenerek yalnızca temel etik ilkeler üzerinden değerlendirilmiştir.",
+            "blinded_prompt": (
+                "Özne kimliği gizlenerek yalnızca temel etik ilkeler üzerinden "
+                "değerlendirilmiştir."
+            ),
             "real_identity_revealed": "Kamu Görevlisi & Vatandaş",
             "neutrality_score": 0.88,
         },
@@ -213,13 +223,18 @@ def build_analytical_perspectives(
             "primary_principle": "PROCEDURAL_JUSTICE",
             "secondary_principle": "EMPATHY_COMPASSION",
             "consistency_score": 0.84,
-            "reflection_prompt": "Seçtiğiniz ilke ile gerekçeniz arasında yüksek tutarlılık gözlendi.",
+            "reflection_prompt": (
+                "Seçtiğiniz ilke ile gerekçeniz arasında yüksek tutarlılık gözlendi."
+            ),
         },
         "role_flip": {
             "case_version_id": str(case_version_id),
             "initial_role": "Kuralı Uygulayan Memur",
             "flipped_role": "Sıradaki Vatandaş",
-            "flipped_scenario_prompt": "Acil durumdaki vatandaşın yerine geçseydiniz kararın adil olduğunu düşünür müydünüz?",
+            "flipped_scenario_prompt": (
+                "Acil durumdaki vatandaşın yerine geçseydiniz kararın adil "
+                "olduğunu düşünür müydünüz?"
+            ),
             "perspective_shift_score": 0.72,
         },
         "decision_receipt": {
@@ -247,7 +262,10 @@ def build_analytical_perspectives(
             "case_version_id": str(case_version_id),
             "institution_name": "Ulaştırma ve Altyapı Denetleme Kurulu",
             "institution_type": "OFFICIAL_GOVERNMENT",
-            "official_statement": "Koltuk tahsis ölçütleri ve kamu yararı ilkeleri resmi tebliğ ile uyumludur.",
+            "official_statement": (
+                "Koltuk tahsis ölçütleri ve kamu yararı ilkeleri resmi tebliğ "
+                "ile uyumludur."
+            ),
             "verification_fingerprint": "sha256-inst-resp-9f8a32",
             "responded_at_utc": ts_str,
         },

@@ -122,7 +122,10 @@ class IncentiveMapCalculator:
                 incentive_type=IncentiveTypeEnum.POLITICAL_ELECTORAL,
                 alignment_status=AlignmentStatusEnum.PERVERSE,
                 intensity_score=0.75,
-                unintended_behavior="Gelecek nesillere mali ve ekolojik borç bırakma pahasına günü kurtarma.",
+                unintended_behavior=(
+                    "Gelecek nesillere mali ve ekolojik borç bırakma pahasına "
+                    "günü kurtarma."
+                ),
             ),
             IncentiveNodeItem(
                 stakeholder_group="Kamu Düzenleyicisi ve Bürokrasi",
@@ -138,7 +141,10 @@ class IncentiveMapCalculator:
                 incentive_type=IncentiveTypeEnum.CIVIC_PUBLIC_WELFARE,
                 alignment_status=AlignmentStatusEnum.ALIGNED,
                 intensity_score=0.90,
-                unintended_behavior="Kısa vadeli tüketici fiyat duyarlılığı ile uzun vadeli kamu yararı ikilemi.",
+                unintended_behavior=(
+                    "Kısa vadeli tüketici fiyat duyarlılığı ile uzun vadeli "
+                    "kamu yararı ikilemi."
+                ),
             ),
         ]
 
@@ -148,6 +154,9 @@ class IncentiveMapCalculator:
             alignment_index=0.62,
             perverse_incentive_risk=PerverseRiskEnum.MODERATE,
             primary_driver="Kısa Vadeli Kâr ve Seçim Odaklı Teşvik Dinamikleri",
-            mitigation_mechanism="Bağımsız performans denetimi, şeffaflık zorunluluğu ve uzun vadeli etki tavanı",
+            mitigation_mechanism=(
+                "Bağımsız performans denetimi, şeffaflık zorunluluğu ve uzun "
+                "vadeli etki tavanı"
+            ),
             incentive_nodes=nodes,
         )

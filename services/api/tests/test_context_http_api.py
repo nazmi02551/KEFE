@@ -12,6 +12,7 @@ Covers:
 - Malformed UUID → 422 (FastAPI validation)
 - Response is bounded (blocks ≤ 20, sources ≤ 20)
 """
+
 from __future__ import annotations
 
 import uuid
@@ -34,6 +35,7 @@ def _make_client() -> TestClient:
 # ---------------------------------------------------------------------------
 # Happy path — shape and field contract
 # ---------------------------------------------------------------------------
+
 
 def test_context_response_shape() -> None:
     client = _make_client()
@@ -88,6 +90,7 @@ def test_context_sources_have_required_fields() -> None:
 # ADR-0142 claim_status governance
 # ---------------------------------------------------------------------------
 
+
 def test_context_claim_status_in_governed_set() -> None:
     """Every block's claim_status must be one of the four canonical values."""
     client = _make_client()
@@ -96,7 +99,8 @@ def test_context_claim_status_in_governed_set() -> None:
 
     for block in body["blocks"]:
         assert block["claim_status"] in _GOVERNED_CLAIM_STATUSES, (
-            f"Unexpected claim_status '{block['claim_status']}' in block {block['context_block_id']}"
+            f"Unexpected claim_status '{block['claim_status']}' in block "
+            f"{block['context_block_id']}"
         )
 
 
@@ -120,6 +124,7 @@ def test_context_first_block_is_essential_and_verified() -> None:
 # CAP-069 source_kind governance
 # ---------------------------------------------------------------------------
 
+
 def test_context_source_kind_in_governed_set() -> None:
     """Every source's source_kind must be one of the governed values."""
     client = _make_client()
@@ -140,13 +145,15 @@ def test_context_disclosure_level_in_governed_set() -> None:
 
     for block in body["blocks"]:
         assert block["disclosure_level"] in _GOVERNED_DISCLOSURE_LEVELS, (
-            f"Unexpected disclosure_level '{block['disclosure_level']}' in block {block['context_block_id']}"
+            f"Unexpected disclosure_level '{block['disclosure_level']}' in block "
+            f"{block['context_block_id']}"
         )
 
 
 # ---------------------------------------------------------------------------
 # Source ID cross-reference
 # ---------------------------------------------------------------------------
+
 
 def test_context_source_ids_cross_reference_sources() -> None:
     """source_ids in each block must reference existing source_id values."""
@@ -166,6 +173,7 @@ def test_context_source_ids_cross_reference_sources() -> None:
 # Commit First isolation — result / perspective fields absent
 # ---------------------------------------------------------------------------
 
+
 def test_context_result_perspective_fields_absent() -> None:
     """No result, perspective or community data must appear in context response."""
     client = _make_client()
@@ -182,6 +190,7 @@ def test_context_result_perspective_fields_absent() -> None:
 # Bounds — no more than 20 blocks or sources
 # ---------------------------------------------------------------------------
 
+
 def test_context_bounded_to_20_blocks_and_sources() -> None:
     """Response must not exceed 20 blocks or 20 sources."""
     client = _make_client()
@@ -195,6 +204,7 @@ def test_context_bounded_to_20_blocks_and_sources() -> None:
 # ---------------------------------------------------------------------------
 # Error cases
 # ---------------------------------------------------------------------------
+
 
 def test_unknown_case_version_returns_404_with_stable_error_code() -> None:
     client = _make_client()
@@ -216,6 +226,7 @@ def test_malformed_uuid_returns_422() -> None:
 # ---------------------------------------------------------------------------
 # Demo case_version_id consistency across modules
 # ---------------------------------------------------------------------------
+
 
 def test_context_demo_id_matches_decision_demo_id() -> None:
     """Context and decision bootstrap use the same DEMO_CASE_VERSION_ID."""

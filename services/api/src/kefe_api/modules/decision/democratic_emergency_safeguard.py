@@ -29,7 +29,9 @@ class DemocraticEmergencySafeguardService:
         remaining_sunset_days: int,
     ) -> DemocraticEmergencyResult:
         if not 0.0 <= proportionality_score <= 1.0:
-            raise ValueError(f"proportionality_score must be in [0.0, 1.0], got {proportionality_score}")
+            raise ValueError(
+                f"proportionality_score must be in [0.0, 1.0], got {proportionality_score}"
+            )
         if remaining_sunset_days < 0:
             raise ValueError("remaining_sunset_days cannot be negative")
         if len(emergency_jurisdiction.strip()) < 3:

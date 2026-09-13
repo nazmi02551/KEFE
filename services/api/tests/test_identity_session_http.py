@@ -10,9 +10,8 @@ Covers:
 - Guest creation is idempotent-safe (no server error on repeated calls)
 - Response fields: access_token, token_type, expires_in, actor_kind
 """
-from __future__ import annotations
 
-import uuid
+from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
@@ -42,6 +41,7 @@ def _guest_renew_headers(client: TestClient) -> tuple[dict[str, str], str]:
 # ---------------------------------------------------------------------------
 # Guest creation — shape tests
 # ---------------------------------------------------------------------------
+
 
 def test_guest_returns_201() -> None:
     client = _client()
@@ -95,6 +95,7 @@ def test_guest_creation_stable_under_repeated_calls() -> None:
 # Session renew — POST /v1/identity/session/renew
 # ---------------------------------------------------------------------------
 
+
 def test_session_renew_requires_renewal_token_body() -> None:
     """Session renew without renewal_token body returns 422."""
     client = _client()
@@ -137,6 +138,7 @@ def test_session_renew_new_token_is_usable() -> None:
 # Session delete — DELETE /v1/identity/session
 # ---------------------------------------------------------------------------
 
+
 def test_session_delete_requires_auth() -> None:
     client = _client()
     res = client.delete("/v1/identity/session")
@@ -177,6 +179,7 @@ def test_double_session_delete_not_500() -> None:
 # Continuity bootstrap — POST /v1/identity/session/continuity/bootstrap
 # ---------------------------------------------------------------------------
 
+
 def test_continuity_bootstrap_requires_auth() -> None:
     client = _client()
     res = client.post("/v1/identity/session/continuity/bootstrap")
@@ -194,6 +197,7 @@ def test_continuity_bootstrap_with_auth_not_500() -> None:
 # ---------------------------------------------------------------------------
 # OpenAPI registration
 # ---------------------------------------------------------------------------
+
 
 def test_identity_paths_in_openapi() -> None:
     client = _client()

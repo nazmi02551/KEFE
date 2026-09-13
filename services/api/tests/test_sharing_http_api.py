@@ -10,6 +10,7 @@ Covers:
 - Revoked share returns SHARE_NOT_FOUND (404)
 - Expired share returns SHARE_NOT_FOUND (404)
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -63,6 +64,7 @@ def _seed_share(
 # Unknown / malformed tokens — no authentication required
 # ---------------------------------------------------------------------------
 
+
 def test_unknown_share_token_returns_404() -> None:
     client = _make_client()
     res = client.get("/v1/shares/kefe_s_nonexistent_token_xyz")
@@ -97,6 +99,7 @@ def test_sql_injection_attempt_in_token_returns_404_not_500() -> None:
 # Authentication guard on write endpoints
 # ---------------------------------------------------------------------------
 
+
 def test_create_share_without_auth_returns_401_or_403() -> None:
     """POST /v1/shares requires a valid bearer token."""
     client = _make_client()
@@ -122,6 +125,7 @@ def test_delete_share_without_auth_returns_401_or_403() -> None:
 # PublicShareResponse shape contract
 # (tested via seeded in-memory repository + direct service layer)
 # ---------------------------------------------------------------------------
+
 
 def test_public_share_response_has_required_fields() -> None:
     """
@@ -157,10 +161,11 @@ def test_public_share_response_has_required_fields() -> None:
 # Revoked and expired shares
 # ---------------------------------------------------------------------------
 
+
 def test_revoked_share_returns_share_not_found() -> None:
+    from kefe_api.core.errors import DomainError
     from kefe_api.modules.decision.bootstrap import build_demo_repository
     from kefe_api.modules.sharing.service import ShareService
-    from kefe_api.core.errors import DomainError
 
     decision_repo = build_demo_repository()
     share_repo = InMemoryShareRepository()
@@ -170,15 +175,15 @@ def test_revoked_share_returns_share_not_found() -> None:
 
     try:
         svc.read_public(token)
-        assert False, "Expected DomainError for revoked share"
+        raise AssertionError("Expected DomainError for revoked share")
     except DomainError as e:
         assert e.code == "SHARE_NOT_FOUND"
 
 
 def test_expired_share_returns_share_not_found() -> None:
+    from kefe_api.core.errors import DomainError
     from kefe_api.modules.decision.bootstrap import build_demo_repository
     from kefe_api.modules.sharing.service import ShareService
-    from kefe_api.core.errors import DomainError
 
     decision_repo = build_demo_repository()
     share_repo = InMemoryShareRepository()
@@ -188,7 +193,7 @@ def test_expired_share_returns_share_not_found() -> None:
 
     try:
         svc.read_public(token)
-        assert False, "Expected DomainError for expired share"
+        raise AssertionError("Expected DomainError for expired share")
     except DomainError as e:
         assert e.code == "SHARE_NOT_FOUND"
 
@@ -196,6 +201,7 @@ def test_expired_share_returns_share_not_found() -> None:
 # ---------------------------------------------------------------------------
 # Token hash determinism
 # ---------------------------------------------------------------------------
+
 
 def test_token_hash_is_deterministic() -> None:
     """The same token always produces the same hash (SHA-256)."""

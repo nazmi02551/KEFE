@@ -11,6 +11,10 @@ PROGRESSIVE = (
     ROOT / "apps/mobile/lib/features/context/presentation/context_section_progressive.dart"
 )
 STRINGS = ROOT / "apps/mobile/lib/features/context/presentation/context_journey_strings.dart"
+STRING_CATALOG = (
+    ROOT
+    / "apps/mobile/lib/features/context/presentation/context_journey_string_catalog.dart"
+)
 MODEL = ROOT / "apps/mobile/lib/features/context/domain/context_models.dart"
 TEST = ROOT / "apps/mobile/test/context_section_test.dart"
 FORBIDDEN_WORKFLOW = ROOT / ".github/workflows/context-source-trust-presentation.yml"
@@ -44,7 +48,12 @@ def main() -> None:
     support = SUPPORT.read_text(encoding="utf-8")
     legacy = LEGACY.read_text(encoding="utf-8")
     progressive = PROGRESSIVE.read_text(encoding="utf-8")
-    strings = STRINGS.read_text(encoding="utf-8")
+    strings = "\n".join(
+        (
+            STRINGS.read_text(encoding="utf-8"),
+            STRING_CATALOG.read_text(encoding="utf-8"),
+        )
+    )
     model = MODEL.read_text(encoding="utf-8")
     test = TEST.read_text(encoding="utf-8")
 

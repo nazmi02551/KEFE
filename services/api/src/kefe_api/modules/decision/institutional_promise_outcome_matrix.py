@@ -31,7 +31,9 @@ class InstitutionalPromiseOutcomeMatrixService:
         empirical_evidence_artifacts_count: int,
     ) -> PromiseOutcomeResult:
         if not 0.0 <= milestone_completion_pct <= 1.0:
-            raise ValueError(f"milestone_completion_pct must be in [0.0, 1.0], got {milestone_completion_pct}")
+            raise ValueError(
+                f"milestone_completion_pct must be in [0.0, 1.0], got {milestone_completion_pct}"
+            )
         if empirical_evidence_artifacts_count < 0:
             raise ValueError("empirical_evidence_artifacts_count cannot be negative")
         if len(institution_name.strip()) < 3:

@@ -25,7 +25,8 @@ class StakeholderSegmentGap:
     def __post_init__(self) -> None:
         if self.sample_size < MIN_STAKEHOLDER_SAMPLE_SIZE:
             raise ValueError(
-                f"Stakeholder sample size {self.sample_size} is below minimum privacy threshold {MIN_STAKEHOLDER_SAMPLE_SIZE}"
+                f"Stakeholder sample size {self.sample_size} is below minimum "
+                f"privacy threshold {MIN_STAKEHOLDER_SAMPLE_SIZE}"
             )
 
 
@@ -41,7 +42,8 @@ class StakeholderGapCalculator:
     ) -> StakeholderSegmentGap:
         if sample_size < MIN_STAKEHOLDER_SAMPLE_SIZE:
             raise ValueError(
-                f"Cannot disclose stakeholder gap for n={sample_size} < {MIN_STAKEHOLDER_SAMPLE_SIZE}"
+                f"Cannot disclose stakeholder gap for n={sample_size} "
+                f"< {MIN_STAKEHOLDER_SAMPLE_SIZE}"
             )
 
         overall_share = overall_distributions.get(target_option, 0.0)

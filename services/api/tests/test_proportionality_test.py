@@ -19,7 +19,10 @@ def test_proportionality_calculator_evaluates_three_prongs() -> None:
         suitability_score=0.85,
         necessity_least_intrusive_score=0.90,
         strict_proportionality_score=0.80,
-        summary="Risk odaklı hedefli denetim, tüm vatandaşları izlemeden kamu yararını sağlamaktadır.",
+        summary=(
+            "Risk odaklı hedefli denetim, tüm vatandaşları izlemeden kamu "
+            "yararını sağlamaktadır."
+        ),
     )
     assert isinstance(r1, ProportionalityTestResult)
     assert r1.outcome == ProportionalityOutcome.PROPORTIONAL_VALID
@@ -32,7 +35,10 @@ def test_proportionality_calculator_evaluates_three_prongs() -> None:
         suitability_score=0.50,
         necessity_least_intrusive_score=0.20,
         strict_proportionality_score=0.25,
-        summary="Toptan yasaklama ölçülülük ilkesine aykırıdır; daha hafif alternatifler mevcuttur.",
+        summary=(
+            "Toptan yasaklama ölçülülük ilkesine aykırıdır; daha hafif "
+            "alternatifler mevcuttur."
+        ),
     )
     assert r2.outcome == ProportionalityOutcome.DISPROPORTIONATE_INVALID
 

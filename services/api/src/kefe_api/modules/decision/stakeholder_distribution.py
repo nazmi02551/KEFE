@@ -127,7 +127,14 @@ class StakeholderDistributionService:
             )
 
         # Pluralism score measures category balance across the 5 categories
-        pluralism = round(1.0 - (max(d.sample_share for d in distributions) - min(d.sample_share for d in distributions)), 3)
+        pluralism = round(
+            1.0
+            - (
+                max(d.sample_share for d in distributions)
+                - min(d.sample_share for d in distributions)
+            ),
+            3,
+        )
 
         return StakeholderDistributionResult(
             case_version_id=case_version_id,
