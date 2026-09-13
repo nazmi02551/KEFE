@@ -24,6 +24,7 @@ const contract = JSON.parse(
   read("docs/contracts/admin-studio-editorial-workspace.v1.json")
 );
 const packageJson = JSON.parse(read("apps/admin/package.json"));
+const nextConfig = read("apps/admin/next.config.mjs");
 const apiClient = read("apps/admin/src/lib/admin-api.ts");
 const workspace = read("apps/admin/src/components/editorial-workspace.tsx");
 const primitives = read("apps/admin/src/components/workspace-primitives.tsx");
@@ -60,6 +61,20 @@ for (const required of [
   'cache: "no-store"'
 ]) {
   requireText(apiClient, required, "Admin API security boundary");
+}
+
+for (const required of [
+  'poweredByHeader: false',
+  'key: "X-Content-Type-Options"',
+  'value: "nosniff"',
+  'key: "X-Frame-Options"',
+  'value: "DENY"',
+  'key: "Referrer-Policy"',
+  'value: "no-referrer"',
+  'key: "Permissions-Policy"',
+  'camera=(), geolocation=(), microphone=()',
+]) {
+  requireText(nextConfig, required, "Admin response security boundary");
 }
 
 for (const forbidden of [
