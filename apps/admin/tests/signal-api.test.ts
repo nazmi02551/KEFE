@@ -7,7 +7,8 @@ import {
   getContributionClassesReport,
   getSignalScopeAlignmentReport,
   getSignalVersioningReport,
-  getSignalTargetRegistry
+  getSignalTargetRegistry,
+  getSignalFreshnessReport,
 } from "../src/lib/signal-api";
 
 test("listSignalConsensusCards calls GET endpoint with pagination", async () => {
@@ -186,3 +187,32 @@ test("getSignalTargetRegistry returns target institutions and channels", async (
   assert.equal(res.primary_target_id, "TGT-01");
   assert.equal(res.targets[0].dispatch_status, "DISPATCHED");
 });
+
+test("getSignalFreshnessReport evaluates decay and remaining weight (CAP-045)", async () => {
+  const calls: string[] = [];
+  const mockFetch = (async (url: RequestInfo | URL) => {
+    calls.push(url.toString());
+    return new Response(JSON.stringify({
+      signal_id: "SIG-001",
+      case_version_id: "CASE-001",
+      half_life_days: 30,
+      age_days: 3.5,
+      remaining_weight: 0.92,
+      freshness_state: "FRESH",
+      certified_at: "2026-09-12T00:00:00Z",
+    }), { status: 200 });
+  }) as typeof fetch;
+
+  const res = await getSignalFreshnessReport("http://localhost:8000", "SIG-001", {
+    halfLifeDays: 30,
+    ageDays: 3.5,
+    fetchImpl: mockFetch,
+  });
+
+  assert.equal(calls.length, 1);
+  assert.ok(calls[0].includes("/v1/signals/SIG-001/freshness?half_life_days=30&age_days=3.5"));
+  assert.equal(res.signal_id, "SIG-001");
+  assert.equal(res.freshness_state, "FRESH");
+  assert.equal(res.remaining_weight, 0.92);
+});
+

@@ -238,6 +238,16 @@ export async function getSignalVersioningReport(
   );
 }
 
+export interface SignalFreshnessReport {
+  signal_id: string;
+  case_version_id: string;
+  half_life_days: number;
+  age_days: number;
+  remaining_weight: number;
+  freshness_state: "FRESH" | "STABLE" | "DEPRECATING" | "EXPIRED_NEEDS_RETEST";
+  certified_at: string;
+}
+
 export async function getSignalTargetRegistry(
   baseUrl: string,
   signalId: string,
@@ -248,3 +258,16 @@ export async function getSignalTargetRegistry(
     fetchImpl
   );
 }
+
+export async function getSignalFreshnessReport(
+  baseUrl: string,
+  signalId: string,
+  options: { halfLifeDays?: number; ageDays?: number; fetchImpl?: typeof fetch } = {}
+): Promise<SignalFreshnessReport> {
+  const { halfLifeDays = 30, ageDays, fetchImpl } = options;
+  let url = `${baseUrl}/v1/signals/${signalId}/freshness?half_life_days=${halfLifeDays}`;
+  if (ageDays !== undefined) {
+    url += `&age_days=${ageDays}`;
+  }
+  return apiFetch<SignalFreshnessReport>(url, fetchImpl);
+}

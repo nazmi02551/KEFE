@@ -13,17 +13,25 @@
 import { useCallback, useEffect, useState } from "react";
 import styles from "@/src/components/signal-workspace.module.css";
 import type {
+  ContributionClassesReport,
   SignalConsensusCard,
+  SignalFreshnessReport,
   SignalHealthReport,
   SignalQualificationReport,
+  SignalScopeAlignmentReport,
+  SignalTargetRegistryReport,
+  SignalVersioningReport,
 } from "@/src/lib/signal-api";
 import {
+  getContributionClassesReport,
+  getSignalFreshnessReport,
   getSignalHealthReport,
   getSignalQualificationReport,
+  getSignalScopeAlignmentReport,
   getSignalTargetRegistry,
+  getSignalVersioningReport,
   listSignalConsensusCards,
 } from "@/src/lib/signal-api";
-import type { SignalTargetRegistryReport } from "@/src/lib/signal-api";
 
 const TIER_LABELS: Record<string, string> = {
   GOLD_STANDARD: "Altın Standart",
@@ -39,6 +47,20 @@ const TIER_CLASS: Record<string, string> = {
   UNQUALIFIED: styles.tierUnqualified,
 };
 
+const FRESHNESS_CLASS: Record<string, string> = {
+  FRESH: styles.badgeFresh,
+  STABLE: styles.badgeStable,
+  DEPRECATING: styles.badgeDeprecating,
+  EXPIRED_NEEDS_RETEST: styles.badgeExpired,
+};
+
+const FRESHNESS_LABELS: Record<string, string> = {
+  FRESH: "Taze (Yüksek Güven)",
+  STABLE: "Kararlı",
+  DEPRECATING: "Eskiyen",
+  EXPIRED_NEEDS_RETEST: "Süresi Doldu / Retest Gerekli",
+};
+
 interface SignalDetailPanelProps {
   card: SignalConsensusCard;
   baseUrl: string;
@@ -49,6 +71,10 @@ function SignalDetailPanel({ card, baseUrl, onClose }: SignalDetailPanelProps) {
   const [health, setHealth] = useState<SignalHealthReport | null>(null);
   const [qualification, setQualification] = useState<SignalQualificationReport | null>(null);
   const [targets, setTargets] = useState<SignalTargetRegistryReport | null>(null);
+  const [classes, setClasses] = useState<ContributionClassesReport | null>(null);
+  const [scope, setScope] = useState<SignalScopeAlignmentReport | null>(null);
+  const [versioning, setVersioning] = useState<SignalVersioningReport | null>(null);
+  const [freshness, setFreshness] = useState<SignalFreshnessReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,15 +84,23 @@ function SignalDetailPanel({ card, baseUrl, onClose }: SignalDetailPanelProps) {
       setLoading(true);
       setError(null);
       try {
-        const [h, q, t] = await Promise.allSettled([
+        const [h, q, t, cc, sc, vr, fr] = await Promise.allSettled([
           getSignalHealthReport(baseUrl, card.signal_id),
           getSignalQualificationReport(baseUrl, card.signal_id),
           getSignalTargetRegistry(baseUrl, card.signal_id),
+          getContributionClassesReport(baseUrl, card.signal_id),
+          getSignalScopeAlignmentReport(baseUrl, card.signal_id),
+          getSignalVersioningReport(baseUrl, card.signal_id),
+          getSignalFreshnessReport(baseUrl, card.signal_id),
         ]);
         if (cancelled) return;
         if (h.status === "fulfilled") setHealth(h.value);
         if (q.status === "fulfilled") setQualification(q.value);
         if (t.status === "fulfilled") setTargets(t.value);
+        if (cc.status === "fulfilled") setClasses(cc.value);
+        if (sc.status === "fulfilled") setScope(sc.value);
+        if (vr.status === "fulfilled") setVersioning(vr.value);
+        if (fr.status === "fulfilled") setFreshness(fr.value);
       } catch (err) {
         if (!cancelled) setError((err as Error).message);
       } finally {
@@ -118,6 +152,70 @@ function SignalDetailPanel({ card, baseUrl, onClose }: SignalDetailPanelProps) {
           <p className={styles.errorText} role="alert">{error}</p>
         )}
 
+        {!loading && freshness && (
+          <section className={styles.detailSection}>
+            <div className={styles.freshnessCard}>
+              <div className={styles.freshnessHeader}>
+                <span className={`${styles.freshnessBadge} ${FRESHNESS_CLASS[freshness.freshness_state] ?? ""}`}>
+                  {FRESHNESS_LABELS[freshness.freshness_state] ?? freshness.freshness_state}
+                </span>
+                <span className={styles.detailSectionScore}>
+                  Kalan Ağırlık: %{(freshness.remaining_weight * 100).toFixed(0)}
+                </span>
+              </div>
+              <div
+                className={styles.freshnessBar}
+                role="progressbar"
+                aria-valuenow={Math.round(freshness.remaining_weight * 100)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              >
+                <div
+                  className={styles.freshnessFill}
+                  style={{ width: `${Math.round(freshness.remaining_weight * 100)}%` }}
+                />
+              </div>
+              <div className={styles.freshnessMeta}>
+                <span>Sinyal Yaşı: {freshness.age_days.toFixed(1)} gün</span>
+                <span>Yarı Ömür: {freshness.half_life_days} gün</span>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {!loading && classes && (
+          <section className={styles.detailSection}>
+            <h3 className={styles.detailSectionTitle}>
+              Katkı Sınıfları & İzolasyon Kanıtı
+              <span className={styles.detailSectionScore}>
+                Toplam: {classes.total_contributions.toLocaleString("tr-TR")}
+              </span>
+            </h3>
+            <div className={styles.classesGrid}>
+              {classes.classes.map((cls) => (
+                <div key={cls.class_id} className={styles.classCard}>
+                  <div className={styles.classHeader}>
+                    <span className={styles.classTitle}>{cls.name_tr}</span>
+                    <span className={cls.is_signal_eligible ? styles.classEligibleBadge : styles.classExcludedBadge}>
+                      {cls.is_signal_eligible ? "Sinyal Geçerli" : "Hariç"}
+                    </span>
+                  </div>
+                  <div className={styles.classMetrics}>
+                    <span className={styles.classPercent}>%{cls.percentage.toFixed(1)}</span>
+                    <span className={styles.classCount}>({cls.count.toLocaleString("tr-TR")})</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className={styles.isolationAuditRow}>
+              <span>Kirlenme Riski İndeksi: %{(classes.contamination_risk_index * 100).toFixed(1)}</span>
+              <span className={styles.monospaceValue} title={classes.isolation_proof_hash}>
+                Kanıt: {classes.isolation_proof_hash.slice(0, 16)}…
+              </span>
+            </div>
+          </section>
+        )}
+
         {!loading && health && (
           <section className={styles.detailSection}>
             <h3 className={styles.detailSectionTitle}>
@@ -163,6 +261,60 @@ function SignalDetailPanel({ card, baseUrl, onClose }: SignalDetailPanelProps) {
                 </li>
               ))}
             </ul>
+          </section>
+        )}
+
+        {!loading && scope && (
+          <section className={styles.detailSection}>
+            <h3 className={styles.detailSectionTitle}>
+              Kapsam Hizalaması
+              <span className={styles.detailSectionScore}>
+                Hizalama: %{scope.overall_alignment_score.toFixed(0)}
+              </span>
+            </h3>
+            <div className={styles.scopeGrid}>
+              <div className={styles.scopeItem}>
+                <div className={styles.scopeLabel}>Yargı / Yetki Alanı</div>
+                <div className={styles.scopeValue}>{scope.jurisdiction_level}</div>
+              </div>
+              <div className={styles.scopeItem}>
+                <div className={styles.scopeLabel}>Coğrafi Kapsam</div>
+                <div className={styles.scopeValue}>{scope.geographic_scope}</div>
+              </div>
+              <div className={styles.scopeItem}>
+                <div className={styles.scopeLabel}>Hedef Kitle</div>
+                <div className={styles.scopeValue}>{scope.target_population}</div>
+              </div>
+              <div className={styles.scopeItem}>
+                <div className={styles.scopeLabel}>Geçerlilik Penceresi</div>
+                <div className={styles.scopeValue}>{scope.validity_window_days} gün</div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {!loading && versioning && (
+          <section className={styles.detailSection}>
+            <h3 className={styles.detailSectionTitle}>
+              Metodoloji Sürümü & Denetim Zinciri
+              <span className={styles.versionBadge}>{versioning.current_version}</span>
+            </h3>
+            <div className={styles.versioningCard}>
+              <div className={styles.versioningHeader}>
+                <span className={styles.auditSealValid}>
+                  {versioning.audit_chain_valid ? "✓ Kriptografik Denetim Zinciri Geçerli" : "✗ Denetim Zinciri Uyuşmazlığı"}
+                </span>
+                <span className={styles.monospaceValue}>
+                  {versioning.snapshots.length} Anlık Görüntü
+                </span>
+              </div>
+              {versioning.latest_delta && (
+                <div className={styles.deltaBox}>
+                  <strong>Metodoloji Farkı:</strong> {versioning.latest_delta.from_version} → {versioning.latest_delta.to_version}
+                  {" "}(Dağılım Kayması: %{versioning.latest_delta.distribution_shift.toFixed(1)}, Güven Farkı: %{versioning.latest_delta.confidence_delta.toFixed(1)})
+                </div>
+              )}
+            </div>
           </section>
         )}
 

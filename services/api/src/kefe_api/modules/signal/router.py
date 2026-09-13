@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
 
+from kefe_api.modules.decision.signal_half_life import SignalHalfLifeCalculator
 from kefe_api.modules.impact.signal_target_registry import SignalTargetRegistryService
 from kefe_api.modules.signal.card_service import SignalConsensusCardService
 from kefe_api.modules.signal.contribution_classes import ContributionClassesService
@@ -222,6 +224,18 @@ class SignalTargetRegistryReportOut(BaseModel):
     targets: list[SignalTargetItemOut]
     certified_at: str
     registry_proof_hash: str
+
+
+class SignalFreshnessReportOut(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    signal_id: str
+    case_version_id: str
+    half_life_days: int
+    age_days: float
+    remaining_weight: float
+    freshness_state: str
+    certified_at: str
 
 
 # ---------------------------------------------------------------------------
@@ -531,4 +545,36 @@ def get_signal_targets(
         ],
         certified_at=report.certified_at.isoformat(),
         registry_proof_hash=report.registry_proof_hash,
+    )
+
+
+@signal_router.get("/{signal_id}/freshness", response_model=SignalFreshnessReportOut)
+def get_signal_freshness(
+    signal_id: UUID,
+    repo: SignalRepoDep,
+    half_life_days: Annotated[int, Query(ge=1, le=365)] = 30,
+    age_days: Annotated[float | None, Query(ge=0.0)] = None,
+) -> SignalFreshnessReportOut:
+    """Evaluate signal freshness lifecycle and half-life decay (CAP-045)."""
+    signal = _resolve_signal(signal_id, repo)
+    if age_days is None:
+        delta = datetime.now(UTC) - signal.certified_at
+        computed_age = max(0.0, delta.total_seconds() / 86400.0)
+    else:
+        computed_age = age_days
+
+    result = SignalHalfLifeCalculator.evaluate(
+        signal_id=str(signal.signal_id),
+        case_version_id=signal.case_version_id,
+        half_life_days=half_life_days,
+        age_days=computed_age,
+    )
+    return SignalFreshnessReportOut(
+        signal_id=str(result.signal_id),
+        case_version_id=str(result.case_version_id),
+        half_life_days=result.half_life_days,
+        age_days=result.age_days,
+        remaining_weight=result.remaining_weight,
+        freshness_state=result.freshness_state.value,
+        certified_at=signal.certified_at.isoformat(),
     )

@@ -356,3 +356,215 @@
   font-size: 11px;
   color: var(--color-dark-muted, #8a8a9a);
 }
+
+/* Freshness & Half-life (CAP-045) */
+.freshnessCard {
+  background: color-mix(in srgb, var(--color-dark-foreground, #f0efe8) 4%, transparent);
+  border: 1px solid rgba(240, 239, 232, 0.08);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.freshnessHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.freshnessBadge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.badgeFresh {
+  background: rgba(76, 175, 125, 0.15);
+  color: #4caf7d;
+  border: 1px solid rgba(76, 175, 125, 0.3);
+}
+
+.badgeStable {
+  background: rgba(43, 195, 238, 0.15);
+  color: #2bc3ee;
+  border: 1px solid rgba(43, 195, 238, 0.3);
+}
+
+.badgeDeprecating {
+  background: rgba(245, 166, 35, 0.15);
+  color: #f5a623;
+  border: 1px solid rgba(245, 166, 35, 0.3);
+}
+
+.badgeExpired {
+  background: rgba(224, 87, 87, 0.15);
+  color: #e05757;
+  border: 1px solid rgba(224, 87, 87, 0.3);
+}
+
+.freshnessBar {
+  height: 6px;
+  background: rgba(240, 239, 232, 0.08);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.freshnessFill {
+  height: 100%;
+  background: linear-gradient(90deg, #c9a84c, #4caf7d);
+  transition: width 300ms ease;
+}
+
+.freshnessMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--color-dark-muted, #8a8a9a);
+}
+
+/* Contribution Classes (CAP-043) */
+.classesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.classCard {
+  background: color-mix(in srgb, var(--color-dark-foreground, #f0efe8) 4%, transparent);
+  border: 1px solid rgba(240, 239, 232, 0.08);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.classHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.classTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-dark-foreground, #f0efe8);
+}
+
+.classEligibleBadge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #4caf7d;
+  background: rgba(76, 175, 125, 0.12);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.classExcludedBadge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-dark-muted, #8a8a9a);
+  background: rgba(240, 239, 232, 0.06);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.classMetrics {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.classPercent {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-dark-foreground, #f0efe8);
+}
+
+.classCount {
+  font-size: 11px;
+  color: var(--color-dark-muted, #8a8a9a);
+}
+
+.isolationAuditRow {
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--color-dark-muted, #8a8a9a);
+}
+
+/* Scope Alignment (CAP-046) */
+.scopeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.scopeItem {
+  background: color-mix(in srgb, var(--color-dark-foreground, #f0efe8) 4%, transparent);
+  border: 1px solid rgba(240, 239, 232, 0.06);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.scopeLabel {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-dark-muted, #8a8a9a);
+  margin-bottom: 2px;
+}
+
+.scopeValue {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-dark-foreground, #f0efe8);
+}
+
+/* Versioning (CAP-047) */
+.versioningCard {
+  background: color-mix(in srgb, var(--color-dark-foreground, #f0efe8) 4%, transparent);
+  border: 1px solid rgba(240, 239, 232, 0.08);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.versioningHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.versionBadge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-dark-gold, #c9a227);
+  font-family: monospace;
+}
+
+.auditSealValid {
+  font-size: 11px;
+  color: #4caf7d;
+  font-weight: 600;
+}
+
+.deltaBox {
+  margin-top: 4px;
+  padding: 6px 8px;
+  background: rgba(201, 168, 76, 0.08);
+  border-left: 2px solid #c9a84c;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--color-dark-foreground, #f0efe8);
+}

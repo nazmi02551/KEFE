@@ -350,3 +350,78 @@
 .completeButton:hover {
   opacity: 0.8;
 }
+
+/* Institution Response Room (CAP-050) & Verified Details (CAP-049) */
+.roomBadgeVerified {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: rgba(76, 175, 125, 0.15);
+  color: #4caf7d;
+  border: 1px solid rgba(76, 175, 125, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.roomBadgePending {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: rgba(245, 166, 35, 0.15);
+  color: #f5a623;
+  border: 1px solid rgba(245, 166, 35, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.responseRoomFooter {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(240, 239, 232, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.roomMetaDetails {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--color-dark-muted, #8a8a9a);
+}
+
+.milestoneTag {
+  color: #c9a84c;
+  font-weight: 600;
+}
+
+.reweighBadge {
+  background: rgba(74, 191, 207, 0.12);
+  color: #4abfcf;
+  border: 1px solid rgba(74, 191, 207, 0.25);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.roomActionBtn {
+  font-size: 12px;
+  font-weight: 600;
+  color: #c9a84c;
+  background: rgba(201, 168, 76, 0.1);
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.roomActionBtn:hover {
+  background: rgba(201, 168, 76, 0.2);
+}
