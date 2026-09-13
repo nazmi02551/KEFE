@@ -246,6 +246,13 @@ class KefeStrings {
   String get aboutSignalTitle => _text('about.signal_title');
   String get aboutSignalDesc => _text('about.signal_desc');
   String get aboutVersionLabel => _text('about.version_label');
+  // Signal screen (CAP-036..050)
+  String get signalScreenTitle => _text('signal_screen.title');
+  String get signalScreenSubtitle => _text('signal_screen.subtitle');
+  String get signalMethodologyNote => _text('signal_screen.methodology_note');
+  String get signalLoadError => _text('signal_screen.load_error');
+  String get signalEmpty => _text('signal_screen.empty');
+  String get signalProvisionalLabel => _text('signal_screen.provisional_label');
 }
 
 class KefeStringsDelegate extends LocalizationsDelegate<KefeStrings> {

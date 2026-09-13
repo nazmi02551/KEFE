@@ -159,6 +159,14 @@ abstract final class CoreStringCatalog {
       'institution.type_clarification': 'Factual Clarification',
       'institution.type_decline': 'Declined with Stated Reason',
       'retry_action': 'Try Again',
+      // Signal screen
+      'signal_screen.title': 'Signals',
+      'signal_screen.subtitle': 'Collective decisions that have passed qualification thresholds.',
+      'signal_screen.methodology_note': 'Collective Result is not automatically Signal or truth. Each card has passed scale, integrity and methodology gates.',
+      'signal_screen.load_error': 'Could not load signals. Please try again.',
+      'signal_screen.empty': 'No qualified signals yet. Signals appear when collective results meet thresholds.',
+      'signal_screen.provisional_label': 'EDITORIAL REVIEW PENDING',
+
       // Impact screen
       'impact.title': 'Impact',
       'impact.subtitle': 'Qualified signals that have reached institutions and triggered action.',
@@ -336,6 +344,14 @@ abstract final class CoreStringCatalog {
       'institution.type_clarification': 'Maddi Olgu Açıklaması',
       'institution.type_decline': 'Gerekçeli Yanıt Vermeme',
       'retry_action': 'Tekrar Dene',
+      // Signal screen
+      'signal_screen.title': 'Sinyaller',
+      'signal_screen.subtitle': 'Nitelik eşiklerini gecen kolektif kararlar.',
+      'signal_screen.methodology_note': 'Kolektif sonuc otomatik olarak Sinyal veya gercek sayilmaz. Her kart olcek, butunluk ve metodoloji kapilalarindan gecmistir.',
+      'signal_screen.load_error': 'Sinyaller yuklenemedi. Lutfen tekrar deneyin.',
+      'signal_screen.empty': 'Henuz nitelikli sinyal yok. Kolektif sonuclar eslikleri karsiladiginda sinyaller burada gorulur.',
+      'signal_screen.provisional_label': 'EDITORYAL INCELEME BEKLIYOR',
+
       // Impact screen
       'impact.title': 'Etki',
       'impact.subtitle': 'Kurumlara ulaşan ve eylem başlatan nitelikli sinyaller.',

@@ -262,6 +262,15 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
             ),
             const SizedBox(height: 10),
             _ExperienceCard(
+              cardKey: const ValueKey('experience-signals'),
+              icon: Icons.show_chart_rounded,
+              title: strings.experienceSignalTitle,
+              body: strings.experienceSignalBody,
+              actionLabel: strings.experienceSignalAction,
+              onPressed: () => context.push('/signals'),
+            ),
+            const SizedBox(height: 10),
+            _ExperienceCard(
               cardKey: const ValueKey('experience-impact'),
               icon: Icons.trending_up_rounded,
               title: strings.experienceImpactTitle,

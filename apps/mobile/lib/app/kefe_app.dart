@@ -15,6 +15,7 @@ import '../features/explore/presentation/discovery_explore_screen.dart';
 import '../features/explore/presentation/experience_hub_screen.dart';
 import '../features/impact/presentation/impact_screen.dart';
 import '../features/observatory/presentation/public_observatory_screen.dart';
+import '../features/signal/presentation/signal_screen.dart';
 import '../features/onboarding/presentation/onboarding_experience_screen.dart';
 import '../features/privacy/presentation/privacy_screen.dart';
 import '../features/progress/presentation/my_kefe_journey_screen.dart';
@@ -118,6 +119,10 @@ class _KefeAppState extends ConsumerState<KefeApp> {
       GoRoute(
         path: '/impact',
         builder: (context, state) => const ImpactScreen(),
+      ),
+      GoRoute(
+        path: '/signals',
+        builder: (context, state) => const SignalScreen(),
       ),
       GoRoute(
         path: '/observatory',
