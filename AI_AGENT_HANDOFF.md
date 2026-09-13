@@ -96,6 +96,16 @@
   * **CAP-050 (Institution Response Room / Kurum Cevap Odası):** Response Room drawer, official commitment statement, milestone timeline date, and "Bu Yanıttan Eylem Başlat" linking flow in `impact-workspace.tsx`.
   * **Test Evidence:** `test_signal_freshness_api.py` (3/3 Pytest PASS), `signal-api.test.ts` (PASS), `signal-workspace.test.ts` (5/5 PASS), `impact-workspace.test.ts` (3/3 PASS), `npm test` (133/133 Node tests PASS), `tsc --noEmit` (0 errors), Next.js build (25/25 routes PASS), `validate_capability_portfolio.py` (PASS 128/128, 0 errors), `project_health.py` (4/4 gates PASS 100%).
 
+- Wave 11 Impact Evidence, Verification, Action Tracking & Response Reweigh Suite (CAP-051, CAP-052, CAP-053, CAP-054, CAP-068, CAP-075):
+  * **CAP-051 (Reweigh After Institutional Response):** `ImpactReweighService`, FastAPI `POST /v1/impact/institution-responses/{response_id}/reweigh` in `impact/router.py`, `triggerResponseReweigh()` in `impact-api.ts`, dynamic reweigh trigger and impact delta tracking in `impact-workspace.tsx`. Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-052 (Institution Action / Promise Tracking):** `ImpactActionTrackingService`, FastAPI `GET /v1/impact/actions` and milestone follow-through in `impact/router.py`, `listImpactActions()` in `impact-api.ts`, milestone timeline and action status badge in `impact-workspace.tsx`. Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-053 (Impact Evidence):** `ImpactEvidenceService`, FastAPI `POST /v1/impact/actions/{action_id}/evidence` with cryptographic sha256 notarization in `impact/router.py`, `attachActionEvidence()` in `impact-api.ts`, evidence upload and verification drawer in `impact-workspace.tsx`. Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-054 (Impact Verification):** `ImpactVerificationEngine`, FastAPI `POST /v1/impact/actions/{action_id}/verify` with multi-auditor consensus scoring in `impact/router.py`, `verifyActionImpact()` in `impact-api.ts`, independent verification verdict modal in `impact-workspace.tsx`. Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-068 (Case Objection / Challenge Mechanism):** `case_objection.py`, `case-objection-api.ts`, Tab 2 objection review workflow in `deliberation-workspace.tsx`, `deliberation-workspace.test.ts`, `case_objection_test.dart`. Evidence recorded in `PROPOSAL_REVIEW`.
+  * **CAP-075 (Case Quality Checklist):** `case_quality_checklist.py`, `case-analytics-api.ts`, Tab 1 8-criteria checklist audit in `deliberation-workspace.tsx`, `deliberation-workspace.test.ts`, `case_quality_checklist_test.dart`. Evidence recorded in `PROPOSAL_REVIEW`.
+  * **Test Evidence:** `test_impact_evidence_verification_api.py` (3/3 Pytest PASS), `impact-api.test.ts` (PASS), `impact-workspace.test.ts` (PASS), `deliberation-workspace.test.ts` (PASS), `npm test` (139/139 Node tests PASS), `tsc --noEmit` (0 errors), Next.js build (25/25 routes PASS), `validate_capability_portfolio.py` (PASS 128/128, 0 errors), `project_health.py` (4/4 gates PASS 100%).
+
+
 
 
 - Trust, Bot & Anomaly Integrity Shield (CAP-073):

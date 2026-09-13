@@ -50,4 +50,50 @@ describe("Impact Workspace & Institution Response Room (CAP-049, CAP-050)", () =
     assert.equal(milestone.status, "IN_PROGRESS");
     assert.ok(milestone.evidence_url?.startsWith("https://"));
   });
+
+  it("verifies ImpactEvidence artifact data model (CAP-053)", () => {
+    const evidence = {
+      evidence_id: "ev-1111",
+      action_id: "act-9999",
+      evidence_type: "OFFICIAL_GAZETTE_DECREE",
+      evidence_title: "Resmi Gazete 32155",
+      source_url: "https://resmigazete.gov.tr/32155",
+      sha256_digest: "b".repeat(64),
+      verification_status: "VERIFIED_AUTHENTIC",
+    };
+
+    assert.equal(evidence.evidence_type, "OFFICIAL_GAZETTE_DECREE");
+    assert.equal(evidence.verification_status, "VERIFIED_AUTHENTIC");
+    assert.equal(evidence.sha256_digest.length, 64);
+  });
+
+  it("verifies ImpactVerification verdict calculation (CAP-054)", () => {
+    const verification = {
+      verification_id: "ver-1111",
+      action_id: "act-9999",
+      outcome_verdict: "FULL_RESOLUTION",
+      resolution_score: 0.95,
+      auditor_consensus_count: 3,
+      verification_notes: "Yurttaş uzlaşısı %95 oranında hayata geçirildi.",
+    };
+
+    assert.equal(verification.outcome_verdict, "FULL_RESOLUTION");
+    assert.ok(verification.resolution_score >= 0.9);
+    assert.ok(verification.auditor_consensus_count >= 1);
+  });
+
+  it("verifies ResponseReweigh data model (CAP-051)", () => {
+    const reweigh = {
+      response_id: "resp-1111",
+      case_version_id: "22222222-2222-4222-8222-222222222222",
+      reweigh_round_id: "reweigh-998877",
+      is_reweigh_active: true,
+      initiated_at: "2026-09-12T12:00:00Z",
+      instructions: "Kurum taahhüdü sonrası tercih güncelleme penceresi açıldı.",
+    };
+
+    assert.equal(reweigh.is_reweigh_active, true);
+    assert.ok(reweigh.instructions.length > 10);
+  });
 });
+

@@ -4,7 +4,10 @@ import {
   listInstitutionResponses,
   listActionMilestones,
   proposeAction,
-  updateActionProgress
+  updateActionProgress,
+  attachActionEvidence,
+  verifyActionImpact,
+  triggerResponseReweigh,
 } from "../src/lib/impact-api";
 
 test("listInstitutionResponses calls GET with params", async () => {
@@ -158,3 +161,101 @@ test("updateActionProgress makes authenticated PATCH with CSRF", async () => {
   assert.equal(updated.progress_percentage, 100);
   assert.equal(updated.status, "VERIFIED_COMPLETE");
 });
+
+test("attachActionEvidence posts empirical evidence artifact (CAP-053)", async () => {
+  const calls: { url: string; method: string }[] = [];
+  const mockFetch = (async (url: RequestInfo | URL, init?: RequestInit) => {
+    calls.push({ url: url.toString(), method: init?.method ?? "GET" });
+    return new Response(JSON.stringify({
+      evidence_id: "EV-001",
+      action_id: "ACT-001",
+      evidence_type: "OFFICIAL_GAZETTE_DECREE",
+      evidence_title: "Resmi Gazete Kararı 32155",
+      source_url: "https://resmigazete.gov.tr/karar-32155",
+      sha256_digest: "a".repeat(64),
+      verification_status: "VERIFIED_AUTHENTIC",
+    }), { status: 201 });
+  }) as typeof fetch;
+
+  const res = await attachActionEvidence(
+    "http://localhost:8000",
+    "ACT-001",
+    {
+      evidence_type: "OFFICIAL_GAZETTE_DECREE",
+      evidence_title: "Resmi Gazete Kararı 32155",
+      source_url: "https://resmigazete.gov.tr/karar-32155",
+      raw_document_content: "Resmi karar metni ve mevzuat düzenlemesi.",
+    },
+    "csrf-ev-token",
+    mockFetch
+  );
+
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].method, "POST");
+  assert.ok(calls[0].url.includes("/v1/impact/actions/ACT-001/evidence"));
+  assert.equal(res.evidence_id, "EV-001");
+  assert.equal(res.verification_status, "VERIFIED_AUTHENTIC");
+});
+
+test("verifyActionImpact certifies audit verdict (CAP-054)", async () => {
+  const calls: { url: string; method: string }[] = [];
+  const mockFetch = (async (url: RequestInfo | URL, init?: RequestInit) => {
+    calls.push({ url: url.toString(), method: init?.method ?? "GET" });
+    return new Response(JSON.stringify({
+      verification_id: "VER-001",
+      action_id: "ACT-001",
+      outcome_verdict: "FULL_RESOLUTION",
+      resolution_score: 0.95,
+      auditor_consensus_count: 3,
+      verification_notes: "Tam bağımsız denetim onaylandı.",
+    }), { status: 200 });
+  }) as typeof fetch;
+
+  const res = await verifyActionImpact(
+    "http://localhost:8000",
+    "ACT-001",
+    {
+      outcome_verdict: "FULL_RESOLUTION",
+      resolution_score: 0.95,
+      auditor_consensus_count: 3,
+      verification_notes: "Tam bağımsız denetim onaylandı.",
+    },
+    "csrf-ver-token",
+    mockFetch
+  );
+
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].method, "POST");
+  assert.ok(calls[0].url.includes("/v1/impact/actions/ACT-001/verify"));
+  assert.equal(res.outcome_verdict, "FULL_RESOLUTION");
+  assert.equal(res.resolution_score, 0.95);
+});
+
+test("triggerResponseReweigh initiates post-response reweigh round (CAP-051)", async () => {
+  const calls: { url: string; method: string }[] = [];
+  const mockFetch = (async (url: RequestInfo | URL, init?: RequestInit) => {
+    calls.push({ url: url.toString(), method: init?.method ?? "GET" });
+    return new Response(JSON.stringify({
+      response_id: "RESP-001",
+      case_version_id: "CASE-001",
+      reweigh_round_id: "reweigh-1234",
+      is_reweigh_active: true,
+      initiated_at: "2026-09-12T00:00:00Z",
+      instructions: "Yeniden tartım başlatıldı.",
+    }), { status: 200 });
+  }) as typeof fetch;
+
+  const res = await triggerResponseReweigh(
+    "http://localhost:8000",
+    "RESP-001",
+    "csrf-reweigh-token",
+    mockFetch
+  );
+
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].method, "POST");
+  assert.ok(calls[0].url.includes("/v1/impact/institution-responses/RESP-001/reweigh"));
+  assert.equal(res.is_reweigh_active, true);
+  assert.equal(res.reweigh_round_id, "reweigh-1234");
+});
+
