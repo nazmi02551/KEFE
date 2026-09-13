@@ -227,6 +227,22 @@ test("public list pages: never render upstream error messages", () => {
   }
 });
 
+test("case detail: auxiliary reads degrade independently with a visible notice", () => {
+  const page = readFile("app/cases/[caseId]/page.tsx");
+  assert(
+    page.includes("Promise.allSettled"),
+    "An auxiliary read failure must not discard the governed case detail",
+  );
+  assert(
+    page.includes("auxiliaryDataUnavailable") && page.includes('role="status"'),
+    "Partial case-detail data must be disclosed accessibly",
+  );
+  assert(
+    !page.includes("Promise.all([\n    getCaseContext"),
+    "Auxiliary reads must not share an all-or-nothing failure boundary",
+  );
+});
+
 test("home page: featured signals link to their detail route", () => {
   const page = readFile("app/page.tsx");
   assert(

@@ -82,12 +82,20 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
     throw err;
   }
 
-  // Load context, version history and signal cards in parallel — all fail-open.
-  const [context, history, signalCards] = await Promise.all([
+  // Auxiliary sections degrade independently; the governed case remains readable.
+  const [contextResult, historyResult, signalCardsResult] = await Promise.allSettled([
     getCaseContext(caseDetail.case_version_id),
     getCaseVersionHistory(caseId),
     listCaseSignalCards(caseDetail.case_version_id),
   ]);
+  const context = contextResult.status === "fulfilled" ? contextResult.value : null;
+  const history = historyResult.status === "fulfilled" ? historyResult.value : null;
+  const signalCards = signalCardsResult.status === "fulfilled" ? signalCardsResult.value : [];
+  const auxiliaryDataUnavailable = [
+    contextResult,
+    historyResult,
+    signalCardsResult,
+  ].some((result) => result.status === "rejected");
 
   return (
     <main className={styles.main}>
@@ -124,6 +132,13 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
             </span>
           </div>
         </header>
+
+        {auxiliaryDataUnavailable && (
+          <aside className={styles.loadWarning} role="status" aria-live="polite">
+            Mesele yüklendi; bazı bağlam, yayın geçmişi veya sinyal bilgileri geçici
+            olarak gösterilemiyor. Daha sonra yeniden deneyebilirsiniz.
+          </aside>
+        )}
 
         {caseDetail.questions.length > 0 && (
           <section className={styles.questions}>
