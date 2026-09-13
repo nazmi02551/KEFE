@@ -58,7 +58,8 @@ for (const required of [
   'headers.set("X-KEFE-CSRF", this.csrfToken)',
   "WRITE_METHODS.has(upperMethod)",
   'redirect: "error"',
-  'cache: "no-store"'
+  'cache: "no-store"',
+  "AbortSignal.timeout(ADMIN_API_TIMEOUT_MS)"
 ]) {
   requireText(apiClient, required, "Admin API security boundary");
 }

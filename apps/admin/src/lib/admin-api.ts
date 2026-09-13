@@ -32,6 +32,7 @@ import type {
 } from "@/src/lib/publication-operations";
 
 const WRITE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+export const ADMIN_API_TIMEOUT_MS = 15_000;
 
 export class AdminApiError extends Error {
   readonly code: string;
@@ -51,7 +52,7 @@ export interface AdminApiClientOptions {
   fetchImpl?: typeof fetch;
 }
 
-function normalizeBaseUrl(value: string): string {
+export function normalizeAdminApiBaseUrl(value: string): string {
   const trimmed = value.trim().replace(/\/+$/, "");
   if (!trimmed) {
     throw new AdminApiError(
@@ -72,14 +73,30 @@ function normalizeBaseUrl(value: string): string {
     );
   }
 
-  if (parsed.protocol !== "https:" && parsed.hostname !== "localhost") {
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new AdminApiError(
+      "ADMIN_API_BASE_INVALID",
+      "Admin API base URL must use HTTP or HTTPS",
+      0
+    );
+  }
+  if (parsed.username || parsed.password || parsed.search || parsed.hash) {
+    throw new AdminApiError(
+      "ADMIN_API_BASE_INVALID",
+      "Admin API base URL must not contain credentials, a query, or a fragment",
+      0
+    );
+  }
+
+  const loopbackHosts = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
+  if (parsed.protocol !== "https:" && !loopbackHosts.has(parsed.hostname.toLowerCase())) {
     throw new AdminApiError(
       "ADMIN_API_BASE_INSECURE",
       "Admin API requires HTTPS outside localhost",
       0
     );
   }
-  return trimmed;
+  return parsed.toString().replace(/\/+$/, "");
 }
 
 function queryString<T extends object>(filters: T): string {
@@ -130,7 +147,7 @@ export class AdminApiClient {
   private readonly fetchImpl: typeof fetch;
 
   constructor(options: AdminApiClientOptions) {
-    this.baseUrl = normalizeBaseUrl(options.baseUrl);
+    this.baseUrl = normalizeAdminApiBaseUrl(options.baseUrl);
     this.csrfToken = options.csrfToken?.trim() || undefined;
     this.fetchImpl = options.fetchImpl ?? fetch;
   }
@@ -161,6 +178,7 @@ export class AdminApiClient {
       headers,
       cache: "no-store",
       redirect: "error",
+      signal: AbortSignal.timeout(ADMIN_API_TIMEOUT_MS),
       body: body === undefined ? undefined : JSON.stringify(body)
     });
 
