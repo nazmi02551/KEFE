@@ -13,6 +13,7 @@ import {
   listInstitutionResponses,
   listPublicCases,
   listSignalConsensusCards,
+  normalizeApiBase,
 } from "../src/lib/kefe-api";
 
 const originalFetch = globalThis.fetch;
@@ -51,7 +52,7 @@ afterEach(() => {
 });
 
 test("list endpoints use the server base, bounded query parameters and GET semantics", async () => {
-  process.env.KEFE_API_BASE_URL = "https://api.example.test";
+  process.env.KEFE_API_BASE_URL = "https://api.example.test/gateway/";
   const requests = installFetch([
     jsonResponse([]),
     jsonResponse([]),
@@ -65,15 +66,47 @@ test("list endpoints use the server base, bounded query parameters and GET seman
   assert.deepEqual(
     requests.map(({ url }) => url),
     [
-      "https://api.example.test/v1/signals/consensus-cards?limit=25&offset=5",
-      "https://api.example.test/v1/cases?limit=30&offset=10",
-      "https://api.example.test/v1/impact/institution-responses",
+      "https://api.example.test/gateway/v1/signals/consensus-cards?limit=25&offset=5",
+      "https://api.example.test/gateway/v1/cases?limit=30&offset=10",
+      "https://api.example.test/gateway/v1/impact/institution-responses",
     ],
   );
   for (const request of requests) {
     assert.equal(request.init?.method, undefined, "Public readers must use HTTP GET");
     assert.equal(request.init?.cache, "no-store");
     assert.equal((request.init?.headers as Record<string, string>).Accept, "application/json");
+  }
+});
+
+test("API base validation normalizes paths and permits explicit server HTTP", () => {
+  assert.equal(
+    normalizeApiBase("https://api.example.test/gateway///", { allowInsecureHttp: false }),
+    "https://api.example.test/gateway",
+  );
+  assert.equal(
+    normalizeApiBase("http://api.internal:8000/", { allowInsecureHttp: true }),
+    "http://api.internal:8000",
+  );
+  assert.equal(
+    normalizeApiBase("http://localhost:8000/", { allowInsecureHttp: false }),
+    "http://localhost:8000",
+  );
+});
+
+test("browser-visible API bases reject unsafe or ambiguous URLs", () => {
+  for (const rawBase of [
+    "not a URL",
+    "ftp://api.example.test",
+    "http://api.example.test",
+    "https://user:secret@api.example.test",
+    "https://api.example.test?tenant=internal",
+    "https://api.example.test#fragment",
+  ]) {
+    assert.throws(
+      () => normalizeApiBase(rawBase, { allowInsecureHttp: false }),
+      TypeError,
+      rawBase,
+    );
   }
 });
 

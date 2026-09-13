@@ -23,13 +23,58 @@ export class KefApiError extends Error {
   }
 }
 
+interface ApiBaseOptions {
+  allowInsecureHttp: boolean;
+}
+
+/**
+ * Validates an API origin before it is combined with request paths.
+ * Browser-visible deployments require TLS, except for explicit loopback
+ * development. Server-side service networking may use HTTP internally.
+ */
+export function normalizeApiBase(
+  rawBase: string,
+  { allowInsecureHttp }: ApiBaseOptions,
+): string {
+  let url: URL;
+  try {
+    url = new URL(rawBase);
+  } catch {
+    throw new TypeError("KEFE API base URL is invalid.");
+  }
+
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    throw new TypeError("KEFE API base URL must use HTTP or HTTPS.");
+  }
+  if (url.username || url.password || url.search || url.hash) {
+    throw new TypeError("KEFE API base URL must not contain credentials, a query, or a fragment.");
+  }
+
+  const loopbackHosts = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
+  if (
+    url.protocol === "http:"
+    && !allowInsecureHttp
+    && !loopbackHosts.has(url.hostname.toLowerCase())
+  ) {
+    throw new TypeError("Browser-visible KEFE API base URL must use HTTPS.");
+  }
+
+  return url.toString().replace(/\/+$/, "");
+}
+
 function apiBase(): string {
   // Server-side: use KEFE_API_BASE_URL (not exposed to browser)
   // Client-side: use NEXT_PUBLIC_KEFE_API_BASE_URL
   if (typeof window === "undefined") {
-    return process.env.KEFE_API_BASE_URL ?? "http://localhost:8000";
+    return normalizeApiBase(
+      process.env.KEFE_API_BASE_URL ?? "http://localhost:8000",
+      { allowInsecureHttp: true },
+    );
   }
-  return process.env.NEXT_PUBLIC_KEFE_API_BASE_URL ?? "http://localhost:8000";
+  return normalizeApiBase(
+    process.env.NEXT_PUBLIC_KEFE_API_BASE_URL ?? "http://localhost:8000",
+    { allowInsecureHttp: false },
+  );
 }
 
 async function fetchJson<T>(path: string, options?: RequestInit): Promise<T> {
