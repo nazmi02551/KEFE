@@ -1,7 +1,57 @@
 # AI Agent Handoff — KEFE Convergence & Capabilities
 
-**Updated:** 2026-09-13 (Multi-agent convergence merge — Claude + Gemini + Codex)  
+**Updated:** 2026-09-13 (Session 5 — mobile enrichment + 25-case InMemory bootstrap)  
 **Active Working Branch (merged trunk):** `maintenance/2026-09-10-signal-impact-hexagonal-studio` (`E:\KEFE`)
+
+---
+
+## Session 5 Handoff (2026-09-13 afternoon)
+
+**APK on device:** `main.dart` target, `http://10.4.19.136:8000`, 56.3MB. API must be running on the dev machine for case data to load.
+
+**How to start API locally (no PostgreSQL needed):**
+```
+cd E:\KEFE\services\api\src
+uvicorn kefe_api.main:app --host 0.0.0.0 --port 8000
+```
+Returns 25 cases via InMemory bootstrap. No `.env` or DB required.
+
+**New screens (all in main app router):**
+- `/signals` → SignalScreen — confidence tier cards, agreement bars
+- `/impact` → ImpactScreen — institution responses + action milestones  
+- `/observatory` → PublicObservatoryScreen
+- `/about` → AboutScreen (methodology, v2.0 label)
+- `/radar`, `/atlas` → Preview screens (visible via ExperienceHub, locked with "Yakında" overlay)
+
+**Key files changed this session:**
+- `apps/mobile/lib/features/signal/presentation/signal_screen.dart` (NEW)
+- `apps/mobile/lib/features/impact/presentation/impact_screen.dart` (NEW)
+- `apps/mobile/lib/features/settings/presentation/about_screen.dart` (NEW)
+- `services/api/src/kefe_api/modules/decision/bootstrap_catalog.py` (NEW)
+- `services/api/src/kefe_api/modules/context/bootstrap_catalog.py` (NEW)
+- `services/api/src/kefe_api/infrastructure/beta_catalog.py` (enriched — perspectives + context blocks)
+- `services/api/src/kefe_api/infrastructure/persistence.py` (context + decision InMemory merging)
+- `apps/mobile/lib/app/kefe_app.dart` (all new routes)
+- `apps/mobile/lib/features/explore/presentation/experience_hub_screen.dart` (isComingSoon overlay)
+- `apps/mobile/lib/core/localization/explore_string_catalog.dart` (HEALTH domain EN+TR)
+
+**Next priorities for incoming agent:**
+1. **Issue #291** — Public Feed conflict (PR #267 vs #273). Product decision required before F1 closes.
+2. **Real OTP provider** (CAP-084) — currently CAPTURE mode, no SMS delivery proof.
+3. **Case detail page depth** — context screen renders but no inline source links; DATA_POINT blocks not visually distinguished from DETAIL.
+4. **My KEFE journey screen** — works but shows empty state until user completes a case. Add onboarding nudge.
+5. **PR** — open PR from `maintenance/2026-09-10-signal-impact-hexagonal-studio` → `main`.
+
+**Invariants to preserve (AGENTS.md §4):**
+- Blind First / Commit First — no result/perspective before user commits
+- My KEFE is observed/descriptive only — no personality, causal, bias inference
+- Collective Result ≠ Signal or truth automatically
+- AI output is not truth authority or autonomous publication
+- Preview fixtures must never become production fallback
+
+---
+
+## Previous session notes below
 
 ### Merged Agent Sessions (2026-09-12 → 2026-09-13):
 

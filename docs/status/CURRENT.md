@@ -1,12 +1,58 @@
 # KEFE Current Project Checkpoint
 
-**Updated:** 2026-09-10 (Session 2 complete — automated maintenance)
+**Updated:** 2026-09-13 (Session 5 complete — multi-agent convergence + mobile enrichment)
 **Repository:** `nazmi02551/KEFE`
 **Default branch:** `main`
+**Active branch:** `maintenance/2026-09-10-signal-impact-hexagonal-studio`
 **Convergence issue:** Issue #287
-**Next runtime issue:** Issue #291
+**Next runtime issue:** Issue #291 (Public Feed conflict — requires product decision)
 **Delivery registry:** `docs/status/active-delivery-registry.v1.json`
 **Registry version:** `1.1.0`
+
+---
+
+## Session 5 Summary (2026-09-13) — Multi-agent convergence + Mobile enrichment
+
+### Multi-agent merge completed
+Codex (`codex/2026-09-12-independent-hardening`) and Gemini (`gemini/2026-09-12-convergence-suite` — Wave 1-14, 50+ capabilities) branches merged into trunk with zero capability drops. All conflicts resolved in documentation and registry files only.
+
+### API
+- **1325 tests, 0 failures** (was 968 before session)
+- InMemory bootstrap: **25 cases** (2 demo + 23 beta catalog) — no PostgreSQL required for local dev
+- InMemory context: All 25 cases have context blocks (Durum / Neden zor? / Araştırma bulgusu)
+- beta_catalog.py: 19 DILEMMA + 4 CALL, each with 2-4 rich perspectives (NEAR/OPPOSING/BRIDGE/ALTERNATIVE_CONTEXT) and 1-3 context blocks
+- bootstrap_catalog.py (new) and context/bootstrap_catalog.py (new): generate full InMemory state from catalog
+
+### Mobile (Flutter)
+New screens / routes added to main app router:
+- `/signals` → SignalScreen (confidence tier, agreement bar, provisional label)
+- `/impact` → ImpactScreen (institution responses + action milestones)
+- `/observatory` → PublicObservatoryScreen (was routed but not reachable)
+- `/about` → AboutScreen (methodology cards, version label)
+- `/radar` → RadarPreviewScreen (wrapped in AppBar)
+- `/atlas` → AtlasPreviewScreen (wrapped in AppBar)
+
+Radar/Atlas now visible in ExperienceHub with "Yakında" lock overlay (opacity 0.75, lock badge, info box). Previously completely hidden.
+
+Domain filter fixes: HEALTH domain label/icon added; TECHNOLOGY_AI, CITY_PUBLIC_LIFE, WORK_BUSINESS, FAMILY_PARENTING, CULTURE_MEDIA domain aliases added to icon map.
+
+### APK
+- Built with `--target=lib/main.dart` (AppConfig.fromEnvironment, allows HTTP + local IP)
+- `--dart-define=KEFE_API_BASE_URL=http://10.4.19.136:8000`
+- Connected Alpha (main_connected_alpha.dart) requires HTTPS + non-local host — not suitable for local dev
+- Latest APK installed on physical device (Android 13)
+
+### Portfolio
+128/128 PASS, 0 errors
+
+### Issue #291 (Public Feed conflict — PR #267 vs #273)
+Still unresolved. Requires product decision before F1 can close.
+
+---
+
+<!-- Previous session notes below -->
+
+**Previous Updated:** 2026-09-10 (Session 2 complete — automated maintenance)
 
 This is the durable engineering handoff for the full-vision convergence program. Chat history is supplementary only. Before continuing, read root `AGENTS.md`, the capability portfolio, the foundation program, ADR-0096, the executable convergence contract, this file, the live PR graph and exact-head CI.
 
