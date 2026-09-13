@@ -687,6 +687,45 @@ export class CaseAnalyticsApiClient {
       session_duration_minutes: sessionDurationMinutes,
     });
   }
+
+  public async getContextLens(caseVersionId: string): Promise<ContextLensReport> {
+    return this.getJson<ContextLensReport>(`/v1/cases/${caseVersionId}/context-lens`);
+  }
+
+  public async addContextLensPillar(
+    caseVersionId: string,
+    pillar: ContextLensPillarInput
+  ): Promise<{ status: string; pillar: ContextLensPillar }> {
+    if (pillar.title.trim().length < 2) {
+      throw new AdminApiError("INVALID_TITLE", "Title must have at least 2 characters", 400);
+    }
+    if (pillar.content.trim().length < 20) {
+      throw new AdminApiError("INVALID_CONTENT", "Content must have at least 20 characters", 400);
+    }
+    return this.postJson<{ status: string; pillar: ContextLensPillar }>(
+      `/v1/cases/${caseVersionId}/context-lens/pillars`,
+      pillar
+    );
+  }
 }
 
+export interface ContextLensPillar {
+  pillar_type: "LEGAL_FRAMEWORK" | "HISTORICAL_CONTEXT" | "SCIENTIFIC_DATA" | "COMPARATIVE_PRACTICE";
+  title: string;
+  content: string;
+  source_citation: string;
+  source_url?: string | null;
+}
 
+export interface ContextLensReport {
+  case_version_id: string;
+  pillars: ContextLensPillar[];
+}
+
+export interface ContextLensPillarInput {
+  pillar_type: "LEGAL_FRAMEWORK" | "HISTORICAL_CONTEXT" | "SCIENTIFIC_DATA" | "COMPARATIVE_PRACTICE";
+  title: string;
+  content: string;
+  source_citation: string;
+  source_url?: string | null;
+}

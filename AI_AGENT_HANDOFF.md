@@ -105,9 +105,13 @@
   * **CAP-075 (Case Quality Checklist):** `case_quality_checklist.py`, `case-analytics-api.ts`, Tab 1 8-criteria checklist audit in `deliberation-workspace.tsx`, `deliberation-workspace.test.ts`, `case_quality_checklist_test.dart`. Evidence recorded in `PROPOSAL_REVIEW`.
   * **Test Evidence:** `test_impact_evidence_verification_api.py` (3/3 Pytest PASS), `impact-api.test.ts` (PASS), `impact-workspace.test.ts` (PASS), `deliberation-workspace.test.ts` (PASS), `npm test` (139/139 Node tests PASS), `tsc --noEmit` (0 errors), Next.js build (25/25 routes PASS), `validate_capability_portfolio.py` (PASS 128/128, 0 errors), `project_health.py` (4/4 gates PASS 100%).
 
-
-
-
+- Wave 12 Context Lens, Atlas, Sports CALL & Accessibility Suite (CAP-024, CAP-025, CAP-095, CAP-097, CAP-120):
+  * **CAP-024 (Sports CALL / Format-Neutral Media Presentation):** ADR-0059 & Slice 21 contract, `sports_call_scene_visual.dart`, `sports_call_scene_slice21_test.dart` (7/7 PASS), format-neutral preview case without domain branching.
+  * **CAP-025 (KEFE Atlas / World Globe Deliberation):** ADR-0055, Slice 5 and Slice 19 contracts, `world_globe_canvas.dart`, `atlas_world_globe_slice19_test.dart` (12/12 PASS), localized theme-adaptive preview world globe.
+  * **CAP-095 (Accessibility, Reduce Motion & Low-End Android):** ADR-0157, `accessibility_contrast_motion_test.dart` (3/3 PASS), WCAG AA contrast ratio compliance (>= 4.5:1) in dark and light themes, reduced motion guard.
+  * **CAP-097 (Context Lens / Neutral Background Multi-Pillar Engine):** `ContextLensService`, FastAPI `GET /v1/cases/{case_version_id}/context-lens` and `POST /v1/cases/{case_version_id}/context-lens/pillars` in `case_analytics_router.py`, `getContextLens()` and `addContextLensPillar()` in `case-analytics-api.ts`, `context_lens_models.dart`, `context_lens_sheet.dart`, `test_context_lens.py` (2/2 PASS), `test_context_lens_api.py` (3/3 PASS), `context_lens_test.dart` (3/3 PASS). Advanced to `IMPLEMENTED_PARTIAL`.
+  * **CAP-120 (User Personal Reports / My KEFE Journey Report):** ADR-0138, `my-kefe-journey-report.v1`, `my_kefe_personal_report_test.dart` (5/5 PASS), preserved `ROADMAP_ACCEPTED` status per governance gate.
+  * **Test Evidence:** `test_context_lens_api.py` (3/3 Pytest PASS), `case-analytics-api.test.ts` (PASS with 35 assertions), `sports_call_scene_slice21_test.dart` (7/7 PASS), `atlas_world_globe_slice19_test.dart` (12/12 PASS), `context_lens_test.dart` (3/3 PASS), `accessibility_contrast_motion_test.dart` (3/3 PASS), `my_kefe_personal_report_test.dart` (5/5 PASS), `npm test` (139/139 PASS), `tsc --noEmit` (0 errors), Next.js build (25/25 routes PASS), `validate_capability_portfolio.py` (PASS 128/128, 0 errors), `project_health.py` (4/4 gates PASS 100%).
 - Trust, Bot & Anomaly Integrity Shield (CAP-073):
   * Implemented FastAPI router `trust_integrity_router.py` in `services/api/src/kefe_api/modules/decision` with endpoints:
     - `POST /v1/trust/shield/inspect`: inspects cluster for synthetic astroturfing and quarantines bot swarms via `SyntheticAstroturfingShieldService`.

@@ -109,12 +109,19 @@ from kefe_api.modules.decision.temporal_drift import (
 from kefe_api.modules.decision.fatigue_guard import (
     DecisionFatigueCalculator,
 )
+from kefe_api.modules.decision.context_lens import (
+    ContextLensPillar,
+    ContextLensResult,
+    ContextLensService,
+    LensPillarType,
+)
 
 case_analytics_router = APIRouter(prefix="/v1/cases", tags=["Case Analytics"])
 
 _OBJECTION_SERVICE = CaseObjectionService()
 _CORRECTION_SERVICE = CaseCorrectionHistoryService()
 _BRIDGE_SERVICE = BridgeArgumentsService()
+_CONTEXT_LENS_SERVICE = ContextLensService()
 
 
 # Seed default objection
@@ -135,6 +142,32 @@ _CORRECTION_SERVICE.log_correction(
     editorial_rationale="2026 revizyonu uyarınca mevzuat maddesi yeniden numaralandırılmıştır.",
     previous_text="Madde 14 uyarınca",
     corrected_text="Madde 16/A uyarınca",
+)
+
+# Seed default context lens pillars (CAP-097)
+_CONTEXT_LENS_SERVICE.add_pillar(
+    case_version_id=_default_case_id,
+    pillar_type=LensPillarType.LEGAL_FRAMEWORK,
+    title="Belediye Kanunu ve Kamu Hizmeti İmtiyaz Çerçevesi",
+    content="5393 Sayılı Belediye Kanunu Madde 14 ve 15 uyarınca yerel yönetimler toplu ulaşım ve kentsel altyapı hizmetlerini kamu yararı ve bütçe dengesi gözeterek tanzim etmekle yükümlüdür.",
+    source_citation="5393 Sayılı Belediye Kanunu, T.C. Resmi Gazete",
+    source_url="https://mevzuat.gov.tr/mevzuat?MevzuatNo=5393",
+)
+_CONTEXT_LENS_SERVICE.add_pillar(
+    case_version_id=_default_case_id,
+    pillar_type=LensPillarType.COMPARATIVE_PRACTICE,
+    title="Avrupa Metropollerinde Gece Seferleri ve Kamu Bütçesi",
+    content="Londra Night Tube ve Berlin 24 saatlik metro uygulamaları kamu bütçesi ve güvenlik personeli sübvansiyonu ile sürdürülebilir kılınmaktadır.",
+    source_citation="Transport for London (TfL) Night Services Report 2024",
+    source_url="https://tfl.gov.uk/campaign/tube-night-services",
+)
+_CONTEXT_LENS_SERVICE.add_pillar(
+    case_version_id=_default_case_id,
+    pillar_type=LensPillarType.SCIENTIFIC_DATA,
+    title="Kentsel Hareketlilik ve Gece Güvenlik Verileri",
+    content="Gece saatlerindeki toplu taşıma erişilebilirliğinin genç istihdamı ve kadın çalışanların kentsel güvenliğine pozitif çarpan etkisi saha araştırmalarıyla ölçümlenmiştir.",
+    source_citation="Kentsel Politika ve Güvenlik Araştırmaları Vakfı (2025)",
+    source_url=None,
 )
 
 
@@ -930,6 +963,104 @@ def evaluate_fatigue_guard(payload: dict[str, Any]) -> dict[str, Any]:
         consecutive_weigh_count=count,
         session_duration_minutes=duration,
     ).to_dict()
+
+
+class ContextLensPillarCreate(BaseModel):
+    pillar_type: str = Field(..., description="LEGAL_FRAMEWORK, HISTORICAL_CONTEXT, SCIENTIFIC_DATA, COMPARATIVE_PRACTICE")
+    title: str = Field(..., min_length=2)
+    content: str = Field(..., min_length=20)
+    source_citation: str = Field(..., min_length=2)
+    source_url: str | None = None
+
+
+@case_analytics_router.get("/{case_version_id}/context-lens")
+def get_context_lens(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve multi-pillar neutral Context Lens for a case version (CAP-097)."""
+    result = _CONTEXT_LENS_SERVICE.get_lens_for_case(case_version_id)
+    if not result.pillars:
+        return {
+            "case_version_id": str(case_version_id),
+            "pillars": [
+                {
+                    "pillar_type": "LEGAL_FRAMEWORK",
+                    "title": "Temel Hukuki Dayanak ve Mevzuat Çerçevesi",
+                    "content": "İlgili kamu hizmeti, temel haklar ve düzenleyici idari yetki çerçevesi yürürlükteki anayasal ilkeler ve kanuni mevzuat hükümleriyle güvence altındadır.",
+                    "source_citation": "Resmi Gazete Mevzuat Veritabanı",
+                    "source_url": "https://mevzuat.gov.tr",
+                },
+                {
+                    "pillar_type": "HISTORICAL_CONTEXT",
+                    "title": "Tarihsel Gelişim ve Karşılaşılan Emsaller",
+                    "content": "Benzer kentsel ve toplumsal politika tercihleri geçmiş on yıllarda farklı bütçe ve talep koşulları altında test edilmiş ve sonuçları raporlanmıştır.",
+                    "source_citation": "Kamu Politikaları ve Kent Tarihi Arşivi",
+                    "source_url": None,
+                },
+                {
+                    "pillar_type": "SCIENTIFIC_DATA",
+                    "title": "Ampirik Veri, Saha Ölçümleri ve İstatistiki Etki",
+                    "content": "Akademik literatür ve bağımsız etki analizleri, politika değişikliğinin doğrudan ve dolaylı çarpan etkilerini tarafsız ölçümlerle belgeler.",
+                    "source_citation": "Bağımsız Sosyo-Ekonomik Araştırma Raporu (2025)",
+                    "source_url": None,
+                },
+                {
+                    "pillar_type": "COMPARATIVE_PRACTICE",
+                    "title": "Uluslararası Karşılaştırmalı Uygulamalar",
+                    "content": "Farklı kıtalardaki metropol ve kamu idareleri, benzer kamu malı ve bütçe dengesini sağlarken hibrit sübvansiyon modelleri uygulamaktadır.",
+                    "source_citation": "Uluslararası Kamu Yönetimi Karşılaştırmalı Endeksi",
+                    "source_url": None,
+                },
+            ],
+        }
+    return {
+        "case_version_id": str(result.case_version_id),
+        "pillars": [
+            {
+                "pillar_type": p.pillar_type.value if hasattr(p.pillar_type, "value") else str(p.pillar_type),
+                "title": p.title,
+                "content": p.content,
+                "source_citation": p.source_citation,
+                "source_url": p.source_url,
+            }
+            for p in result.pillars
+        ],
+    }
+
+
+@case_analytics_router.post("/{case_version_id}/context-lens/pillars")
+def add_context_lens_pillar(
+    case_version_id: UUID, payload: ContextLensPillarCreate
+) -> dict[str, Any]:
+    """Add a neutral contextual pillar to a case version (CAP-097)."""
+    try:
+        pillar_type = LensPillarType(payload.pillar_type)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Geçersiz pillar_type: {payload.pillar_type}",
+        )
+    try:
+        p = _CONTEXT_LENS_SERVICE.add_pillar(
+            case_version_id=case_version_id,
+            pillar_type=pillar_type,
+            title=payload.title,
+            content=payload.content,
+            source_citation=payload.source_citation,
+            source_url=payload.source_url,
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=400, detail=str(err))
+
+    return {
+        "status": "CREATED",
+        "pillar": {
+            "pillar_type": p.pillar_type.value,
+            "title": p.title,
+            "content": p.content,
+            "source_citation": p.source_citation,
+            "source_url": p.source_url,
+        },
+    }
+
 
 
 

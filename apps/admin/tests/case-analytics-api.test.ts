@@ -268,6 +268,32 @@ test("CaseAnalyticsApiClient mocked GET and POST requests", async () => {
       }), { status: 200 });
     }
 
+    if (url.includes("/context-lens/pillars") && method === "POST") {
+      return new Response(JSON.stringify({
+        status: "CREATED",
+        pillar: {
+          pillar_type: "COMPARATIVE_PRACTICE",
+          title: "Tokyo Ulaşım Modeli",
+          content: "Kamu ve özel sektör dengeli sübvansiyon modeli uygulamaktadır.",
+          source_citation: "Tokyo Transport Report 2025"
+        }
+      }), { status: 200 });
+    }
+
+    if (url.includes("/context-lens")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        pillars: [
+          {
+            pillar_type: "LEGAL_FRAMEWORK",
+            title: "Belediye Kanunu",
+            content: "Belediyelerin toplu taşıma hizmetlerini düzenleme yetkisi kanunla tanımlanmıştır.",
+            source_citation: "5393 Sayılı Kanun"
+          }
+        ]
+      }), { status: 200 });
+    }
+
     if (url.includes("/outcome-triangle")) {
       return new Response(JSON.stringify({
         case_version_id: "test-case",
@@ -554,7 +580,20 @@ test("CaseAnalyticsApiClient mocked GET and POST requests", async () => {
     const fgEval = await client.evaluateFatigueGuard("SESS-01", 6, 24.5);
     assert.equal(fgEval.consecutive_weigh_count, 6);
 
-    assert.equal(calls.length, 33);
+    const cl = await client.getContextLens("test-case");
+    assert.equal(cl.pillars.length, 1);
+    assert.equal(cl.pillars[0].pillar_type, "LEGAL_FRAMEWORK");
+
+    const clAdd = await client.addContextLensPillar("test-case", {
+      pillar_type: "COMPARATIVE_PRACTICE",
+      title: "Tokyo Ulaşım Modeli",
+      content: "Kamu ve özel sektör dengeli sübvansiyon modeli uygulamaktadır.",
+      source_citation: "Tokyo Transport Report 2025"
+    });
+    assert.equal(clAdd.status, "CREATED");
+    assert.equal(clAdd.pillar.pillar_type, "COMPARATIVE_PRACTICE");
+
+    assert.equal(calls.length, 35);
   } finally {
     globalThis.fetch = originalFetch;
   }
