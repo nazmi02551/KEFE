@@ -55,6 +55,8 @@ from kefe_api.modules.content_configuration.in_memory import (
 )
 from kefe_api.modules.content_configuration.ports import ContentConfigurationRepository
 from kefe_api.modules.context.bootstrap import build_demo_context_repository
+from kefe_api.modules.context.bootstrap_catalog import build_catalog_context_repository
+from kefe_api.modules.context.in_memory import InMemoryContextRepository
 from kefe_api.modules.context.ports import ContextRepository
 from kefe_api.modules.decision.bootstrap import build_demo_repository
 from kefe_api.modules.decision.in_memory import InMemoryDecisionRepository
@@ -132,7 +134,13 @@ def build_consensus_repository(settings: Settings) -> ConsensusRepository:
 
 def build_context_repository(settings: Settings) -> ContextRepository:
     if settings.persistence_backend == "memory":
-        return build_demo_context_repository()
+        demo_repo = build_demo_context_repository()
+        catalog_repo = build_catalog_context_repository()
+        # Merge demo + catalog snapshots into a single InMemoryContextRepository
+        all_snapshots = list(demo_repo._snapshots.values()) + list(
+            catalog_repo._snapshots.values()
+        )
+        return InMemoryContextRepository(all_snapshots)
 
     if not settings.database_url:
         raise RuntimeError("KEFE_DATABASE_URL is required when persistence_backend=postgres")
