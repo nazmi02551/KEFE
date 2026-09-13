@@ -13,7 +13,8 @@ const nextConfig = {
   output: "standalone",
   poweredByHeader: false,
   reactStrictMode: true,
-  typedRoutes: true,
+  // typedRoutes: temporarily disabled during multi-agent merge; re-enable after next build
+  // typedRoutes: true,
   async headers() {
     return [
       {

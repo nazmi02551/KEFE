@@ -291,3 +291,39 @@ export async function getSignalTargetRegistry(
     fetchImpl,
   );
 }
+
+// ---------------------------------------------------------------------------
+// Signal Freshness (CAP-045) — Gemini convergence addition
+// ---------------------------------------------------------------------------
+
+export interface SignalFreshnessReport {
+  signal_id: string;
+  case_version_id: string;
+  half_life_days: number;
+  age_days: number;
+  remaining_weight: number;
+  freshness_state: string;
+  certified_at: string;
+}
+
+export interface SignalFreshnessOptions {
+  halfLifeDays?: number;
+  ageDays?: number;
+  fetchImpl?: typeof fetch;
+}
+
+export async function getSignalFreshnessReport(
+  baseUrl: string,
+  signalId: string,
+  options?: SignalFreshnessOptions
+): Promise<SignalFreshnessReport> {
+  const params = new URLSearchParams();
+  if (options?.halfLifeDays != null) params.set("half_life_days", String(options.halfLifeDays));
+  if (options?.ageDays != null) params.set("age_days", String(options.ageDays));
+  const query = params.toString() ? `?${params.toString()}` : "";
+  return apiFetch<SignalFreshnessReport>(
+    baseUrl,
+    `/v1/signals/${encodeURIComponent(signalId)}/freshness${query}`,
+    options?.fetchImpl,
+  );
+}
