@@ -5,7 +5,10 @@ import {
   listInstitutionResponses,
   listActionMilestones,
 } from "@/src/lib/kefe-api";
-import { clampPercentage } from "@/src/lib/presentation";
+import {
+  clampPercentage,
+  publicLoadErrorMessage,
+} from "@/src/lib/presentation";
 import styles from "@/app/impact/page.module.css";
 
 const _siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://kefe.app";
@@ -81,7 +84,7 @@ export default async function ImpactPage() {
       listActionMilestones(),
     ]);
   } catch (err) {
-    error = err instanceof Error ? err.message : "Etki verileri yüklenemedi.";
+    error = publicLoadErrorMessage(err, "Etki verileri şu anda yüklenemiyor.");
   }
 
   return (

@@ -197,6 +197,20 @@ test("impact page: exposes accessible error, progress and navigation landmarks",
   assert(page.includes('aria-label="İlgili sayfalar"'), "Impact footer navigation needs a label");
 });
 
+test("public list pages: never render upstream error messages", () => {
+  for (const path of ["app/cases/page.tsx", "app/signal/page.tsx", "app/impact/page.tsx"]) {
+    const page = readFile(path);
+    assert(
+      page.includes("publicLoadErrorMessage"),
+      `${path} must map request failures to safe public copy`,
+    );
+    assert(
+      !page.includes("err.message"),
+      `${path} must not reflect upstream error messages into public HTML`,
+    );
+  }
+});
+
 test("home page: featured signals link to their detail route", () => {
   const page = readFile("app/page.tsx");
   assert(

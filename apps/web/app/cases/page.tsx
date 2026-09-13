@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { listPublicCases } from "@/src/lib/kefe-api";
 import { CasesFilter } from "@/src/components/cases-filter";
+import { publicLoadErrorMessage } from "@/src/lib/presentation";
 import styles from "@/app/cases/page.module.css";
 
 const _siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://kefe.app";
@@ -31,7 +32,7 @@ export default async function CasesPage() {
     // Load up to 100 cases — client-side filter handles the rest
     cases = await listPublicCases(100, 0);
   } catch (err) {
-    error = err instanceof Error ? err.message : "Meseleler yüklenemedi.";
+    error = publicLoadErrorMessage(err, "Meseleler şu anda yüklenemiyor.");
   }
 
   return (

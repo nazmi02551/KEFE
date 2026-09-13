@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { clampPercentage } from "../src/lib/presentation";
+import {
+  clampPercentage,
+  publicLoadErrorMessage,
+} from "../src/lib/presentation";
 
 test("percentage values inside the display range remain unchanged", () => {
   assert.equal(clampPercentage(0), 0);
@@ -18,4 +21,25 @@ test("non-finite percentage values fail closed to zero", () => {
   assert.equal(clampPercentage(Number.NaN), 0);
   assert.equal(clampPercentage(Number.POSITIVE_INFINITY), 0);
   assert.equal(clampPercentage(Number.NEGATIVE_INFINITY), 0);
+});
+
+test("public load errors never reflect upstream error details", () => {
+  const upstream = new Error("postgresql://admin:secret@internal-db/kefe");
+
+  assert.equal(
+    publicLoadErrorMessage(upstream, "İçerik şu anda yüklenemiyor."),
+    "İçerik şu anda yüklenemiyor.",
+  );
+});
+
+test("public load errors provide safe guidance for rate limiting", () => {
+  const upstream = {
+    status: 429,
+    message: "internal quota key customer-123",
+  };
+
+  assert.equal(
+    publicLoadErrorMessage(upstream, "İçerik şu anda yüklenemiyor."),
+    "Çok fazla istek gönderildi. Lütfen kısa süre sonra yeniden deneyin.",
+  );
 });

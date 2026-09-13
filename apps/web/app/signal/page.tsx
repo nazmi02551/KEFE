@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { listSignalConsensusCards } from "@/src/lib/kefe-api";
 import { SignalFilter } from "@/src/components/signal-filter";
+import { publicLoadErrorMessage } from "@/src/lib/presentation";
 import styles from "@/app/signal/page.module.css";
 
 const _siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://kefe.app";
@@ -31,7 +32,7 @@ export default async function SignalPage() {
     // Load up to 100 signals — client-side filter handles the rest
     cards = await listSignalConsensusCards(100, 0);
   } catch (err) {
-    error = err instanceof Error ? err.message : "Sinyaller yüklenemedi.";
+    error = publicLoadErrorMessage(err, "Sinyaller şu anda yüklenemiyor.");
   }
 
   return (
