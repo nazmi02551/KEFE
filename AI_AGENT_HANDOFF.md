@@ -31,7 +31,7 @@
     - Unit tests: `test_radar_live_api.py` (2/2 Pytest PASS), `radar-live.test.ts` (2/2 Node test PASS).
   * **Admin Studio 25-Route Production Build:**
     - Next.js 16 (Turbopack) production build passed across all 25 routes (`/`, `/_not-found`, `/ai-editorial`, `/analytics`, `/case-builder`, `/case-media`, `/claims`, `/content-review`, `/deliberation`, `/evidence-builder`, `/finops`, `/flow-composer`, `/impact`, `/kefe-today`, `/moderator-audit`, `/open-methodology`, `/operational-reports`, `/publication-operations`, `/radar-live`, `/reason-moderation`, `/signal`, `/source-diversity`, `/trust-integrity`, `/user-discovery`).
-    - Admin Studio unit tests: 119/119 PASS (`tsc --noEmit` 0 errors).
+    - Admin Studio unit tests: 120/120 PASS (`tsc --noEmit` 0 errors).
 - Extended 6-Capability Implementation Suite (CAP-071, CAP-074, CAP-098, CAP-067, CAP-077, CAP-026):
   * **CAP-071 (Source Diversity Indicator):** `source_diversity_router.py` (`/v1/cases/{case_version_id}/source-diversity`), `SourceDiversityApiClient`, `SourceDiversityWorkspace` (`/source-diversity`), `test_source_diversity_api.py` (4/4 PASS), `source-diversity.test.ts` (3/3 PASS).
   * **CAP-074 (Open Methodology Disclosure):** `open_methodology_router.py` (`/v1/methodology/{target_type}/{target_id}` & `/manifest/summary`), `OpenMethodologyApiClient`, `OpenMethodologyWorkspace` (`/open-methodology`), `test_open_methodology_api.py` (4/4 PASS), `open-methodology.test.ts` (3/3 PASS).
@@ -39,6 +39,14 @@
   * **CAP-067 (Moderator Action Audit Log):** `moderator_audit_router.py` (`/v1/moderation/audit`), `ModeratorAuditApiClient`, `ModeratorAuditWorkspace` (`/moderator-audit`), `test_moderator_audit_api.py` (2/2 PASS), `moderator-audit.test.ts` (3/3 PASS).
   * **CAP-077 (User-Controlled Discovery Profile):** `UserDiscoveryApiClient`, `UserDiscoveryWorkspace` (`/user-discovery`), `user-discovery.test.ts` (3/3 PASS), backed by `user_discovery_profile.py` and `test_user_controlled_discovery_api.py`.
   * **CAP-026 (KEFE Today Real Event Projection):** `kefe_today_router.py` (`/v1/today/case` & `/curate`), `KefeTodayApiClient`, `KefeTodayWorkspace` (`/kefe-today`), `test_kefe_today_api.py` (2/2 PASS), `kefe-today.test.ts` (3/3 PASS).
+- Wave 4 Advanced Deliberation & Epistemic Engines Suite (CAP-005, CAP-006, CAP-011, CAP-012, CAP-102):
+  * **CAP-005 (Blind Variants / Veil of Ignorance):** `BlindVariantsCalculator`, FastAPI `GET /v1/cases/{case_version_id}/blind-variants` in `case_analytics_router.py`, `getBlindVariants()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **CAP-006 (Principle-First Commitment):** `PrincipleFirstCalculator`, FastAPI `GET /v1/cases/{case_version_id}/principle-first` in `case_analytics_router.py`, `getPrincipleFirst()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **CAP-011 (Non-Coercive Insufficient Information / Missing Options Response):** Telemetry endpoint `GET /v1/cases/{case_version_id}/insufficient-info-report` in `case_analytics_router.py`, `getInsufficientInfoReport()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **CAP-012 (Versioned Cryptographic Decision Receipt):** `DecisionReceiptGenerator`, sealed integrity digest endpoint `GET /v1/cases/{case_version_id}/decision-receipt` in `case_analytics_router.py`, `getDecisionReceipt()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **CAP-102 (Tri-axial Outcome Triangle):** `OutcomeTriangleCalculator`, Rules/Empathy/Utility weights endpoint `GET /v1/cases/{case_version_id}/outcome-triangle` in `case_analytics_router.py`, `getOutcomeTriangle()` in `case-analytics-api.ts`, Tab 5 integration in `deliberation-workspace.tsx`.
+  * **Test Evidence:** `test_advanced_deliberation_api.py` (5/5 Pytest PASS), `case-analytics-api.test.ts` (3/3 Node test PASS with 23 mocked API assertions), `deliberation-workspace.test.ts` (PASS), Next.js build (25/25 routes PASS), `project_health.py` (4/4 gates PASS 100%).
+
 - Trust, Bot & Anomaly Integrity Shield (CAP-073):
   * Implemented FastAPI router `trust_integrity_router.py` in `services/api/src/kefe_api/modules/decision` with endpoints:
     - `POST /v1/trust/shield/inspect`: inspects cluster for synthetic astroturfing and quarantines bot swarms via `SyntheticAstroturfingShieldService`.

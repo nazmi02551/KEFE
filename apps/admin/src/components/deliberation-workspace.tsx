@@ -9,6 +9,11 @@ import {
   type ExpertPublicGapReport,
   type NormativeModelsReport,
   type IncentiveMapReport,
+  type BlindVariantsReport,
+  type PrincipleFirstReport,
+  type DecisionReceiptReport,
+  type OutcomeTriangleReport,
+  type InsufficientInfoReport,
 } from "@/src/lib/case-analytics-api";
 import {
   CaseObjectionApiClient,
@@ -37,7 +42,7 @@ export function DeliberationWorkspace({
   const [caseVersionId, setCaseVersionId] = useState(initialCaseVersionId);
   const [baseUrl, setBaseUrl] = useState(initialBaseUrl);
   const [csrfToken, setCsrfToken] = useState(initialCsrfToken);
-  const [activeTab, setActiveTab] = useState<"checklist" | "objections" | "corrections" | "analytics">("checklist");
+  const [activeTab, setActiveTab] = useState<"checklist" | "objections" | "corrections" | "analytics" | "advanced">("checklist");
 
   // Data states
   const [checklist, setChecklist] = useState<QualityChecklistReport | null>(null);
@@ -47,6 +52,11 @@ export function DeliberationWorkspace({
   const [expertGap, setExpertGap] = useState<ExpertPublicGapReport | null>(null);
   const [normative, setNormative] = useState<NormativeModelsReport | null>(null);
   const [incentives, setIncentives] = useState<IncentiveMapReport | null>(null);
+  const [blindVariants, setBlindVariants] = useState<BlindVariantsReport | null>(null);
+  const [principleFirst, setPrincipleFirst] = useState<PrincipleFirstReport | null>(null);
+  const [decisionReceipt, setDecisionReceipt] = useState<DecisionReceiptReport | null>(null);
+  const [outcomeTriangle, setOutcomeTriangle] = useState<OutcomeTriangleReport | null>(null);
+  const [insufficientInfo, setInsufficientInfo] = useState<InsufficientInfoReport | null>(null);
 
   // Status & loading states
   const [loading, setLoading] = useState(false);
@@ -87,6 +97,11 @@ export function DeliberationWorkspace({
         expertGapRes,
         normativeRes,
         incentivesRes,
+        blindVariantsRes,
+        principleFirstRes,
+        decisionReceiptRes,
+        outcomeTriangleRes,
+        insufficientInfoRes,
       ] = await Promise.all([
         analyticsClient.getQualityChecklist(caseVersionId),
         objectionClient.listObjections(caseVersionId),
@@ -95,6 +110,11 @@ export function DeliberationWorkspace({
         analyticsClient.getExpertPublicGap(caseVersionId),
         analyticsClient.getNormativeModels(caseVersionId),
         analyticsClient.getIncentiveMap(caseVersionId),
+        analyticsClient.getBlindVariants(caseVersionId),
+        analyticsClient.getPrincipleFirst(caseVersionId),
+        analyticsClient.getDecisionReceipt(caseVersionId),
+        analyticsClient.getOutcomeTriangle(caseVersionId),
+        analyticsClient.getInsufficientInfoReport(caseVersionId),
       ]);
 
       setChecklist(checklistRes);
@@ -104,6 +124,12 @@ export function DeliberationWorkspace({
       setExpertGap(expertGapRes);
       setNormative(normativeRes);
       setIncentives(incentivesRes);
+      setBlindVariants(blindVariantsRes);
+      setPrincipleFirst(principleFirstRes);
+      setDecisionReceipt(decisionReceiptRes);
+      setOutcomeTriangle(outcomeTriangleRes);
+      setInsufficientInfo(insufficientInfoRes);
+
 
       setStatusMessage({
         type: "success",
@@ -296,6 +322,13 @@ export function DeliberationWorkspace({
           onClick={() => setActiveTab("analytics")}
         >
           Deliberation Analitikleri (CAP-039 / CAP-041)
+        </button>
+        <button
+          type="button"
+          className={`${styles.tabButton} ${activeTab === "advanced" ? styles.tabActive : ""}`}
+          onClick={() => setActiveTab("advanced")}
+        >
+          İleri Düzey Müzakere (CAP-005 / CAP-006 / CAP-011 / CAP-012 / CAP-102)
         </button>
       </nav>
 
@@ -670,6 +703,172 @@ export function DeliberationWorkspace({
                     </div>
                   </div>
                 ))}
+              </div>
+            ) : (
+              <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Tab 5: Advanced Deliberation & Epistemic Engines */}
+      {activeTab === "advanced" && (
+        <section aria-label="İleri Düzey Müzakere ve Epistemik Motorlar">
+          <div className={styles.sectionTitle}>
+            <span>Kör İkilemler, İlke-Önce Taahhüt, Karar Makbuzu ve Sonuç Üçgeni</span>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+            {/* CAP-005: Blind Variants */}
+            <div className={styles.itemCard}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1rem", color: "var(--gold)" }}>
+                  Kör Varyantlar / Cehalet Örtüsü (CAP-005)
+                </h3>
+                {blindVariants && (
+                  <span className={`${styles.badge} ${styles.badgePassed}`}>{blindVariants.blind_mode}</span>
+                )}
+              </div>
+              {blindVariants ? (
+                <div>
+                  <p style={{ fontSize: "0.85rem", color: "var(--text)", margin: "0 0 0.5rem" }}>
+                    <strong>Körleştirilmiş Metin:</strong> {blindVariants.blinded_prompt}
+                  </p>
+                  <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: "0 0 0.5rem" }}>
+                    <strong>Açığa Çıkarılan Gerçek Kimlik:</strong> {blindVariants.real_identity_revealed}
+                  </p>
+                  <div style={{ fontSize: "0.82rem", color: "var(--muted)" }}>
+                    <span>Tarafsızlık Skoru: {blindVariants.neutrality_score}</span>
+                  </div>
+                </div>
+              ) : (
+                <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
+              )}
+            </div>
+
+            {/* CAP-006: Principle-First */}
+            <div className={styles.itemCard}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1rem", color: "var(--gold)" }}>
+                  İlke-Önce Taahhüt (CAP-006)
+                </h3>
+                {principleFirst && (
+                  <span className={`${styles.badge} ${styles.badgeProvisional}`}>
+                    {principleFirst.primary_principle}
+                  </span>
+                )}
+              </div>
+              {principleFirst ? (
+                <div>
+                  <p style={{ fontSize: "0.85rem", color: "var(--text)", margin: "0 0 0.5rem" }}>
+                    <strong>Yansıma Sorusu:</strong> {principleFirst.reflection_prompt}
+                  </p>
+                  <div style={{ fontSize: "0.82rem", color: "var(--muted)", display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+                    <span>İkincil İlke: {principleFirst.secondary_principle}</span>
+                    <span>İlkesel Tutarlılık Skoru: {principleFirst.consistency_score}</span>
+                  </div>
+                </div>
+              ) : (
+                <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
+              )}
+            </div>
+
+            {/* CAP-012: Decision Receipt */}
+            <div className={styles.itemCard}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1rem", color: "var(--gold)" }}>
+                  Kriptografik Karar Makbuzu (CAP-012)
+                </h3>
+                {decisionReceipt && (
+                  <span className={`${styles.badge} ${styles.badgePassed}`}>
+                    {decisionReceipt.committed_choice}
+                  </span>
+                )}
+              </div>
+              {decisionReceipt ? (
+                <div>
+                  <p style={{ fontSize: "0.85rem", color: "var(--text)", margin: "0 0 0.5rem" }}>
+                    <strong>Makbuz Kimliği:</strong> <code>{decisionReceipt.receipt_id}</code>
+                  </p>
+                  <p style={{ fontSize: "0.82rem", color: "var(--muted)", margin: "0 0 0.5rem", wordBreak: "break-all" }}>
+                    <strong>Bütünlük Özeti (Digest):</strong> <code>{decisionReceipt.integrity_digest}</code>
+                  </p>
+                  <div style={{ fontSize: "0.8rem", color: "var(--muted)" }}>
+                    <span>Zaman Damgası: {decisionReceipt.timestamp_utc}</span>
+                  </div>
+                </div>
+              ) : (
+                <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
+              )}
+            </div>
+
+            {/* CAP-102: Outcome Triangle */}
+            <div className={styles.itemCard}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1rem", color: "var(--gold)" }}>
+                  Sonuç Üçgeni Analizi (CAP-102)
+                </h3>
+                {outcomeTriangle && (
+                  <span className={`${styles.badge} ${styles.badgePassed}`}>
+                    {outcomeTriangle.dominant_archetype}
+                  </span>
+                )}
+              </div>
+              {outcomeTriangle ? (
+                <div>
+                  <p style={{ fontSize: "0.85rem", color: "var(--text)", margin: "0 0 0.5rem" }}>
+                    <strong>İncelenen Seçenek:</strong> {outcomeTriangle.option_code}
+                  </p>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem", background: "var(--background)", padding: "0.6rem", borderRadius: "0.4rem", fontSize: "0.82rem", textAlign: "center" }}>
+                    <div>
+                      <span style={{ color: "#4fc3f7", fontWeight: 600 }}>Kurallar / Haklar</span>
+                      <p style={{ margin: "0.25rem 0 0" }}>{Math.round(outcomeTriangle.rules_weight * 100)}%</p>
+                    </div>
+                    <div>
+                      <span style={{ color: "#ffb74d", fontWeight: 600 }}>Empati / Şefkat</span>
+                      <p style={{ margin: "0.25rem 0 0" }}>{Math.round(outcomeTriangle.empathy_weight * 100)}%</p>
+                    </div>
+                    <div>
+                      <span style={{ color: "#81c784", fontWeight: 600 }}>Fayda / Çıktı</span>
+                      <p style={{ margin: "0.25rem 0 0" }}>{Math.round(outcomeTriangle.utility_weight * 100)}%</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>
+              )}
+            </div>
+          </div>
+
+          {/* CAP-011: Insufficient Info Report */}
+          <div className={styles.itemCard} style={{ marginTop: "1.25rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+              <h3 style={{ margin: 0, fontSize: "1rem", color: "var(--gold)" }}>
+                Yetersiz Bilgi / Eksik Seçenek Çekimserlik Telemetrisi (CAP-011)
+              </h3>
+              {insufficientInfo && (
+                <span className={`${styles.badge} ${styles.badgePassed}`}>
+                  Toplam Çekimser: {insufficientInfo.total_opt_outs}
+                </span>
+              )}
+            </div>
+            {insufficientInfo ? (
+              <div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1rem", marginBottom: "0.75rem" }}>
+                  {insufficientInfo.breakdown.map((item) => (
+                    <div key={item.code} style={{ background: "var(--background)", padding: "0.75rem", borderRadius: "0.5rem", border: "1px solid var(--line)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
+                        <code style={{ fontSize: "0.82rem", color: "var(--gold)" }}>{item.code}</code>
+                        <span className={styles.badge}>{item.count} oy ({item.percentage}%)</span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: "0.82rem", color: "var(--muted)" }}>{item.description_tr}</p>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ fontSize: "0.8rem", color: "var(--muted)" }}>
+                  Sözleşme: <code>{insufficientInfo.contract_id}</code> · Kör İlk Yalıtımı Korunuyor:{" "}
+                  <strong>{insufficientInfo.preserves_commit_first_isolation ? "EVET" : "HAYIR"}</strong>
+                </div>
               </div>
             ) : (
               <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Veri yüklenmedi.</p>

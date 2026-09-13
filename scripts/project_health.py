@@ -20,7 +20,16 @@ def run_check(name: str, cmd: list[str], cwd: Path) -> bool:
     print(f"\n[+] Kontrol Ediliyor: {name}...")
     print(f"    Komut: {' '.join(cmd)}")
     try:
-        res = subprocess.run(cmd, cwd=str(cwd), capture_output=True, text=True, check=False, shell=True)
+        res = subprocess.run(
+            cmd,
+            cwd=str(cwd),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+            shell=True,
+        )
         if res.returncode == 0:
             print(f"    >>> {name}: [BASARILI / PASS]")
             if res.stdout.strip():

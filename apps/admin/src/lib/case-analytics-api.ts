@@ -196,6 +196,60 @@ export interface StakeholderDistributionReport {
   stakeholder_groups: StakeholderDistributionGroup[];
 }
 
+export interface BlindVariantsReport {
+  case_version_id: string;
+  blind_mode: "ACTOR_BLIND" | "OUTCOME_BLIND" | "IDENTITY_BLIND";
+  blinded_prompt: string;
+  real_identity_revealed: string;
+  neutrality_score: number;
+  capability_id: string;
+}
+
+export interface PrincipleFirstReport {
+  case_version_id: string;
+  primary_principle: "COLLECTIVE_WELLBEING" | "PROCEDURAL_JUSTICE" | "INDIVIDUAL_LIBERTY" | "EGALITARIAN_FAIRNESS";
+  secondary_principle: "COLLECTIVE_WELLBEING" | "PROCEDURAL_JUSTICE" | "INDIVIDUAL_LIBERTY" | "EGALITARIAN_FAIRNESS";
+  consistency_score: number;
+  reflection_prompt: string;
+  capability_id: string;
+}
+
+export interface DecisionReceiptReport {
+  receipt_id: string;
+  case_version_id: string;
+  committed_choice: string;
+  integrity_digest: string;
+  timestamp_utc: string;
+  capability_id: string;
+}
+
+export interface OutcomeTriangleReport {
+  case_version_id: string;
+  option_code: string;
+  rules_weight: number;
+  empathy_weight: number;
+  utility_weight: number;
+  dominant_archetype: "RULES_FIRST" | "EMPATHY_FIRST" | "UTILITY_FIRST" | "BALANCED_TRIAD";
+  capability_id: string;
+}
+
+export interface InsufficientInfoBreakdownItem {
+  code: string;
+  count: number;
+  percentage: number;
+  description_tr: string;
+}
+
+export interface InsufficientInfoReport {
+  case_version_id: string;
+  contract_id: string;
+  capabilities: string[];
+  total_opt_outs: number;
+  breakdown: InsufficientInfoBreakdownItem[];
+  preserves_commit_first_isolation: boolean;
+}
+
+
 export class CaseAnalyticsApiClient {
   private readonly baseUrl: string;
 
@@ -369,4 +423,25 @@ export class CaseAnalyticsApiClient {
       proposed_context: context.trim(),
     });
   }
+
+  public async getBlindVariants(caseVersionId: string): Promise<BlindVariantsReport> {
+    return this.getJson<BlindVariantsReport>(`/v1/cases/${caseVersionId}/blind-variants`);
+  }
+
+  public async getPrincipleFirst(caseVersionId: string): Promise<PrincipleFirstReport> {
+    return this.getJson<PrincipleFirstReport>(`/v1/cases/${caseVersionId}/principle-first`);
+  }
+
+  public async getDecisionReceipt(caseVersionId: string): Promise<DecisionReceiptReport> {
+    return this.getJson<DecisionReceiptReport>(`/v1/cases/${caseVersionId}/decision-receipt`);
+  }
+
+  public async getOutcomeTriangle(caseVersionId: string): Promise<OutcomeTriangleReport> {
+    return this.getJson<OutcomeTriangleReport>(`/v1/cases/${caseVersionId}/outcome-triangle`);
+  }
+
+  public async getInsufficientInfoReport(caseVersionId: string): Promise<InsufficientInfoReport> {
+    return this.getJson<InsufficientInfoReport>(`/v1/cases/${caseVersionId}/insufficient-info-report`);
+  }
 }
+

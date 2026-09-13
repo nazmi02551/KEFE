@@ -235,6 +235,69 @@ test("CaseAnalyticsApiClient mocked GET and POST requests", async () => {
       ]), { status: 200 });
     }
 
+    if (url.includes("/blind-variants")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        blind_mode: "ACTOR_BLIND",
+        blinded_prompt: "A generic entity...",
+        real_identity_revealed: "Rail Authority",
+        neutrality_score: 0.88,
+        capability_id: "CAP-005"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/principle-first")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        primary_principle: "COLLECTIVE_WELLBEING",
+        secondary_principle: "PROCEDURAL_JUSTICE",
+        consistency_score: 0.91,
+        reflection_prompt: "Does prioritizing wellbeing compromise autonomy?",
+        capability_id: "CAP-006"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/decision-receipt")) {
+      return new Response(JSON.stringify({
+        receipt_id: "RCPT-001",
+        case_version_id: "test-case",
+        committed_choice: "OPTION_A",
+        integrity_digest: "sha256-abc123",
+        timestamp_utc: "2026-09-12T00:00:00Z",
+        capability_id: "CAP-012"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/outcome-triangle")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        option_code: "OPTION_A",
+        rules_weight: 0.45,
+        empathy_weight: 0.35,
+        utility_weight: 0.20,
+        dominant_archetype: "RULES_FIRST",
+        capability_id: "CAP-102"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/insufficient-info-report")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        contract_id: "KEFE-INSUFFICIENT-INFO-RESPONSE-001",
+        capabilities: ["CAP-011"],
+        total_opt_outs: 48,
+        breakdown: [
+          {
+            code: "OPT_OUT_INSUFFICIENT_INFO",
+            count: 32,
+            percentage: 66.7,
+            description_tr: "Yeterli bilgim olmadığı için tercih belirtmedim"
+          }
+        ],
+        preserves_commit_first_isolation: true
+      }), { status: 200 });
+    }
+
     return new Response(JSON.stringify({ error: "Not found" }), { status: 404 });
   };
 
@@ -304,7 +367,27 @@ test("CaseAnalyticsApiClient mocked GET and POST requests", async () => {
     );
     assert.equal(newProp.curation_state, "DRAFT_SUBMITTED");
 
-    assert.equal(calls.length, 18);
+    const bv = await client.getBlindVariants("test-case");
+    assert.equal(bv.blind_mode, "ACTOR_BLIND");
+    assert.equal(bv.capability_id, "CAP-005");
+
+    const pf = await client.getPrincipleFirst("test-case");
+    assert.equal(pf.primary_principle, "COLLECTIVE_WELLBEING");
+    assert.equal(pf.capability_id, "CAP-006");
+
+    const dr = await client.getDecisionReceipt("test-case");
+    assert.equal(dr.committed_choice, "OPTION_A");
+    assert.equal(dr.capability_id, "CAP-012");
+
+    const ot = await client.getOutcomeTriangle("test-case");
+    assert.equal(ot.dominant_archetype, "RULES_FIRST");
+    assert.equal(ot.capability_id, "CAP-102");
+
+    const ii = await client.getInsufficientInfoReport("test-case");
+    assert.equal(ii.total_opt_outs, 48);
+    assert.equal(ii.preserves_commit_first_isolation, true);
+
+    assert.equal(calls.length, 23);
   } finally {
     globalThis.fetch = originalFetch;
   }

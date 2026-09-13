@@ -159,3 +159,104 @@ test("Deliberation Workspace: correction creation requires valid fields and CSRF
     }
   );
 });
+
+test("Deliberation Workspace: loads advanced deliberation capabilities (CAP-005, CAP-006, CAP-011, CAP-012, CAP-102)", async () => {
+  const caseId = "22222222-2222-4222-8222-222222222222";
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = async (input: RequestInfo | URL) => {
+    const url = input.toString();
+
+    if (url.includes("/blind-variants")) {
+      return new Response(JSON.stringify({
+        case_version_id: caseId,
+        blind_mode: "ACTOR_BLIND",
+        blinded_prompt: "Anonim bir kurum sübvansiyon talep ediyor.",
+        real_identity_revealed: "Devlet Demiryolları İdaresi",
+        neutrality_score: 0.88,
+        capability_id: "CAP-005"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/principle-first")) {
+      return new Response(JSON.stringify({
+        case_version_id: caseId,
+        primary_principle: "COLLECTIVE_WELLBEING",
+        secondary_principle: "PROCEDURAL_JUSTICE",
+        consistency_score: 0.91,
+        reflection_prompt: "Toplumsal fayda öncelenirken bireysel haklar nasıl korunur?",
+        capability_id: "CAP-006"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/decision-receipt")) {
+      return new Response(JSON.stringify({
+        receipt_id: "RCPT-2222",
+        case_version_id: caseId,
+        committed_choice: "OPTION_A",
+        integrity_digest: "sha256-abcdef123456",
+        timestamp_utc: "2026-09-12T12:00:00Z",
+        capability_id: "CAP-012"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/outcome-triangle")) {
+      return new Response(JSON.stringify({
+        case_version_id: caseId,
+        option_code: "OPTION_A",
+        rules_weight: 0.45,
+        empathy_weight: 0.35,
+        utility_weight: 0.20,
+        dominant_archetype: "RULES_FIRST",
+        capability_id: "CAP-102"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/insufficient-info-report")) {
+      return new Response(JSON.stringify({
+        case_version_id: caseId,
+        contract_id: "KEFE-INSUFFICIENT-INFO-RESPONSE-001",
+        capabilities: ["CAP-011"],
+        total_opt_outs: 48,
+        breakdown: [
+          {
+            code: "OPT_OUT_INSUFFICIENT_INFO",
+            count: 32,
+            percentage: 66.7,
+            description_tr: "Yeterli bilgim olmadığı için tercih belirtmedim"
+          }
+        ],
+        preserves_commit_first_isolation: true
+      }), { status: 200 });
+    }
+
+    return new Response(JSON.stringify({}), { status: 200 });
+  };
+
+  try {
+    const client = new CaseAnalyticsApiClient("http://localhost:8000");
+
+    const bv = await client.getBlindVariants(caseId);
+    assert.equal(bv.blind_mode, "ACTOR_BLIND");
+    assert.equal(bv.capability_id, "CAP-005");
+
+    const pf = await client.getPrincipleFirst(caseId);
+    assert.equal(pf.primary_principle, "COLLECTIVE_WELLBEING");
+    assert.equal(pf.capability_id, "CAP-006");
+
+    const dr = await client.getDecisionReceipt(caseId);
+    assert.equal(dr.committed_choice, "OPTION_A");
+    assert.equal(dr.capability_id, "CAP-012");
+
+    const ot = await client.getOutcomeTriangle(caseId);
+    assert.equal(ot.dominant_archetype, "RULES_FIRST");
+    assert.equal(ot.capability_id, "CAP-102");
+
+    const ii = await client.getInsufficientInfoReport(caseId);
+    assert.equal(ii.total_opt_outs, 48);
+    assert.equal(ii.preserves_commit_first_isolation, true);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+

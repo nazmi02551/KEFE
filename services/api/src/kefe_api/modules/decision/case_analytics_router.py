@@ -63,6 +63,21 @@ from kefe_api.modules.decision.segment_distribution import (
 from kefe_api.modules.decision.stakeholder_distribution import (
     StakeholderDistributionService,
 )
+from kefe_api.modules.decision.blind_variants import (
+    BlindMode,
+    BlindVariantsCalculator,
+)
+from kefe_api.modules.decision.principle_first import (
+    PrincipleFirstCalculator,
+    PrincipleType,
+)
+from kefe_api.modules.decision.decision_receipt import (
+    DecisionReceiptGenerator,
+)
+from kefe_api.modules.decision.outcome_triangle import (
+    OutcomeTriangleCalculator,
+    TriangleArchetype,
+)
 
 case_analytics_router = APIRouter(prefix="/v1/cases", tags=["Case Analytics"])
 
@@ -578,3 +593,108 @@ def create_community_proposal(
     }
     _PROPOSALS_STORE.append(item)
     return item
+
+
+@case_analytics_router.get("/{case_version_id}/blind-variants")
+def get_blind_variants(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve blind-first veil-of-ignorance testing variants (CAP-005)."""
+    res = BlindVariantsCalculator.evaluate(
+        case_version_id=case_version_id,
+        blind_mode=BlindMode.ACTOR_BLIND,
+        blinded_prompt="A generic corporate entity requests emergency subsidy allocation.",
+        real_identity_revealed="State Rail Transportation Authority",
+        neutrality_score=0.88,
+    )
+    return {
+        "case_version_id": str(res.case_version_id),
+        "blind_mode": res.blind_mode.value,
+        "blinded_prompt": res.blinded_prompt,
+        "real_identity_revealed": res.real_identity_revealed,
+        "neutrality_score": res.neutrality_score,
+        "capability_id": "CAP-005",
+    }
+
+
+@case_analytics_router.get("/{case_version_id}/principle-first")
+def get_principle_first(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve abstract principle-first commitment evaluation (CAP-006)."""
+    res = PrincipleFirstCalculator.evaluate(
+        case_version_id=case_version_id,
+        primary_principle=PrincipleType.COLLECTIVE_WELLBEING,
+        secondary_principle=PrincipleType.PROCEDURAL_JUSTICE,
+        consistency_score=0.91,
+        reflection_prompt="Does prioritizing collective wellbeing in public transit compromise individual autonomy?",
+    )
+    return {
+        "case_version_id": str(res.case_version_id),
+        "primary_principle": res.primary_principle.value,
+        "secondary_principle": res.secondary_principle.value,
+        "consistency_score": res.consistency_score,
+        "reflection_prompt": res.reflection_prompt,
+        "capability_id": "CAP-006",
+    }
+
+
+@case_analytics_router.get("/{case_version_id}/decision-receipt")
+def get_decision_receipt(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve sample cryptographic decision receipt and sealed proof (CAP-012)."""
+    res = DecisionReceiptGenerator.generate(
+        case_version_id=case_version_id,
+        committed_choice="OPTION_A",
+        user_pseudonym="actor-pseudonym-alpha",
+    )
+    return {
+        "receipt_id": res.receipt_id,
+        "case_version_id": str(res.case_version_id),
+        "committed_choice": res.committed_choice,
+        "integrity_digest": res.integrity_digest,
+        "timestamp_utc": res.timestamp_utc,
+        "capability_id": "CAP-012",
+    }
+
+
+@case_analytics_router.get("/{case_version_id}/outcome-triangle")
+def get_outcome_triangle(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve tri-axial ethical balance analysis across Rights, Empathy, Utility (CAP-102)."""
+    res = OutcomeTriangleCalculator.calculate_balance(
+        case_version_id=case_version_id,
+        option_code="OPTION_A",
+        rules_score=0.45,
+        empathy_score=0.35,
+        utility_score=0.20,
+    )
+    return {
+        "case_version_id": str(res.case_version_id),
+        "option_code": res.option_code,
+        "rules_weight": res.rules_weight,
+        "empathy_weight": res.empathy_weight,
+        "utility_weight": res.utility_weight,
+        "dominant_archetype": res.dominant_archetype.value,
+        "capability_id": "CAP-102",
+    }
+
+
+@case_analytics_router.get("/{case_version_id}/insufficient-info-report")
+def get_insufficient_info_report(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve non-coercive opt-out and missing options telemetry (CAP-011)."""
+    return {
+        "case_version_id": str(case_version_id),
+        "contract_id": "KEFE-INSUFFICIENT-INFO-RESPONSE-001",
+        "capabilities": ["CAP-011"],
+        "total_opt_outs": 48,
+        "breakdown": [
+            {
+                "code": "OPT_OUT_INSUFFICIENT_INFO",
+                "count": 32,
+                "percentage": 66.7,
+                "description_tr": "Yeterli bilgim olmadığı için tercih belirtmedim",
+            },
+            {
+                "code": "OPT_OUT_MISSING_OPTIONS",
+                "count": 16,
+                "percentage": 33.3,
+                "description_tr": "Mevcut seçenekler ikilemi kapsamıyor / eksik",
+            },
+        ],
+        "preserves_commit_first_isolation": True,
+    }
