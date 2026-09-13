@@ -3,6 +3,7 @@ import { afterEach, test } from "node:test";
 
 import {
   KefApiError,
+  PUBLIC_API_TIMEOUT_MS,
   getCaseVersionHistory,
   getPublicCase,
   getPublicShare,
@@ -75,7 +76,10 @@ test("list endpoints use the server base, bounded query parameters and GET seman
     assert.equal(request.init?.method, undefined, "Public readers must use HTTP GET");
     assert.equal(request.init?.cache, "no-store");
     assert.equal((request.init?.headers as Record<string, string>).Accept, "application/json");
+    assert(request.init?.signal instanceof AbortSignal, "Public reads need a request timeout");
+    assert.equal(request.init.signal.aborted, false);
   }
+  assert.equal(PUBLIC_API_TIMEOUT_MS, 10_000);
 });
 
 test("list pagination is bounded to each public endpoint contract", async () => {

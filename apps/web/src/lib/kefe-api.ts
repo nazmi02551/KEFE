@@ -23,6 +23,8 @@ export class KefApiError extends Error {
   }
 }
 
+export const PUBLIC_API_TIMEOUT_MS = 10_000;
+
 interface ApiBaseOptions {
   allowInsecureHttp: boolean;
 }
@@ -97,6 +99,7 @@ async function fetchJson<T>(path: string, options?: RequestInit): Promise<T> {
       ...options?.headers,
     },
     cache: options?.cache ?? "no-store",
+    signal: options?.signal ?? AbortSignal.timeout(PUBLIC_API_TIMEOUT_MS),
   });
 
   if (!res.ok) {

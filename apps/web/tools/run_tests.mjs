@@ -317,6 +317,15 @@ test("kefe-api.ts: impact client exposes public reads only", () => {
   assert(!api.includes('method: "DELETE"'), "Public API client must not issue DELETE requests");
 });
 
+test("kefe-api.ts: public reads have a bounded response wait", () => {
+  const api = readFile("src/lib/kefe-api.ts");
+  assert(api.includes("PUBLIC_API_TIMEOUT_MS = 10_000"), "Missing bounded API timeout");
+  assert(
+    api.includes("AbortSignal.timeout(PUBLIC_API_TIMEOUT_MS)"),
+    "Public fetches must not wait indefinitely for an upstream response",
+  );
+});
+
 test("share/[token]/page.tsx: does not expose share token in rendered HTML title", () => {
   const page = readFile("app/share/[token]/page.tsx");
   // Token must NOT appear in static text — only the title from API
