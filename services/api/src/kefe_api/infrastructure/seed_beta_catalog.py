@@ -6,7 +6,9 @@ from datetime import UTC, datetime
 from sqlalchemy import text
 
 from kefe_api.core.settings import get_settings
-from kefe_api.infrastructure.beta_catalog import BETA_CATALOG
+from uuid import uuid5
+
+from kefe_api.infrastructure.beta_catalog import BETA_CATALOG, CATALOG_NAMESPACE
 from kefe_api.infrastructure.db import build_engine
 from kefe_api.infrastructure.persistence import (
     build_content_authoring_repository,
@@ -140,33 +142,65 @@ def seed_beta_catalog() -> None:
                     "generated_at": generated_at,
                 },
             )
-            connection.execute(
-                text(
-                    """
-                    INSERT INTO content.perspective_card (
-                        id, case_version_id, slot, body, source_kind,
-                        provenance_label, moderation_state, status, published_at
-                    ) VALUES (
-                        :id, :case_version_id, 'BRIDGE', :body, 'CURATED',
-                        'KEFE beta editoryal fixture', 'NOT_REQUIRED', 'PUBLISHED', :published_at
-                    )
-                    ON CONFLICT (id) DO UPDATE SET
-                        body = EXCLUDED.body,
-                        status = EXCLUDED.status,
-                        published_at = EXCLUDED.published_at,
-                        updated_at = now()
-                    """
-                ),
-                {
-                    "id": item.perspective_id,
-                    "case_version_id": item.version_id,
-                    "body": (
-                        f"{item.option_a} yaklaşımı ile {item.option_b} yaklaşımı farklı değerleri "
-                        "koruyabilir; kararın bağlama göre değişebileceğini birlikte düşün."
+            # Insert all perspectives from catalog
+            for persp_idx, persp in enumerate(item.perspectives):
+                persp_id = uuid5(CATALOG_NAMESPACE, f"perspective:{item.slug}:{persp.slot}:{persp_idx}")
+                connection.execute(
+                    text(
+                        """
+                        INSERT INTO content.perspective_card (
+                            id, case_version_id, slot, body, source_kind,
+                            provenance_label, moderation_state, status, published_at
+                        ) VALUES (
+                            :id, :case_version_id, :slot, :body, 'CURATED',
+                            'KEFE beta editoryal fixture', 'NOT_REQUIRED', 'PUBLISHED', :published_at
+                        )
+                        ON CONFLICT (id) DO UPDATE SET
+                            body = EXCLUDED.body,
+                            slot = EXCLUDED.slot,
+                            status = EXCLUDED.status,
+                            published_at = EXCLUDED.published_at,
+                            updated_at = now()
+                        """
                     ),
-                    "published_at": generated_at,
-                },
-            )
+                    {
+                        "id": persp_id,
+                        "case_version_id": item.version_id,
+                        "slot": persp.slot,
+                        "body": persp.body,
+                        "published_at": generated_at,
+                    },
+                )
+            # Insert context blocks — schema: display_order, disclosure_level, title, body, claim_status
+            disclosure_map = {"ESSENTIAL": "ESSENTIAL", "DETAIL": "DETAIL", "DATA_POINT": "DETAIL"}
+            for ctx_idx, ctx in enumerate(item.context_blocks):
+                ctx_id = uuid5(CATALOG_NAMESPACE, f"context:{item.slug}:{ctx.block_type}:{ctx_idx}")
+                disclosure = disclosure_map.get(ctx.block_type, "DETAIL")
+                connection.execute(
+                    text(
+                        """
+                        INSERT INTO content.context_block (
+                            id, case_version_id, display_order,
+                            disclosure_level, title, body, claim_status
+                        ) VALUES (
+                            :id, :case_version_id, :display_order,
+                            :disclosure_level, :title, :body, 'CLAIMED'
+                        )
+                        ON CONFLICT (id) DO UPDATE SET
+                            body = EXCLUDED.body,
+                            title = EXCLUDED.title,
+                            display_order = EXCLUDED.display_order
+                        """
+                    ),
+                    {
+                        "id": ctx_id,
+                        "case_version_id": item.version_id,
+                        "display_order": ctx_idx * 10,
+                        "disclosure_level": disclosure,
+                        "title": ctx.label,
+                        "body": ctx.body,
+                    },
+                )
 
 
 if __name__ == "__main__":

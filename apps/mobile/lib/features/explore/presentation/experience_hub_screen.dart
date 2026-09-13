@@ -232,33 +232,21 @@ class _ExperienceHubScreenState extends ConsumerState<ExperienceHubScreen> {
                 title: strings.experienceSportsTitle,
                 body: strings.experienceSportsEmpty,
               ),
-            if (widget.previewRadarEnabled) ...[
-              const SizedBox(height: 14),
-              _ExperienceCard(
-                cardKey: const ValueKey('experience-radar'),
-                icon: Icons.radar_rounded,
-                title: strings.experienceRadarTitle,
-                body: strings.experienceRadarBody,
-                statusLabel: strings.experiencePreviewStatus,
-                actionLabel: strings.experienceRadarAction,
-                onPressed: () => context.push('/radar'),
-              ),
-            ],
+            const SizedBox(height: 14),
+            _ExperienceCard(
+              cardKey: const ValueKey('experience-radar'),
+              icon: Icons.radar_rounded,
+              title: strings.experienceRadarTitle,
+              body: strings.experienceRadarBody,
+              isComingSoon: true,
+            ),
             const SizedBox(height: 14),
             _ExperienceCard(
               cardKey: const ValueKey('experience-atlas'),
               icon: Icons.public_rounded,
               title: strings.experienceAtlasTitle,
               body: strings.experienceAtlasBody,
-              statusLabel: widget.previewAtlasEnabled
-                  ? strings.experiencePreviewStatus
-                  : strings.experienceAtlasStatus,
-              actionLabel: widget.previewAtlasEnabled
-                  ? strings.experienceAtlasAction
-                  : null,
-              onPressed: widget.previewAtlasEnabled
-                  ? () => context.push('/atlas')
-                  : null,
+              isComingSoon: true,
             ),
             const SizedBox(height: 10),
             _ExperienceCard(
@@ -324,8 +312,8 @@ class _ExperienceCard extends StatelessWidget {
     required this.title,
     required this.body,
     this.actionLabel,
-    this.statusLabel,
     this.onPressed,
+    this.isComingSoon = false,
   });
 
   final Key cardKey;
@@ -333,13 +321,14 @@ class _ExperienceCard extends StatelessWidget {
   final String title;
   final String body;
   final String? actionLabel;
-  final String? statusLabel;
   final VoidCallback? onPressed;
+  final bool isComingSoon;
 
   @override
   Widget build(BuildContext context) {
     final visual = context.kefeVisual;
-    return KefeSurface(
+
+    final Widget card = KefeSurface(
       key: cardKey,
       tone: KefeSurfaceTone.raised,
       padding: const EdgeInsets.all(18),
@@ -353,10 +342,15 @@ class _ExperienceCard extends StatelessWidget {
                 width: 46,
                 height: 46,
                 decoration: BoxDecoration(
-                  color: visual.subtleGoldSurface,
+                  color: isComingSoon
+                      ? visual.border.withValues(alpha: 0.4)
+                      : visual.subtleGoldSurface,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(icon, color: visual.goldSoft),
+                child: Icon(
+                  icon,
+                  color: isComingSoon ? visual.mutedForeground : visual.goldSoft,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -367,22 +361,40 @@ class _ExperienceCard extends StatelessWidget {
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w900,
+                        color: isComingSoon ? visual.mutedForeground : null,
                       ),
                     ),
-                    if (statusLabel != null) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        statusLabel!,
-                        style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(
-                              color: visual.goldSoft,
-                              fontWeight: FontWeight.w800,
-                            ),
-                      ),
-                    ],
+                    
                   ],
                 ),
               ),
+              if (isComingSoon)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: visual.gold.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                    border:
+                        Border.all(color: visual.gold.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.lock_outline_rounded,
+                          size: 11, color: visual.gold),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Yakında',
+                        style: TextStyle(
+                          color: visual.gold,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 14),
@@ -393,7 +405,25 @@ class _ExperienceCard extends StatelessWidget {
               height: 1.45,
             ),
           ),
-          if (actionLabel != null && onPressed != null) ...[
+          if (isComingSoon) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: visual.surfaceSunken,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                'Bu deneyim geliştirme aşamasında. Yakında kullanıma açılacak.',
+                style: TextStyle(
+                  color: visual.mutedForeground,
+                  fontSize: 12,
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ] else if (actionLabel != null && onPressed != null) ...[
             const SizedBox(height: 16),
             FilledButton.icon(
               onPressed: onPressed,
@@ -404,5 +434,10 @@ class _ExperienceCard extends StatelessWidget {
         ],
       ),
     );
+
+    if (isComingSoon) {
+      return Opacity(opacity: 0.75, child: card);
+    }
+    return card;
   }
 }
