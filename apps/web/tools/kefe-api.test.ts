@@ -78,6 +78,22 @@ test("list endpoints use the server base, bounded query parameters and GET seman
   }
 });
 
+test("list pagination is bounded to each public endpoint contract", async () => {
+  process.env.KEFE_API_BASE_URL = "https://api.example.test";
+  const requests = installFetch([jsonResponse([]), jsonResponse([])]);
+
+  await listSignalConsensusCards(1000.9, -8);
+  await listPublicCases(100, Number.POSITIVE_INFINITY);
+
+  assert.deepEqual(
+    requests.map(({ url }) => url),
+    [
+      "https://api.example.test/v1/signals/consensus-cards?limit=100&offset=0",
+      "https://api.example.test/v1/cases?limit=50&offset=0",
+    ],
+  );
+});
+
 test("API base validation normalizes paths and permits explicit server HTTP", () => {
   assert.equal(
     normalizeApiBase("https://api.example.test/gateway///", { allowInsecureHttp: false }),

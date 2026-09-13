@@ -29,8 +29,8 @@ export default async function CasesPage() {
   let error: string | null = null;
 
   try {
-    // Load up to 100 cases — client-side filter handles the rest
-    cases = await listPublicCases(100, 0);
+    // Public cases contract caps a page at 50; client-side filter handles it.
+    cases = await listPublicCases(50, 0);
   } catch (err) {
     error = publicLoadErrorMessage(err, "Meseleler şu anda yüklenemiyor.");
   }

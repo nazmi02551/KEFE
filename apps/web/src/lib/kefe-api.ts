@@ -77,6 +77,18 @@ function apiBase(): string {
   );
 }
 
+function boundedInteger(
+  value: number,
+  { minimum, maximum, fallback }: {
+    minimum: number;
+    maximum: number;
+    fallback: number;
+  },
+): number {
+  if (!Number.isFinite(value)) return fallback;
+  return Math.min(maximum, Math.max(minimum, Math.trunc(value)));
+}
+
 async function fetchJson<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${apiBase()}${path}`, {
     ...options,
@@ -124,8 +136,14 @@ export async function listSignalConsensusCards(
   limit = 20,
   offset = 0,
 ): Promise<SignalConsensusCard[]> {
+  const safeLimit = boundedInteger(limit, { minimum: 1, maximum: 100, fallback: 20 });
+  const safeOffset = boundedInteger(offset, {
+    minimum: 0,
+    maximum: Number.MAX_SAFE_INTEGER,
+    fallback: 0,
+  });
   return fetchJson<SignalConsensusCard[]>(
-    `/v1/signals/consensus-cards?limit=${limit}&offset=${offset}`,
+    `/v1/signals/consensus-cards?limit=${safeLimit}&offset=${safeOffset}`,
   );
 }
 
@@ -250,8 +268,14 @@ export async function listPublicCases(
   limit = 20,
   offset = 0,
 ): Promise<CaseContextSummary[]> {
+  const safeLimit = boundedInteger(limit, { minimum: 1, maximum: 50, fallback: 20 });
+  const safeOffset = boundedInteger(offset, {
+    minimum: 0,
+    maximum: Number.MAX_SAFE_INTEGER,
+    fallback: 0,
+  });
   return fetchJson<CaseContextSummary[]>(
-    `/v1/cases?limit=${limit}&offset=${offset}`,
+    `/v1/cases?limit=${safeLimit}&offset=${safeOffset}`,
   );
 }
 
