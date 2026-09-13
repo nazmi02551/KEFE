@@ -135,6 +135,21 @@ from kefe_api.modules.decision.citizen_jury_chamber import (
     CitizenJuryResult,
     CitizenJuryStage,
 )
+from kefe_api.modules.decision.academic_research_portal import (
+    AcademicResearchDatasetResult,
+    AcademicResearchPortalService,
+    ResearchCorpusType,
+)
+from kefe_api.modules.decision.ngo_impact_desk import (
+    NgoAdvocacyDomain,
+    NgoImpactDeskResult,
+    NgoImpactDeskService,
+)
+from kefe_api.modules.decision.civic_petition_simulator import (
+    CivicPetitionResult,
+    CivicPetitionSimulatorService,
+    PetitionStage,
+)
 
 case_analytics_router = APIRouter(prefix="/v1/cases", tags=["Case Analytics"])
 
@@ -1342,6 +1357,208 @@ def convene_citizen_jury(
         "verdict_consensus_rate": res.verdict_consensus_rate,
         "reference_adr": "ADR-0223",
     }
+
+
+class AcademicResearchRequest(BaseModel):
+    dataset_id: str = Field(..., min_length=4)
+    dataset_title: str = Field(..., min_length=5)
+    corpus_type: str = Field(..., description="DELIBERATIVE_POLARIZATION_DATASET, ETHICAL_TRADE_OFF_CORPUS, ARGUMENT_GRAPH_TOPOLOGY, POLICY_OUTCOME_BENCHMARK")
+    record_count: int = Field(..., ge=0)
+    differential_privacy_epsilon: float = Field(..., ge=0.0, le=1.0)
+    doi_identifier: str = Field(..., min_length=7)
+
+
+@case_analytics_router.get("/{case_version_id}/academic-research")
+def get_academic_research(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve Academic Research Portal dataset status (CAP-109, CAP-125, ADR-0209)."""
+    res = AcademicResearchPortalService.publish_or_get_dataset(
+        dataset_id=f"data-{str(case_version_id)[:8]}",
+        dataset_title="Polarization & Deliberation Benchmark Dataset",
+        corpus_type=ResearchCorpusType.DELIBERATIVE_POLARIZATION_DATASET,
+        record_count=1250,
+        differential_privacy_epsilon=0.15,
+        doi_identifier="doi:10.1000/182",
+    )
+    return {
+        "case_version_id": str(case_version_id),
+        "dataset_id": res.dataset_id,
+        "dataset_title": res.dataset_title,
+        "corpus_type": res.corpus_type.value,
+        "record_count": res.record_count,
+        "differential_privacy_epsilon": res.differential_privacy_epsilon,
+        "doi_identifier": res.doi_identifier,
+        "capability_id": "CAP-109",
+        "reference_adr": "ADR-0209",
+        "contract_id": "KEFE-ACAD-PORTAL-001",
+    }
+
+
+@case_analytics_router.post("/{case_version_id}/academic-research")
+def publish_academic_research(
+    case_version_id: UUID, payload: AcademicResearchRequest
+) -> dict[str, Any]:
+    """Publish or evaluate Academic Research dataset with differential privacy (CAP-109, CAP-125, ADR-0209)."""
+    try:
+        corpus = ResearchCorpusType(payload.corpus_type)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Geçersiz corpus_type: {payload.corpus_type}",
+        )
+    try:
+        res = AcademicResearchPortalService.publish_or_get_dataset(
+            dataset_id=payload.dataset_id,
+            dataset_title=payload.dataset_title,
+            corpus_type=corpus,
+            record_count=payload.record_count,
+            differential_privacy_epsilon=payload.differential_privacy_epsilon,
+            doi_identifier=payload.doi_identifier,
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=400, detail=str(err))
+
+    return {
+        "case_version_id": str(case_version_id),
+        "dataset_id": res.dataset_id,
+        "dataset_title": res.dataset_title,
+        "corpus_type": res.corpus_type.value,
+        "record_count": res.record_count,
+        "differential_privacy_epsilon": res.differential_privacy_epsilon,
+        "doi_identifier": res.doi_identifier,
+        "capability_id": "CAP-109",
+        "reference_adr": "ADR-0209",
+        "contract_id": "KEFE-ACAD-PORTAL-001",
+    }
+
+
+class NgoImpactRequest(BaseModel):
+    campaign_id: str = Field(..., min_length=4)
+    ngo_name: str = Field(..., min_length=3)
+    advocacy_domain: str = Field(..., description="HUMAN_RIGHTS_AND_JUSTICE, ENVIRONMENT_AND_CLIMATE, PUBLIC_HEALTH_AND_SAFETY, TRANSPARENCY_AND_ANTI_CORRUPTION")
+    citizen_endorsement_count: int = Field(..., ge=0)
+    institutional_reforms_achieved: int = Field(..., ge=0)
+
+
+@case_analytics_router.get("/{case_version_id}/ngo-impact")
+def get_ngo_impact(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve NGO Impact Desk campaign status (CAP-108, ADR-0210)."""
+    res = NgoImpactDeskService.evaluate_campaign(
+        campaign_id=f"ngo-{str(case_version_id)[:8]}",
+        ngo_name="Açık Toplum ve İklim Hareketi",
+        advocacy_domain=NgoAdvocacyDomain.ENVIRONMENT_AND_CLIMATE,
+        citizen_endorsement_count=450,
+        institutional_reforms_achieved=2,
+    )
+    return {
+        "case_version_id": str(case_version_id),
+        "campaign_id": res.campaign_id,
+        "ngo_name": res.ngo_name,
+        "advocacy_domain": res.advocacy_domain.value,
+        "citizen_endorsement_count": res.citizen_endorsement_count,
+        "institutional_reforms_achieved": res.institutional_reforms_achieved,
+        "advocacy_efficacy_score": res.advocacy_efficacy_score,
+        "capability_id": "CAP-108",
+        "reference_adr": "ADR-0210",
+        "contract_id": "KEFE-NGO-DESK-001",
+    }
+
+
+@case_analytics_router.post("/{case_version_id}/ngo-impact")
+def evaluate_ngo_impact(
+    case_version_id: UUID, payload: NgoImpactRequest
+) -> dict[str, Any]:
+    """Evaluate NGO Impact Desk advocacy campaign (CAP-108, ADR-0210)."""
+    try:
+        domain = NgoAdvocacyDomain(payload.advocacy_domain)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Geçersiz advocacy_domain: {payload.advocacy_domain}",
+        )
+    try:
+        res = NgoImpactDeskService.evaluate_campaign(
+            campaign_id=payload.campaign_id,
+            ngo_name=payload.ngo_name,
+            advocacy_domain=domain,
+            citizen_endorsement_count=payload.citizen_endorsement_count,
+            institutional_reforms_achieved=payload.institutional_reforms_achieved,
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=400, detail=str(err))
+
+    return {
+        "case_version_id": str(case_version_id),
+        "campaign_id": res.campaign_id,
+        "ngo_name": res.ngo_name,
+        "advocacy_domain": res.advocacy_domain.value,
+        "citizen_endorsement_count": res.citizen_endorsement_count,
+        "institutional_reforms_achieved": res.institutional_reforms_achieved,
+        "advocacy_efficacy_score": res.advocacy_efficacy_score,
+        "capability_id": "CAP-108",
+        "reference_adr": "ADR-0210",
+        "contract_id": "KEFE-NGO-DESK-001",
+    }
+
+
+class CivicPetitionRequest(BaseModel):
+    petition_id: str = Field(..., min_length=4)
+    bill_title: str = Field(..., min_length=5)
+    signatures_count: int = Field(..., ge=0)
+    signature_target_threshold: int = Field(..., ge=1000)
+    projected_net_benefit_score: float = Field(..., ge=-1.0, le=1.0)
+
+
+@case_analytics_router.get("/{case_version_id}/civic-petition")
+def get_civic_petition(case_version_id: UUID) -> dict[str, Any]:
+    """Retrieve Civic Petition Simulator projection (ADR-0225, CAP-079)."""
+    res = CivicPetitionSimulatorService.simulate_petition(
+        petition_id=f"pet-{str(case_version_id)[:8]}",
+        bill_title="Dijital Mahremiyet ve Şeffaflık Yasa Tasarısı",
+        signatures_count=1500,
+        signature_target_threshold=2000,
+        projected_net_benefit_score=0.42,
+    )
+    return {
+        "case_version_id": str(case_version_id),
+        "petition_id": res.petition_id,
+        "bill_title": res.bill_title,
+        "stage": res.stage.value,
+        "signatures_count": res.signatures_count,
+        "signature_target_threshold": res.signature_target_threshold,
+        "projected_net_benefit_score": res.projected_net_benefit_score,
+        "reference_adr": "ADR-0225",
+        "contract_id": "KEFE-PETITION-SIM-001",
+    }
+
+
+@case_analytics_router.post("/{case_version_id}/civic-petition")
+def simulate_civic_petition(
+    case_version_id: UUID, payload: CivicPetitionRequest
+) -> dict[str, Any]:
+    """Simulate Civic Petition legislative impact (ADR-0225, CAP-079)."""
+    try:
+        res = CivicPetitionSimulatorService.simulate_petition(
+            petition_id=payload.petition_id,
+            bill_title=payload.bill_title,
+            signatures_count=payload.signatures_count,
+            signature_target_threshold=payload.signature_target_threshold,
+            projected_net_benefit_score=payload.projected_net_benefit_score,
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=400, detail=str(err))
+
+    return {
+        "case_version_id": str(case_version_id),
+        "petition_id": res.petition_id,
+        "bill_title": res.bill_title,
+        "stage": res.stage.value,
+        "signatures_count": res.signatures_count,
+        "signature_target_threshold": res.signature_target_threshold,
+        "projected_net_benefit_score": res.projected_net_benefit_score,
+        "reference_adr": "ADR-0225",
+        "contract_id": "KEFE-PETITION-SIM-001",
+    }
+
 
 
 

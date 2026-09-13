@@ -346,6 +346,50 @@ test("CaseAnalyticsApiClient mocked GET and POST requests", async () => {
       }), { status: 200 });
     }
 
+    if (url.includes("/academic-research")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        dataset_id: "data-01",
+        dataset_title: "Polarization Benchmark",
+        corpus_type: "DELIBERATIVE_POLARIZATION_DATASET",
+        record_count: 1250,
+        differential_privacy_epsilon: 0.15,
+        doi_identifier: "doi:10.1000/182",
+        capability_id: "CAP-109",
+        reference_adr: "ADR-0209",
+        contract_id: "KEFE-ACAD-PORTAL-001"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/ngo-impact")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        campaign_id: "ngo-01",
+        ngo_name: "Açık Toplum Hareketi",
+        advocacy_domain: "ENVIRONMENT_AND_CLIMATE",
+        citizen_endorsement_count: 450,
+        institutional_reforms_achieved: 2,
+        advocacy_efficacy_score: 0.85,
+        capability_id: "CAP-108",
+        reference_adr: "ADR-0210",
+        contract_id: "KEFE-NGO-DESK-001"
+      }), { status: 200 });
+    }
+
+    if (url.includes("/civic-petition")) {
+      return new Response(JSON.stringify({
+        case_version_id: "test-case",
+        petition_id: "pet-01",
+        bill_title: "Mahremiyet Yasa Tasarısı",
+        stage: "SIGNATURE_GATHERING_CAMPAIGN",
+        signatures_count: 1500,
+        signature_target_threshold: 2000,
+        projected_net_benefit_score: 0.42,
+        reference_adr: "ADR-0225",
+        contract_id: "KEFE-PETITION-SIM-001"
+      }), { status: 200 });
+    }
+
     if (url.includes("/outcome-triangle")) {
       return new Response(JSON.stringify({
         case_version_id: "test-case",
@@ -661,7 +705,47 @@ test("CaseAnalyticsApiClient mocked GET and POST requests", async () => {
     assert.equal(cj.juror_count, 24);
     assert.equal(cj.reference_adr, "ADR-0223");
 
-    assert.equal(calls.length, 39);
+    const ar = await client.getAcademicResearch("test-case");
+    assert.equal(ar.capability_id, "CAP-109");
+    assert.equal(ar.corpus_type, "DELIBERATIVE_POLARIZATION_DATASET");
+
+    const arPub = await client.publishAcademicResearch("test-case", {
+      dataset_id: "data-01",
+      dataset_title: "Polarization Benchmark",
+      corpus_type: "DELIBERATIVE_POLARIZATION_DATASET",
+      record_count: 1250,
+      differential_privacy_epsilon: 0.15,
+      doi_identifier: "doi:10.1000/182"
+    });
+    assert.equal(arPub.dataset_id, "data-01");
+
+    const ngo = await client.getNgoImpact("test-case");
+    assert.equal(ngo.capability_id, "CAP-108");
+    assert.equal(ngo.advocacy_domain, "ENVIRONMENT_AND_CLIMATE");
+
+    const ngoEval = await client.evaluateNgoImpact("test-case", {
+      campaign_id: "ngo-01",
+      ngo_name: "Açık Toplum Hareketi",
+      advocacy_domain: "ENVIRONMENT_AND_CLIMATE",
+      citizen_endorsement_count: 450,
+      institutional_reforms_achieved: 2
+    });
+    assert.equal(ngoEval.advocacy_efficacy_score, 0.85);
+
+    const cp = await client.getCivicPetition("test-case");
+    assert.equal(cp.reference_adr, "ADR-0225");
+    assert.equal(cp.stage, "SIGNATURE_GATHERING_CAMPAIGN");
+
+    const cpSim = await client.simulateCivicPetition("test-case", {
+      petition_id: "pet-01",
+      bill_title: "Mahremiyet Yasa Tasarısı",
+      signatures_count: 1500,
+      signature_target_threshold: 2000,
+      projected_net_benefit_score: 0.42
+    });
+    assert.equal(cpSim.projected_net_benefit_score, 0.42);
+
+    assert.equal(calls.length, 45);
   } finally {
     globalThis.fetch = originalFetch;
   }

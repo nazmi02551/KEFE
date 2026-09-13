@@ -106,8 +106,8 @@ CAP-104	entitlement-service	Provider-independent Entitlement Service	COMMERCIAL	
 CAP-105	native-store-billing	Apple/Google native billing + server verification	COMMERCIAL	ACCEPTED_POST_PMF_GATE	Post-PMF	P1	KEFE-CGD-001|KEFE-ENG-001			canonical	
 CAP-106	web-checkout	Web checkout/account linking	COMMERCIAL	ROADMAP_ACCEPTED	Post-native billing	P2	KEFE-CGD-001|KEFE-SEC-001			canonical	
 CAP-107	commercial-catalog	Regional product/price/catalog service	COMMERCIAL	ARCHITECTURE_ACCEPTED	Post-PMF	P1	KEFE-CGD-001|KEFE-ENG-001			canonical	
-CAP-108	kefe-insights	KEFE Insights aggregate B2B	COMMERCIAL	ROADMAP_ACCEPTED	Phase 8	P1	KEFE-CGD-001|KEFE-RM-001			canonical	
-CAP-109	kefe-research	KEFE Research	COMMERCIAL	ROADMAP_ACCEPTED	Phase 7	P1	KEFE-CGD-001|KEFE-RM-001			canonical	
+CAP-108	kefe-insights	KEFE Insights aggregate B2B	COMMERCIAL	IMPLEMENTED_PARTIAL	Phase 8	P1	KEFE-CGD-001|KEFE-RM-001		ADR-0210|ngo-impact-desk.v1.json|NgoImpactDeskService|test_ngo_impact_desk.py|test_civic_research_ngo_api.py|case-analytics-api.ts|case-analytics-api.test.ts	canonical	production institutional integration and verified advocacy audit
+CAP-109	kefe-research	KEFE Research	COMMERCIAL	IMPLEMENTED_PARTIAL	Phase 7	P1	KEFE-CGD-001|KEFE-RM-001		ADR-0209|academic-research-portal.v1.json|AcademicResearchPortalService|test_academic_research_portal.py|test_civic_research_ngo_api.py|case-analytics-api.ts|case-analytics-api.test.ts	canonical	academic institutional peer review and DOI repository publishing
 CAP-110	custom-studies	Custom Studies	COMMERCIAL	ROADMAP_ACCEPTED	Phase 7/8	P2	KEFE-CGD-001|KEFE-RM-001			canonical	
 CAP-111	kefe-pulse	KEFE Pulse aggregate embeds	COMMERCIAL	ROADMAP_ACCEPTED	Phase 8	P1	KEFE-CGD-001|KEFE-TIM-001			canonical	
 CAP-112	aggregate-api	Aggregate API	COMMERCIAL	ROADMAP_ACCEPTED	Phase 8	P1	KEFE-CGD-001|KEFE-SEC-001			canonical	
@@ -123,7 +123,7 @@ CAP-121	institutional-reports	Aggregate institutional reports	ANALYTICS_REPORTIN
 CAP-122	research-reports	Study and reproducibility reports	ANALYTICS_REPORTING	ROADMAP_ACCEPTED	Phase 7	P1	KEFE-RM-001|KEFE-AED-001			canonical	
 CAP-123	admin-operational-reports	Admin operational/trust/editorial reports	ANALYTICS_REPORTING	ROADMAP_ACCEPTED	Phase 2+	P1	KEFE-ADM-001|KEFE-AED-001			canonical	
 CAP-124	finops-reporting	FinOps unit economics and provider cost reporting	ANALYTICS_REPORTING	IMPLEMENTED_PARTIAL	Phase 2+	P1	KEFE-CGD-001|KEFE-ENG-001		finops_router.py|test_finops_api.py|finops-api.ts|finops-workspace.tsx|finops.test.ts	canonical	production cloud billing telemetry ingestion and live provider spend alerting
-CAP-125	privacy-safe-research-export	Privacy-safe research/data portability package	ANALYTICS_REPORTING	PROPOSAL_REVIEW	Phase 7/8	P2	KEFE-RM-001|KEFE-SEC-001			conversation_proposal	
+CAP-125	privacy-safe-research-export	Privacy-safe research/data portability package	ANALYTICS_REPORTING	PROPOSAL_REVIEW	Phase 7/8	P2	KEFE-RM-001|KEFE-SEC-001		ADR-0209|academic-research-portal.v1.json|AcademicResearchPortalService|test_civic_research_ngo_api.py|case-analytics-api.ts	conversation_proposal	differential privacy formal privacy-budget audit and export encryption verification
 CAP-126	capability-portfolio-register	Capability Portfolio Register and no-forgotten-feature gate	GOVERNANCE	IMPLEMENTED_THIS_CHANGE	All phases	P0	KEFE-GOV-001|KEFE-PB-001		v3.5 WORKING documentation package|Issue #175|Drive file 1xJnoSFQB963acChiAQCSBAbS5VOdOJAJ	current_change	
 CAP-127	standards-council	Independent Standards Council	GOVERNANCE	LONG_TERM	Phase 9+	P2	KEFE-PB-001|KEFE-GOV-001			canonical	
 CAP-128	global-indices	Global indices	GOVERNANCE	VALIDATION_ONLY	Phase 9	P3	KEFE-PB-001|KEFE-RM-001			canonical	

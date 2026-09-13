@@ -751,7 +751,41 @@ export class CaseAnalyticsApiClient {
   ): Promise<CitizenJuryReport> {
     return this.postJson<CitizenJuryReport>(`/v1/cases/${caseVersionId}/citizen-jury`, payload);
   }
+
+  public async getAcademicResearch(caseVersionId: string): Promise<AcademicResearchReport> {
+    return this.getJson<AcademicResearchReport>(`/v1/cases/${caseVersionId}/academic-research`);
+  }
+
+  public async publishAcademicResearch(
+    caseVersionId: string,
+    payload: AcademicResearchInput
+  ): Promise<AcademicResearchReport> {
+    return this.postJson<AcademicResearchReport>(`/v1/cases/${caseVersionId}/academic-research`, payload);
+  }
+
+  public async getNgoImpact(caseVersionId: string): Promise<NgoImpactReport> {
+    return this.getJson<NgoImpactReport>(`/v1/cases/${caseVersionId}/ngo-impact`);
+  }
+
+  public async evaluateNgoImpact(
+    caseVersionId: string,
+    payload: NgoImpactInput
+  ): Promise<NgoImpactReport> {
+    return this.postJson<NgoImpactReport>(`/v1/cases/${caseVersionId}/ngo-impact`, payload);
+  }
+
+  public async getCivicPetition(caseVersionId: string): Promise<CivicPetitionReport> {
+    return this.getJson<CivicPetitionReport>(`/v1/cases/${caseVersionId}/civic-petition`);
+  }
+
+  public async simulateCivicPetition(
+    caseVersionId: string,
+    payload: CivicPetitionInput
+  ): Promise<CivicPetitionReport> {
+    return this.postJson<CivicPetitionReport>(`/v1/cases/${caseVersionId}/civic-petition`, payload);
+  }
 }
+
 
 export interface ContextLensPillar {
   pillar_type: "LEGAL_FRAMEWORK" | "HISTORICAL_CONTEXT" | "SCIENTIFIC_DATA" | "COMPARATIVE_PRACTICE";
@@ -852,3 +886,67 @@ export interface CitizenJuryInput {
   expert_witnesses_count: number;
   verdict_consensus_rate: number;
 }
+
+export interface AcademicResearchReport {
+  case_version_id: string;
+  dataset_id: string;
+  dataset_title: string;
+  corpus_type: "DELIBERATIVE_POLARIZATION_DATASET" | "ETHICAL_TRADE_OFF_CORPUS" | "ARGUMENT_GRAPH_TOPOLOGY" | "POLICY_OUTCOME_BENCHMARK";
+  record_count: number;
+  differential_privacy_epsilon: number;
+  doi_identifier: string;
+  capability_id: string;
+  reference_adr: string;
+  contract_id: string;
+}
+
+export interface AcademicResearchInput {
+  dataset_id: string;
+  dataset_title: string;
+  corpus_type: string;
+  record_count: number;
+  differential_privacy_epsilon: number;
+  doi_identifier: string;
+}
+
+export interface NgoImpactReport {
+  case_version_id: string;
+  campaign_id: string;
+  ngo_name: string;
+  advocacy_domain: "HUMAN_RIGHTS_AND_JUSTICE" | "ENVIRONMENT_AND_CLIMATE" | "PUBLIC_HEALTH_AND_SAFETY" | "TRANSPARENCY_AND_ANTI_CORRUPTION";
+  citizen_endorsement_count: number;
+  institutional_reforms_achieved: number;
+  advocacy_efficacy_score: number;
+  capability_id: string;
+  reference_adr: string;
+  contract_id: string;
+}
+
+export interface NgoImpactInput {
+  campaign_id: string;
+  ngo_name: string;
+  advocacy_domain: string;
+  citizen_endorsement_count: number;
+  institutional_reforms_achieved: number;
+}
+
+export interface CivicPetitionReport {
+  case_version_id: string;
+  petition_id: string;
+  bill_title: string;
+  stage: "DRAFT_IMPACT_SIMULATION" | "SIGNATURE_GATHERING_CAMPAIGN" | "SUBMITTED_TO_PARLIAMENT";
+  signatures_count: number;
+  signature_target_threshold: number;
+  projected_net_benefit_score: number;
+  reference_adr: string;
+  contract_id: string;
+}
+
+export interface CivicPetitionInput {
+  petition_id: string;
+  bill_title: string;
+  signatures_count: number;
+  signature_target_threshold: number;
+  projected_net_benefit_score: number;
+}
+
